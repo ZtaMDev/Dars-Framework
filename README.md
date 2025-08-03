@@ -7,7 +7,7 @@ Dars es un framework que permite crear interfaces de usuario modernas utilizando
 ## Características Principales
 
 - **Python Puro**: Permite el desarrollo de interfaces de usuario utilizando exclusivamente Python.
-- **Multiplataforma**: Soporta la exportación a HTML/CSS/JavaScript.
+- **Multiplataforma**: Soportado por todos los sistemas operativos compatibles con python.
 - **Facilidad de Uso**: Ofrece una sintaxis intuitiva y simplificada.
 - **Personalización**: Proporciona un sistema de estilos flexible para una adaptación visual completa.
 - **Extensibilidad**: Diseñado con una arquitectura modular que facilita la expansión.
