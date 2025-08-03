@@ -1,0 +1,2 @@
+[console_scripts]
+dars = dars.cli.main:main
