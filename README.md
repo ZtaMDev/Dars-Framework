@@ -41,10 +41,6 @@ pip install rich
 import sys
 import os
 
-# Configurar path para Dars
-framework_path = os.path.join(os.path.dirname(__file__), 'dars')
-sys.path.insert(0, framework_path)
-
 from dars.core.app import App
 from dars.components.basic.text import Text
 from dars.components.basic.button import Button
