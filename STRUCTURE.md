@@ -3,15 +3,14 @@
 ## 📁 Estructura General
 
 ```
-pywebui-framework/
+dars-framework/
 ├── README.md                    # Documentación principal
 ├── INSTALL.md                   # Guía de instalación
 ├── STRUCTURE.md                 # Este archivo
-├── pywebui_exporter            # CLI principal ejecutable
-├── pywebui_architecture.md     # Documentación de arquitectura
-├── todo.md                     # Lista de tareas (desarrollo)
+├── dars_architecture.md         # Documentación de arquitectura
+├── pyproject.toml               # Configuración del proyecto Python
 │
-├── pywebui/                    # Framework principal
+├── dars/                       # Framework principal
 │   ├── __init__.py
 │   ├── core/                   # Núcleo del framework
 │   ├── components/             # Componentes UI
@@ -21,14 +20,14 @@ pywebui-framework/
 │   ├── cli/                    # Herramientas CLI
 │   └── docs/                   # Documentación detallada
 │
-└── examples/                   # Ejemplos de aplicaciones
+└── dars/templates/examples/    # Ejemplos de aplicaciones
     ├── README.md
     ├── basic/                  # Ejemplos básicos
     ├── advanced/               # Ejemplos avanzados
     └── demo/                   # Aplicación de demostración
 ```
 
-## 🏗️ Núcleo del Framework (`pywebui/core/`)
+## 🏗️ Núcleo del Framework (`dars/core/`)
 
 ```
 core/
@@ -36,7 +35,7 @@ core/
 ├── app.py                      # Clase principal App
 ├── component.py                # Clase base Component
 ├── properties.py               # Sistema de propiedades y estilos
-└── events.py                   # Sistema de eventos
+└── events.py                   # Sistema de manejo de eventos
 ```
 
 ### Descripción de Archivos
@@ -46,7 +45,7 @@ core/
 - **`properties.py`**: Define propiedades de estilo y eventos
 - **`events.py`**: Sistema de manejo de eventos
 
-## 🧩 Componentes (`pywebui/components/`)
+## 🧩 Componentes (`dars/components/`)
 
 ```
 components/
@@ -56,9 +55,15 @@ components/
 │   ├── text.py                 # Componente Text
 │   ├── button.py               # Componente Button
 │   ├── input.py                # Componente Input
-│   └── container.py            # Componente Container
-├── advanced/                   # Componentes avanzados (futuro)
-│   └── __init__.py
+│   ├── container.py            # Componente Container
+│   ├── image.py                # Componente Image
+│   ├── link.py                 # Componente Link
+│   └── textarea.py             # Componente Textarea
+├── advanced/                   # Componentes avanzados
+│   ├── __init__.py
+│   ├── card.py                 # Componente Card
+│   ├── modal.py                # Componente Modal
+│   └── navbar.py               # Componente Navbar
 └── layout/                     # Componentes de layout (futuro)
     └── __init__.py
 ```
@@ -66,11 +71,17 @@ components/
 ### Componentes Implementados
 
 - **Text**: Mostrar texto estático o dinámico
-- **Button**: Botones interactivos con eventos
+- **Button**: Botones interactivos
 - **Input**: Campos de entrada de datos
 - **Container**: Contenedores para organizar layout
+- **Image**: Mostrar imágenes
+- **Link**: Crear enlaces de navegación
+- **Textarea**: Áreas de texto multilínea
+- **Card**: Contenedor estilizado para agrupar contenido
+- **Modal**: Ventana emergente superpuesta
+- **Navbar**: Barra de navegación
 
-## 📜 Sistema de Scripts (`pywebui/scripts/`)
+## 📜 Sistema de Scripts (`dars/scripts/`)
 
 ```
 scripts/
@@ -80,73 +91,54 @@ scripts/
 
 ### Tipos de Scripts
 
-- **InlineScript**: Código JavaScript/TypeScript definido en Python
+- **InlineScript**: Código JavaScript definido en Python
 - **FileScript**: Código cargado desde archivos externos
 
-## 🔄 Exportadores (`pywebui/exporters/`)
+## 🔄 Exportadores (`dars/exporters/`)
 
 ```
 exporters/
 ├── __init__.py
 ├── base.py                     # Clase base Exporter
-├── web/                        # Exportadores web
-│   ├── __init__.py
-│   ├── html_css_js.py          # Exportador HTML/CSS/JS
-│   ├── react.py                # Exportador React
-│   └── react_native.py         # Exportador React Native
-└── native/                     # Exportadores nativos
+└── web/                        # Exportadores web
     ├── __init__.py
-    ├── pyside6.py              # Exportador PySide6
-    ├── csharp.py               # Exportador C#
-    └── kotlin.py               # Exportador Kotlin
+    └── html_css_js.py          # Exportador HTML/CSS/JS
 ```
 
 ### Exportadores Disponibles
 
 #### Web
 - **HTML/CSS/JS**: Aplicaciones web estándar
-- **React**: Aplicaciones React modernas
-- **React Native**: Aplicaciones móviles
 
-#### Nativos
-- **PySide6**: Aplicaciones de escritorio Qt
-- **C#**: Aplicaciones Windows WinForms
-- **Kotlin**: Aplicaciones Kotlin Multiplatform
-
-## 📋 Templates (`pywebui/templates/`)
+## 📋 Templates (`dars/templates/`)
 
 ```
 templates/
 ├── __init__.py
-├── html/                       # Templates HTML
-│   └── __init__.py
-├── react/                      # Templates React
-│   └── __init__.py
-├── react_native/               # Templates React Native
-│   └── __init__.py
-├── pyside6/                    # Templates PySide6
-│   └── __init__.py
-├── csharp/                     # Templates C#
-│   └── __init__.py
-└── kotlin/                     # Templates Kotlin
+├── examples/                   # Ejemplos de aplicaciones
+│   ├── README.md
+│   ├── basic/                  # Ejemplos básicos
+│   ├── advanced/               # Ejemplos avanzados
+│   └── demo/                   # Aplicación de demostración
+└── html/                       # Templates HTML
     └── __init__.py
 ```
 
-## 🛠️ Herramientas CLI (`pywebui/cli/`)
+## 🛠️ Herramientas CLI (`dars/cli/`)
 
 ```
 cli/
 ├── __init__.py
-├── exporter.py                 # CLI principal con Rich
+├── main.py                     # CLI principal con Rich
 └── preview.py                  # Sistema de preview
 ```
 
 ### Herramientas Disponibles
 
-- **exporter.py**: CLI principal para exportar aplicaciones
+- **main.py**: CLI principal para exportar aplicaciones
 - **preview.py**: Sistema de preview para aplicaciones exportadas
 
-## 📚 Documentación (`pywebui/docs/`)
+## 📚 Documentación (`dars/docs/`)
 
 ```
 docs/
@@ -157,7 +149,7 @@ docs/
 └── exporters.md                # Guía de exportadores
 ```
 
-## 🎯 Ejemplos (`examples/`)
+## 🎯 Ejemplos (`dars/templates/examples/`)
 
 ```
 examples/
@@ -185,8 +177,8 @@ examples/
 
 ## 🔧 Archivos de Configuración
 
-### `pywebui_exporter`
-Script ejecutable principal que proporciona la interfaz CLI.
+### `pyproject.toml`
+Archivo de configuración para el proyecto Python, incluyendo metadatos y dependencias para PyPI.
 
 ### `__init__.py`
 Archivos de inicialización de módulos Python en cada directorio.
@@ -202,7 +194,7 @@ Aplicación Python (*.py)
          ↓
     Exportador Específico
          ↓
-    Código de Salida (HTML/React/etc.)
+    Código de Salida (HTML/CSS/JS)
 ```
 
 ## 🎨 Patrones de Diseño Utilizados
@@ -224,8 +216,8 @@ Aplicación Python (*.py)
 ### Nuevos Componentes
 
 ```python
-# pywebui/components/basic/mi_componente.py
-from pywebui.core.component import Component
+# dars/components/basic/mi_componente.py
+from dars.core.component import Component
 
 class MiComponente(Component):
     def __init__(self, **props):
@@ -236,8 +228,8 @@ class MiComponente(Component):
 ### Nuevos Exportadores
 
 ```python
-# pywebui/exporters/mi_plataforma/mi_exportador.py
-from pywebui.exporters.base import Exporter
+# dars/exporters/mi_plataforma/mi_exportador.py
+from dars.exporters.base import Exporter
 
 class MiExportador(Exporter):
     def get_platform(self):
@@ -252,7 +244,7 @@ class MiExportador(Exporter):
 
 ```python
 # Extender funcionalidad de scripts
-from pywebui.scripts.script import Script
+from dars.scripts.script import Script
 
 class MiTipoScript(Script):
     def get_code(self):
@@ -265,23 +257,24 @@ class MiTipoScript(Script):
 ### Líneas de Código (Aproximado)
 
 - **Core**: ~800 líneas
-- **Componentes**: ~600 líneas
-- **Exportadores**: ~1200 líneas
+- **Componentes**: ~1000 líneas (actualizado con nuevos componentes)
+- **Exportadores**: ~500 líneas (solo HTML/CSS/JS)
 - **CLI**: ~400 líneas
 - **Scripts**: ~200 líneas
 - **Ejemplos**: ~800 líneas
-- **Documentación**: ~2000 líneas
+- **Documentación**: ~3000 líneas (actualizado con nueva documentación)
 
-### Total: ~6000 líneas de código y documentación
+### Total: ~7000 líneas de código y documentación
 
 ## 🚀 Roadmap de Desarrollo
 
 ### Implementado ✅
 
 - [x] Núcleo del framework
-- [x] Componentes básicos
+- [x] Componentes básicos (Text, Button, Input, Container, Image, Link, Textarea)
+- [x] Componentes avanzados (Card, Modal, Navbar)
 - [x] Sistema de scripts
-- [x] Exportadores principales
+- [x] Exportador HTML/CSS/JS
 - [x] CLI con Rich
 - [x] Sistema de preview
 - [x] Documentación completa
@@ -289,12 +282,13 @@ class MiTipoScript(Script):
 
 ### Futuras Mejoras 🔮
 
-- [ ] Más componentes (Image, Video, Table, etc.)
-- [ ] Sistema de temas
+- [ ] Más componentes (Video, Table, Chart, etc.)
+- [ ] Sistema de temas avanzado
 - [ ] Hot reloading en desarrollo
 - [ ] Plugin system
 - [ ] Generador de código automático
 - [ ] Testing framework integrado
+- [ ] Exportadores para otras plataformas (React, React Native, Desktop)
 
 ## 🛡️ Consideraciones de Seguridad
 
@@ -328,4 +322,5 @@ class MiTipoScript(Script):
 ---
 
 Esta estructura proporciona una base sólida y extensible para el framework Dars, permitiendo fácil mantenimiento y expansión futura.
+
 

@@ -17,7 +17,7 @@ Dars es un framework de interfaz de usuario multiplataforma que permite a los de
 ### Estructura de Directorios
 
 ```
-pywebui/
+dars/
 ├── core/
 │   ├── __init__.py
 │   ├── component.py          # Clase base Component
@@ -31,45 +31,40 @@ pywebui/
 │   │   ├── button.py
 │   │   ├── text.py
 │   │   ├── input.py
-│   │   └── container.py
-│   ├── layout/
+│   │   ├── container.py
+│   │   ├── image.py
+│   │   ├── link.py
+│   │   └── textarea.py
+│   ├── advanced/
 │   │   ├── __init__.py
-│   │   ├── flex.py
-│   │   ├── grid.py
-│   │   └── stack.py
-│   └── advanced/
+│   │   ├── card.py
+│   │   ├── modal.py
+│   │   └── navbar.py
+│   └── layout/
 │       ├── __init__.py
-│       ├── table.py
-│       ├── chart.py
-│       └── form.py
+│       ├── flex.py
+│       ├── grid.py
+│       └── stack.py
 ├── scripts/
 │   ├── __init__.py
-│   ├── script.py           # Clase base Script
-│   └── transpiler.py       # Transpilador Python -> JS/TS
+│   └── script.py           # Clase base Script
 ├── exporters/
 │   ├── __init__.py
 │   ├── base.py             # Clase base Exporter
-│   ├── web/
-│   │   ├── __init__.py
-│   │   ├── html_css_js.py
-│   │   ├── react.py
-│   │   └── react_native.py
-│   └── native/
+│   └── web/
 │       ├── __init__.py
-│       ├── pyside6.py
-│       ├── csharp.py
-│       └── kotlin.py
+│       └── html_css_js.py
 ├── cli/
 │   ├── __init__.py
-│   ├── exporter.py         # Herramienta de consola
+│   ├── main.py             # Herramienta de consola
 │   └── preview.py          # Sistema de preview
 ├── templates/
 │   ├── html/
-│   ├── react/
-│   ├── react_native/
-│   ├── pyside6/
-│   ├── csharp/
-│   └── kotlin/
+│   └── examples/
+│       ├── README.md
+│       ├── basic/
+│       ├── advanced/
+│       └── demo/
 └── docs/
     ├── getting_started.md
     ├── components.md
@@ -92,12 +87,12 @@ class Component(ABC):
         self.props = props
         self.children: List[Component] = []
         self.parent: Optional[Component] = None
-        self.id: Optional[str] = props.get('id')
-        self.class_name: Optional[str] = props.get('class_name')
-        self.style: Dict[str, Any] = props.get('style', {})
+        self.id: Optional[str] = props.get("id")
+        self.class_name: Optional[str] = props.get("class_name")
+        self.style: Dict[str, Any] = props.get("style", {})
         self.events: Dict[str, Callable] = {}
         
-    def add_child(self, child: 'Component'):
+    def add_child(self, child: "Component"):
         child.parent = self
         self.children.append(child)
         
@@ -105,7 +100,7 @@ class Component(ABC):
         self.events[event_name] = handler
         
     @abstractmethod
-    def render(self, exporter: 'Exporter') -> str:
+    def render(self) -> str:
         pass
 ```
 
@@ -149,10 +144,10 @@ class App:
     def set_root(self, component: Component):
         self.root = component
         
-    def add_script(self, script: 'Script'):
+    def add_script(self, script: "Script"):
         self.scripts.append(script)
         
-    def export(self, exporter: 'Exporter', output_path: str):
+    def export(self, exporter: "Exporter", output_path: str):
         return exporter.export(self, output_path)
 ```
 
@@ -165,29 +160,29 @@ from abc import ABC, abstractmethod
 from typing import Optional
 
 class Script(ABC):
-    def __init__(self, target_language: str = "javascript"):
-        self.target_language = target_language  # "javascript" o "typescript"
+    def __init__(self):
+        pass
         
     @abstractmethod
     def get_code(self) -> str:
-        """Retorna el código del script en el lenguaje objetivo"""
+        """Retorna el código del script"""
         pass
         
 class InlineScript(Script):
-    def __init__(self, code: str, target_language: str = "javascript"):
-        super().__init__(target_language)
+    def __init__(self, code: str):
+        super().__init__()
         self.code = code
         
     def get_code(self) -> str:
         return self.code
         
 class FileScript(Script):
-    def __init__(self, file_path: str, target_language: str = "javascript"):
-        super().__init__(target_language)
+    def __init__(self, file_path: str):
+        super().__init__()
         self.file_path = file_path
         
     def get_code(self) -> str:
-        with open(self.file_path, 'r') as f:
+        with open(self.file_path, "r") as f:
             return f.read()
 ```
 
@@ -215,7 +210,7 @@ class Exporter(ABC):
     def load_template(self, template_name: str) -> str:
         """Carga una plantilla desde el directorio de templates"""
         template_path = f"{self.templates_path}{self.get_platform()}/{template_name}"
-        with open(template_path, 'r') as f:
+        with open(template_path, "r") as f:
             return f.read()
             
     @abstractmethod
@@ -227,15 +222,18 @@ class Exporter(ABC):
 ## Flujo de Trabajo
 
 1. **Desarrollo**: El usuario escribe su aplicación usando los componentes de Dars
-2. **Exportación**: Se ejecuta el CLI exporter especificando el formato de salida
+2. **Exportación**: Se ejecuta el CLI `dars export` especificando el formato de salida
 3. **Generación**: El exportador correspondiente procesa la aplicación y genera el código
-4. **Preview**: Opcionalmente se puede previsualizar el resultado en el navegador
+4. **Preview**: Opcionalmente se puede previsualizar el resultado en el navegador con `dars preview`
 
 ## Ejemplo de Uso
 
 ```python
-from pywebui import App, Button, Text, Container
-from pywebui.scripts import InlineScript
+from dars.core.app import App
+from dars.components.basic.button import Button
+from dars.components.basic.text import Text
+from dars.components.basic.container import Container
+from dars.scripts.script import InlineScript
 
 # Crear la aplicación
 app = App(title="Mi Primera App")
@@ -243,37 +241,37 @@ app = App(title="Mi Primera App")
 # Crear componentes
 container = Container(
     style={
-        'display': 'flex',
-        'flex_direction': 'column',
-        'align_items': 'center',
-        'padding': '20px'
+        "display": "flex",
+        "flex-direction": "column",
+        "align-items": "center",
+        "padding": "20px"
     }
 )
 
 title = Text(
     text="¡Hola Dars!",
     style={
-        'font_size': '24px',
-        'color': '#333',
-        'margin_bottom': '20px'
+        "font-size": "24px",
+        "color": "#333",
+        "margin-bottom": "20px"
     }
 )
 
 button = Button(
     text="Hacer clic",
     style={
-        'background_color': '#007bff',
-        'color': 'white',
-        'padding': '10px 20px',
-        'border': 'none',
-        'border_radius': '5px'
+        "background-color": "#007bff",
+        "color": "white",
+        "padding": "10px 20px",
+        "border": "none",
+        "border-radius": "5px"
     }
 )
 
 # Agregar script
 script = InlineScript("""
 function handleClick() {
-    alert('¡Botón presionado!');
+    alert("¡Botón presionado!");
 }
 """)
 
@@ -284,8 +282,10 @@ app.set_root(container)
 app.add_script(script)
 
 # El archivo se guarda como app.py y se ejecuta con:
-# pywebui export app.py --format html --output ./dist
+# dars export app.py --format html --output ./dist
+# dars preview ./dist/index.html
 ```
 
 Esta arquitectura proporciona una base sólida y extensible para el framework Dars, permitiendo agregar nuevos componentes y exportadores de manera modular.
+
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Dars Preview - Sistema de preview para aplicaciones exportadas
+Dars Preview - Preview system for exported applications
 """
 
 import os
@@ -15,12 +15,15 @@ from pathlib import Path
 from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
+from rich.table import Table
 from rich import print as rprint
+
+from dars.cli.translations import translator
 
 console = Console()
 
 class PreviewServer:
-    """Servidor de preview para aplicaciones Dars"""
+    """Preview server for Dars applications"""
     
     def __init__(self, directory: str, port: int = 8000):
         self.directory = os.path.abspath(directory)
@@ -29,16 +32,16 @@ class PreviewServer:
         self.server_thread = None
         
     def start(self):
-        """Inicia el servidor de preview"""
+        """Starts the preview server"""
         try:
-            # Cambiar al directorio de la aplicación
+            # Change to the application directory
             os.chdir(self.directory)
             
-            # Crear el servidor
+            # Create the server
             handler = http.server.SimpleHTTPRequestHandler
             self.server = socketserver.TCPServer(("", self.port), handler)
             
-            # Iniciar en un hilo separado
+            # Start in a separate thread
             self.server_thread = threading.Thread(target=self.server.serve_forever)
             self.server_thread.daemon = True
             self.server_thread.start()
@@ -46,29 +49,29 @@ class PreviewServer:
             return True
             
         except Exception as e:
-            console.print(f"[red]Error al iniciar el servidor: {e}[/red]")
+            console.print(f"[red]{translator.get('server_start_error')}: {e}[/red]")
             return False
             
     def stop(self):
-        """Detiene el servidor de preview"""
+        """Stops the preview server"""
         if self.server:
             self.server.shutdown()
             self.server.server_close()
             
     def get_url(self) -> str:
-        """Obtiene la URL del servidor"""
+        """Gets the server URL"""
         return f"http://localhost:{self.port}"
 
 def preview_html_app(directory: str, auto_open: bool = True, port: int = 8000):
-    """Previsualiza una aplicación HTML exportada"""
+    """Previews an exported HTML application"""
     
-    # Verificar que existe index.html
+    # Verify that index.html exists
     index_path = os.path.join(directory, "index.html")
     if not os.path.exists(index_path):
-        console.print(f"[red]Error: No se encontró index.html en {directory}[/red]")
+        console.print(f"[red]{translator.get('index_not_found_in')} {directory}[/red]")
         return False
         
-    # Crear y iniciar el servidor
+    # Create and start the server
     server = PreviewServer(directory, port)
     
     if not server.start():
@@ -76,210 +79,210 @@ def preview_html_app(directory: str, auto_open: bool = True, port: int = 8000):
         
     url = server.get_url()
     
-    # Mostrar información
+    # Show information
     panel_content = f"""
-[green]✓[/green] Servidor de preview iniciado
+[green]✓[/green] {translator.get('preview_server_started')}
 
 [bold]URL:[/bold] {url}
-[bold]Directorio:[/bold] {directory}
-[bold]Puerto:[/bold] {port}
+[bold]{translator.get('directory')}:[/bold] {directory}
+[bold]{translator.get('port')}:[/bold] {port}
 
-[yellow]Presiona Ctrl+C para detener el servidor[/yellow]
+[yellow]{translator.get('press_ctrl_c')}[/yellow]
 """
     
     console.print(Panel(panel_content, title="Dars Preview", border_style="green"))
     
-    # Abrir en navegador si se solicita
+    # Open in browser if requested
     if auto_open:
         try:
             webbrowser.open(url)
-            console.print(f"[cyan]Abriendo {url} en el navegador...[/cyan]")
+            console.print(f"[cyan]{translator.get('opening_in_browser').format(url=url)}[/cyan]")
         except Exception as e:
-            console.print(f"[yellow]No se pudo abrir automáticamente el navegador: {e}[/yellow]")
-            console.print(f"[cyan]Abrir manualmente: {url}[/cyan]")
+            console.print(f"[yellow]{translator.get('browser_open_error')}: {e}[/yellow]")
+            console.print(f"[cyan]{translator.get('open_manually')}: {url}[/cyan]")
     
     try:
-        # Mantener el servidor corriendo
+        # Keep the server running
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        console.print("\n[yellow]Deteniendo servidor...[/yellow]")
+        console.print(f"\n[yellow]{translator.get('stopping_server')}[/yellow]")
         server.stop()
-        console.print("[green]Servidor detenido[/green]")
+        console.print(f"[green]{translator.get('server_stopped')}[/green]")
         
     return True
 
 def preview_react_app(directory: str):
-    """Previsualiza una aplicación React exportada"""
+    """Previews an exported React application"""
     
-    # Verificar que existe package.json
+    # Verify that package.json exists
     package_path = os.path.join(directory, "package.json")
     if not os.path.exists(package_path):
-        console.print(f"[red]Error: No se encontró package.json en {directory}[/red]")
+        console.print(f"[red]{translator.get('package_json_not_found')} {directory}[/red]")
         return False
         
     console.print(Panel(
         f"""
-Para previsualizar la aplicación React:
+{translator.get('preview_react_instructions')}:
 
-1. Navegar al directorio:
+1. {translator.get('navigate_to_directory')}:
    [cyan]cd {directory}[/cyan]
 
-2. Instalar dependencias:
+2. {translator.get('install_dependencies')}:
    [cyan]npm install[/cyan]
 
-3. Iniciar el servidor de desarrollo:
+3. {translator.get('start_dev_server')}:
    [cyan]npm start[/cyan]
 
-La aplicación se abrirá automáticamente en http://localhost:3000
+{translator.get('app_will_open')} http://localhost:3000
         """,
-        title="Preview de React",
+        title=translator.get('react_preview'),
         border_style="blue"
     ))
     
     return True
 
 def preview_react_native_app(directory: str):
-    """Previsualiza una aplicación React Native exportada"""
+    """Previews an exported React Native application"""
     
-    # Verificar que existe package.json
+    # Verify that package.json exists
     package_path = os.path.join(directory, "package.json")
     if not os.path.exists(package_path):
-        console.print(f"[red]Error: No se encontró package.json en {directory}[/red]")
+        console.print(f"[red]{translator.get('package_json_not_found')} {directory}[/red]")
         return False
         
     console.print(Panel(
         f"""
-Para previsualizar la aplicación React Native:
+{translator.get('preview_react_native_instructions')}:
 
-1. Navegar al directorio:
+1. {translator.get('navigate_to_directory')}:
    [cyan]cd {directory}[/cyan]
 
-2. Instalar dependencias:
+2. {translator.get('install_dependencies')}:
    [cyan]npm install[/cyan]
 
-3. Para Android:
+3. {translator.get('for_android')}:
    [cyan]npm run android[/cyan]
 
-4. Para iOS (solo en macOS):
+4. {translator.get('for_ios')}:
    [cyan]npm run ios[/cyan]
 
-5. Iniciar Metro bundler:
+5. {translator.get('start_metro')}:
    [cyan]npm start[/cyan]
 
-[yellow]Nota: Necesitas tener configurado el entorno de desarrollo de React Native[/yellow]
+[yellow]{translator.get('react_native_note')}[/yellow]
         """,
-        title="Preview de React Native",
+        title=translator.get('react_native_preview'),
         border_style="green"
     ))
     
     return True
 
 def preview_pyside6_app(directory: str):
-    """Previsualiza una aplicación PySide6 exportada"""
+    """Previews an exported PySide6 application"""
     
-    # Verificar que existe main.py
+    # Verify that main.py exists
     main_path = os.path.join(directory, "main.py")
     if not os.path.exists(main_path):
-        console.print(f"[red]Error: No se encontró main.py en {directory}[/red]")
+        console.print(f"[red]{translator.get('main_py_not_found')} {directory}[/red]")
         return False
         
     console.print(Panel(
         f"""
-Para ejecutar la aplicación PySide6:
+{translator.get('run_pyside6_app')}:
 
-1. Navegar al directorio:
+1. {translator.get('navigate_to_directory')}:
    [cyan]cd {directory}[/cyan]
 
-2. Instalar dependencias:
+2. {translator.get('install_dependencies')}:
    [cyan]pip install -r requirements.txt[/cyan]
 
-3. Ejecutar la aplicación:
+3. {translator.get('run_application')}:
    [cyan]python main.py[/cyan]
 
-[yellow]Nota: Asegúrate de tener PySide6 instalado[/yellow]
+[yellow]{translator.get('pyside6_note')}[/yellow]
         """,
-        title="Preview de PySide6",
+        title=translator.get('pyside6_preview'),
         border_style="magenta"
     ))
     
     return True
 
 def preview_csharp_app(directory: str):
-    """Previsualiza una aplicación C# exportada"""
+    """Previews an exported C# application"""
     
-    # Buscar archivo .csproj
+    # Search for .csproj file
     csproj_files = list(Path(directory).glob("*.csproj"))
     if not csproj_files:
-        console.print(f"[red]Error: No se encontró archivo .csproj en {directory}[/red]")
+        console.print(f"[red]{translator.get('csproj_not_found')} {directory}[/red]")
         return False
         
     csproj_file = csproj_files[0].name
     
     console.print(Panel(
         f"""
-Para ejecutar la aplicación C#:
+{translator.get('run_csharp_app')}:
 
-1. Navegar al directorio:
+1. {translator.get('navigate_to_directory')}:
    [cyan]cd {directory}[/cyan]
 
-2. Restaurar dependencias:
+2. {translator.get('restore_dependencies')}:
    [cyan]dotnet restore[/cyan]
 
-3. Compilar la aplicación:
+3. {translator.get('build_application')}:
    [cyan]dotnet build[/cyan]
 
-4. Ejecutar la aplicación:
+4. {translator.get('run_application')}:
    [cyan]dotnet run[/cyan]
 
-[yellow]Nota: Necesitas tener .NET 6.0 o superior instalado[/yellow]
+[yellow]{translator.get('dotnet_note')}[/yellow]
         """,
-        title="Preview de C#",
+        title=translator.get('csharp_preview'),
         border_style="red"
     ))
     
     return True
 
 def preview_kotlin_app(directory: str):
-    """Previsualiza una aplicación Kotlin exportada"""
+    """Previews an exported Kotlin application"""
     
-    # Verificar que existe build.gradle.kts
+    # Verify that build.gradle.kts exists
     gradle_path = os.path.join(directory, "build.gradle.kts")
     if not os.path.exists(gradle_path):
-        console.print(f"[red]Error: No se encontró build.gradle.kts en {directory}[/red]")
+        console.print(f"[red]{translator.get('gradle_not_found')} {directory}[/red]")
         return False
         
     console.print(Panel(
         f"""
-Para ejecutar la aplicación Kotlin Multiplatform:
+{translator.get('run_kotlin_app')}:
 
-1. Navegar al directorio:
+1. {translator.get('navigate_to_directory')}:
    [cyan]cd {directory}[/cyan]
 
-2. Para escritorio:
+2. {translator.get('for_desktop')}:
    [cyan]./gradlew run[/cyan]
 
-3. Para Android (con emulador/dispositivo):
+3. {translator.get('for_android')}:
    [cyan]./gradlew installDebug[/cyan]
 
-4. Para compilar todas las plataformas:
+4. {translator.get('build_all_platforms')}:
    [cyan]./gradlew build[/cyan]
 
-[yellow]Nota: Necesitas tener JDK 11+ y Android SDK configurados[/yellow]
+[yellow]{translator.get('kotlin_note')}[/yellow]
         """,
-        title="Preview de Kotlin Multiplatform",
+        title=translator.get('kotlin_preview'),
         border_style="yellow"
     ))
     
     return True
 
 def auto_detect_format(directory: str) -> str:
-    """Detecta automáticamente el formato de la aplicación exportada"""
+    """Automatically detects the format of the exported application"""
     
     if os.path.exists(os.path.join(directory, "index.html")):
         return "html"
     elif os.path.exists(os.path.join(directory, "package.json")):
-        # Leer package.json para distinguir entre React y React Native
+        # Read package.json to distinguish between React and React Native
         try:
             import json
             with open(os.path.join(directory, "package.json"), 'r') as f:
@@ -301,23 +304,23 @@ def auto_detect_format(directory: str) -> str:
         return "unknown"
 
 def preview_app(directory: str, format_name: str = None, auto_open: bool = True, port: int = 8000):
-    """Previsualiza una aplicación exportada"""
+    """Previews an exported application"""
     
     if not os.path.exists(directory):
-        console.print(f"[red]Error: El directorio {directory} no existe[/red]")
+        console.print(f"[red]{translator.get('directory_not_exists').format(directory=directory)}[/red]")
         return False
         
-    # Detectar formato automáticamente si no se especifica
+    # Automatically detect format if not specified
     if format_name is None:
         format_name = auto_detect_format(directory)
         
     if format_name == "unknown":
-        console.print(f"[red]Error: No se pudo detectar el formato de la aplicación en {directory}[/red]")
+        console.print(f"[red]{translator.get('format_not_detected').format(directory=directory)}[/red]")
         return False
         
-    console.print(f"[cyan]Formato detectado: {format_name}[/cyan]")
+    console.print(f"[cyan]{translator.get('detected_format')}: {format_name}[/cyan]")
     
-    # Llamar al previsualizador correspondiente
+    # Call the corresponding previewer
     preview_functions = {
         "html": lambda: preview_html_app(directory, auto_open, port),
         "react": lambda: preview_react_app(directory),
@@ -331,17 +334,67 @@ def preview_app(directory: str, format_name: str = None, auto_open: bool = True,
     if preview_function:
         return preview_function()
     else:
-        console.print(f"[red]Error: Formato '{format_name}' no soportado para preview[/red]")
+        console.print(f"[red]{translator.get('format_not_supported').format(format=format_name)}[/red]")
         return False
 
 if __name__ == "__main__":
     import argparse
+    import sys
     
-    parser = argparse.ArgumentParser(description="Dars Preview - Sistema de preview")
-    parser.add_argument("directory", help="Directorio con la aplicación exportada")
-    parser.add_argument("--format", "-f", help="Formato de la aplicación (auto-detectado si no se especifica)")
-    parser.add_argument("--no-open", action="store_true", help="No abrir automáticamente el navegador")
-    parser.add_argument("--port", "-p", type=int, default=8000, help="Puerto para el servidor (solo HTML)")
+    # First, create a simple parser just to extract the language
+    pre_parser = argparse.ArgumentParser(add_help=False)
+    pre_parser.add_argument("--lang", "-l", choices=["en", "es"], default="en")
+    
+    # Parse known args to get language without triggering errors on other args
+    pre_args, _ = pre_parser.parse_known_args()
+    
+    # Set language before creating the main parser and save preference if specified
+    # If --lang is in sys.argv, it means the user explicitly specified it
+    save_preference = "--lang" in sys.argv or "-l" in sys.argv
+    translator.set_language(pre_args.lang, save=save_preference)
+    
+    # Check for help before parsing arguments to show Rich-styled help
+    if '-h' in sys.argv or '--help' in sys.argv:
+        # Show banner
+        console.print(Panel(
+            Text("Dars Preview", style="bold cyan", justify="center"),
+            subtitle=translator.get('preview_description'),
+            border_style="cyan"
+        ))
+        
+        # Show usage
+        console.print(f"\n[bold cyan]{translator.get('usage')}:[/bold cyan]")
+        console.print("preview.py [-h] [--format FORMAT] [--no-open] [--port PORT] [--lang {en,es}] directory")
+        
+        # Show positional arguments
+        console.print(f"\n[bold cyan]{translator.get('positional_arguments')}:[/bold cyan]")
+        pos_table = Table(show_header=False, box=None, padding=(0, 2, 0, 0), expand=True)
+        pos_table.add_column("Argument", style="bold green", width=20, no_wrap=True)
+        pos_table.add_column("Description", style="dim white", overflow="fold")
+        pos_table.add_row("directory", translator.get('directory_help'))
+        console.print(pos_table)
+        
+        # Show options
+        console.print(f"\n[bold cyan]{translator.get('options')}:[/bold cyan]")
+        opt_table = Table(show_header=False, box=None, padding=(0, 2, 0, 0), expand=True)
+        opt_table.add_column("Option", style="bold green", width=30, no_wrap=True)
+        opt_table.add_column("Description", style="dim white", overflow="fold")
+        opt_table.add_row("-h, --help", "show this help message and exit")
+        opt_table.add_row("--format FORMAT, -f FORMAT", translator.get('format_help'))
+        opt_table.add_row("--no-open", translator.get('no_open_help'))
+        opt_table.add_row("--port PORT, -p PORT", translator.get('port_help'))
+        opt_table.add_row("--lang {en,es}, -l {en,es}", translator.get('lang_help'))
+        console.print(opt_table)
+        
+        sys.exit(0)
+    
+    # Now create the full parser with translated help text
+    parser = argparse.ArgumentParser(description=translator.get('preview_description'))
+    parser.add_argument("directory", help=translator.get('directory_help'))
+    parser.add_argument("--format", "-f", help=translator.get('format_help'))
+    parser.add_argument("--no-open", action="store_true", help=translator.get('no_open_help'))
+    parser.add_argument("--port", "-p", type=int, default=8000, help=translator.get('port_help'))
+    parser.add_argument("--lang", "-l", choices=["en", "es"], default="en", help=translator.get('lang_help'))
     
     args = parser.parse_args()
     

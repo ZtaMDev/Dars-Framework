@@ -9,284 +9,76 @@
 - **RAM**: 512 MB mínimo (2 GB recomendado)
 - **Espacio en Disco**: 100 MB para el framework
 
-### Dependencias de Python
-
-```bash
-pip install rich
-```
-
 ## 🚀 Instalación Rápida
 
-### Opción 1: Descarga Directa
-
-1. Descarga el framework Dars completo
-2. Extrae el archivo en tu directorio de trabajo
-3. ¡Listo para usar!
-
-### Opción 2: Clonar Repositorio
+Para instalar Dars, simplemente usa pip:
 
 ```bash
-git clone <repositorio-pywebui>
-cd pywebui-framework
+pip install dars-framework
 ```
 
-## 🔧 Configuración del Entorno
+Esto instalará Dars y todas sus dependencias automáticamente.
 
-### Estructura Recomendada
+## 🛠️ Uso del CLI
 
-```
-mi_proyecto/
-├── pywebui/                 # Framework Dars
-│   ├── core/
-│   ├── components/
-│   ├── exporters/
-│   └── ...
-├── mi_app.py               # Tu aplicación
-├── scripts/                # Scripts JavaScript (opcional)
-└── assets/                 # Recursos (opcional)
-```
+Una vez instalado, el comando `dars` estará disponible en tu terminal. Puedes usarlo para:
 
-### Configuración en tu Proyecto
-
-En cada archivo de aplicación, agrega al inicio:
-
-```python
-import sys
-import os
-
-# Configurar path para Dars
-framework_path = os.path.join(os.path.dirname(__file__), 'pywebui')
-sys.path.insert(0, framework_path)
-
-# Ahora puedes importar Dars
-from pywebui.core.app import App
-from pywebui.components.basic.text import Text
-# ... otros imports
-```
-
-## 🛠️ Configuración del CLI
-
-### Hacer Ejecutable el Exportador
-
-#### En Linux/macOS:
+### Exportar Aplicaciones
 
 ```bash
-chmod +x pywebui_exporter
+dars export mi_app.py --format html --output ./mi_app_web
 ```
 
-#### En Windows:
-
-El archivo ya es ejecutable con Python:
-
-```cmd
-python pywebui_exporter
-```
-
-### Agregar al PATH (Opcional)
-
-#### Linux/macOS:
+### Previsualizar Aplicaciones
 
 ```bash
-# Agregar al ~/.bashrc o ~/.zshrc
-export PATH="$PATH:/ruta/a/pywebui-framework"
+dars preview ./mi_app_web
 ```
 
-#### Windows:
+### Inicializar un Nuevo Proyecto
 
-1. Abrir "Variables de entorno"
-2. Agregar la ruta del framework al PATH
-3. Reiniciar terminal
+```bash
+# Proyecto básico con Hello World
+dars init mi_nuevo_proyecto
+
+# Proyecto con una plantilla específica
+dars init mi_nuevo_proyecto -t demo/complete_app
+```
+
+### Ver Información de una Aplicación
+
+```bash
+dars info mi_app.py
+```
+
+### Ver Formatos Soportados
+
+```bash
+dars formats
+```
 
 ## ✅ Verificación de Instalación
 
-### Prueba Básica
+Para verificar que Dars se ha instalado correctamente, abre tu terminal y ejecuta:
 
 ```bash
-# Verificar que el CLI funciona
-./pywebui_exporter --help
-
-# Verificar formatos disponibles
-./pywebui_exporter formats
+dars --help
 ```
 
-### Prueba con Ejemplo
-
-```bash
-# Probar con ejemplo básico
-./pywebui_exporter info examples/basic/hello_world.py
-
-# Exportar ejemplo
-./pywebui_exporter export examples/basic/hello_world.py --format html --output ./test_output
-
-# Previsualizar
-python3 pywebui/cli/preview.py ./test_output
-```
-
-## 🎯 Configuración por Plataforma de Exportación
-
-### Para Exportación Web (HTML/React)
-
-No requiere configuración adicional.
-
-### Para React Native
-
-```bash
-# Instalar Node.js y npm
-# Instalar React Native CLI
-npm install -g react-native-cli
-
-# Configurar entorno de desarrollo Android/iOS
-# (Seguir guía oficial de React Native)
-```
-
-### Para PySide6
-
-```bash
-pip install PySide6
-```
-
-### Para C#
-
-- Instalar .NET 6.0 o superior
-- Visual Studio o Visual Studio Code (opcional)
-
-### Para Kotlin Multiplatform
-
-- Instalar JDK 11 o superior
-- Android Studio (para desarrollo Android)
-- Xcode (para desarrollo iOS, solo macOS)
-
-## 🔍 Solución de Problemas de Instalación
-
-### Error: "No module named 'pywebui'"
-
-**Solución:**
-
-```python
-# Verificar que el path esté configurado correctamente
-import sys
-import os
-framework_path = os.path.join(os.path.dirname(__file__), 'pywebui')
-sys.path.insert(0, framework_path)
-```
-
-### Error: "rich module not found"
-
-**Solución:**
-
-```bash
-pip install rich
-```
-
-### Error: "Permission denied" en Linux/macOS
-
-**Solución:**
-
-```bash
-chmod +x pywebui_exporter
-```
-
-### Error: CLI no funciona en Windows
-
-**Solución:**
-
-```cmd
-python pywebui_exporter --help
-```
-
-## 🌟 Configuración Avanzada
-
-### Variables de Entorno
-
-```bash
-# Opcional: Configurar directorio de templates personalizados
-export PYWEBUI_TEMPLATES_PATH="/ruta/a/mis/templates"
-
-# Opcional: Configurar directorio de salida por defecto
-export PYWEBUI_OUTPUT_PATH="/ruta/a/salida/por/defecto"
-```
-
-### Configuración de Desarrollo
-
-Para desarrollo del framework:
-
-```bash
-# Instalar dependencias de desarrollo
-pip install -r requirements-dev.txt  # Si existe
-
-# Configurar pre-commit hooks
-pre-commit install  # Si se usa pre-commit
-```
-
-## 📦 Instalación en Entornos Específicos
-
-### Docker
-
-```dockerfile
-FROM python:3.9
-
-# Instalar dependencias
-RUN pip install rich
-
-# Copiar framework
-COPY pywebui /app/pywebui
-COPY pywebui_exporter /app/
-
-WORKDIR /app
-
-# Hacer ejecutable
-RUN chmod +x pywebui_exporter
-```
-
-### Virtual Environment
-
-```bash
-# Crear entorno virtual
-python -m venv pywebui_env
-
-# Activar entorno
-source pywebui_env/bin/activate  # Linux/macOS
-# o
-pywebui_env\Scripts\activate     # Windows
-
-# Instalar dependencias
-pip install rich
-
-# Usar Dars normalmente
-```
-
-### Conda
-
-```bash
-# Crear entorno conda
-conda create -n pywebui python=3.9
-
-# Activar entorno
-conda activate pywebui
-
-# Instalar dependencias
-pip install rich
-```
+Deberías ver la ayuda del comando `dars`, lo que indica que la instalación fue exitosa.
 
 ## 🚀 Primeros Pasos Después de la Instalación
 
-### 1. Crear tu Primera Aplicación
+### 1. Crear tu Primera Aplicación (mi_primera_app.py)
 
 ```python
-# mi_primera_app.py
-import sys
-import os
-
-framework_path = os.path.join(os.path.dirname(__file__), 'pywebui')
-sys.path.insert(0, framework_path)
-
-from pywebui.core.app import App
-from pywebui.components.basic.text import Text
-from pywebui.components.basic.container import Container
+from dars.core.app import App
+from dars.components.basic.text import Text
+from dars.components.basic.container import Container
 
 app = App(title="Mi Primera App")
-container = Container(style={'padding': '20px'})
-texto = Text(text="¡Hola Dars!", style={'font-size': '24px'})
+container = Container(style={\'padding\': \'20px\'}) # Usar \' para escapar comillas
+texto = Text(text="¡Hola Dars!", style={\'font-size\': \'24px\'}) # Usar \' para escapar comillas
 
 container.add_child(texto)
 app.set_root(container)
@@ -294,61 +86,65 @@ app.set_root(container)
 
 ### 2. Exportar la Aplicación
 
+Guarda el código anterior como `mi_primera_app.py` y luego ejecuta:
+
 ```bash
-./pywebui_exporter export mi_primera_app.py --format html --output ./mi_app
+dars export mi_primera_app.py --format html --output ./mi_app
 ```
 
 ### 3. Previsualizar
 
 ```bash
-python3 pywebui/cli/preview.py ./mi_app
+dars preview ./mi_app
 ```
 
 ## 📚 Recursos Adicionales
 
 ### Documentación
 
-- [README Principal](README.md)
-- [Guía de Inicio Rápido](pywebui/docs/getting_started.md)
-- [Documentación de Componentes](pywebui/docs/components.md)
-- [Sistema de Scripts](pywebui/docs/scripts.md)
-- [Guía de Exportadores](pywebui/docs/exporters.md)
+- [README Principal](../README.md)
+- [Guía de Inicio Rápido](../dars/docs/getting_started.md)
+- [Documentación de Componentes](../dars/docs/components.md)
+- [Sistema de Scripts](../dars/docs/scripts.md)
+- [Guía de Exportadores](../dars/docs/exporters.md)
 
 ### Ejemplos
 
-- [Ejemplos Básicos](examples/basic/)
-- [Ejemplos Avanzados](examples/advanced/)
-- [Aplicación de Demostración](examples/demo/)
+- [Ejemplos Básicos](../dars/templates/examples/basic/)
+- [Ejemplos Avanzados](../dars/templates/examples/advanced/)
+- [Aplicación de Demostración](../dars/templates/examples/demo/)
 
 ### Comandos Útiles
 
 ```bash
 # Ayuda general
-./pywebui_exporter --help
+dars --help
 
 # Información de aplicación
-./pywebui_exporter info mi_app.py
+dars info mi_app.py
 
 # Formatos disponibles
-./pywebui_exporter formats
+dars formats
 
 # Preview de aplicación
-python3 pywebui/cli/preview.py ./output_directory
+dars preview ./output_directory
 ```
 
 ## ✅ Lista de Verificación Post-Instalación
 
-- [ ] Python 3.8+ instalado
-- [ ] Dependencia `rich` instalada
-- [ ] Framework Dars descargado/clonado
-- [ ] CLI ejecutable configurado
-- [ ] Prueba básica realizada exitosamente
-- [ ] Ejemplo exportado y previsualizando correctamente
-- [ ] Documentación revisada
+- [x] Python 3.8+ instalado
+- [x] Dars Framework instalado vía `pip install dars-framework`
+- [x] CLI `dars` funciona correctamente (`dars --help`)
+- [x] Prueba básica realizada exitosamente
+- [x] Ejemplo exportado y previsualizando correctamente
+- [x] Documentación revisada
 
 ¡Felicidades! Dars está listo para usar. 🎉
 
 ---
 
-**Siguiente paso:** [Guía de Inicio Rápido](pywebui/docs/getting_started.md)
+**Siguiente paso:** [Guía de Inicio Rápido](../dars/docs/getting_started.md)
+
+
+
 

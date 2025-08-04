@@ -13,17 +13,13 @@ Dars es un framework que permite a los desarrolladores crear interfaces de usuar
 
 ### Instalación del Framework
 
-1. Descarga o clona el repositorio de Dars
-2. Navega al directorio del framework
-3. Instala las dependencias necesarias:
+Para instalar Dars, simplemente usa pip:
 
 ```bash
-pip install rich
+pip install dars-framework
 ```
 
-### Configuración del Entorno
-
-Para usar Dars, asegúrate de que el directorio del framework esté en tu PYTHONPATH o copia la carpeta `dars` a tu proyecto.
+Esto instalará Dars y todas sus dependencias automáticamente.
 
 ## Tu Primera Aplicación
 
@@ -118,7 +114,7 @@ Ahora puedes exportar tu aplicación a HTML/CSS/JS usando el exportador de Dars:
 #### Exportar a HTML/CSS/JS
 
 ```bash
-./dars export mi_primera_app.py --format html --output ./mi_app_web
+dars export mi_primera_app.py --format html --output ./mi_app_web
 ```
 
 ### Paso 3: Previsualizar la Aplicación
@@ -128,7 +124,7 @@ Para ver tu aplicación en acción:
 #### Para aplicaciones HTML
 
 ```bash
-./dars/cli/preview.py ./mi_app_web
+dars preview ./mi_app_web
 ```
 
 Esto iniciará un servidor local y abrirá tu aplicación en el navegador.
@@ -161,7 +157,7 @@ estilo_boton = {
 
 Los scripts permiten agregar lógica interactiva a tus aplicaciones. Puedes usar:
 
-- **InlineScript**: Código JavaScript/TypeScript definido directamente en Python
+- **InlineScript**: Código JavaScript definido directamente en Python
 - **FileScript**: Código cargado desde archivos externos
 
 ### Aplicación (App)
@@ -180,27 +176,38 @@ Ahora que has creado tu primera aplicación, puedes:
 1. Explorar más componentes en la [documentación de componentes](components.md)
 2. Aprender sobre el sistema de scripts en [scripts.md](scripts.md)
 3. Descubrir todos los exportadores disponibles en [exporters.md](exporters.md)
-4. Ver ejemplos avanzados en el directorio `examples/`
+4. Ver ejemplos avanzados en el directorio `dars/templates/examples/`
 
 ## Comandos Útiles
+
+### Inicializar un Nuevo Proyecto
+
+```bash
+# Proyecto básico con Hello World
+dars init mi_proyecto
+
+# Proyecto con una plantilla específica
+dars init mi_proyecto -t demo/complete_app
+```
 
 ### Información de la Aplicación
 
 ```bash
-./pywebui_exporter info mi_primera_app.py
+dars info mi_primera_app.py
 ```
 
 ### Ver Formatos Soportados
 
 ```bash
-./pywebui_exporter formats
+dars formats
 ```
 
 ### Ayuda del CLI
 
 ```bash
-./pywebui_exporter --help
+dars --help
 ```
 
 ¡Felicidades! Has creado tu primera aplicación con Dars. El framework te permite crear interfaces modernas y exportarlas a múltiples plataformas con facilidad y elegancia.
+
 

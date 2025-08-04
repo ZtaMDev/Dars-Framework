@@ -15,22 +15,16 @@ Dars es un framework que permite crear interfaces de usuario modernas utilizando
 
 ## Instalación
 
+Para instalar Dars, simplemente usa pip:
+
+```bash
+pip install dars-framework
+```
+
 ### Requisitos
 
 - Python 3.8 o superior
 - pip (gestor de paquetes de Python)
-
-### Dependencias
-
-```bash
-pip install rich
-```
-
-### Configuración
-
-1. Descarga o clona el framework Dars
-2. Asegúrate de que la carpeta `dars` esté en tu proyecto
-3. ¡Listo para usar!
 
 ## Inicio Rápido
 
@@ -38,9 +32,6 @@ pip install rich
 
 ```python
 #!/usr/bin/env python3
-import sys
-import os
-
 from dars.core.app import App
 from dars.components.basic.text import Text
 from dars.components.basic.button import Button
@@ -88,22 +79,20 @@ app.add_script(script)
 ### Exportar la Aplicación
 
 ```bash
-# Exportar a HTML
 dars export mi_app.py --format html --output ./mi_app_web
 ```
 
 ### Previsualizar
 
 ```bash
-# Para aplicaciones HTML
-python3 dars/cli/preview.py ./mi_app_web
+dars preview ./mi_app_web
 ```
 
-## Herramientas de Línea de Comandos
+## Herramientas de Línea de Comandos (CLI)
 
-### Dars
+### Dars CLI
 
-El exportador principal con interfaz rica en colores:
+El CLI de Dars te permite gestionar tus proyectos, exportar aplicaciones y previsualizar resultados. Aquí están los comandos principales:
 
 ```bash
 # Ver información de una aplicación
@@ -115,21 +104,17 @@ dars export mi_app.py --format html --output ./output
 # Ver formatos soportados
 dars formats
 
+# Inicializar un nuevo proyecto
+dars init mi_nuevo_proyecto
+
+# Inicializar un proyecto con una plantilla específica
+dars init mi_nuevo_proyecto -t demo/complete_app
+
+# Previsualizar una aplicación exportada
+dars preview ./output_directory
+
 # Ayuda
 dars --help
-```
-
-### Sistema de Preview
-
-```bash
-# Preview automático (detecta formato)
-python3 dars/cli/preview.py ./output_directory
-
-# Preview específico
-python3 dars/cli/preview.py ./output_directory --format html
-
-# Sin abrir navegador automáticamente
-python3 dars/cli/preview.py ./output_directory --no-open
 ```
 
 ## Componentes Disponibles
@@ -140,6 +125,15 @@ python3 dars/cli/preview.py ./output_directory --no-open
 - **Button**: Botones interactivos
 - **Input**: Campos de entrada de datos
 - **Container**: Contenedores para layout
+- **Image**: Mostrar imágenes
+- **Link**: Crear enlaces de navegación
+- **Textarea**: Áreas de texto multilínea
+
+### Componentes Avanzados
+
+- **Card**: Contenedor estilizado para agrupar contenido relacionado
+- **Modal**: Ventana emergente superpuesta al contenido principal
+- **Navbar**: Barra de navegación
 
 ### Ejemplo de Uso
 
@@ -187,6 +181,45 @@ formulario = Container(
         'gap': '15px',
         'padding': '20px'
     }
+)
+
+# Imagen
+imagen = Image(
+    src="https://via.placeholder.com/150",
+    alt="Placeholder Image",
+    width="150px"
+)
+
+# Enlace
+enlace = Link(
+    text="Visitar Dars",
+    href="https://github.com/your-repo/dars",
+    target="_blank"
+)
+
+# Textarea
+comentarios = Textarea(
+    placeholder="Tus comentarios...",
+    rows=4,
+    cols=50
+)
+
+# Card
+mi_card = Card(
+    title="Mi Tarjeta",
+    children=[
+        Text("Contenido de la tarjeta."),
+        Button("Acción")
+    ]
+)
+
+# Navbar
+mi_navbar = Navbar(
+    brand="Mi App",
+    children=[
+        Link("Inicio", "/"),
+        Link("Acerca de", "/about")
+    ]
 )
 ```
 
@@ -248,34 +281,34 @@ app.add_script(script)
 
 ### Ejemplos
 
-- [**Básicos**](examples/basic/) - Ejemplos simples para empezar
-- [**Avanzados**](examples/advanced/) - Ejemplos complejos y características avanzadas
-- [**Demostración**](examples/demo/) - Aplicación completa de demostración
+- [**Básicos**](dars/templates/examples/basic/) - Ejemplos simples para empezar
+- [**Avanzados**](dars/templates/examples/advanced/) - Ejemplos complejos y características avanzadas
+- [**Demostración**](dars/templates/examples/demo/) - Aplicación completa de demostración
 
 ## Ejemplos de Aplicaciones
 
 ### Hello World
 
 ```bash
-./dars export examples/basic/hello_world.py --format html --output ./hello_output
+dars export dars/templates/examples/basic/hello_world.py --format html --output ./hello_output
 ```
 
 ### Formulario de Contacto
 
 ```bash
-./dars export examples/basic/simple_form.py --format html --output ./form_output
+dars export dars/templates/examples/basic/simple_form.py --format html --output ./form_output
 ```
 
 ### Dashboard Empresarial
 
 ```bash
-./dars export examples/advanced/dashboard.py --format html --output ./dashboard_output
+dars export dars/templates/examples/advanced/dashboard.py --format html --output ./dashboard_output
 ```
 
 ### Aplicación Completa
 
 ```bash
-./dars export examples/demo/complete_app.py --format html --output ./demo_output
+dars export dars/templates/examples/demo/complete_app.py --format html --output ./demo_output
 ```
 
 ## Arquitectura del Framework
@@ -288,19 +321,25 @@ dars/
 │   ├── properties.py      # Sistema de propiedades
 │   └── events.py          # Sistema de eventos
 ├── components/            # Componentes UI
-│   └── basic/            # Componentes básicos
+│   ├── basic/            # Componentes básicos
 │       ├── text.py       # Componente Text
 │       ├── button.py     # Componente Button
 │       ├── input.py      # Componente Input
-│       └── container.py  # Componente Container
+│       ├── container.py  # Componente Container
+│       ├── image.py      # Componente Image
+│       ├── link.py       # Componente Link
+│       └── textarea.py   # Componente Textarea
+│   └── advanced/         # Componentes avanzados
+│       ├── card.py       # Componente Card
+│       ├── modal.py      # Componente Modal
+│       └── navbar.py     # Componente Navbar
 ├── scripts/              # Sistema de scripts
 │   └── script.py         # Clases de scripts
 ├── exporters/            # Exportadores
 │   ├── base.py          # Clase base Exporter
-│   ├── web/             # Exportadores web
-│   └── native/          # Exportadores nativos
+│   └── web/             # Exportadores web
 ├── cli/                 # Herramientas CLI
-│   ├── exporter.py      # CLI principal
+│   ├── main.py          # CLI principal
 │   └── preview.py       # Sistema de preview
 └── docs/                # Documentación
 ```
@@ -383,15 +422,10 @@ app.add_script(api_script)
 
 #### Error de Importación
 
-```python
-# ❌ Incorrecto
-from core.app import App
+Ahora que Dars se instala como un paquete, las importaciones son directas:
 
+```python
 # ✅ Correcto
-import sys
-import os
-framework_path = os.path.join(os.path.dirname(__file__), 'dars')
-sys.path.insert(0, framework_path)
 from dars.core.app import App
 ```
 
@@ -412,10 +446,10 @@ app.set_root(container)
 
 ```bash
 # Verificar que el archivo sea válido
-./dars info mi_app.py
+dars info mi_app.py
 
 # Verificar formatos soportados
-./dars formats
+dars formats
 ```
 
 ## Contribuir
@@ -436,7 +470,7 @@ class MiComponente(Component):
 ### Nuevos Exportadores
 
 ```python
-from darss.base import Exporter
+from dars.exporters.base import Exporter
 
 class MiExportador(Exporter):
     def get_platform(self):
@@ -466,25 +500,27 @@ Dars Framework - Creado en Python
 
 ### Ejemplos
 
-- [Ejemplos Básicos](examples/basic/)
-- [Ejemplos Avanzados](examples/advanced/)
-- [Aplicación de Demostración](examples/demo/)
+- [Ejemplos Básicos](dars/templates/examples/basic/)
+- [Ejemplos Avanzados](dars/templates/examples/advanced/)
+- [Aplicación de Demostración](dars/templates/examples/demo/)
 
 ### Comandos de Ayuda
 
 ```bash
 # Ayuda general
-./dars --help
+dars --help
 
 # Información de aplicación
-./dars info mi_app.py
+dars info mi_app.py
 
 # Formatos disponibles
-./dars formats
+dars formats
 ```
 
 ---
 
 **¡Comienza a crear interfaces increíbles con Dars hoy mismo!**
+
+
 
 
