@@ -96,8 +96,6 @@ dars preview ./mi_app_web
 
 ### Dars CLI
 
-<img width="1599" height="573" alt="imagen" src="https://github.com/user-attachments/assets/7c15e211-7096-4072-b46f-6004bb1f985a" />
-
 El CLI de Dars te permite gestionar tus proyectos, exportar aplicaciones y previsualizar resultados. Aquí están los comandos principales:
 
 ```bash
