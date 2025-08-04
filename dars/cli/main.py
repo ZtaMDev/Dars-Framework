@@ -310,9 +310,9 @@ class DarsExporter:
     def show_supported_formats(self):
         """Shows supported formats"""
         table = Table(title=translator.get('supported_export_formats'))
-        table.add_column(translator.get('format_column'), style="cyan")
-        table.add_column(translator.get('description_column'), style="white")
-        table.add_column(translator.get('platform_column'), style="green")
+        table.add_column(translator.get('format_name'), style="cyan")
+        table.add_column(translator.get('format_description'), style="white")
+        table.add_column(translator.get('html_description'), style="green")
         
         formats_info = {
             'html': ('HTML/CSS/JavaScript', 'Web'),
