@@ -7,10 +7,6 @@ Demuestra layouts complejos, múltiples componentes y funcionalidad avanzada
 import sys
 import os
 
-# Agregar el directorio del framework al path
-framework_path = os.path.join(os.path.dirname(__file__), '..', '..')
-sys.path.insert(0, framework_path)
-
 from dars.core.app import App
 from dars.components.basic.text import Text
 from dars.components.basic.button import Button

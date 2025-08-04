@@ -450,9 +450,9 @@ app.add_script(script)
         # 5. Final instructions
         console.print(f"\n[bold cyan]🎉 {translator.get('project_initialized')}[/bold cyan]")
         console.print(Syntax(f"cd {name}", "bash"))
-        console.print(Syntax(f"\n{translator.get('export_command_help')}:", "bash"))
+        console.print(Syntax(f"\n{translator.get('export_command')}:", "bash"))
         console.print(Syntax(f"dars export main.py --format html --output build", "bash"))
-        console.print(Syntax(f"\n{translator.get('preview_command_help')}:", "bash"))
+        console.print(Syntax(f"\n{translator.get('preview_command')}:", "bash"))
         console.print(Syntax(f"dars preview build", "bash")) 
     
 
@@ -610,8 +610,20 @@ def main():
             console.print(f"{translator.get('view_preview')} [green]y[/green] / [red]n[/red] [y/n] ")
             if input().lower() == 'y':
                 # Pass the current language to preview.py
-                lang_param = f"--lang {args.lang}" if hasattr(args, 'lang') and args.lang else ""
-                os.system(f"{sys.executable} -m dars.cli.preview {args.path} {lang_param}")
+                
+                import subprocess
+                process = None
+                try:
+                    process = subprocess.Popen([sys.executable, '-m', 'dars.cli.preview', args.path])
+                    process.wait()
+                except KeyboardInterrupt:
+                    if process:
+                        process.terminate()
+                        process.wait()
+                finally:
+                    if process and process.poll() is None:
+                        process.terminate()
+                        process.wait()
         else:
             console.print(f"[red]{translator.get('index_not_found')} {args.path}[/red]")
 

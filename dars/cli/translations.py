@@ -128,11 +128,11 @@ translations = {
         'preview_question': "Do you want to see the preview? [green]y[/green] / [red]n[/red] [y/n] ",
         'index_not_found': "index.html not found in {}",
         'dir_created': "Directory '{}' created",
-        'template_copied': "Template '{}' copied as main.py",
+        'template_copied': "Template '{template}' copied as main.py",
         'main_created': "main.py file created (default Hello World)",
         'project_initialized': "🎉 Dars project successfully initialized",
-        'export_command': "To export the template use:",
-        'preview_command': "To view the project in a browser use:",
+        'export_command': "To export the template use",
+        'preview_command': "To view the project in a browser use",
         
         # Formats
         'supported_formats': "Supported export formats",
@@ -276,11 +276,11 @@ translations = {
         'preview_question': "¿Quieres ver la preview? [green]y[/green] / [red]n[/red] [y/n] ",
         'index_not_found': "No se encontró index.html en {}",
         'dir_created': "Directorio '{}' creado",
-        'template_copied': "Template '{}' copiado como main.py",
+        'template_copied': "Template '{template}' copiado como main.py",
         'main_created': "Archivo main.py creado (Hello World por defecto)",
         'project_initialized': "🎉 Proyecto Dars inicializado exitosamente",
-        'export_command': "Para exportar el template usa:",
-        'preview_command': "Para ver el proyecto en un navegador usa:",
+        'export_command': "Para exportar el template usa",
+        'preview_command': "Para ver el proyecto en un navegador usa",
         
         # Formats
         'supported_formats': "Formatos de exportación soportados",
