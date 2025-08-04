@@ -91,7 +91,6 @@ dars export mi_app.py --format html --output ./mi_app_web
 ```bash
 dars preview ./mi_app_web
 ```
-<img width="800" height="600" alt="imagen" src="https://github.com/user-attachments/assets/60e41a4e-29da-45ef-9182-43aea0517fca" />
 
 ## Herramientas de Línea de Comandos (CLI)
 
@@ -105,29 +104,11 @@ El CLI de Dars te permite gestionar tus proyectos, exportar aplicaciones y previ
 # Ver información de una aplicación
 dars info mi_app.py
 
-```
-
-<img width="1588" height="401" alt="imagen" src="https://github.com/user-attachments/assets/7bb06816-9b2e-42df-940d-5903d6855a1b" />
-
-```bash
-
 # Exportar a diferentes formatos
 dars export mi_app.py --format html --output ./output
 
-```
-
-<img width="1571" height="383" alt="imagen" src="https://github.com/user-attachments/assets/e11694cf-ac99-4e87-89c7-ad9714759940" />
-
-```bash
-
 # Ver formatos soportados
 dars formats
-
-```
-
-<img width="1593" height="167" alt="imagen" src="https://github.com/user-attachments/assets/ab60f9cc-50fb-4b63-a970-37a1e6f0ac75" />
-
-```bash
 
 # Inicializar un nuevo proyecto
 dars init mi_nuevo_proyecto
@@ -135,26 +116,12 @@ dars init mi_nuevo_proyecto
 # Inicializar un proyecto con una plantilla específica
 dars init mi_nuevo_proyecto -t demo/complete_app
 
-```
-
-<img width="1590" height="271" alt="imagen" src="https://github.com/user-attachments/assets/d9f4ee65-d34f-415b-bcbb-12bde9af9080" />
-
-```bash
-
 # Previsualizar una aplicación exportada
 dars preview ./output_directory
-
-```
-
-<img width="1593" height="271" alt="imagen" src="https://github.com/user-attachments/assets/b1c0f007-0438-4157-80d5-d0f61487ed19" />
-
-```bash
 
 # Ayuda
 dars --help
 ```
-<img width="1599" height="573" alt="imagen" src="https://github.com/user-attachments/assets/7c15e211-7096-4072-b46f-6004bb1f985a" />
-
 
 ## Componentes Disponibles
 
