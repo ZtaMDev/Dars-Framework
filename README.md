@@ -88,7 +88,7 @@ dars export mi_app.py --format html --output ./mi_app_web
 dars preview ./mi_app_web
 ```
 <img width="800" height="600" alt="imagen" src="https://github.com/user-attachments/assets/60e41a4e-29da-45ef-9182-43aea0517fca" />
-
+ 
 ## Herramientas de Línea de Comandos (CLI)
 
 ### Dars CLI
