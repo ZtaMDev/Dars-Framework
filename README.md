@@ -12,6 +12,10 @@ Dars es un framework que permite crear interfaces de usuario modernas utilizando
 - **Personalización**: Proporciona un sistema de estilos flexible para una adaptación visual completa.
 - **Extensibilidad**: Diseñado con una arquitectura modular que facilita la expansión.
 - **Diseño Adaptativo**: Genera interfaces que se ajustan a diferentes tamaños de pantalla.
+- **Componentes Modernos**: Incluye Checkbox, RadioButton, Select, Slider, DatePicker y más.
+- **SEO Optimizado**: Meta tags completos, Open Graph, Twitter Cards y configuración robots.
+- **PWA Ready**: Soporte completo para Progressive Web Apps con manifest y configuración móvil.
+- **Templates Oficiales**: Templates básicos y avanzados para inicio rápido de proyectos.
 
 ## Instalación
 
@@ -88,7 +92,7 @@ dars export mi_app.py --format html --output ./mi_app_web
 dars preview ./mi_app_web
 ```
 <img width="800" height="600" alt="imagen" src="https://github.com/user-attachments/assets/60e41a4e-29da-45ef-9182-43aea0517fca" />
- 
+
 ## Herramientas de Línea de Comandos (CLI)
 
 ### Dars CLI
@@ -156,13 +160,25 @@ dars --help
 
 ### Componentes Básicos
 
+#### Componentes de Texto y Navegación
 - **Text**: Mostrar texto estático o dinámico
-- **Button**: Botones interactivos
-- **Input**: Campos de entrada de datos
-- **Container**: Contenedores para layout
-- **Image**: Mostrar imágenes
 - **Link**: Crear enlaces de navegación
+- **Image**: Mostrar imágenes
+
+#### Componentes de Entrada
+- **Input**: Campos de entrada de datos
 - **Textarea**: Áreas de texto multilínea
+- **Button**: Botones interactivos
+
+#### Nuevos Componentes de Formulario (2024)
+- **Checkbox**: Casillas de verificación con etiquetas
+- **RadioButton**: Botones de opción para selección única
+- **Select**: Menús desplegables con opciones múltiples
+- **Slider**: Controles deslizantes para valores numéricos
+- **DatePicker**: Selectores de fecha con múltiples formatos
+
+#### Componentes de Layout
+- **Container**: Contenedores para layout y organización
 
 ### Componentes Avanzados
 
@@ -230,6 +246,52 @@ enlace = Link(
     text="Visitar Dars",
     href="https://github.com/your-repo/dars",
     target="_blank"
+)
+
+# Nuevos Componentes de Formulario
+
+# Checkbox
+checkbox = Checkbox(
+    label="Acepto los términos y condiciones",
+    checked=False,
+    required=True
+)
+
+# RadioButton
+radio1 = RadioButton(
+    label="Opción A",
+    name="opciones",
+    value="a",
+    checked=True
+)
+
+radio2 = RadioButton(
+    label="Opción B",
+    name="opciones",
+    value="b"
+)
+
+# Select con opciones
+select = Select(
+    placeholder="Selecciona un país"
+)
+select.add_option(SelectOption(value="es", label="España"))
+select.add_option(SelectOption(value="mx", label="México"))
+select.add_option(SelectOption(value="ar", label="Argentina"))
+
+# Slider
+slider = Slider(
+    min_value=0,
+    max_value=100,
+    value=50,
+    show_value=True,
+    label="Porcentaje"
+)
+
+# DatePicker
+date_picker = DatePicker(
+    format="DD/MM/YYYY",
+    placeholder="Selecciona una fecha"
 )
 
 # Textarea
@@ -314,11 +376,27 @@ app.add_script(script)
 - [**Scripts**](dars/docs/scripts.md) - Sistema de scripts y eventos
 - [**Exportadores**](dars/docs/exporters.md) - Guía de todos los exportadores
 
-### Ejemplos
+### Ejemplos y Templates Oficiales
 
 - [**Básicos**](dars/templates/examples/basic/) - Ejemplos simples para empezar
 - [**Avanzados**](dars/templates/examples/advanced/) - Ejemplos complejos y características avanzadas
 - [**Demostración**](dars/templates/examples/demo/) - Aplicación completa de demostración
+
+#### Templates Disponibles
+
+**Template Básico - Componentes de Formulario:**
+```bash
+# Crear proyecto con nuevos componentes básicos
+dars init mi_formulario -t basic/form_components
+```
+Incluye: Checkbox, RadioButton, Select, Slider, DatePicker con ejemplos interactivos.
+
+**Template Avanzado - Aplicación Web Moderna:**
+```bash
+# Crear aplicación con SEO, PWA y Open Graph
+dars init mi_app_moderna -t advanced/modern_web_app
+```
+Incluye: SEO completo, Open Graph, Twitter Cards, PWA, todos los componentes nuevos.
 
 ## Ejemplos de Aplicaciones
 

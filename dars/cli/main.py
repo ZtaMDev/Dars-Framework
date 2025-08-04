@@ -538,7 +538,7 @@ def main():
         # Show banner
         console.print(Panel(
             Text("Dars Exporter", style="bold cyan", justify="center"),
-            subtitle=translator.get('cli_subtitle'),
+            subtitle=translator.get('main_description'),
             border_style="cyan"
         ))
         

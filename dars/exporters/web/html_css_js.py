@@ -8,6 +8,11 @@ from dars.components.basic.container import Container
 from dars.components.basic.image import Image
 from dars.components.basic.link import Link
 from dars.components.basic.textarea import Textarea
+from dars.components.basic.checkbox import Checkbox
+from dars.components.basic.radiobutton import RadioButton
+from dars.components.basic.select import Select
+from dars.components.basic.slider import Slider
+from dars.components.basic.datepicker import DatePicker
 from dars.components.advanced.card import Card
 from dars.components.advanced.modal import Modal
 from dars.components.advanced.navbar import Navbar
@@ -44,17 +49,32 @@ class HTMLCSSJSExporter(Exporter):
             return False
             
     def generate_html(self, app: App) -> str:
-        """Genera el contenido HTML"""
+        """Genera el contenido HTML con todas las propiedades de la aplicación"""
         body_content = ""
         if app.root:
             body_content = self.render_component(app.root)
-            
+        
+        # Generar meta tags
+        meta_tags_html = self._generate_meta_tags(app)
+        
+        # Generar links (favicon, manifest, etc.)
+        links_html = self._generate_links(app)
+        
+        # Generar Open Graph tags
+        og_tags_html = self._generate_open_graph_tags(app)
+        
+        # Generar Twitter Card tags
+        twitter_tags_html = self._generate_twitter_tags(app)
+        
         html_template = f"""<!DOCTYPE html>
-<html lang="es">
+<html lang="{app.language}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="{app.config.get('charset', 'UTF-8')}">
+    {meta_tags_html}
     <title>{app.title}</title>
+    {links_html}
+    {og_tags_html}
+    {twitter_tags_html}
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -64,6 +84,65 @@ class HTMLCSSJSExporter(Exporter):
 </html>"""
         soup = BeautifulSoup(html_template, "html.parser")
         return soup.prettify()
+    
+    def _generate_meta_tags(self, app: App) -> str:
+        """Genera todos los meta tags de la aplicación"""
+        meta_tags = app.get_meta_tags()
+        meta_html = []
+        
+        for name, content in meta_tags.items():
+            if content:
+                meta_html.append(f'    <meta name="{name}" content="{content}">')
+        
+        # Añadir canonical URL si está configurado
+        if app.canonical_url:
+            meta_html.append(f'    <link rel="canonical" href="{app.canonical_url}">')
+        
+        return '\n'.join(meta_html)
+    
+    def _generate_links(self, app: App) -> str:
+        """Genera todos los links (favicon, manifest, iconos)"""
+        links = []
+        
+        # Favicon
+        if app.favicon:
+            links.append(f'    <link rel="icon" type="image/x-icon" href="{app.favicon}">')
+        
+        # Icono principal
+        if app.icon:
+            links.append(f'    <link rel="icon" type="image/png" href="{app.icon}">')
+        
+        # Apple Touch Icon
+        if app.apple_touch_icon:
+            links.append(f'    <link rel="apple-touch-icon" href="{app.apple_touch_icon}">')
+        
+        # PWA Manifest
+        if app.manifest:
+            links.append(f'    <link rel="manifest" href="{app.manifest}">')
+        
+        return '\n'.join(links)
+    
+    def _generate_open_graph_tags(self, app: App) -> str:
+        """Genera todos los tags Open Graph para redes sociales"""
+        og_tags = app.get_open_graph_tags()
+        og_html = []
+        
+        for property_name, content in og_tags.items():
+            if content:
+                og_html.append(f'    <meta property="{property_name}" content="{content}">')
+        
+        return '\n'.join(og_html)
+    
+    def _generate_twitter_tags(self, app: App) -> str:
+        """Genera todos los tags de Twitter Card"""
+        twitter_tags = app.get_twitter_tags()
+        twitter_html = []
+        
+        for name, content in twitter_tags.items():
+            if content:
+                twitter_html.append(f'    <meta name="{name}" content="{content}">')
+        
+        return '\n'.join(twitter_html)
         
     def generate_css(self, app: App) -> str:
         """Genera el contenido CSS"""
@@ -220,6 +299,175 @@ body {
     border-radius: 4px;
 }
 
+/* Estilos para nuevos componentes básicos */
+
+/* Checkbox */
+.dars-checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 4px 0;
+}
+
+.dars-checkbox {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.dars-checkbox:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.dars-checkbox-wrapper label {
+    cursor: pointer;
+    user-select: none;
+}
+
+/* RadioButton */
+.dars-radio-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 4px 0;
+}
+
+.dars-radio {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.dars-radio:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.dars-radio-wrapper label {
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Select */
+.dars-select {
+    display: inline-block;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: white;
+    cursor: pointer;
+    min-width: 120px;
+}
+
+.dars-select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.dars-select:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: #f8f9fa;
+}
+
+.dars-select option:disabled {
+    color: #6c757d;
+}
+
+/* Slider */
+.dars-slider-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 8px 0;
+}
+
+.dars-slider-wrapper.dars-slider-vertical {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.dars-slider {
+    flex: 1;
+    cursor: pointer;
+}
+
+.dars-slider-horizontal .dars-slider {
+    width: 100%;
+    height: 6px;
+}
+
+.dars-slider-vertical .dars-slider {
+    width: 6px;
+    height: 100px;
+    writing-mode: bt-lr; /* IE */
+    -webkit-appearance: slider-vertical; /* WebKit */
+}
+
+.dars-slider:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.dars-slider-value {
+    font-weight: bold;
+    min-width: 40px;
+    text-align: center;
+    padding: 4px 8px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.dars-slider-wrapper label {
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+/* DatePicker */
+.dars-datepicker {
+    display: inline-block;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: white;
+    cursor: pointer;
+}
+
+.dars-datepicker:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.dars-datepicker:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: #f8f9fa;
+}
+
+.dars-datepicker:readonly {
+    background-color: #f8f9fa;
+    cursor: default;
+}
+
+.dars-datepicker-inline {
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 12px;
+    background-color: white;
+}
+
+.dars-datepicker-inline .dars-datepicker {
+    border: none;
+    padding: 0;
+}
+
 """
         
         # Agregar estilos globales de la aplicación definidos por el usuario
@@ -270,6 +518,16 @@ function initializeEvents() {
             return self.render_link(component)
         elif isinstance(component, Textarea):
             return self.render_textarea(component)
+        elif isinstance(component, Checkbox):
+            return self.render_checkbox(component)
+        elif isinstance(component, RadioButton):
+            return self.render_radiobutton(component)
+        elif isinstance(component, Select):
+            return self.render_select(component)
+        elif isinstance(component, Slider):
+            return self.render_slider(component)
+        elif isinstance(component, DatePicker):
+            return self.render_datepicker(component)
         elif isinstance(component, Card):
             return self.render_card(component)
         elif isinstance(component, Modal):
@@ -405,6 +663,115 @@ function initializeEvents() {
             children_html += self.render_component(child)
 
         return f'<nav id="{component_id}" {class_attr} {style_attr}>{brand_html}<div class="dars-navbar-nav">{children_html}</div></nav>'
+
+    def render_checkbox(self, checkbox: Checkbox) -> str:
+        """Renderiza un componente Checkbox"""
+        component_id = self.generate_unique_id(checkbox)
+        class_attr = f'class="dars-checkbox {checkbox.class_name or ""}"'
+        style_attr = f'style="{self.render_styles(checkbox.style)}"' if checkbox.style else ""
+        checked_attr = "checked" if checkbox.checked else ""
+        disabled_attr = "disabled" if checkbox.disabled else ""
+        required_attr = "required" if checkbox.required else ""
+        name_attr = f'name="{checkbox.name}"' if checkbox.name else ""
+        value_attr = f'value="{checkbox.value}"' if checkbox.value else ""
+        
+        attrs = [class_attr, style_attr, checked_attr, disabled_attr, required_attr, name_attr, value_attr]
+        attrs_str = " ".join(attr for attr in attrs if attr)
+        
+        label_html = f'<label for="{component_id}">{checkbox.label}</label>' if checkbox.label else ""
+        
+        return f'<div class="dars-checkbox-wrapper"><input type="checkbox" id="{component_id}" {attrs_str}>{label_html}</div>'
+
+    def render_radiobutton(self, radio: RadioButton) -> str:
+        """Renderiza un componente RadioButton"""
+        component_id = self.generate_unique_id(radio)
+        class_attr = f'class="dars-radio {radio.class_name or ""}"'
+        style_attr = f'style="{self.render_styles(radio.style)}"' if radio.style else ""
+        checked_attr = "checked" if radio.checked else ""
+        disabled_attr = "disabled" if radio.disabled else ""
+        required_attr = "required" if radio.required else ""
+        name_attr = f'name="{radio.name}"'
+        value_attr = f'value="{radio.value}"'
+        
+        attrs = [class_attr, style_attr, checked_attr, disabled_attr, required_attr, name_attr, value_attr]
+        attrs_str = " ".join(attr for attr in attrs if attr)
+        
+        label_html = f'<label for="{component_id}">{radio.label}</label>' if radio.label else ""
+        
+        return f'<div class="dars-radio-wrapper"><input type="radio" id="{component_id}" {attrs_str}>{label_html}</div>'
+
+    def render_select(self, select: Select) -> str:
+        """Renderiza un componente Select"""
+        component_id = self.generate_unique_id(select)
+        class_attr = f'class="dars-select {select.class_name or ""}"'
+        style_attr = f'style="{self.render_styles(select.style)}"' if select.style else ""
+        disabled_attr = "disabled" if select.disabled else ""
+        required_attr = "required" if select.required else ""
+        multiple_attr = "multiple" if select.multiple else ""
+        size_attr = f'size="{select.size}"' if select.size else ""
+        
+        attrs = [class_attr, style_attr, disabled_attr, required_attr, multiple_attr, size_attr]
+        attrs_str = " ".join(attr for attr in attrs if attr)
+        
+        # Generar opciones
+        options_html = ""
+        if select.placeholder and not select.multiple:
+            selected = "selected" if not select.value else ""
+            options_html += f'<option value="" disabled {selected}>{select.placeholder}</option>'
+        
+        for option in select.options:
+            selected = "selected" if option.value == select.value else ""
+            disabled = "disabled" if option.disabled else ""
+            options_html += f'<option value="{option.value}" {selected} {disabled}>{option.label}</option>'
+        
+        return f'<select id="{component_id}" {attrs_str}>{options_html}</select>'
+
+    def render_slider(self, slider: Slider) -> str:
+        """Renderiza un componente Slider"""
+        component_id = self.generate_unique_id(slider)
+        class_attr = f'class="dars-slider {slider.class_name or ""}"'
+        style_attr = f'style="{self.render_styles(slider.style)}"' if slider.style else ""
+        disabled_attr = "disabled" if slider.disabled else ""
+        min_attr = f'min="{slider.min_value}"'
+        max_attr = f'max="{slider.max_value}"'
+        value_attr = f'value="{slider.value}"'
+        step_attr = f'step="{slider.step}"'
+        
+        attrs = [class_attr, style_attr, disabled_attr, min_attr, max_attr, value_attr, step_attr]
+        attrs_str = " ".join(attr for attr in attrs if attr)
+        
+        label_html = f'<label for="{component_id}">{slider.label}</label>' if slider.label else ""
+        value_display = f'<span class="dars-slider-value">{slider.value}</span>' if slider.show_value else ""
+        
+        wrapper_class = "dars-slider-vertical" if slider.orientation == "vertical" else "dars-slider-horizontal"
+        
+        return f'<div class="dars-slider-wrapper {wrapper_class}">{label_html}<input type="range" id="{component_id}" {attrs_str}>{value_display}</div>'
+
+    def render_datepicker(self, datepicker: DatePicker) -> str:
+        """Renderiza un componente DatePicker"""
+        component_id = self.generate_unique_id(datepicker)
+        class_attr = f'class="dars-datepicker {datepicker.class_name or ""}"'
+        style_attr = f'style="{self.render_styles(datepicker.style)}"' if datepicker.style else ""
+        disabled_attr = "disabled" if datepicker.disabled else ""
+        required_attr = "required" if datepicker.required else ""
+        readonly_attr = "readonly" if datepicker.readonly else ""
+        value_attr = f'value="{datepicker.value}"' if datepicker.value else ""
+        placeholder_attr = f'placeholder="{datepicker.placeholder}"' if datepicker.placeholder else ""
+        min_attr = f'min="{datepicker.min_date}"' if datepicker.min_date else ""
+        max_attr = f'max="{datepicker.max_date}"' if datepicker.max_date else ""
+        
+        # Determinar el tipo de input según si incluye tiempo
+        input_type = "datetime-local" if datepicker.show_time else "date"
+        
+        attrs = [class_attr, style_attr, disabled_attr, required_attr, readonly_attr, 
+                value_attr, placeholder_attr, min_attr, max_attr]
+        attrs_str = " ".join(attr for attr in attrs if attr)
+        
+        # Si es inline, usar un div contenedor adicional
+        if datepicker.inline:
+            return f'<div class="dars-datepicker-inline"><input type="{input_type}" id="{component_id}" {attrs_str}></div>'
+        else:
+            return f'<input type="{input_type}" id="{component_id}" {attrs_str}>'
 
     def render_generic_component(self, component: Component) -> str:
         """Renderiza un componente genérico"""

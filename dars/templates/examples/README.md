@@ -11,12 +11,19 @@ Ejemplos simples que muestran conceptos fundamentales:
 #### `hello_world.py`
 - **Descripción**: Aplicación básica con texto y botón
 - **Conceptos**: Componentes básicos, estilos, scripts simples
-- **Exportar**: `./pywebui_exporter export examples/basic/hello_world.py --format html --output ./hello_world_output`
+- **Exportar**: `dars export examples/basic/hello_world.py --format html --output ./hello_world_output`
 
 #### `simple_form.py`
 - **Descripción**: Formulario de contacto con validación
 - **Conceptos**: Inputs, validación, manejo de eventos
-- **Exportar**: `./pywebui_exporter export examples/basic/simple_form.py --format html --output ./form_output`
+- **Exportar**: `dars export examples/basic/simple_form.py --format html --output ./form_output`
+
+#### `form_components.py` ⭐ **NUEVO 2024**
+- **Descripción**: Template oficial con todos los nuevos componentes de formulario
+- **Conceptos**: Checkbox, RadioButton, Select, Slider, DatePicker, interactividad
+- **Inicializar**: `dars init mi_formulario -t basic/form_components`
+- **Exportar**: `dars export mi_formulario.py --format html --output ./mi_formulario`
+- **Incluye**: Ejemplos interactivos de todos los componentes nuevos con JavaScript
 
 ### Avanzados (`advanced/`)
 
@@ -25,7 +32,21 @@ Ejemplos que demuestran características más complejas:
 #### `dashboard.py`
 - **Descripción**: Dashboard empresarial con navegación y estadísticas
 - **Conceptos**: Layouts complejos, navegación, datos dinámicos
-- **Exportar**: `./pywebui_exporter export examples/advanced/dashboard.py --format html --output ./dashboard_output`
+- **Exportar**: `dars export examples/advanced/dashboard.py --format html --output ./dashboard_output`
+
+#### `modern_web_app.py` ⭐ **NUEVO 2024**
+- **Descripción**: Template oficial de aplicación web moderna con todas las características avanzadas
+- **Conceptos**: SEO completo, Open Graph, Twitter Cards, PWA, favicon, nuevos componentes
+- **Inicializar**: `dars init mi_app_moderna -t advanced/modern_web_app`
+- **Exportar**: `dars export mi_app_moderna.py --format html --output ./mi_app_moderna`
+- **Incluye**: 
+  - Meta tags SEO completos
+  - Open Graph para redes sociales
+  - Twitter Cards optimizadas
+  - Progressive Web App (PWA) con manifest
+  - Favicon y iconos multi-dispositivo
+  - Todos los nuevos componentes de formulario
+  - JavaScript interactivo y PWA installation
 
 ### Demostración (`demo/`)
 
@@ -34,32 +55,45 @@ Aplicación completa que muestra todas las características:
 #### `complete_app.py`
 - **Descripción**: Aplicación de demostración completa con todas las características
 - **Conceptos**: Todos los conceptos del framework
-- **Exportar**: `./pywebui_exporter export examples/demo/complete_app.py --format html --output ./demo_output`
+- **Exportar**: `dars export examples/demo/complete_app.py --format html --output ./demo_output`
 
 ## Cómo Usar los Ejemplos
 
-### 1. Información de la Aplicación
+### 1. Inicializar Proyecto con Template
 
 ```bash
-./pywebui_exporter info examples/basic/hello_world.py
+# Template básico con nuevos componentes
+dars init mi_proyecto -t basic/form_components
+
+# Template avanzado con SEO, PWA y Open Graph
+dars init mi_app_moderna -t advanced/modern_web_app
+
+# También funciona la forma corta
+dars init mi_proyecto -t basic/form_components
 ```
 
-### 2. Exportar a HTML
+### 2. Información de la Aplicación
 
 ```bash
-./pywebui_exporter export examples/basic/hello_world.py --format html --output ./output
+dars info mi_proyecto.py
+```
+
+### 3. Exportar a HTML
+
+```bash
+dars export mi_proyecto.py --format html --output ./mi_proyecto_web
 ```
 
 ### 3. Exportar a React
 
 ```bash
-./pywebui_exporter export examples/basic/hello_world.py --format react --output ./react_app
+dars export examples/basic/hello_world.py --format react --output ./react_app
 ```
 
 ### 4. Exportar a PySide6
 
 ```bash
-./pywebui_exporter export examples/basic/hello_world.py --format pyside6 --output ./desktop_app
+dars export examples/basic/hello_world.py --format pyside6 --output ./desktop_app
 ```
 
 ### 5. Previsualizar
@@ -88,19 +122,19 @@ npm start
 ### Ver Formatos Disponibles
 
 ```bash
-./pywebui_exporter formats
+dars formats
 ```
 
 ### Ayuda del CLI
 
 ```bash
-./pywebui_exporter --help
+dars --help
 ```
 
 ### Información Detallada
 
 ```bash
-./pywebui_exporter info <archivo.py>
+dars info <archivo.py>
 ```
 
 ## Estructura de un Ejemplo Típico
@@ -176,7 +210,7 @@ app = App(title="Mi Aplicación")
 Para aplicaciones HTML, usa el sistema de preview integrado:
 
 ```bash
-python3 pywebui/cli/preview.py ./output_directory
+python3 dars preview ./output_directory
 ```
 
 ¡Explora los ejemplos y experimenta con diferentes combinaciones de componentes y estilos!

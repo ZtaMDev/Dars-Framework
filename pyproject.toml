@@ -1,6 +1,6 @@
 [project]
 name = "dars-framework"
-version = "1.0.0"
+version = "1.0.1"
 description = "Dars Framework build applications with Python and export to web"
 authors = [
     { name="ztamdev", email="zondax2009@gmail.com" }
@@ -8,7 +8,8 @@ authors = [
 readme = "README.md"
 license = { text = "MIT" }
 dependencies = [
-    "rich"
+    "rich",
+    "bs4"
 ]
 
 [project.scripts]
