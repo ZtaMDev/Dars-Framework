@@ -135,7 +135,7 @@ dars --help
 - **Textarea**: Áreas de texto multilínea
 - **Button**: Botones interactivos
 
-#### Nuevos Componentes de Formulario (2024)
+#### Componentes de Formulario
 - **Checkbox**: Casillas de verificación con etiquetas
 - **RadioButton**: Botones de opción para selección única
 - **Select**: Menús desplegables con opciones múltiples
