@@ -171,7 +171,7 @@ python mi_app.py --port 8088
 También puedes seguir usando el comando de preview del CLI sobre una exportación:
 
 ```bash
-python -m dars.cli.preview ./mi_app_exportada
+dars preview ./mi_app_exportada
 ```
 
 Esto levantará un servidor local en http://localhost:8000 para ver tu app en el navegador.
