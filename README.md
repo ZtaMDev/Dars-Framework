@@ -130,7 +130,7 @@ app.set_root(container)
 app.add_script(script)
 
 if __name__ == "__main__":
-    app.rTimeCompile()  # También puedes usar app.preview() o app.timeCompile()
+    app.rTimeCompile() 
 ```
 
 ### Exportar la Aplicación
