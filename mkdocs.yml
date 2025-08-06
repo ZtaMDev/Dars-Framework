@@ -1,0 +1,105 @@
+site_name: Dars Framework
+site_description: "Cross-platform UI framework for Python: export web apps to HTML/CSS/JS."
+site_author: ZtaMDev
+repo_url: https://github.com/ZtaMDev/Dars-Framework
+repo_name: ZtaMDev/Dars-Framework
+docs_dir: docs
+site_url: https://ztamdev.github.io/Dars-Framework/
+
+plugins:
+  - search
+
+nav:
+  - Home: index.md
+  - Getting Started: getting_started.md
+  - Components: components.md
+  - Scripts: scripts.md
+  - Exporters: exporters.md
+  - Architecture: architecture.md
+  - Templates & Examples:
+      - Basic: examples_basic.md
+      - Advanced: examples_advanced.md
+      - Demo: examples_demo.md
+  - CLI Reference: cli.md
+  - FAQ: faq.md
+  - Contributing: contributing.md
+  - License: license.md
+
+theme:
+  name: material
+  language: en
+  palette:
+    - scheme: slate   # Dark mode by default
+      primary: blue
+      accent: orange
+  features:
+    - navigation.sections
+    - navigation.tabs
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - toc.integrate
+    - content.code.annotate
+    - content.tabs.link
+  code:
+    highlight_theme: dracula
+    highlight_theme_dark: dracula
+markdown_extensions:
+  - admonition
+  - codehilite
+  - footnotes
+  - meta
+  - toc:
+      permalink: true
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/ZtaMDev/Dars-Framework
+
+site_description: "Framework de UI multiplataforma en Python: exporta apps a HTML/CSS/JS."
+site_author: ZtaMDev
+repo_url: https://github.com/ZtaMDev/Dars-Framework
+repo_name: ZtaMDev/Dars-Framework
+docs_dir: docs
+site_url: https://ztamdev.github.io/Dars-Framework/
+nav:
+  - Home: index.md
+  - Getting Started: getting_started.md
+  - Components: components.md
+  - Scripts: scripts.md
+  - Exporters: exporters.md
+  - Architecture: architecture.md
+  - Templates & Examples:
+      - Basic: examples_basic.md
+      - Advanced: examples_advanced.md
+      - Demo: examples_demo.md
+  - CLI Reference: cli.md
+  - FAQ: faq.md
+  - Contributing: contributing.md
+  - License: license.md
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: blue
+      accent: orange
+  features:
+    - navigation.sections
+    - navigation.tabs
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - toc.integrate
+    - content.code.annotate
+    - content.tabs.link
+markdown_extensions:
+  - admonition
+  - codehilite
+  - footnotes
+  - meta
+  - toc:
+      permalink: true
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/ZtaMDev/Dars-Framework

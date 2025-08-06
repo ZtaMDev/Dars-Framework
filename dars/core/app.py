@@ -100,13 +100,66 @@ class App:
                         print("Could not start preview server.")
                     return
                 try:
+                    # --- HOT RELOAD ---
+                    import inspect
+                    import importlib.util
+                    from dars.cli.hot_reload import FileWatcher
+
+                    app_file = None
+                    # Detectar archivo fuente de la app (donde está definida la clase App)
+                    for frame in inspect.stack():
+                        if frame.function == "<module>":
+                            app_file = frame.filename
+                            break
+                    if not app_file:
+                        app_file = sys.argv[0]
+
+                    def reload_and_export():
+                        # Limpiar y recompilar app
+                        if console:
+                            console.print("[yellow]Detected app file change. Reloading...[/yellow]")
+                        else:
+                            print("[Dars] Detected app file change. Reloading...")
+                        try:
+                            # Recargar módulo de la app
+                            spec = importlib.util.spec_from_file_location("dars_app", app_file)
+                            module = importlib.util.module_from_spec(spec)
+                            spec.loader.exec_module(module)
+                            # Buscar instancia App
+                            new_app = None
+                            for v in vars(module).values():
+                                if isinstance(v, App):
+                                    new_app = v
+                                    break
+                            if not new_app:
+                                if console:
+                                    console.print("[red]No App instance found after reload.[/red]")
+                                else:
+                                    print("[Dars] No App instance found after reload.")
+                                return
+                            # Exportar de nuevo
+                            exporter.export(new_app, preview_dir)
+                            if console:
+                                console.print("[green]App reloaded and re-exported successfully.[/green]")
+                            else:
+                                print("[Dars] App reloaded and re-exported successfully.")
+                        except Exception as e:
+                            if console:
+                                console.print(f"[red]Hot reload failed: {e}[/red]")
+                            else:
+                                print(f"[Dars] Hot reload failed: {e}")
+
+                    watcher = FileWatcher(app_file, reload_and_export)
+                    watcher.start()
+
                     while True:
                         time.sleep(1)
                 except KeyboardInterrupt:
+                    watcher.stop()
                     if console:
-                        console.print("\n[cyan] Stopping preview... [/cyan]")
+                        console.print("\n[cyan] Stopping preview and watcher... [/cyan]")
                     else:
-                        print("\n[Dars] Stopping preview...")
+                        print("\n[Dars] Stopping preview and watcher...")
                 finally:
                     server.stop()
                     if console:

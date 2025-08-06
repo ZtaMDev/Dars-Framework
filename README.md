@@ -1,34 +1,76 @@
 # Dars Framework
 
-**Framework de UI multiplataforma en Python**
+**A cross-platform UI framework for Python. Build modern web apps using only Python and export them to HTML, CSS, and JS.**
 
-Dars es un framework que permite crear interfaces de usuario modernas utilizando únicamente Python y exportarlas a HTML/CSS/JavaScript.
+[English](#english) | [Español](#español)
 
-## Características Principales
+---
 
-- **Python Puro**: Permite el desarrollo de interfaces de usuario utilizando exclusivamente Python.
-- **Multiplataforma**: Soportado por todos los sistemas operativos compatibles con python.
-- **Facilidad de Uso**: Ofrece una sintaxis intuitiva y simplificada.
-- **Personalización**: Proporciona un sistema de estilos flexible para una adaptación visual completa.
-- **Extensibilidad**: Diseñado con una arquitectura modular que facilita la expansión.
-- **Diseño Adaptativo**: Genera interfaces que se ajustan a diferentes tamaños de pantalla.
-- **Componentes Modernos**: Incluye Checkbox, RadioButton, Select, Slider, DatePicker y más.
-- **SEO Optimizado**: Meta tags completos, Open Graph, Twitter Cards y configuración robots.
-- **PWA Ready**: Soporte completo para Progressive Web Apps con manifest y configuración móvil.
-- **Templates Oficiales**: Templates básicos y avanzados para inicio rápido de proyectos.
+## English
 
-## Instalación
+Dars lets you create beautiful, responsive web apps entirely in Python. Export your projects to static HTML/CSS/JS or deploy as a PWA.
 
-Para instalar Dars, simplemente usa pip:
+- [Documentation & Guides](https://ztamdev.github.io/Dars-Framework/)
+- [GitHub Repository](https://github.com/ZtaMDev/Dars-Framework)
+
+### Quick Example
+```python
+from dars.core.app import App
+from dars.components.basic.text import Text
+app = App(title="Hello Dars!")
+app.set_root(Text("Welcome to Dars!"))
+if __name__ == "__main__":
+    app.rTimeCompile()
+```
+
+---
+
+## Español
+
+**Framework de UI multiplataforma en Python. Crea apps web modernas usando solo Python y expórtalas a HTML, CSS y JS.**
+
+- [Documentación y Guías](https://ztamdev.github.io/Dars-Framework/)
+- [Repositorio en GitHub](https://github.com/ZtaMDev/Dars-Framework)
+
+### Ejemplo rápido
+```python
+from dars.core.app import App
+from dars.components.basic.text import Text
+app = App(title="¡Hola Dars!")
+app.set_root(Text("¡Bienvenido a Dars!"))
+if __name__ == "__main__":
+    app.rTimeCompile()
+```
+
+---
+
+For complete guides, API reference, and more examples, visit the [documentation site](https://ztamdev.github.io/Dars-Framework/).
+
+Para guías completas, referencia de API y más ejemplos, visita la [documentación web](https://ztamdev.github.io/Dars-Framework/).
+
+
+Framework de UI multiplataforma en Python. Crea aplicaciones web modernas y multiplataforma usando solo Python y expórtalas a HTML/CSS/JS.
+
+- [Sitio web y documentación completa](https://ztamdev.github.io/Dars-Framework/)
+- [Repositorio en GitHub](https://github.com/ZtaMDev/Dars-Framework)
+
+## Instalación rápida
 
 ```bash
 pip install dars-framework
 ```
 
-### Requisitos
+## Documentación
 
-- Python 3.8 o superior
-- pip (gestor de paquetes de Python)
+La documentación completa, guías, ejemplos y referencia de API están en:
+
+- [docs/](./docs/) (local)
+- [https://ztamdev.github.io/Dars-Framework/](https://ztamdev.github.io/Dars-Framework/) (online)
+
+---
+
+¿Quieres contribuir? Consulta [docs/contributing.md](./docs/contributing.md)
+
 
 ## Novedad: Soporte Multipágina con Page
 
@@ -80,6 +122,36 @@ document.addEventListener('DOMContentLoaded', function() {
 """))
 ```
 
+**Framework de UI multiplataforma en Python**
+
+Dars es un framework que permite crear interfaces de usuario modernas utilizando únicamente Python y exportarlas a HTML/CSS/JavaScript.
+
+## Características Principales
+
+- **Python Puro**: Permite el desarrollo de interfaces de usuario utilizando exclusivamente Python.
+- **Multiplataforma**: Soportado por todos los sistemas operativos compatibles con python.
+- **Facilidad de Uso**: Ofrece una sintaxis intuitiva y simplificada.
+- **Personalización**: Proporciona un sistema de estilos flexible para una adaptación visual completa.
+- **Extensibilidad**: Diseñado con una arquitectura modular que facilita la expansión.
+- **Diseño Adaptativo**: Genera interfaces que se ajustan a diferentes tamaños de pantalla.
+- **Componentes Modernos**: Incluye Checkbox, RadioButton, Select, Slider, DatePicker y más.
+- **SEO Optimizado**: Meta tags completos, Open Graph, Twitter Cards y configuración robots.
+- **PWA Ready**: Soporte completo para Progressive Web Apps con manifest y configuración móvil.
+- **Templates Oficiales**: Templates básicos y avanzados para inicio rápido de proyectos.
+
+## Instalación
+
+Para instalar Dars, simplemente usa pip:
+
+```bash
+pip install dars-framework
+```
+
+### Requisitos
+
+- Python 3.8 o superior
+- pip (gestor de paquetes de Python)
+
 ## Inicio Rápido
 
 ### Tu Primera Aplicación
@@ -130,7 +202,7 @@ app.set_root(container)
 app.add_script(script)
 
 if __name__ == "__main__":
-    app.rTimeCompile() 
+    app.rTimeCompile()  # También puedes usar app.preview() o app.timeCompile()
 ```
 
 ### Exportar la Aplicación
@@ -151,7 +223,7 @@ Para probar tu aplicación localmente antes de exportarla, puedes usar el métod
 
 ```python
 if __name__ == "__main__":
-    app.rTimeCompile()
+    app.rTimeCompile()  # También puedes usar app.preview() o app.timeCompile()
 ```
 
 Luego ejecuta tu archivo directamente:
@@ -171,7 +243,7 @@ python mi_app.py --port 8088
 También puedes seguir usando el comando de preview del CLI sobre una exportación:
 
 ```bash
-dars preview ./mi_app_exportada
+python -m dars.cli.preview ./mi_app_exportada
 ```
 
 Esto levantará un servidor local en http://localhost:8000 para ver tu app en el navegador.

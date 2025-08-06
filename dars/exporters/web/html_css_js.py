@@ -80,6 +80,11 @@ class HTMLCSSJSExporter(Exporter):
                         self.write_file(os.path.join(output_path, "script.js"), script_js)
                         html_content = self.generate_html(page_app, css_file="styles.css", script_file="script.js")
                         filename = "index.html"
+                        try:
+                            soup = BeautifulSoup(html_content, "html.parser")
+                            html_content = soup.prettify()
+                        except ImportError:
+                            pass
                         self.write_file(os.path.join(output_path, filename), html_content)
                     else:
                         css_content = self.generate_css(page_app)
@@ -91,6 +96,11 @@ class HTMLCSSJSExporter(Exporter):
                         self.write_file(os.path.join(output_path, script_name), script_js)
                         html_content = self.generate_html(page_app, css_file="styles.css", script_file=script_name)
                         filename = f"{slug}.html"
+                        try:
+                            soup = BeautifulSoup(html_content, "html.parser")
+                            html_content = soup.prettify()
+                        except ImportError:
+                            pass
                         self.write_file(os.path.join(output_path, filename), html_content)
                         self.write_file(os.path.join(output_path, f"styles_{slug}.css"), css_content)
                         # El script_{slug}.js ya fue generado correctamente arriba, y el HTML ya fue generado, no sobrescribir
@@ -101,6 +111,11 @@ class HTMLCSSJSExporter(Exporter):
                 script_js = ""  # Aquí podrías agregar lógica para scripts de usuario en el futuro
                 self.write_file(os.path.join(output_path, "script.js"), script_js)
                 html_content = self.generate_html(app, css_file="styles.css", script_file="script.js")
+                try:
+                    soup = BeautifulSoup(html_content, "html.parser")
+                    html_content = soup.prettify()
+                except ImportError:
+                    pass  # Si no está bs4, sigue igual
                 self.write_file(os.path.join(output_path, "index.html"), html_content)
 
             # Generar archivos PWA si está habilitado
@@ -938,8 +953,14 @@ function initializeEvents() {
     def render_component(self, component: Component) -> str:
         """Renderiza un componente a HTML"""
         from dars.components.basic.page import Page
+        from dars.components.layout.grid import GridLayout
+        from dars.components.layout.flex import FlexLayout
         if isinstance(component, Page):
             return self.render_page(component)
+        if isinstance(component, GridLayout):
+            return self.render_grid(component)
+        if isinstance(component, FlexLayout):
+            return self.render_flex(component)
         if isinstance(component, Text):
             return self.render_text(component)
         elif isinstance(component, Button):
@@ -986,6 +1007,89 @@ function initializeEvents() {
             # Componente genérico
             return self.render_generic_component(component)
 
+    def render_grid(self, grid):
+        """Renderiza un GridLayout como un div con CSS grid."""
+        component_id = self.generate_unique_id(grid)
+        class_attr = f'class="dars-grid {grid.class_name or ""}"'
+        style = f'display: grid; grid-template-rows: repeat({grid.rows}, 1fr); grid-template-columns: repeat({grid.cols}, 1fr); gap: {getattr(grid, "gap", "16px")};'
+        # Render anchors/positions
+        children_html = ""
+        layout_info = getattr(grid, 'get_child_layout', lambda: [])()
+        for child_info in layout_info:
+            child = child_info['child']
+            row = child_info.get('row', 0) + 1
+            col = child_info.get('col', 0) + 1
+            row_span = child_info.get('row_span', 1)
+            col_span = child_info.get('col_span', 1)
+            anchor = child_info.get('anchor')
+            anchor_style = ''
+            if anchor:
+                if isinstance(anchor, str):
+                    anchor_map = {
+                        'top-left': 'justify-self: start; align-self: start;',
+                        'top': 'justify-self: center; align-self: start;',
+                        'top-right': 'justify-self: end; align-self: start;',
+                        'left': 'justify-self: start; align-self: center;',
+                        'center': 'justify-self: center; align-self: center;',
+                        'right': 'justify-self: end; align-self: center;',
+                        'bottom-left': 'justify-self: start; align-self: end;',
+                        'bottom': 'justify-self: center; align-self: end;',
+                        'bottom-right': 'justify-self: end; align-self: end;'
+                    }
+                    anchor_style = anchor_map.get(anchor, '')
+                elif hasattr(anchor, 'x') or hasattr(anchor, 'y'):
+                    # AnchorPoint object
+                    if getattr(anchor, 'x', None):
+                        if anchor.x == 'left': anchor_style += 'justify-self: start;'
+                        elif anchor.x == 'center': anchor_style += 'justify-self: center;'
+                        elif anchor.x == 'right': anchor_style += 'justify-self: end;'
+                        elif '%' in anchor.x or 'px' in anchor.x: anchor_style += f'left: {anchor.x}; position: relative;'
+                    if getattr(anchor, 'y', None):
+                        if anchor.y == 'top': anchor_style += 'align-self: start;'
+                        elif anchor.y == 'center': anchor_style += 'align-self: center;'
+                        elif anchor.y == 'bottom': anchor_style += 'align-self: end;'
+                        elif '%' in anchor.y or 'px' in anchor.y: anchor_style += f'top: {anchor.y}; position: relative;'
+            grid_item_style = f'grid-row: {row} / span {row_span}; grid-column: {col} / span {col_span}; {anchor_style}'
+            children_html += f'<div style="{grid_item_style}">{self.render_component(child)}</div>'
+        return f'<div id="{component_id}" {class_attr} style="{style}">{children_html}</div>'
+
+    def render_flex(self, flex):
+        """Renderiza un FlexLayout como un div con CSS flexbox."""
+        component_id = self.generate_unique_id(flex)
+        class_attr = f'class="dars-flex {flex.class_name or ""}"'
+        style = f'display: flex; flex-direction: {getattr(flex, "direction", "row")}; flex-wrap: {getattr(flex, "wrap", "wrap")}; justify-content: {getattr(flex, "justify", "flex-start")}; align-items: {getattr(flex, "align", "stretch")}; gap: {getattr(flex, "gap", "16px")};'
+        children_html = ""
+        for child in flex.children:
+            anchor = getattr(child, 'anchor', None)
+            anchor_style = ''
+            if anchor:
+                if isinstance(anchor, str):
+                    anchor_map = {
+                        'top-left': 'align-self: flex-start; justify-self: flex-start;',
+                        'top': 'align-self: flex-start; margin-left: auto; margin-right: auto;',
+                        'top-right': 'align-self: flex-start; margin-left: auto;',
+                        'left': 'align-self: center;',
+                        'center': 'align-self: center; margin-left: auto; margin-right: auto;',
+                        'right': 'align-self: center; margin-left: auto;',
+                        'bottom-left': 'align-self: flex-end;',
+                        'bottom': 'align-self: flex-end; margin-left: auto; margin-right: auto;',
+                        'bottom-right': 'align-self: flex-end; margin-left: auto;'
+                    }
+                    anchor_style = anchor_map.get(anchor, '')
+                elif hasattr(anchor, 'x') or hasattr(anchor, 'y'):
+                    if getattr(anchor, 'x', None):
+                        if anchor.x == 'left': anchor_style += 'margin-right: auto;'
+                        elif anchor.x == 'center': anchor_style += 'margin-left: auto; margin-right: auto;'
+                        elif anchor.x == 'right': anchor_style += 'margin-left: auto;'
+                        elif '%' in anchor.x or 'px' in anchor.x: anchor_style += f'left: {anchor.x}; position: relative;'
+                    if getattr(anchor, 'y', None):
+                        if anchor.y == 'top': anchor_style += 'align-self: flex-start;'
+                        elif anchor.y == 'center': anchor_style += 'align-self: center;'
+                        elif anchor.y == 'bottom': anchor_style += 'align-self: flex-end;'
+                        elif '%' in anchor.y or 'px' in anchor.y: anchor_style += f'top: {anchor.y}; position: relative;'
+            children_html += f'<div style="{anchor_style}">{self.render_component(child)}</div>'
+        return f'<div id="{component_id}" {class_attr} style="{style}">{children_html}</div>'
+
     def render_page(self, page):
         """Renderiza un componente Page como root de una página multipage"""
         component_id = self.generate_unique_id(page)
@@ -999,7 +1103,7 @@ function initializeEvents() {
         for child in children:
             if hasattr(child, 'render'):
                 children_html += self.render_component(child)
-        return f'<section id="{component_id}" {class_attr} {style_attr}>{children_html}</section>'
+        return f'<div id="{component_id}" {class_attr} {style_attr}>{children_html}</div>'
 
 
             
