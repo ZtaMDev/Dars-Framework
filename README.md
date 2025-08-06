@@ -151,7 +151,7 @@ Para probar tu aplicación localmente antes de exportarla, puedes usar el métod
 
 ```python
 if __name__ == "__main__":
-    app.rTimeCompile()  # También puedes usar app.preview() o app.timeCompile()
+    app.rTimeCompile()
 ```
 
 Luego ejecuta tu archivo directamente:
