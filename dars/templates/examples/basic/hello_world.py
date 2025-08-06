@@ -99,3 +99,6 @@ app.add_script(script)
 # Para exportar esta aplicación, ejecuta:
 # ./dars_exporter export examples/basic/hello_world.py --format html --output ./hello_world_output
 
+if __name__ == "__main__":
+    app.rTimeCompile()  # Preview/compilación rápida
+

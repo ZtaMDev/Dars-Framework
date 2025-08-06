@@ -25,6 +25,16 @@ console = Console()
 class PreviewServer:
     """Preview server for Dars applications"""
     
+    class DarsRequestHandler(http.server.SimpleHTTPRequestHandler):
+        def end_headers(self):
+            # CORS para desarrollo PWA si es necesario
+            self.send_header('Access-Control-Allow-Origin', '*')
+            super().end_headers()
+        def guess_type(self, path):
+            if path.endswith('sw.js'):
+                return 'application/javascript'
+            return super().guess_type(path)
+    
     def __init__(self, directory: str, port: int = 8000):
         self.directory = os.path.abspath(directory)
         self.port = port
@@ -38,7 +48,7 @@ class PreviewServer:
             os.chdir(self.directory)
             
             # Create the server
-            handler = http.server.SimpleHTTPRequestHandler
+            handler = self.DarsRequestHandler
             self.server = socketserver.TCPServer(("", self.port), handler)
             
             # Start in a separate thread
@@ -68,7 +78,7 @@ def preview_html_app(directory: str, auto_open: bool = True, port: int = 8000):
     # Verify that index.html exists
     index_path = os.path.join(directory, "index.html")
     if not os.path.exists(index_path):
-        console.print(f"[red]{translator.get('index_not_found_in')} {directory}[/red]")
+        console.print(f"[red]{translator.get('index_html_missing')} {directory}[/red]")
         return False
         
     # Create and start the server

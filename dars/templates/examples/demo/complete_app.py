@@ -715,3 +715,6 @@ app.add_script(main_script)
 # Para exportar esta aplicación, ejecuta:
 # dars export examples/demo/complete_app.py --format html --output ./complete_app_output
 
+if __name__ == "__main__":
+    app.rTimeCompile()  # Preview/compilación rápida
+

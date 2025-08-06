@@ -513,7 +513,4 @@ app.add_global_style('button:hover', {
 })
 
 if __name__ == "__main__":
-    print("📋 Plantilla: Componentes de Formulario - Dars Framework")
-    print("🎯 Esta plantilla demuestra todos los componentes básicos de formulario")
-    print("🚀 Para exportar: dars export form_components.py --format html --output ./mi_formulario")
-    print("👀 Para previsualizar: dars preview ./mi_formulario")
+    app.rTimeCompile()  # Preview/compilación rápida

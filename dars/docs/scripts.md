@@ -399,6 +399,42 @@ window.api = new ApiClient(\'https://api.ejemplo.com\');
 
 ### Uso en la Aplicación
 
+#### Scripts globales y por página (multipage)
+
+En aplicaciones multipágina, puedes añadir scripts globales a la App y scripts específicos a cada Page:
+
+```python
+from dars.scripts.script import InlineScript
+from dars.components.basic import Page, Button, Text
+
+home = Page(
+    Text("Inicio"),
+    Button("Ir a About", id="btn-about")
+)
+home.add_script(InlineScript("""
+document.addEventListener('DOMContentLoaded', function() {
+    var btn = document.getElementById('btn-about');
+    if (btn) btn.onclick = () => window.location.href = 'about.html';
+});
+"""))
+
+about = Page(
+    Text("Sobre Nosotros"),
+    Button("Volver", id="btn-home")
+)
+about.add_script(InlineScript("""
+document.addEventListener('DOMContentLoaded', function() {
+    var btn = document.getElementById('btn-home');
+    if (btn) btn.onclick = () => window.location.href = 'index.html';
+});
+"""))
+
+# Script global
+app.add_script(InlineScript("console.log('Script global para todas las páginas');"))
+```
+
+Al exportar, cada página tendrá su propio archivo JS combinando los scripts globales y los de la Page.
+
 ```python
 from dars.scripts.script import FileScript
 

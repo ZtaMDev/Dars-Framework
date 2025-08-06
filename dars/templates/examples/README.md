@@ -25,6 +25,27 @@ Ejemplos simples que muestran conceptos fundamentales:
 - **Exportar**: `dars export mi_formulario.py --format html --output ./mi_formulario`
 - **Incluye**: Ejemplos interactivos de todos los componentes nuevos con JavaScript
 
+## Ejemplos Multipágina
+
+Los ejemplos multipágina ahora usan el componente `Page` como root de cada página y permiten añadir scripts por página:
+
+```python
+from dars.components.basic import Page, Text, Button
+from dars.scripts.script import InlineScript
+home = Page(
+    Text("Bienvenido!"),
+    Button("Ir a About", id="btn-about")
+)
+home.add_script(InlineScript("""
+document.addEventListener('DOMContentLoaded', function() {
+    var btn = document.getElementById('btn-about');
+    if (btn) btn.onclick = () => window.location.href = 'about.html';
+});
+"""))
+```
+
+Los scripts globales añadidos a la App se combinan automáticamente con los de cada página al exportar.
+
 ### Avanzados (`advanced/`)
 
 Ejemplos que demuestran características más complejas:

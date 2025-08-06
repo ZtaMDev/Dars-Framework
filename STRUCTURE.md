@@ -268,10 +268,10 @@ class MiTipoScript(Script):
 
 ## 🚀 Roadmap de Desarrollo
 
-### Implementado ✅
+### Implementado 
 
 - [x] Núcleo del framework
-- [x] Componentes básicos (Text, Button, Input, Container, Image, Link, Textarea)
+- [x] Componentes básicos (Text, Button, Input, Container, Page [soporta add_script para scripts por página en multipage], Checkbox, RadioButton, Select, Slider, DatePicker, etc)
 - [x] Componentes avanzados (Card, Modal, Navbar)
 - [x] Sistema de scripts
 - [x] Exportador HTML/CSS/JS

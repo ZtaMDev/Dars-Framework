@@ -449,7 +449,4 @@ app.add_global_style('button:hover', {
 })
 
 if __name__ == "__main__":
-    print("🌟 Template: Aplicación Web Moderna")
-    print("📱 Incluye: SEO, Open Graph, Twitter Cards, PWA, Favicon")
-    print("🎯 Componentes: Checkbox, RadioButton, Select, Slider, DatePicker")
-    print("🚀 Para usar: dars init mi_app --template advanced/modern_web_app")
+    app.rTimeCompile()  # Preview/compilación rápida

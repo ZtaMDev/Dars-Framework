@@ -2,8 +2,192 @@ from typing import Optional, List, Dict, Any
 from .component import Component
 from .events import EventManager
 
+class Page:
+    """Representa una página individual en la app Dars (multipágina)."""
+    def __init__(self, name: str, root: 'Component', title: str = None, meta: dict = None, index: bool = False):
+        self.name = name  # slug o nombre de la página
+        self.root = root  # componente raíz de la página
+        self.title = title
+        self.meta = meta or {}
+        self.index = index  # ¿Es la página principal?
+
 class App:
     """Clase principal que representa una aplicación Dars"""
+
+    def rTimeCompile(self, exporter=None, port=None):
+        """
+        Genera una preview rápida de la app en un servidor local usando un exportador
+        (por defecto HTMLCSSJSExporter) y sirviendo los archivos en un directorio temporal.
+        No abre el navegador automáticamente. El servidor se detiene con Ctrl+C.
+        Puedes pasar el puerto como argumento de línea de comandos: python main.py --port 8080
+        """
+        import threading
+        import time
+        import sys
+        from pathlib import Path
+        
+        # Rich para mensajes bonitos
+        try:
+            from rich.console import Console
+            from rich.panel import Panel
+            from rich.text import Text
+        except ImportError:
+            Console = None
+        console = Console() if 'Console' in locals() else None
+        
+        # Leer puerto de sys.argv si no se pasa explícito
+        if port is None:
+            port = 8000
+            for i, arg in enumerate(sys.argv):
+                if arg in ('--port', '-p') and i + 1 < len(sys.argv):
+                    try:
+                        port = int(sys.argv[i + 1])
+                    except Exception:
+                        pass
+        
+        # Importar exportador por defecto si no se pasa
+        if exporter is None:
+            try:
+                from dars.exporters.web.html_css_js import HTMLCSSJSExporter
+            except ImportError:
+                print("Could not import HTMLCSSJSExporter")
+                return
+            exporter = HTMLCSSJSExporter()
+        
+        # Importar PreviewServer
+        try:
+            from dars.cli.preview import PreviewServer
+        except ImportError:
+            print("Could not import PreviewServer")
+            return
+        
+        import shutil
+        import traceback
+
+        try:
+            import os
+            preview_dir = os.path.abspath("./dars_preview")
+            cwd_original = os.getcwd()
+            if os.path.exists(preview_dir):
+                import shutil
+                try:
+                    shutil.rmtree(preview_dir)
+                except Exception as e:
+                    if console:
+                        console.print(f"[yellow]Warning: Could not clean previous preview directory: {e}[/yellow]")
+                    else:
+                        print(f"Warning: Could not clean previous preview directory: {e}")
+            os.makedirs(preview_dir, exist_ok=True)
+            exporter.export(self, preview_dir)
+            url = f"http://localhost:{port}"
+            app_title = getattr(self, 'title', 'Dars App')
+            if console:
+                from rich.text import Text
+                from rich.panel import Panel
+                panel = Panel(
+                    Text(f"✔ App running successfully\n\nName: {app_title}\nPreview available at: {url}\n\nPress Ctrl+C to stop the server.",
+                         style="bold green", justify="center"),
+                    title="Dars Preview", border_style="cyan")
+                console.print(panel)
+            else:
+                print(f"[Dars] App '{app_title}' running. Preview at {url}")
+            server = PreviewServer(preview_dir, port)
+            try:
+                if not server.start():
+                    if console:
+                        console.print("[red] Could not start preview server. [/red]")
+                    else:
+                        print("Could not start preview server.")
+                    return
+                try:
+                    while True:
+                        time.sleep(1)
+                except KeyboardInterrupt:
+                    if console:
+                        console.print("\n[cyan] Stopping preview... [/cyan]")
+                    else:
+                        print("\n[Dars] Stopping preview...")
+                finally:
+                    server.stop()
+                    if console:
+                        console.print("[green] Preview stopped. [/green]")
+                    else:
+                        print("[Dars] Preview stopped.")
+            finally:
+                os.chdir(cwd_original)
+                try:
+                    shutil.rmtree(preview_dir)
+                    if console:
+                        console.print("[yellow]Preview files deleted.[/yellow]")
+                    else:
+                        print("Preview files deleted.")
+                except Exception as e:
+                    if console:
+                        console.print(f"[red]Could not delete preview directory: {e}[/red]")
+                    else:
+                        print(f"Could not delete preview directory: {e}")
+
+        except PermissionError as e:
+            # Windows: temp dir cleanup error
+            msg = f"[yellow] Warning: Could not clean temp directory due to permissions: {e} [/yellow]"
+            if 'console' in locals() and console:
+                console.print(msg)
+            else:
+                print(msg)
+        except Exception as e:
+            msg = f"[red] Unexpected error in fast preview: {e}\n{traceback.format_exc()} [/red]"
+            if 'console' in locals() and console:
+                console.print(msg)
+            else:
+                print(msg)
+
+        """
+        Genera una preview rápida de la app en un servidor local usando un exportador
+        (por defecto HTMLCSSJSExporter) y sirviendo los archivos en un directorio temporal.
+        No abre el navegador automáticamente. El servidor se detiene con Ctrl+C.
+        Puedes pasar el puerto como argumento de línea de comandos: python main.py --port 8080
+        """
+        import tempfile
+        import threading
+        import time
+        import sys
+        from pathlib import Path
+        
+        # Rich para mensajes bonitos
+        try:
+            from rich.console import Console
+            from rich.panel import Panel
+            from rich.text import Text
+        except ImportError:
+            Console = None
+        console = Console() if 'Console' in locals() else None
+        
+        # Leer puerto de sys.argv si no se pasa explícito
+        if port is None:
+            port = 8000
+            for i, arg in enumerate(sys.argv):
+                if arg in ('--port', '-p') and i + 1 < len(sys.argv):
+                    try:
+                        port = int(sys.argv[i + 1])
+                    except Exception:
+                        pass
+        
+        # Importar exportador por defecto si no se pasa
+        if exporter is None:
+            try:
+                from dars.exporters.web.html_css_js import HTMLCSSJSExporter
+            except ImportError:
+                print("Could not import HTMLCSSJSExporter")
+                return
+            exporter = HTMLCSSJSExporter()
+        
+        # Importar PreviewServer
+        try:
+            from dars.cli.preview import PreviewServer
+        except ImportError:
+            print("Could not import PreviewServer")
+            return
+
     
     def __init__(
         self, 
@@ -11,7 +195,7 @@ class App:
         description: str = "",
         author: str = "",
         keywords: List[str] = None,
-        language: str = "es",
+        language: str = "en",
         favicon: str = "",
         icon: str = "",
         apple_touch_icon: str = "",
@@ -38,6 +222,14 @@ class App:
         self.background_color = background_color
         
         # Propiedades Open Graph (para redes sociales)
+
+        #
+        # [RECOMENDACIÓN DARS]
+        # Para lanzar la compilación/preview rápido de tu app, añade al final de tu archivo principal:
+        #   if __name__ == "__main__":
+        #       app.rTimeCompile()  # o app.timeCompile()
+        # Así tendrás preview instantáneo y control explícito, sin efectos colaterales.
+        #
         self.og_title = config.get('og_title', title)
         self.og_description = config.get('og_description', description)
         self.og_image = config.get('og_image', '')
@@ -62,7 +254,9 @@ class App:
         self.pwa_orientation = config.get('pwa_orientation', 'portrait')
         
         # Propiedades del framework
-        self.root: Optional[Component] = None
+        self.root: Optional[Component] = None  # Single-page mode
+        self._pages: Dict[str, Page] = {}      # Multipage mode
+        self._index_page: str = None           # Nombre de la página principal (si existe)
         self.scripts: List['Script'] = []
         self.global_styles: Dict[str, Any] = {}
         self.event_manager = EventManager()
@@ -79,8 +273,51 @@ class App:
         self.config.setdefault('charset', 'UTF-8')
         
     def set_root(self, component: Component):
-        """Establece el componente raíz de la aplicación"""
+        """Establece el componente raíz de la aplicación (modo single-page retrocompatible)"""
         self.root = component
+
+    def add_page(self, name: str, root: 'Component', title: str = None, meta: dict = None, index: bool = False):
+        """
+        Agrega una página multipágina a la app.
+        name es el slug/clave, root el componente raíz.
+        Si index=True, esta página será la principal (exportada como index.html).
+        Si varias páginas tienen index=True, la última registrada será la principal.
+        """
+        if name in self._pages:
+            raise ValueError(f"Ya existe una página con el nombre '{name}'")
+        self._pages[name] = Page(name, root, title, meta, index=index)
+        if index:
+            self._index_page = name
+
+
+    def get_page(self, name: str) -> 'Page':
+        """Obtiene una página registrada por su nombre."""
+        return self._pages.get(name)
+
+    def get_index_page(self) -> 'Page':
+        """
+        Devuelve la página marcada como index, o la primera registrada si ninguna tiene index=True.
+        """
+        # Prioridad: explícita, luego la primera
+        if hasattr(self, '_index_page') and self._index_page and self._index_page in self._pages:
+            return self._pages[self._index_page]
+        for page in self._pages.values():
+            if getattr(page, 'index', False):
+                return page
+        # Si ninguna marcada, devolver la primera
+        if self._pages:
+            return list(self._pages.values())[0]
+        return None
+
+
+    @property
+    def pages(self) -> Dict[str, 'Page']:
+        """Devuelve el diccionario de páginas registradas (multipágina)."""
+        return self._pages
+
+    def is_multipage(self) -> bool:
+        """Indica si la app está en modo multipágina (True si hay páginas registradas)."""
+        return bool(self._pages)
         
     def add_script(self, script: 'Script'):
         """Agrega un script a la aplicación"""

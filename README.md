@@ -1,5 +1,55 @@
 # Dars Framework
 
+## Novedad: Soporte Multipágina con Page
+
+Ahora puedes definir múltiples páginas usando el componente `Page` como root de cada página, pasando hijos directamente como argumentos:
+
+```python
+from dars.core.app import App
+from dars.components.basic import Page, Text, Button
+
+app = App(title="Demo Multipágina")
+
+home = Page(
+    Text("Bienvenido a la página principal!"),
+    Button("Ir a Sobre Nosotros", class_name="dars-btn-link")
+)
+about = Page(
+    Text("Sobre Nosotros"),
+    Button("Volver al inicio", class_name="dars-btn-link")
+)
+
+app.add_page(name="inicio", root=home, title="Inicio", index=True)
+app.add_page(name="about", root=about, title="Sobre Nosotros")
+```
+
+Ya no necesitas usar `Container` como root ni listas de componentes. Usa siempre `Page` para cada página en multipage.
+
+## Scripts por página en multipage
+
+Puedes añadir scripts globales a la app (con `app.add_script`) y scripts específicos a cada página usando `Page.add_script`. Ambos se combinarán automáticamente al exportar cada página:
+
+```python
+from dars.scripts.script import InlineScript
+
+# Script global (estará en todas las páginas)
+app.add_script(InlineScript("""
+console.log('Script global cargado');
+"""))
+
+# Script solo para la página 'about'
+about = Page(
+    Text("Sobre Nosotros"),
+    Button("Volver", id="btn-home")
+)
+about.add_script(InlineScript("""
+document.addEventListener('DOMContentLoaded', function() {
+    var btn = document.getElementById('btn-home');
+    if (btn) btn.onclick = () => window.location.href = 'index.html';
+});
+"""))
+```
+
 **Framework de UI multiplataforma en Python**
 
 Dars es un framework que permite crear interfaces de usuario modernas utilizando únicamente Python y exportarlas a HTML/CSS/JavaScript.
@@ -78,6 +128,9 @@ container.add_child(titulo)
 container.add_child(boton)
 app.set_root(container)
 app.add_script(script)
+
+if __name__ == "__main__":
+    app.rTimeCompile()  # También puedes usar app.preview() o app.timeCompile()
 ```
 
 ### Exportar la Aplicación
@@ -91,6 +144,37 @@ dars export mi_app.py --format html --output ./mi_app_web
 ```bash
 dars preview ./mi_app_web
 ```
+
+## 🏁 Ejecución y Preview Local
+
+Para probar tu aplicación localmente antes de exportarla, puedes usar el método rápido de preview/compilación en caliente desde cualquier archivo Python que defina tu app:
+
+```python
+if __name__ == "__main__":
+    app.rTimeCompile()  # También puedes usar app.preview() o app.timeCompile()
+```
+
+Luego ejecuta tu archivo directamente:
+
+```bash
+python mi_app.py
+```
+
+Esto levantará un servidor local en http://localhost:8000 para ver tu app en el navegador, sin necesidad de exportar manualmente. Puedes cambiar el puerto con:
+
+```bash
+python mi_app.py --port 8088
+```
+
+---
+
+También puedes seguir usando el comando de preview del CLI sobre una exportación:
+
+```bash
+python -m dars.cli.preview ./mi_app_exportada
+```
+
+Esto levantará un servidor local en http://localhost:8000 para ver tu app en el navegador.
 
 ## Herramientas de Línea de Comandos (CLI)
 
@@ -348,6 +432,24 @@ app.add_script(script)
 - [**Demostración**](dars/templates/examples/demo/) - Aplicación completa de demostración
 
 #### Templates Disponibles
+
+### PWA Custom Icons
+
+Template oficial para crear una Progressive Web App (PWA) con iconos personalizados y configuración lista para exportar y publicar.
+
+**Inicializar un proyecto con este template:**
+
+```bash
+dars init mi_pwa -t basic/pwa_custom_icons
+```
+
+Esto crea un proyecto con `main.py` preconfigurado para PWA, incluyendo:
+- Registro automático de Service Worker
+- manifest.json y assets de iconos
+- Personalización de colores y nombre
+- Ejemplo de uso de componentes básicos
+
+Recomendado para apps móviles, instalables y con soporte offline.
 
 **Template Básico - Componentes de Formulario:**
 ```bash

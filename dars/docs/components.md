@@ -33,6 +33,26 @@ Todos los componentes soportan estas propiedades básicas:
 
 ## Componentes Básicos
 
+## Page (root multipágina)
+
+```python
+from dars.components.basic import Page, Text, Button
+from dars.scripts.script import InlineScript
+page = Page(
+    Text("Bienvenido!"),
+    Button("Click aquí", id="btn-demo")
+)
+# Añadir script JS solo a esta página
+page.add_script(InlineScript("""
+document.addEventListener('DOMContentLoaded', function() {
+    var btn = document.getElementById('btn-demo');
+    if (btn) btn.onclick = () => alert('¡Botón de esta página!');
+});
+"""))
+```
+
+Usa `Page` como root de cada página en el sistema multipágina. Permite pasar hijos directamente como argumentos y scripts JS por página.
+
 ### Text
 
 El componente `Text` muestra texto estático o dinámico.
@@ -598,6 +618,142 @@ mi_navbar = Navbar(
 |-----------|------|-------------|
 | `brand` | str | Texto o componente para la marca/logo de la navegación |
 | `children` | list | Lista de componentes hijos (elementos de navegación, usualmente `Link`s) |
+
+## Componentes Adicionales
+
+### Checkbox
+
+El componente `Checkbox` permite la selección de opciones.
+
+#### Sintaxis
+
+```python
+from dars.components.basic.checkbox import Checkbox
+
+mi_checkbox = Checkbox(
+    label="Acepto términos",
+    checked=True,
+    style={
+        "margin": "10px"
+    }
+)
+```
+
+#### Propiedades
+
+| Propiedad | Tipo | Descripción | Valores |
+|-----------|------|-------------|---------|
+| `label` | str | Texto de la etiqueta | `"Acepto términos"` |
+| `checked` | bool | Estado de selección | `True`, `False` |
+
+### RadioButton
+
+El componente `RadioButton` permite la selección de una opción entre varias.
+
+#### Sintaxis
+
+```python
+from dars.components.basic.radio_button import RadioButton
+
+mi_radio_button = RadioButton(
+    label="Opción A",
+    name="grupo1",
+    checked=False,
+    style={
+        "margin": "10px"
+    }
+)
+```
+
+#### Propiedades
+
+| Propiedad | Tipo | Descripción | Valores |
+|-----------|------|-------------|---------|
+| `label` | str | Texto de la etiqueta | `"Opción A"` |
+| `name` | str | Nombre del grupo de radio buttons | `"grupo1"` |
+| `checked` | bool | Estado de selección | `True`, `False` |
+
+### Select
+
+El componente `Select` permite la selección de una opción de un conjunto de opciones.
+
+#### Sintaxis
+
+```python
+from dars.components.basic.select import Select
+
+mi_select = Select(
+    options=["Uno", "Dos", "Tres"],
+    value="Dos",
+    style={
+        "width": "200px",
+        "padding": "10px",
+        "border": "1px solid #ccc"
+    }
+)
+```
+
+#### Propiedades
+
+| Propiedad | Tipo | Descripción | Valores |
+|-----------|------|-------------|---------|
+| `options` | list | Lista de opciones | `["Uno", "Dos", "Tres"]` |
+| `value` | str | Valor seleccionado | `"Dos"` |
+
+### Slider
+
+El componente `Slider` permite la selección de un valor dentro de un rango.
+
+#### Sintaxis
+
+```python
+from dars.components.basic.slider import Slider
+
+mi_slider = Slider(
+    min_value=0,
+    max_value=100,
+    value=50,
+    show_value=True,
+    style={
+        "width": "200px",
+        "padding": "10px"
+    }
+)
+```
+
+#### Propiedades
+
+| Propiedad | Tipo | Descripción | Valores |
+|-----------|------|-------------|---------|
+| `min_value` | int | Valor mínimo | `0` |
+| `max_value` | int | Valor máximo | `100` |
+| `value` | int | Valor seleccionado | `50` |
+| `show_value` | bool | Mostrar el valor seleccionado | `True`, `False` |
+
+### DatePicker
+
+El componente `DatePicker` permite la selección de una fecha.
+
+#### Sintaxis
+
+```python
+from dars.components.basic.date_picker import DatePicker
+
+mi_date_picker = DatePicker(
+    value="2025-08-06",
+    style={
+        "width": "200px",
+        "padding": "10px",
+        "border": "1px solid #ccc"
+    }
+)
+```
+
+#### Propiedades
+
+| Propiedad | Tipo | Descripción | Valores |
+|-----------|------|-------------|---------|
+| `value` | str | Fecha seleccionada | `"2025-08-06"` |
 
 ## Sistema de Estilos
 

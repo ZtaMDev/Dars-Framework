@@ -1,0 +1,21 @@
+from dars.core.component import Component
+from typing import List, Optional
+
+class Accordion(Component):
+    """
+    Componente Accordion para mostrar secciones colapsables.
+    sections: Lista de tuplas (título, contenido)
+    open_indices: Lista de índices abiertos (opcional)
+    """
+    def __init__(self, sections: List[tuple], open_indices: Optional[List[int]]=None, **props):
+        super().__init__(**props)
+        self.sections = sections
+        self.open_indices = open_indices or []
+
+    def render(self) -> str:
+        html = '<div class="dars-accordion">'
+        for i, (title, content) in enumerate(self.sections):
+            opened = ' dars-accordion-open' if i in self.open_indices else ''
+            html += f'<div class="dars-accordion-section{opened}"><div class="dars-accordion-title">{title}</div><div class="dars-accordion-content">{content.render() if hasattr(content, "render") else content}</div></div>'
+        html += '</div>'
+        return html

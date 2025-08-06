@@ -233,12 +233,15 @@ from dars.core.app import App
 from dars.components.basic.button import Button
 from dars.components.basic.text import Text
 from dars.components.basic.container import Container
+from dars.components.basic.page import Page
 from dars.scripts.script import InlineScript
 
 # Crear la aplicación
 app = App(title="Mi Primera App")
 
 # Crear componentes
+page = Page(title="Página principal")
+
 container = Container(
     style={
         "display": "flex",

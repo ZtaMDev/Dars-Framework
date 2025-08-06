@@ -16,6 +16,12 @@ from dars.components.basic.datepicker import DatePicker
 from dars.components.advanced.card import Card
 from dars.components.advanced.modal import Modal
 from dars.components.advanced.navbar import Navbar
+from dars.components.advanced.table import Table
+from dars.components.advanced.tabs import Tabs
+from dars.components.advanced.accordion import Accordion
+from dars.components.basic.progressbar import ProgressBar
+from dars.components.basic.spinner import Spinner
+from dars.components.basic.tooltip import Tooltip
 from typing import Dict, Any
 import os
 from bs4 import BeautifulSoup
@@ -27,32 +33,240 @@ class HTMLCSSJSExporter(Exporter):
         return "html"
         
     def export(self, app: App, output_path: str) -> bool:
-        """Exporta la aplicación a HTML/CSS/JS"""
+        """Exporta la aplicación a HTML/CSS/JS (soporta multipágina)."""
         try:
             self.create_output_directory(output_path)
-            
-            # Generar HTML
-            html_content = self.generate_html(app)
-            self.write_file(os.path.join(output_path, "index.html"), html_content)
-            
-            # Generar CSS
+
+            # Generar CSS y JS globales (compartidos)
             css_content = self.generate_css(app)
             self.write_file(os.path.join(output_path, "styles.css"), css_content)
-            
-            # Generar JavaScript
-            js_content = self.generate_javascript(app)
-            self.write_file(os.path.join(output_path, "script.js"), js_content)
-            
+
+            runtime_js = self.generate_javascript(app)
+            self.write_file(os.path.join(output_path, "runtime_dars.js"), runtime_js)
+
+            script_js = ""  # Aquí podrías agregar lógica para scripts de usuario en el futuro
+            self.write_file(os.path.join(output_path, "script.js"), script_js)
+
+            # Multipágina: exportar un HTML, CSS y JS por cada página registrada
+            if hasattr(app, "is_multipage") and app.is_multipage():
+                import copy
+                # Determinar la página index (principal)
+                index_page = None
+                if hasattr(app, 'get_index_page'):
+                    index_page = app.get_index_page()
+                # Exportar cada página
+                for slug, page in app.pages.items():
+                    import copy
+                    page_app = copy.copy(app)
+                    page_app.root = page.root
+                    if page.title:
+                        page_app.title = page.title
+                    if page.meta:
+                        for k, v in page.meta.items():
+                            setattr(page_app, k, v)
+                    # --- Aseguramos que root nunca sea lista, igual que single-page ---
+                    from dars.components.basic.container import Container
+                    if isinstance(page_app.root, list):
+                        page_app.root = Container(children=page_app.root)
+                    # --- Generación idéntica a single-page, solo cambia el nombre de archivo ---
+                    if index_page is not None and page is index_page:
+                        css_content = self.generate_css(page_app)
+                        self.write_file(os.path.join(output_path, "styles.css"), css_content)
+                        # --- scripts globales + scripts de la Page ---
+                        scripts = list(getattr(app, 'scripts', []))
+                        if hasattr(page_app.root, 'get_scripts'):
+                            scripts += page_app.root.get_scripts()
+                        script_js = self._generate_combined_script_js(scripts)
+                        self.write_file(os.path.join(output_path, "script.js"), script_js)
+                        html_content = self.generate_html(page_app, css_file="styles.css", script_file="script.js")
+                        filename = "index.html"
+                        self.write_file(os.path.join(output_path, filename), html_content)
+                    else:
+                        css_content = self.generate_css(page_app)
+                        scripts = list(getattr(app, 'scripts', []))
+                        if hasattr(page_app.root, 'get_scripts'):
+                            scripts += page_app.root.get_scripts()
+                        script_js = self._generate_combined_script_js(scripts)
+                        script_name = f"script_{slug}.js"
+                        self.write_file(os.path.join(output_path, script_name), script_js)
+                        html_content = self.generate_html(page_app, css_file="styles.css", script_file=script_name)
+                        filename = f"{slug}.html"
+                        self.write_file(os.path.join(output_path, filename), html_content)
+                        self.write_file(os.path.join(output_path, f"styles_{slug}.css"), css_content)
+                        # El script_{slug}.js ya fue generado correctamente arriba, y el HTML ya fue generado, no sobrescribir
+            else:
+                # Single-page clásico
+                css_content = self.generate_css(app)
+                self.write_file(os.path.join(output_path, "styles.css"), css_content)
+                script_js = ""  # Aquí podrías agregar lógica para scripts de usuario en el futuro
+                self.write_file(os.path.join(output_path, "script.js"), script_js)
+                html_content = self.generate_html(app, css_file="styles.css", script_file="script.js")
+                self.write_file(os.path.join(output_path, "index.html"), html_content)
+
+            # Generar archivos PWA si está habilitado
+            if getattr(app, 'pwa_enabled', False):
+                self._generate_pwa_files(app, output_path)
+
             return True
         except Exception as e:
             print(f"Error al exportar: {e}")
             return False
+
             
-    def generate_html(self, app: App) -> str:
+    def _generate_pwa_files(self, app: 'App', output_path: str) -> None:
+        """Genera manifest.json, iconos y service worker para PWA"""
+        import json, os
+        # Manifest
+        self._generate_manifest_json(app, output_path)
+        # Iconos por defecto (placeholder, puedes mejorar esto)
+        self._generate_default_icons(output_path)
+        # Service worker
+        sw_path = getattr(app, 'service_worker_path', None)
+        sw_enabled = getattr(app, 'service_worker_enabled', True)
+        if sw_enabled:
+            if sw_path:
+                # Copiar el personalizado
+                import shutil
+                shutil.copy(sw_path, os.path.join(output_path, 'sw.js'))
+            else:
+                self._generate_basic_service_worker(output_path)
+
+    def _generate_manifest_json(self, app: 'App', output_path: str) -> None:
+        import json, os, shutil
+        manifest = {
+            "name": getattr(app, 'pwa_name', getattr(app, 'title', 'Dars App')),
+            "short_name": getattr(app, 'pwa_short_name', 'Dars'),
+            "description": getattr(app, 'description', 'Aplicación web progresiva creada con Dars'),
+            "start_url": ".",
+            "display": getattr(app, 'pwa_display', 'standalone'),
+            "background_color": getattr(app, 'background_color', '#ffffff'),
+            "theme_color": getattr(app, 'theme_color', '#4a90e2'),
+            "orientation": getattr(app, 'pwa_orientation', 'portrait')
+        }
+        icons = self._get_icons_manifest(app, output_path)
+        if icons is not None:
+            manifest["icons"] = icons
+        manifest_path = os.path.join(output_path, "manifest.json")
+        with open(manifest_path, 'w', encoding='utf-8') as f:
+            json.dump(manifest, f, indent=2)
+
+    def _get_icons_manifest(self, app: 'App', output_path: str) -> list:
+        import os, shutil
+        user_icons = getattr(app, 'icons', None)
+        if user_icons is not None:
+            # Si el usuario define icons=[] explícito, no ponemos icons
+            if isinstance(user_icons, list) and len(user_icons) == 0:
+                return None
+            # Si el usuario define iconos personalizados
+            icons_manifest = []
+            icons_dir = os.path.join(output_path, "icons")
+            os.makedirs(icons_dir, exist_ok=True)
+            for icon in user_icons:
+                if isinstance(icon, dict):
+                    src = icon.get("src")
+                    if src and os.path.isfile(src):
+                        # Copiamos el icono al output
+                        dest_path = os.path.join(icons_dir, os.path.basename(src))
+                        shutil.copy(src, dest_path)
+                        icon["src"] = f"icons/{os.path.basename(src)}"
+                    icons_manifest.append(icon)
+                elif isinstance(icon, str):
+                    # Si solo es una ruta, la copiamos y generamos el dict
+                    if os.path.isfile(icon):
+                        dest_path = os.path.join(icons_dir, os.path.basename(icon))
+                        shutil.copy(icon, dest_path)
+                        icons_manifest.append({
+                            "src": f"icons/{os.path.basename(icon)}",
+                            "sizes": "192x192",
+                            "type": "image/png",
+                            "purpose": "any maskable"
+                        })
+            return icons_manifest if icons_manifest else None
+        # Si no hay icons definidos, ponemos por defecto
+        return [
+            {
+                "src": "icons/icon-192x192.png",
+                "sizes": "192x192",
+                "type": "image/png",
+                "purpose": "any maskable"
+            },
+            {
+                "src": "icons/icon-512x512.png",
+                "sizes": "512x512",
+                "type": "image/png"
+            }
+        ]
+
+    def _generate_default_icons(self, output_path: str) -> None:
+        import os, shutil
+        # Ruta de los iconos PWA por defecto incluidos en el framework
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        default_icons_dir = os.path.join(base_dir, "icons", "pwa")
+        icons_dir = os.path.join(output_path, "icons")
+        os.makedirs(icons_dir, exist_ok=True)
+        # Copiar icon-192x192.png y icon-512x512.png si existen
+        for fname in ["icon-192x192.png", "icon-512x512.png"]:
+            src = os.path.join(default_icons_dir, fname)
+            dst = os.path.join(icons_dir, fname)
+            if os.path.isfile(src):
+                shutil.copy(src, dst)
+
+
+    def _generate_basic_service_worker(self, output_path: str) -> None:
+        sw_content = '''// Service Worker básico para Dars PWA
+const CACHE_NAME = 'dars-pwa-cache-v1';
+const urlsToCache = [
+  '/',
+  '/index.html',
+  '/styles.css',
+  '/script.js'
+];
+
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => {
+        console.log('Cache abierto');
+        return cache.addAll(urlsToCache);
+      })
+  );
+});
+
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request)
+      .then(response => {
+        if (response) {
+          return response;
+        }
+        return fetch(event.request);
+      })
+  );
+});
+'''
+        sw_path = os.path.join(output_path, "sw.js")
+        with open(sw_path, 'w', encoding='utf-8') as f:
+            f.write(sw_content)
+
+    def _generate_combined_script_js(self, scripts):
+        """Combina y concatena el código de todos los scripts (InlineScript/FileScript)"""
+        js = ""
+        for script in scripts:
+            js += f"// Script: {script.__class__.__name__}\n"
+            js += script.get_code()
+            js += "\n\n"
+        return js
+
+    def generate_html(self, app: App, css_file: str = "styles.css", script_file: str = "script.js") -> str:
         """Genera el contenido HTML con todas las propiedades de la aplicación"""
         body_content = ""
-        if app.root:
-            body_content = self.render_component(app.root)
+        from dars.components.basic.container import Container
+        root_component = app.root
+        # Protección: si root es lista, envolver en Container correctamente
+        if isinstance(root_component, list):
+            root_component = Container(children=root_component)
+        if root_component:
+            body_content = self.render_component(root_component)
         
         # Generar meta tags
         meta_tags_html = self._generate_meta_tags(app)
@@ -75,15 +289,17 @@ class HTMLCSSJSExporter(Exporter):
     {links_html}
     {og_tags_html}
     {twitter_tags_html}
-    <link rel="stylesheet" href="styles.css">
+    <link rel=\"stylesheet\" href=\"{css_file}\">
 </head>
 <body>
     {body_content}
-    <script src="script.js"></script>
+    <script src=\"runtime_dars.js\"></script>
+    <script src=\"{script_file}\"></script>
 </body>
 </html>"""
-        soup = BeautifulSoup(html_template, "html.parser")
-        return soup.prettify()
+        # No modificar el HTML con BeautifulSoup para no perder tags/scripts
+        return html_template
+
     
     def _generate_meta_tags(self, app: App) -> str:
         """Genera todos los meta tags de la aplicación"""
@@ -101,27 +317,35 @@ class HTMLCSSJSExporter(Exporter):
         return '\n'.join(meta_html)
     
     def _generate_links(self, app: App) -> str:
-        """Genera todos los links (favicon, manifest, iconos)"""
+        """Genera los enlaces en el head del HTML"""
         links = []
         
         # Favicon
-        if app.favicon:
-            links.append(f'    <link rel="icon" type="image/x-icon" href="{app.favicon}">')
+        if hasattr(app, 'favicon'):
+            links.append(f'<link rel="icon" href="{app.favicon}" type="image/x-icon">')
         
-        # Icono principal
-        if app.icon:
-            links.append(f'    <link rel="icon" type="image/png" href="{app.icon}">')
-        
-        # Apple Touch Icon
-        if app.apple_touch_icon:
-            links.append(f'    <link rel="apple-touch-icon" href="{app.apple_touch_icon}">')
-        
-        # PWA Manifest
-        if app.manifest:
-            links.append(f'    <link rel="manifest" href="{app.manifest}">')
-        
-        return '\n'.join(links)
-    
+        # Manifest
+        if getattr(app, 'pwa_enabled', False):
+            links.append('<link rel="manifest" href="manifest.json">')
+            # Registrar service worker si está habilitado
+            if getattr(app, 'service_worker_enabled', True):
+                links.append("""
+<script>
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+            .then(registration => {
+                console.log('ServiceWorker registration successful');
+            })
+            .catch(err => {
+                console.log('ServiceWorker registration failed: ', err);
+            });
+    });
+}
+</script>
+""")
+        return "\n    ".join(links)
+
     def _generate_open_graph_tags(self, app: App) -> str:
         """Genera todos los tags Open Graph para redes sociales"""
         og_tags = app.get_open_graph_tags()
@@ -241,6 +465,169 @@ body {
     margin-bottom: 15px;
     font-size: 24px;
     color: #333;
+}
+
+/* Table */
+.dars-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    background: white;
+}
+.dars-table th, .dars-table td {
+    border: 1px solid #ddd;
+    padding: 8px 12px;
+    text-align: left;
+}
+.dars-table th {
+    background: #f5f5f5;
+    font-weight: bold;
+}
+.dars-table tr:nth-child(even) {
+    background: #fafbfc;
+}
+
+/* Tabs */
+.dars-tabs {
+    margin-bottom: 20px;
+}
+.dars-tabs-header {
+    display: flex;
+    border-bottom: 2px solid #eee;
+    margin-bottom: 10px;
+}
+.dars-tab {
+    background: none;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    color: #555;
+    border-bottom: 2px solid transparent;
+    transition: border 0.2s, color 0.2s;
+}
+.dars-tab-active {
+    color: #007bff;
+    border-bottom: 2px solid #007bff;
+    font-weight: bold;
+}
+.dars-tab-panel {
+    display: none;
+    padding: 16px 0;
+}
+.dars-tab-panel-active {
+    display: block;
+}
+
+/* Accordion */
+.dars-accordion {
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.dars-accordion-section {
+    border-bottom: 1px solid #eee;
+}
+.dars-accordion-title {
+    padding: 14px 20px;
+    background: #f7f7f7;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+.dars-accordion-section.dars-accordion-open .dars-accordion-title {
+    background: #e9ecef;
+}
+.dars-accordion-content {
+    display: none;
+    padding: 16px 20px;
+    background: #fafbfc;
+}
+.dars-accordion-section.dars-accordion-open .dars-accordion-content {
+    display: block;
+}
+
+/* ProgressBar */
+.dars-progressbar {
+    width: 100%;
+    background: #e9ecef;
+    border-radius: 8px;
+    overflow: hidden;
+    height: 20px;
+    margin-bottom: 20px;
+}
+.dars-progressbar-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #007bff, #4a90e2);
+    transition: width 0.3s;
+}
+
+/* Spinner */
+.dars-spinner {
+    border: 4px solid #e9ecef;
+    border-top: 4px solid #007bff;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    animation: dars-spin 1s linear infinite;
+    margin: 10px auto;
+}
+@keyframes dars-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Tooltip */
+.dars-tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+.dars-tooltip .dars-tooltip-text {
+    visibility: hidden;
+    width: max-content;
+    background: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 4px;
+    padding: 6px 10px;
+    position: absolute;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.2s;
+    font-size: 13px;
+    pointer-events: none;
+}
+.dars-tooltip:hover .dars-tooltip-text,
+.dars-tooltip:focus .dars-tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+.dars-tooltip-top .dars-tooltip-text {
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 6px;
+}
+.dars-tooltip-bottom .dars-tooltip-text {
+    top: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 6px;
+}
+.dars-tooltip-left .dars-tooltip-text {
+    right: 125%;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-right: 6px;
+}
+.dars-tooltip-right .dars-tooltip-text {
+    left: 125%;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-left: 6px;
 }
 
 .dars-modal {
@@ -400,11 +787,11 @@ body {
     height: 6px;
 }
 
-.dars-slider-vertical .dars-slider {
-    width: 6px;
-    height: 100px;
-    writing-mode: bt-lr; /* IE */
-    -webkit-appearance: slider-vertical; /* WebKit */
+.dars-slider-vertical input[type="range"] {
+  width: 8px;
+  height: 160px;
+  writing-mode: vertical-lr;
+  direction: rtl;
 }
 
 .dars-slider:disabled {
@@ -490,10 +877,56 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function initializeEvents() {
     // Los eventos específicos se agregarán aquí
-}
-
 """
-        
+
+        def has_component_type(component, cls):
+            if isinstance(component, cls):
+                return True
+            if hasattr(component, 'children'):
+                for child in getattr(component, 'children', []):
+                    if has_component_type(child, cls):
+                        return True
+            return False
+
+        has_tabs = has_component_type(app.root, Tabs) if hasattr(app, 'root') else False
+        has_accordion = has_component_type(app.root, Accordion) if hasattr(app, 'root') else False
+        # Aquí puedes añadir otros has_<componente> para lógica futura
+
+        if has_tabs:
+            js_content += "    // Tabs interactivas\n"
+            js_content += """    document.querySelectorAll('.dars-tabs').forEach(function(tabsEl) {
+        const tabButtons = tabsEl.querySelectorAll('.dars-tab');
+        const panels = tabsEl.querySelectorAll('.dars-tab-panel');
+        tabButtons.forEach(function(btn, i) {
+            btn.addEventListener('click', function() {
+                tabButtons.forEach(b => b.classList.remove('dars-tab-active'));
+                panels.forEach(p => p.classList.remove('dars-tab-panel-active'));
+                btn.classList.add('dars-tab-active');
+                if (panels[i]) panels[i].classList.add('dars-tab-panel-active');
+            });
+        });
+    });\n"""
+        if has_accordion:
+            js_content += "    // Accordion interactivo\n"
+            js_content += """    document.querySelectorAll('.dars-accordion').forEach(function(accEl) {
+        accEl.querySelectorAll('.dars-accordion-title').forEach(function(titleEl) {
+            titleEl.addEventListener('click', function() {
+                const section = titleEl.parentElement;
+                const isOpen = section.classList.contains('dars-accordion-open');
+                if (isOpen) {
+                    section.classList.remove('dars-accordion-open');
+                } else {
+                    // Si es acordeón exclusivo, cerrar otros
+                    accEl.querySelectorAll('.dars-accordion-section').forEach(function(sec) {
+                        sec.classList.remove('dars-accordion-open');
+                    });
+                    section.classList.add('dars-accordion-open');
+                }
+            });
+        });
+    });\n"""
+        js_content += "}\n\n"
+
         # Agregar scripts de la aplicación
         for script in app.scripts:
             js_content += f"// Script: {script.__class__.__name__}\n"
@@ -504,6 +937,9 @@ function initializeEvents() {
         
     def render_component(self, component: Component) -> str:
         """Renderiza un componente a HTML"""
+        from dars.components.basic.page import Page
+        if isinstance(component, Page):
+            return self.render_page(component)
         if isinstance(component, Text):
             return self.render_text(component)
         elif isinstance(component, Button):
@@ -518,6 +954,12 @@ function initializeEvents() {
             return self.render_link(component)
         elif isinstance(component, Textarea):
             return self.render_textarea(component)
+        elif isinstance(component, Card):
+            return self.render_card(component)
+        elif isinstance(component, Modal):
+            return self.render_modal(component)
+        elif isinstance(component, Navbar):
+            return self.render_navbar(component)
         elif isinstance(component, Checkbox):
             return self.render_checkbox(component)
         elif isinstance(component, RadioButton):
@@ -528,15 +970,38 @@ function initializeEvents() {
             return self.render_slider(component)
         elif isinstance(component, DatePicker):
             return self.render_datepicker(component)
-        elif isinstance(component, Card):
-            return self.render_card(component)
-        elif isinstance(component, Modal):
-            return self.render_modal(component)
-        elif isinstance(component, Navbar):
-            return self.render_navbar(component)
+        elif isinstance(component, Table):
+            return self.render_table(component)
+        elif isinstance(component, Tabs):
+            return self.render_tabs(component)
+        elif isinstance(component, Accordion):
+            return self.render_accordion(component)
+        elif isinstance(component, ProgressBar):
+            return self.render_progressbar(component)
+        elif isinstance(component, Spinner):
+            return self.render_spinner(component)
+        elif isinstance(component, Tooltip):
+            return self.render_tooltip(component)
         else:
             # Componente genérico
             return self.render_generic_component(component)
+
+    def render_page(self, page):
+        """Renderiza un componente Page como root de una página multipage"""
+        component_id = self.generate_unique_id(page)
+        class_attr = f'class="dars-page {page.class_name or ""}"'
+        style_attr = f'style="{self.render_styles(page.style)}"' if page.style else ""
+        # Renderizar hijos
+        children_html = ""
+        children = getattr(page, 'children', [])
+        if not isinstance(children, list):
+            children = []
+        for child in children:
+            if hasattr(child, 'render'):
+                children_html += self.render_component(child)
+        return f'<section id="{component_id}" {class_attr} {style_attr}>{children_html}</section>'
+
+
             
     def render_text(self, text: Text) -> str:
         """Renderiza un componente Text"""
@@ -579,12 +1044,22 @@ function initializeEvents() {
         component_id = self.generate_unique_id(container)
         class_attr = f'class="dars-container {container.class_name or ""}"'
         style_attr = f'style="{self.render_styles(container.style)}"' if container.style else ""
-        
-        # Renderizar hijos
+
+        # Protección: asegurar que children es lista de Component
         children_html = ""
-        for child in container.children:
+        children = container.children
+        if not isinstance(children, list):
+            children = []
+        # Aplanar si hay listas anidadas
+        flat_children = []
+        for child in children:
+            if isinstance(child, list):
+                flat_children.extend([c for c in child if hasattr(c, 'render')])
+            elif hasattr(child, 'render'):
+                flat_children.append(child)
+        for child in flat_children:
             children_html += self.render_component(child)
-            
+
         return f'<div id="{component_id}" {class_attr} {style_attr}>{children_html}</div>'
         
     def render_image(self, image: Image) -> str:
@@ -772,6 +1247,44 @@ function initializeEvents() {
             return f'<div class="dars-datepicker-inline"><input type="{input_type}" id="{component_id}" {attrs_str}></div>'
         else:
             return f'<input type="{input_type}" id="{component_id}" {attrs_str}>'
+
+    def render_table(self, table: Table) -> str:
+        # Renderizado HTML para Table
+        thead = '<thead><tr>' + ''.join(f'<th>{col["title"]}</th>' for col in table.columns) + '</tr></thead>'
+        rows = table.data[:table.page_size] if table.page_size else table.data
+        tbody = '<tbody>' + ''.join(
+            '<tr>' + ''.join(f'<td>{row.get(col["field"], "")}</td>' for col in table.columns) + '</tr>'
+            for row in rows) + '</tbody>'
+        return f'<table class="dars-table">{thead}{tbody}</table>'
+
+    def render_tabs(self, tabs: Tabs) -> str:
+        tab_headers = ''.join(
+            f'<button class="dars-tab{ " dars-tab-active" if i == tabs.selected else "" }" data-tab="{i}">{title}</button>'
+            for i, title in enumerate(tabs.tabs)
+        )
+        panels_html = ''.join(
+            f'<div class="dars-tab-panel{ " dars-tab-panel-active" if i == tabs.selected else "" }">{self.render_component(panel) if hasattr(panel, "render") else panel}</div>'
+            for i, panel in enumerate(tabs.panels)
+        )
+        return f'<div class="dars-tabs"><div class="dars-tabs-header">{tab_headers}</div><div class="dars-tabs-panels">{panels_html}</div></div>'
+
+    def render_accordion(self, accordion: Accordion) -> str:
+        html = '<div class="dars-accordion">'
+        for i, (title, content) in enumerate(accordion.sections):
+            opened = ' dars-accordion-open' if i in accordion.open_indices else ''
+            html += f'<div class="dars-accordion-section{opened}"><div class="dars-accordion-title">{title}</div><div class="dars-accordion-content">{self.render_component(content) if hasattr(content, "render") else content}</div></div>'
+        html += '</div>'
+        return html
+
+    def render_progressbar(self, bar: ProgressBar) -> str:
+        percent = min(max(bar.value / bar.max_value * 100, 0), 100)
+        return f'<div class="dars-progressbar"><div class="dars-progressbar-bar" style="width: {percent}%;"></div></div>'
+
+    def render_spinner(self, spinner: Spinner) -> str:
+        return '<div class="dars-spinner"></div>'
+
+    def render_tooltip(self, tooltip: Tooltip) -> str:
+        return f'<div class="dars-tooltip dars-tooltip-{tooltip.position}">{self.render_component(tooltip.child) if hasattr(tooltip.child, "render") else tooltip.child}<span class="dars-tooltip-text">{tooltip.text}</span></div>'
 
     def render_generic_component(self, component: Component) -> str:
         """Renderiza un componente genérico"""

@@ -159,7 +159,7 @@ estilo = {
 }
 ```
 
-## Nuevos Componentes de Formulario
+## Nuevos Componentes de Formulario (2024)
 
 Dars ahora incluye componentes modernos de formulario para crear interfaces interactivas:
 
