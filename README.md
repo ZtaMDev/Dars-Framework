@@ -50,36 +50,6 @@ document.addEventListener('DOMContentLoaded', function() {
 """))
 ```
 
-**Framework de UI multiplataforma en Python**
-
-Dars es un framework que permite crear interfaces de usuario modernas utilizando únicamente Python y exportarlas a HTML/CSS/JavaScript.
-
-## Características Principales
-
-- **Python Puro**: Permite el desarrollo de interfaces de usuario utilizando exclusivamente Python.
-- **Multiplataforma**: Soportado por todos los sistemas operativos compatibles con python.
-- **Facilidad de Uso**: Ofrece una sintaxis intuitiva y simplificada.
-- **Personalización**: Proporciona un sistema de estilos flexible para una adaptación visual completa.
-- **Extensibilidad**: Diseñado con una arquitectura modular que facilita la expansión.
-- **Diseño Adaptativo**: Genera interfaces que se ajustan a diferentes tamaños de pantalla.
-- **Componentes Modernos**: Incluye Checkbox, RadioButton, Select, Slider, DatePicker y más.
-- **SEO Optimizado**: Meta tags completos, Open Graph, Twitter Cards y configuración robots.
-- **PWA Ready**: Soporte completo para Progressive Web Apps con manifest y configuración móvil.
-- **Templates Oficiales**: Templates básicos y avanzados para inicio rápido de proyectos.
-
-## Instalación
-
-Para instalar Dars, simplemente usa pip:
-
-```bash
-pip install dars-framework
-```
-
-### Requisitos
-
-- Python 3.8 o superior
-- pip (gestor de paquetes de Python)
-
 ## Inicio Rápido
 
 ### Tu Primera Aplicación
@@ -130,7 +100,7 @@ app.set_root(container)
 app.add_script(script)
 
 if __name__ == "__main__":
-    app.rTimeCompile()  # También puedes usar app.preview() o app.timeCompile()
+    app.rTimeCompile() 
 ```
 
 ### Exportar la Aplicación
@@ -151,7 +121,7 @@ Para probar tu aplicación localmente antes de exportarla, puedes usar el métod
 
 ```python
 if __name__ == "__main__":
-    app.rTimeCompile()  # También puedes usar app.preview() o app.timeCompile()
+    app.rTimeCompile()
 ```
 
 Luego ejecuta tu archivo directamente:
@@ -171,7 +141,7 @@ python mi_app.py --port 8088
 También puedes seguir usando el comando de preview del CLI sobre una exportación:
 
 ```bash
-python -m dars.cli.preview ./mi_app_exportada
+dars preview ./mi_app_exportada
 ```
 
 Esto levantará un servidor local en http://localhost:8000 para ver tu app en el navegador.
@@ -700,7 +670,4 @@ dars formats
 ---
 
 **¡Comienza a crear interfaces increíbles con Dars hoy mismo!**
-
-
-
 
