@@ -70,13 +70,14 @@ if __name__ == "__main__":
 | `dars --help`                           | Show help and all CLI options               |
 
 ## More
+- [Project Roadmap](ROADMAP.md)
 - [Getting Started](dars/docs/getting_started.md)
 - [Components Reference](dars/docs/components.md)
 - [Exporters](dars/docs/exporters.md)
 - [Scripts System](dars/docs/scripts.md)
 - [CLI usage and commands](dars/docs/cli.md)
 - [Project Structure](STRUCTURE.md)
-- [Architecture](dars_architecture.md)
+- [Architecture](DARS_ARCHITECTURE.md)
 - [Installation Guide](INSTALL.md)
 
 ## Local Execution and Live Preview

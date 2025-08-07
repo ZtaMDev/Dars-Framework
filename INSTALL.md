@@ -21,6 +21,8 @@ This will install Dars and all its dependencies automatically.
 
 ## CLI Usage
 
+- [Dars CLI](dars/docs/cli.md)
+
 Once installed, the `dars` command will be available in your terminal. You can use it to:
 
 ### Export Applications
@@ -102,17 +104,17 @@ dars preview ./my_app
 
 ### Documentation
 
-- [Main README](../README.md)
-- [Quick Start Guide](../dars/docs/getting_started.md)
-- [Components Documentation](../dars/docs/components.md)
-- [Script System](../dars/docs/scripts.md)
-- [Exporters Guide](../dars/docs/exporters.md)
+- [Main README](README.md)
+- [Quick Start Guide](dars/docs/getting_started.md)
+- [Components Documentation](dars/docs/components.md)
+- [Script System](dars/docs/scripts.md)
+- [Exporters Guide](dars/docs/exporters.md)
 
 ### Examples
 
-- [Basic Examples](../dars/templates/examples/basic/)
-- [Advanced Examples](../dars/templates/examples/advanced/)
-- [Demo Application](../dars/templates/examples/demo/)
+- [Basic Examples](dars/templates/examples/basic/)
+- [Advanced Examples](dars/templates/examples/advanced/)
+- [Demo Application](dars/templates/examples/demo/)
 
 ### Useful Commands
 
@@ -143,4 +145,4 @@ Congratulations! Dars is ready to use.
 
 ---
 
-**Next Step:** [Quick Start Guide](../dars/docs/getting_started.md)
+**Next Step:** [Quick Start Guide](dars/docs/getting_started.md)

@@ -2,29 +2,29 @@
 
 ## Introduction
 
-El sistema de scripts de Dars permite agregar lógica interactiva y comportamientos dinámicos a las aplicaciones. Los scripts se escriben en JavaScript y se integran seamless con los componentes de la interfaz de usuario.
+The script system of Dars allows adding interactive logic and dynamic behaviors to applications. Scripts are written in JavaScript and seamlessly integrate with UI components.
 
-## Conceptos Fundamentales
+## Fundamentals
 
-### ¿Qué son los Scripts?
+### What are Scripts?
 
-Los scripts en Dars son fragmentos de código JavaScript que:
+Scripts in Dars are fragments of JavaScript code that:
 
-- Manejan eventos de la interfaz de usuario
-- Implementan lógica de negocio del lado del cliente
-- Proporcionan interactividad avanzada
-- Se ejecutan en el contexto de la aplicación exportada
+- Handle user interface events
+- Implement client-side business logic
+- Provide advanced interactivity
+- Run in the context of the exported application
 
-### Tipos de Scripts
+### Types of Scripts
 
-Dars soporta dos tipos principales de scripts:
+Dars supports two main types of scripts:
 
-1. **InlineScript**: Código definido directamente en Python
-2. **FileScript**: Código cargado desde archivos externos
+1. **InlineScript**: Code defined directly in Python
+2. **FileScript**: Code loaded from external files
 
-## Clase Base Script
+## Base Script Class
 
-Todos los scripts heredan de la clase base `Script`:
+All scripts inherit from the base `Script` class:
 
 ```python
 from abc import ABC, abstractmethod
@@ -41,38 +41,38 @@ class Script(ABC):
 
 ## InlineScript
 
-### Sintaxis Básica
+### Basic Syntax
 
 ```python
 from dars.scripts.script import InlineScript
 
 script = InlineScript("""
 function saludar() {
-    alert(\'¡Hola desde Dars!\');
+    alert('¡Hola desde Dars!');
 }
 
-document.addEventListener(\'DOMContentLoaded\', function() {
-    console.log(\'Aplicación cargada\');
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Aplicación cargada');
 });
 """)
 ```
 
-### Ejemplos Prácticos
+### Practical Examples
 
-#### Manejo de Eventos de Botones
+#### Button Event Handling
 
 ```python
 script_botones = InlineScript("""
-// Función para manejar clicks de botones
+// Function to handle button clicks
 function manejarClickBoton(evento) {
     const boton = evento.target;
     const texto = boton.textContent;
     
-    console.log(`Botón presionado: ${texto}`);
+    console.log(`Button pressed: ${texto}`);
     
-    // Cambiar el texto temporalmente
+    // Change text temporarily
     const textoOriginal = boton.textContent;
-    boton.textContent = \'¡Presionado!\';
+    boton.textContent = '¡Presionado!';
     boton.disabled = true;
     
     setTimeout(() => {
@@ -81,38 +81,38 @@ function manejarClickBoton(evento) {
     }, 1000);
 }
 
-// Agregar eventos a todos los botones
-document.addEventListener(\'DOMContentLoaded\', function() {
-    const botones = document.querySelectorAll(\'button\');
+// Add events to all buttons
+document.addEventListener('DOMContentLoaded', function() {
+    const botones = document.querySelectorAll('button');
     botones.forEach(boton => {
-        boton.addEventListener(\'click\', manejarClickBoton);
+        boton.addEventListener('click', manejarClickBoton);
     });
 });
 """)
 ```
 
-#### Validación de Formularios
+#### Form Validation
 
 ```python
 script_validacion = InlineScript("""
-// Validación de formularios
+// Form validation
 function validarFormulario() {
-    const inputs = document.querySelectorAll(\'input[required]\');
+    const inputs = document.querySelectorAll('input[required]');
     let esValido = true;
     
     inputs.forEach(input => {
         if (!input.value.trim()) {
-            mostrarError(input, \'Este campo es obligatorio\');
+            mostrarError(input, 'This field is required');
             esValido = false;
         } else {
             limpiarError(input);
         }
         
-        // Validación específica por tipo
-        if (input.type === \'email\' && input.value) {
-            const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+        // Specific type validation
+        if (input.type === 'email' && input.value) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(input.value)) {
-                mostrarError(input, \'Email inválido\');
+                mostrarError(input, 'Email is invalid');
                 esValido = false;
             }
         }
@@ -122,45 +122,45 @@ function validarFormulario() {
 }
 
 function mostrarError(input, mensaje) {
-    // Remover error anterior
+    //  Remove previous error
     limpiarError(input);
     
-    // Crear elemento de error
-    const error = document.createElement(\'div\');
-    error.className = \'error-mensaje\';
+    // Create error element
+    const error = document.createElement('div');
+    error.className = 'error-mensaje';
     error.textContent = mensaje;
-    error.style.color = \'#dc3545\';
-    error.style.fontSize = \'12px\';
-    error.style.marginTop = \'5px\';
+    error.style.color = '#dc3545';
+    error.style.fontSize = '12px';
+    error.style.marginTop = '5px';
     
-    // Agregar después del input
+    // Add after the input
     input.parentNode.insertBefore(error, input.nextSibling);
     
-    // Cambiar estilo del input
-    input.style.borderColor = \'#dc3545\';
+    // Change input style
+    input.style.borderColor = '#dc3545';
 }
 
 function limpiarError(input) {
-    const error = input.parentNode.querySelector(\'\\.error-mensaje\');
+    const error = input.parentNode.querySelector('.error-mensaje');
     if (error) {
         error.remove();
     }
-    input.style.borderColor = \'\';
+    input.style.borderColor = '';
 }
 
-// Configurar validación en tiempo real
-document.addEventListener(\'DOMContentLoaded\', function() {
-    const inputs = document.querySelectorAll(\'input\');
+// Configure real-time validation
+document.addEventListener('DOMContentLoaded', function() {
+    const inputs = document.querySelectorAll('input');
     inputs.forEach(input => {
-        input.addEventListener(\'blur\', function() {
-            if (this.hasAttribute(\'required\') && !this.value.trim()) {
-                mostrarError(this, \'Este campo es obligatorio\');
+        input.addEventListener('blur', function() {
+            if (this.hasAttribute('required') && !this.value.trim()) {
+                mostrarError(this, 'This field is required');
             } else {
                 limpiarError(this);
             }
         });
         
-        input.addEventListener(\'input\', function() {
+        input.addEventListener('input', function() {
             limpiarError(this);
         });
     });
@@ -168,14 +168,14 @@ document.addEventListener(\'DOMContentLoaded\', function() {
 """)
 ```
 
-#### Efectos Visuales y Animaciones
+#### Visual Effects and Animations
 
 ```python
 script_animaciones = InlineScript("""
-// Efectos de fade in para elementos
+// Fade in effect for elements
 function fadeIn(elemento, duracion = 500) {
-    elemento.style.opacity = \'0\';
-    elemento.style.display = \'block\';
+    elemento.style.opacity = '0';
+    elemento.style.display = 'block';
     
     const inicio = performance.now();
     
@@ -186,16 +186,16 @@ function fadeIn(elemento, duracion = 500) {
             elemento.style.opacity = progreso;
             requestAnimationFrame(animar);
         } else {
-            elemento.style.opacity = \'1\';
+            elemento.style.opacity = '1';
         }
     }
     
     requestAnimationFrame(animar);
 }
 
-// Efecto de typing para texto
+// Typing effect for text
 function efectoTyping(elemento, texto, velocidad = 50) {
-    elemento.textContent = \'\';
+    elemento.textContent = '';
     let i = 0;
     
     function escribir() {
@@ -211,9 +211,9 @@ function efectoTyping(elemento, texto, velocidad = 50) {
 
 // Parallax simple
 function iniciarParallax() {
-    window.addEventListener(\'scroll\', function() {
+    window.addEventListener('scroll', function() {
         const scrolled = window.pageYOffset;
-        const elementos = document.querySelectorAll(\'\\.parallax\');
+        const elementos = document.querySelectorAll('.parallax');
         
         elementos.forEach(elemento => {
             const velocidad = elemento.dataset.velocidad || 0.5;
@@ -224,15 +224,15 @@ function iniciarParallax() {
 }
 
 // Inicializar efectos
-document.addEventListener(\'DOMContentLoaded\', function() {
-    // Fade in para todos los elementos con clase \'fade-in\'
-    const elementosFadeIn = document.querySelectorAll(\'\\.fade-in\');
+document.addEventListener('DOMContentLoaded', function() {
+    // Fade in para todos los elementos con clase 'fade-in'
+    const elementosFadeIn = document.querySelectorAll('.fade-in');
     elementosFadeIn.forEach((elemento, index) => {
         setTimeout(() => fadeIn(elemento), index * 200);
     });
     
     // Efecto typing para títulos
-    const titulos = document.querySelectorAll(\'\\.typing-effect\');
+    const titulos = document.querySelectorAll('.typing-effect');
     titulos.forEach(titulo => {
         const texto = titulo.textContent;
         efectoTyping(titulo, texto);
@@ -246,16 +246,16 @@ document.addEventListener(\'DOMContentLoaded\', function() {
 
 ## FileScript
 
-### Sintaxis Básica
+### Basic Syntax
 
 ```python
 from dars.scripts.script import FileScript
 
-# Cargar script desde archivo
+# Load script from file
 script = FileScript("./scripts/mi_script.js")
 ```
 
-### Organización de Archivos
+### File Organization
 
 ```
 mi_proyecto/
@@ -269,23 +269,23 @@ mi_proyecto/
     └── main.css
 ```
 
-#### Ejemplo: utils.js
+#### Example: utils.js
 
 ```javascript
 // scripts/utils.js
 
-// Utilidades generales
+// General utilities
 const Utils = {
-    // Formatear fecha
+    // Date formatting
     formatearFecha: function(fecha) {
-        return new Intl.DateTimeFormat(\'es-ES\', {
-            year: \'numeric\',
-            month: \'long\',
-            day: \'numeric\'
+        return new Intl.DateTimeFormat('es-ES', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
         }).format(fecha);
     },
     
-    // Debounce para optimizar eventos
+    // Debounce for event optimization
     debounce: function(func, wait) {
         let timeout;
         return function executedFunction(...args) {
@@ -298,24 +298,24 @@ const Utils = {
         };
     },
     
-    // Validar email
+    // Email validation
     esEmailValido: function(email) {
-        const regex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return regex.test(email);
     },
     
-    // Generar ID único
+    // Generate unique ID
     generarId: function() {
-        return \'_\' + Math.random().toString(36).substr(2, 9);
+        return '_'+ Math.random().toString(36).substr(2, 9);
     },
     
-    // Almacenamiento local
+    // Local storage
     guardarEnLocal: function(clave, valor) {
         try {
             localStorage.setItem(clave, JSON.stringify(valor));
             return true;
         } catch (e) {
-            console.error(\'Error al guardar en localStorage:\', e);
+            console.error('Error al guardar en localStorage:', e);
             return false;
         }
     },
@@ -325,27 +325,27 @@ const Utils = {
             const item = localStorage.getItem(clave);
             return item ? JSON.parse(item) : null;
         } catch (e) {
-            console.error(\'Error al leer de localStorage:\', e);
+            console.error('Error al leer de localStorage:', e);
             return null;
         }
     }
 };
 
-// Hacer disponible globalmente
+// Make available globally
 window.Utils = Utils;
 ```
 
-#### Ejemplo: api.js
+#### Example: api.js
 
 ```javascript
 // scripts/api.js
 
-// Cliente API
+// API client
 class ApiClient {
     constructor(baseUrl) {
         this.baseUrl = baseUrl;
         this.headers = {
-            \'Content-Type\': \'application/json\'
+            'Content-Type': 'application/json'
         };
     }
     
@@ -365,43 +365,43 @@ class ApiClient {
             
             return await response.json();
         } catch (error) {
-            console.error(\'Error en la petición:\', error);
+            console.error('Error en la petición:', error);
             throw error;
         }
     }
     
     async get(endpoint) {
-        return this.request(endpoint, { method: \'GET\' });
+        return this.request(endpoint, { method: 'GET' });
     }
     
     async post(endpoint, data) {
         return this.request(endpoint, {
-            method: \'POST\',
+            method: 'POST',
             body: JSON.stringify(data)
         });
     }
     
     async put(endpoint, data) {
         return this.request(endpoint, {
-            method: \'PUT\',
+            method: 'PUT',
             body: JSON.stringify(data)
         });
     }
     
     async delete(endpoint) {
-        return this.request(endpoint, { method: \'DELETE\' });
+        return this.request(endpoint, { method: 'DELETE' });
     }
 }
 
-// Instancia global
-window.api = new ApiClient(\'https://api.ejemplo.com\');
+// Global instance
+window.api = new ApiClient('https://api.ejemplo.com');
 ```
 
-### Uso en la Aplicación
+### Usage in the Application
 
-#### Scripts globales y por página (multipage)
+#### Global and Page-specific Scripts (multipage)
 
-En aplicaciones multipágina, puedes añadir scripts globales a la App y scripts específicos a cada Page:
+In multipage applications, you can add global scripts to the App and page-specific scripts to each Page:
 
 ```python
 from dars.scripts.script import InlineScript
@@ -429,24 +429,24 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 """))
 
-# Script global
+# Global script
 app.add_script(InlineScript("console.log('Script global para todas las páginas');"))
 ```
 
-Al exportar, cada página tendrá su propio archivo JS combinando los scripts globales y los de la Page.
+When exporting, each page will have its own JS file combining global scripts and page-specific scripts.
 
 ```python
 from dars.scripts.script import FileScript
 
-# Cargar múltiples scripts
+# Load multiple scripts
 app.add_script(FileScript("./scripts/utils.js"))
 app.add_script(FileScript("./scripts/api.js"))
 app.add_script(FileScript("./scripts/validaciones.js"))
 ```
 
-## Integración con Componentes
+## Component Integration
 
-### Conectar Scripts con Componentes
+### Connecting Scripts to Components
 
 ```python
 from dars.core.app import App
@@ -455,7 +455,7 @@ from dars.components.basic.input import Input
 from dars.components.basic.container import Container
 from dars.scripts.script import InlineScript
 
-# Crear componentes con IDs específicos
+# Create components with specific IDs
 formulario = Container(
     id="formulario-contacto",
     children=[
@@ -477,7 +477,7 @@ formulario = Container(
     ]
 )
 
-# Script que interactúa con los componentes
+# Script that interacts with components
 script_formulario = InlineScript("""
 document.addEventListener(\'DOMContentLoaded\', function() {
     const formulario = document.getElementById(\'formulario-contacto\');
@@ -485,7 +485,7 @@ document.addEventListener(\'DOMContentLoaded\', function() {
     const campoEmail = document.getElementById(\'campo-email\');
     const botonEnviar = document.getElementById(\'boton-enviar\');
     
-    // Validación en tiempo real
+    // Real-time validation
     campoNombre.addEventListener(\'input\', function() {
         validarNombre(this.value);
     });
@@ -494,7 +494,7 @@ document.addEventListener(\'DOMContentLoaded\', function() {
         validarEmail(this.value);
     });
     
-    // Manejo del envío
+    // Handle form submission
     botonEnviar.addEventListener(\'click\', function(e) {
         e.preventDefault();
         enviarFormulario();

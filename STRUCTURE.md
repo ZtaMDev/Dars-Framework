@@ -1,6 +1,6 @@
 # Dars Project Structure
 
-## 📁 General Structure
+## General Structure
 
 ```
 dars-framework/
@@ -27,7 +27,7 @@ dars-framework/
     └── demo/                    # Complete demo application
 ```
 
-## 🏗️ Framework Core (`dars/core/`)
+## Framework Core (`dars/core/`)
 
 ```
 core/
@@ -38,14 +38,14 @@ core/
 └── events.py                   # Event handling system
 ```
 
-### Descripción de Archivos
+### Files Description
 
 - **`app.py`**: Main class representing a Dars application
 - **`component.py`**: Abstract base class for all components
 - **`properties.py`**: Defines style properties and events
 - **`events.py`**: Event handling system
 
-## 🧩 Componentes (`dars/components/`)
+## Components (`dars/components/`)
 
 ```
 components/
@@ -68,7 +68,7 @@ components/
     └── __init__.py
 ```
 
-### Componentes Implementados
+### Implemented Components
 
 - **Text**: Display static or dynamic text
 - **Button**: Interactive buttons
@@ -81,7 +81,7 @@ components/
 - **Modal**: Overlay modal window
 - **Navbar**: Navigation bar
 
-## 📜 Script System (`dars/scripts/`)
+## Script System (`dars/scripts/`)
 
 ```
 scripts/
@@ -94,7 +94,7 @@ scripts/
 - **InlineScript**: JavaScript code defined in Python
 - **FileScript**: Code loaded from external files
 
-## 🔄 Exportadores (`dars/exporters/`)
+## Exporters (`dars/exporters/`)
 
 ```
 exporters/
@@ -105,12 +105,12 @@ exporters/
     └── html_css_js.py          # HTML/CSS/JS exporter
 ```
 
-### Exportadores Disponibles
+### Exporters Available
 
 #### Web
 - **HTML/CSS/JS**: Standard web applications
 
-## 📋 Templates (`dars/templates/`)
+## Templates (`dars/templates/`)
 
 ```
 templates/
@@ -124,7 +124,7 @@ templates/
     └── __init__.py
 ```
 
-## 🛠️ CLI Tools (`dars/cli/`)
+## CLI Tools (`dars/cli/`)
 
 ```
 cli/
@@ -136,9 +136,9 @@ cli/
 ### Available Tools
 
 - **main.py**: Main CLI to export applications
-- **preview.py**: Preview system para aplicaciones exportadas
+- **preview.py**: Preview system for exported applications
 
-## 📚 Documentación (`dars/docs/`)
+## Documentation (`dars/docs/`)
 
 ```
 docs/
@@ -149,7 +149,7 @@ docs/
 └── exporters.md                # Exporters guide
 ```
 
-## 🎯 Ejemplos (`dars/templates/examples/`)
+## Examples (`dars/templates/examples/`)
 
 ```
 examples/
@@ -163,7 +163,7 @@ examples/
     └── complete_app.py         # Complete application
 ```
 
-### Tipos de Ejemplos
+### Examples
 
 #### Basic
 - **Hello World**: Simple app with text and button
@@ -172,10 +172,10 @@ examples/
 #### Advanced
 - **Dashboard**: Dashboard with navigation and statistics
 
-#### Demostración
+#### Demo
 - **Complete App**: App showcasing all features
 
-## 🔧 Configuration Files
+## Configuration Files
 
 ### `pyproject.toml`
 Configuration file for the Python project, including metadata and dependencies for PyPI.
@@ -183,7 +183,7 @@ Configuration file for the Python project, including metadata and dependencies f
 ### `__init__.py`
 Initialization files for Python modules in each directory.
 
-## 📊 Data Flow
+## Data Flow
 
 ```
 Python Application (*.py)
@@ -197,7 +197,7 @@ Python Application (*.py)
     Output Code (HTML/CSS/JS)
 ```
 
-## 🎨 Design Patterns Used
+## Design Patterns Used
 
 ### Factory Pattern
 - Exporters are created dynamically according to the requested format
@@ -211,7 +211,7 @@ Python Application (*.py)
 ### Template Method Pattern
 - Common export process with platform-specific steps
 
-## 🔍 Extension Points
+## Extension Points
 
 ### New Components
 
@@ -252,45 +252,8 @@ class MiTipoScript(Script):
         return "código_generado"
 ```
 
-## 📈 Project Metrics
 
-### Lines of Code (Approximate)
-
-- **Core**: ~800 lines
-- **Components**: ~1000 lines (updated with new components)
-- **Exporters**: ~500 lines (HTML/CSS/JS only)
-- **CLI**: ~400 lines
-- **Scripts**: ~200 lines
-- **Examples**: ~800 lines
-- **Documentation**: ~3000 lines (updated with new documentation)
-
-### Total: ~7000 lines of code and documentation
-
-## 🚀 Development Roadmap
-
-### Implemented
-
-- [x] Framework core
-- [x] Basic components (Text, Button, Input, Container, Page [supports add_script for per-page scripts in multipage], Checkbox, RadioButton, Select, Slider, DatePicker, etc)
-- [x] Advanced components (Card, Modal, Navbar)
-- [x] Script system
-- [x] HTML/CSS/JS exporter
-- [x] CLI with Rich
-- [x] Preview system
-- [x] Complete documentation
-- [x] Functional examples
-
-### Future Improvements 🔮
-
-- [ ] More components (Video, Table, Chart, etc.)
-- [ ] Advanced theme system
-- [ ] Hot reloading in development
-- [ ] Plugin system
-- [ ] Automatic code generator
-- [ ] Integrated testing framework
-- [ ] Exporters for other platforms (React, React Native, Desktop)
-
-## 🛡️ Security Considerations
+## Security Considerations
 
 ### Scripts
 - Scripts run in the context of the browser/application
@@ -302,7 +265,7 @@ class MiTipoScript(Script):
 - Write permissions verification
 - Special character escaping
 
-## 📝 Code Conventions
+## Code Conventions
 
 ### Python
 - PEP 8 for code style
@@ -322,6 +285,3 @@ class MiTipoScript(Script):
 ---
 
 This structure provides a solid and extensible foundation for the Dars framework, allowing for easy maintenance and future expansion.
-This structure provides a solid and extensible foundation for the Dars framework, allowing for easy maintenance and future expansion.
-
-
