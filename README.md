@@ -1,6 +1,6 @@
 # Dars Framework
 
-Dars is a Python UI framework for building modern, interactive web apps with only Python code. Write your interface in Python, export it to static HTML/CSS/JS, and deploy anywhere—no Javascript or frontend stack required.
+Dars is a Python UI framework for building modern, interactive web apps with only Python code. Write your interface in Python, export it to static HTML/CSS/JS, and deploy anywhere some Javascript or frontend stack required.
 
 ## How It Works
 - Build your UI using Python classes and components (like Text, Button, Container, Page, etc).
