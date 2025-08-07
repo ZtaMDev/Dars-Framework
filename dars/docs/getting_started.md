@@ -8,7 +8,7 @@ Welcome to Dars, a modern Python framework for building web applications with re
    See [INSTALL.md](../INSTALL.md) for installation instructions.
 
 2. **Project Structure**  
-   Learn about the recommended project layout in [STRUCTURE.md](../STRUCTURE.md).
+   Learn about the framework internal project layout in [STRUCTURE.md](../STRUCTURE.md).
 
 3. **Explore Components**  
    Discover all available UI components in [components.md](components.md).
