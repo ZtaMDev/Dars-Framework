@@ -1,219 +1,219 @@
-# Estructura del Proyecto Dars
+# Dars Project Structure
 
-## 📁 Estructura General
+## 📁 General Structure
 
 ```
 dars-framework/
-├── README.md                    # Documentación principal
-├── INSTALL.md                   # Guía de instalación
-├── STRUCTURE.md                 # Este archivo
-├── dars_architecture.md         # Documentación de arquitectura
-├── pyproject.toml               # Configuración del proyecto Python
+├── README.md                    # Main documentation (project overview and usage guide)
+├── INSTALL.md                   # Installation instructions and requirements
+├── STRUCTURE.md                 # Project structure reference (this file)
+├── dars_architecture.md         # Internal architecture and design documentation
+├── pyproject.toml               # Python project configuration (dependencies, metadata)
 │
-├── dars/                       # Framework principal
+├── dars/                        # Main framework package
 │   ├── __init__.py
-│   ├── core/                   # Núcleo del framework
-│   ├── components/             # Componentes UI
-│   ├── scripts/                # Sistema de scripts
-│   ├── exporters/              # Exportadores
-│   ├── templates/              # Templates de exportación
-│   ├── cli/                    # Herramientas CLI
-│   └── docs/                   # Documentación detallada
+│   ├── core/                    # Core logic and base classes
+│   ├── components/              # User interface components
+│   ├── scripts/                 # Script system and integrations
+│   ├── exporters/               # Exporters for different platforms
+│   ├── templates/               # Templates used for export
+│   ├── cli/                     # Command-line interface tools
+│   └── docs/                    # Detailed documentation and guides
 │
-└── dars/templates/examples/    # Ejemplos de aplicaciones
+└── dars/templates/examples/     # Example applications and templates
     ├── README.md
-    ├── basic/                  # Ejemplos básicos
-    ├── advanced/               # Ejemplos avanzados
-    └── demo/                   # Aplicación de demostración
+    ├── basic/                   # Basic usage examples
+    ├── advanced/                # Advanced usage examples
+    └── demo/                    # Complete demo application
 ```
 
-## 🏗️ Núcleo del Framework (`dars/core/`)
+## 🏗️ Framework Core (`dars/core/`)
 
 ```
 core/
 ├── __init__.py
-├── app.py                      # Clase principal App
-├── component.py                # Clase base Component
-├── properties.py               # Sistema de propiedades y estilos
-└── events.py                   # Sistema de manejo de eventos
+├── app.py                      # Main App class
+├── component.py                # Base Component class
+├── properties.py               # Property and style system
+└── events.py                   # Event handling system
 ```
 
 ### Descripción de Archivos
 
-- **`app.py`**: Clase principal que representa una aplicación Dars
-- **`component.py`**: Clase base abstracta para todos los componentes
-- **`properties.py`**: Define propiedades de estilo y eventos
-- **`events.py`**: Sistema de manejo de eventos
+- **`app.py`**: Main class representing a Dars application
+- **`component.py`**: Abstract base class for all components
+- **`properties.py`**: Defines style properties and events
+- **`events.py`**: Event handling system
 
 ## 🧩 Componentes (`dars/components/`)
 
 ```
 components/
 ├── __init__.py
-├── basic/                      # Componentes básicos
+├── basic/                      # Basic components
 │   ├── __init__.py
-│   ├── text.py                 # Componente Text
-│   ├── button.py               # Componente Button
-│   ├── input.py                # Componente Input
-│   ├── container.py            # Componente Container
-│   ├── image.py                # Componente Image
-│   ├── link.py                 # Componente Link
-│   └── textarea.py             # Componente Textarea
-├── advanced/                   # Componentes avanzados
+│   ├── text.py                 # Text component
+│   ├── button.py               # Button component
+│   ├── input.py                # Input component
+│   ├── container.py            # Container component
+│   ├── image.py                # Image component
+│   ├── link.py                 # Link component
+│   └── textarea.py             # Text componentarea
+├── advanced/                   # Advanced components
 │   ├── __init__.py
-│   ├── card.py                 # Componente Card
-│   ├── modal.py                # Componente Modal
-│   └── navbar.py               # Componente Navbar
-└── layout/                     # Componentes de layout (futuro)
+│   ├── card.py                 # Card component
+│   ├── modal.py                # Modal component
+│   └── navbar.py               # Navbar component
+└── layout/                     # Layout components (future)
     └── __init__.py
 ```
 
 ### Componentes Implementados
 
-- **Text**: Mostrar texto estático o dinámico
-- **Button**: Botones interactivos
-- **Input**: Campos de entrada de datos
-- **Container**: Contenedores para organizar layout
-- **Image**: Mostrar imágenes
-- **Link**: Crear enlaces de navegación
-- **Textarea**: Áreas de texto multilínea
-- **Card**: Contenedor estilizado para agrupar contenido
-- **Modal**: Ventana emergente superpuesta
-- **Navbar**: Barra de navegación
+- **Text**: Display static or dynamic text
+- **Button**: Interactive buttons
+- **Input**: Input fields
+- **Container**: Containers for organizing layout
+- **Image**: Display images
+- **Link**: Create navigation links
+- **Textarea**: Multiline text areas
+- **Card**: Styled container for grouping content
+- **Modal**: Overlay modal window
+- **Navbar**: Navigation bar
 
-## 📜 Sistema de Scripts (`dars/scripts/`)
+## 📜 Script System (`dars/scripts/`)
 
 ```
 scripts/
 ├── __init__.py
-└── script.py                   # Clases InlineScript y FileScript
+└── script.py                   # InlineScript and FileScript classes
 ```
 
 ### Tipos de Scripts
 
-- **InlineScript**: Código JavaScript definido en Python
-- **FileScript**: Código cargado desde archivos externos
+- **InlineScript**: JavaScript code defined in Python
+- **FileScript**: Code loaded from external files
 
 ## 🔄 Exportadores (`dars/exporters/`)
 
 ```
 exporters/
 ├── __init__.py
-├── base.py                     # Clase base Exporter
-└── web/                        # Exportadores web
+├── base.py                     # Base Exporter class
+└── web/                        # Web exporters
     ├── __init__.py
-    └── html_css_js.py          # Exportador HTML/CSS/JS
+    └── html_css_js.py          # HTML/CSS/JS exporter
 ```
 
 ### Exportadores Disponibles
 
 #### Web
-- **HTML/CSS/JS**: Aplicaciones web estándar
+- **HTML/CSS/JS**: Standard web applications
 
 ## 📋 Templates (`dars/templates/`)
 
 ```
 templates/
 ├── __init__.py
-├── examples/                   # Ejemplos de aplicaciones
+├── examples/                   # Application examples
 │   ├── README.md
-│   ├── basic/                  # Ejemplos básicos
-│   ├── advanced/               # Ejemplos avanzados
-│   └── demo/                   # Aplicación de demostración
-└── html/                       # Templates HTML
+│   ├── basic/                  # Basic examples
+│   ├── advanced/               # Advanced examples
+│   └── demo/                   # Complete demo application
+└── html/                       # HTML templates
     └── __init__.py
 ```
 
-## 🛠️ Herramientas CLI (`dars/cli/`)
+## 🛠️ CLI Tools (`dars/cli/`)
 
 ```
 cli/
 ├── __init__.py
-├── main.py                     # CLI principal con Rich
-└── preview.py                  # Sistema de preview
+├── main.py                     # Main CLI with Rich
+└── preview.py                  # Preview system
 ```
 
-### Herramientas Disponibles
+### Available Tools
 
-- **main.py**: CLI principal para exportar aplicaciones
-- **preview.py**: Sistema de preview para aplicaciones exportadas
+- **main.py**: Main CLI to export applications
+- **preview.py**: Preview system para aplicaciones exportadas
 
 ## 📚 Documentación (`dars/docs/`)
 
 ```
 docs/
 ├── __init__.py
-├── getting_started.md          # Guía de inicio rápido
-├── components.md               # Documentación de componentes
-├── scripts.md                  # Sistema de scripts
-└── exporters.md                # Guía de exportadores
+├── getting_started.md          # Quick Start Guide
+├── components.md               # Components documentation
+├── scripts.md                  # Script system
+└── exporters.md                # Exporters guide
 ```
 
 ## 🎯 Ejemplos (`dars/templates/examples/`)
 
 ```
 examples/
-├── README.md                   # Guía de ejemplos
-├── basic/                      # Ejemplos básicos
-│   ├── hello_world.py          # Ejemplo Hello World
-│   └── simple_form.py          # Formulario simple
-├── advanced/                   # Ejemplos avanzados
-│   └── dashboard.py            # Dashboard empresarial
-└── demo/                       # Demostración completa
-    └── complete_app.py         # Aplicación completa
+├── README.md                   # Examples guide
+├── basic/                      # Basic examples
+│   ├── hello_world.py          # Hello World example
+│   └── simple_form.py          # Simple form
+├── advanced/                   # Advanced examples
+│   └── dashboard.py            # Business dashboard
+└── demo/                       # Complete demonstration
+    └── complete_app.py         # Complete application
 ```
 
 ### Tipos de Ejemplos
 
-#### Básicos
-- **Hello World**: Aplicación simple con texto y botón
-- **Simple Form**: Formulario con validación
+#### Basic
+- **Hello World**: Simple app with text and button
+- **Simple Form**: Form with validation
 
-#### Avanzados
-- **Dashboard**: Panel de control con navegación y estadísticas
+#### Advanced
+- **Dashboard**: Dashboard with navigation and statistics
 
 #### Demostración
-- **Complete App**: Aplicación que muestra todas las características
+- **Complete App**: App showcasing all features
 
-## 🔧 Archivos de Configuración
+## 🔧 Configuration Files
 
 ### `pyproject.toml`
-Archivo de configuración para el proyecto Python, incluyendo metadatos y dependencias para PyPI.
+Configuration file for the Python project, including metadata and dependencies for PyPI.
 
 ### `__init__.py`
-Archivos de inicialización de módulos Python en cada directorio.
+Initialization files for Python modules in each directory.
 
-## 📊 Flujo de Datos
+## 📊 Data Flow
 
 ```
-Aplicación Python (*.py)
+Python Application (*.py)
          ↓
     Dars Core
          ↓
-    Validación
+    Validation
          ↓
-    Exportador Específico
+    Specific Exporter
          ↓
-    Código de Salida (HTML/CSS/JS)
+    Output Code (HTML/CSS/JS)
 ```
 
-## 🎨 Patrones de Diseño Utilizados
+## 🎨 Design Patterns Used
 
 ### Factory Pattern
-- Los exportadores se crean dinámicamente según el formato solicitado
+- Exporters are created dynamically according to the requested format
 
 ### Component Pattern
-- Todos los elementos UI heredan de la clase base Component
+- All UI elements inherit from the base Component class
 
 ### Strategy Pattern
-- Diferentes estrategias de exportación para cada plataforma
+- Different export strategies for each platform
 
 ### Template Method Pattern
-- Proceso de exportación común con pasos específicos por plataforma
+- Common export process with platform-specific steps
 
-## 🔍 Puntos de Extensión
+## 🔍 Extension Points
 
-### Nuevos Componentes
+### New Components
 
 ```python
 # dars/components/basic/mi_componente.py
@@ -222,10 +222,10 @@ from dars.core.component import Component
 class MiComponente(Component):
     def __init__(self, **props):
         super().__init__(**props)
-        # Implementación específica
+        # Specific implementation
 ```
 
-### Nuevos Exportadores
+### New Exporters
 
 ```python
 # dars/exporters/mi_plataforma/mi_exportador.py
@@ -236,91 +236,92 @@ class MiExportador(Exporter):
         return "mi_plataforma"
     
     def export(self, app, output_path):
-        # Lógica de exportación
+        # Export logic
         return True
 ```
 
-### Nuevos Scripts
+### New Scripts
 
 ```python
-# Extender funcionalidad de scripts
+# Extend script functionality
 from dars.scripts.script import Script
 
 class MiTipoScript(Script):
     def get_code(self):
-        # Generar código específico
+        # Generate specific code
         return "código_generado"
 ```
 
-## 📈 Métricas del Proyecto
+## 📈 Project Metrics
 
-### Líneas de Código (Aproximado)
+### Lines of Code (Approximate)
 
-- **Core**: ~800 líneas
-- **Componentes**: ~1000 líneas (actualizado con nuevos componentes)
-- **Exportadores**: ~500 líneas (solo HTML/CSS/JS)
-- **CLI**: ~400 líneas
-- **Scripts**: ~200 líneas
-- **Ejemplos**: ~800 líneas
-- **Documentación**: ~3000 líneas (actualizado con nueva documentación)
+- **Core**: ~800 lines
+- **Components**: ~1000 lines (updated with new components)
+- **Exporters**: ~500 lines (HTML/CSS/JS only)
+- **CLI**: ~400 lines
+- **Scripts**: ~200 lines
+- **Examples**: ~800 lines
+- **Documentation**: ~3000 lines (updated with new documentation)
 
-### Total: ~7000 líneas de código y documentación
+### Total: ~7000 lines of code and documentation
 
-## 🚀 Roadmap de Desarrollo
+## 🚀 Development Roadmap
 
-### Implementado 
+### Implemented
 
-- [x] Núcleo del framework
-- [x] Componentes básicos (Text, Button, Input, Container, Page [soporta add_script para scripts por página en multipage], Checkbox, RadioButton, Select, Slider, DatePicker, etc)
-- [x] Componentes avanzados (Card, Modal, Navbar)
-- [x] Sistema de scripts
-- [x] Exportador HTML/CSS/JS
-- [x] CLI con Rich
-- [x] Sistema de preview
-- [x] Documentación completa
-- [x] Ejemplos funcionales
+- [x] Framework core
+- [x] Basic components (Text, Button, Input, Container, Page [supports add_script for per-page scripts in multipage], Checkbox, RadioButton, Select, Slider, DatePicker, etc)
+- [x] Advanced components (Card, Modal, Navbar)
+- [x] Script system
+- [x] HTML/CSS/JS exporter
+- [x] CLI with Rich
+- [x] Preview system
+- [x] Complete documentation
+- [x] Functional examples
 
-### Futuras Mejoras 🔮
+### Future Improvements 🔮
 
-- [ ] Más componentes (Video, Table, Chart, etc.)
-- [ ] Sistema de temas avanzado
-- [ ] Hot reloading en desarrollo
+- [ ] More components (Video, Table, Chart, etc.)
+- [ ] Advanced theme system
+- [ ] Hot reloading in development
 - [ ] Plugin system
-- [ ] Generador de código automático
-- [ ] Testing framework integrado
-- [ ] Exportadores para otras plataformas (React, React Native, Desktop)
+- [ ] Automatic code generator
+- [ ] Integrated testing framework
+- [ ] Exporters for other platforms (React, React Native, Desktop)
 
-## 🛡️ Consideraciones de Seguridad
+## 🛡️ Security Considerations
 
 ### Scripts
-- Los scripts se ejecutan en el contexto del navegador/aplicación
-- Validación de entrada en formularios
-- Sanitización de datos
+- Scripts run in the context of the browser/application
+- Input validation in forms
+- Data sanitization
 
-### Exportación
-- Validación de rutas de salida
-- Verificación de permisos de escritura
-- Escape de caracteres especiales
+### Export
+- Output path validation
+- Write permissions verification
+- Special character escaping
 
-## 📝 Convenciones de Código
+## 📝 Code Conventions
 
 ### Python
-- PEP 8 para estilo de código
-- Type hints donde sea apropiado
-- Docstrings para clases y métodos públicos
+- PEP 8 for code style
+- Type hints where appropriate
+- Docstrings for public classes and methods
 
 ### JavaScript
 - ES6+ features
-- Comentarios descriptivos
-- Manejo de errores
+- Descriptive comments
+- Error handling
 
-### Estructura de Archivos
-- Un componente por archivo
-- Nombres descriptivos
-- Organización lógica por funcionalidad
+### File Structure
+- One component per file
+- Descriptive names
+- Logical organization by functionality
 
 ---
 
-Esta estructura proporciona una base sólida y extensible para el framework Dars, permitiendo fácil mantenimiento y expansión futura.
+This structure provides a solid and extensible foundation for the Dars framework, allowing for easy maintenance and future expansion.
+This structure provides a solid and extensible foundation for the Dars framework, allowing for easy maintenance and future expansion.
 
 

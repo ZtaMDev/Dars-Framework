@@ -1,6 +1,6 @@
-# Dars - Sistema de Scripts
+# Dars - Script System
 
-## Introducción
+## Introduction
 
 El sistema de scripts de Dars permite agregar lógica interactiva y comportamientos dinámicos a las aplicaciones. Los scripts se escriben en JavaScript y se integran seamless con los componentes de la interfaz de usuario.
 
@@ -536,9 +536,9 @@ document.addEventListener(\'DOMContentLoaded\', function() {
 });
 """)
 
-# Agregar a la aplicación
-app = App(title="Formulario con Script")
-app.set_root(formulario)
-app.add_script(script_formulario)
+# Add to the application
+app = App(title="Form with Script")
+app.set_root(form)
+app.add_script(form_script)
 
 

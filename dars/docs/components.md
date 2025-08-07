@@ -1,12 +1,46 @@
-# Dars - Documentación de Componentes
+# Dars - Components Documentation
 
-## Introducción a los Componentes
+## Introduction to Components
 
-Los componentes son los elementos fundamentales de Dars que representan elementos de la interfaz de usuario. Cada componente encapsula su apariencia, comportamiento y estado, permitiendo crear interfaces complejas mediante la composición de elementos simples.
+Components are the fundamental elements of Dars that represent UI elements. Each component encapsulates its appearance, behavior, and state, allowing you to create complex interfaces by composing simple elements.
 
-## Clase Base Component
+---
 
-Todos los componentes en Dars heredan de la clase base `Component`, que proporciona la funcionalidad común:
+### Quick Access
+
+- [Base Component Class](#base-component-class)
+- [Page](#Page)
+- [Text](#Text)
+- [Button](#Button)
+- [Input](#Input)
+- [Container](#Container)
+- [Image](#Image)
+- [Link](#Link)
+- [Textarea](#Textarea)
+- [Checkbox](#Checkbox)
+- [RadioButton](#RadioButton)
+- [Select](#Select)
+- [Slider](#Slider)
+- [ProgressBar](#ProgressBar)
+- [Tooltip](#Tooltip)
+- [DatePicker](#DatePicker)
+- [Card](#Card)
+- [Modal](#Modal)
+- [Navbar](#Navbar)
+- [Accordion](#Accordion)
+- [Tabs](#Tabs)
+- [Table](#Table)
+- [Layout Components](#layout-components)
+  - [GridLayout](#GridLayout)
+  - [FlexLayout](#FlexLayout)
+  - [LayoutBase](#LayoutBase)
+  - [AnchorPoint](#AnchorPoint)
+
+---
+
+## Base Component Class
+
+All components in Dars inherit from the base `Component` class, which provides common functionality:
 
 ```python
 from dars.core.component import Component
@@ -22,18 +56,20 @@ class Component(ABC):
         self.events = {}
 ```
 
-### Propiedades Comunes
+### Common Properties
 
-Todos los componentes soportan estas propiedades básicas:
+All components support these basic properties:
 
-- **id**: Identificador único del componente
-- **class_name**: Clase CSS para estilos adicionales
-- **style**: Diccionario con estilos CSS
-- **children**: Lista de componentes hijos (para contenedores)
+- **id**: Unique component identifier
+- **class_name**: CSS class for additional styles
+- **style**: Dictionary of CSS styles
+- **children**: List of child components (for containers)
 
-## Componentes Básicos
+### Page
 
-## Page (root multipágina)
+The `Page` component represents the root of a multipage app. It can contain other components and scripts specific to that page.
+
+#### Syntax
 
 ```python
 from dars.components.basic import Page, Text, Button
@@ -51,21 +87,29 @@ document.addEventListener('DOMContentLoaded', function() {
 """))
 ```
 
-Usa `Page` como root de cada página en el sistema multipágina. Permite pasar hijos directamente como argumentos y scripts JS por página.
+Use `Page` as the root of each page in the multipage system. Allows passing children directly as arguments and JS scripts per page.
+
+#### Properties
+
+| Property    | Type   | Description                                         |
+|-------------|--------|-----------------------------------------------------|
+| `children`  | list   | List of child components                            |
+| `anchors`   | dict   | Optional anchor points for child placement          |
+
 
 ### Text
 
-El componente `Text` muestra texto estático o dinámico.
+The `Text` component displays static or dynamic text.
 
-#### Sintaxis
+#### Syntax
 
 ```python
 from dars.components.basic.text import Text
 
-texto = Text(
-    text="Contenido del texto",
-    id="mi-texto",
-    class_name="texto-principal",
+text = Text(
+    text="Contenido del text",
+    id="mi-text",
+    class_name="text-principal",
     style={
         "font-size": "16px",
         "color": "#333",
@@ -74,20 +118,20 @@ texto = Text(
 )
 ```
 
-#### Propiedades
+#### Properties
 
-| Propiedad | Tipo | Descripción | Ejemplo |
+| Property | Type | Description | Example |
 |-----------|------|-------------|---------|
-| `text` | str | Contenido del texto | `"Hola mundo"` |
-| `id` | str | Identificador único | `"titulo-principal"` |
-| `class_name` | str | Clase CSS | `"texto-destacado"` |
-| `style` | dict | Estilos CSS | `{"color": "red"}` |
+| `text` | str | Text content | `"Hello world"` |
+| `id` | str | Unique identifier | `"title-primary"` |
+| `class_name` | str | CSS class | `"text-highlight"` |
+| `style` | dict | CSS styles | `{"color": "red"}` |
 
-#### Estilos Comunes
+#### Common Styles
 
 ```python
 # Título principal
-titulo = Text(
+title = Text(
     text="Título Principal",
     style={
         "font-size": "32px",
@@ -99,7 +143,7 @@ titulo = Text(
 )
 
 # Párrafo de contenido
-parrafo = Text(
+paragraph = Text(
     text="Este es un párrafo de ejemplo con contenido descriptivo.",
     style={
         "font-size": "16px",
@@ -110,7 +154,7 @@ parrafo = Text(
 )
 
 # Texto pequeño
-nota = Text(
+note = Text(
     text="Nota: Esta información es importante.",
     style={
         "font-size": "12px",
@@ -122,9 +166,9 @@ nota = Text(
 
 ### Button
 
-El componente `Button` crea botones interactivos que pueden ejecutar acciones.
+The `Button` component creates interactive buttons that can execute actions.
 
-#### Sintaxis
+#### Syntax
 
 ```python
 from dars.components.basic.button import Button
@@ -133,7 +177,7 @@ boton = Button(
     text="Hacer clic",
     button_type="button",  # "button", "submit", "reset"
     disabled=False,
-    # on_click=mi_funcion, # Los eventos se manejan con app.add_script o InlineScript
+    # on_click=my_function, # Los eventos se manejan con app.add_script o InlineScript
     style={
         "background-color": "#3498db",
         "color": "white",
@@ -144,19 +188,19 @@ boton = Button(
 )
 ```
 
-#### Propiedades
+#### Properties
 
-| Propiedad | Tipo | Descripción | Valores |
+| Property | Type | Description | Values |
 |-----------|------|-------------|---------|
-| `text` | str | Texto del botón | `"Enviar"` |
-| `button_type` | str | Tipo de botón | `"button"`, `"submit"`, `"reset"` |
+| `text` | str | Button text | `"Enviar"` |
+| `button_type` | str | Button type | `"button"`, `"submit"`, `"reset"` |
 | `disabled` | bool | Si está deshabilitado | `True`, `False` |
 
-#### Ejemplos de Botones
+#### Button Examples
 
 ```python
-# Botón primario
-boton_primario = Button(
+# Primary Button
+primary_button = Button(
     text="Acción Principal",
     style={
         "background-color": "#007bff",
@@ -171,8 +215,8 @@ boton_primario = Button(
     }
 )
 
-# Botón secundario
-boton_secundario = Button(
+# Secondary Button
+secondary_button = Button(
     text="Cancelar",
     style={
         "background-color": "transparent",
@@ -185,8 +229,8 @@ boton_secundario = Button(
     }
 )
 
-# Botón de peligro
-boton_eliminar = Button(
+# Danger Button
+delete_button = Button(
     text="Eliminar",
     style={
         "background-color": "#dc3545",
@@ -198,8 +242,8 @@ boton_eliminar = Button(
     }
 )
 
-# Botón deshabilitado
-boton_deshabilitado = Button(
+# Disabled Button
+disabled_button = Button(
     text="No disponible",
     disabled=True,
     style={
@@ -215,9 +259,9 @@ boton_deshabilitado = Button(
 
 ### Input
 
-El componente `Input` permite la entrada de datos del usuario.
+The `Input` component allows user data entry.
 
-#### Sintaxis
+#### Syntax
 
 ```python
 from dars.components.basic.input import Input
@@ -230,7 +274,7 @@ entrada = Input(
     readonly=False,
     required=False,
     max_length=100,
-    # on_change=mi_funcion_cambio, # Los eventos se manejan con app.add_script o InlineScript
+    # on_change=my_function_cambio, # Los eventos se manejan con app.add_script o InlineScript
     style={
         "width": "300px",
         "padding": "10px",
@@ -240,26 +284,26 @@ entrada = Input(
 )
 ```
 
-#### Propiedades
+#### Properties
 
-| Propiedad | Tipo | Descripción | Valores |
+| Property | Type | Description | Values |
 |-----------|------|-------------|---------|
-| `value` | str | Valor inicial | `"texto"` |
-| `placeholder` | str | Texto de ayuda | `"Ingresa tu nombre"` |
+| `value` | str | Initial value | `"text"` |
+| `placeholder` | str | Help text | `"Ingresa tu name"` |
 | `input_type` | str | Tipo de entrada | `"text"`, `"password"`, `"email"`, `"number"` |
 | `disabled` | bool | Si está deshabilitado | `True`, `False` |
 | `readonly` | bool | Solo lectura | `True`, `False` |
 | `required` | bool | Campo obligatorio | `True`, `False` |
 | `max_length` | int | Longitud máxima | `50` |
 | `min_length` | int | Longitud mínima | `3` |
-| `pattern` | str | Patrón de validación | `"[0-9]+"` |
+| `pattern` | str | Validation pattern | `"[0-9]+"` |
 
-#### Tipos de Input
+#### Input Types
 
 ```python
-# Campo de texto básico
-nombre = Input(
-    placeholder="Ingresa tu nombre",
+# Basic text input
+name = Input(
+    placeholder="Ingresa tu name",
     input_type="text",
     required=True,
     style={
@@ -271,7 +315,7 @@ nombre = Input(
     }
 )
 
-# Campo de email
+# Email input
 email = Input(
     placeholder="tu@email.com",
     input_type="email",
@@ -284,7 +328,7 @@ email = Input(
     }
 )
 
-# Campo de contraseña
+# Password input
 password = Input(
     placeholder="Contraseña",
     input_type="password",
@@ -298,7 +342,7 @@ password = Input(
     }
 )
 
-# Campo numérico
+# Numeric input
 edad = Input(
     placeholder="Edad",
     input_type="number",
@@ -311,7 +355,7 @@ edad = Input(
     }
 )
 
-# Campo de búsqueda
+# Search input
 busqueda = Input(
     placeholder="Buscar...",
     input_type="search",
@@ -327,14 +371,14 @@ busqueda = Input(
 
 ### Container
 
-El componente `Container` es un contenedor que puede albergar otros componentes.
+The `Container` component is a container that can hold other components.
 
-#### Sintaxis
+#### Syntax
 
 ```python
 from dars.components.basic.container import Container
 
-contenedor = Container(
+container = Container(
     children=[componente1, componente2],
     style={
         "display": "flex",
@@ -345,19 +389,19 @@ contenedor = Container(
 )
 
 # O agregar hijos después
-contenedor.add_child(componente3)
+container.add_child(componente3)
 ```
 
-#### Propiedades
+#### Properties
 
-| Propiedad | Tipo | Descripción |
+| Property | Type | Description |
 |-----------|------|-------------|
-| `children` | list | Lista de componentes hijos |
+| `children` | list | List of child components |
 
-#### Layouts con Container
+#### Container Layouts
 
 ```python
-# Layout vertical (columna)
+# Vertical layout (column)
 columna = Container(
     style={
         "display": "flex",
@@ -367,7 +411,7 @@ columna = Container(
     }
 )
 
-# Layout horizontal (fila)
+# Horizontal layout (row)
 fila = Container(
     style={
         "display": "flex",
@@ -416,16 +460,16 @@ sidebar = Container(
 
 ### Image
 
-El componente `Image` muestra imágenes.
+The `Image` component displays images.
 
-#### Sintaxis
+#### Syntax
 
 ```python
 from dars.components.basic.image import Image
 
-imagen = Image(
+image = Image(
     src="path/to/your/image.jpg",
-    alt="Descripción de la imagen",
+    alt="Descripción de la image",
     width="300px",
     height="200px",
     class_name="responsive-img",
@@ -436,25 +480,25 @@ imagen = Image(
 )
 ```
 
-#### Propiedades
+#### Properties
 
-| Propiedad | Tipo | Descripción | Ejemplo |
+| Property | Type | Description | Example |
 |-----------|------|-------------|---------|
-| `src` | str | Ruta de la imagen | `"images/logo.png"` |
-| `alt` | str | Texto alternativo | `"Logo de la empresa"` |
-| `width` | str | Ancho de la imagen (CSS) | `"100%"`, `"200px"` |
-| `height` | str | Alto de la imagen (CSS) | `"auto"`, `"150px"` |
+| `src` | str | Image path | `"images/logo.png"` |
+| `alt` | str | Alternative text | `"Logo of the company"` |
+| `width` | str | Ancho de la image (CSS) | `"100%"`, `"200px"` |
+| `height` | str | Alto de la image (CSS) | `"auto"`, `"150px"` |
 
 ### Link
 
-El componente `Link` crea enlaces de navegación.
+The `Link` component creates navigation links.
 
-#### Sintaxis
+#### Syntax
 
 ```python
 from dars.components.basic.link import Link
 
-enlace = Link(
+link = Link(
     text="Visitar Google",
     href="https://www.google.com",
     target="_blank", # Abre en una nueva pestaña
@@ -467,24 +511,24 @@ enlace = Link(
 )
 ```
 
-#### Propiedades
+#### Properties
 
-| Propiedad | Tipo | Descripción | Valores |
+| Property | Type | Description | Values |
 |-----------|------|-------------|---------|
-| `text` | str | Texto del enlace | `"Ir a la página"` |
-| `href` | str | URL de destino | `"/about"`, `"https://example.com"` |
-| `target` | str | Dónde abrir el enlace | `"_self"` (misma pestaña), `"_blank"` (nueva pestaña) |
+| `text` | str | Link text | `"Ir a la página"` |
+| `href` | str | URL of destination | `"/about"`, `"https://example.com"` |
+| `target` | str | Dónde abrir el link | `"_self"` (misma pestaña), `"_blank"` (nueva pestaña) |
 
 ### Textarea
 
-El componente `Textarea` permite la entrada de texto multilínea.
+The `Textarea` component allows for multi-line text input.
 
-#### Sintaxis
+#### Syntax
 
 ```python
 from dars.components.basic.textarea import Textarea
 
-area_texto = Textarea(
+area_text = Textarea(
     value="Texto inicial",
     placeholder="Escribe tu mensaje aquí...",
     rows=5,
@@ -503,12 +547,12 @@ area_texto = Textarea(
 )
 ```
 
-#### Propiedades
+#### Properties
 
-| Propiedad | Tipo | Descripción | Valores |
+| Property | Type | Description | Values |
 |-----------|------|-------------|---------|
-| `value` | str | Valor inicial | `""` |
-| `placeholder` | str | Texto de ayuda | `"Escribe aquí..."` |
+| `value` | str | Initial value | `""` |
+| `placeholder` | str | Help text | `"Escribe aquí..."` |
 | `rows` | int | Número de filas visibles | `4` |
 | `cols` | int | Número de columnas visibles | `50` |
 | `disabled` | bool | Si está deshabilitado | `True`, `False` |
@@ -516,20 +560,341 @@ area_texto = Textarea(
 | `required` | bool | Campo obligatorio | `True`, `False` |
 | `max_length` | int | Longitud máxima | `500` |
 
-## Componentes Avanzados
+---
+
+---
+
+### ProgressBar
+
+The `ProgressBar` component visually displays progress for a task, such as loading or completion percentage.
+
+#### Syntax
+
+```python
+from dars.components.basic.progressbar import ProgressBar
+
+progress = ProgressBar(value=40, max_value=100)
+```
+
+#### Properties
+
+| Property    | Type | Description                       |
+|-------------|------|-----------------------------------|
+| `value`     | int  | Current progress value            |
+| `max_value` | int  | Maximum value (default: 100)      |
+
+#### Example
+
+```python
+progress = ProgressBar(value=75, max_value=100)
+```
+
+---
+
+### Tooltip
+
+The `Tooltip` component displays a tooltip when hovering over a child component.
+
+#### Syntax
+
+```python
+from dars.components.basic.tooltip import Tooltip
+from dars.components.basic.button import Button
+
+tooltip = Tooltip(
+    text="More info",
+    child=Button(text="Hover me")
+)
+```
+
+#### Properties
+
+| Property   | Type      | Description                             |
+|------------|-----------|-----------------------------------------|
+| `text`     | str       | Tooltip text                            |
+| `child`    | Component | Component to wrap                       |
+| `position` | str       | Tooltip position (e.g., "top")          |
+
+#### Example
+
+```python
+tooltip = Tooltip(text="Help", child=Button(text="?"))
+```
+
+---
+
+### Accordion
+
+The `Accordion` component creates a vertically stacked set of expandable/collapsible panels for organizing content.
+
+#### Syntax
+
+```python
+from dars.components.advanced.accordion import Accordion
+
+accordion = Accordion(
+    items=[
+        {"title": "Section 1", "content": "Content for section 1"},
+        {"title": "Section 2", "content": "Content for section 2"}
+    ],
+    allow_multiple=False
+)
+```
+
+#### Properties
+
+| Property         | Type    | Description                                         |
+|------------------|---------|-----------------------------------------------------|
+| `items`          | list    | List of dicts with `title` and `content`            |
+| `allow_multiple` | bool    | Allow multiple sections open at once                |
+
+#### Example
+
+```python
+accordion = Accordion(
+    items=[
+        {"title": "FAQ 1", "content": "Answer 1"},
+        {"title": "FAQ 2", "content": "Answer 2"}
+    ]
+)
+```
+
+---
+
+### Tabs
+
+The `Tabs` component allows navigation between different views or content panels.
+
+#### Syntax
+
+```python
+from dars.components.advanced.tabs import Tabs
+
+tabs = Tabs(
+    tabs=[
+        {"label": "Tab 1", "content": "Content 1"},
+        {"label": "Tab 2", "content": "Content 2"}
+    ],
+    default_index=0
+)
+```
+
+#### Properties
+
+| Property        | Type | Description                              |
+|-----------------|------|------------------------------------------|
+| `tabs`          | list | List of dicts with `label` and `content` |
+| `default_index` | int  | Index of the initially selected tab      |
+
+#### Example
+
+```python
+tabs = Tabs(
+    tabs=[
+        {"label": "Overview", "content": "Main content"},
+        {"label": "Details", "content": "Detailed info"}
+    ],
+    default_index=0
+)
+```
+
+---
+
+### Table
+
+The `Table` component displays tabular data with rows and columns.
+
+#### Syntax
+
+```python
+from dars.components.advanced.table import Table
+
+table = Table(
+    columns=["Name", "Age", "Country"],
+    data=[
+        ["Alice", 30, "USA"],
+        ["Bob", 25, "UK"]
+    ]
+)
+```
+
+#### Properties
+
+| Property   | Type   | Description                       |
+|------------|--------|-----------------------------------|
+| `columns`  | list   | List of column headers            |
+| `data`     | list   | List of rows (each a list/tuple)  |
+
+#### Example
+
+```python
+table = Table(
+    columns=["Product", "Price"],
+    data=[
+        ["Book", "$10"],
+        ["Pen", "$2"]
+    ]
+)
+```
+
+---
+
+## Layout Components
+
+### GridLayout
+
+The `GridLayout` component provides a responsive grid-based layout with customizable rows, columns, gaps, and anchor points for precise positioning of children.
+
+#### Syntax
+
+```python
+from dars.components.layout.grid import GridLayout
+from dars.components.basic.text import Text
+
+grid = GridLayout(
+    rows=2,
+    cols=2,
+    gap="24px",
+    children=[
+        Text("Top Left"),
+        Text("Top Right"),
+        Text("Bottom Left"),
+        Text("Bottom Right")
+    ]
+)
+```
+
+#### Properties
+
+| Property   | Type   | Description                                 |
+|------------|--------|---------------------------------------------|
+| `rows`     | int    | Number of grid rows                         |
+| `cols`     | int    | Number of grid columns                      |
+| `gap`      | str    | Gap between grid cells (e.g., "16px")      |
+| `children` | list   | List of child components                    |
+| `anchors`  | dict   | Optional anchor points for child placement  |
+
+#### Example
+
+```python
+grid = GridLayout(
+    rows=3,
+    cols=2,
+    gap="16px",
+    children=[Text(f"Cell {i}") for i in range(6)]
+)
+```
+
+---
+
+### FlexLayout
+
+The `FlexLayout` component provides a responsive flexbox layout, supporting direction, wrap, alignment, and gap between children. Useful for row/column layouts.
+
+#### Syntax
+
+```python
+from dars.components.layout.flex import FlexLayout
+from dars.components.basic.button import Button
+
+flex = FlexLayout(
+    direction="row",
+    justify="space-between",
+    align="center",
+    gap="12px",
+    children=[Button("A"), Button("B"), Button("C")]
+)
+```
+
+#### Properties
+
+| Property    | Type   | Description                                         |
+|-------------|--------|-----------------------------------------------------|
+| `direction` | str    | Flex direction: "row" or "column"                   |
+| `wrap`      | str    | Flex wrap: "wrap" or "nowrap"                       |
+| `justify`   | str    | Justify content: e.g., "flex-start", "center"      |
+| `align`     | str    | Align items: e.g., "stretch", "center"             |
+| `gap`       | str    | Gap between children (e.g., "16px")                |
+| `children`  | list   | List of child components                            |
+| `anchors`   | dict   | Optional anchor points for child placement          |
+
+#### Example
+
+```python
+flex = FlexLayout(
+    direction="column",
+    gap="24px",
+    children=[Button("Save"), Button("Cancel")]
+)
+```
+
+---
+
+### LayoutBase
+
+The `LayoutBase` component is the base class for all layout components. It allows adding children and anchor/positioning info. You typically use `FlexLayout` or `GridLayout` directly.
+
+#### Syntax
+
+```python
+from dars.components.layout.grid import LayoutBase
+from dars.components.basic.text import Text
+
+layout = LayoutBase(
+    children=[Text("Item 1"), Text("Item 2")],
+    anchors={}
+)
+```
+
+#### Properties
+
+| Property    | Type   | Description                    |
+|-------------|--------|--------------------------------|
+| `children`  | list   | List of child components       |
+| `anchors`   | dict   | Anchor/positioning information |
+
+---
+
+### AnchorPoint
+
+The `AnchorPoint` class represents an anchor or alignment point for a child in a layout (e.g., top, left, right, bottom, center, percent, or px).
+
+#### Syntax
+
+```python
+from dars.components.layout.anchor import AnchorPoint
+
+anchor = AnchorPoint(x="left", y="top", name="top-left")
+```
+
+#### Properties
+
+| Property | Type | Description                                      |
+|----------|------|--------------------------------------------------|
+| `x`      | str  | Horizontal alignment (e.g., "left", "center")    |
+| `y`      | str  | Vertical alignment (e.g., "top", "center")       |
+| `name`   | str  | Optional semantic name for the anchor            |
+
+#### Example
+
+```python
+anchor = AnchorPoint(x="50%", y="50%", name="center")
+```
+
+---
 
 ### Card
 
-El componente `Card` es un contenedor estilizado para agrupar contenido relacionado, como un título y otros componentes.
+The `Card` component is a styled container to group related content, such as a title and other components.
 
-#### Sintaxis
+#### Syntax
 
 ```python
-from dars.components.advanced.card import Card
+from dars.components.basic.card import Card
 from dars.components.basic.text import Text
 from dars.components.basic.button import Button
 
-mi_tarjeta = Card(
+my_card = Card(
     title="Título de la Tarjeta",
     children=[
         Text("Este es el contenido de la tarjeta."),
@@ -546,25 +911,47 @@ mi_tarjeta = Card(
 )
 ```
 
-#### Propiedades
+#### Properties
 
-| Propiedad | Tipo | Descripción |
+| Property | Type | Description |
 |-----------|------|-------------|
-| `title` | str | Título de la tarjeta |
-| `children` | list | Lista de componentes hijos |
+| `title` | str | Card title |
+| `children` | list | List of child components |
+
+#### Example
+
+```python
+my_card = Card(
+    title="Título de la Tarjeta",
+    children=[
+        Text("Este es el contenido de la tarjeta."),
+        Button("Ver más")
+    ],
+    class_name="product-card",
+    style={
+        "background-color": "#ffffff",
+        "border": "1px solid #e0e0e0",
+        "border-radius": "10px",
+        "padding": "20px",
+        "box-shadow": "0 4px 8px rgba(0,0,0,0.05)"
+    }
+)
+```
+
+---
 
 ### Modal
 
-El componente `Modal` crea una ventana emergente que se superpone al contenido principal de la página.
+The `Modal` component creates an overlay window that appears on top of the main page content.
 
-#### Sintaxis
+#### Syntax
 
 ```python
 from dars.components.advanced.modal import Modal
 from dars.components.basic.text import Text
 from dars.components.basic.button import Button
 
-mi_modal = Modal(
+my_modal = Modal(
     title="Bienvenido al Modal",
     is_open=True, # O False para que esté oculto inicialmente
     children=[
@@ -578,25 +965,44 @@ mi_modal = Modal(
 )
 ```
 
-#### Propiedades
+#### Properties
 
-| Propiedad | Tipo | Descripción |
+| Property | Type | Description |
 |-----------|------|-------------|
-| `title` | str | Título del modal |
-| `is_open` | bool | Controla la visibilidad del modal (`True` para mostrar, `False` para ocultar) |
-| `children` | list | Lista de componentes hijos (contenido del modal) |
+| `title` | str | Modal title |
+| `is_open` | bool | Controls modal visibility (`True` to show, `False` to hide) |
+| `children` | list | List of child components |
+
+#### Example
+
+```python
+my_modal = Modal(
+    title="Bienvenido al Modal",
+    is_open=True, # O False para que esté oculto inicialmente
+    children=[
+        Text("Este es el contenido de tu ventana modal."),
+        Button("Cerrar")
+    ],
+    class_name="welcome-modal",
+    style={
+        "background-color": "rgba(0, 0, 0, 0.7)" # Estilo para el overlay
+    }
+)
+```
+
+---
 
 ### Navbar
 
-El componente `Navbar` crea una barra de navegación, comúnmente utilizada en la parte superior de las páginas.
+The `Navbar` component creates a navigation bar, commonly used at the top of pages.
 
-#### Sintaxis
+#### Syntax
 
 ```python
 from dars.components.advanced.navbar import Navbar
 from dars.components.basic.link import Link
 
-mi_navbar = Navbar(
+my_navbar = Navbar(
     brand="Mi App",
     children=[
         Link("Inicio", "/"),
@@ -612,20 +1018,20 @@ mi_navbar = Navbar(
 )
 ```
 
-#### Propiedades
+#### Properties
 
-| Propiedad | Tipo | Descripción |
+| Property | Type | Description |
 |-----------|------|-------------|
 | `brand` | str | Texto o componente para la marca/logo de la navegación |
-| `children` | list | Lista de componentes hijos (elementos de navegación, usualmente `Link`s) |
+| `children` | list | List of child components (navigation items, usually `Link`s) |
 
-## Componentes Adicionales
+## Additional Components
 
 ### Checkbox
 
-El componente `Checkbox` permite la selección de opciones.
+The `Checkbox` component allows users to select options.
 
-#### Sintaxis
+#### Syntax
 
 ```python
 from dars.components.basic.checkbox import Checkbox
@@ -639,18 +1045,18 @@ mi_checkbox = Checkbox(
 )
 ```
 
-#### Propiedades
+#### Properties
 
-| Propiedad | Tipo | Descripción | Valores |
+| Property | Type | Description | Values |
 |-----------|------|-------------|---------|
 | `label` | str | Texto de la etiqueta | `"Acepto términos"` |
 | `checked` | bool | Estado de selección | `True`, `False` |
 
 ### RadioButton
 
-El componente `RadioButton` permite la selección de una opción entre varias.
+The `RadioButton` component allows users to select one option from a group of options.
 
-#### Sintaxis
+#### Syntax
 
 ```python
 from dars.components.basic.radio_button import RadioButton
@@ -665,9 +1071,9 @@ mi_radio_button = RadioButton(
 )
 ```
 
-#### Propiedades
+#### Properties
 
-| Propiedad | Tipo | Descripción | Valores |
+| Property | Type | Description | Values |
 |-----------|------|-------------|---------|
 | `label` | str | Texto de la etiqueta | `"Opción A"` |
 | `name` | str | Nombre del grupo de radio buttons | `"grupo1"` |
@@ -675,9 +1081,9 @@ mi_radio_button = RadioButton(
 
 ### Select
 
-El componente `Select` permite la selección de una opción de un conjunto de opciones.
+The `Select` component allows users to select one option from a group of options.
 
-#### Sintaxis
+#### Syntax
 
 ```python
 from dars.components.basic.select import Select
@@ -693,18 +1099,18 @@ mi_select = Select(
 )
 ```
 
-#### Propiedades
+#### Properties
 
-| Propiedad | Tipo | Descripción | Valores |
+| Property | Type | Description | Values |
 |-----------|------|-------------|---------|
-| `options` | list | Lista de opciones | `["Uno", "Dos", "Tres"]` |
-| `value` | str | Valor seleccionado | `"Dos"` |
+| `options` | list | List of options | `["Uno", "Dos", "Tres"]` |
+| `value` | str | Selected value | `"Dos"` |
 
 ### Slider
 
-El componente `Slider` permite la selección de un valor dentro de un rango.
+The `Slider` component allows users to select a value within a range.
 
-#### Sintaxis
+#### Syntax
 
 ```python
 from dars.components.basic.slider import Slider
@@ -721,20 +1127,21 @@ mi_slider = Slider(
 )
 ```
 
-#### Propiedades
+#### Properties
 
-| Propiedad | Tipo | Descripción | Valores |
+| Property | Type | Description | Values |
 |-----------|------|-------------|---------|
-| `min_value` | int | Valor mínimo | `0` |
-| `max_value` | int | Valor máximo | `100` |
-| `value` | int | Valor seleccionado | `50` |
-| `show_value` | bool | Mostrar el valor seleccionado | `True`, `False` |
+| `min_value` | int | Minimum value | `0` |
+| `max_value` | int | Maximum value | `100` |
+| `value` | int | Valor selectado | `50` |
+| `show_value` | bool | Mostrar el valor selectado | `True`, `False` |
+
 
 ### DatePicker
 
-El componente `DatePicker` permite la selección de una fecha.
+The `DatePicker` component allows users to select a date.
 
-#### Sintaxis
+#### Syntax
 
 ```python
 from dars.components.basic.date_picker import DatePicker
@@ -749,37 +1156,37 @@ mi_date_picker = DatePicker(
 )
 ```
 
-#### Propiedades
+#### Properties
 
-| Propiedad | Tipo | Descripción | Valores |
+| Property | Type | Description | Values |
 |-----------|------|-------------|---------|
-| `value` | str | Fecha seleccionada | `"2025-08-06"` |
+| `value` | str | Selected date | `"2025-08-06"` |
 
-## Sistema de Estilos
+## Styling System
 
-### Propiedades de Estilo Soportadas
+### Supported Style Properties
 
-Dars soporta la mayoría de propiedades CSS estándar:
+Dars supports most standard CSS properties:
 
-#### Dimensiones
+#### Dimensions
 - `width`, `height`
 - `min-width`, `min-height`
 - `max-width`, `max-height`
 
-#### Espaciado
+#### Spacing
 - `margin`, `margin-top`, `margin-right`, `margin-bottom`, `margin-left`
 - `padding`, `padding-top`, `padding-right`, `padding-bottom`, `padding-left`
 
-#### Colores
+#### Colors
 - `background-color`
 - `color`
 - `border-color`
 
-#### Tipografía
+#### Typography
 - `font-size`, `font-family`, `font-weight`, `font-style`
 - `text-align`, `text-decoration`, `line-height`
 
-#### Bordes
+#### Borders
 - `border`, `border-width`, `border-style`, `border-radius`
 
 #### Layout
@@ -795,10 +1202,10 @@ Dars soporta la mayoría de propiedades CSS estándar:
 - `grid-template-columns`, `grid-template-rows`
 - `grid-gap`, `grid-column`, `grid-row`
 
-#### Efectos
+#### Effects
 - `opacity`, `box-shadow`, `transform`, `transition`
 
-### Ejemplos de Estilos Avanzados
+### Advanced Style Examples
 
 ```python
 # Gradiente de fondo
@@ -848,9 +1255,9 @@ responsive_container = Container(
 )
 ```
 
-## Eventos y Interactividad
+## Events and Interactivity
 
-Los componentes pueden responder a eventos del usuario. Para manejar eventos, debes usar `InlineScript` o `ExternalScript` para añadir lógica JavaScript que interactúe con los elementos HTML generados. Cada componente tiene un `id` único que puedes usar para seleccionarlo en JavaScript.
+Components can respond to user events. To handle events, you can use `InlineScript` or `ExternalScript` to add JavaScript logic that interacts with the generated HTML elements. Each component has a unique `id` that you can use to select it in JavaScript.
 
 ```python
 from dars.core.app import App
@@ -860,7 +1267,7 @@ from dars.scripts.script import InlineScript
 
 app = App(title="App con Eventos")
 
-# Crear un componente de texto para mostrar mensajes
+# Crear un componente de text para mostrar mensajes
 message_text = Text("Esperando interacción...", id="status-message")
 
 # Crear un botón
@@ -874,32 +1281,32 @@ document.getElementById("my-button").addEventListener("click", function() {
 });
 """)
 
-app.set_root(my_button) # O un contenedor que contenga ambos
-app.add_child(message_text) # Asumiendo que App tiene un método add_child o similar para componentes fuera del root
+app.set_root(my_button) # Or a container that contains both
+app.add_child(message_text) # Assuming App has an add_child method or similar for components outside the root
 app.add_script(frontend_script)
 ```
 
-**Tipos de Eventos Comunes:**
+**Common Event Types:**
 
-Dars soporta una variedad de eventos estándar del navegador, como:
+Dars supports a variety of standard browser events, such as:
 
-*   **Eventos de Mouse**: `click`, `dblclick`, `mousedown`, `mouseup`, `mouseenter`, `mouseleave`, `mousemove`.
-*   **Eventos de Teclado**: `keydown`, `keyup`, `keypress`.
-*   **Eventos de Formulario**: `change`, `input`, `submit`, `focus`, `blur`.
-*   **Otros**: `load`, `error`, `resize`.
+*   **Mouse Events**: `click`, `dblclick`, `mousedown`, `mouseup`, `mouseenter`, `mouseleave`, `mousemove`.
+*   **Keyboard Events**: `keydown`, `keyup`, `keypress`.
+*   **Form Events**: `change`, `input`, `submit`, `focus`, `blur`.
+*   **Other**: `load`, `error`, `resize`.
 
-También puedes definir eventos personalizados.
+You can also define custom events.
 
-## Mejores Prácticas
+## Best Practices
 
-### Organización de Componentes
+### Component Organization
 
 ```python
-def crear_header():
+def create_header():
     return Container(
         children=[
-            Text("Mi Aplicación", style={\"font-size\": \"24px\", \"font-weight\": \"bold\"}),
-            Text("Subtítulo descriptivo", style={\"color\": \"#666\"})
+            Text("My Application", style={"font-size": "24px", "font-weight": "bold"}),
+            Text("Descriptive subtitle", style={"color": "#666"})
         ],
         style={
             "padding": "20px",
@@ -908,13 +1315,13 @@ def crear_header():
         }
     )
 
-def crear_formulario():
+def create_form():
     return Container(
         children=[
-            Text("Formulario de Contacto", style={\"font-size\": \"20px\", \"margin-bottom\": \"20px\"}),
-            Input(placeholder="Nombre", style={\"margin-bottom\": \"10px\"}),
-            Input(placeholder="Email", input_type="email", style={\"margin-bottom\": \"10px\"}),
-            Button("Enviar", style={\"background-color\": \"#007bff\", \"color\": \"white\"})
+            Text("Contact Form", style={"font-size": "20px", "margin-bottom": "20px"}),
+            Input(placeholder="Name", style={"margin-bottom": "10px"}),
+            Input(placeholder="Email", input_type="email", style={"margin-bottom": "10px"}),
+            Button("Send", style={"background-color": "#007bff", "color": "white"})
         ],
         style={
             "max-width": "400px",
@@ -924,11 +1331,11 @@ def crear_formulario():
     )
 ```
 
-### Reutilización de Estilos
+### Style Reuse
 
 ```python
-# Definir estilos comunes
-ESTILOS_BOTON_BASE = {
+# Define common styles
+BASE_BUTTON_STYLES = {
     "padding": "10px 20px",
     "border": "none",
     "border-radius": "4px",
@@ -936,23 +1343,23 @@ ESTILOS_BOTON_BASE = {
     "cursor": "pointer"
 }
 
-ESTILOS_BOTON_PRIMARIO = {
-    **ESTILOS_BOTON_BASE,
+PRIMARY_BUTTON_STYLES = {
+    **BASE_BUTTON_STYLES,
     "background-color": "#007bff",
     "color": "white"
 }
 
-ESTILOS_BOTON_SECUNDARIO = {
-    **ESTILOS_BOTON_BASE,
+SECONDARY_BUTTON_STYLES = {
+    **BASE_BUTTON_STYLES,
     "background-color": "#6c757d",
     "color": "white"
 }
 
-# Usar en componentes
-boton_guardar = Button("Guardar", style=ESTILOS_BOTON_PRIMARIO)
-boton_cancelar = Button("Cancelar", style=ESTILOS_BOTON_SECUNDARIO)
+# Use in components
+cancel_button = Button("Cancelar", style=SECONDARY_BUTTON_STYLES)
+save_button = Button("Guardar", style=PRIMARY_BUTTON_STYLES)
 ```
 
-Los componentes de Dars proporcionan una base sólida para crear interfaces de usuario modernas y responsivas que pueden exportarse a múltiples plataformas manteniendo consistencia y funcionalidad.
+Components provide a solid foundation for creating modern and responsive user interfaces that can be exported to multiple platforms while maintaining consistency and functionality.
 
 

@@ -1,14 +1,14 @@
 # Dars - Documentación de Exportadores
 
-## Introducción
+## Introduction
 
-Los exportadores son el corazón de Dars que permiten transformar aplicaciones escritas en Python a diferentes tecnologías y plataformas. Cada exportador traduce los componentes, estilos y scripts de Dars al código nativo de la plataforma objetivo.
+Exporters are the heart of Dars that allow transforming applications written in Python to different technologies and platforms. Each exporter translates Dars components, styles, and scripts to the native code of the target platform.
 
-## Arquitectura de Exportadores
+## Exporter Architecture
 
-### Clase Base Exporter
+### Base Exporter Class
 
-Todos los exportadores heredan de la clase base `Exporter`:
+All exporters inherit from the base `Exporter` class:
 
 ```python
 from abc import ABC, abstractmethod
@@ -19,72 +19,72 @@ class Exporter(ABC):
         
     @abstractmethod
     def export(self, app: App, output_path: str) -> bool:
-        """Exporta la aplicación al formato específico"""
+        """Exports the application to the specific format"""
         pass
         
     @abstractmethod
     def render_component(self, component: Component) -> str:
-        """Renderiza un componente individual"""
+        """Renders an individual component"""
         pass
         
     @abstractmethod
     def get_platform(self) -> str:
-        """Retorna el nombre de la plataforma"""
+        """Returns the name of the platform"""
         pass
 ```
 
-### Flujo de Exportación
+### Exportation Flow
 
-1. **Validación**: Verificar que la aplicación sea válida
-2. **Preparación**: Crear estructura de directorios
-3. **Renderizado**: Convertir componentes al formato objetivo
-4. **Generación**: Crear archivos de configuración y dependencias
-5. **Finalización**: Escribir archivos al sistema
+1. **Validation**: Verify that the application is valid
+2. **Preparation**: Create directory structure
+3. **Rendering**: Convert components to the target format
+4. **Generation**: Create configuration and dependency files
+5. **Finalization**: Write files to the system
 
-## Exportadores Web
+## Web Exporters
 
 ### HTML/CSS/JavaScript
 
-El exportador HTML genera aplicaciones web estándar que pueden ejecutarse en cualquier navegador.
+The HTML exporter generates standard web applications that can run in any browser.
 
-#### Características
+#### Features
 
-- **Compatibilidad**: Funciona en todos los navegadores modernos
-- **Simplicidad**: No requiere herramientas de build
-- **Performance**: Carga rápida y ejecución eficiente
-- **SEO**: Contenido indexable por motores de búsqueda
+- **Compatibility**: Works in all modern browsers
+- **Simplicity**: No requires build tools
+- **Performance**: Fast loading and efficient execution
+- **SEO**: Content indexable by search engines
 
-#### Uso
+#### Usage
 
 ```bash
-dars export mi_app.py --format html --output ./dist
+dars export my_app.py --format html --output ./dist
 ```
 
-#### Estructura Generada
+#### Generated Structure
 
 ```
 dist/
-├── index.html      # Página principal
-├── styles.css      # Estilos CSS
-└── script.js       # Lógica JavaScript
+├── index.html      # Main page
+├── styles.css      # CSS styles
+└── script.js       # JavaScript logic
 ```
 
-#### Ejemplo de Salida
+#### Example Output
 
 **index.html**
 ```html
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Aplicación</title>
+    <title>My Application</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div id="container_123" class="dars-container" style="display: flex; flex-direction: column; padding: 20px;">
-        <span id="text_456" class="dars-text" style="font-size: 24px; color: #333;">¡Hola Dars!</span>
-        <button id="button_789" class="dars-button" style="background-color: #007bff; color: white;">Hacer clic</button>
+        <span id="text_456" class="dars-text" style="font-size: 24px; color: #333;">Hello Dars!</span>
+        <button id="button_789" class="dars-button" style="background-color: #007bff; color: white;">Click</button>
     </div>
     <script src="script.js"></script>
 </body>
@@ -93,7 +93,7 @@ dist/
 
 **styles.css**
 ```css
-/* Estilos base de Dars */
+/* Base Dars styles */
 * {
     box-sizing: border-box;
 }
@@ -120,39 +120,39 @@ body {
 }
 ```
 
-#### Ventajas
+#### Advantages
 
-- **Universalidad**: Funciona en cualquier servidor web
-- **Debugging**: Fácil de depurar con herramientas del navegador
-- **Personalización**: CSS y JavaScript completamente modificables
-- **Hosting**: Puede alojarse en cualquier servicio de hosting estático
+- **Universality**: Works in any web server
+- **Debugging**: Easy to debug with browser tools
+- **Personalization**: CSS and JavaScript completely modifiable
+- **Hosting**: Can be hosted on any static hosting service
 
-#### Casos de Uso
+#### Use Cases
 
-- Sitios web corporativos
+- Corporate websites
 - Landing pages
-- Aplicaciones web simples
-- Prototipos rápidos
-- Documentación interactiva
+- Simple web applications
+- Quick prototypes
+- Interactive documentation
 
-## Personalización de Exportadores
+## Exporter Personalization
 
-### Extender Exportadores Existentes
+### Extending Existing Exporters
 
 ```python
 from dars.exporters.base import Exporter
 
-class MiExportadorPersonalizado(Exporter):
+class MyCustomExporter(Exporter):
     def get_platform(self):
-        return "mi_plataforma_personalizada"
+        return "my_custom_platform"
     
     def export(self, app, output_path):
-        # Implementar lógica de exportación personalizada
+        # Implement custom export logic
         return True
     
     def render_component(self, component):
-        # Implementar renderizado de componentes personalizado
-        return "código_generado"
+        # Implement custom component rendering
+        return "generated_code"
 ```
 
 

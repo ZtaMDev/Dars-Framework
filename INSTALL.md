@@ -1,150 +1,146 @@
-# Guía de Instalación - Dars Framework
+# Installation Guide - Dars Framework
 
-## 📋 Requisitos del Sistema
+## System Requirements
 
-### Requisitos Mínimos
+### Minimum Requirements
 
-- **Python**: 3.8 o superior
-- **Sistema Operativo**: Windows, macOS, Linux
-- **RAM**: 512 MB mínimo (2 GB recomendado)
-- **Espacio en Disco**: 100 MB para el framework
+- **Python**: 3.8 or higher
+- **Operating System**: Windows, macOS, Linux
+- **RAM**: 512 MB minimum (2 GB recommended)
+- **Disk Space**: 100 MB for the framework
 
-## 🚀 Instalación Rápida
+## Quick Installation
 
-Para instalar Dars, simplemente usa pip:
+To install Dars, simply use pip:
 
 ```bash
 pip install dars-framework
 ```
 
-Esto instalará Dars y todas sus dependencias automáticamente.
+This will install Dars and all its dependencies automatically.
 
-## 🛠️ Uso del CLI
+## CLI Usage
 
-Una vez instalado, el comando `dars` estará disponible en tu terminal. Puedes usarlo para:
+Once installed, the `dars` command will be available in your terminal. You can use it to:
 
-### Exportar Aplicaciones
-
-```bash
-dars export mi_app.py --format html --output ./mi_app_web
-```
-
-### Previsualizar Aplicaciones
+### Export Applications
 
 ```bash
-dars preview ./mi_app_web
+dars export my_app.py --format html --output ./my_app_web
 ```
 
-### Inicializar un Nuevo Proyecto
+### Preview Applications
 
 ```bash
-# Proyecto básico con Hello World
-dars init mi_nuevo_proyecto
-
-# Proyecto con una plantilla específica
-dars init mi_nuevo_proyecto -t demo/complete_app
+dars preview ./my_app_web
 ```
 
-### Ver Información de una Aplicación
+### Initialize a New Project
 
 ```bash
-dars info mi_app.py
+# Basic project with Hello World
+dars init my_new_project
+
+# Project with a specific template
+dars init my_project -t demo/complete_app
 ```
 
-### Ver Formatos Soportados
+### View Application Information
+
+```bash
+dars info my_app.py
+```
+
+### View Supported Formats
 
 ```bash
 dars formats
 ```
 
-## ✅ Verificación de Instalación
+## Post-Installation Verification
 
-Para verificar que Dars se ha instalado correctamente, abre tu terminal y ejecuta:
+To verify that Dars has been installed correctly, open your terminal and run:
 
 ```bash
 dars --help
 ```
 
-Deberías ver la ayuda del comando `dars`, lo que indica que la instalación fue exitosa.
+You should see the help for the `dars` command, indicating that the installation was successful.
 
-## 🚀 Primeros Pasos Después de la Instalación
+## First Steps After Installation
 
-### 1. Crear tu Primera Aplicación (mi_primera_app.py)
+### 1. Create Your First Application (my_first_app.py)
 
 ```python
 from dars.core.app import App
 from dars.components.basic.text import Text
 from dars.components.basic.container import Container
 
-app = App(title="Mi Primera App")
-container = Container(style={\'padding\': \'20px\'}) # Usar \' para escapar comillas
-texto = Text(text="¡Hola Dars!", style={\'font-size\': \'24px\'}) # Usar \' para escapar comillas
+app = App(title="My First App")
+container = Container(style={'padding': '20px'}) # Use ' to escape quotes
+text = Text(text="Hello Dars!", style={'font-size': '24px'}) # Use ' to escape quotes
 
-container.add_child(texto)
+container.add_child(text)
 app.set_root(container)
 ```
 
-### 2. Exportar la Aplicación
+### 2. Export the Application
 
-Guarda el código anterior como `mi_primera_app.py` y luego ejecuta:
+Save the code above as `my_first_app.py` and then run:
 
 ```bash
-dars export mi_primera_app.py --format html --output ./mi_app
+dars export my_first_app.py --format html --output ./my_app
 ```
 
-### 3. Previsualizar
+### 3. Preview
 
 ```bash
-dars preview ./mi_app
+dars preview ./my_app
 ```
 
-## 📚 Recursos Adicionales
+## Additional Resources
 
-### Documentación
+### Documentation
 
-- [README Principal](../README.md)
-- [Guía de Inicio Rápido](../dars/docs/getting_started.md)
-- [Documentación de Componentes](../dars/docs/components.md)
-- [Sistema de Scripts](../dars/docs/scripts.md)
-- [Guía de Exportadores](../dars/docs/exporters.md)
+- [Main README](../README.md)
+- [Quick Start Guide](../dars/docs/getting_started.md)
+- [Components Documentation](../dars/docs/components.md)
+- [Script System](../dars/docs/scripts.md)
+- [Exporters Guide](../dars/docs/exporters.md)
 
-### Ejemplos
+### Examples
 
-- [Ejemplos Básicos](../dars/templates/examples/basic/)
-- [Ejemplos Avanzados](../dars/templates/examples/advanced/)
-- [Aplicación de Demostración](../dars/templates/examples/demo/)
+- [Basic Examples](../dars/templates/examples/basic/)
+- [Advanced Examples](../dars/templates/examples/advanced/)
+- [Demo Application](../dars/templates/examples/demo/)
 
-### Comandos Útiles
+### Useful Commands
 
 ```bash
-# Ayuda general
+# General help
 dars --help
 
-# Información de aplicación
-dars info mi_app.py
+# Application information
+dars info my_app.py
 
-# Formatos disponibles
+# Available formats
 dars formats
 
-# Preview de aplicación
+# Preview application
 dars preview ./output_directory
 ```
 
-## ✅ Lista de Verificación Post-Instalación
+## Post-Installation Checklist
 
-- [x] Python 3.8+ instalado
-- [x] Dars Framework instalado vía `pip install dars-framework`
-- [x] CLI `dars` funciona correctamente (`dars --help`)
-- [x] Prueba básica realizada exitosamente
-- [x] Ejemplo exportado y previsualizando correctamente
-- [x] Documentación revisada
+- [x] Python 3.8+ installed
+- [x] Dars Framework installed via `pip install dars-framework`
+- [x] CLI `dars` works correctly (`dars --help`)
+- [x] Basic test run successfully
+- [x] Example exported and previewed correctly
+- [x] Documentation reviewed
 
-¡Felicidades! Dars está listo para usar. 🎉
+Congratulations! Dars is ready to use.
 
 ---
 
-**Siguiente paso:** [Guía de Inicio Rápido](../dars/docs/getting_started.md)
-
-
-
-
+**Next Step:** [Quick Start Guide](../dars/docs/getting_started.md)

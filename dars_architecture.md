@@ -1,20 +1,20 @@
-# Dars Framework - Arquitectura y Diseño
+# Dars Framework - Architecture and Design
 
-## Visión General
+## Overview
 
-Dars es un framework de interfaz de usuario multiplataforma que permite a los desarrolladores escribir interfaces de usuario en Python puro y exportarlas a múltiples tecnologías y plataformas. El framework está diseñado con los siguientes principios fundamentales:
+Dars is a cross-platform user interface framework that allows developers to write user interfaces in pure Python and export them to multiple technologies and platforms. The framework is designed with the following core principles:
 
-### Principios de Diseño
+### Design Principles
 
-1. **Simplicidad de Uso**: El código debe ser legible y fácil de escribir, manteniendo la expresividad de Python.
-2. **Modularidad**: Cada componente y exportador debe ser independiente y extensible.
-3. **Multiplataforma**: Soporte nativo para exportar a tecnologías web, móviles y de escritorio.
-4. **Declarativo**: Los componentes se definen de manera declarativa, similar a frameworks modernos como React.
-5. **Tipado Fuerte**: Uso de type hints para mejor experiencia de desarrollo.
+1. **Ease of Use**: Code should be readable and easy to write, maintaining Python's expressiveness.
+2. **Modularity**: Each component and exporter should be independent and extensible.
+3. **Cross-Platform**: Native support for exporting to web, mobile, and desktop technologies.
+4. **Declarative**: Components are defined declaratively, similar to modern frameworks like React.
+5. **Strong Typing**: Use of type hints for a better development experience.
 
-## Arquitectura del Framework
+## Framework Architecture
 
-### Estructura de Directorios
+### Directory Structure
 
 ```
 dars/
@@ -72,11 +72,11 @@ dars/
     └── exporters.md
 ```
 
-### Componentes Principales
+### Main Components
 
-#### 1. Clase Base Component
+#### 1. Base Component Class
 
-La clase `Component` es la base de todos los elementos UI del framework:
+The `Component` class is the base for all UI elements in the framework:
 
 ```python
 from typing import Dict, Any, List, Optional, Callable
@@ -104,9 +104,9 @@ class Component(ABC):
         pass
 ```
 
-#### 2. Sistema de Propiedades
+#### 2. Property System
 
-Las propiedades se definen usando un sistema tipado que permite validación y autocompletado:
+Properties are defined using a typed system that allows validation and autocompletion:
 
 ```python
 from typing import Union, Optional
@@ -127,11 +127,12 @@ class StyleProps:
     flex_direction: Optional[str] = None
     justify_content: Optional[str] = None
     align_items: Optional[str] = None
+    ...
 ```
 
-#### 3. Clase App
+#### 3. App Class
 
-La clase principal que contiene toda la aplicación:
+The main class that contains the entire application:
 
 ```python
 class App:
@@ -151,9 +152,9 @@ class App:
         return exporter.export(self, output_path)
 ```
 
-### Sistema de Scripts
+### Script System
 
-Los scripts permiten agregar lógica interactiva a las aplicaciones:
+Scripts allow you to add interactive logic to applications:
 
 ```python
 from abc import ABC, abstractmethod
@@ -165,7 +166,7 @@ class Script(ABC):
         
     @abstractmethod
     def get_code(self) -> str:
-        """Retorna el código del script"""
+        """Returns the script code"""
         pass
         
 class InlineScript(Script):
@@ -186,9 +187,9 @@ class FileScript(Script):
             return f.read()
 ```
 
-### Sistema de Exportadores
+### Exporter System
 
-Cada exportador implementa la interfaz base `Exporter`:
+Each exporter implements the base `Exporter` interface:
 
 ```python
 from abc import ABC, abstractmethod
@@ -199,34 +200,34 @@ class Exporter(ABC):
         
     @abstractmethod
     def export(self, app: App, output_path: str) -> bool:
-        """Exporta la aplicación al formato específico"""
+        """Exports the application to the specific format"""
         pass
         
     @abstractmethod
     def render_component(self, component: Component) -> str:
-        """Renderiza un componente individual"""
+        """Renders an individual component"""
         pass
         
     def load_template(self, template_name: str) -> str:
-        """Carga una plantilla desde el directorio de templates"""
+        """Loads a template from the templates directory"""
         template_path = f"{self.templates_path}{self.get_platform()}/{template_name}"
         with open(template_path, "r") as f:
             return f.read()
             
     @abstractmethod
     def get_platform(self) -> str:
-        """Retorna el nombre de la plataforma (html, react, etc.)"""
+        """Returns the platform name (html, react, etc.)"""
         pass
 ```
 
-## Flujo de Trabajo
+## Workflow
 
-1. **Desarrollo**: El usuario escribe su aplicación usando los componentes de Dars
-2. **Exportación**: Se ejecuta el CLI `dars export` especificando el formato de salida
-3. **Generación**: El exportador correspondiente procesa la aplicación y genera el código
-4. **Preview**: Opcionalmente se puede previsualizar el resultado en el navegador con `dars preview`
+1. **Development**: The user writes their application using Dars components
+2. **Export**: The CLI `dars export` is run, specifying the output format
+3. **Generation**: The corresponding exporter processes the application and generates the code
+4. **Preview**: Optionally, the result can be previewed in the browser with `dars preview`
 
-## Ejemplo de Uso
+## Usage Example
 
 ```python
 from dars.core.app import App
@@ -236,11 +237,11 @@ from dars.components.basic.container import Container
 from dars.components.basic.page import Page
 from dars.scripts.script import InlineScript
 
-# Crear la aplicación
-app = App(title="Mi Primera App")
+# Create the application
+app = App(title="My First App")
 
-# Crear componentes
-page = Page(title="Página principal")
+# Create components
+page = Page(title="Main Page")
 
 container = Container(
     style={
@@ -252,7 +253,7 @@ container = Container(
 )
 
 title = Text(
-    text="¡Hola Dars!",
+    text="Hello Dars!",
     style={
         "font-size": "24px",
         "color": "#333",
@@ -261,7 +262,7 @@ title = Text(
 )
 
 button = Button(
-    text="Hacer clic",
+    text="Click",
     style={
         "background-color": "#007bff",
         "color": "white",
@@ -271,24 +272,22 @@ button = Button(
     }
 )
 
-# Agregar script
+# Add script
 script = InlineScript("""
 function handleClick() {
-    alert("¡Botón presionado!");
+    alert("Button pressed!");
 }
 """)
 
-# Ensamblar la aplicación
+# Assemble the application
 container.add_child(title)
 container.add_child(button)
 app.set_root(container)
 app.add_script(script)
 
-# El archivo se guarda como app.py y se ejecuta con:
+# Save the file as app.py and run with:
 # dars export app.py --format html --output ./dist
 # dars preview ./dist/index.html
 ```
 
-Esta arquitectura proporciona una base sólida y extensible para el framework Dars, permitiendo agregar nuevos componentes y exportadores de manera modular.
-
-
+This architecture provides a solid and extensible foundation for the Dars framework, allowing new components and exporters to be added in a modular way.

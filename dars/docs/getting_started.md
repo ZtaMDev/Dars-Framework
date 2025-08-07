@@ -1,6 +1,6 @@
-# Dars - Guía de Inicio Rápido
+# Dars - Quick Start Guide
 
-## Introducción
+## Introduction
 
 Dars es un framework que permite a los desarrolladores crear interfaces de usuario modernas utilizando únicamente Python, y exportarlas a HTML/CSS/JS.
 
@@ -138,7 +138,7 @@ Esto iniciará un servidor local y abrirá tu aplicación en el navegador.
 
 ### Componentes
 
-Los componentes son los bloques de construcción básicos de Dars. Cada componente hereda de la clase base `Component` y puede tener:
+Components are the basic building blocks of Dars. Each component inherits from the base class `Component` and can have:
 
 - **Propiedades**: Configuración del componente (texto, estilos, etc.)
 - **Hijos**: Otros componentes anidados
@@ -360,52 +360,53 @@ Los scripts permiten agregar lógica interactiva a tus aplicaciones. Puedes usar
 
 ### Aplicación (App)
 
-La clase `App` es el contenedor principal que:
+The `App` class is the main container that:
 
-- Mantiene la configuración global
-- Contiene el componente raíz
-- Gestiona los scripts
-- Define estilos globales
+- Maintains global configuration
+- Contains the root component
+- Manages scripts
+- Defines global styles
 
-## Próximos Pasos
+## Next Steps
 
-Ahora que has creado tu primera aplicación, puedes:
+Now that you have created your first application, you can:
 
-1. Explorar más componentes en la [documentación de componentes](components.md)
-2. Aprender sobre el sistema de scripts en [scripts.md](scripts.md)
-3. Descubrir todos los exportadores disponibles en [exporters.md](exporters.md)
-4. Ver ejemplos avanzados en el directorio `dars/templates/examples/`
+1. Explore more components in the [components documentation](components.md)
+2. Learn about the script system in [scripts.md](scripts.md)
+3. Discover all available exporters in [exporters.md](exporters.md)
+4. See advanced examples in the `dars/templates/examples/` directory
 
-## Comandos Útiles
+## Useful Commands
 
-### Inicializar un Nuevo Proyecto
-
-```bash
-# Proyecto básico con Hello World
-dars init mi_proyecto
-
-# Proyecto con una plantilla específica
-dars init mi_proyecto -t demo/complete_app
-```
-
-### Información de la Aplicación
+### Initialize a New Project
 
 ```bash
-dars info mi_primera_app.py
+# Basic project with Hello World
+dars init my_project
+
+# Project with a specific template
+dars init my_project -t demo/complete_app
 ```
 
-### Ver Formatos Soportados
+### Application Information
+
+```bash
+dars info my_first_app.py
+```
+
+### View Supported Formats
 
 ```bash
 dars formats
 ```
 
-### Ayuda del CLI
+### CLI Help
 
 ```bash
 dars --help
 ```
 
-¡Felicidades! Has creado tu primera aplicación con Dars. El framework te permite crear interfaces modernas y exportarlas a múltiples plataformas con facilidad y elegancia.
+Congratulations! You have created your first application with Dars. The framework allows you to create modern interfaces and export them to multiple platforms easily and elegantly.
 
 
+ 

@@ -1,58 +1,14 @@
 # Dars Framework
 
-## Novedad: Soporte Multipágina con Page
+Dars is a Python UI framework for building modern, interactive web apps with only Python code. Write your interface in Python, export it to static HTML/CSS/JS, and deploy anywhere—no Javascript or frontend stack required.
 
-Ahora puedes definir múltiples páginas usando el componente `Page` como root de cada página, pasando hijos directamente como argumentos:
+## How It Works
+- Build your UI using Python classes and components (like Text, Button, Container, Page, etc).
+- Preview instantly with hot-reload using `app.rTimeCompile()`.
+- Export your app to static web files with a single CLI command.
+- Use multipage, layouts, scripts, and more—see docs for advanced features.
 
-```python
-from dars.core.app import App
-from dars.components.basic import Page, Text, Button
-
-app = App(title="Demo Multipágina")
-
-home = Page(
-    Text("Bienvenido a la página principal!"),
-    Button("Ir a Sobre Nosotros", class_name="dars-btn-link")
-)
-about = Page(
-    Text("Sobre Nosotros"),
-    Button("Volver al inicio", class_name="dars-btn-link")
-)
-
-app.add_page(name="inicio", root=home, title="Inicio", index=True)
-app.add_page(name="about", root=about, title="Sobre Nosotros")
-```
-
-Ya no necesitas usar `Container` como root ni listas de componentes. Usa siempre `Page` para cada página en multipage.
-
-## Scripts por página en multipage
-
-Puedes añadir scripts globales a la app (con `app.add_script`) y scripts específicos a cada página usando `Page.add_script`. Ambos se combinarán automáticamente al exportar cada página:
-
-```python
-from dars.scripts.script import InlineScript
-
-# Script global (estará en todas las páginas)
-app.add_script(InlineScript("""
-console.log('Script global cargado');
-"""))
-
-# Script solo para la página 'about'
-about = Page(
-    Text("Sobre Nosotros"),
-    Button("Volver", id="btn-home")
-)
-about.add_script(InlineScript("""
-document.addEventListener('DOMContentLoaded', function() {
-    var btn = document.getElementById('btn-home');
-    if (btn) btn.onclick = () => window.location.href = 'index.html';
-});
-"""))
-```
-
-## Inicio Rápido
-
-### Tu Primera Aplicación
+## Quick Example: Your First App
 
 ```python
 #!/usr/bin/env python3
@@ -100,574 +56,57 @@ app.set_root(container)
 app.add_script(script)
 
 if __name__ == "__main__":
-    app.rTimeCompile() 
+    app.rTimeCompile() # Live preview at http://localhost:8000
 ```
 
-### Exportar la Aplicación
+## CLI Usage
+| Command                                 | What it does                               |
+|-----------------------------------------|--------------------------------------------|
+| `dars export my_app.py --format html`   | Export app to HTML/CSS/JS in `./my_app_web` |
+| `dars preview ./my_app_web`             | Preview exported app locally                |
+| `dars init my_project`                  | Create a new Dars project                   |
+| `dars info my_app.py`                   | Show info about your app                    |
+| `dars formats`                          | List supported export formats               |
+| `dars --help`                           | Show help and all CLI options               |
 
-```bash
-dars export mi_app.py --format html --output ./mi_app_web
-```
+## More
+- [Getting Started](dars/docs/getting_started.md)
+- [Components Reference](dars/docs/components.md)
+- [Exporters](dars/docs/exporters.md)
+- [Scripts System](dars/docs/scripts.md)
+- [CLI usage and commands](dars/docs/cli.md)
+- [Project Structure](STRUCTURE.md)
+- [Architecture](dars_architecture.md)
+- [Installation Guide](INSTALL.md)
 
-### Previsualizar
+## Local Execution and Live Preview
 
-```bash
-dars preview ./mi_app_web
-```
-
-## 🏁 Ejecución y Preview Local
-
-Para probar tu aplicación localmente antes de exportarla, puedes usar el método rápido de preview/compilación en caliente desde cualquier archivo Python que defina tu app:
+To test your app locally before exporting, use the hot-reload preview from any Python file that defines your app:
 
 ```python
 if __name__ == "__main__":
     app.rTimeCompile()
 ```
 
-Luego ejecuta tu archivo directamente:
+Then run your file directly:
 
 ```bash
-python mi_app.py
+python my_app.py
 ```
 
-Esto levantará un servidor local en http://localhost:8000 para ver tu app en el navegador, sin necesidad de exportar manualmente. Puedes cambiar el puerto con:
+This will start a local server at http://localhost:8000 so you can view your app in the browser—no manual export needed. You can change the port with:
 
 ```bash
-python mi_app.py --port 8088
+python my_app.py --port 8088
 ```
 
 ---
 
-También puedes seguir usando el comando de preview del CLI sobre una exportación:
+You can also use the CLI preview command on an exported app:
 
 ```bash
-dars preview ./mi_app_exportada
+dars preview ./my_exported_app
 ```
 
-Esto levantará un servidor local en http://localhost:8000 para ver tu app en el navegador.
-
-## Herramientas de Línea de Comandos (CLI)
-
-### Dars CLI
-
-El CLI de Dars te permite gestionar tus proyectos, exportar aplicaciones y previsualizar resultados. Aquí están los comandos principales:
-
-```bash
-# Ver información de una aplicación
-dars info mi_app.py
-
-# Exportar a diferentes formatos
-dars export mi_app.py --format html --output ./output
-
-# Ver formatos soportados
-dars formats
-
-# Inicializar un nuevo proyecto
-dars init mi_nuevo_proyecto
-
-# Inicializar un proyecto con una plantilla específica
-dars init mi_nuevo_proyecto -t demo/complete_app
-
-# Previsualizar una aplicación exportada
-dars preview ./output_directory
-
-# Ayuda
-dars --help
-```
-
-## Componentes Disponibles
-
-### Componentes Básicos
-
-#### Componentes de Texto y Navegación
-- **Text**: Mostrar texto estático o dinámico
-- **Link**: Crear enlaces de navegación
-- **Image**: Mostrar imágenes
-
-#### Componentes de Entrada
-- **Input**: Campos de entrada de datos
-- **Textarea**: Áreas de texto multilínea
-- **Button**: Botones interactivos
-
-#### Componentes de Formulario
-- **Checkbox**: Casillas de verificación con etiquetas
-- **RadioButton**: Botones de opción para selección única
-- **Select**: Menús desplegables con opciones múltiples
-- **Slider**: Controles deslizantes para valores numéricos
-- **DatePicker**: Selectores de fecha con múltiples formatos
-
-#### Componentes de Layout
-- **Container**: Contenedores para layout y organización
-
-### Componentes Avanzados
-
-- **Card**: Contenedor estilizado para agrupar contenido relacionado
-- **Modal**: Ventana emergente superpuesta al contenido principal
-- **Navbar**: Barra de navegación
-
-### Ejemplo de Uso
-
-```python
-# Texto con estilos
-titulo = Text(
-    text="Mi Título",
-    style={
-        'font-size': '24px',
-        'color': '#2c3e50',
-        'font-weight': 'bold'
-    }
-)
-
-# Botón con eventos
-boton = Button(
-    text="Enviar",
-    style={
-        'background-color': '#28a745',
-        'color': 'white',
-        'padding': '10px 20px',
-        'border': 'none',
-        'border-radius': '4px'
-    }
-)
-
-# Input con validación
-email = Input(
-    placeholder="tu@email.com",
-    input_type="email",
-    required=True,
-    style={
-        'width': '300px',
-        'padding': '10px',
-        'border': '1px solid #ccc'
-    }
-)
-
-# Container con layout
-formulario = Container(
-    children=[titulo, email, boton],
-    style={
-        'display': 'flex',
-        'flex-direction': 'column',
-        'gap': '15px',
-        'padding': '20px'
-    }
-)
-
-# Imagen
-imagen = Image(
-    src="https://via.placeholder.com/150",
-    alt="Placeholder Image",
-    width="150px"
-)
-
-# Enlace
-enlace = Link(
-    text="Visitar Dars",
-    href="https://github.com/your-repo/dars",
-    target="_blank"
-)
-
-# Nuevos Componentes de Formulario
-
-# Checkbox
-checkbox = Checkbox(
-    label="Acepto los términos y condiciones",
-    checked=False,
-    required=True
-)
-
-# RadioButton
-radio1 = RadioButton(
-    label="Opción A",
-    name="opciones",
-    value="a",
-    checked=True
-)
-
-radio2 = RadioButton(
-    label="Opción B",
-    name="opciones",
-    value="b"
-)
-
-# Select con opciones
-select = Select(
-    placeholder="Selecciona un país"
-)
-select.add_option(SelectOption(value="es", label="España"))
-select.add_option(SelectOption(value="mx", label="México"))
-select.add_option(SelectOption(value="ar", label="Argentina"))
-
-# Slider
-slider = Slider(
-    min_value=0,
-    max_value=100,
-    value=50,
-    show_value=True,
-    label="Porcentaje"
-)
-
-# DatePicker
-date_picker = DatePicker(
-    format="DD/MM/YYYY",
-    placeholder="Selecciona una fecha"
-)
-
-# Textarea
-comentarios = Textarea(
-    placeholder="Tus comentarios...",
-    rows=4,
-    cols=50
-)
-
-# Card
-mi_card = Card(
-    title="Mi Tarjeta",
-    children=[
-        Text("Contenido de la tarjeta."),
-        Button("Acción")
-    ]
-)
-
-# Navbar
-mi_navbar = Navbar(
-    brand="Mi App",
-    children=[
-        Link("Inicio", "/"),
-        Link("Acerca de", "/about")
-    ]
-)
-```
-
-## Sistema de Scripts
-
-### Scripts Inline
-
-```python
-from dars.scripts.script import InlineScript
-
-script = InlineScript("""
-function validarFormulario() {
-    const email = document.querySelector('input[type="email"]').value;
-    if (!email.includes('@')) {
-        alert('Email inválido');
-        return false;
-    }
-    return true;
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('form');
-    form.addEventListener('submit', function(e) {
-        if (!validarFormulario()) {
-            e.preventDefault();
-        }
-    });
-});
-""")
-
-app.add_script(script)
-```
-
-### Scripts desde Archivo
-
-```python
-from dars.scripts.script import FileScript
-
-script = FileScript("./scripts/validaciones.js")
-app.add_script(script)
-```
-
-## Exportadores Soportados
-
-### Web
-
-| Formato | Descripción | Comando |
-|---------|-------------|---------|
-| **html** | HTML/CSS/JavaScript estándar | `--format html` |
-
-## Documentación
-
-### Guías Completas
-
-- [**Inicio Rápido**](dars/docs/getting_started.md) - Primeros pasos con Dars
-- [**Componentes**](dars/docs/components.md) - Documentación completa de componentes
-- [**Scripts**](dars/docs/scripts.md) - Sistema de scripts y eventos
-- [**Exportadores**](dars/docs/exporters.md) - Guía de todos los exportadores
-
-### Ejemplos y Templates Oficiales
-
-- [**Básicos**](dars/templates/examples/basic/) - Ejemplos simples para empezar
-- [**Avanzados**](dars/templates/examples/advanced/) - Ejemplos complejos y características avanzadas
-- [**Demostración**](dars/templates/examples/demo/) - Aplicación completa de demostración
-
-#### Templates Disponibles
-
-### PWA Custom Icons
-
-Template oficial para crear una Progressive Web App (PWA) con iconos personalizados y configuración lista para exportar y publicar.
-
-**Inicializar un proyecto con este template:**
-
-```bash
-dars init mi_pwa -t basic/pwa_custom_icons
-```
-
-Esto crea un proyecto con `main.py` preconfigurado para PWA, incluyendo:
-- Registro automático de Service Worker
-- manifest.json y assets de iconos
-- Personalización de colores y nombre
-- Ejemplo de uso de componentes básicos
-
-Recomendado para apps móviles, instalables y con soporte offline.
-
-**Template Básico - Componentes de Formulario:**
-```bash
-# Crear proyecto con nuevos componentes básicos
-dars init mi_formulario -t basic/form_components
-```
-Incluye: Checkbox, RadioButton, Select, Slider, DatePicker con ejemplos interactivos.
-
-**Template Avanzado - Aplicación Web Moderna:**
-```bash
-# Crear aplicación con SEO, PWA y Open Graph
-dars init mi_app_moderna -t advanced/modern_web_app
-```
-Incluye: SEO completo, Open Graph, Twitter Cards, PWA, todos los componentes nuevos.
-
-## Ejemplos de Aplicaciones
-
-### Hello World
-
-```bash
-dars export dars/templates/examples/basic/hello_world.py --format html --output ./hello_output
-```
-
-### Formulario de Contacto
-
-```bash
-dars export dars/templates/examples/basic/simple_form.py --format html --output ./form_output
-```
-
-### Dashboard Empresarial
-
-```bash
-dars export dars/templates/examples/advanced/dashboard.py --format html --output ./dashboard_output
-```
-
-### Aplicación Completa
-
-```bash
-dars export dars/templates/examples/demo/complete_app.py --format html --output ./demo_output
-```
-
-## Arquitectura del Framework
-
-```
-dars/
-├── core/                   # Núcleo del framework
-│   ├── app.py             # Clase principal App
-│   ├── component.py       # Clase base Component
-│   ├── properties.py      # Sistema de propiedades
-│   └── events.py          # Sistema de eventos
-├── components/            # Componentes UI
-│   ├── basic/            # Componentes básicos
-│       ├── text.py       # Componente Text
-│       ├── button.py     # Componente Button
-│       ├── input.py      # Componente Input
-│       ├── container.py  # Componente Container
-│       ├── image.py      # Componente Image
-│       ├── link.py       # Componente Link
-│       └── textarea.py   # Componente Textarea
-│   └── advanced/         # Componentes avanzados
-│       ├── card.py       # Componente Card
-│       ├── modal.py      # Componente Modal
-│       └── navbar.py     # Componente Navbar
-├── scripts/              # Sistema de scripts
-│   └── script.py         # Clases de scripts
-├── exporters/            # Exportadores
-│   ├── base.py          # Clase base Exporter
-│   └── web/             # Exportadores web
-├── cli/                 # Herramientas CLI
-│   ├── main.py          # CLI principal
-│   └── preview.py       # Sistema de preview
-└── docs/                # Documentación
-```
-
-## Casos de Uso
-
-### Desarrollo Web
-
-- **Landing Pages**: Sitios web estáticos y dinámicos
-- **Aplicaciones Web**: SPAs con HTML/CSS/JavaScript
-- **Dashboards**: Paneles de control empresariales
-
-## Mejores Prácticas
-
-### Organización del Código
-
-```python
-# Separar componentes en funciones
-def crear_header():
-    return Container(
-        children=[
-            Text("Mi App", style={'font-size': '24px'}),
-            Text("Subtítulo", style={'color': '#666'})
-        ],
-        style={'padding': '20px'}
-    )
-
-def crear_contenido():
-    return Container(
-        children=[
-            # Componentes del contenido
-        ]
-    )
-
-# Ensamblar la aplicación
-app = App(title="Mi Aplicación")
-app.set_root(Container(children=[
-    crear_header(),
-    crear_contenido()
-]))
-```
-
-### Estilos Reutilizables
-
-```python
-# Definir estilos comunes
-ESTILOS_BOTON = {
-    'padding': '10px 20px',
-    'border': 'none',
-    'border-radius': '4px',
-    'cursor': 'pointer'
-}
-
-ESTILOS_BOTON_PRIMARIO = {
-    **ESTILOS_BOTON,
-    'background-color': '#007bff',
-    'color': 'white'
-}
-
-# Usar en componentes
-boton = Button("Enviar", style=ESTILOS_BOTON_PRIMARIO)
-```
-
-### Scripts Modulares
-
-```python
-# Separar funcionalidad en scripts específicos
-validacion_script = FileScript("./scripts/validacion.js")
-ui_script = FileScript("./scripts/ui-effects.js")
-api_script = FileScript("./scripts/api-client.js")
-
-app.add_script(validacion_script)
-app.add_script(ui_script)
-app.add_script(api_script)
-```
-
-## Solución de Problemas
-
-### Errores Comunes
-
-#### Error de Importación
-
-Ahora que Dars se instala como un paquete, las importaciones son directas:
-
-```python
-# ✅ Correcto
-from dars.core.app import App
-```
-
-#### Variable 'app' No Encontrada
-
-```python
-# ❌ Falta definir la variable app
-container = Container()
-# ...
-
-# ✅ Correcto
-app = App(title="Mi App")
-container = Container()
-app.set_root(container)
-```
-
-#### Problemas de Exportación
-
-```bash
-# Verificar que el archivo sea válido
-dars info mi_app.py
-
-# Verificar formatos soportados
-dars formats
-```
-
-## Contribuir
-
-Dars es un framework extensible. Puedes contribuir:
-
-### Nuevos Componentes
-
-```python
-from dars.core.component import Component
-
-class MiComponente(Component):
-    def __init__(self, **props):
-        super().__init__(**props)
-        # Implementar lógica del componente
-```
-
-### Nuevos Exportadores
-
-```python
-from dars.exporters.base import Exporter
-
-class MiExportador(Exporter):
-    def get_platform(self):
-        return "mi_plataforma"
-    
-    def export(self, app, output_path):
-        # Implementar lógica de exportación
-        return True
-    
-    def render_component(self, component):
-        # Implementar renderizado
-        return "código_generado"
-```
-
-## Licencia
-
-Dars Framework - Creado en Python
-
-## Soporte
-
-### Documentación
-
-- [**Inicio Rápido**](dars/docs/getting_started.md)
-- [**Componentes**](dars/docs/components.md)
-- [**Scripts**](dars/docs/scripts.md)
-- [**Exportadores**](dars/docs/exporters.md)
-
-### Ejemplos
-
-- [Ejemplos Básicos](dars/templates/examples/basic/)
-- [Ejemplos Avanzados](dars/templates/examples/advanced/)
-- [Aplicación de Demostración](dars/templates/examples/demo/)
-
-### Comandos de Ayuda
-
-```bash
-# Ayuda general
-dars --help
-
-# Información de aplicación
-dars info mi_app.py
-
-# Formatos disponibles
-dars formats
-```
-
----
-
-**¡Comienza a crear interfaces increíbles con Dars hoy mismo!**
+This will start a local server at http://localhost:8000 to view your exported app in the browser.
 
