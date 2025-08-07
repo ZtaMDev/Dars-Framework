@@ -2,15 +2,15 @@
 
 Dars is a Python UI framework for building modern, interactive web apps with only Python code. Write your interface in Python, export it to static HTML/CSS/JS, and deploy anywhere some Javascript or frontend stack required.
 
+```bash
+pip install dars-framework
+```
+
 ## How It Works
 - Build your UI using Python classes and components (like Text, Button, Container, Page, etc).
 - Preview instantly with hot-reload using `app.rTimeCompile()`.
 - Export your app to static web files with a single CLI command.
 - Use multipage, layouts, scripts, and more—see docs for advanced features.
-
-```bash
-pip install dars-framework
-```
 
 ## Quick Example: Your First App
 
