@@ -215,6 +215,11 @@ class DarsExporter:
                 console.print(f"[red]{translator.get('error_file_not_exists')} {file_path}[/red]")
                 return None
                 
+            # Add the application's root directory to sys.path
+            file_dir = os.path.dirname(os.path.abspath(file_path))
+            if file_dir not in sys.path:
+                sys.path.insert(0, file_dir)
+                
             # Load the module dynamically
             spec = importlib.util.spec_from_file_location("user_app", file_path)
             if spec is None or spec.loader is None:
@@ -222,11 +227,6 @@ class DarsExporter:
                 return None
                 
             module = importlib.util.module_from_spec(spec)
-            
-            # Add the file directory to the path for relative imports
-            file_dir = os.path.dirname(os.path.abspath(file_path))
-
-                
             spec.loader.exec_module(module)
             
             # Look for the 'app' variable in the module

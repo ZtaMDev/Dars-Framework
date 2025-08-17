@@ -4,17 +4,22 @@ from typing import Optional, Union, Dict, Any, List
 
 class Container(Component):
     def __init__(
-        self, 
+        self,
+        *children: Component,
         id: Optional[str] = None, 
         class_name: Optional[str] = None, 
         style: Optional[Dict[str, Any]] = None,
-        children: Optional[List[Component]] = None
+        additional_children: Optional[List[Component]] = None
     ):
         super().__init__(id=id, class_name=class_name, style=style)
         
-        # Agregar hijos si se proporcionan
-        if children:
-            for child in children:
+        # Agregar hijos pasados como argumentos posicionales
+        for child in children:
+            self.add_child(child)
+            
+        # Agregar hijos adicionales si se proporcionan
+        if additional_children:
+            for child in additional_children:
                 self.add_child(child)
 
     def render(self, exporter: Any) -> str:

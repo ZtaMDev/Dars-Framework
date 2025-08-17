@@ -279,7 +279,7 @@ self.addEventListener('fetch', event => {
         root_component = app.root
         # Protección: si root es lista, envolver en Container correctamente
         if isinstance(root_component, list):
-            root_component = Container(children=root_component)
+            root_component = Container(*root_component)
         if root_component:
             body_content = self.render_component(root_component)
         

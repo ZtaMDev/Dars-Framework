@@ -371,15 +371,17 @@ busqueda = Input(
 
 ### Container
 
-The `Container` component is a container that can hold other components.
+The `Container` component is a container that can hold other components. It supports multiple ways to add child components.
 
 #### Syntax
 
 ```python
 from dars.components.basic.container import Container
 
+# Method 1: Pass components as arguments
 container = Container(
-    children=[componente1, componente2],
+    Text("Hello"),
+    Button("Click me"),
     style={
         "display": "flex",
         "flex-direction": "column",
@@ -388,15 +390,35 @@ container = Container(
     }
 )
 
-# O agregar hijos después
-container.add_child(componente3)
+# Method 2: Use additional_children parameter
+components = [Text("Hello"), Button("Click me")]
+container = Container(
+    additional_children=components,
+    style={
+        "display": "flex",
+        "flex-direction": "column",
+        "padding": "20px",
+        "background-color": "#f8f9fa"
+    }
+)
+
+# Method 3: Add children after creation
+container = Container(style={
+    "display": "flex",
+    "flex-direction": "column",
+    "padding": "20px",
+    "background-color": "#f8f9fa"
+})
+container.add_child(Text("Hello"))
+container.add_child(Button("Click me"))
 ```
 
 #### Properties
 
 | Property | Type | Description |
 |-----------|------|-------------|
-| `children` | list | List of child components |
+| `children` | tuple | Components passed as positional arguments |
+| `additional_children` | list | Optional list of additional components |
 
 #### Container Layouts
 

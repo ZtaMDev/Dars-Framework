@@ -1,6 +1,6 @@
 [project]
 name = "dars-framework"
-version = "1.0.1"
+version = "1.0.2"
 description = "Dars Framework build applications with Python and export to web"
 authors = [
     { name="ztamdev", email="zondax2009@gmail.com" }
