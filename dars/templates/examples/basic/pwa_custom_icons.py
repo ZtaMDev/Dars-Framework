@@ -24,8 +24,6 @@ app = App(
 )
 
 app.root = Container(
-    children=[
-        Text(text="¡Bienvenido a la PWA con iconos personalizados!"),
-        Button(text="Haz clic aquí", on_click=lambda: print("¡Botón de ejemplo!")),
-    ]
+    Text(text="¡Bienvenido a la PWA con iconos personalizados!"),
+    Button(text="Haz clic aquí", on_click=lambda: print("¡Botón de ejemplo!")),
 )

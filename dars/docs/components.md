@@ -65,6 +65,90 @@ All components support these basic properties:
 - **style**: Dictionary of CSS styles
 - **children**: List of child components (for containers)
 
+### Component Search and Modification
+
+All components include a powerful search and modification system through the `find()` method. This allows you to search for components in the component tree and modify their attributes using a fluent interface.
+
+#### Basic Search
+
+```python
+# Find by ID
+component.find(id="search-button")
+
+# Find by CSS class
+component.find(class_name="primary-button")
+
+# Find by component type
+component.find(type="Button")  # or type=Button
+
+# Find using a custom predicate
+component.find(predicate=lambda c: "welcome" in c.text.lower())
+```
+
+#### Chained Searches
+
+You can chain multiple `find()` calls to search within the results of previous searches:
+
+```python
+# Find a container and then search within it
+component.find(id="main-container")\
+        .find(type="Text")\
+        .attr(text="New text")
+
+# Multiple levels of search
+component.find(class_name="section")\
+        .find(type="Container")\
+        .find(id="special-text")\
+        .attr(text="Modified text")
+```
+
+#### Modifying Components
+
+Use the `attr()` method to modify the found components:
+
+```python
+# Modify styles
+component.find(type="Button").attr(
+    style={"background-color": "red", "color": "white"}
+)
+
+# Modify class names
+component.find(class_name="btn").attr(
+    class_name="btn primary"
+)
+
+# Modify component-specific attributes
+component.find(type="Text").attr(
+    text="New content"
+)
+
+# Multiple modifications at once
+component.find(type="Input").attr(
+    placeholder="Type here...",
+    style={"padding": "10px"},
+    class_name="modern-input"
+)
+```
+
+#### Getting Results
+
+```python
+# Get all matched components
+components = component.find(type="Button").get()
+
+# Get only the first match
+first_button = component.find(type="Button").first()
+```
+
+#### Search Parameters
+
+| Parameter | Type | Description | Example |
+|-----------|------|-------------|---------|
+| `id` | str | Search by component ID | `find(id="search-btn")` |
+| `class_name` | str | Search by CSS class | `find(class_name="primary")` |
+| `type` | str/Type | Search by component type | `find(type="Button")` or `find(type=Button)` |
+| `predicate` | Callable | Custom search function | `find(predicate=lambda c: len(c.children) > 0)` |
+
 ### Page
 
 The `Page` component represents the root of a multipage app. It can contain other components and scripts specific to that page.

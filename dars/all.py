@@ -5,6 +5,7 @@
 from dars.core.app import App
 from dars.core.component import Component
 from dars.core.events import EventManager
+from dars.core.properties import *
 
 # Basic Components
 from dars.components.basic.button import Button

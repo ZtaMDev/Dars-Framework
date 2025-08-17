@@ -16,7 +16,40 @@ Welcome to Dars, a modern Python framework for building web applications with re
 4. **Command-Line Usage**  
    Find CLI commands, options, and workflows in [cli.md](cli.md).
 
-5. **Official Templates**  
+5. **Component Search and Modification**
+   All components in Dars now support a powerful search and modification system:
+
+   ```python
+   from dars.all import *
+
+   app = App(title="Search Demo")
+
+   # Create a page with nested components
+   page = Page(
+       Container(
+           Text(text="Welcome!", id="welcome-text"),
+           Container(
+               Button(text="Click me", class_name="action-btn"),
+               Button(text="Cancel", class_name="action-btn"),
+               id="buttons-container"
+           ),
+           id="main-container"
+       )
+   )
+
+   # Find and modify components
+   page.find(id="welcome-text")\
+       .attr(text="Welcome to Dars!", style={"color": "blue"})
+
+   # Chain searches to find nested components
+   page.find(id="buttons-container")\
+       .find(class_name="action-btn")\
+       .attr(style={"padding": "10px"})
+
+   app.add_page(name="main", root=page)
+   ```
+
+6. **Official Templates**  
    Browse ready-to-use examples in the following files:
    - [Hello World](template_hello_world.md)
    - [Simple Form](template_simple_form.md)

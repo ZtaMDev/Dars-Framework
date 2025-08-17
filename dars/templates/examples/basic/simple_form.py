@@ -375,3 +375,5 @@ app.add_script(script)
 # Para exportar esta aplicación, ejecuta:
 # ./dars_exporter export examples/basic/simple_form.py --format html --output ./simple_form_output
 
+if __name__ == '__main__':
+    app.rTimeCompile()
