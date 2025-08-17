@@ -15,32 +15,26 @@ pip install dars-framework
 ## Quick Example: Your First App
 
 ```python
-#!/usr/bin/env python3
-from dars.core.app import App
-from dars.components.basic.text import Text
-from dars.components.basic.button import Button
-from dars.components.basic.container import Container
-from dars.scripts.script import InlineScript
+from dars import App, Container, Text, Button, InlineScript
 
-# Crear aplicación
-app = App(title="Mi Primera App")
+app = App()
 
-# Crear componentes
-container = Container(style={
-    'display': 'flex',
-    'flex-direction': 'column',
-    'align-items': 'center',
-    'padding': '40px'
-})
-
-titulo = Text(
-    text="Hola Dars",
-    style={'font-size': '32px', 'color': '#333'}
-)
-
-boton = Button(
-    text="Hacer clic",
-    style={'background-color': '#007bff', 'color': 'white'}
+# Crear aplicación con sintaxis nueva (v1.0.3)
+container = Container(
+    Text(
+        "Hola Dars",
+        style={'font-size': '32px', 'color': '#333'}
+    ),
+    Button(
+        "Hacer clic",
+        style={'background-color': '#007bff', 'color': 'white'}
+    ),
+    style={
+        'display': 'flex',
+        'flex-direction': 'column',
+        'align-items': 'center',
+        'padding': '40px'
+    }
 )
 
 # Script para interactividad
@@ -54,13 +48,12 @@ document.addEventListener('DOMContentLoaded', function() {
 """)
 
 # Ensamblar aplicación
-container.add_child(titulo)
-container.add_child(boton)
 app.set_root(container)
 app.add_script(script)
 
 if __name__ == "__main__":
-    app.rTimeCompile() # Live preview at http://localhost:8000
+    app.rTimeCompile()  # Live preview at http://localhost:8000
+
 ```
 
 ## CLI Usage
