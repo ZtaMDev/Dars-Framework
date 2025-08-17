@@ -76,7 +76,7 @@ if __name__ == "__main__":
 ## More
 - [Project Roadmap](ROADMAP.md)
 - [Getting Started](dars/docs/getting_started.md)
-- [Components Reference](dars/docs/components.md)
+- [Components Documentation](dars/docs/components.md)
 - [Exporters](dars/docs/exporters.md)
 - [Scripts System](dars/docs/scripts.md)
 - [CLI usage and commands](dars/docs/cli.md)
