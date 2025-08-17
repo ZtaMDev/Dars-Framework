@@ -304,7 +304,7 @@ self.addEventListener('fetch', event => {
     {links_html}
     {og_tags_html}
     {twitter_tags_html}
-    <link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css\">\n    <link rel=\"stylesheet\" href=\"{css_file}\">
+    <link rel=\"stylesheet\" href=\"{css_file}\">
 </head>
 <body>
     {body_content}
