@@ -41,13 +41,10 @@ class HTMLCSSJSExporter(Exporter):
             css_content = self.generate_css(app)
             self.write_file(os.path.join(output_path, "styles.css"), css_content)
 
-            # Generar runtime_dars.js (scripts internos del framework)
             runtime_js = self.generate_javascript(app)
             self.write_file(os.path.join(output_path, "runtime_dars.js"), runtime_js)
 
-            # Generar script.js (scripts de usuario)
-            user_scripts = list(getattr(app, 'scripts', []))
-            script_js = self._generate_combined_script_js(user_scripts)
+            script_js = ""  # Aquí podrías agregar lógica para scripts de usuario en el futuro
             self.write_file(os.path.join(output_path, "script.js"), script_js)
 
             # Multipágina: exportar un HTML, CSS y JS por cada página registrada
@@ -76,7 +73,7 @@ class HTMLCSSJSExporter(Exporter):
                         css_content = self.generate_css(page_app)
                         self.write_file(os.path.join(output_path, "styles.css"), css_content)
                         # --- scripts globales + scripts de la Page ---
-                        scripts = list(getattr(page_app, 'scripts', []))
+                        scripts = list(getattr(app, 'scripts', []))
                         if hasattr(page_app.root, 'get_scripts'):
                             scripts += page_app.root.get_scripts()
                         script_js = self._generate_combined_script_js(scripts)
@@ -111,9 +108,7 @@ class HTMLCSSJSExporter(Exporter):
                 # Single-page clásico
                 css_content = self.generate_css(app)
                 self.write_file(os.path.join(output_path, "styles.css"), css_content)
-                
-                user_scripts = list(getattr(app, 'scripts', []))
-                script_js = self._generate_combined_script_js(user_scripts)
+                script_js = ""  # Aquí podrías agregar lógica para scripts de usuario en el futuro
                 self.write_file(os.path.join(output_path, "script.js"), script_js)
                 html_content = self.generate_html(app, css_file="styles.css", script_file="script.js")
                 try:
@@ -946,6 +941,12 @@ function initializeEvents() {
         });
     });\n"""
         js_content += "}\n\n"
+
+        # Agregar scripts de la aplicación
+        for script in app.scripts:
+            js_content += f"// Script: {script.__class__.__name__}\n"
+            js_content += script.get_code()
+            js_content += "\n\n"
             
         return js_content
         
