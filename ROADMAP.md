@@ -1,16 +1,16 @@
 ## Project Metrics
 
-### Lines of Code (Approximate/Beta 1.0.0)
+### Lines of Code (Approximate)
 
-- **Core**: ~800 lines
+- **Core**: ~1200 lines
 - **Components**: ~5000 lines (updated with new components)
-- **Exporters**: ~500 lines (HTML/CSS/JS only)
-- **CLI**: ~400 lines
+- **Exporters**: ~2000 lines (HTML/CSS/JS only)
+- **CLI**: ~1200 lines
 - **Scripts**: ~200 lines
-- **Examples**: ~800 lines
-- **Documentation**: ~6000 lines (updated with new documentation)
+- **Examples**: ~2000 lines
+- **Documentation**: ~2000 lines (updated with new documentation)
 
-### Total: ~12000 lines of code and documentation
+### Total: ~13600 lines of code and documentation
 
 ## Development Roadmap
 
@@ -25,14 +25,15 @@
 - [x] Preview system
 - [x] Complete documentation
 - [x] Functional examples
+- [x] Modular preview system
 
 ### Future Improvements
 
 - [ ] More components (Video, Table, Chart, etc.)
 - [ ] Advanced theme system
-- [ ] Hot reloading in development/beta
+- [x ] Hot reloading in development/beta
 - [ ] Plugin system
 - [ ] Automatic code generator
-- [ ] Integrated testing framework
+- [x] Integrated testing framework
 - [ ] Exporters for other platforms (React, React Native, Desktop)
 - [ ] VS code extension with preview an a lot of features (in development)
