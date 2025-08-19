@@ -14,6 +14,12 @@
 - **Stability Improvements:** Several minor bug fixes and stability enhancements.
 - **Preview Ctrl+C Clean Shutdown:** The preview server (rTimeCompile) now shuts down cleanly on Ctrl+C using a shutdown_event, ensuring all resources and threads are properly closed on exit, even on Windows.
 
+## Bugfixes
+
+- The HTML/CSS/JS exporter now only copies files explicitly referenced by your app (favicon, icons, service worker, user-defined static files), never executables or files outside the project. This prevents unwanted files from being exported.
+- The CLI export command now correctly detects and reports the total number of components and pages for both singlepage and multipage apps.
+- Export statistics and the CLI summary panel fully support multipage apps: you will see the total number of pages and components exported, regardless of app mode.
+
 ## Usage Example: Flicker-Free Modal
 
 ```python
