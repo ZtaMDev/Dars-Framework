@@ -49,7 +49,7 @@ main.children += [
     Button("Botón primario"),
     Input(placeholder="Campo de texto"),
     Image(src="https://via.placeholder.com/120x60.png?text=Logo", alt="Logo Demo", style={"margin": "10px 0"}),
-    Link("Ir a Dars Framework", href="https://github.com/zondahuman/Dars-Framework", target="_blank"),
+    Link("Ir a Dars Framework", href="https://github.com/ZtaMDev/Dars-Framework", target="_blank"),
     Textarea(value="Texto multilinea de ejemplo", rows=3),
     Checkbox(label="Acepto términos y condiciones", checked=True),
     RadioButton(label="Opción A", name="grupo1", checked=True),

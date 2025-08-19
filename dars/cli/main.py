@@ -336,6 +336,7 @@ class DarsExporter:
 
 [bold]{translator.get('statistics')}:[/bold]
 • {translator.get('total_components')}: {stats['total_components']}
+• {translator.get('total_pages')}: {stats.get('total_pages', 1)}
 • {translator.get('max_depth')}: {stats['max_depth']}
 • {translator.get('scripts')}: {stats['scripts_count']}
 • {translator.get('global_styles')}: {stats['global_styles_count']}
@@ -456,6 +457,21 @@ app.add_script(script)
         console.print(Syntax(f"dars preview build", "bash")) 
     
 
+def print_version_info():
+    import importlib.util
+    import os
+    from rich.panel import Panel
+    from rich.console import Console
+    console = Console()
+    version_path = os.path.join(os.path.dirname(__file__), '../version.py')
+    spec = importlib.util.spec_from_file_location("dars.version", version_path)
+    version_mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(version_mod)
+    version = getattr(version_mod, "__version__", "unknown")
+    release_url = getattr(version_mod, "__release_url__", "https://github.com/ZtaMDev/Dars-Framework/releases")
+    panel_content = f"[bold cyan]Dars Framework[/bold cyan]\n\n[green]Version:[/green] {version}\n[green]Release notes:[/green] [link={release_url}]{release_url}[/link]"
+    console.print(Panel(panel_content, title="Dars Version", border_style="cyan"))
+
 def create_parser() -> argparse.ArgumentParser:
     """Creates the command line argument parser"""
     parser = argparse.ArgumentParser(
@@ -463,6 +479,7 @@ def create_parser() -> argparse.ArgumentParser:
         formatter_class=RichHelpFormatter,
         epilog=""  # Remove epilog to avoid duplication
     )
+    parser.add_argument('-v', '--version', action='store_true', help='Show Dars version and release link')
     
     # Add language parameter to the main parser
     parser.add_argument('--lang', '-l', choices=['en', 'es'], default='en',
@@ -567,6 +584,11 @@ def main():
     # This is already handled in the pre-parsing step above, so we don't need to do it again
     # The translator will already have the correct language set
     
+    # Show version and exit if -v/--version is passed
+    if getattr(args, 'version', False):
+        print_version_info()
+        sys.exit(0)
+
     # Show banner for normal commands
     console.print(Panel(
         Text("Dars Exporter", style="bold cyan", justify="center"),

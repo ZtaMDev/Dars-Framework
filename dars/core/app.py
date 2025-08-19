@@ -24,8 +24,24 @@ class App:
         import threading
         import time
         import sys
+        import os
+        import inspect
+        import importlib.util
         from pathlib import Path
-        
+        from contextlib import contextmanager
+        import shutil
+        import traceback
+
+        @contextmanager
+        def pushd(path):
+            """Cambia temporalmente el cwd y lo restaura al salir."""
+            old = os.getcwd()
+            os.chdir(path)
+            try:
+                yield
+            finally:
+                os.chdir(old)
+
         # Rich para mensajes bonitos
         try:
             from rich.console import Console
@@ -34,7 +50,7 @@ class App:
         except ImportError:
             Console = None
         console = Console() if 'Console' in locals() else None
-        
+
         # Leer puerto de sys.argv si no se pasa explícito
         if port is None:
             port = 8000
@@ -44,7 +60,7 @@ class App:
                         port = int(sys.argv[i + 1])
                     except Exception:
                         pass
-        
+
         # Importar exportador por defecto si no se pasa
         if exporter is None:
             try:
@@ -53,193 +69,135 @@ class App:
                 print("Could not import HTMLCSSJSExporter")
                 return
             exporter = HTMLCSSJSExporter()
-        
+
         # Importar PreviewServer
         try:
             from dars.cli.preview import PreviewServer
         except ImportError:
             print("Could not import PreviewServer")
             return
-        
-        import shutil
-        import traceback
 
+        shutdown_event = threading.Event()
         try:
-            import os
-            preview_dir = os.path.abspath("./dars_preview")
+            # Detectar archivo principal de la app
+            app_file = None
+            for frame in inspect.stack():
+                if frame.function == "<module>":
+                    app_file = frame.filename
+                    break
+            if not app_file:
+                app_file = sys.argv[0]
+
+            project_root = os.path.dirname(os.path.abspath(app_file))
+            if project_root not in sys.path:
+                sys.path.insert(0, project_root)
+
+            preview_dir = os.path.join(project_root, "dars_preview")
             cwd_original = os.getcwd()
+
+            # limpiar preview anterior
             if os.path.exists(preview_dir):
-                import shutil
                 try:
                     shutil.rmtree(preview_dir)
                 except Exception as e:
-                    if console:
-                        console.print(f"[yellow]Warning: Could not clean previous preview directory: {e}[/yellow]")
-                    else:
-                        print(f"Warning: Could not clean previous preview directory: {e}")
+                    msg = f"Warning: Could not clean previous preview directory: {e}"
+                    console.print(f"[yellow]{msg}[/yellow]") if console else print(msg)
+
             os.makedirs(preview_dir, exist_ok=True)
-            exporter.export(self, preview_dir)
+
+            # export inicial desde el root
+            with pushd(project_root):
+                exporter.export(self, preview_dir)
+
             url = f"http://localhost:{port}"
             app_title = getattr(self, 'title', 'Dars App')
             if console:
-                from rich.text import Text
-                from rich.panel import Panel
                 panel = Panel(
                     Text(f"✔ App running successfully\n\nName: {app_title}\nPreview available at: {url}\n\nPress Ctrl+C to stop the server.",
-                         style="bold green", justify="center"),
+                        style="bold green", justify="center"),
                     title="Dars Preview", border_style="cyan")
                 console.print(panel)
             else:
                 print(f"[Dars] App '{app_title}' running. Preview at {url}")
+
             server = PreviewServer(preview_dir, port)
             try:
                 if not server.start():
-                    if console:
-                        console.print("[red] Could not start preview server. [/red]")
-                    else:
-                        print("Could not start preview server.")
+                    (console.print("[red]Could not start preview server.[/red]")
+                    if console else print("Could not start preview server."))
                     return
-                try:
-                    # --- HOT RELOAD ---
-                    import inspect
-                    import importlib.util
-                    from dars.cli.hot_reload import FileWatcher
 
-                    app_file = None
-                    # Detectar archivo fuente de la app (donde está definida la clase App)
-                    for frame in inspect.stack():
-                        if frame.function == "<module>":
-                            app_file = frame.filename
-                            break
-                    if not app_file:
-                        app_file = sys.argv[0]
+                # --- HOT RELOAD ---
+                from dars.cli.hot_reload import FileWatcher
 
-                    def reload_and_export():
-                        # Limpiar y recompilar app
-                        if console:
-                            console.print("[yellow]Detected app file change. Reloading...[/yellow]")
-                        else:
-                            print("[Dars] Detected app file change. Reloading...")
-                        try:
-                            # Recargar módulo de la app
+                def reload_and_export():
+                    if console:
+                        console.print("[yellow]Detected app file change. Reloading...[/yellow]")
+                    else:
+                        print("[Dars] Detected app file change. Reloading...")
+
+                    try:
+                        if project_root not in sys.path:
+                            sys.path.insert(0, project_root)
+
+                        with pushd(project_root):
+                            # Recargar módulo
                             spec = importlib.util.spec_from_file_location("dars_app", app_file)
                             module = importlib.util.module_from_spec(spec)
                             spec.loader.exec_module(module)
+
                             # Buscar instancia App
                             new_app = None
                             for v in vars(module).values():
                                 if isinstance(v, App):
                                     new_app = v
                                     break
+
                             if not new_app:
-                                if console:
-                                    console.print("[red]No App instance found after reload.[/red]")
-                                else:
-                                    print("[Dars] No App instance found after reload.")
+                                (console.print("[red]No App instance found after reload.[/red]")
+                                if console else print("[Dars] No App instance found after reload."))
                                 return
-                            # Exportar de nuevo
+
                             exporter.export(new_app, preview_dir)
-                            if console:
-                                console.print("[green]App reloaded and re-exported successfully.[/green]")
-                            else:
-                                print("[Dars] App reloaded and re-exported successfully.")
-                        except Exception as e:
-                            if console:
-                                console.print(f"[red]Hot reload failed: {e}[/red]")
-                            else:
-                                print(f"[Dars] Hot reload failed: {e}")
 
-                    watcher = FileWatcher(app_file, reload_and_export)
-                    watcher.start()
+                        (console.print("[green]App reloaded and re-exported successfully.[/green]")
+                        if console else print("[Dars] App reloaded and re-exported successfully."))
 
-                    while True:
-                        time.sleep(1)
-                except KeyboardInterrupt:
-                    watcher.stop()
-                    if console:
-                        console.print("\n[cyan] Stopping preview and watcher... [/cyan]")
-                    else:
-                        print("\n[Dars] Stopping preview and watcher...")
-                finally:
-                    server.stop()
-                    if console:
-                        console.print("[green] Preview stopped. [/green]")
-                    else:
-                        print("[Dars] Preview stopped.")
+                    except Exception as e:
+                        (console.print(f"[red]Hot reload failed: {e}[/red]")
+                        if console else print(f"[Dars] Hot reload failed: {e}"))
+
+                watcher = FileWatcher(app_file, reload_and_export)
+                watcher.start()
+
+                while not shutdown_event.is_set():
+                    shutdown_event.wait(timeout=1)  # Espera hasta que se pida cerrar, sin consumir CPU
+            except KeyboardInterrupt:
+                shutdown_event.set()
+                watcher.stop()
+                (console.print("\n[cyan]Stopping preview and watcher...[/cyan]")
+                if console else print("\n[Dars] Stopping preview and watcher..."))
             finally:
-                os.chdir(cwd_original)
-                try:
-                    shutil.rmtree(preview_dir)
-                    if console:
-                        console.print("[yellow]Preview files deleted.[/yellow]")
-                    else:
-                        print("Preview files deleted.")
-                except Exception as e:
-                    if console:
-                        console.print(f"[red]Could not delete preview directory: {e}[/red]")
-                    else:
-                        print(f"Could not delete preview directory: {e}")
+                server.stop()
+                (console.print("[green]Preview stopped.[/green]")
+                if console else print("[Dars] Preview stopped."))
 
         except PermissionError as e:
-            # Windows: temp dir cleanup error
-            msg = f"[yellow] Warning: Could not clean temp directory due to permissions: {e} [/yellow]"
-            if 'console' in locals() and console:
-                console.print(msg)
-            else:
-                print(msg)
+            msg = f"Warning: Could not clean temp directory due to permissions: {e}"
+            console.print(f"[yellow]{msg}[/yellow]") if console else print(msg)
         except Exception as e:
-            msg = f"[red] Unexpected error in fast preview: {e}\n{traceback.format_exc()} [/red]"
-            if 'console' in locals() and console:
-                console.print(msg)
-            else:
-                print(msg)
-
-        """
-        Genera una preview rápida de la app en un servidor local usando un exportador
-        (por defecto HTMLCSSJSExporter) y sirviendo los archivos en un directorio temporal.
-        No abre el navegador automáticamente. El servidor se detiene con Ctrl+C.
-        Puedes pasar el puerto como argumento de línea de comandos: python main.py --port 8080
-        """
-        import tempfile
-        import threading
-        import time
-        import sys
-        from pathlib import Path
-        
-        # Rich para mensajes bonitos
-        try:
-            from rich.console import Console
-            from rich.panel import Panel
-            from rich.text import Text
-        except ImportError:
-            Console = None
-        console = Console() if 'Console' in locals() else None
-        
-        # Leer puerto de sys.argv si no se pasa explícito
-        if port is None:
-            port = 8000
-            for i, arg in enumerate(sys.argv):
-                if arg in ('--port', '-p') and i + 1 < len(sys.argv):
-                    try:
-                        port = int(sys.argv[i + 1])
-                    except Exception:
-                        pass
-        
-        # Importar exportador por defecto si no se pasa
-        if exporter is None:
+            msg = f"Unexpected error in fast preview: {e}\n{traceback.format_exc()}"
+            console.print(f"[red]{msg}[/red]") if console else print(msg)
+        finally:
+            os.chdir(cwd_original)
             try:
-                from dars.exporters.web.html_css_js import HTMLCSSJSExporter
-            except ImportError:
-                print("Could not import HTMLCSSJSExporter")
-                return
-            exporter = HTMLCSSJSExporter()
-        
-        # Importar PreviewServer
-        try:
-            from dars.cli.preview import PreviewServer
-        except ImportError:
-            print("Could not import PreviewServer")
-            return
+                shutil.rmtree(preview_dir)
+                (console.print("[yellow]Preview files deleted.[/yellow]")
+                if console else print("Preview files deleted."))
+            except Exception as e:
+                msg = f"Could not delete preview directory: {e}"
+                console.print(f"[red]{msg}[/red]") if console else print(msg)
+
 
     
     def __init__(
@@ -523,25 +481,34 @@ class App:
         return exporter.export(self, output_path)
         
     def validate(self) -> List[str]:
-        """Valida la aplicación y retorna una lista de errores"""
+        """Valida la aplicación y retorna una lista de errores (single-page y multipage)"""
         errors = []
-        
-        if not self.root:
-            errors.append("No se ha establecido un componente raíz")
-            
+
+        # Validar título
         if not self.title:
             errors.append("El título de la aplicación no puede estar vacío")
-            
-        # Validar componentes recursivamente
-        if self.root:
-            errors.extend(self._validate_component(self.root))
-            
+
+        # Validación single-page y multipage
+        if self.is_multipage():
+            if not self._pages:
+                errors.append("La app está en modo multipágina pero no hay páginas registradas.")
+            for name, page in self._pages.items():
+                if not page.root:
+                    errors.append(f"La página '{name}' no tiene componente raíz.")
+                else:
+                    errors.extend(self._validate_component(page.root, path=f"pages['{name}']"))
+        else:
+            if not self.root:
+                errors.append("No se ha establecido un componente raíz (single-page mode)")
+            else:
+                errors.extend(self._validate_component(self.root))
+
         return errors
         
     def _validate_component(self, component: Component, path: str = "root") -> List[str]:
         """Valida un componente y sus hijos recursivamente"""
         errors = []
-        
+
         # Validar que el componente tenga un método render
         if not hasattr(component, 'render'):
             errors.append(f"El componente en {path} no tiene método render")
@@ -591,23 +558,38 @@ class App:
         return None
         
     def get_stats(self) -> Dict[str, Any]:
-        """Retorna estadísticas de la aplicación"""
-        if not self.root:
+        """Retorna estadísticas de la aplicación (soporta single-page y multipage)"""
+        if self.is_multipage():
+            total_components = 0
+            max_depth = 0
+            for page in self._pages.values():
+                if page.root:
+                    total_components += self._count_components(page.root)
+                    depth = self._calculate_max_depth(page.root)
+                    max_depth = max(max_depth, depth)
+            return {
+                'total_components': total_components,
+                'max_depth': max_depth,
+                'scripts_count': len(self.scripts),
+                'global_styles_count': len(self.global_styles),
+                'total_pages': len(self._pages)
+            }
+        elif self.root:
+            return {
+                'total_components': self._count_components(self.root),
+                'max_depth': self._calculate_max_depth(self.root),
+                'scripts_count': len(self.scripts),
+                'global_styles_count': len(self.global_styles),
+                'total_pages': 1
+            }
+        else:
             return {
                 'total_components': 0,
                 'max_depth': 0,
                 'scripts_count': len(self.scripts),
-                'global_styles_count': len(self.global_styles)
+                'global_styles_count': len(self.global_styles),
+                'total_pages': 0
             }
-            
-        stats = {
-            'total_components': self._count_components(self.root),
-            'max_depth': self._calculate_max_depth(self.root),
-            'scripts_count': len(self.scripts),
-            'global_styles_count': len(self.global_styles)
-        }
-        
-        return stats
         
     def _count_components(self, component: Component) -> int:
         """Cuenta el número total de componentes"""

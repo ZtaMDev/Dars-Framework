@@ -37,6 +37,47 @@ class HTMLCSSJSExporter(Exporter):
         try:
             self.create_output_directory(output_path)
 
+            # --- Copiar recursos adicionales desde la carpeta del proyecto ---
+            import inspect, shutil
+            import sys
+            # Determinar la raíz del proyecto desde el archivo fuente de la app
+            app_source = getattr(app, '__source__', None)
+            if app_source is None and hasattr(app, 'source_file'):
+                app_source = app.source_file
+            if app_source is None:
+                # Fallback: usar root del componente, pero esto no es robusto
+                project_root = os.getcwd()
+            else:
+                project_root = os.path.dirname(os.path.abspath(app_source))
+
+            os.makedirs(output_path, exist_ok=True)
+
+            # Copiar solo recursos explícitos usados por la app
+            # 1) Favicon
+            favicon = getattr(app, 'favicon', None)
+            if favicon and os.path.isfile(os.path.join(project_root, favicon)):
+                shutil.copy2(os.path.join(project_root, favicon), os.path.join(output_path, os.path.basename(favicon)))
+            # 2) Iconos PWA
+            icons = getattr(app, 'icons', None)
+            if icons:
+                icons_dir = os.path.join(output_path, 'icons')
+                os.makedirs(icons_dir, exist_ok=True)
+                for icon in icons:
+                    src = icon.get('src') if isinstance(icon, dict) else icon
+                    if src and os.path.isfile(os.path.join(project_root, src)):
+                        shutil.copy2(os.path.join(project_root, src), os.path.join(icons_dir, os.path.basename(src)))
+            # 3) Service Worker
+            sw_path = getattr(app, 'service_worker_path', None)
+            if sw_path and os.path.isfile(os.path.join(project_root, sw_path)):
+                shutil.copy2(os.path.join(project_root, sw_path), os.path.join(output_path, 'sw.js'))
+            # 4) Archivos estáticos definidos por el usuario
+            static_files = getattr(app, 'static_files', [])
+            for static in static_files:
+                src = static.get('src') if isinstance(static, dict) else static
+                if src and os.path.isfile(os.path.join(project_root, src)):
+                    shutil.copy2(os.path.join(project_root, src), os.path.join(output_path, os.path.basename(src)))
+            # NOTA: No copiar ejecutables ni nada fuera del proyecto
+
             # Generar CSS y JS globales (compartidos)
             css_content = self.generate_css(app)
             self.write_file(os.path.join(output_path, "styles.css"), css_content)
@@ -645,12 +686,6 @@ body {
 }
 .dars-tooltip-right .dars-tooltip-text {
     left: 125%;
-    top: 50%;
-    transform: translateY(-50%);
-    margin-left: 6px;
-}
-
-.dars-modal {
     display: none; /* Hidden by default */
     position: fixed; /* Stay in place */
     z-index: 1; /* Sit on top */
@@ -662,6 +697,9 @@ body {
     background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
     justify-content: center;
     align-items: center;
+}
+.dars-modal-hidden {
+    display: none !important;
 }
 
 .dars-modal-content {
@@ -899,20 +937,49 @@ function initializeEvents() {
     // Los eventos específicos se agregarán aquí
 """
 
-        def has_component_type(component, cls):
-            if isinstance(component, cls):
+        def has_component_type_with_logic(component, cls):
+            # Busca si hay algún componente del tipo dado con minimum_logic=True
+            if isinstance(component, cls) and getattr(component, 'minimum_logic', True):
                 return True
+            # Recursión robusta para diferentes tipos de componentes
+            # 1. Multipágina: Page
+            if component.__class__.__name__ == "Page" and hasattr(component, 'children'):
+                for child in getattr(component, 'children', []):
+                    if has_component_type_with_logic(child, cls):
+                        return True
+            # 2. Accordion: sections
+            if hasattr(component, 'sections'):
+                for section in getattr(component, 'sections', []):
+                    # section puede ser (title, content)
+                    if isinstance(section, (list, tuple)) and len(section) == 2:
+                        _, content = section
+                        if has_component_type_with_logic(content, cls):
+                            return True
+            # 3. Tabs: panels
+            if hasattr(component, 'panels'):
+                for panel in getattr(component, 'panels', []):
+                    if has_component_type_with_logic(panel, cls):
+                        return True
+            # 4. children genérico
             if hasattr(component, 'children'):
                 for child in getattr(component, 'children', []):
-                    if has_component_type(child, cls):
+                    if has_component_type_with_logic(child, cls):
                         return True
             return False
 
-        has_tabs = has_component_type(app.root, Tabs) if hasattr(app, 'root') else False
-        has_accordion = has_component_type(app.root, Accordion) if hasattr(app, 'root') else False
-        # Aquí puedes añadir otros has_<componente> para lógica futura
+        # Si es multipágina, buscar en todas las páginas, si no, solo en root
+        root_components = []
+        if hasattr(app, 'is_multipage') and callable(app.is_multipage) and app.is_multipage():
+            if hasattr(app, 'pages') and isinstance(app.pages, dict):
+                root_components = [p.root for p in app.pages.values() if hasattr(p, 'root')]
+        else:
+            root_components = [app.root]
 
-        if has_tabs:
+        has_tabs_logic = any(has_component_type_with_logic(root, Tabs) for root in root_components)
+        has_accordion_logic = any(has_component_type_with_logic(root, Accordion) for root in root_components)
+        # Aquí puedes añadir otros has_<componente>_logic para lógica futura (Modal, Card)
+
+        if has_tabs_logic:
             js_content += "    // Tabs interactivas\n"
             js_content += """    document.querySelectorAll('.dars-tabs').forEach(function(tabsEl) {
         const tabButtons = tabsEl.querySelectorAll('.dars-tab');
@@ -926,7 +993,7 @@ function initializeEvents() {
             });
         });
     });\n"""
-        if has_accordion:
+        if has_accordion_logic:
             js_content += "    // Accordion interactivo\n"
             js_content += """    document.querySelectorAll('.dars-accordion').forEach(function(accEl) {
         accEl.querySelectorAll('.dars-accordion-title').forEach(function(titleEl) {
@@ -1218,17 +1285,29 @@ function initializeEvents() {
     def render_modal(self, modal: Modal) -> str:
         """Renderiza un componente Modal"""
         component_id = self.generate_unique_id(modal)
-        class_attr = f'class="dars-modal {modal.class_name or ""}"'
-        style_attr = f'style="{self.render_styles(modal.style)}"' if modal.style else ""
+        class_list = "dars-modal"
+        if not modal.is_open:
+            class_list += " dars-modal-hidden"
+        if modal.class_name:
+            class_list += f" {modal.class_name}"
+        hidden_attr = " hidden" if not modal.is_open else ""
+        display_style = "display: flex;" if modal.is_open else "display: none;"
+        modal_style = f'{display_style} position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000;'
+        if modal.style:
+            modal_style += f' {self.render_styles(modal.style)}'
+        data_enabled = f'data-enabled="{str(getattr(modal, "is_enabled", True)).lower()}"'
         title_html = f'<h2>{modal.title}</h2>' if modal.title else ""
         children_html = ""
         for child in modal.children:
             children_html += self.render_component(child)
-
-        display_style = "display: flex;" if modal.is_open else "display: none;"
-        modal_overlay_style = f'style="{display_style} position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; {style_attr}"'
-
-        return f'<div id="{component_id}" {class_attr} {modal_overlay_style}>\n    <div class="dars-modal-content" style="background: white; padding: 20px; border-radius: 8px; max-width: 500px; width: 90%;">\n        {title_html}\n        {children_html}\n    </div>\n</div>'
+        return (
+            f'<div id="{component_id}" class="{class_list}" {data_enabled}{hidden_attr} style="{modal_style}">\n'
+            f'    <div class="dars-modal-content" style="background: white; padding: 20px; border-radius: 8px; max-width: 500px; width: 90%;">\n'
+            f'        {title_html}\n'
+            f'        {children_html}\n'
+            f'    </div>\n'
+            f'</div>'
+        )
 
     def render_navbar(self, navbar: Navbar) -> str:
         """Renderiza un componente Navbar"""
@@ -1236,8 +1315,16 @@ function initializeEvents() {
         class_attr = f'class="dars-navbar {navbar.class_name or ""}"'
         style_attr = f'style="{self.render_styles(navbar.style)}"' if navbar.style else ""
         brand_html = f'<div class="dars-navbar-brand">{navbar.brand}</div>' if navbar.brand else ""
+        # Soporta hijos como lista o *args (igual que Container)
+        children = getattr(navbar, 'children', [])
+        if callable(children):
+            children = children()
+        if children is None:
+            children = []
+        if not isinstance(children, (list, tuple)):
+            children = [children]
         children_html = ""
-        for child in navbar.children:
+        for child in children:
             children_html += self.render_component(child)
 
         return f'<nav id="{component_id}" {class_attr} {style_attr}>{brand_html}<div class="dars-navbar-nav">{children_html}</div></nav>'

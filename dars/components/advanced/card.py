@@ -9,10 +9,15 @@ class Card(Component):
         title: Optional[str] = None,
         class_name: Optional[str] = None,
         style: Optional[Dict[str, Any]] = None,
+        minimum_logic: bool = True,
         **kwargs
     ):
-        super().__init__(children=children, class_name=class_name, style=style, **kwargs)
+        super().__init__(class_name=class_name, style=style, **kwargs)
         self.title = title
+        self.minimum_logic = minimum_logic
+        if children:
+            for child in children:
+                self.add_child(child)
 
     def render(self) -> str:
         title_html = f'<h2>{self.title}</h2>' if self.title else ''

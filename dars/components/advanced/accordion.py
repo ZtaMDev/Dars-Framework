@@ -7,10 +7,14 @@ class Accordion(Component):
     sections: Lista de tuplas (título, contenido)
     open_indices: Lista de índices abiertos (opcional)
     """
-    def __init__(self, sections: List[tuple], open_indices: Optional[List[int]]=None, **props):
+    def __init__(self, sections: List[tuple], open_indices: Optional[List[int]]=None, minimum_logic: bool = True, **props):
         super().__init__(**props)
         self.sections = sections
         self.open_indices = open_indices or []
+        self.minimum_logic = minimum_logic
+        for _, content in sections:
+            if hasattr(content, 'render'):
+                self.add_child(content)
 
     def render(self) -> str:
         html = '<div class="dars-accordion">'

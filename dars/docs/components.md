@@ -1,5 +1,19 @@
 # Dars - Components Documentation
 
+---
+
+## Barrel Import (from v1.0.5)
+
+You can now import all main components and modules with a single line:
+
+```python
+from dars.all import *
+```
+
+This simplifies integration and improves the developer experience.
+
+---
+
 ## Introduction to Components
 
 Components are the fundamental elements of Dars that represent UI elements. Each component encapsulates its appearance, behavior, and state, allowing you to create complex interfaces by composing simple elements.
@@ -771,6 +785,9 @@ accordion = Accordion(
 
 The `Tabs` component allows navigation between different views or content panels.
 
+> **New in 1.0.5:** The exporter now recursively detects Tabs at any nesting level (including inside containers, panels, or multipage apps) for `minimum_logic` and JS injection. You can safely nest Tabs in any structure and the export will work as expected.
+
+
 #### Syntax
 
 ```python
@@ -1050,6 +1067,8 @@ my_card = Card(
 
 The `Modal` component creates an overlay window that appears on top of the main page content.
 
+> **New in 1.0.5:** Modal is now exported as hidden by default (`hidden` attribute and `dars-modal-hidden` class) if `is_open=False`, preventing any visual flicker on page load, even if CSS/JS loads slowly.
+
 #### Syntax
 
 ```python
@@ -1058,43 +1077,45 @@ from dars.components.basic.text import Text
 from dars.components.basic.button import Button
 
 my_modal = Modal(
-    title="Bienvenido al Modal",
-    is_open=True, # O False para que esté oculto inicialmente
+    title="Welcome to the Modal",
+    is_open=False, # Now hidden from the very first render
     children=[
-        Text("Este es el contenido de tu ventana modal."),
-        Button("Cerrar")
+        Text("This is your modal content."),
+        Button("Close")
     ],
     class_name="welcome-modal",
     style={
-        "background-color": "rgba(0, 0, 0, 0.7)" # Estilo para el overlay
+        "background-color": "rgba(0, 0, 0, 0.7)" # Overlay style
     }
 )
 ```
 
 #### Properties
 
-| Property | Type | Description |
-|-----------|------|-------------|
-| `title` | str | Modal title |
-| `is_open` | bool | Controls modal visibility (`True` to show, `False` to hide) |
+| Property   | Type | Description |
+|------------|------|------------------------------------------------------------|
+| `title`    | str  | Modal title |
+| `is_open`  | bool | Controls modal visibility (`True` to show, `False` to hide). If `False`, modal is hidden from exported HTML. |
 | `children` | list | List of child components |
 
-#### Example
+#### Updated Example
 
 ```python
 my_modal = Modal(
-    title="Bienvenido al Modal",
-    is_open=True, # O False para que esté oculto inicialmente
+    title="Welcome to the Modal",
+    is_open=False,  # Hidden from the very first render
     children=[
-        Text("Este es el contenido de tu ventana modal."),
-        Button("Cerrar")
+        Text("This is your modal content."),
+        Button("Close")
     ],
     class_name="welcome-modal",
     style={
-        "background-color": "rgba(0, 0, 0, 0.7)" # Estilo para el overlay
+        "background-color": "rgba(0, 0, 0, 0.7)"
     }
 )
 ```
+
+> **Note:** The exporter now recursively detects advanced components (Tabs, Accordion, Modal, Card) at any nesting level, including inside multipage apps, and applies `minimum_logic` robustly.
 
 ---
 

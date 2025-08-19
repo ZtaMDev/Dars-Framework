@@ -75,6 +75,8 @@ class PreviewServer:
 def preview_html_app(directory: str, auto_open: bool = True, port: int = 8000):
     """Previews an exported HTML application"""
     
+    import signal
+    
     # Verify that index.html exists
     index_path = os.path.join(directory, "index.html")
     if not os.path.exists(index_path):
@@ -110,16 +112,22 @@ def preview_html_app(directory: str, auto_open: bool = True, port: int = 8000):
         except Exception as e:
             console.print(f"[yellow]{translator.get('browser_open_error')}: {e}[/yellow]")
             console.print(f"[cyan]{translator.get('open_manually')}: {url}[/cyan]")
-    
+
+    import threading
+    import signal
+
+    shutdown_event = threading.Event()
+
     try:
-        # Keep the server running
-        while True:
-            time.sleep(1)
+        while not shutdown_event.is_set():
+            shutdown_event.wait(timeout=1)  # Espera hasta que se pida cerrar, sin consumir CPU
     except KeyboardInterrupt:
+        shutdown_event.set()
+    finally:
         console.print(f"\n[yellow]{translator.get('stopping_server')}[/yellow]")
         server.stop()
         console.print(f"[green]{translator.get('server_stopped')}[/green]")
-        
+
     return True
 
 def preview_react_app(directory: str):

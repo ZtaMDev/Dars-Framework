@@ -38,6 +38,8 @@ from dars.components.layout.grid import GridLayout, LayoutBase
 from dars.components.layout.flex import FlexLayout
 from dars.components.layout.anchor import AnchorPoint
 
+from dars.scripts.script import *
+
 # Exporters (optional, for direct use)
 # from dars.exporters.web.html_css_js import HTMLCSSJSExporter
 
