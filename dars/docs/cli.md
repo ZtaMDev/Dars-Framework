@@ -27,6 +27,9 @@ Open your terminal in your project directory and use any of the following comman
 
 # Help
  dars --help
+
+# Version
+ dars -v
 ```
 
 ## Main Commands Table
