@@ -313,10 +313,9 @@ mi_proyecto/
 ├── scripts/
 │   ├── utils.js
 │   ├── validaciones.js
-│   ├── animaciones.js
-│   └── api.js
-└── estilos/
-    └── main.css
+│   └── animaciones.js
+└────── api.js
+
 ```
 
 #### Example: utils.js
