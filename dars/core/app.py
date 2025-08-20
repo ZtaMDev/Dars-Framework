@@ -11,6 +11,26 @@ class Page:
         self.meta = meta or {}
         self.index = index  # ¿Es la página principal?
 
+    def attr(self, **attrs):
+        """
+        Setter/getter de atributos para Page, similar a Component.attr().
+        Si se pasan kwargs, setea atributos; si no, devuelve un dict con los atributos editables.
+        """
+        if attrs:
+            for key, value in attrs.items():
+                if hasattr(self, key):
+                    setattr(self, key, value)
+                else:
+                    self.meta[key] = value
+            return self
+        # Getter
+        d = dict(self.meta)
+        d['name'] = self.name
+        d['root'] = self.root
+        d['title'] = self.title
+        d['index'] = self.index
+        return d
+
 class App:
     """Clase principal que representa una aplicación Dars"""
 
@@ -520,12 +540,29 @@ class App:
             
         return errors
         
-    def get_component_tree(self) -> Dict[str, Any]:
-        """Retorna la estructura del árbol de componentes"""
-        if not self.root:
-            return {}
-            
-        return self._component_to_dict(self.root)
+    def get_component_tree(self) -> str:
+        """
+        Devuelve una representación legible (string) del árbol de componentes.
+        Soporta single-page y multipage.
+        """
+        def tree_str(component, indent=0):
+            pad = '  ' * indent
+            s = f"{pad}- {component.__class__.__name__} (id={getattr(component, 'id', None)})"
+            for child in getattr(component, 'children', []):
+                s += '\n' + tree_str(child, indent + 1)
+            return s
+
+        if self.is_multipage():
+            if not self._pages:
+                return "[Dars] No hay páginas registradas."
+            result = []
+            for name, page in self._pages.items():
+                result.append(f"Página: {name} (title={page.title})\n" + tree_str(page.root))
+            return '\n\n'.join(result)
+        elif self.root:
+            return tree_str(self.root)
+        else:
+            return "[Dars] No hay componente raíz definido."
         
     def _component_to_dict(self, component: Component) -> Dict[str, Any]:
         """Convierte un componente a diccionario para inspección"""
@@ -539,22 +576,26 @@ class App:
         }
         
     def find_component_by_id(self, component_id: str) -> Optional[Component]:
-        """Busca un componente por su ID"""
-        if not self.root:
+        """Busca un componente por su ID (soporta multipage y single-page)"""
+        if self.is_multipage():
+            for page in self._pages.values():
+                result = self._find_component_recursive(page.root, component_id)
+                if result:
+                    return result
             return None
-            
-        return self._find_component_recursive(self.root, component_id)
-        
+        elif self.root:
+            return self._find_component_recursive(self.root, component_id)
+        else:
+            return None
+
     def _find_component_recursive(self, component: Component, target_id: str) -> Optional[Component]:
         """Busca un componente recursivamente por ID"""
         if component.id == target_id:
             return component
-            
-        for child in component.children:
+        for child in getattr(component, 'children', []):
             result = self._find_component_recursive(child, target_id)
             if result:
                 return result
-                
         return None
         
     def get_stats(self) -> Dict[str, Any]:
@@ -590,23 +631,20 @@ class App:
                 'global_styles_count': len(self.global_styles),
                 'total_pages': 0
             }
-        
-    def _count_components(self, component: Component) -> int:
-        """Cuenta el número total de componentes"""
-        count = 1
-        for child in component.children:
-            count += self._count_components(child)
-        return count
-        
+
+    def calculate_max_depth(self) -> int:
+        """Calcula la profundidad máxima de la app (soporta multipage y single-page)"""
+        if self.is_multipage():
+            return max((self._calculate_max_depth(page.root) for page in self._pages.values() if page.root), default=0)
+        elif self.root:
+            return self._calculate_max_depth(self.root)
+        else:
+            return 0
+
     def _calculate_max_depth(self, component: Component, current_depth: int = 0) -> int:
-        """Calcula la profundidad máxima del árbol de componentes"""
-        if not component.children:
+        """Calcula la profundidad máxima de un árbol de componentes (uso interno)"""
+        if not component or not getattr(component, 'children', []):
             return current_depth
-            
-        max_child_depth = 0
-        for child in component.children:
-            child_depth = self._calculate_max_depth(child, current_depth + 1)
-            max_child_depth = max(max_child_depth, child_depth)
-            
-        return max_child_depth
+        return max(self._calculate_max_depth(child, current_depth + 1) for child in component.children)
+
 

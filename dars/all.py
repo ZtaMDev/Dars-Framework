@@ -39,6 +39,7 @@ from dars.components.layout.flex import FlexLayout
 from dars.components.layout.anchor import AnchorPoint
 
 from dars.scripts.script import *
+from dars.scripts.dscript import dScript
 
 # Exporters (optional, for direct use)
 # from dars.exporters.web.html_css_js import HTMLCSSJSExporter
@@ -52,4 +53,5 @@ __all__ = [
     'RadioButton', 'Select', 'Slider', 'Spinner', 'Text', 'Textarea', 'Tooltip',
     'Accordion', 'Card', 'Modal', 'Navbar', 'Table', 'Tabs',
     'GridLayout', 'FlexLayout', 'LayoutBase', 'AnchorPoint',
+    'InlineScript', 'FileScript', 'dScript',
 ]

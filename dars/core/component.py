@@ -133,6 +133,38 @@ class Component(ABC):
         search_recursive(self)
         return ComponentQuery(results)
 
+    def attr(self, **attrs) -> Union['Component', dict]:
+        """
+        Si se pasan kwargs, setea atributos en el componente (como setter encadenable).
+        Si no se pasan kwargs, retorna un dict con todos los atributos editables del componente (como getter).
+        Ejemplo:
+            c.attr(id='nuevo', style={'color': 'red'})
+            c.attr()['id']  # getter
+        """
+        if attrs:
+            for key, value in attrs.items():
+                if key == 'style':
+                    self.style.update(value)
+                    continue
+                elif key == 'class_name':
+                    self.class_name = value
+                    continue
+                elif key == 'events':
+                    self.events.update(value)
+                    continue
+                if hasattr(self, key):
+                    setattr(self, key, value)
+                else:
+                    self.props[key] = value
+            return self
+        # Getter: devolver todos los atributos editables
+        d = dict(self.props)
+        d['id'] = self.id
+        d['class_name'] = self.class_name
+        d['style'] = self.style
+        d['events'] = self.events
+        return d
+
     @abstractmethod
     def render(self, exporter: 'Exporter') -> str:
         pass

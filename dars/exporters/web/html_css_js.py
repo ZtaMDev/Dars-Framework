@@ -1,4 +1,5 @@
 from dars.exporters.base import Exporter
+from dars.scripts.dscript import dScript
 from dars.core.app import App
 from dars.core.component import Component
 from dars.components.basic.text import Text
@@ -310,12 +311,18 @@ self.addEventListener('fetch', event => {
             f.write(sw_content)
 
     def _generate_combined_script_js(self, scripts):
-        """Combina y concatena el código de todos los scripts (InlineScript/FileScript)"""
+        """Combina y concatena el código de todos los scripts (InlineScript/FileScript/dScript)"""
         js = ""
         for script in scripts:
-            js += f"// Script: {script.__class__.__name__}\n"
-            js += script.get_code()
-            js += "\n\n"
+            # Soporte para dScript
+            if hasattr(script, 'get_code'):
+                js += f"// Script: {script.__class__.__name__}\n"
+                js += script.get_code()
+                js += "\n\n"
+            else:
+                # Si el script no tiene get_code, lo ignoramos o lanzamos warning
+                import warnings
+                warnings.warn(f"Script {script} does not implement get_code()")
         return js
 
     def generate_html(self, app: App, css_file: str = "styles.css", script_file: str = "script.js") -> str:

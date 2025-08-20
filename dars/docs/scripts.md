@@ -17,10 +17,11 @@ Scripts in Dars are fragments of JavaScript code that:
 
 ### Types of Scripts
 
-Dars supports two main types of scripts:
+Dars supports three main types of scripts:
 
 1. **InlineScript**: Code defined directly in Python
 2. **FileScript**: Code loaded from external files
+3. **dScript**: Flexible script that can be defined either inline (as a string) or as a reference to an external file. Only one mode is allowed at a time.
 
 ## Base Script Class
 
@@ -243,6 +244,55 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 """)
 ```
+
+## dScript
+
+### When to use dScript
+
+dScript is a flexible class that allows you to define a script as either:
+- Inline JavaScript (via the `code` argument)
+- Or as a reference to an external file (via the `file_path` argument)
+
+But **never both at the same time**. This is useful for presets, user-editable actions, and advanced integrations.
+
+### Basic Syntax
+
+```python
+from dars.scripts.dscript import dScript
+
+# Inline JS
+script_inline = dScript(code="""
+function hello() { alert('Hello from dScript!'); }
+document.addEventListener('DOMContentLoaded', hello);
+""")
+
+# External file
+script_file = dScript(file_path="./scripts/my_script.js")
+```
+
+### Example: Editable JS preset from Python
+
+```python
+from dars.scripts.dscript import dScript
+
+custom_action = dScript(code="""
+function customClick() {
+    alert('Custom action from preset!');
+}
+document.addEventListener('DOMContentLoaded', function() {
+    var btn = document.getElementById('my-btn');
+    if (btn) btn.onclick = customClick;
+});
+""")
+
+app.add_script(custom_action)
+```
+
+### Integration with Exporter
+
+The exporter (`html_css_js.py`) automatically detects and exports all scripts of type `dScript`, `InlineScript`, and `FileScript`. You can safely mix and match them in your app, and all will be included in the generated JS.
+
+---
 
 ## FileScript
 
