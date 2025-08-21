@@ -1,7 +1,6 @@
 # Dars Framework
 
-<p align="center">
-   <img src="Dars-logo.png" alt="Logo" width="100">  
+Dars Landing Page: https://ztamdev.github.io/Dars-Framework/
 
 Dars is a Python UI framework for building modern, interactive web apps with Python code. Write your interface in Python, export it to static HTML/CSS/JS, and deploy anywhere.
 
