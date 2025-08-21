@@ -86,7 +86,8 @@ components/
 ```
 scripts/
 ├── __init__.py
-└── script.py                   # InlineScript and FileScript classes
+├── script.py
+└── dscript.py                 # InlineScript , dScript(moderm) and FileScript classes
 ```
 
 ### Tipos de Scripts
