@@ -79,29 +79,19 @@ class HTMLCSSJSExporter(Exporter):
                     shutil.copy2(os.path.join(project_root, src), os.path.join(output_path, os.path.basename(src)))
             # NOTA: No copiar ejecutables ni nada fuera del proyecto
 
-            # Generar CSS y JS globales (compartidos)
+            # Generar CSS global (compartido)
             css_content = self.generate_css(app)
             self.write_file(os.path.join(output_path, "styles.css"), css_content)
-
-            # Generar runtime_dars.js (scripts internos del framework)
-            runtime_js = self.generate_javascript(app)
-            self.write_file(os.path.join(output_path, "runtime_dars.js"), runtime_js)
-
-            # Generar script.js (scripts de usuario)
-            user_scripts = list(getattr(app, 'scripts', []))
-            script_js = self._generate_combined_script_js(user_scripts)
-            self.write_file(os.path.join(output_path, "script.js"), script_js)
 
             # Multipágina: exportar un HTML, CSS y JS por cada página registrada
             if hasattr(app, "is_multipage") and app.is_multipage():
                 import copy
-                # Determinar la página index (principal)
                 index_page = None
                 if hasattr(app, 'get_index_page'):
                     index_page = app.get_index_page()
+                
                 # Exportar cada página
                 for slug, page in app.pages.items():
-                    import copy
                     page_app = copy.copy(app)
                     page_app.root = page.root
                     if page.title:
@@ -109,60 +99,76 @@ class HTMLCSSJSExporter(Exporter):
                     if page.meta:
                         for k, v in page.meta.items():
                             setattr(page_app, k, v)
-                    # --- Aseguramos que root nunca sea lista, igual que single-page ---
+                    
+                    # Asegurar que root sea Container si es lista
                     from dars.components.basic.container import Container
                     if isinstance(page_app.root, list):
                         page_app.root = Container(children=page_app.root)
-                    # --- Generación idéntica a single-page, solo cambia el nombre de archivo ---
+                    
+                    # Generar runtime específico para esta página
+                    runtime_js = self.generate_javascript(page_app, page.root)
+                    runtime_name = f"runtime_dars_{slug}.js" if slug != "index" else "runtime_dars.js"
+                    self.write_file(os.path.join(output_path, runtime_name), runtime_js)
+                    
+                    # Generar scripts específicos de esta página
+                    page_scripts = []
+                    
+                    # Scripts globales de la app
+                    page_scripts.extend(getattr(app, 'scripts', []))
+                    
+                    # Scripts específicos de esta página
+                    if hasattr(page, 'scripts'):
+                        page_scripts.extend(page.scripts)
+                    
+                    # Scripts de componentes dentro de la página
+                    if hasattr(page_app.root, 'get_scripts'):
+                        page_scripts.extend(page_app.root.get_scripts())
+                    
+                    # Generar script.js específico para esta página
+                    script_js = self._generate_combined_script_js(page_scripts)
+                    
                     if index_page is not None and page is index_page:
-                        css_content = self.generate_css(page_app)
-                        self.write_file(os.path.join(output_path, "styles.css"), css_content)
-                        # --- scripts globales + scripts de la Page ---
-                        scripts = list(getattr(page_app, 'scripts', []))
-                        if hasattr(page_app.root, 'get_scripts'):
-                            scripts += page_app.root.get_scripts()
-                        script_js = self._generate_combined_script_js(scripts)
+                        # Página index
                         self.write_file(os.path.join(output_path, "script.js"), script_js)
-                        html_content = self.generate_html(page_app, css_file="styles.css", script_file="script.js")
+                        html_content = self.generate_html(page_app, css_file="styles.css", 
+                                                        script_file="script.js", 
+                                                        runtime_file="runtime_dars.js")
                         filename = "index.html"
-                        try:
-                            soup = BeautifulSoup(html_content, "html.parser")
-                            html_content = soup.prettify()
-                        except ImportError:
-                            pass
-                        self.write_file(os.path.join(output_path, filename), html_content)
                     else:
-                        css_content = self.generate_css(page_app)
-                        scripts = list(getattr(app, 'scripts', []))
-                        if hasattr(page_app.root, 'get_scripts'):
-                            scripts += page_app.root.get_scripts()
-                        script_js = self._generate_combined_script_js(scripts)
+                        # Otras páginas
                         script_name = f"script_{slug}.js"
                         self.write_file(os.path.join(output_path, script_name), script_js)
-                        html_content = self.generate_html(page_app, css_file="styles.css", script_file=script_name)
+                        html_content = self.generate_html(page_app, css_file="styles.css", 
+                                                        script_file=script_name, 
+                                                        runtime_file=runtime_name)
                         filename = f"{slug}.html"
-                        try:
-                            soup = BeautifulSoup(html_content, "html.parser")
-                            html_content = soup.prettify()
-                        except ImportError:
-                            pass
-                        self.write_file(os.path.join(output_path, filename), html_content)
-                        self.write_file(os.path.join(output_path, f"styles_{slug}.css"), css_content)
-                        # El script_{slug}.js ya fue generado correctamente arriba, y el HTML ya fue generado, no sobrescribir
+                    
+                    # Mejorar formato HTML si es posible
+                    try:
+                        soup = BeautifulSoup(html_content, "html.parser")
+                        html_content = soup.prettify()
+                    except ImportError:
+                        pass
+                    
+                    self.write_file(os.path.join(output_path, filename), html_content)
             else:
-                # Single-page clásico
-                css_content = self.generate_css(app)
-                self.write_file(os.path.join(output_path, "styles.css"), css_content)
+                # Single-page clásico (mantener comportamiento existente)
+                runtime_js = self.generate_javascript(app, app.root)
+                self.write_file(os.path.join(output_path, "runtime_dars.js"), runtime_js)
                 
                 user_scripts = list(getattr(app, 'scripts', []))
                 script_js = self._generate_combined_script_js(user_scripts)
                 self.write_file(os.path.join(output_path, "script.js"), script_js)
-                html_content = self.generate_html(app, css_file="styles.css", script_file="script.js")
+                
+                html_content = self.generate_html(app, css_file="styles.css", 
+                                                script_file="script.js", 
+                                                runtime_file="runtime_dars.js")
                 try:
                     soup = BeautifulSoup(html_content, "html.parser")
                     html_content = soup.prettify()
                 except ImportError:
-                    pass  # Si no está bs4, sigue igual
+                    pass
+                
                 self.write_file(os.path.join(output_path, "index.html"), html_content)
 
             # Generar archivos PWA si está habilitado
@@ -311,21 +317,26 @@ self.addEventListener('fetch', event => {
             f.write(sw_content)
 
     def _generate_combined_script_js(self, scripts):
-        """Combina y concatena el código de todos los scripts (InlineScript/FileScript/dScript)"""
-        js = ""
+        """Combina y concatena el código de todos los scripts específicos de la página"""
+        js = "// Scripts específicos de esta página\n"
+        js += "document.addEventListener('DOMContentLoaded', function() {\n"
+        
         for script in scripts:
-            # Soporte para dScript
             if hasattr(script, 'get_code'):
-                js += f"// Script: {script.__class__.__name__}\n"
-                js += script.get_code()
-                js += "\n\n"
-            else:
-                # Si el script no tiene get_code, lo ignoramos o lanzamos warning
-                import warnings
-                warnings.warn(f"Script {script} does not implement get_code()")
+                js += f"    // Script: {script.__class__.__name__}\n"
+                code = script.get_code().strip()
+                # Asegurar que el código esté dentro del contexto DOMContentLoaded
+                if not code.startswith('document.addEventListener'):
+                    js += f"    {code}\n"
+                else:
+                    js += f"{code}\n"
+                js += "\n"
+        
+        js += "});\n"
         return js
 
-    def generate_html(self, app: App, css_file: str = "styles.css", script_file: str = "script.js") -> str:
+    def generate_html(self, app: App, css_file: str = "styles.css", 
+                 script_file: str = "script.js", runtime_file: str = "runtime_dars.js") -> str:
         """Genera el contenido HTML con todas las propiedades de la aplicación"""
         body_content = ""
         from dars.components.basic.container import Container
@@ -361,11 +372,11 @@ self.addEventListener('fetch', event => {
 </head>
 <body>
     {body_content}
-    <script src=\"runtime_dars.js\"></script>
+    <script src=\"{runtime_file}\"></script>
     <script src=\"{script_file}\"></script>
 </body>
 </html>"""
-        # No modificar el HTML con BeautifulSoup para no perder tags/scripts
+
         return html_template
 
     
@@ -930,61 +941,38 @@ body {
             
         return css_content
         
-    def generate_javascript(self, app: App) -> str:
-        """Genera el contenido JavaScript"""
-        js_content = """// Dars Runtime
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Dars App loaded');
-    
-    // Inicializar eventos de componentes
-    initializeEvents();
-});
+    def generate_javascript(self, app: App, page_root: Component) -> str:
+        """Genera el contenido JavaScript específico para una página"""
+        js_content = """// Dars Runtime - Página específica
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Dars App loaded');
+        
+        // Inicializar eventos de componentes
+        initializeEvents();
+    });
 
-function initializeEvents() {
-    // Los eventos específicos se agregarán aquí
-"""
+    function initializeEvents() {
+        // Los eventos específicos se agregarán aquí
+    """
 
+        # Función para detectar componentes con lógica mínima
         def has_component_type_with_logic(component, cls):
-            # Busca si hay algún componente del tipo dado con minimum_logic=True
             if isinstance(component, cls) and getattr(component, 'minimum_logic', True):
                 return True
-            # Recursión robusta para diferentes tipos de componentes
-            # 1. Multipágina: Page
-            if component.__class__.__name__ == "Page" and hasattr(component, 'children'):
-                for child in getattr(component, 'children', []):
-                    if has_component_type_with_logic(child, cls):
-                        return True
-            # 2. Accordion: sections
-            if hasattr(component, 'sections'):
-                for section in getattr(component, 'sections', []):
-                    # section puede ser (title, content)
-                    if isinstance(section, (list, tuple)) and len(section) == 2:
-                        _, content = section
-                        if has_component_type_with_logic(content, cls):
-                            return True
-            # 3. Tabs: panels
-            if hasattr(component, 'panels'):
-                for panel in getattr(component, 'panels', []):
-                    if has_component_type_with_logic(panel, cls):
-                        return True
-            # 4. children genérico
-            if hasattr(component, 'children'):
-                for child in getattr(component, 'children', []):
-                    if has_component_type_with_logic(child, cls):
-                        return True
+            
+            # Recursión para buscar en hijos
+            children = getattr(component, 'children', [])
+            if not isinstance(children, list):
+                children = []
+            
+            for child in children:
+                if has_component_type_with_logic(child, cls):
+                    return True
             return False
 
-        # Si es multipágina, buscar en todas las páginas, si no, solo en root
-        root_components = []
-        if hasattr(app, 'is_multipage') and callable(app.is_multipage) and app.is_multipage():
-            if hasattr(app, 'pages') and isinstance(app.pages, dict):
-                root_components = [p.root for p in app.pages.values() if hasattr(p, 'root')]
-        else:
-            root_components = [app.root]
-
-        has_tabs_logic = any(has_component_type_with_logic(root, Tabs) for root in root_components)
-        has_accordion_logic = any(has_component_type_with_logic(root, Accordion) for root in root_components)
-        # Aquí puedes añadir otros has_<componente>_logic para lógica futura (Modal, Card)
+        # Verificar si la página contiene componentes específicos
+        has_tabs_logic = has_component_type_with_logic(page_root, Tabs)
+        has_accordion_logic = has_component_type_with_logic(page_root, Accordion)
 
         if has_tabs_logic:
             js_content += "    // Tabs interactivas\n"
@@ -1000,6 +988,7 @@ function initializeEvents() {
             });
         });
     });\n"""
+        
         if has_accordion_logic:
             js_content += "    // Accordion interactivo\n"
             js_content += """    document.querySelectorAll('.dars-accordion').forEach(function(accEl) {
@@ -1019,24 +1008,23 @@ function initializeEvents() {
             });
         });
     });\n"""
+        
         js_content += "}\n\n"
 
-        # --- Lógica automática para asociar eventos Script a cualquier componente ---
-        js_content += "// Asociación automática de eventos Script\n"
+        # Lógica para asociar eventos Script a componentes específicos de esta página
+        js_content += "// Asociación automática de eventos Script para esta página\n"
+        
         from dars.scripts.script import Script
+        
         def traverse_and_bind_events(component, js_lines):
-            # Debug: ver componente actual
-            comp_class = component.__class__.__name__
             comp_id = getattr(component, 'id', None)
             
-            # Para cualquier componente con eventos Script
-            comp_id = getattr(component, 'id', None)
             # Si no tiene ID pero tiene eventos, generamos uno temporal
             if not comp_id and hasattr(component, 'events') and component.events:
                 import uuid
                 comp_id = f"comp_{str(uuid.uuid4())[:8]}"
-                component.id = comp_id  # Asignamos el ID generado
-                
+                component.id = comp_id
+            
             if comp_id and hasattr(component, 'events') and component.events:
                 events = getattr(component, 'events', {})
                 
@@ -1055,22 +1043,16 @@ function initializeEvents() {
                             js_line = f"document.getElementById('{comp_id}').on{dom_event} = function(event) {{\n{code}\n}};"
                             js_lines.append(js_line)
             
-            # Recursivo en hijos (robusto: recorre todos los hijos si existen)
+            # Recursivo en hijos
             children = getattr(component, 'children', [])
             if children and isinstance(children, (list, tuple)):
-                for i, child in enumerate(children):
+                for child in children:
                     if child is not None:
                         traverse_and_bind_events(child, js_lines)
-        # Recorrer root(s)
+        
+        # Recorrer el árbol de componentes de esta página
         js_lines = []
-        root_components = []
-        if hasattr(app, 'is_multipage') and callable(app.is_multipage) and app.is_multipage():
-            if hasattr(app, 'pages') and isinstance(app.pages, dict):
-                root_components = [p.root for p in app.pages.values() if hasattr(p, 'root')]
-        else:
-            root_components = [app.root]
-        for root in root_components:
-            traverse_and_bind_events(root, js_lines)
+        traverse_and_bind_events(page_root, js_lines)
         js_content += "\n".join(js_lines) + "\n"
             
         return js_content
