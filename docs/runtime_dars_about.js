@@ -11,12 +11,12 @@
     }
 
 // Asociación automática de eventos Script para esta página
-document.getElementById('comp_5366e81f').onclick = function(event) {
+document.getElementById('comp_082828d4').onclick = function(event) {
 document.getElementById('mobile-warning-modal').style.display = 'none';
 };
-document.getElementById('comp_e2baf49e').onclick = function(event) {
+document.getElementById('comp_2fd351a8').onclick = function(event) {
 window.open('https://github.com/ZtaMDev/Dars-Framework/blob/CrystalMain/dars/docs/getting_started.md', '_blank');
 };
-document.getElementById('comp_53a76a85').onclick = function(event) {
+document.getElementById('comp_a2284c08').onclick = function(event) {
 window.open('https://github.com/ZtaMDev/Dars-Framework', '_blank');
 };
