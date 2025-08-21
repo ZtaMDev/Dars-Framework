@@ -524,10 +524,6 @@ body {
     display: flex; align-items: center; gap: 15px
 }
 
-@media (max-width: 8100px) {
-    #start-container: {'flex-direction': 'column', 'padding': '15px', 'gap': '15px'}; #navbar-left: {'justify-content': 'center', 'text-align': 'center'}; #navbar-right: {'flex-direction': 'column', 'width': '100%', 'gap': '10px'}; #navbar-right a: {'text-align': 'center', 'width': '100%', 'padding': '10px'}; #hero-section: {'flex-direction': 'column', 'text-align': 'center'}; #hero-text: {'padding': '20px 0', 'padding-right': '0'}; #hero-image: {'display': 'none'}
-}
-
 #hero-section {
     display: flex; align-items: center; justify-content: space-between; max-width: 1200px; margin: 0 auto; padding: 60px 20px; gap: 40px
 }
@@ -542,10 +538,6 @@ body {
 
 #how-it-works {
     background-color: #1e2b23; padding: 80px 20px; border-top: 2px solid #00d68f; border-bottom: 2px solid #00d68f
-}
-
-@media (max-width: 850px), (max-device-width: 850px) {
-    #hero-image: {'display': 'none !important'}; #code-background-container: {'display': 'none !important'}
 }
 
 footer a {
@@ -578,5 +570,13 @@ h1, h2, h3, h4, h5, h6 {
 
 p {
     color: #b2ffe5; line-height: 1.6
+}
+
+@media (max-width: 850px), (max-device-width: 850px) {
+    #hero-image: {'display': 'none !important'}; #code-background-container: {'display': 'none !important'}; #code-foreground-container: {'display': 'none !important'}
+}
+
+@media (max-width: 8100px) {
+    #start-container: {'flex-direction': 'column', 'padding': '15px', 'gap': '15px'}; #navbar-left: {'justify-content': 'center', 'text-align': 'center'}; #navbar-right: {'flex-direction': 'column', 'width': '100%', 'gap': '10px'}; #navbar-right a: {'text-align': 'center', 'width': '100%', 'padding': '10px'}; #hero-section: {'flex-direction': 'column', 'text-align': 'center'}; #hero-text: {'padding': '20px 0', 'padding-right': '0'}; #hero-image: {'display': 'none'}
 }
 
