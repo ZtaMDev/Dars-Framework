@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-   Star Dars Framework to meke dars popular! 
+   Star Dars Framework to meke it popular! 
    <a href="https://github.com/ZtaMDev/Dars-Framework/stargazers">
     <img src="https://img.shields.io/github/stars/ZtaMDev/Dars-Framework.svg?style=social&label=Star" alt="GitHub Repo stars">
   </a>
