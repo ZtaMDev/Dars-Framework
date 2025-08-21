@@ -75,21 +75,6 @@ Welcome to Dars, a modern Python framework for building web applications with re
 ### Command-Line Usage  
    Find CLI commands, options, and workflows in [cli.md](cli.md).
 
-### Official Templates  
-   Browse ready-to-use examples in the following files:
-   - [Hello World](template_hello_world.md)
-   - [Simple Form](template_simple_form.md)
-   - [Form Components](template_form_components.md)
-   - [Flex Layout Responsive](template_flex_layout_responsive.md)
-   - [Grid Layout Responsive](template_grid_layout_responsive.md)
-   - [Multipage Example](template_multipage_example.md)
-   - [Layout Multipage Demo](template_layout_multipage_demo.md)
-   - [PWA Custom Icons](template_pwa_custom_icons.md)
-   - [All Components Demo](template_all_components_demo.md)
-   - [Dashboard](template_dashboard.md)
-   - [Modern Web App](template_modern_web_app.md)
-   - [Complete App](template_complete_app.md)
-
 ### Need More Help?
 - For advanced topics, see the full documentation and examples in the referenced files above.
 - If you have questions or need support, check the official repository or community channels.
