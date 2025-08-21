@@ -11,17 +11,17 @@
     }
 
 // Asociación automática de eventos Script para esta página
-document.getElementById('comp_082828d4').onclick = function(event) {
+document.getElementById('comp_f470a6da').onclick = function(event) {
 document.getElementById('mobile-warning-modal').style.display = 'none';
 };
-document.getElementById('comp_a89b5276').onclick = function(event) {
+document.getElementById('comp_af5c5d9e').onclick = function(event) {
 navigator.clipboard.writeText('pip install dars-framework')
                                         .then(() => alert('Command copied to clipboard!'))
                                         .catch(err => console.error('Failed to copy: ', err));
 };
-document.getElementById('comp_5662129b').onclick = function(event) {
+document.getElementById('comp_5edceb9c').onclick = function(event) {
 window.location.href = '/getting-started.html';
 };
-document.getElementById('comp_14a15aba').onclick = function(event) {
+document.getElementById('comp_16bdde71').onclick = function(event) {
 window.open('https://github.com/ZtaMDev/Dars-Framework/tree/CrystalMain/examples', '_blank');
 };
