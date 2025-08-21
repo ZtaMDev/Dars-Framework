@@ -539,7 +539,13 @@ class App:
             errors.extend(self._validate_component(child, child_path))
             
         return errors
-        
+
+    def _count_components(self, component: Component) -> int:
+        """Cuenta el número total de componentes en la app (single-page y multipage)"""
+        count = 1
+        for child in component.children:
+            count += self._count_components(child)
+        return count
     def get_component_tree(self) -> str:
         """
         Devuelve una representación legible (string) del árbol de componentes.
