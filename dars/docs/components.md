@@ -18,6 +18,65 @@ This simplifies integration and improves the developer experience.
 
 Components are the fundamental elements of Dars that represent UI elements. Each component encapsulates its appearance, behavior, and state, allowing you to create complex interfaces by composing simple elements.
 
+## Event Handling with dScript
+
+Dars provides a powerful way to handle user interactions through the `dScript` class. You can attach event handlers to interactive components like `Button` and `Input` to create dynamic and responsive user interfaces.
+
+### Basic Usage
+
+```python
+from dars.scripts.dscript import dScript
+
+# Button with click handler
+button = Button(
+    text="Click me",
+    on_click=dScript("""
+        function handleClick(event) {
+            alert('Button was clicked!');
+            // Access the button element
+            const button = event.target;
+            // Toggle a class on click
+            button.classList.toggle('clicked');
+        }
+    """)
+)
+
+# Input with change handler
+input_field = Input(
+    placeholder="Type something...",
+    on_change=dScript("""
+        function handleChange(event) {
+            console.log('Input value changed to:', event.target.value);
+            // Add validation or other logic here
+            if (event.target.value.length < 3) {
+                event.target.style.borderColor = 'red';
+            } else {
+                event.target.style.borderColor = 'green';
+            }
+        }
+    """
+)
+```
+
+### Available Events
+
+| Component | Event | Description |
+|-----------|-------|-------------|
+| `Button` | `on_click` | Triggered when the button is clicked |
+| `Button` | `on_double_click` | Triggered on double click |
+| `Button` | `on_mouse_enter` | Triggered when mouse enters the button |
+| `Button` | `on_mouse_leave` | Triggered when mouse leaves the button |
+| `Input` | `on_change` | Triggered when input value changes |
+| `Input` | `on_key_up` | Triggered when a key is released |
+| `Input` | `on_key_down` | Triggered when a key is pressed |
+
+### Best Practices
+
+1. **Use Named Functions**: Makes debugging easier and allows reusing the same function for multiple events.
+2. **Keep Handlers Small**: Move complex logic to separate functions in your JavaScript code.
+3. **Access Event Object**: The event object provides useful properties like `target`, `keyCode`, etc.
+4. **Return `false`** to prevent default behavior when needed.
+
 ---
 
 ### Quick Access
@@ -275,7 +334,11 @@ boton = Button(
     text="Hacer clic",
     button_type="button",  # "button", "submit", "reset"
     disabled=False,
-    # on_click=my_function, # Los eventos se manejan con app.add_script o InlineScript
+    on_click=dScript("""
+        function handleClick() {
+            alert('Button clicked!');
+        }
+    """)
     style={
         "background-color": "#3498db",
         "color": "white",
@@ -293,6 +356,12 @@ boton = Button(
 | `text` | str | Button text | `"Enviar"` |
 | `button_type` | str | Button type | `"button"`, `"submit"`, `"reset"` |
 | `disabled` | bool | Si está deshabilitado | `True`, `False` |
+| `on_click` | dScript | Click handler | `dScript("function() { ... }")` |
+| `on_double_click` | dScript | Double click handler | `dScript("function() { ... }")` |
+| `on_mouse_enter` | dScript | Mouse enter handler | `dScript("function() { ... }")` |
+| `on_mouse_leave` | dScript | Mouse leave handler | `dScript("function() { ... }")` |
+| `on_key_up` | dScript | Key up handler | `dScript("function(e) { ... }")` |
+| `on_key_down` | dScript | Key down handler | `dScript("function(e) { ... }")` |
 
 #### Button Examples
 
@@ -372,7 +441,11 @@ entrada = Input(
     readonly=False,
     required=False,
     max_length=100,
-    # on_change=my_function_cambio, # Los eventos se manejan con app.add_script o InlineScript
+    on_change=dScript("""
+        function handleChange(event) {
+            console.log('Input changed:', event.target.value);
+        }
+    """)
     style={
         "width": "300px",
         "padding": "10px",
@@ -392,6 +465,9 @@ entrada = Input(
 | `disabled` | bool | Si está deshabilitado | `True`, `False` |
 | `readonly` | bool | Solo lectura | `True`, `False` |
 | `required` | bool | Campo obligatorio | `True`, `False` |
+| `on_change` | dScript | Change handler | `dScript("function(e) { ... }")` |
+| `on_key_up` | dScript | Key up handler | `dScript("function(e) { ... }")` |
+| `on_key_down` | dScript | Key down handler | `dScript("function(e) { ... }")` |
 | `max_length` | int | Longitud máxima | `50` |
 | `min_length` | int | Longitud mínima | `3` |
 | `pattern` | str | Validation pattern | `"[0-9]+"` |

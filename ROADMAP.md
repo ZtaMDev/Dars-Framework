@@ -6,11 +6,11 @@
 - **Components**: ~5000 lines (updated with new components)
 - **Exporters**: ~500 lines (HTML/CSS/JS only)
 - **CLI**: ~400 lines
-- **Scripts**: ~200 lines
+- **Scripts**: ~320 lines
 - **Examples**: ~800 lines
 - **Documentation**: ~6000 lines (updated with new documentation)
 
-### Total: ~12000 lines of code and documentation
+### Total: ~15620 lines of code and documentation
 
 ## Development Roadmap
 

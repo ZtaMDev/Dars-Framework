@@ -1020,6 +1020,58 @@ function initializeEvents() {
         });
     });\n"""
         js_content += "}\n\n"
+
+        # --- Lógica automática para asociar eventos Script a cualquier componente ---
+        js_content += "// Asociación automática de eventos Script\n"
+        from dars.scripts.script import Script
+        def traverse_and_bind_events(component, js_lines):
+            # Debug: ver componente actual
+            comp_class = component.__class__.__name__
+            comp_id = getattr(component, 'id', None)
+            
+            # Para cualquier componente con eventos Script
+            comp_id = getattr(component, 'id', None)
+            # Si no tiene ID pero tiene eventos, generamos uno temporal
+            if not comp_id and hasattr(component, 'events') and component.events:
+                import uuid
+                comp_id = f"comp_{str(uuid.uuid4())[:8]}"
+                component.id = comp_id  # Asignamos el ID generado
+                
+            if comp_id and hasattr(component, 'events') and component.events:
+                events = getattr(component, 'events', {})
+                
+                for event_name, handler in events.items():
+                    if isinstance(handler, Script):
+                        dom_event = event_name.lower()
+                        code = handler.get_code().strip()
+                        import re
+                        m = re.search(r"function\s+([a-zA-Z0-9_]+)\s*\(", code, re.DOTALL | re.MULTILINE)
+                        if m:
+                            func_name = m.group(1)
+                            js_lines.append(code)
+                            js_line = f"document.getElementById('{comp_id}').on{dom_event} = {func_name};"
+                            js_lines.append(js_line)
+                        else:
+                            js_line = f"document.getElementById('{comp_id}').on{dom_event} = function(event) {{\n{code}\n}};"
+                            js_lines.append(js_line)
+            
+            # Recursivo en hijos (robusto: recorre todos los hijos si existen)
+            children = getattr(component, 'children', [])
+            if children and isinstance(children, (list, tuple)):
+                for i, child in enumerate(children):
+                    if child is not None:
+                        traverse_and_bind_events(child, js_lines)
+        # Recorrer root(s)
+        js_lines = []
+        root_components = []
+        if hasattr(app, 'is_multipage') and callable(app.is_multipage) and app.is_multipage():
+            if hasattr(app, 'pages') and isinstance(app.pages, dict):
+                root_components = [p.root for p in app.pages.values() if hasattr(p, 'root')]
+        else:
+            root_components = [app.root]
+        for root in root_components:
+            traverse_and_bind_events(root, js_lines)
+        js_content += "\n".join(js_lines) + "\n"
             
         return js_content
         
@@ -1190,13 +1242,18 @@ function initializeEvents() {
         
     def render_button(self, button: Button) -> str:
         """Renderiza un componente Button"""
+        # Asegurarse de que el botón tenga un ID
+        if not hasattr(button, 'id') or not button.id:
+            import uuid
+            button.id = f"btn_{str(uuid.uuid4())[:8]}"
+            
         component_id = self.generate_unique_id(button)
         class_attr = f'class="dars-button {button.class_name or ""}"'
         style_attr = f'style="{self.render_styles(button.style)}"' if button.style else ""
-        disabled_attr = "disabled" if button.disabled else ""
         type_attr = f'type="{button.button_type}"'
+        disabled_attr = "disabled" if button.disabled else ""
         
-        return f'<button id="{component_id}" {class_attr} {style_attr} {type_attr} {disabled_attr}>{button.text}</button>'
+        return f'<button id="{button.id}" {class_attr} {style_attr} {type_attr} {disabled_attr}>{button.text}</button>'
         
     def render_input(self, input_comp: Input) -> str:
         """Renderiza un componente Input"""
