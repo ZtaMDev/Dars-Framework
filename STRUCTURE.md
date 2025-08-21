@@ -65,7 +65,9 @@ components/
 │   ├── modal.py                # Modal component
 │   └── navbar.py               # Navbar component
 └── layout/                     # Layout components (future)
-    └── __init__.py
+    └── __init__.
+ etc...
+
 ```
 
 ### Implemented Components
