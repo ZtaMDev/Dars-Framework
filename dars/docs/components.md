@@ -1458,47 +1458,7 @@ responsive_container = Container(
 )
 ```
 
-## Events and Interactivity
 
-Components can respond to user events. To handle events, you can use `InlineScript` or `ExternalScript` to add JavaScript logic that interacts with the generated HTML elements. Each component has a unique `id` that you can use to select it in JavaScript.
-
-```python
-from dars.core.app import App
-from dars.components.basic.button import Button
-from dars.components.basic.text import Text
-from dars.scripts.script import InlineScript
-
-app = App(title="App con Eventos")
-
-# Crear un componente de text para mostrar mensajes
-message_text = Text("Esperando interacción...", id="status-message")
-
-# Crear un botón
-my_button = Button("Haz clic aquí", id="my-button")
-
-# Añadir un script inline para manejar el evento en el frontend
-frontend_script = InlineScript("""
-document.getElementById("my-button").addEventListener("click", function() {
-    alert("¡Evento de click detectado en el navegador!");
-    document.getElementById("status-message").innerText = "¡Botón clickeado!";
-});
-""")
-
-app.set_root(my_button) # Or a container that contains both
-app.add_child(message_text) # Assuming App has an add_child method or similar for components outside the root
-app.add_script(frontend_script)
-```
-
-**Common Event Types:**
-
-Dars supports a variety of standard browser events, such as:
-
-*   **Mouse Events**: `click`, `dblclick`, `mousedown`, `mouseup`, `mouseenter`, `mouseleave`, `mousemove`.
-*   **Keyboard Events**: `keydown`, `keyup`, `keypress`.
-*   **Form Events**: `change`, `input`, `submit`, `focus`, `blur`.
-*   **Other**: `load`, `error`, `resize`.
-
-You can also define custom events.
 
 ## Best Practices
 
