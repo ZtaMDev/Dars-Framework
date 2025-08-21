@@ -40,6 +40,49 @@ class Script(ABC):
         pass
 ```
 
+## dScript
+
+### When to use dScript
+
+dScript is a flexible class that allows you to define a script as either:
+- Inline JavaScript (via the `code` argument)
+- Or as a reference to an external file (via the `file_path` argument)
+
+But **never both at the same time**. This is useful for presets, user-editable actions, and advanced integrations.
+
+### Basic Syntax
+
+```python
+from dars.scripts.dscript import dScript
+
+# Inline JS
+script_inline = dScript(code="""
+function hello() { alert('Hello from dScript!'); }
+document.addEventListener('DOMContentLoaded', hello);
+""")
+
+# External file
+script_file = dScript(file_path="./scripts/my_script.js")
+```
+
+### Example: Editable JS preset from Python
+
+```python
+from dars.scripts.dscript import dScript
+
+custom_action = dScript(code="""
+function customClick() {
+    alert('Custom action from preset!');
+}
+document.addEventListener('DOMContentLoaded', function() {
+    var btn = document.getElementById('my-btn');
+    if (btn) btn.onclick = customClick;
+});
+""")
+
+app.add_script(custom_action)
+```
+
 ## InlineScript
 
 ### Basic Syntax
@@ -243,49 +286,6 @@ document.addEventListener('DOMContentLoaded', function() {
     iniciarParallax();
 });
 """)
-```
-
-## dScript
-
-### When to use dScript
-
-dScript is a flexible class that allows you to define a script as either:
-- Inline JavaScript (via the `code` argument)
-- Or as a reference to an external file (via the `file_path` argument)
-
-But **never both at the same time**. This is useful for presets, user-editable actions, and advanced integrations.
-
-### Basic Syntax
-
-```python
-from dars.scripts.dscript import dScript
-
-# Inline JS
-script_inline = dScript(code="""
-function hello() { alert('Hello from dScript!'); }
-document.addEventListener('DOMContentLoaded', hello);
-""")
-
-# External file
-script_file = dScript(file_path="./scripts/my_script.js")
-```
-
-### Example: Editable JS preset from Python
-
-```python
-from dars.scripts.dscript import dScript
-
-custom_action = dScript(code="""
-function customClick() {
-    alert('Custom action from preset!');
-}
-document.addEventListener('DOMContentLoaded', function() {
-    var btn = document.getElementById('my-btn');
-    if (btn) btn.onclick = customClick;
-});
-""")
-
-app.add_script(custom_action)
 ```
 
 ### Integration with Exporter
