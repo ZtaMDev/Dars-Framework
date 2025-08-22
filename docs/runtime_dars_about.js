@@ -11,9 +11,9 @@
     }
 
 // Asociación automática de eventos Script para esta página
-document.getElementById('comp_a5c0bd1c').onclick = function(event) {
+document.getElementById('comp_b5d8e98d').onclick = function(event) {
 window.open('https://github.com/ZtaMDev/Dars-Framework/blob/CrystalMain/dars/docs/getting_started.md', '_blank');
 };
-document.getElementById('comp_2a97d319').onclick = function(event) {
+document.getElementById('comp_78dba363').onclick = function(event) {
 window.open('https://github.com/ZtaMDev/Dars-Framework', '_blank');
 };
