@@ -3,7 +3,7 @@ from dars.scripts.script import *
 # Crear la aplicación
 app = App(title="Mi App con Navbar Funcional")
 app.add_script(InlineScript('''
-    document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function() {
         var modal = document.getElementById('modal-demo');
         var btnAbrir = document.getElementById('btn-abrir-modal');
         var btnCerrar = document.getElementById('btn-cerrar-modal');
@@ -25,7 +25,7 @@ app.add_script(InlineScript('''
             modal.classList.add('dars-modal-hidden');
             modal.setAttribute('hidden', '');
         }
-    });
+});
     '''))
 # Función para crear el navbar (reutilizable en todas las páginas)
 def crear_navbar():

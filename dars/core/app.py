@@ -4,12 +4,13 @@ from .events import EventManager
 
 class Page:
     """Representa una página individual en la app Dars (multipágina)."""
-    def __init__(self, name: str, root: 'Component', title: str = None, meta: dict = None, index: bool = False):
+    def __init__(self, name: str, root: 'Component', title: str = None, meta: dict = None, index: bool = False, scripts: Optional[List[Any]] = None):
         self.name = name  # slug o nombre de la página
         self.root = root  # componente raíz de la página
         self.title = title
         self.meta = meta or {}
         self.index = index  # ¿Es la página principal?
+        self.scripts: List[Any] = list(scripts) if scripts else []
 
     def attr(self, **attrs):
         """
@@ -29,12 +30,110 @@ class Page:
         d['root'] = self.root
         d['title'] = self.title
         d['index'] = self.index
+        d['scripts'] = list(self.scripts)
         return d
+    # -----------------------------
+    # Métodos para manejar scripts
+    # -----------------------------
+    def add_script(self, script: Any):
+        """
+        Agrega un script a esta página.
+        - Si 'script' es una instancia (p. ej. InlineScript/FileScript/DScript), se añade tal cual.
+        - Si 'script' es una cadena, se interpreta como InlineScript (código).
+        - Si 'script' es un dict, se añade tal cual (fallback).
+        Devuelve self para encadenar llamadas.
+        """
+        # si es str => interpretarlo como inline
+        if isinstance(script, str):
+            created = self._make_inline_script(script)
+            self.scripts.append(created)
+            return self
+
+        # si es dict => fallback, guardarlo
+        if isinstance(script, dict):
+            self.scripts.append(script)
+            return self
+
+        # si ya es una instancia de "Script" (no podemos verificar tipo concreto sin dependencia),
+        # asumimos que es un script válido y lo añadimos.
+        self.scripts.append(script)
+        return self
+
+    # alias corto (pedido)
+    def addscript(self, script: Any):
+        return self.add_script(script)
+
+    def add_inline_script(self, code: str, **kwargs):
+        """Convenience: añade un InlineScript a la página (code = JS o similar)."""
+        s = self._make_inline_script(code, **kwargs)
+        self.scripts.append(s)
+        return self
+
+    def add_file_script(self, path: str, **kwargs):
+        """Convenience: añade un FileScript (referencia a archivo .js/.ts/etc.)"""
+        s = self._make_file_script(path, **kwargs)
+        self.scripts.append(s)
+        return self
+
+    def add_dscript(self, obj: Any, **kwargs):
+        """Convenience: intenta crear/añadir un DScript (si existe la clase)."""
+        s = self._make_dscript(obj, **kwargs)
+        self.scripts.append(s)
+        return self
+
+    def get_scripts(self) -> List[Any]:
+        """Retorna la lista de scripts añadidos a la página."""
+        return list(self.scripts)
+
+    # -----------------------------
+    # Helpers para construcción segura
+    # -----------------------------
+    def _make_inline_script(self, code: str, **kwargs) -> Any:
+        """
+        Intenta crear una instancia InlineScript si existe en dars.scripts.*.
+        Si no, devuelve un dict fallback: {'type':'inline','code':..., **kwargs}
+        """
+        try:
+            # intentamos import común (ajusta según tu layout de módulos si hace falta)
+            from dars.scripts import InlineScript  # type: ignore
+            return InlineScript(code, **kwargs)
+        except Exception:
+            try:
+                from dars.scripts.inline import InlineScript  # type: ignore
+                return InlineScript(code, **kwargs)
+            except Exception:
+                # fallback: dict simple que contiene lo mínimo
+                return {'type': 'inline', 'code': code, **kwargs}
+
+    def _make_file_script(self, path: str, **kwargs) -> Any:
+        """
+        Intenta crear una instancia FileScript si existe. Si no, devuelve dict fallback.
+        """
+        try:
+            from dars.scripts import FileScript  # type: ignore
+            return FileScript(path, **kwargs)
+        except Exception:
+            try:
+                from dars.scripts.file import FileScript  # type: ignore
+                return FileScript(path, **kwargs)
+            except Exception:
+                return {'type': 'file', 'path': path, **kwargs}
+
+    def _make_dscript(self, obj: Any, **kwargs) -> Any:
+        """
+        Intenta crear una instancia DScript si existe. Si no, guarda el objeto con marca.
+        """
+        try:
+            from dars.scripts import DScript  # type: ignore
+            return DScript(obj, **kwargs)
+        except Exception:
+            # si ya es dict o similar, solo anotamos el tipo
+            return {'type': 'dscript', 'value': obj, **kwargs}
 
 class App:
     """Clase principal que representa una aplicación Dars"""
 
-    def rTimeCompile(self, exporter=None, port=None):
+    def rTimeCompile(self, exporter=None, port=None, add_file_types=None):
         """
         Genera una preview rápida de la app en un servidor local usando un exportador
         (por defecto HTMLCSSJSExporter) y sirviendo los archivos en un directorio temporal.
@@ -80,7 +179,40 @@ class App:
                         port = int(sys.argv[i + 1])
                     except Exception:
                         pass
+            # --- Normalizar add_file_types => lista de extensiones que empiezan con '.' ---
+        def _normalize_exts(exts):
+            if not exts:
+                return ['.py']
+            # aceptar string con comas
+            if isinstance(exts, str):
+                parts = [p.strip() for p in exts.split(',') if p.strip()]
+            elif isinstance(exts, (list, tuple, set)):
+                parts = [str(p).strip() for p in exts if p]
+            else:
+                parts = [str(exts).strip()]
 
+            normalized = []
+            for p in parts:
+                if not p:
+                    continue
+                if not p.startswith('.'):
+                    p = '.' + p
+                normalized.append(p.lower())
+            # siempre incluir .py (comportamiento: .py + los adicionales)
+            if '.py' not in normalized:
+                normalized.insert(0, '.py')
+            # eliminar duplicados preservando orden
+            seen = set()
+            result = []
+            for e in normalized:
+                if e not in seen:
+                    seen.add(e)
+                    result.append(e)
+            return result
+
+        # Lista final de extensiones a vigilar (ej: ['.py', '.js', '.css'])
+        watch_exts = _normalize_exts(add_file_types)
+               
         # Importar exportador por defecto si no se pasa
         if exporter is None:
             try:
@@ -98,8 +230,15 @@ class App:
             return
 
         shutdown_event = threading.Event()
+        watchers = []  # aquí guardaremos todos los watchers
+
+        # Debounce / lock para evitar reloads concurrentes
+        reload_lock = threading.Lock()
+        last_reload_at = 0.0
+        MIN_RELOAD_INTERVAL = 0.4  # segundos
+
         try:
-            # Detectar archivo principal de la app
+            # Detectar archivo principal de la app (el que ejecutaste con `python archivo.py`)
             app_file = None
             for frame in inspect.stack():
                 if frame.function == "<module>":
@@ -125,7 +264,7 @@ class App:
 
             os.makedirs(preview_dir, exist_ok=True)
 
-            # export inicial desde el root
+            # export inicial desde el root usando la instancia actual (self)
             with pushd(project_root):
                 exporter.export(self, preview_dir)
 
@@ -150,55 +289,178 @@ class App:
                 # --- HOT RELOAD ---
                 from dars.cli.hot_reload import FileWatcher
 
-                def reload_and_export():
-                    if console:
-                        console.print("[yellow]Detected app file change. Reloading...[/yellow]")
-                    else:
-                        print("[Dars] Detected app file change. Reloading...")
-
-                    try:
-                        if project_root not in sys.path:
-                            sys.path.insert(0, project_root)
-
-                        with pushd(project_root):
-                            # Recargar módulo
-                            spec = importlib.util.spec_from_file_location("dars_app", app_file)
-                            module = importlib.util.module_from_spec(spec)
-                            spec.loader.exec_module(module)
-
-                            # Buscar instancia App
-                            new_app = None
-                            for v in vars(module).values():
-                                if isinstance(v, App):
-                                    new_app = v
+                def _collect_project_files_by_ext(root, exts):
+                    files = []
+                    for dirpath, dirnames, filenames in os.walk(root):
+                        # excluir preview_dir, .git y __pycache__
+                        if os.path.abspath(dirpath).startswith(os.path.abspath(preview_dir)):
+                            continue
+                        if '.git' in dirpath or '__pycache__' in dirpath:
+                            continue
+                        for fname in filenames:
+                            for ext in exts:
+                                if fname.lower().endswith(ext):
+                                    files.append(os.path.join(dirpath, fname))
                                     break
+                    return files
 
-                            if not new_app:
-                                (console.print("[red]No App instance found after reload.[/red]")
-                                if console else print("[Dars] No App instance found after reload."))
-                                return
 
-                            exporter.export(new_app, preview_dir)
+                def reload_and_export(changed_file=None):
+                    nonlocal last_reload_at
+                    now = time.time()
+                    # debounce rápido
+                    if now - last_reload_at < MIN_RELOAD_INTERVAL:
+                        return
+                    with reload_lock:
+                        last_reload_at = time.time()
+                        if console:
+                            console.print(f"[yellow]Detected change in {changed_file}. Reloading...[/yellow]")
+                        else:
+                            print(f"[Dars] Detected change in {changed_file}. Reloading...")
 
-                        (console.print("[green]App reloaded and re-exported successfully.[/green]")
-                        if console else print("[Dars] App reloaded and re-exported successfully."))
+                        try:
+                            if project_root not in sys.path:
+                                sys.path.insert(0, project_root)
 
+                            with pushd(project_root):
+                                # --- Limpiar del cache todos los módulos que pertenecen al proyecto ---
+                                to_remove = []
+                                for name, mod in list(sys.modules.items()):
+                                    try:
+                                        mod_file = getattr(mod, '__file__', None)
+                                        if not mod_file:
+                                            continue
+                                        # normalizar paths
+                                        mod_file_abs = os.path.abspath(mod_file)
+                                        if mod_file_abs.startswith(os.path.abspath(project_root)):
+                                            to_remove.append(name)
+                                    except Exception:
+                                        continue
+
+                                for name in to_remove:
+                                    try:
+                                        del sys.modules[name]
+                                    except Exception:
+                                        pass
+
+                                # también borrar cualquier nombre temporal 'dars_app' si existiese
+                                sys.modules.pop("dars_app", None)
+
+                                # Importar el archivo principal en un nombre único (para limpieza segura)
+                                unique_name = f"dars_app_reload_{int(time.time()*1000)}"
+                                spec = importlib.util.spec_from_file_location(unique_name, app_file)
+                                module = importlib.util.module_from_spec(spec)
+                                spec.loader.exec_module(module)
+
+                                # Buscar nueva instancia App en el módulo recargado
+                                new_app = None
+                                for v in vars(module).values():
+                                    try:
+                                        if isinstance(v, App):
+                                            new_app = v
+                                            break
+                                    except Exception:
+                                        # si isinstance falla por alguna razón, ignorar
+                                        pass
+
+                                # fallback por nombre de clase (por si App es distinto objeto)
+                                if not new_app:
+                                    for v in vars(module).values():
+                                        try:
+                                            if hasattr(v, '__class__') and v.__class__.__name__ == 'App':
+                                                new_app = v
+                                                break
+                                        except Exception:
+                                            pass
+
+                                if not new_app:
+                                    (console.print("[red]No App instance found after reload.[/red]")
+                                    if console else print("[Dars] No App instance found after reload."))
+                                    return
+
+                                # Exportar la nueva instancia
+                                exporter.export(new_app, preview_dir)
+
+                            (console.print("[green]App reloaded and re-exported successfully.[/green]")
+                            if console else print("[Dars] App reloaded and re-exported successfully."))
+
+                        except Exception as e:
+                            tb = traceback.format_exc()
+                            (console.print(f"[red]Hot reload failed: {e}\n{tb}[/red]")
+                            if console else print(f"[Dars] Hot reload failed: {e}\n{tb}"))
+
+                # --- Crear watchers para todos los archivos .py dentro del proyecto (recursivo) ---
+                files_to_watch = _collect_project_files_by_ext(project_root, watch_exts)
+
+
+                # Si no hay archivos detectados (raro), al menos mirar app_file
+                if not files_to_watch:
+                    files_to_watch = [app_file]
+
+                for f in files_to_watch:
+                    try:
+                        # FileWatcher espera una función sin argumentos; usamos lambda que captura f
+                        w = FileWatcher(f, lambda f=f: reload_and_export(f))
+                        w.start()
+                        watchers.append(w)
                     except Exception as e:
-                        (console.print(f"[red]Hot reload failed: {e}[/red]")
-                        if console else print(f"[Dars] Hot reload failed: {e}"))
+                        if console:
+                            console.print(f"[yellow]Warning: could not watch {f}: {e}[/yellow]")
+                        else:
+                            print(f"[Dars] Warning: could not watch {f}: {e}")
+                
+                if console:
+                    # Mostrar rutas relativas para que no sea tan largo
+                    rel_paths = [os.path.relpath(f, project_root) for f in files_to_watch]
+                    max_show = 80  # número máximo de líneas a mostrar
+                    if len(rel_paths) > max_show:
+                        shown = rel_paths[:max_show]
+                        shown.append(f"... (+{len(rel_paths)-max_show} más)")
+                    else:
+                        shown = rel_paths or ["(ninguno)"]
 
-                watcher = FileWatcher(app_file, reload_and_export)
-                watcher.start()
+                    from rich.table import Table
+                    table = Table(show_header=False, box=None, padding=0)
+                    table.add_column("Files", style="bold")
+                    for p in shown:
+                        table.add_row(p)
 
+                    panel = Panel(
+                        table,
+                        title=f"Watching {len(files_to_watch)} files · Exts: {', '.join(watch_exts)}",
+                        subtitle=f"Project root: {os.path.basename(project_root)}",
+                        border_style="magenta"
+                    )
+                    console.print(panel)
+                else:
+                    print(f"[Dars] Watching {len(files_to_watch)} files in {project_root}:")
+                    for f in files_to_watch:
+                        print("  -", os.path.relpath(f, project_root))
+
+                # Loop principal: espera a Ctrl+C
                 while not shutdown_event.is_set():
-                    shutdown_event.wait(timeout=1)  # Espera hasta que se pida cerrar, sin consumir CPU
+                    shutdown_event.wait(timeout=1)  # Espera sin consumir CPU
+
             except KeyboardInterrupt:
                 shutdown_event.set()
-                watcher.stop()
+                for w in watchers:
+                    try:
+                        w.stop()
+                    except Exception:
+                        pass
                 (console.print("\n[cyan]Stopping preview and watcher...[/cyan]")
                 if console else print("\n[Dars] Stopping preview and watcher..."))
             finally:
-                server.stop()
+                # Detener watchers y servidor
+                try:
+                    server.stop()
+                except Exception:
+                    pass
+                for w in watchers:
+                    try:
+                        w.stop()
+                    except Exception:
+                        pass
                 (console.print("[green]Preview stopped.[/green]")
                 if console else print("[Dars] Preview stopped."))
 
@@ -209,7 +471,11 @@ class App:
             msg = f"Unexpected error in fast preview: {e}\n{traceback.format_exc()}"
             console.print(f"[red]{msg}[/red]") if console else print(msg)
         finally:
-            os.chdir(cwd_original)
+            # Restaurar cwd y limpiar preview
+            try:
+                os.chdir(cwd_original)
+            except Exception:
+                pass
             try:
                 shutil.rmtree(preview_dir)
                 (console.print("[yellow]Preview files deleted.[/yellow]")
@@ -217,7 +483,6 @@ class App:
             except Exception as e:
                 msg = f"Could not delete preview directory: {e}"
                 console.print(f"[red]{msg}[/red]") if console else print(msg)
-
 
     
     def __init__(

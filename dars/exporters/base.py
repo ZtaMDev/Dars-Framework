@@ -61,9 +61,18 @@ class Exporter(ABC):
             
         return "; ".join(css_rules)
         
-    def generate_unique_id(self, component: 'Component') -> str:
-        """Genera un ID único para un componente si no tiene uno"""
-        if component.id:
+    def generate_unique_id(self, component: 'Component', prefix: str = "component") -> str:
+        """Genera un ID único para un componente si no tiene uno definido."""
+        # Si el usuario ya puso un id, usarlo siempre
+        if getattr(component, "id", None):
             return component.id
-        return f"component_{id(component)}"
+
+        # Si no tiene id, generar uno único pero persistente
+        unique = f"{prefix}_{hex(id(component))}"
+        try:
+            component.id = unique  # lo guardamos en el componente
+        except Exception:
+            pass  # por si el objeto no permite asignación
+        return unique
+
 

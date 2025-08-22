@@ -125,25 +125,22 @@ class HTMLCSSJSExporter(Exporter):
                         page_scripts.extend(page_app.root.get_scripts())
                     
                     # Generar script.js específico para esta página
-                    # Preparar y copiar scripts: combinados + externos
-                    combined_js, external_srcs = self._prepare_page_scripts(page_scripts, output_path, project_root)
-
+                    script_js = self._generate_combined_script_js(page_scripts)
+                    
                     if index_page is not None and page is index_page:
                         # Página index
-                        self.write_file(os.path.join(output_path, "script.js"), combined_js)
-                        html_content = self.generate_html(page_app, css_file="styles.css",
-                                                        script_file="script.js",
-                                                        runtime_file="runtime_dars.js",
-                                                        extra_script_srcs=external_srcs)
+                        self.write_file(os.path.join(output_path, "script.js"), script_js)
+                        html_content = self.generate_html(page_app, css_file="styles.css", 
+                                                        script_file="script.js", 
+                                                        runtime_file="runtime_dars.js")
                         filename = "index.html"
                     else:
                         # Otras páginas
                         script_name = f"script_{slug}.js"
-                        self.write_file(os.path.join(output_path, script_name), combined_js)
-                        html_content = self.generate_html(page_app, css_file="styles.css",
-                                                        script_file=script_name,
-                                                        runtime_file=runtime_name,
-                                                        extra_script_srcs=external_srcs)
+                        self.write_file(os.path.join(output_path, script_name), script_js)
+                        html_content = self.generate_html(page_app, css_file="styles.css", 
+                                                        script_file=script_name, 
+                                                        runtime_file=runtime_name)
                         filename = f"{slug}.html"
                     
                     # Mejorar formato HTML si es posible
@@ -160,15 +157,17 @@ class HTMLCSSJSExporter(Exporter):
                 self.write_file(os.path.join(output_path, "runtime_dars.js"), runtime_js)
                 
                 user_scripts = list(getattr(app, 'scripts', []))
-                combined_js, external_srcs = self._prepare_page_scripts(user_scripts, output_path, project_root)
-                self.write_file(os.path.join(output_path, "script.js"), combined_js)
-
-                html_content = self.generate_html(app, css_file="styles.css",
-                                                script_file="script.js",
-                                                runtime_file="runtime_dars.js",
-                                                extra_script_srcs=external_srcs)
-                soup = BeautifulSoup(html_content, "html.parser")
-                html_content = soup.prettify()
+                script_js = self._generate_combined_script_js(user_scripts)
+                self.write_file(os.path.join(output_path, "script.js"), script_js)
+                
+                html_content = self.generate_html(app, css_file="styles.css", 
+                                                script_file="script.js", 
+                                                runtime_file="runtime_dars.js")
+                try:
+                    soup = BeautifulSoup(html_content, "html.parser")
+                    html_content = soup.prettify()
+                except ImportError:
+                    pass
                 
                 self.write_file(os.path.join(output_path, "index.html"), html_content)
 
@@ -317,112 +316,27 @@ self.addEventListener('fetch', event => {
         with open(sw_path, 'w', encoding='utf-8') as f:
             f.write(sw_content)
 
-    def _prepare_page_scripts(self, scripts, output_path: str, project_root: str):
-        """
-        Toma la lista mixta `scripts` y:
-        - concatena todo el JS inline en un único string (combined_js)
-        - copia los file scripts al output_path y devuelve la lista de src relativos (external_srcs)
-        Compatibilidades:
-        - objetos con get_code()
-        - dicts {'type':'inline','code':...} o {'type':'file','path':...}
-        - objetos con attribute 'path' o 'src' (se interpretan como file script)
-        - strings -> treated as inline code
-        """
-        combined_lines = []
-        external_srcs = []
-        import shutil
-
-        for script in scripts or []:
-            # Instancia con get_code()
-            try:
-                if hasattr(script, 'get_code'):
-                    code = script.get_code()
-                    if code:
-                        combined_lines.append(f"// Script: {getattr(script, '__class__', type(script)).__name__}\n{code.strip()}\n")
-                    continue
-            except Exception:
-                pass
-
-            # Dict fallback
-            if isinstance(script, dict):
-                stype = script.get('type', '').lower()
-                if stype == 'inline' or ('code' in script and not stype):
-                    code = script.get('code') or script.get('value') or ''
-                    if code:
-                        combined_lines.append(f"// Inline dict script\n{code.strip()}\n")
-                    continue
-                if stype == 'file' or 'path' in script:
-                    path = script.get('path') or script.get('src') or script.get('value')
-                    if path:
-                        # Resolver ruta relativa a project_root
-                        src_path = os.path.join(project_root, path) if not os.path.isabs(path) else path
-                        if os.path.isfile(src_path):
-                            dest_name = os.path.basename(src_path)
-                            dest_path = os.path.join(output_path, dest_name)
-                            try:
-                                shutil.copy2(src_path, dest_path)
-                                external_srcs.append(dest_name)
-                            except Exception:
-                                pass
-                        else:
-                            # si no existe en disco, asumimos que es una URL o ya accesible: usar tal cual
-                            external_srcs.append(path)
-                    continue
-                # Otros dicts con code
-                if 'code' in script:
-                    code = script.get('code')
-                    if code:
-                        combined_lines.append(f"// Inline dict script\n{code.strip()}\n")
-                    continue
-
-            # String -> inline code
-            if isinstance(script, str):
-                combined_lines.append(f"// Inline string script\n{script.strip()}\n")
-                continue
-
-            # Objetos con .path o .src (file scripts)
-            path_attr = None
-            for candidate in ('path', 'src', 'file'):
-                if hasattr(script, candidate):
-                    try:
-                        path_attr = getattr(script, candidate)
-                        break
-                    except Exception:
-                        continue
-            if path_attr:
-                path = path_attr
-                src_path = os.path.join(project_root, path) if not os.path.isabs(path) else path
-                if os.path.isfile(src_path):
-                    dest_name = os.path.basename(src_path)
-                    dest_path = os.path.join(output_path, dest_name)
-                    try:
-                        shutil.copy2(src_path, dest_path)
-                        external_srcs.append(dest_name)
-                    except Exception:
-                        pass
-                else:
-                    external_srcs.append(path)
-                continue
-
-            # Si no sabemos qué es, intentar str() y añadir como inline (fallback)
-            try:
-                s = str(script)
-                if s:
-                    combined_lines.append(f"// Fallback script: {type(script).__name__}\n{s}\n")
-            except Exception:
-                pass
-
-        combined_js = "// Scripts específicos de esta página (combinados)\n" + "\n".join(combined_lines)
-
-        return combined_js, external_srcs
     def _generate_combined_script_js(self, scripts):
-        """Deprecated internal wrapper: usa _prepare_page_scripts sin copiar archivos.
-           Conserva compatibilidad devolviendo solo el combined JS (sin external refs)."""
-        combined_js, external_srcs = self._prepare_page_scripts(scripts, output_path=os.getcwd(), project_root=os.getcwd())
-        return combined_js
+        """Combina y concatena el código de todos los scripts específicos de la página"""
+        js = "// Scripts específicos de esta página\n"
+        js += "document.addEventListener('DOMContentLoaded', function() {\n"
+        
+        for script in scripts:
+            if hasattr(script, 'get_code'):
+                js += f"    // Script: {script.__class__.__name__}\n"
+                code = script.get_code().strip()
+                # Asegurar que el código esté dentro del contexto DOMContentLoaded
+                if not code.startswith('document.addEventListener'):
+                    js += f"    {code}\n"
+                else:
+                    js += f"{code}\n"
+                js += "\n"
+        
+        js += "});\n"
+        return js
 
     def generate_html(self, app: App, css_file: str = "styles.css", 
-                 script_file: str = "script.js", runtime_file: str = "runtime_dars.js", extra_script_srcs: list = None) -> str:
+                 script_file: str = "script.js", runtime_file: str = "runtime_dars.js") -> str:
         """Genera el contenido HTML con todas las propiedades de la aplicación"""
         body_content = ""
         from dars.components.basic.container import Container
@@ -445,14 +359,6 @@ self.addEventListener('fetch', event => {
         # Generar Twitter Card tags
         twitter_tags_html = self._generate_twitter_tags(app)
         
-
-        # Construir string de scripts externos (extra_script_srcs)
-        extra_scripts_html = ""
-        if extra_script_srcs:
-            for src in extra_script_srcs:
-                # si es ruta absoluta o URL la dejamos tal cual; si es solo nombre lo usamos relativo
-                extra_scripts_html += f'    <script src="{src}"></script>\n'
-
         html_template = f"""<!DOCTYPE html>
 <html lang="{app.language}">
 <head>
@@ -466,7 +372,8 @@ self.addEventListener('fetch', event => {
 </head>
 <body>
     {body_content}
-    <script src=\"{runtime_file}\"></script>\n{extra_scripts_html}    <script src=\"{script_file}\"></script>
+    <script src=\"{runtime_file}\"></script>
+    <script src=\"{script_file}\"></script>
 </body>
 </html>"""
 
@@ -1045,20 +952,21 @@ body {
     });
 
     function initializeEvents() {
+        // Los eventos específicos se agregarán aquí
     """
 
         # Función para detectar componentes con lógica mínima
         def has_component_type_with_logic(component, cls):
             if isinstance(component, cls) and getattr(component, 'minimum_logic', True):
                 return True
-
+            
             # Recursión para buscar en hijos
             children = getattr(component, 'children', [])
-            if not isinstance(children, (list, tuple)):
+            if not isinstance(children, list):
                 children = []
-
+            
             for child in children:
-                if child is not None and has_component_type_with_logic(child, cls):
+                if has_component_type_with_logic(child, cls):
                     return True
             return False
 
@@ -1066,131 +974,89 @@ body {
         has_tabs_logic = has_component_type_with_logic(page_root, Tabs)
         has_accordion_logic = has_component_type_with_logic(page_root, Accordion)
 
-        # Añadir lógica de tabs y accordion dentro de initializeEvents
         if has_tabs_logic:
             js_content += "    // Tabs interactivas\n"
             js_content += """    document.querySelectorAll('.dars-tabs').forEach(function(tabsEl) {
-            const tabButtons = tabsEl.querySelectorAll('.dars-tab');
-            const panels = tabsEl.querySelectorAll('.dars-tab-panel');
-            tabButtons.forEach(function(btn, i) {
-                btn.addEventListener('click', function() {
-                    tabButtons.forEach(b => b.classList.remove('dars-tab-active'));
-                    panels.forEach(p => p.classList.remove('dars-tab-panel-active'));
-                    btn.classList.add('dars-tab-active');
-                    if (panels[i]) panels[i].classList.add('dars-tab-panel-active');
-                });
+        const tabButtons = tabsEl.querySelectorAll('.dars-tab');
+        const panels = tabsEl.querySelectorAll('.dars-tab-panel');
+        tabButtons.forEach(function(btn, i) {
+            btn.addEventListener('click', function() {
+                tabButtons.forEach(b => b.classList.remove('dars-tab-active'));
+                panels.forEach(p => p.classList.remove('dars-tab-panel-active'));
+                btn.classList.add('dars-tab-active');
+                if (panels[i]) panels[i].classList.add('dars-tab-panel-active');
             });
-        });\n"""
-
+        });
+    });\n"""
+        
         if has_accordion_logic:
             js_content += "    // Accordion interactivo\n"
             js_content += """    document.querySelectorAll('.dars-accordion').forEach(function(accEl) {
-            accEl.querySelectorAll('.dars-accordion-title').forEach(function(titleEl) {
-                titleEl.addEventListener('click', function() {
-                    const section = titleEl.parentElement;
-                    const isOpen = section.classList.contains('dars-accordion-open');
-                    if (isOpen) {
-                        section.classList.remove('dars-accordion-open');
-                    } else {
-                        // Si es acordeón exclusivo, cerrar otros
-                        accEl.querySelectorAll('.dars-accordion-section').forEach(function(sec) {
-                            sec.classList.remove('dars-accordion-open');
-                        });
-                        section.classList.add('dars-accordion-open');
-                    }
-                });
+        accEl.querySelectorAll('.dars-accordion-title').forEach(function(titleEl) {
+            titleEl.addEventListener('click', function() {
+                const section = titleEl.parentElement;
+                const isOpen = section.classList.contains('dars-accordion-open');
+                if (isOpen) {
+                    section.classList.remove('dars-accordion-open');
+                } else {
+                    // Si es acordeón exclusivo, cerrar otros
+                    accEl.querySelectorAll('.dars-accordion-section').forEach(function(sec) {
+                        sec.classList.remove('dars-accordion-open');
+                    });
+                    section.classList.add('dars-accordion-open');
+                }
             });
-        });\n"""
+        });
+    });\n"""
+        
+        js_content += "}\n\n"
 
-        # Ahora construir las asociaciones automáticas (pero *no* ejecutarlas aún)
+        # Lógica para asociar eventos Script a componentes específicos de esta página
+        js_content += "// Asociación automática de eventos Script para esta página\n"
+        
         from dars.scripts.script import Script
-
-        def traverse_and_build_bindings(component, js_lines):
+        
+        def traverse_and_bind_events(component, js_lines):
             comp_id = getattr(component, 'id', None)
-
-            # Si no tiene ID pero tiene events, generamos uno temporal
+            
+            # Si no tiene ID pero tiene eventos, generamos uno temporal
             if not comp_id and hasattr(component, 'events') and component.events:
                 import uuid
                 comp_id = f"comp_{str(uuid.uuid4())[:8]}"
                 component.id = comp_id
-
+            
             if comp_id and hasattr(component, 'events') and component.events:
                 events = getattr(component, 'events', {})
+                
                 for event_name, handler in events.items():
-                    dom_event = event_name.lower()
-                    # Si el handler es un Script (obj con get_code)
-                    if isinstance(handler, Script) or hasattr(handler, 'get_code'):
-                        try:
-                            code = handler.get_code().strip()
-                        except Exception:
-                            code = str(handler)
-                        # chequear si define una función nombrada
+                    if isinstance(handler, Script):
+                        dom_event = event_name.lower()
+                        code = handler.get_code().strip()
                         import re
                         m = re.search(r"function\s+([a-zA-Z0-9_]+)\s*\(", code, re.DOTALL | re.MULTILINE)
                         if m:
                             func_name = m.group(1)
-                            # Añadir definición de la función y binding seguro
                             js_lines.append(code)
-                            js_lines.append(
-                                f"var el = document.getElementById('{comp_id}'); if (el) el.addEventListener('{dom_event}', {func_name});"
-                            )
+                            js_line = f"document.getElementById('{comp_id}').on{dom_event} = {func_name};"
+                            js_lines.append(js_line)
                         else:
-                            # Inline anonymous function binding (con chequeo de existencia)
-                            # Encapsulamos el código en una función para no duplicar scopes
-                            func_wrapper = f"function(event) {{\n{code}\n}}"
-                            js_lines.append(f"var el = document.getElementById('{comp_id}'); if (el) el.addEventListener('{dom_event}', {func_wrapper});")
-                    else:
-                        # handler no es Script: intentar convertir a texto JS (fallback)
-                        try:
-                            code = str(handler)
-                        except Exception:
-                            code = ""
-                        if code.strip():
-                            js_lines.append(f"var el = document.getElementById('{comp_id}'); if (el) el.addEventListener('{dom_event}', function(event) {{\n{code}\n}});")
-
+                            js_line = f"document.getElementById('{comp_id}').on{dom_event} = function(event) {{\n{code}\n}};"
+                            js_lines.append(js_line)
+            
             # Recursivo en hijos
             children = getattr(component, 'children', [])
             if children and isinstance(children, (list, tuple)):
                 for child in children:
                     if child is not None:
-                        traverse_and_build_bindings(child, js_lines)
-
-        # Recolectar bindings
+                        traverse_and_bind_events(child, js_lines)
+        
+        # Recorrer el árbol de componentes de esta página
         js_lines = []
-        traverse_and_build_bindings(page_root, js_lines)
-
-        # Insertar las líneas de binding dentro de initializeEvents (con indentación)
-        if js_lines:
-            js_content += "    // Asociación automática de eventos para componentes (bindings generados)\n"
-            for line in js_lines:
-                # Añadir cada línea con 4 espacios de indent para estar dentro de initializeEvents
-                # Aseguramos nueva línea final si no existe
-                js_content += "    " + line + "\n"
-
-        # Cerrar initializeEvents
-        js_content += "}\n\n"
-
-        # Si quieres, también añadimos comentarios / debug global
-        js_content += "// Fin del runtime generado para esta página\n"
-
+        traverse_and_bind_events(page_root, js_lines)
+        js_content += "\n".join(js_lines) + "\n"
+            
         return js_content
-
-    def get_component_id(self, component, prefix="comp"):
-        """
-        Devuelve el id del componente.
-        - Si el componente ya tiene id definido, se respeta.
-        - Si no tiene, se genera uno único y se asigna al objeto (para consistencia).
-        """
-        comp_id = getattr(component, "id", None)
-        if not comp_id:
-            comp_id = self.generate_unique_id(component, prefix=prefix)
-            try:
-                component.id = comp_id
-            except Exception:
-                # si el objeto no permite asignar, seguimos usando comp_id local
-                pass
-        return comp_id
-
+        
     def render_component(self, component: Component) -> str:
         """Renderiza un componente a HTML"""
         from dars.components.basic.page import Page
@@ -1250,7 +1116,7 @@ body {
 
     def render_grid(self, grid):
         """Renderiza un GridLayout como un div con CSS grid."""
-        component_id = self.get_component_id(grid, prefix="grid")
+        component_id = self.generate_unique_id(grid)
         class_attr = f'class="dars-grid {grid.class_name or ""}"'
         style = f'display: grid; grid-template-rows: repeat({grid.rows}, 1fr); grid-template-columns: repeat({grid.cols}, 1fr); gap: {getattr(grid, "gap", "16px")};'
         # Render anchors/positions
@@ -1296,7 +1162,7 @@ body {
 
     def render_flex(self, flex):
         """Renderiza un FlexLayout como un div con CSS flexbox."""
-        component_id = self.get_component_id(flex, prefix="flex")
+        component_id = self.generate_unique_id(flex)
         class_attr = f'class="dars-flex {flex.class_name or ""}"'
         style = f'display: flex; flex-direction: {getattr(flex, "direction", "row")}; flex-wrap: {getattr(flex, "wrap", "wrap")}; justify-content: {getattr(flex, "justify", "flex-start")}; align-items: {getattr(flex, "align", "stretch")}; gap: {getattr(flex, "gap", "16px")};'
         children_html = ""
@@ -1350,7 +1216,7 @@ body {
             
     def render_text(self, text: Text) -> str:
         """Renderiza un componente Text"""
-        component_id = self.get_component_id(text, prefix="text")
+        component_id = self.generate_unique_id(text)
         class_attr = f'class="dars-text {text.class_name or ""}"'
         style_attr = f'style="{self.render_styles(text.style)}"' if text.style else ""
         
@@ -1363,13 +1229,13 @@ body {
             import uuid
             button.id = f"btn_{str(uuid.uuid4())[:8]}"
             
-        component_id =  self.get_component_id(button, prefix="btn")
+        component_id = self.generate_unique_id(button)
         class_attr = f'class="dars-button {button.class_name or ""}"'
         style_attr = f'style="{self.render_styles(button.style)}"' if button.style else ""
         type_attr = f'type="{button.button_type}"'
         disabled_attr = "disabled" if button.disabled else ""
         
-        return f'<button id="{component_id}" {class_attr} {style_attr} {type_attr} {disabled_attr}>{button.text}</button>'
+        return f'<button id="{button.id}" {class_attr} {style_attr} {type_attr} {disabled_attr}>{button.text}</button>'
         
     def render_input(self, input_comp: Input) -> str:
         """Renderiza un componente Input"""
@@ -1391,7 +1257,7 @@ body {
         
     def render_container(self, container: Container) -> str:
         """Renderiza un componente Container"""
-        component_id = self.get_component_id(container, prefix="container")
+        component_id = self.generate_unique_id(container)
         class_attr = f'class="dars-container {container.class_name or ""}"'
         style_attr = f'style="{self.render_styles(container.style)}"' if container.style else ""
 
@@ -1414,7 +1280,7 @@ body {
         
     def render_image(self, image: Image) -> str:
         """Renderiza un componente Image"""
-        component_id = self.get_component_id(image, prefix="image")
+        component_id = self.generate_unique_id(image)
         class_attr = f'class="dars-image {image.class_name or ""}"'
         style_attr = f'style="{self.render_styles(image.style)}"' if image.style else ""
         width_attr = f'width="{image.width}"' if image.width else ""
@@ -1424,7 +1290,7 @@ body {
 
     def render_link(self, link: Link) -> str:
         """Renderiza un componente Link"""
-        component_id = self.get_component_id(link, prefix="link")
+        component_id = self.generate_unique_id(link)
         class_attr = f'class="dars-link {link.class_name or ""}"'
         style_attr = f'style="{self.render_styles(link.style)}"' if link.style else ""
         target_attr = f'target="{link.target}"'
@@ -1433,7 +1299,7 @@ body {
 
     def render_textarea(self, textarea: Textarea) -> str:
         """Renderiza un componente Textarea"""
-        component_id = self.get_component_id(textarea, prefix="textarea")
+        component_id = self.generate_unique_id(textarea)
         class_attr = f'class="dars-textarea {textarea.class_name or ""}"'
         style_attr = f'style="{self.render_styles(textarea.style)}"' if textarea.style else ""
         rows_attr = f'rows="{textarea.rows}"'
@@ -1452,7 +1318,7 @@ body {
 
     def render_card(self, card: Card) -> str:
         """Renderiza un componente Card"""
-        component_id = self.get_component_id(card, prefix="card")
+        component_id = self.generate_unique_id(card)
         class_attr = f'class="dars-card {card.class_name or ""}"'
         style_attr = f'style="{self.render_styles(card.style)}"' if card.style else ""
         title_html = f'<h2>{card.title}</h2>' if card.title else ""
@@ -1464,7 +1330,7 @@ body {
 
     def render_modal(self, modal: Modal) -> str:
         """Renderiza un componente Modal"""
-        component_id = self.get_component_id(modal, prefix="modal")
+        component_id = self.generate_unique_id(modal)
         class_list = "dars-modal"
         if not modal.is_open:
             class_list += " dars-modal-hidden"
@@ -1491,7 +1357,7 @@ body {
 
     def render_navbar(self, navbar: Navbar) -> str:
         """Renderiza un componente Navbar"""
-        component_id = self.get_component_id(navbar, prefix="navbar")
+        component_id = self.generate_unique_id(navbar)
         class_attr = f'class="dars-navbar {navbar.class_name or ""}"'
         style_attr = f'style="{self.render_styles(navbar.style)}"' if navbar.style else ""
         brand_html = f'<div class="dars-navbar-brand">{navbar.brand}</div>' if navbar.brand else ""
@@ -1511,7 +1377,7 @@ body {
 
     def render_checkbox(self, checkbox: Checkbox) -> str:
         """Renderiza un componente Checkbox"""
-        component_id = self.get_component_id(checkbox, prefix="checkbox")
+        component_id = self.generate_unique_id(checkbox)
         class_attr = f'class="dars-checkbox {checkbox.class_name or ""}"'
         style_attr = f'style="{self.render_styles(checkbox.style)}"' if checkbox.style else ""
         checked_attr = "checked" if checkbox.checked else ""
@@ -1529,7 +1395,7 @@ body {
 
     def render_radiobutton(self, radio: RadioButton) -> str:
         """Renderiza un componente RadioButton"""
-        component_id = self.get_component_id(radio, prefix="radiobutton")
+        component_id = self.generate_unique_id(radio)
         class_attr = f'class="dars-radio {radio.class_name or ""}"'
         style_attr = f'style="{self.render_styles(radio.style)}"' if radio.style else ""
         checked_attr = "checked" if radio.checked else ""
@@ -1547,7 +1413,7 @@ body {
 
     def render_select(self, select: Select) -> str:
         """Renderiza un componente Select"""
-        component_id = self.get_component_id(select, prefix="select")
+        component_id = self.generate_unique_id(select)
         class_attr = f'class="dars-select {select.class_name or ""}"'
         style_attr = f'style="{self.render_styles(select.style)}"' if select.style else ""
         disabled_attr = "disabled" if select.disabled else ""
@@ -1573,7 +1439,7 @@ body {
 
     def render_slider(self, slider: Slider) -> str:
         """Renderiza un componente Slider"""
-        component_id = self.get_component_id(slider, prefix="slider")
+        component_id = self.generate_unique_id(slider)
         class_attr = f'class="dars-slider {slider.class_name or ""}"'
         style_attr = f'style="{self.render_styles(slider.style)}"' if slider.style else ""
         disabled_attr = "disabled" if slider.disabled else ""
@@ -1594,7 +1460,7 @@ body {
 
     def render_datepicker(self, datepicker: DatePicker) -> str:
         """Renderiza un componente DatePicker"""
-        component_id = self.get_component_id(datepicker, prefix="datepicker")
+        component_id = self.generate_unique_id(datepicker)
         class_attr = f'class="dars-datepicker {datepicker.class_name or ""}"'
         style_attr = f'style="{self.render_styles(datepicker.style)}"' if datepicker.style else ""
         disabled_attr = "disabled" if datepicker.disabled else ""
@@ -1658,7 +1524,7 @@ body {
 
     def render_generic_component(self, component: Component) -> str:
         """Renderiza un componente genérico"""
-        component_id = self.get_component_id(component, prefix="dars-generic-component-")
+        component_id = self.generate_unique_id(component)
         class_attr = f'class="{component.class_name or ""}"'
         style_attr = f'style="{self.render_styles(component.style)}"' if component.style else ""
         
@@ -1668,4 +1534,5 @@ body {
             children_html += self.render_component(child)
             
         return f'<div id="{component_id}" {class_attr} {style_attr}>{children_html}</div>'
+
 
