@@ -2,7 +2,7 @@
 
 ---
 
-## Barrel Import (from v1.0.5)
+## Barrel Import
 
 You can now import all main components and modules with a single line:
 
