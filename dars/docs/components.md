@@ -253,6 +253,20 @@ Use `Page` as the root of each page in the multipage system. Allows passing chil
 | `children`  | list   | List of child components                            |
 | `anchors`   | dict   | Optional anchor points for child placement          |
 
+#### Page Scripts System
+
+The new page scripts system allows assigning scripts to specific pages instead of globally:
+
+* **Adding Scripts**:
+  Use the `add_script()` method on a page instance.
+
+```python
+from dars.scripts.dscript import dScript
+
+index.add_script(
+    dScript(code="console.log('Hello world')")
+)
+```
 
 ### Text
 
