@@ -1,4 +1,4 @@
-# Dars - Ejemplos
+# Dars - Examples
 
-Esta carpeta contiene ejemplos que demuestran las capacidades del framework Dars.
+This folder contains all Dars framework templates.
 
