@@ -52,7 +52,7 @@ Welcome to Dars, a modern Python framework for building web applications with re
 7.  **Adding Custom File Types**
 
 ```python
-app.rTimeCompile().add_file_types = ".js,.ts,.css"
+app.rTimeCompile().add_file_types = ".js,.css"
 ```
 
 * Include any extension your project uses beyond default Python files.
