@@ -1,4 +1,4 @@
-# Dars - Documentación de Exportadores
+# Dars - Exporter Documentation
 
 ## Introduction
 
