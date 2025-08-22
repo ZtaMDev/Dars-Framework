@@ -11,11 +11,11 @@
     }
 
 // Asociación automática de eventos Script para esta página
-document.getElementById('comp_af61d052').onclick = function(event) {
+document.getElementById('comp_938bb5b8').onclick = function(event) {
 document.getElementById('getting-started-section').scrollIntoView({
                                     behavior: 'smooth'
                                 });
 };
-document.getElementById('comp_6a8c75a1').onclick = function(event) {
+document.getElementById('comp_0cf8e1a1').onclick = function(event) {
 window.open('https://github.com/ZtaMDev/Dars-Framework', '_blank');
 };
