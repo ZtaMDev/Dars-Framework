@@ -19,7 +19,7 @@ Welcome to Dars, a modern Python framework for building web applications with re
 5. **Component Search and Modification**
    All components in Dars now support a powerful search and modification system:
 
-   ```python
+      ```python
    from dars.all import *
 
    app = App(title="Search Demo")
@@ -48,6 +48,15 @@ Welcome to Dars, a modern Python framework for building web applications with re
 
    app.add_page(name="main", root=page)
    ```
+
+7.  **Adding Custom File Types**
+
+```python
+app.rTimeCompile().add_file_types = ".js,.ts,.css"
+```
+
+* Include any extension your project uses beyond default Python files.
+
 
 6. **Official Templates**  
    Browse ready-to-use examples in the following files:
