@@ -40,6 +40,6 @@ if (document.readyState === 'loading') {
 }
 
     // Script: dScript
-    console.log('Dars-framework version: 1.0.61 running...')
+    console.log('Dars-framework version: 1.0.62 running...')
 
 });
