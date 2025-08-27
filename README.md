@@ -4,7 +4,7 @@ Dars is a Python UI framework for building modern, interactive web apps with Pyt
 
 > Some Javascript or frontend stack required.
 
-```python
+```bash
 pip install dars-framework
 ```
 
