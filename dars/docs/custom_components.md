@@ -9,7 +9,7 @@ class Button(Component):
         
         self.title = title
         self.id = id
-        self.set_event('click', handler=(""))
+        self.set_event('click', dScript("console.log('Hello from dars events')"))
     def render(self, exporter: 'Exporter') -> str:
         # Use the exporter to consistently render children
         children_html = self.render_children(exporter)
