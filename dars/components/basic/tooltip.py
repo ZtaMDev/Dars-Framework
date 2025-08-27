@@ -3,11 +3,12 @@ from typing import Optional
 
 class Tooltip(Component):
     """
-    Tooltip: cuadro de información al pasar el cursor.
-    text: texto a mostrar
-    child: componente o HTML envuelto
-    position: top, right, bottom, left (opcional)
+    Tooltip: information box on hover.
+    text: text to display
+    child: wrapped component or HTML
+    position: top, right, bottom, left (optional)
     """
+
     def __init__(self, text: str, child: Component, position: Optional[str] = "top", **props):
         super().__init__(**props)
         self.text = text

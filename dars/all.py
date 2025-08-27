@@ -42,7 +42,7 @@ from dars.scripts.script import *
 from dars.scripts.dscript import dScript
 
 # Exporters (optional, for direct use)
-# from dars.exporters.web.html_css_js import HTMLCSSJSExporter
+from dars.exporters.web.html_css_js import HTMLCSSJSExporter
 
 # CLI (optional, for advanced usage)
 # from dars.cli.main import main as dars_cli_main

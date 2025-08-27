@@ -63,16 +63,34 @@ class Exporter(ABC):
         
     def generate_unique_id(self, component: 'Component', prefix: str = "component") -> str:
         """Genera un ID único para un componente si no tiene uno definido."""
-        # Si el usuario ya puso un id, usarlo siempre
         if getattr(component, "id", None):
             return component.id
 
-        # Si no tiene id, generar uno único pero persistente
-        unique = f"{prefix}_{hex(id(component))}"
+        # Si ya existe un mapping de este objeto en la sesión, usarlo
+        if not hasattr(self, "_component_ids"):
+            self._component_ids = {}
+
+        obj_key = id(component)  # memoria (solo para lookup durante export actual)
+
+        if obj_key in self._component_ids:
+            return self._component_ids[obj_key]
+
+        # Nuevo id secuencial
+        if not hasattr(self, "_id_counter"):
+            self._id_counter = 0
+        self._id_counter += 1
+
+        unique = f"{prefix}_{self._id_counter}"
+        self._component_ids[obj_key] = unique
+
+        # Asignar también al componente
         try:
-            component.id = unique  # lo guardamos en el componente
+            component.id = unique
         except Exception:
-            pass  # por si el objeto no permite asignación
+            pass
+
         return unique
+
+
 
 

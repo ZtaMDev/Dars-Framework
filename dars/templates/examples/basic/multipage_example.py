@@ -63,8 +63,5 @@ app.add_page("home", home, title="Inicio", index=True)
 app.add_page("about", about, title="Sobre Nosotros")
 app.add_page("contact", contact, title="Contacto")
 
-# También sigue funcionando el modo clásico (single-page):
-#app.set_root(home)
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.rTimeCompile()

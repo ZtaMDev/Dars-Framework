@@ -512,5 +512,5 @@ app.add_global_style('button:hover', {
     'box-shadow': '0 4px 8px rgba(0,0,0,0.2)'
 })
 
-if __name__ == "__main__":
-    app.rTimeCompile()  # Preview/compilación rápida
+if __name__ == '__main__':
+    app.rTimeCompile()

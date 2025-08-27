@@ -8,6 +8,5 @@ grid.add_child(Button("Center"), row=0, col=1, anchor="center")
 grid.add_child(Image(src="https://placehold.co/120x120", alt="Demo", style={"width": "100%"}), row=1, col=0, col_span=2, anchor=AnchorPoint(x="center", y="bottom"))
 
 app.set_root(grid)
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.rTimeCompile()

@@ -19,5 +19,5 @@ page2 = Page(page2_flex)
 app.add_page("grid", page1, title="Grid Page", index=True)
 app.add_page("flex", page2, title="Flex Page")
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.rTimeCompile()

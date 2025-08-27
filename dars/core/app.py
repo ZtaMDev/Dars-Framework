@@ -3,7 +3,7 @@ from .component import Component
 from .events import EventManager
 
 class Page:
-    """Representa una página individual en la app Dars (multipágina)."""
+    """Represents an individual page in the Dars app (multipage)."""
     def __init__(self, name: str, root: 'Component', title: str = None, meta: dict = None, index: bool = False, scripts: Optional[List[Any]] = None):
         self.name = name  # slug o nombre de la página
         self.root = root  # componente raíz de la página
@@ -13,10 +13,9 @@ class Page:
         self.scripts: List[Any] = list(scripts) if scripts else []
 
     def attr(self, **attrs):
-        """
-        Setter/getter de atributos para Page, similar a Component.attr().
-        Si se pasan kwargs, setea atributos; si no, devuelve un dict con los atributos editables.
-        """
+        """Setter/getter for Page attributes, similar to Component.attr().  
+        If kwargs are provided, sets attributes; otherwise, returns a dict with the editable attributes."""  
+
         if attrs:
             for key, value in attrs.items():
                 if hasattr(self, key):
@@ -36,13 +35,12 @@ class Page:
     # Métodos para manejar scripts
     # -----------------------------
     def add_script(self, script: Any):
-        """
-        Agrega un script a esta página.
-        - Si 'script' es una instancia (p. ej. InlineScript/FileScript/DScript), se añade tal cual.
-        - Si 'script' es una cadena, se interpreta como InlineScript (código).
-        - Si 'script' es un dict, se añade tal cual (fallback).
-        Devuelve self para encadenar llamadas.
-        """
+        """Adds a script to this page.  
+        - If 'script' is an instance (e.g., InlineScript/FileScript/DScript), it is added as is.  
+        - If 'script' is a string, it is interpreted as an InlineScript (code).  
+        - If 'script' is a dict, it is added as is (fallback).  
+        Returns self to allow call chaining."""  
+
         # si es str => interpretarlo como inline
         if isinstance(script, str):
             created = self._make_inline_script(script)
@@ -64,81 +62,77 @@ class Page:
         return self.add_script(script)
 
     def add_inline_script(self, code: str, **kwargs):
-        """Convenience: añade un InlineScript a la página (code = JS o similar)."""
+        """Convenience: adds an InlineScript to the page (code = JS or similar)."""
         s = self._make_inline_script(code, **kwargs)
         self.scripts.append(s)
         return self
 
     def add_file_script(self, path: str, **kwargs):
-        """Convenience: añade un FileScript (referencia a archivo .js/.ts/etc.)"""
+        """Convenience: adds a FileScript (reference to a .js/.ts/etc. file)."""
         s = self._make_file_script(path, **kwargs)
         self.scripts.append(s)
         return self
 
     def add_dscript(self, obj: Any, **kwargs):
-        """Convenience: intenta crear/añadir un DScript (si existe la clase)."""
+        """Convenience: attempts to create/add a DScript (if the class exists)."""
         s = self._make_dscript(obj, **kwargs)
         self.scripts.append(s)
         return self
 
     def get_scripts(self) -> List[Any]:
-        """Retorna la lista de scripts añadidos a la página."""
+        """Returns the list of scripts added to the page."""
         return list(self.scripts)
 
     # -----------------------------
     # Helpers para construcción segura
     # -----------------------------
     def _make_inline_script(self, code: str, **kwargs) -> Any:
-        """
-        Intenta crear una instancia InlineScript si existe en dars.scripts.*.
-        Si no, devuelve un dict fallback: {'type':'inline','code':..., **kwargs}
-        """
+        """Attempts to create an InlineScript instance if it exists in dars.scripts.*.  
+            Otherwise, returns a fallback dict: {'type': 'inline', 'code': ..., **kwargs}"""
+
         try:
             # intentamos import común (ajusta según tu layout de módulos si hace falta)
-            from dars.scripts import InlineScript  # type: ignore
+            from dars.scripts.script import InlineScript  # type: ignore
             return InlineScript(code, **kwargs)
         except Exception:
             try:
-                from dars.scripts.inline import InlineScript  # type: ignore
+                from dars.scripts.script import InlineScript  # type: ignore
                 return InlineScript(code, **kwargs)
             except Exception:
                 # fallback: dict simple que contiene lo mínimo
                 return {'type': 'inline', 'code': code, **kwargs}
 
     def _make_file_script(self, path: str, **kwargs) -> Any:
-        """
-        Intenta crear una instancia FileScript si existe. Si no, devuelve dict fallback.
-        """
+        """Attempts to create a FileScript instance if it exists. Otherwise, returns a fallback dict."""
+
         try:
-            from dars.scripts import FileScript  # type: ignore
+            from dars.scripts.script import FileScript  # type: ignore
             return FileScript(path, **kwargs)
         except Exception:
             try:
-                from dars.scripts.file import FileScript  # type: ignore
+                from dars.scripts.script import FileScript  # type: ignore
                 return FileScript(path, **kwargs)
             except Exception:
                 return {'type': 'file', 'path': path, **kwargs}
 
     def _make_dscript(self, obj: Any, **kwargs) -> Any:
-        """
-        Intenta crear una instancia DScript si existe. Si no, guarda el objeto con marca.
-        """
+        """Attempts to create a DScript instance if it exists. Otherwise, stores the object with a marker."""
         try:
-            from dars.scripts import DScript  # type: ignore
-            return DScript(obj, **kwargs)
+            from dars.scripts.dscript import dScript  # type: ignore
+            return dScript(obj, **kwargs)
         except Exception:
             # si ya es dict o similar, solo anotamos el tipo
             return {'type': 'dscript', 'value': obj, **kwargs}
 
 class App:
-    """Clase principal que representa una aplicación Dars"""
+    """Main class that represents a Dars application"""
 
     def rTimeCompile(self, exporter=None, port=None, add_file_types=None):
         """
-        Genera una preview rápida de la app en un servidor local usando un exportador
-        (por defecto HTMLCSSJSExporter) y sirviendo los archivos en un directorio temporal.
-        No abre el navegador automáticamente. El servidor se detiene con Ctrl+C.
-        Puedes pasar el puerto como argumento de línea de comandos: python main.py --port 8080
+        Generates a quick preview of the app on a local server using an exporter  
+        (default: HTMLCSSJSExporter) and serving the files from a temporary directory.  
+        Does not open the browser automatically. The server stops with Ctrl+C.  
+        You can pass the port as a command-line argument: python main.py --port 8080  
         """
         import threading
         import time
@@ -514,6 +508,7 @@ class App:
         self.manifest = manifest  # Para PWA manifest.json
         
         # Colores para PWA y tema
+        self.icons = config.get('icons', [])
         self.theme_color = theme_color
         self.background_color = background_color
         
@@ -569,30 +564,30 @@ class App:
         self.config.setdefault('charset', 'UTF-8')
         
     def set_root(self, component: Component):
-        """Establece el componente raíz de la aplicación (modo single-page retrocompatible)"""
+        """Sets the root component of the application (backward-compatible single-page mode)."""
         self.root = component
 
     def add_page(self, name: str, root: 'Component', title: str = None, meta: dict = None, index: bool = False):
         """
-        Agrega una página multipágina a la app.
-        name es el slug/clave, root el componente raíz.
-        Si index=True, esta página será la principal (exportada como index.html).
-        Si varias páginas tienen index=True, la última registrada será la principal.
+        Adds a multipage page to the app.  
+        `name` is the slug/key, `root` the root component.  
+        If `index=True`, this page will be the main one (exported as index.html).  
+        If multiple pages have `index=True`, the last registered one will be the main page.  
         """
         if name in self._pages:
-            raise ValueError(f"Ya existe una página con el nombre '{name}'")
+            raise ValueError(f"Page already exists with this name: '{name}'")
         self._pages[name] = Page(name, root, title, meta, index=index)
         if index:
             self._index_page = name
 
 
     def get_page(self, name: str) -> 'Page':
-        """Obtiene una página registrada por su nombre."""
+        """Obtain one registered page by name."""
         return self._pages.get(name)
 
     def get_index_page(self) -> 'Page':
         """
-        Devuelve la página marcada como index, o la primera registrada si ninguna tiene index=True.
+        Returns the index page, or the first one if none has index=True.
         """
         # Prioridad: explícita, luego la primera
         if hasattr(self, '_index_page') and self._index_page and self._index_page in self._pages:
@@ -608,53 +603,53 @@ class App:
 
     @property
     def pages(self) -> Dict[str, 'Page']:
-        """Devuelve el diccionario de páginas registradas (multipágina)."""
+        """Returns the registered pages dictionary (multipage)."""
         return self._pages
 
     def is_multipage(self) -> bool:
-        """Indica si la app está en modo multipágina (True si hay páginas registradas)."""
+        """Indicate if the app is in multipage mode."""
         return bool(self._pages)
         
     def add_script(self, script: 'Script'):
-        """Agrega un script a la aplicación"""
+        """Adds a script to the app"""
         self.scripts.append(script)
         
     def add_global_style(self, selector: str, styles: Dict[str, Any]):
-        """Agrega estilos globales a la aplicación"""
+        """Adds a global style to the app"""
         self.global_styles[selector] = styles
         
     def set_theme(self, theme: str):
-        """Establece el tema de la aplicación"""
+        """Set the theme for the app"""
         self.config['theme'] = theme
         
     def set_favicon(self, favicon_path: str):
-        """Establece el favicon de la aplicación"""
+        """Set the favicon for the app"""
         self.favicon = favicon_path
     
     def set_icon(self, icon_path: str):
-        """Establece el icono principal de la aplicación"""
+        """Set the principal icon for the app"""
         self.icon = icon_path
     
     def set_apple_touch_icon(self, icon_path: str):
-        """Establece el icono para dispositivos Apple"""
+        """Set de icon for apple devices"""
         self.apple_touch_icon = icon_path
     
     def set_manifest(self, manifest_path: str):
-        """Establece el archivo manifest para PWA"""
+        """Set the manifes for PWA"""
         self.manifest = manifest_path
     
     def add_keyword(self, keyword: str):
-        """Añade una palabra clave para SEO"""
+        """Add a keyword for SEO"""
         if keyword not in self.keywords:
             self.keywords.append(keyword)
     
     def add_keywords(self, keywords: List[str]):
-        """Añade múltiples palabras clave para SEO"""
+        """Add multiple keywords for SEO"""
         for keyword in keywords:
             self.add_keyword(keyword)
     
     def set_open_graph(self, **og_data):
-        """Configura propiedades Open Graph para redes sociales"""
+        """Configure properties of Open Graph for social media sharing"""
         if 'title' in og_data:
             self.og_title = og_data['title']
         if 'description' in og_data:
@@ -669,7 +664,7 @@ class App:
             self.og_site_name = og_data['site_name']
     
     def set_twitter_card(self, card_type: str = 'summary', site: str = '', creator: str = ''):
-        """Configura Twitter Card meta tags"""
+        """Set the Twitter Card meta tags"""
         self.twitter_card = card_type
         if site:
             self.twitter_site = site
@@ -677,7 +672,7 @@ class App:
             self.twitter_creator = creator
     
     def enable_pwa(self, name: str = None, short_name: str = None, display: str = 'standalone'):
-        """Habilita configuración PWA (Progressive Web App)"""
+        """Enable PWA settings (Progressive Web App)"""
         self.pwa_enabled = True
         if name:
             self.pwa_name = name
@@ -686,13 +681,13 @@ class App:
         self.pwa_display = display
     
     def set_theme_colors(self, theme_color: str, background_color: str = None):
-        """Establece colores del tema para PWA y navegadores"""
+        """Select the theme color of the PWA theme and browsers themes """
         self.theme_color = theme_color
         if background_color:
             self.background_color = background_color
     
     def get_meta_tags(self) -> Dict[str, str]:
-        """Obtiene todos los meta tags configurados como diccionario"""
+        """Obtain all tags of as a dictionary"""
         meta_tags = {}
         
         # Meta tags básicos
@@ -727,7 +722,7 @@ class App:
         return meta_tags
     
     def get_open_graph_tags(self) -> Dict[str, str]:
-        """Obtiene todos los tags Open Graph configurados"""
+        """ Obtain all tags of Open Graph"""
         og_tags = {}
         
         if self.og_title:
@@ -746,7 +741,7 @@ class App:
         return og_tags
     
     def get_twitter_tags(self) -> Dict[str, str]:
-        """Obtiene todos los tags de Twitter Card configurados"""
+        """Obtain all tags of Twitter Cards"""
         twitter_tags = {}
         
         if self.twitter_card:
@@ -759,44 +754,44 @@ class App:
         return twitter_tags
         
     def export(self, exporter: 'Exporter', output_path: str) -> bool:
-        """Exporta la aplicación usando el exportador especificado"""
+        """Exports the application to the specified path using the exporter"""
         if not self.root:
             raise ValueError("No se ha establecido un componente raíz")
         
         return exporter.export(self, output_path)
         
     def validate(self) -> List[str]:
-        """Valida la aplicación y retorna una lista de errores (single-page y multipage)"""
+        """Validate the applicatiob and return a error lines"""
         errors = []
 
         # Validar título
         if not self.title:
-            errors.append("El título de la aplicación no puede estar vacío")
+            errors.append("The application title can't be empty.")
 
         # Validación single-page y multipage
         if self.is_multipage():
             if not self._pages:
-                errors.append("La app está en modo multipágina pero no hay páginas registradas.")
+                errors.append("The app is on multipage mode but there are no pages registered.")
             for name, page in self._pages.items():
                 if not page.root:
-                    errors.append(f"La página '{name}' no tiene componente raíz.")
+                    errors.append(f"The page '{name}' hasn't a root component.")
                 else:
                     errors.extend(self._validate_component(page.root, path=f"pages['{name}']"))
         else:
             if not self.root:
-                errors.append("No se ha establecido un componente raíz (single-page mode)")
+                errors.append("Can't find a root component (single-page mode)")
             else:
                 errors.extend(self._validate_component(self.root))
 
         return errors
         
     def _validate_component(self, component: Component, path: str = "root") -> List[str]:
-        """Valida un componente y sus hijos recursivamente"""
+        """Validate a component and its children recursively"""
         errors = []
 
         # Validar que el componente tenga un método render
         if not hasattr(component, 'render'):
-            errors.append(f"El componente en {path} no tiene método render")
+            errors.append(f"The component in {path} doesn't have render method")
             
         # Validar hijos
         for i, child in enumerate(component.children):
@@ -806,15 +801,14 @@ class App:
         return errors
 
     def _count_components(self, component: Component) -> int:
-        """Cuenta el número total de componentes en la app (single-page y multipage)"""
+        """Count the total number of components in the app"""
         count = 1
         for child in component.children:
             count += self._count_components(child)
         return count
     def get_component_tree(self) -> str:
         """
-        Devuelve una representación legible (string) del árbol de componentes.
-        Soporta single-page y multipage.
+        Returns a legible representation of the component tree.
         """
         def tree_str(component, indent=0):
             pad = '  ' * indent
@@ -825,7 +819,7 @@ class App:
 
         if self.is_multipage():
             if not self._pages:
-                return "[Dars] No hay páginas registradas."
+                return "[Dars] No pages registered."
             result = []
             for name, page in self._pages.items():
                 result.append(f"Página: {name} (title={page.title})\n" + tree_str(page.root))
@@ -833,10 +827,10 @@ class App:
         elif self.root:
             return tree_str(self.root)
         else:
-            return "[Dars] No hay componente raíz definido."
+            return "[Dars] No root component defined."
         
     def _component_to_dict(self, component: Component) -> Dict[str, Any]:
-        """Convierte un componente a diccionario para inspección"""
+        """Convert a component to a dictionary for inspection"""
         return {
             'type': component.__class__.__name__,
             'id': component.id,
@@ -847,7 +841,7 @@ class App:
         }
         
     def find_component_by_id(self, component_id: str) -> Optional[Component]:
-        """Busca un componente por su ID (soporta multipage y single-page)"""
+        """Find a component by its ID (soporta multipage y single-page)"""
         if self.is_multipage():
             for page in self._pages.values():
                 result = self._find_component_recursive(page.root, component_id)
@@ -860,7 +854,7 @@ class App:
             return None
 
     def _find_component_recursive(self, component: Component, target_id: str) -> Optional[Component]:
-        """Busca un componente recursivamente por ID"""
+        """Search components recursively by ID"""
         if component.id == target_id:
             return component
         for child in getattr(component, 'children', []):
@@ -870,7 +864,7 @@ class App:
         return None
         
     def get_stats(self) -> Dict[str, Any]:
-        """Retorna estadísticas de la aplicación (soporta single-page y multipage)"""
+        """Return application stadistics (single-page and multipage)"""
         if self.is_multipage():
             total_components = 0
             max_depth = 0
@@ -904,7 +898,7 @@ class App:
             }
 
     def calculate_max_depth(self) -> int:
-        """Calcula la profundidad máxima de la app (soporta multipage y single-page)"""
+        """Calculates the maximun depth of a component tree (single page and multipage)"""
         if self.is_multipage():
             return max((self._calculate_max_depth(page.root) for page in self._pages.values() if page.root), default=0)
         elif self.root:
@@ -913,7 +907,7 @@ class App:
             return 0
 
     def _calculate_max_depth(self, component: Component, current_depth: int = 0) -> int:
-        """Calcula la profundidad máxima de un árbol de componentes (uso interno)"""
+        """Calculates the maximun depth of a component tree (internal use)"""
         if not component or not getattr(component, 'children', []):
             return current_depth
         return max(self._calculate_max_depth(child, current_depth + 1) for child in component.children)

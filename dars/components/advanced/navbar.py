@@ -2,7 +2,7 @@ from dars.core.component import Component
 from typing import Optional, Dict, Any, List
 
 class Navbar(Component):
-    """Componente para crear barras de navegación."""
+    """Component to create navigation bars."""
     def __init__(
         self,
         *children,

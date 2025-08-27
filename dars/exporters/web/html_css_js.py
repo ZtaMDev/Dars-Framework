@@ -175,6 +175,7 @@ class HTMLCSSJSExporter(Exporter):
             # Generar archivos PWA si está habilitado
             if getattr(app, 'pwa_enabled', False):
                 self._generate_pwa_files(app, output_path)
+            
 
             return True
         except Exception as e:
@@ -226,32 +227,61 @@ class HTMLCSSJSExporter(Exporter):
             # Si el usuario define icons=[] explícito, no ponemos icons
             if isinstance(user_icons, list) and len(user_icons) == 0:
                 return None
+            
+            # Obtener project_root para rutas relativas
+            app_source = getattr(app, '__source__', None)
+            if app_source is None and hasattr(app, 'source_file'):
+                app_source = app.source_file
+            if app_source is None:
+                project_root = os.getcwd()
+            else:
+                project_root = os.path.dirname(os.path.abspath(app_source))
+            
             # Si el usuario define iconos personalizados
             icons_manifest = []
             icons_dir = os.path.join(output_path, "icons")
             os.makedirs(icons_dir, exist_ok=True)
+            
             for icon in user_icons:
                 if isinstance(icon, dict):
                     src = icon.get("src")
-                    if src and os.path.isfile(src):
-                        # Copiamos el icono al output
-                        dest_path = os.path.join(icons_dir, os.path.basename(src))
-                        shutil.copy(src, dest_path)
-                        icon["src"] = f"icons/{os.path.basename(src)}"
-                    icons_manifest.append(icon)
+                    if src:
+                        # Resolver ruta relativa a project_root
+                        src_path = os.path.join(project_root, src) if not os.path.isabs(src) else src
+                        if os.path.isfile(src_path):
+                            # Copiamos el icono al output
+                            dest_path = os.path.join(icons_dir, os.path.basename(src))
+                            shutil.copy(src_path, dest_path)
+                            icon_copy = icon.copy()  # No modificar el original
+                            icon_copy["src"] = f"/icons/{os.path.basename(src)}"
+                            icons_manifest.append(icon_copy)
+                        else:
+                            # Si no existe, usar la ruta tal cual (podría ser URL)
+                            icons_manifest.append(icon)
+                    else:
+                        icons_manifest.append(icon)
                 elif isinstance(icon, str):
                     # Si solo es una ruta, la copiamos y generamos el dict
-                    if os.path.isfile(icon):
+                    src_path = os.path.join(project_root, icon) if not os.path.isabs(icon) else icon
+                    if os.path.isfile(src_path):
                         dest_path = os.path.join(icons_dir, os.path.basename(icon))
-                        shutil.copy(icon, dest_path)
+                        shutil.copy(src_path, dest_path)
                         icons_manifest.append({
                             "src": f"icons/{os.path.basename(icon)}",
                             "sizes": "192x192",
                             "type": "image/png",
                             "purpose": "any maskable"
                         })
+                    else:
+                        # Si no existe, asumir que es URL
+                        icons_manifest.append({
+                            "src": icon,
+                            "sizes": "192x192",
+                            "type": "image/png"
+                        })
             return icons_manifest if icons_manifest else None
-        # Si no hay icons definidos, ponemos por defecto
+        
+        # Si no hay icons definidos, poner por defecto
         return [
             {
                 "src": "icons/icon-192x192.png",
@@ -1106,19 +1136,18 @@ body {
         from dars.scripts.script import Script
 
         def traverse_and_build_bindings(component, js_lines):
-            comp_id = getattr(component, 'id', None)
-
-            # Si no tiene ID pero tiene events, generamos uno temporal
-            if not comp_id and hasattr(component, 'events') and component.events:
-                import uuid
-                comp_id = f"comp_{str(uuid.uuid4())[:8]}"
-                component.id = comp_id
+            # SIEMPRE obtener el id con la misma función que usa el render
+            from dars.core.component import Component
+            if isinstance(component, Component):
+                comp_id = self.get_component_id(component)  # <-- usa SIEMPRE esta
+            else:
+                comp_id = getattr(component, "id", None)
 
             if comp_id and hasattr(component, 'events') and component.events:
                 events = getattr(component, 'events', {})
                 for event_name, handler in events.items():
                     dom_event = event_name.lower()
-                    # Si el handler es un Script (obj con get_code)
+                    from dars.scripts.script import Script
                     if isinstance(handler, Script) or hasattr(handler, 'get_code'):
                         try:
                             code = handler.get_code().strip()
@@ -1126,34 +1155,32 @@ body {
                             code = str(handler)
                         # chequear si define una función nombrada
                         import re
-                        m = re.search(r"function\s+([a-zA-Z0-9_]+)\s*\(", code, re.DOTALL | re.MULTILINE)
+                        m = re.search(r"function\s+([a-zA-Z0-9_]+)\s*\(", code)
                         if m:
                             func_name = m.group(1)
-                            # Añadir definición de la función y binding seguro
                             js_lines.append(code)
                             js_lines.append(
                                 f"var el = document.getElementById('{comp_id}'); if (el) el.addEventListener('{dom_event}', {func_name});"
                             )
                         else:
-                            # Inline anonymous function binding (con chequeo de existencia)
-                            # Encapsulamos el código en una función para no duplicar scopes
                             func_wrapper = f"function(event) {{\n{code}\n}}"
-                            js_lines.append(f"var el = document.getElementById('{comp_id}'); if (el) el.addEventListener('{dom_event}', {func_wrapper});")
+                            js_lines.append(
+                                f"var el = document.getElementById('{comp_id}'); if (el) el.addEventListener('{dom_event}', {func_wrapper});"
+                            )
                     else:
-                        # handler no es Script: intentar convertir a texto JS (fallback)
-                        try:
-                            code = str(handler)
-                        except Exception:
-                            code = ""
-                        if code.strip():
-                            js_lines.append(f"var el = document.getElementById('{comp_id}'); if (el) el.addEventListener('{dom_event}', function(event) {{\n{code}\n}});")
+                        code = str(handler).strip()
+                        if code:
+                            js_lines.append(
+                                f"var el = document.getElementById('{comp_id}'); if (el) el.addEventListener('{dom_event}', function(event) {{\n{code}\n}});"
+                            )
 
-            # Recursivo en hijos
-            children = getattr(component, 'children', [])
+            # Recorrer hijos
+            children = getattr(component, "children", [])
             if children and isinstance(children, (list, tuple)):
                 for child in children:
                     if child is not None:
                         traverse_and_build_bindings(child, js_lines)
+
 
         # Recolectar bindings
         js_lines = []
@@ -1196,6 +1223,28 @@ body {
         from dars.components.basic.page import Page
         from dars.components.layout.grid import GridLayout
         from dars.components.layout.flex import FlexLayout
+        
+        # Lista de componentes built-in de Dars que NO deben usar su propio método render()
+        builtin_components = [
+            Page, GridLayout, FlexLayout, Text, Button, Input, Container, Image, Link, 
+            Textarea, Card, Modal, Navbar, Checkbox, RadioButton, Select, Slider, 
+            DatePicker, Table, Tabs, Accordion, ProgressBar, Spinner, Tooltip
+        ]
+        
+        # Verificar si es un componente personalizado (no built-in)
+        is_custom_component = True
+        for builtin_type in builtin_components:
+            if isinstance(component, builtin_type):
+                is_custom_component = False
+                break
+        
+        # Solo llamar al método render() del componente si es personalizado
+        if is_custom_component and hasattr(component, 'render') and callable(component.render):
+            try:
+                return component.render(self)  # Pasar el exporter como argumento
+            except Exception as e:
+                print(f"Error al renderizar componente personalizado {component.__class__.__name__}: {e}")
+        
         if isinstance(component, Page):
             return self.render_page(component)
         if isinstance(component, GridLayout):
@@ -1373,7 +1422,7 @@ body {
         
     def render_input(self, input_comp: Input) -> str:
         """Renderiza un componente Input"""
-        component_id = self.generate_unique_id(input_comp)
+        component_id = self.get_component_id(input_comp, prefix="input")
         class_attr = f'class="dars-input {input_comp.class_name or ""}"'
         style_attr = f'style="{self.render_styles(input_comp.style)}"' if input_comp.style else ""
         type_attr = f'type="{input_comp.input_type}"'
@@ -1657,15 +1706,20 @@ body {
         return f'<div class="dars-tooltip dars-tooltip-{tooltip.position}">{self.render_component(tooltip.child) if hasattr(tooltip.child, "render") else tooltip.child}<span class="dars-tooltip-text">{tooltip.text}</span></div>'
 
     def render_generic_component(self, component: Component) -> str:
-        """Renderiza un componente genérico"""
-        component_id = self.get_component_id(component, prefix="dars-generic-component-")
+        """Renderiza un componente genérico con estructura básica"""
+        component_id = self.get_component_id(component, prefix="comp")
         class_attr = f'class="{component.class_name or ""}"'
         style_attr = f'style="{self.render_styles(component.style)}"' if component.style else ""
         
-        # Renderizar hijos
+        # Renderizar hijos usando el exporter
         children_html = ""
         for child in component.children:
             children_html += self.render_component(child)
             
-        return f'<div id="{component_id}" {class_attr} {style_attr}>{children_html}</div>'
-
+        # Agregar eventos como data attributes para referencia
+        events_attr = ""
+        if component.events:
+            for event_name in component.events:
+                events_attr += f' data-event-{event_name}="true"'
+        
+        return f'<div id="{component_id}" {class_attr} {style_attr}{events_attr}>{children_html}</div>'

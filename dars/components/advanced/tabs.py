@@ -3,11 +3,12 @@ from typing import List, Optional
 
 class Tabs(Component):
     """
-    Componente de navegación por pestañas.
-    tabs: Lista de títulos de pestañas
-    panels: Lista de componentes o strings (contenido de cada pestaña)
-    selected: Índice de la pestaña activa (opcional)
+    Tab navigation component.
+    tabs: List of tab titles
+    panels: List of components or strings (content of each tab)
+    selected: Index of the active tab (optional)
     """
+
     def __init__(self, tabs: List[str], panels: List[Component], selected: Optional[int]=0, minimum_logic: bool = True, **props):
         super().__init__(**props)
         self.tabs = tabs

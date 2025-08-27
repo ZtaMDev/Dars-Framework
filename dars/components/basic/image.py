@@ -2,7 +2,7 @@ from dars.core.component import Component
 from typing import Optional, Dict, Any
 
 class Image(Component):
-    """Componente para mostrar imágenes."""
+    """Component to display images."""
     def __init__(
         self,
         src: str,

@@ -3,10 +3,11 @@ from typing import List, Optional
 
 class Accordion(Component):
     """
-    Componente Accordion para mostrar secciones colapsables.
-    sections: Lista de tuplas (título, contenido)
-    open_indices: Lista de índices abiertos (opcional)
+    Accordion component to display collapsible sections.
+    sections: List of tuples (title, content)
+    open_indices: List of open indices (optional)
     """
+
     def __init__(self, sections: List[tuple], open_indices: Optional[List[int]]=None, minimum_logic: bool = True, **props):
         super().__init__(**props)
         self.sections = sections

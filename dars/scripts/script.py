@@ -2,19 +2,19 @@ from abc import ABC, abstractmethod
 from typing import Optional
 
 class Script(ABC):
-    """Clase base para la definición de scripts"""
+    """Base class for script definitions"""
     def __init__(self, target_language: str = "javascript"):
         if target_language not in ["javascript", "typescript"]:
-            raise ValueError("El lenguaje objetivo debe ser 'javascript' o 'typescript'")
+            raise ValueError("The target language must be 'javascript' or 'typescript'")
         self.target_language = target_language
         
     @abstractmethod
     def get_code(self) -> str:
-        """Retorna el código del script en el lenguaje objetivo"""
+        """Returns the script code in the target language"""
         pass
 
 class InlineScript(Script):
-    """Script definido directamente en el código Python"""
+    """Script defined directly in Python code"""
     def __init__(self, code: str, target_language: str = "javascript"):
         super().__init__(target_language)
         self.code = code
@@ -23,7 +23,7 @@ class InlineScript(Script):
         return self.code
         
 class FileScript(Script):
-    """Script cargado desde un archivo externo"""
+    """Script loaded from an external file"""
     def __init__(self, file_path: str, target_language: str = "javascript"):
         super().__init__(target_language)
         self.file_path = file_path
@@ -33,6 +33,6 @@ class FileScript(Script):
             with open(self.file_path, 'r') as f:
                 return f.read()
         except FileNotFoundError:
-            raise FileNotFoundError(f"El archivo de script no se encontró: {self.file_path}")
+            raise FileNotFoundError(f"The script file was not found: {self.file_path}")
 
 

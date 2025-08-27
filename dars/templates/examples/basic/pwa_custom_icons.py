@@ -1,10 +1,11 @@
 from dars.core.app import App
 from dars.components.basic import Container, Text, Button
 import os
+from dars.all import *
 
 # Usar los iconos generados por defecto del framework
-ICON_192 = os.path.join(os.path.dirname(__file__), 'dars', 'exporters', 'web', 'icons', 'pwa', 'icon-192x192.png')
-ICON_512 = os.path.join(os.path.dirname(__file__), 'dars', 'exporters', 'web', 'icons', 'pwa', 'icon-512x512.png')
+ICON_192 = "icon-192x192.png"
+ICON_512 = "icon-512x512.png"
 
 app = App(
     title="Dars PWA Custom Icons Template",
@@ -25,5 +26,8 @@ app = App(
 
 app.root = Container(
     Text(text="¡Bienvenido a la PWA con iconos personalizados!"),
-    Button(text="Haz clic aquí", on_click=lambda: print("¡Botón de ejemplo!")),
+    Button(text="Haz clic aquí", on_click=dScript("alert('¡Botón de ejemplo!')")),
 )
+
+if __name__ == '__main__':
+    app.rTimeCompile(add_file_types=".js")

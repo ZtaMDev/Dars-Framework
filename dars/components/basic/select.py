@@ -4,7 +4,7 @@ from dars.core.events import EventTypes
 from typing import Optional, Union, Dict, Any, Callable, List
 
 class SelectOption:
-    """Clase para representar una opción del select"""
+    """Class to represent a select option"""
     def __init__(self, value: str, label: str, disabled: bool = False):
         self.value = value
         self.label = label

@@ -2,7 +2,7 @@ from dars.core.component import Component
 from typing import Optional, Dict, Any, List
 
 class Card(Component):
-    """Componente para mostrar contenido en una tarjeta."""
+    """Component to display content in a card."""
     def __init__(
         self,
         children: Optional[List[Component]] = None,

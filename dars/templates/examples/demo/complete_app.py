@@ -13,12 +13,9 @@ app = App(
 )
 
 index = Page(
-    Text(text="This template is deprecated. It needs to be updated. Please wait unitil its updated bcause its too old.")
+    Text(text="This template is deprecated. It needs to be updated. Please wait unitil its updated because its too old.")
 )
 
-# Para exportar esta aplicación, ejecuta:
-# dars export examples/demo/complete_app.py --format html --output ./complete_app_output
 app.add_page("index", index, index=True)
-if __name__ == "__main__":
-    app.rTimeCompile()  # Preview/compilación rápida
-
+if __name__ == '__main__':
+    app.rTimeCompile()

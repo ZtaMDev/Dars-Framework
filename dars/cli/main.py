@@ -425,6 +425,9 @@ container.add_child(subtitle_text)
 container.add_child(button)
 app.set_root(container)
 app.add_script(script)
+
+if __name__ == '__main__':
+    app.rTimeCompile()
 """
         """Initializes a base Dars project, optionally using a template"""
         if os.path.exists(name):

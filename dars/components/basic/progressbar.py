@@ -3,10 +3,11 @@ from typing import Optional
 
 class ProgressBar(Component):
     """
-    Barra de progreso visual.
-    value: valor actual (0-100)
-    max_value: valor máximo (default 100)
+    Visual progress bar.
+    value: current value (0-100)
+    max_value: maximum value (default 100)
     """
+
     def __init__(self, value: int, max_value: int = 100, **props):
         super().__init__(**props)
         self.value = value

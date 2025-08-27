@@ -2,7 +2,7 @@ from dars.core.component import Component
 from typing import Optional, Dict, Any
 
 class Link(Component):
-    """Componente para crear enlaces."""
+    """Component to create links."""
     def __init__(
         self,
         text: str,

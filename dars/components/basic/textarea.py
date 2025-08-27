@@ -2,7 +2,7 @@ from dars.core.component import Component
 from typing import Optional, Dict, Any
 
 class Textarea(Component):
-    """Componente para áreas de texto multilínea."""
+    """Component for multiline text areas."""
     def __init__(
         self,
         value: str = "",

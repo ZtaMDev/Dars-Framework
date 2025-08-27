@@ -10,9 +10,8 @@ class ComponentQuery:
              class_name: Optional[str] = None,
              type: Optional[Union[Type['Component'], str]] = None,
              predicate: Optional[Callable[['Component'], bool]] = None) -> 'ComponentQuery':
-        """
-        Busca componentes dentro de los componentes actualmente seleccionados
-        """
+        
+        """Searches for components within the currently selected components."""  
         results: List['Component'] = []
         
         def match_component(comp: Component) -> bool:
@@ -43,7 +42,7 @@ class ComponentQuery:
         return ComponentQuery(results)
 
     def attr(self, **attrs) -> 'ComponentQuery':
-        """Modifica los atributos de todos los componentes encontrados"""
+        """Modifies the attributes of all found components."""  
         for component in self.components:
             for key, value in attrs.items():
                 # Manejo especial para atributos comunes
@@ -66,11 +65,11 @@ class ComponentQuery:
         return self
 
     def get(self) -> List['Component']:
-        """Devuelve la lista de componentes encontrados"""
+        """Returns the list of found components."""  
         return self.components
 
     def first(self) -> Optional['Component']:
-        """Devuelve el primer componente encontrado o None si no hay ninguno"""
+        """Returns the first found component, or None if there is none."""  
         return self.components[0] if self.components else None
 
 class Component(ABC):
@@ -95,18 +94,18 @@ class Component(ABC):
              class_name: Optional[str] = None,
              type: Optional[Union[Type['Component'], str]] = None,
              predicate: Optional[Callable[['Component'], bool]] = None) -> ComponentQuery:
+        """Searches for components that match the specified criteria.
+
+            Args:
+                id: Search by component ID
+                class_name: Search by CSS class name
+                type: Search by component type (class or class name)
+                predicate: Custom filter function that takes a component and returns bool
+
+            Returns:
+                ComponentQuery that allows chaining operations and modifying attributes
         """
-        Busca componentes que coincidan con los criterios especificados.
-        
-        Args:
-            id: Buscar por ID del componente
-            class_name: Buscar por nombre de clase CSS
-            type: Buscar por tipo de componente (clase o nombre de clase)
-            predicate: Función personalizada de filtrado que toma un componente y devuelve bool
-            
-        Returns:
-            ComponentQuery que permite encadenar operaciones y modificar atributos
-        """
+
         results: List[Component] = []
         
         def match_component(comp: Component) -> bool:
@@ -134,13 +133,13 @@ class Component(ABC):
         return ComponentQuery(results)
 
     def attr(self, **attrs) -> Union['Component', dict]:
+        """If kwargs are provided, sets attributes on the component (chained setter).  
+           If no kwargs are provided, returns a dict with all editable component attributes (getter).  
+           Example:
+                c.attr(id='new', style={'color': 'red'})
+                c.attr()['id']  # getter
         """
-        Si se pasan kwargs, setea atributos en el componente (como setter encadenable).
-        Si no se pasan kwargs, retorna un dict con todos los atributos editables del componente (como getter).
-        Ejemplo:
-            c.attr(id='nuevo', style={'color': 'red'})
-            c.attr()['id']  # getter
-        """
+
         if attrs:
             for key, value in attrs.items():
                 if key == 'style':
@@ -165,6 +164,13 @@ class Component(ABC):
         d['events'] = self.events
         return d
 
+    def render_children(self, exporter: 'Exporter') -> str:
+        """Render all children of the component using the exporter."""
+        children_html = ""
+        for child in self.children:
+            children_html += exporter.render_component(child)
+        return children_html
+    
     @abstractmethod
     def render(self, exporter: 'Exporter') -> str:
         pass

@@ -2,7 +2,7 @@ from dars.core.component import Component
 from typing import Optional, Dict, Any, List
 
 class Modal(Component):
-    """Componente para mostrar contenido en un modal."""
+    """Component to display content in a modal."""
     def __init__(
         self,
         children: Optional[List[Component]] = None,

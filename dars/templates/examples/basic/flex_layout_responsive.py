@@ -9,5 +9,5 @@ flex.add_child(Image(src="https://placehold.co/120x120", alt="Demo", style={"wid
 
 app.set_root(flex)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.rTimeCompile()

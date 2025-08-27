@@ -3,11 +3,12 @@ from typing import List, Dict, Any, Optional
 
 class Table(Component):
     """
-    Componente para mostrar datos tabulares con columnas, datos, paginación, orden y filtrado.
-    columns: Lista de diccionarios con claves 'title', 'field', 'sortable', 'width', etc.
-    data: Lista de diccionarios (cada uno es una fila).
-    page_size: Número de filas por página (opcional).
+    Component to display tabular data with columns, data, pagination, sorting, and filtering.
+    columns: List of dictionaries with keys 'title', 'field', 'sortable', 'width', etc.
+    data: List of dictionaries (each one is a row)
+    page_size: Number of rows per page (optional)
     """
+
     def __init__(self, columns: List[Dict[str, Any]], data: List[Dict[str, Any]], page_size: Optional[int]=None, **props):
         super().__init__(**props)
         self.columns = columns

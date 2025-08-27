@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 @dataclass
 class StyleProps:
-    """Propiedades de estilo para componentes UI"""
+    """Style properties for UI components"""
     # Dimensiones
     width: Optional[Union[str, int]] = None
     height: Optional[Union[str, int]] = None

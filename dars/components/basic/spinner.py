@@ -2,8 +2,9 @@ from dars.core.component import Component
 
 class Spinner(Component):
     """
-    Indicador de carga circular (spinner).
+    Circular loading indicator (spinner).
     """
+
     def __init__(self, **props):
         super().__init__(**props)
 
