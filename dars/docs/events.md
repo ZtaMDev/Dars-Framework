@@ -3,7 +3,7 @@
 Custom components in Dars can have events associated with them. You can set an event on a custom component using the `set_event` method.
 
 ```python
-self.set_event(EventTypes.CLICK, dScript("console.log(\'click\')"))
+self.set_event(EventTypes.CLICK, dScript("console.log('click')"))
 ```
 
 ### Available Event Types
