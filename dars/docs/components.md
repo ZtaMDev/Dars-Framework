@@ -18,9 +18,13 @@ This simplifies integration and improves the developer experience.
 
 Components are the fundamental elements of Dars that represent UI elements. Each component encapsulates its appearance, behavior, and state, allowing you to create complex interfaces by composing simple elements.
 
+To learn how to create your own custom components, refer to the documentation in [Custom Components](custom_components.md).
+
 ## Event Handling with dScript
 
 Dars provides a powerful way to handle user interactions through the `dScript` class. You can attach event handlers to interactive components like `Button` and `Input` to create dynamic and responsive user interfaces.
+
+For a complete list of available event types and how to use them, refer to the documentation in [Events](events.md).
 
 ### Basic Usage
 
