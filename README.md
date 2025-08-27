@@ -15,7 +15,7 @@ pip install dars-framework
 - Preview instantly with hot-reload using `app.rTimeCompile()`.
 - Export your app to static web files with a single CLI command.
 - Use multipage, layouts, scripts, and more—see docs for advanced features.
-- For mor information visit the [Documentation](dars/docs/index.md.md)
+- For mor information visit the [Documentation](dars/docs/index.md)
 
 ## Quick Example: Your First App
 
