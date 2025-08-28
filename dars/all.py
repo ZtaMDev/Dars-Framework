@@ -43,7 +43,8 @@ from dars.scripts.dscript import dScript
 
 # Exporters (optional, for direct use)
 from dars.exporters.web.html_css_js import HTMLCSSJSExporter
-
+from dars.core.events import EventTypes
+from dars.core.events import EventHandler,  EventEmitter,  EventManager
 # CLI (optional, for advanced usage)
 # from dars.cli.main import main as dars_cli_main
 
@@ -53,5 +54,6 @@ __all__ = [
     'RadioButton', 'Select', 'Slider', 'Spinner', 'Text', 'Textarea', 'Tooltip',
     'Accordion', 'Card', 'Modal', 'Navbar', 'Table', 'Tabs',
     'GridLayout', 'FlexLayout', 'LayoutBase', 'AnchorPoint',
-    'InlineScript', 'FileScript', 'dScript',
+    'InlineScript', 'FileScript', 'dScript', 'HTMLCSSJSExporter',
+    'EventTypes', 'EventHandler', 'EventEmitter', 'EventManager'
 ]

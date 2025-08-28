@@ -1219,7 +1219,9 @@ body {
         return comp_id
 
     def render_component(self, component: Component) -> str:
-        """Renderiza un componente a HTML"""
+        if not isinstance(component, Component):
+            raise TypeError(f"render_component wait to recived an instance of Component, but recive an {component}")
+        """Render an HTML component"""
         from dars.components.basic.page import Page
         from dars.components.layout.grid import GridLayout
         from dars.components.layout.flex import FlexLayout
@@ -1238,12 +1240,13 @@ body {
                 is_custom_component = False
                 break
         
-        # Solo llamar al método render() del componente si es personalizado
-        if is_custom_component and hasattr(component, 'render') and callable(component.render):
-            try:
-                return component.render(self)  # Pasar el exporter como argumento
-            except Exception as e:
-                print(f"Error al renderizar componente personalizado {component.__class__.__name__}: {e}")
+        if isinstance(component, Component) and is_custom_component:
+            if hasattr(component, 'render') and callable(component.render):
+                try:
+                    return component.render(self) 
+                except Exception as e:
+                    print(f"Error at rendering component {component.__class__.__name__}: {e}")
+
         
         if isinstance(component, Page):
             return self.render_page(component)

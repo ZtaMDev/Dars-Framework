@@ -78,11 +78,13 @@ class Component(ABC):
         self.children: List[Component] = []
         self.parent: Optional[Component] = None
         self.id: Optional[str] = props.get('id')
-        self.class_name: Optional[str] = props.get('class_name')
+        self.class_name: str = props.get("class_name", self.__class__.__name__)
         self.style: Dict[str, Any] = props.get('style', {})
         self.events: Dict[str, Callable] = {}
         
     def add_child(self, child: 'Component'):
+        if isinstance(child, type) and issubclass(child, Component):
+            raise TypeError(f"The class {child.__name__} was passed instead of an instance. You should use {child.__name__}(...).")
         child.parent = self
         self.children.append(child)
         
