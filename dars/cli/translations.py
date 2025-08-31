@@ -19,7 +19,9 @@ translations = {
         'preview_help': "Preview information",
         'preview_cmd_help': "Preview exported application",
         'init_help': "Create a Dars project",
-        
+        'template_not_found': "Template '{template}' not found",
+        'extra_file_copied': "Extra file '{file}' copied",
+                
         # Export command
         'file_help': "Python file with Dars application",
         'format_help': "Export format",
@@ -158,6 +160,8 @@ translations = {
         'cli_description': "Dars Exporter - Exporta aplicaciones Dars a Web",
         'cli_subtitle': "Framework de UI multiplataforma en Python",
         'main_description': "Dars Exporter - Exporta aplicaciones Dars a Web",
+        'template_not_found': "Template '{template}' not found",
+        'extra_file_copied': "Extra file '{file}' copied",
         
         # Commands
         'available_commands': "Comandos disponibles",

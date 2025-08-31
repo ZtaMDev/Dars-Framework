@@ -1,0 +1,6 @@
+include README.md
+include LICENSE
+recursive-include dars/templates *
+recursive-include dars/docs *
+recursive-include dars *.json
+recursive-include dars *.md

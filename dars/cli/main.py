@@ -390,8 +390,46 @@ class DarsExporter:
     
 
     def init_project(self, name: str, template: Optional[str] = None):
-        # 2. Create main.py with example
-        HELLO_WORLD_CODE = """
+        """Initializes a base Dars project, optionally using a template"""
+        if os.path.exists(name):
+            console.print(f"[red]❌ {translator.get('directory_exists').format(name=name)}[/red]")
+            return
+
+        # Create project directory
+        os.makedirs(name)
+        console.print(f"[green]✔ {translator.get('directory_created').format(name=name)}[/green]")
+
+        if template:
+            # Get template information
+            templates = list_templates()
+            if template not in templates:
+                console.print(f"[red]❌ {translator.get('template_not_found').format(template=template)}[/red]")
+                return
+                
+            template_info = templates[template]
+            template_dir = template_info['template_dir']
+            extra_files = template_info['extra_files']
+
+            if not extra_files:
+                console.print(f"[yellow]⚠ {translator.get('template_empty').format(template=template)}[/yellow]")
+                return
+
+            # Copy ALL files (no main_file anymore)
+            for extra_file in extra_files:
+                src_file = template_dir / extra_file
+                dest_file = os.path.join(name, extra_file)
+                
+                # Create directories if needed
+                os.makedirs(os.path.dirname(dest_file), exist_ok=True)
+                
+                if src_file.exists():
+                    shutil.copy2(src_file, dest_file)
+                    console.print(f"[green]✔ {translator.get('extra_file_copied').format(file=extra_file)}[/green]")
+
+            console.print(f"[green]✔ {translator.get('template_copied').format(template=template)}[/green]")
+        else:
+            # Default hello world code (sin template)
+            HELLO_WORLD_CODE = """
 from dars.core.app import App
 from dars.components.basic.text import Text
 from dars.components.basic.button import Button
@@ -429,36 +467,17 @@ app.add_script(script)
 if __name__ == '__main__':
     app.rTimeCompile()
 """
-        """Initializes a base Dars project, optionally using a template"""
-        if os.path.exists(name):
-            console.print(f"[red]❌ {translator.get('directory_exists').format(name=name)}[/red]")
-            return
-
-        # 1. Create project directory
-        os.makedirs(name)
-        console.print(f"[green]✔ {translator.get('directory_created').format(name=name)}[/green]")
-
-
-        # 4. Generate main.py
-        main_py = Path(name) / "main.py"
-        if template:
-            templates = list_templates()
-            src = templates[template]
-            shutil.copy(src, main_py)
-            console.print(f"[green]✔ {translator.get('template_copied').format(template=template)}[/green]")
-        else:
-            # embedded hello world code...
-            main_py.write_text(HELLO_WORLD_CODE, encoding="utf-8")
+            main_py = Path(name) / "main.py"
+            main_py.write_text(HELLO_WORLD_CODE.strip(), encoding="utf-8")
             console.print(f"[green]✔ {translator.get('main_py_created')}[/green]")
 
-        # 5. Final instructions
+        # Final instructions
         console.print(f"\n[bold cyan]🎉 {translator.get('project_initialized')}[/bold cyan]")
         console.print(Syntax(f"cd {name}", "bash"))
         console.print(Syntax(f"\n{translator.get('export_command')}:", "bash"))
-        console.print(Syntax(f"dars export main.py --format html --output build", "bash"))
+        console.print(Syntax(f"dars export python file --format html --output build", "bash"))
         console.print(Syntax(f"\n{translator.get('preview_command')}:", "bash"))
-        console.print(Syntax(f"dars preview build", "bash")) 
-    
+        console.print(Syntax(f"dars preview build", "bash"))
 
 def print_version_info():
     import importlib.util
@@ -511,14 +530,16 @@ def create_parser() -> argparse.ArgumentParser:
     # Preview command
     preview_parser = subparsers.add_parser('preview', help=translator.get('preview_cmd_help'))
     preview_parser.add_argument('path', help=translator.get('path_help'))
-
-    # Init command
+    
     init_parser = subparsers.add_parser('init', help=translator.get('init_help'))
-    init_parser.add_argument('name', help=translator.get('name_help'))
-    tmpl_choices = list_templates().keys()
+    init_parser.add_argument('name', nargs='?', help=translator.get('name_help'))
     init_parser.add_argument(
-        '-t', '--template',
-        choices=tmpl_choices,
+        '--list-templates', '-L',  # Cambia -l por -L
+        action='store_true',
+        help=translator.get('list_templates_help')
+    )
+    init_parser.add_argument(
+        '--template', '-t',
         help=translator.get('template_help')
     )
     # Add language option to all subparsers
@@ -527,19 +548,123 @@ def create_parser() -> argparse.ArgumentParser:
                               help=translator.get('lang_help'))
     
     return parser
-def list_templates() -> Dict[str, Path]:
-        """
-        Busca carpetas dentro de dars/templates/examples y devuelve un dict
-        { "basic/hello_world.py": Path(...), ... }
-        """
-        tmpl_root = Path(resources.files("dars.templates") / "examples")
-        templates = {}
-        for category in tmpl_root.iterdir():
-            if category.is_dir():
-                for py in category.glob("*.py"):
-                    key = f"{category.name}/{py.stem}"
-                    templates[key] = py
-        return templates
+
+from pathlib import Path
+from typing import Dict
+
+from pathlib import Path
+from typing import Dict
+
+from pathlib import Path
+from typing import Dict
+
+from pathlib import Path
+from typing import Dict
+
+from pathlib import Path
+from typing import Dict
+
+from pathlib import Path
+from typing import Dict
+
+def list_templates(debug: bool = False) -> Dict[str, Dict]:
+    """
+    Descubre templates:
+    - ignora dirs en IGNORED_DIRS (ej: __pycache__, .git, node_modules)
+    - ignora extensiones compiladas ('.pyc', '.pyo', '.pyd')
+    - ignora solo archivos ocultos que empiezan con '.' (ej: .env)
+    - incluye TODOS los demás archivos ('.py', '.md', '.png', '.json', etc.)
+    - salida determinista (ordenada)
+    """
+    current_file = Path(__file__).resolve()
+    templates_base = current_file.parent.parent / "templates" / "examples"
+
+    if not templates_base.exists():
+        # usa console.print si tienes rich.console; aquí dejo print para compatibilidad
+        print(f"[red]Error: Template directory not found: {templates_base}[/red]")
+        return {}
+
+    IGNORED_DIRS = {'__pycache__', '.git', '.venv', 'node_modules', '.pytest_cache'}
+    IGNORE_EXTS = {'.pyc', '.pyo', '.pyd'}
+
+    templates: Dict[str, Dict] = {}
+
+    for category_dir in sorted(templates_base.iterdir()):
+        if not (category_dir.is_dir() and not category_dir.name.startswith('__')):
+            continue
+
+        for template_dir in sorted(category_dir.iterdir()):
+            if not (template_dir.is_dir() and not template_dir.name.startswith('__')):
+                continue
+
+            found_files = []
+            for file_path in sorted(template_dir.rglob('*')):
+                # 1) archivo
+                if not file_path.is_file():
+                    if debug: print(f"SKIP (not file): {file_path}")
+                    continue
+
+                # 2) si alguna parte del path es una carpeta ignorada
+                intersect = set(file_path.parts) & IGNORED_DIRS
+                if intersect:
+                    if debug: print(f"SKIP (ignored dir {intersect}): {file_path}")
+                    continue
+
+                # 3) extensiones compiladas
+                if file_path.suffix.lower() in IGNORE_EXTS:
+                    if debug: print(f"SKIP (ignored ext): {file_path}")
+                    continue
+
+                # 4) solo ocultos que empiezan con '.' (por ejemplo .gitignore, .env)
+                if file_path.name.startswith('.'):
+                    if debug: print(f"SKIP (hidden file): {file_path}")
+                    continue
+
+                # si pasó todos los filtros, lo guardamos (ruta relativa al template)
+                rel = str(file_path.relative_to(template_dir))
+                if debug: print(f"INCLUDE: {rel}")
+                found_files.append(rel)
+
+            found_files = sorted(found_files)
+
+            template_key = f"{category_dir.name}/{template_dir.name}"
+            templates[template_key] = {
+                'main_file': None,            # ya no usamos main_file
+                'extra_files': found_files,
+                'category': category_dir.name,
+                'template_dir': template_dir,
+                'all_files': found_files
+            }
+
+    return templates
+
+
+
+                    
+def list_templates_detailed():
+    """Muestra información detallada de los templates disponibles"""
+    templates = list_templates()
+    
+    if not templates:
+        console.print("[yellow]No templates found[/yellow]")
+        return
+    
+    table = Table(title="Available Templates")
+    table.add_column("Template", style="cyan")
+    table.add_column("Category", style="green")
+    table.add_column("Extra Files", style="white")
+    table.add_column("Description", style="dim")
+    
+    for template_name, template_info in templates.items():
+        extra_files = ", ".join(template_info['extra_files']) if template_info['extra_files'] else "None"
+        table.add_row(
+            template_name,
+            template_info['category'],
+            extra_files,
+            f"Template with {len(template_info['extra_files'])} extra files"
+        )
+    
+    console.print(table)
 def main():
     """Main CLI function"""
     # Check for language parameter before parsing arguments
@@ -624,7 +749,13 @@ def main():
         exporter.show_supported_formats()
     
     elif args.command == 'init':
-        exporter.init_project(args.name, template=args.template)
+        if args.list_templates:
+            list_templates_detailed()
+        elif not args.name:
+            console.print("[red]Error: Project name is required[/red]")
+            parser.parse_args(['init', '--help'])
+        else:
+            exporter.init_project(args.name, template=args.template)
 
         
     elif args.command == 'preview':

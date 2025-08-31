@@ -23,6 +23,7 @@ from dars.components.advanced.accordion import Accordion
 from dars.components.basic.progressbar import ProgressBar
 from dars.components.basic.spinner import Spinner
 from dars.components.basic.tooltip import Tooltip
+from dars.components.basic.markdown import Markdown
 from typing import Dict, Any
 import os
 from bs4 import BeautifulSoup
@@ -1053,7 +1054,201 @@ body {
     border: none;
     padding: 0;
 }
+/* Markdown Styles */
+.dars-markdown {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
 
+/* Dark Theme */
+.dars-markdown-dark {
+    color: #e0e0e0;
+    background-color: #1e1e1e;
+}
+
+.dars-markdown h1,
+.dars-markdown h2,
+.dars-markdown h3,
+.dars-markdown h4,
+.dars-markdown h5,
+.dars-markdown h6 {
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+.dars-markdown-dark h1,
+.dars-markdown-dark h2,
+.dars-markdown-dark h3,
+.dars-markdown-dark h4,
+.dars-markdown-dark h5,
+.dars-markdown-dark h6 {
+    color: #ffffff;
+}
+
+.dars-markdown h1 { font-size: 2em; }
+.dars-markdown h2 { font-size: 1.5em; }
+.dars-markdown h3 { font-size: 1.25em; }
+.dars-markdown h4 { font-size: 1em; }
+.dars-markdown h5 { font-size: 0.875em; }
+.dars-markdown h6 { font-size: 0.85em; }
+
+.dars-markdown p {
+    margin-bottom: 1em;
+}
+
+.dars-markdown-dark p {
+    color: #cccccc;
+}
+
+.dars-markdown strong {
+    font-weight: 600;
+}
+
+.dars-markdown em {
+    font-style: italic;
+}
+
+.dars-markdown ul,
+.dars-markdown ol {
+    margin-bottom: 1em;
+    padding-left: 2em;
+}
+
+.dars-markdown-dark ul,
+.dars-markdown-dark ol {
+    color: #cccccc;
+}
+
+.dars-markdown li {
+    margin-bottom: 0.5em;
+}
+
+.dars-markdown code {
+    background-color: #f6f8fa;
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.85em;
+    color: #333;
+}
+
+.dars-markdown-dark code {
+    background-color: #2d2d2d;
+    color: #e0e0e0;
+}
+
+.dars-markdown pre {
+    background-color: #f6f8fa;
+    padding: 1em;
+    border-radius: 3px;
+    overflow: auto;
+    margin-bottom: 1em;
+}
+
+.dars-markdown-dark pre {
+    background-color: #2d2d2d;
+    border: 1px solid #404040;
+}
+
+.dars-markdown pre code {
+    background: none;
+    padding: 0;
+}
+
+.dars-markdown blockquote {
+    border-left: 4px solid #ddd;
+    padding-left: 1em;
+    margin-left: 0;
+    color: #666;
+    font-style: italic;
+    background-color: #f9f9f9;
+    padding: 10px 15px;
+    border-radius: 4px;
+}
+
+.dars-markdown-dark blockquote {
+    border-left-color: #555;
+    color: #bbb;
+    background-color: #2a2a2a;
+}
+
+.dars-markdown table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 1em;
+}
+
+.dars-markdown-dark table {
+    border-color: #444;
+}
+
+.dars-markdown th,
+.dars-markdown td {
+    border: 1px solid #ddd;
+    padding: 0.5em;
+    text-align: left;
+}
+
+.dars-markdown-dark th,
+.dars-markdown-dark td {
+    border-color: #444;
+    color: #e0e0e0;
+}
+
+.dars-markdown th {
+    background-color: #f6f8fa;
+    font-weight: 600;
+}
+
+.dars-markdown-dark th {
+    background-color: #333;
+}
+
+.dars-markdown a {
+    color: #0366d6;
+    text-decoration: none;
+}
+
+.dars-markdown-dark a {
+    color: #4da6ff;
+}
+
+.dars-markdown a:hover {
+    text-decoration: underline;
+}
+
+.dars-markdown-dark a:hover {
+    color: #66b3ff;
+}
+
+.dars-markdown img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+
+.dars-markdown-dark img {
+    filter: brightness(0.9);
+}
+
+/* Horizontal Rule */
+.dars-markdown hr {
+    border: none;
+    height: 1px;
+    background-color: #ddd;
+    margin: 2em 0;
+}
+
+.dars-markdown-dark hr {
+    background-color: #444;
+}
 """
         
         # Agregar estilos globales de la aplicación definidos por el usuario
@@ -1226,11 +1421,12 @@ body {
         from dars.components.layout.grid import GridLayout
         from dars.components.layout.flex import FlexLayout
         
+        
         # Lista de componentes built-in de Dars que NO deben usar su propio método render()
         builtin_components = [
             Page, GridLayout, FlexLayout, Text, Button, Input, Container, Image, Link, 
             Textarea, Card, Modal, Navbar, Checkbox, RadioButton, Select, Slider, 
-            DatePicker, Table, Tabs, Accordion, ProgressBar, Spinner, Tooltip
+            DatePicker, Table, Tabs, Accordion, ProgressBar, Spinner, Tooltip, Markdown,
         ]
         
         # Verificar si es un componente personalizado (no built-in)
@@ -1296,6 +1492,8 @@ body {
             return self.render_spinner(component)
         elif isinstance(component, Tooltip):
             return self.render_tooltip(component)
+        elif isinstance(component, Markdown):
+            return self.render_markdown(component)
         else:
             # Componente genérico
             return self.render_generic_component(component)
@@ -1707,7 +1905,54 @@ body {
 
     def render_tooltip(self, tooltip: Tooltip) -> str:
         return f'<div class="dars-tooltip dars-tooltip-{tooltip.position}">{self.render_component(tooltip.child) if hasattr(tooltip.child, "render") else tooltip.child}<span class="dars-tooltip-text">{tooltip.text}</span></div>'
+    
+    def render_markdown(self, markdown: 'Markdown') -> str:
+        """Render a Markdown component"""
+        try:
+            import markdown2
+            # Convert markdown to HTML
+            html_content = markdown2.markdown(
+                markdown.content,
+                extras=["fenced-code-blocks", "tables", "header-ids"]
+            )
+        except ImportError:
+            # Fallback to basic conversion if markdown2 is not available
+            html_content = self._basic_markdown_to_html(markdown.content)
+        
+        component_id = self.get_component_id(markdown, prefix="markdown")
+        
+        # Add dark theme class if enabled
+        class_name = f"dars-markdown {markdown.class_name or ''}"
+        if markdown.dark_theme:
+            class_name += " dars-markdown-dark"
+        
+        class_attr = f'class="{class_name.strip()}"'
+        style_attr = f'style="{self.render_styles(markdown.style)}"' if markdown.style else ""
+        
+        return f'<div id="{component_id}" {class_attr} {style_attr}>{html_content}</div>'
 
+    def _basic_markdown_to_html(self, markdown_text: str) -> str:
+        """Basic markdown to HTML conversion as fallback"""
+        if not markdown_text:
+            return ""
+        
+        html = markdown_text
+        
+        # Basic replacements
+        html = html.replace('**', '<strong>').replace('**', '</strong>')
+        html = html.replace('*', '<em>').replace('*', '</em>')
+        html = html.replace('__', '<strong>').replace('__', '</strong>')
+        html = html.replace('_', '<em>').replace('_', '</em>')
+        
+        # Headers
+        html = html.replace('# ', '<h1>').replace('\n# ', '</h1>\n<h1>')
+        html = html.replace('## ', '<h2>').replace('\n## ', '</h2>\n<h2>')
+        html = html.replace('### ', '<h3>').replace('\n### ', '</h3>\n<h3>')
+        
+        # Line breaks
+        html = html.replace('\n\n', '<br><br>')
+        
+        return html
     def render_generic_component(self, component: Component) -> str:
         """Renderiza un componente genérico con estructura básica"""
         component_id = self.get_component_id(component, prefix="comp")
