@@ -24,6 +24,7 @@ from dars.components.basic.spinner import Spinner
 from dars.components.basic.text import Text
 from dars.components.basic.textarea import Textarea
 from dars.components.basic.tooltip import Tooltip
+from dars.components.basic.markdown import Markdown
 
 # Advanced Components
 from dars.components.advanced.accordion import Accordion
@@ -32,6 +33,7 @@ from dars.components.advanced.modal import Modal
 from dars.components.advanced.navbar import Navbar
 from dars.components.advanced.table import Table
 from dars.components.advanced.tabs import Tabs
+
 
 # Layout
 from dars.components.layout.grid import GridLayout, LayoutBase
@@ -55,5 +57,5 @@ __all__ = [
     'Accordion', 'Card', 'Modal', 'Navbar', 'Table', 'Tabs',
     'GridLayout', 'FlexLayout', 'LayoutBase', 'AnchorPoint',
     'InlineScript', 'FileScript', 'dScript', 'HTMLCSSJSExporter',
-    'EventTypes', 'EventHandler', 'EventEmitter', 'EventManager'
+    'EventTypes', 'EventHandler', 'EventEmitter', 'EventManager', 'Markdown'
 ]
