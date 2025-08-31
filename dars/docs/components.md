@@ -11,7 +11,7 @@ from dars.all import *
 ```
 
 This simplifies integration and improves the developer experience. 
-> But if you crate your own components it can cause conflicts woth names of your components and built in components if they hay de same name.
+> But if you crate your own components it can cause conflicts with names of your components and built in components if they hay de same name.
 
 ---
 
