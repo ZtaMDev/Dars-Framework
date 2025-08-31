@@ -16,7 +16,7 @@ pip install dars-framework
 - For mor information visit the [Documentation](dars/docs/index.md)
 
 ## Quick Example: Your First App
-> Note: this is an single page example but you can build multipage apps with Page component see the components documentation to know more.
+> Note: this is an single page example but you can build multipage apps with Page component see the [Components Documentation](dars/docs/components.md) to know more.
 
 ```python
 from dars import App, Container, Text, Button, InlineScript
