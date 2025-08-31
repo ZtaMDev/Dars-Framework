@@ -477,7 +477,7 @@ if __name__ == '__main__':
         console.print(Syntax(f"\n{translator.get('export_command')}:", "bash"))
         console.print(Syntax(f"dars export (python file) --format html --output build", "bash"))
         console.print(Syntax(f"\n{translator.get('preview_command')}:", "bash"))
-        console.print(Syntax(f"dars preview build", "bash"))
+        console.print(Syntax(f"python (python file)", "bash"))
 
 def print_version_info():
     import importlib.util
@@ -512,13 +512,25 @@ def create_parser() -> argparse.ArgumentParser:
     # Export command
     export_parser = subparsers.add_parser('export', help=translator.get('export_help'))
     export_parser.add_argument('file', help=translator.get('file_help'))
-    export_parser.add_argument('--format', '-f', required=True, 
-                              choices=["html"],
-                              help=translator.get('format_help'))
-    export_parser.add_argument('--output', '-o', required=True,
-                              help=translator.get('output_help'))
+
+    # --format opcional (default: html)
+    export_parser.add_argument(
+        '--format', '-f',
+        choices=["html"],
+        default="html",
+        help=translator.get('format_help') + " (default: html)"
+    )
+
+    # --output opcional (default: ./dist)
+    export_parser.add_argument(
+        '--output', '-o',
+        default="./dist",
+        help=translator.get('output_help') + " (default: ./dist)"
+    )
+
     export_parser.add_argument('--preview', '-p', action='store_true',
-                              help=translator.get('preview_help'))
+                            help=translator.get('preview_help'))
+
     
     # Info command
     info_parser = subparsers.add_parser('info', help=translator.get('info_help'))
