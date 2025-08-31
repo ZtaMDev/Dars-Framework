@@ -87,6 +87,7 @@ input_field = Input(
 ### Quick Access
 
 - [Base Component Class](#base-component-class)
+- [Component Search](#Component-Search-and-Modification)
 - [Page](#Page)
 - [Text](#Text)
 - [Button](#Button)
@@ -143,7 +144,7 @@ All components support these basic properties:
 - **style**: Dictionary of CSS styles
 - **children**: List of child components (for containers)
 
-### Component Search and Modification
+### Component-Search-and-Modification
 
 All components include a powerful search and modification system through the `find()` method. This allows you to search for components in the component tree and modify their attributes using a fluent interface.
 
@@ -672,6 +673,135 @@ sidebar = Container(
     }
 )
 ```
+
+# Markdown
+
+The `Markdown` component allows you to render markdown content directly in your Dars applications, converting markdown syntax to beautiful HTML with proper styling.
+
+## Syntax
+
+```python
+from dars.components.basic.markdown import Markdown
+
+# From string content
+markdown_component = Markdown(
+    content="# Welcome\nThis is **markdown** content",
+    id="my-markdown",
+    class_name="custom-markdown",
+    style={"padding": "20px"}
+)
+
+# From file
+markdown_from_file = Markdown(
+    file_path="README.md",
+    id="documentation",
+    dark_theme=True
+)
+```
+
+## Properties
+
+| Property | Type | Description | Example |
+|-----------|------|-------------|---------|
+| `content` | str | Markdown content as string | `"# Heading"` |
+| `file_path` | str | Path to a markdown file | `"docs/intro.md"` |
+| `dark_theme` | bool | Enable dark theme styling | `True` |
+| `id` | str | Component ID | `"markdown-content"` |
+| `class_name` | str | CSS class | `"markdown-body"` |
+| `style` | dict | CSS styles | `{"fontSize": "16px"}` |
+
+## Methods
+
+| Method | Description | Example |
+|--------|-------------|---------|
+| `update_content(new_content=None, new_file_path=None)` | Update markdown content | `markdown_component.update_content(new_content="# New")` |
+| `set_dark_theme(enabled=True)` | Enable/disable dark theme | `markdown_component.set_dark_theme(True)` |
+
+## Examples
+
+```python
+# Simple markdown from string
+simple_md = Markdown(
+    content="# Hello\nThis is a **markdown** example",
+    style={"maxWidth": "800px", "margin": "0 auto"}
+)
+
+# Load from file with dark theme
+docs_md = Markdown(
+    file_path="documentation.md",
+    dark_theme=True,
+    class_name="docs-content"
+)
+
+# Update content dynamically
+simple_md.update_content(new_content="# Updated\nNew content here")
+```
+
+## Dependencies
+
+The Markdown component requires the `markdown2` library. Included with the framework.
+
+## Supported Markdown Features
+
+- Headers (`#`, `##`, `###`)
+- **Bold** and *italic* text
+- Lists (ordered and unordered)
+- [Links](https://github.com/ZtaMDev/Dars-Framework)
+- `Inline code` and code blocks
+- Tables
+- Blockquotes
+- Images
+- Horizontal rules
+
+## Styling
+
+The Markdown component includes comprehensive default styling for both light and dark themes:
+
+```python
+# Light theme (default)
+markdown_light = Markdown(content="# Light theme")
+
+# Dark theme
+markdown_dark = Markdown(
+    content="# Dark theme", 
+    dark_theme=True,
+    style={"padding": "20px", "borderRadius": "8px"}
+)
+```
+
+## Best Practices
+
+1. Use file paths for large documentation content
+2. Enable dark theme for better readability in low-light environments
+3. Combine with layout components for responsive designs
+4. Use the update methods for dynamic content changes
+
+## Integration Example
+
+```python
+from dars.core.app import App
+from dars.components.basic.markdown import Markdown
+from dars.components.basic.container import Container
+
+app = App(title="Documentation Viewer")
+
+# Load documentation from file
+docs = Markdown(
+    file_path="README.md",
+    dark_theme=True,
+    class_name="documentation",
+    style={
+        "maxWidth": "800px",
+        "margin": "0 auto",
+        "padding": "40px",
+        "lineHeight": "1.6"
+    }
+)
+
+app.set_root(Container(children=[docs]))
+```
+
+This component is perfect for creating documentation pages, blog posts, content management systems, and any application that needs to display formatted text content.
 
 ### Image
 
