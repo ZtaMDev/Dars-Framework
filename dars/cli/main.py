@@ -475,7 +475,7 @@ if __name__ == '__main__':
         console.print(f"\n[bold cyan]🎉 {translator.get('project_initialized')}[/bold cyan]")
         console.print(Syntax(f"cd {name}", "bash"))
         console.print(Syntax(f"\n{translator.get('export_command')}:", "bash"))
-        console.print(Syntax(f"dars export python file --format html --output build", "bash"))
+        console.print(Syntax(f"dars export (python file) --format html --output build", "bash"))
         console.print(Syntax(f"\n{translator.get('preview_command')}:", "bash"))
         console.print(Syntax(f"dars preview build", "bash"))
 
