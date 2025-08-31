@@ -492,6 +492,8 @@ class App:
         manifest: str = "",
         theme_color: str = "#000000",
         background_color: str = "#ffffff",
+        service_worker_path: str = "",
+        service_worker_enabled: bool = False,
         **config
     ):
         # Propiedades básicas de la aplicación
@@ -511,6 +513,8 @@ class App:
         self.icons = config.get('icons', [])
         self.theme_color = theme_color
         self.background_color = background_color
+        self.service_worker_path = service_worker_path
+        self.service_worker_enabled = service_worker_enabled
         
         # Propiedades Open Graph (para redes sociales)
 

@@ -16,7 +16,10 @@ Welcome to Dars, a modern Python framework for building web applications with re
 4. **Command-Line Usage**  
    Find CLI commands, options, and workflows in [cli.md](cli.md).
 
-5. **Component Search and Modification**
+5. **App Class**
+   Learn how to create an app class in [App Documentation](app.md).
+
+6. **Component Search and Modification**
    All components in Dars now support a powerful search and modification system:
 
       ```python
@@ -56,22 +59,6 @@ app.rTimeCompile().add_file_types = ".js,.css"
 ```
 
 * Include any extension your project uses beyond default Python files.
-
-
-6. **Official Templates**  
-   Browse ready-to-use examples in the following files:
-   - [Hello World](template_hello_world.md)
-   - [Simple Form](template_simple_form.md)
-   - [Form Components](template_form_components.md)
-   - [Flex Layout Responsive](template_flex_layout_responsive.md)
-   - [Grid Layout Responsive](template_grid_layout_responsive.md)
-   - [Multipage Example](template_multipage_example.md)
-   - [Layout Multipage Demo](template_layout_multipage_demo.md)
-   - [PWA Custom Icons](template_pwa_custom_icons.md)
-   - [All Components Demo](template_all_components_demo.md)
-   - [Dashboard](template_dashboard.md)
-   - [Modern Web App](template_modern_web_app.md)
-   - [Complete App](template_complete_app.md)
 
 ## Need More Help?
 
