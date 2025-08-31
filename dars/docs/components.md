@@ -93,6 +93,7 @@ input_field = Input(
 - [Button](#Button)
 - [Input](#Input)
 - [Container](#Container)
+- [Markdown](#Markdown)
 - [Image](#Image)
 - [Link](#Link)
 - [Textarea](#Textarea)
