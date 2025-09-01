@@ -73,6 +73,7 @@ if __name__ == "__main__":
 ## More
 - [Project Roadmap](ROADMAP.md)
 - [Getting Started](dars/docs/getting_started.md)
+- [App Class and PWA](dars/docs/app.md)
 - [Components Documentation](dars/docs/components.md)
 - [Custom Components](dars/docs/custom_components.md)
 - [Event Handling](dars/docs/events.md)
