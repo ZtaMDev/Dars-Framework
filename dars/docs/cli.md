@@ -50,12 +50,18 @@ Dars provides official templates to help you start new projects quickly. Templat
 
 1. **Initialize a new project with a template:**
    ```bash
-   dars init my_new_project -t basic/hello_world
-   dars init my_new_project -t basic/simple_form
-   dars init my_new_project -t advanced/dashboard
-   dars init my_new_project -t demo/complete_app
+   dars init my_new_project -t basic/HelloWorld
    # ...and more (see below)
    ```
+
+You can see the templates available with
+
+```bash
+   dars init --list-templates
+   dars init  -L
+   
+   ```
+
 2. **Export the template to HTML/CSS/JS:**
    ```bash
    dars export main.py --format html --output ./hello_output
@@ -66,22 +72,6 @@ Dars provides official templates to help you start new projects quickly. Templat
    ```bash
    dars preview ./hello_output
    ```
-
-### Available Templates
-- [Hello World](template_hello_world.md)
-- [Simple Form](template_simple_form.md)
-- [Form Components](template_form_components.md)
-- [Flex Layout Responsive](template_flex_layout_responsive.md)
-- [Grid Layout Responsive](template_grid_layout_responsive.md)
-- [Multipage Example](template_multipage_example.md)
-- [Layout Multipage Demo](template_layout_multipage_demo.md)
-- [PWA Custom Icons](template_pwa_custom_icons.md)
-- [All Components Demo](template_all_components_demo.md)
-- [Dashboard](template_dashboard.md)
-- [Modern Web App](template_modern_web_app.md)
-- [Complete App](template_complete_app.md)
-
-Each template has its own documentation file with a brief description and usage notes.
 
 ## Tips
 - Use `dars --help` for a full list of commands and options.
