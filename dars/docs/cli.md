@@ -57,10 +57,9 @@ Dars provides official templates to help you start new projects quickly. Templat
 You can see the templates available with
 
 ```bash
-   dars init --list-templates
-   dars init  -L
-   
-   ```
+dars init --list-templates
+dars init  -L
+```
 
 2. **Export the template to HTML/CSS/JS:**
    ```bash
