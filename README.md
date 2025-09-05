@@ -2,11 +2,13 @@
 
 Dars is a Python UI framework for building modern, interactive web apps with Python code. Write your interface in Python, export it to static HTML/CSS/JS, and deploy anywhere.
 
-> Some Javascript or frontend stack required.
-
 ```bash
 pip install dars-framework
 ```
+
+> Some Javascript or frontend stack required.
+
+Try dars without installing nothing just visit the [Dars Playground](https://dars-playground.vercel.app/)
 
 ## How It Works
 - Build your UI using Python classes and components (like Text, Button, Container, Page, etc).
@@ -73,6 +75,7 @@ if __name__ == "__main__":
 ## More
 - [Project Roadmap](ROADMAP.md)
 - [Getting Started](dars/docs/getting_started.md)
+- [App Class and PWA](dars/docs/app.md)
 - [Components Documentation](dars/docs/components.md)
 - [Custom Components](dars/docs/custom_components.md)
 - [Event Handling](dars/docs/events.md)
