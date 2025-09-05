@@ -7,15 +7,15 @@
     });
 
     function initializeEvents() {
-        // Los eventos específicos se agregarán aquí
-    }
-
-// Asociación automática de eventos Script para esta página
-document.getElementById('comp_2288a6e9').onclick = function(event) {
+        // Asociación automática de eventos para componentes (bindings generados)
+    var el = document.getElementById('comp_16'); if (el) el.addEventListener('click', function(event) {
 document.getElementById('getting-started-section').scrollIntoView({
                                     behavior: 'smooth'
                                 });
-};
-document.getElementById('comp_12541449').onclick = function(event) {
-window.open('https://github.com/ZtaMDev/Dars-Framework', '_blank');
-};
+});
+    var el = document.getElementById('comp_17'); if (el) el.addEventListener('click', function(event) {
+window.open('https://ztamdev.github.io/Dars-Framework/documentation.html', '_blank');
+});
+}
+
+// Fin del runtime generado para esta página

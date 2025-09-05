@@ -8,9 +8,9 @@
   <meta content="width=device-width, initial-scale=1.0, user-scalable=yes" name="viewport"/>
   <meta content="#121212" name="theme-color"/>
   <title>
-   Dars Landing-Page
+   Dars Framework
   </title>
-  <link href="Dars-logo.png" rel="icon" type="image/png"/>
+  <link href="Dars-logo.png" rel="icon" type="image/x-icon"/>
   <meta content="Dars Landing-Page" property="og:title"/>
   <meta content="Dars framework landing page for the UI multiplatform python framework" property="og:description"/>
   <meta content="website" property="og:type"/>
@@ -20,40 +20,51 @@
  </head>
  <body>
   <div class="dars-page" id="index-page" style="background-color: #212529; min-height: 100vh; margin: 0; font-family: Arial, sans-serif">
-   <div class="dars-flex" id="navbar-container" style="display: flex; flex-direction: row; flex-wrap: no_wrap; justify-content: flex-start; align-items: center; gap: 16px;">
+   <div class="dars-flex FlexLayout" id="navbar-container" style="display: flex; flex-direction: row; flex-wrap: no_wrap; justify-content: flex-start; align-items: center; gap: 16px;">
     <div style="">
-     <nav class="dars-navbar" id="start-container">
+     <nav class="dars-navbar" id="dars-navbar">
       <div class="dars-navbar-nav">
        <div class="dars-container" id="navbar-left">
-        <img alt="Logo" class="dars-image" height="40px" id="component_2670313852880" src="Dars-logo.png" style="height: 40px; object-fit: contain" width="40px"/>
-        <span class="dars-text" id="component_2670313856912" style="font-size: 18px; font-weight: 600; color: #b2ffe5; margin: 0">
+        <img alt="Logo" class="dars-image" height="40px" id="comp_1" src="Dars-logo.png" style="object-fit: contain; margin-right: 10px" width="40px"/>
+        <span class="dars-text" id="comp_2" style="font-size: 20px; font-weight: 700; color: #b2ffe5; margin: 0">
          Dars Framework
         </span>
        </div>
-       <div class="dars-container" id="navbar-right">
-        <a class="dars-link" href="https://ztamdev.github.io/Dars-Framework/" id="component_2670313855952" style="color: #b2ffe5; text-decoration: none; border-radius: 5px; padding: 8px 12px" target="_self">
+       <div class="dars-container dars-navbar-nav" id="navbar-right">
+        <a class="dars-link nav-link" href="https://ztamdev.github.io/Dars-Framework/" id="comp_3" target="_self">
          Home
         </a>
-        <a class="dars-link" href="https://ztamdev.github.io/Dars-Framework/about.html" id="component_2670313857808" style="color: #b2ffe5; text-decoration: none; border-radius: 5px; padding: 8px 12px" target="_self">
+        <a class="dars-link nav-link" href="https://ztamdev.github.io/Dars-Framework/about.html" id="comp_4" target="_self">
          About
         </a>
-        <a class="dars-link" href="https://ztamdev.github.io/Dars-Framework/downloads.html" id="component_2670313858896" style="color: #b2ffe5; text-decoration: none; border-radius: 5px; padding: 8px 12px" target="_self">
+        <a class="dars-link nav-link" href="https://ztamdev.github.io/Dars-Framework/downloads.html" id="comp_5" target="_self">
          Download
         </a>
+        <a class="dars-link nav-link" href="https://dars-playground.vercel.app/" id="linkPlayground" target="_self">
+         Playground
+        </a>
+        <a class="dars-link nav-link" href="https://ztamdev.github.io/Dars-Framework/documentation.html" id="comp_6" target="_self">
+         Documentation
+        </a>
+       </div>
+       <div class="dars-container" id="navbar-hamburger" style="display: none">
+        <span class="dars-text" id="comp_7" style="font-size: 28px; color: #b2ffe5; cursor: pointer; padding: 5px 10px">
+         ☰
+        </span>
        </div>
       </div>
      </nav>
     </div>
    </div>
-   <div class="dars-container" id="component_2670314570512" style="padding: 40px 0; background: linear-gradient(to bottom, #212529, #304635)">
-    <div class="dars-container" id="component_2670314570640" style="max-width: 1200px; margin: 0 auto">
+   <div class="dars-container" id="comp_8" style="padding: 40px 0; background: linear-gradient(to bottom, #212529, #304635)">
+    <div class="dars-container" id="comp_9" style="max-width: 1200px; margin: 0 auto">
      <div class="dars-container" id="hero-section">
       <div class="dars-container" id="hero-image" style="position: relative; padding: 20px">
        <div class="dars-container" id="code-background-container" style="position: relative; z-index: 2">
-        <img alt="Dars Framework Logo" class="dars-image" height="300px" id="component_2670313888144" src="Dars-logo.png" style="max-width: 100%; height: auto; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); position: relative; z-index: 2" width="300px"/>
+        <img alt="Dars Framework Logo" class="dars-image" height="300px" id="comp_10" src="Dars-logo.png" style="max-width: 100%; height: auto; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); position: relative; z-index: 2" width="300px"/>
        </div>
        <div class="dars-container" id="code-foreground-container" style="position: relative; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; border-radius: 10px; background: linear-gradient(135deg, rgba(33, 37, 41, 0.7) 0%, rgba(48, 70, 53, 0.7) 100%); backdrop-filter: blur(2px); z-index: 1">
-        <span class="dars-text" id="component_2670313884048" style="color: rgba(178, 255, 229, 0.15); font-family: monospace; font-size: 14px; line-height: 1.4; white-space: pre; position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; z-index: 1; padding: 20px; user-select: none; pointer-events: none">
+        <span class="dars-text" id="comp_11" style="color: rgba(178, 255, 229, 0.15); font-family: monospace; font-size: 14px; line-height: 1.4; white-space: pre; position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; z-index: 1; padding: 20px; user-select: none; pointer-events: none">
          from dars.all import *
 
          app = App(title="Mi App")
@@ -70,20 +81,20 @@
        </div>
       </div>
       <div class="dars-container" id="hero-text">
-       <span class="dars-text" id="component_2670313882832" style="font-size: 2.8rem; font-weight: bold; color: #00d68f; margin-bottom: 20px">
+       <span class="dars-text" id="comp_12" style="font-size: 2.8rem; font-weight: bold; color: #00d68f; margin-bottom: 20px">
         Dars Framework
        </span>
-       <span class="dars-text" id="component_2670313886544" style="font-size: 1.3rem; color: #b2ffe5; margin-bottom: 30px; line-height: 1.5">
+       <span class="dars-text" id="comp_13" style="font-size: 1.3rem; color: #b2ffe5; margin-bottom: 30px; line-height: 1.5">
         Dynamic Aplication Rendering System is an modern Python framework for web development
        </span>
-       <span class="dars-text" id="component_2670313886608" style="font-size: 1.1rem; color: #b2ffe5; margin-bottom: 40px; line-height: 1.6">
+       <span class="dars-text" id="comp_14" style="font-size: 1.1rem; color: #b2ffe5; margin-bottom: 40px; line-height: 1.6">
         Dars is designed to make web development simple, fast, and enjoyable. With an intuitive API and powerful features, you can build modern web applications in record time using Python.
        </span>
-       <div class="dars-container" id="component_2670314578000" style="display: flex; flex-wrap: wrap; gap: 15px">
-        <button class="dars-button" id="comp_2288a6e9" style="background-color: #00d68f; color: #212529; padding: 12px 24px; border-radius: 5px; text-decoration: none; font-weight: bold; margin: 0 10px; border: none; cursor: pointer" type="button">
+       <div class="dars-container" id="comp_15" style="display: flex; flex-wrap: wrap; gap: 15px">
+        <button class="dars-button" id="comp_16" style="background-color: #00d68f; color: #212529; padding: 12px 24px; border-radius: 5px; text-decoration: none; font-weight: bold; margin: 0 10px; border: none; cursor: pointer" type="button">
          Get Started
         </button>
-        <button class="dars-button" id="comp_12541449" style="background-color: transparent; color: #00d68f; padding: 12px 24px; border-radius: 5px; text-decoration: none; border: 2px solid #00d68f; font-weight: bold; margin: 0 10px; cursor: pointer" type="button">
+        <button class="dars-button" id="comp_17" style="background-color: transparent; color: #00d68f; padding: 12px 24px; border-radius: 5px; text-decoration: none; border: 2px solid #00d68f; font-weight: bold; margin: 0 10px; cursor: pointer" type="button">
          View Documentation
         </button>
        </div>
@@ -92,109 +103,115 @@
     </div>
    </div>
    <div class="dars-container" id="how-it-works" style="background-color: #1e2b23; padding: 80px 20px; border-top: 2px solid #00d68f; border-bottom: 2px solid #00d68f">
-    <div class="dars-container" id="component_2670314580816" style="max-width: 1200px; margin: 0 auto; padding: 0 20px">
-     <span class="dars-text" id="component_2670314569808" style="font-size: 2.5rem; font-weight: bold; color: #00d68f; text-align: center; margin-bottom: 50px">
+    <div class="dars-container" id="comp_18" style="max-width: 1200px; margin: 0 auto; padding: 0 20px">
+     <span class="dars-text" id="comp_19" style="font-size: 2.5rem; font-weight: bold; color: #00d68f; text-align: center; margin-bottom: 50px">
       How Dars Framework Works
      </span>
-     <div class="dars-container" id="component_2670314581968" style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; max-width: 1000px; margin: 0 auto">
-      <div class="dars-container" id="component_2670314583760" style="background-color: #2a3b2f; padding: 30px; border-radius: 8px; flex: 1; min-width: 250px; text-align: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2)">
-       <span class="dars-text" id="component_2670314584592" style="font-size: 1.8rem; font-weight: bold; color: #00d68f; margin-bottom: 15px">
+     <div class="dars-container" id="comp_20" style="height: 2px; width: 80%; margin: 50px auto; background: linear-gradient(to right, transparent, #00d68f60, transparent); border-radius: 2px">
+     </div>
+     <div class="dars-container" id="comp_21" style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; max-width: 1000px; margin: 0 auto">
+      <div class="dars-container" id="comp_22" style="background-color: #2a3b2f; padding: 30px; border-radius: 8px; flex: 1; min-width: 250px; text-align: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2)">
+       <span class="dars-text" id="comp_23" style="font-size: 1.8rem; font-weight: bold; color: #00d68f; margin-bottom: 15px">
         1. Install
        </span>
-       <div class="dars-container" id="component_2670314583696" style="line-height: 1.6">
-        <span class="dars-text" id="component_2670314578448" style="color: #b2ffe5; display: inline; line-height: 1.6">
+       <div class="dars-container" id="comp_24" style="line-height: 1.6">
+        <span class="dars-text" id="comp_25" style="color: #b2ffe5; display: inline; line-height: 1.6">
          Install Dars with a simple
         </span>
-        <a class="dars-link" href="https://ztamdev.github.io/Dars-Framework/downloads.html" id="component_2670314581136" style="color: #00d68f; text-decoration: underline; display: inline; font-weight: bold" target="_self">
+        <a class="dars-link" href="https://ztamdev.github.io/Dars-Framework/downloads.html" id="comp_26" style="color: #00d68f; text-decoration: underline; display: inline; font-weight: bold" target="_self">
          pip command
         </a>
-        <span class="dars-text" id="component_2670314582608" style="color: #b2ffe5; display: inline; line-height: 1.6">
+        <span class="dars-text" id="comp_27" style="color: #b2ffe5; display: inline; line-height: 1.6">
          and start building immediately.
         </span>
        </div>
       </div>
-      <div class="dars-container" id="component_2670314580688" style="background-color: #2a3b2f; padding: 30px; border-radius: 8px; flex: 1; min-width: 250px; text-align: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2)">
-       <span class="dars-text" id="component_2670314584080" style="font-size: 1.8rem; font-weight: bold; color: #00d68f; margin-bottom: 15px">
+      <div class="dars-container" id="comp_28" style="background-color: #2a3b2f; padding: 30px; border-radius: 8px; flex: 1; min-width: 250px; text-align: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2)">
+       <span class="dars-text" id="comp_29" style="font-size: 1.8rem; font-weight: bold; color: #00d68f; margin-bottom: 15px">
         2. Develop
        </span>
-       <span class="dars-text" id="component_2670314584784" style="color: #b2ffe5; line-height: 1.6">
+       <span class="dars-text" id="comp_30" style="color: #b2ffe5; line-height: 1.6">
         Use the intuitive API to create routes, components, and pages with minimal code.
        </span>
       </div>
-      <div class="dars-container" id="component_2670314580496" style="background-color: #2a3b2f; padding: 30px; border-radius: 8px; flex: 1; min-width: 250px; text-align: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2)">
-       <span class="dars-text" id="component_2670314580944" style="font-size: 1.8rem; font-weight: bold; color: #00d68f; margin-bottom: 15px">
+      <div class="dars-container" id="comp_31" style="background-color: #2a3b2f; padding: 30px; border-radius: 8px; flex: 1; min-width: 250px; text-align: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2)">
+       <span class="dars-text" id="comp_32" style="font-size: 1.8rem; font-weight: bold; color: #00d68f; margin-bottom: 15px">
         3. Deploy
        </span>
-       <span class="dars-text" id="component_2670314581200" style="color: #b2ffe5; line-height: 1.6">
+       <span class="dars-text" id="comp_33" style="color: #b2ffe5; line-height: 1.6">
         Deploy your application in the test built-in server or your preferred hosting provider.
        </span>
       </div>
      </div>
     </div>
    </div>
+   <div class="dars-container" id="comp_34">
+    <div class="dars-container" id="component-based-section" style="text-align: center; border-bottom: 2px solid #00d68f">
+    </div>
+   </div>
    <div class="dars-container" id="getting-started-section" style="padding: 80px 0; background: linear-gradient(to bottom, #304635, #212529); width: 100%; text-align: center">
-    <div class="dars-container" id="component_2670315840272" style="max-width: 1200px; margin: 0 auto; padding: 0 20px; width: 100%">
-     <span class="dars-text" id="component_2670315515920" style="font-size: 2.5rem; font-weight: bold; color: #00d68f; text-align: center; margin-bottom: 30px">
+    <div class="dars-container" id="comp_35" style="max-width: 1200px; margin: 0 auto; padding: 0 20px; width: 100%">
+     <span class="dars-text" id="comp_36" style="font-size: 2.5rem; font-weight: bold; color: #00d68f; text-align: center; margin-bottom: 30px">
       Getting Started with Dars Framework
      </span>
-     <span class="dars-text" id="component_2670315516048" style="font-size: 1.2rem; color: #b2ffe5; text-align: center; margin-bottom: 50px; line-height: 1.6">
+     <span class="dars-text" id="comp_37" style="font-size: 1.2rem; color: #b2ffe5; text-align: center; margin-bottom: 50px; line-height: 1.6">
       Welcome to Dars, a modern Python framework for building web applications with reusable UI components.
      </span>
-     <div class="dars-container" id="component_2670313856720" style="margin-bottom: 50px; width: 100%; text-align: center">
-      <span class="dars-text" id="component_2670315516432" style="font-size: 2rem; font-weight: bold; color: #00d68f; margin-bottom: 25px; text-align: center">
+     <div class="dars-container" id="comp_38" style="margin-bottom: 50px; width: 100%; text-align: center">
+      <span class="dars-text" id="comp_39" style="font-size: 2rem; font-weight: bold; color: #00d68f; margin-bottom: 25px; text-align: center">
        Quick Start
       </span>
-      <div class="dars-container" id="component_2670313856144" style="width: 100%; margin-bottom: 40px">
-       <div class="dars-container" id="component_2670313852240" style="width: 100%; display: flex; justify-content: center">
-        <div class="dars-container" id="component_2670313863888" style="background-color: #2a3b2f; padding: 40px; border-radius: 10px; max-width: 800px; margin: 0 auto">
-         <span class="dars-text" id="component_2670315516560" style="font-size: 1.4rem; font-weight: bold; color: #00d68f; margin-bottom: 10px; text-align: center">
+      <div class="dars-container" id="comp_40" style="width: 100%; margin-bottom: 40px">
+       <div class="dars-container" id="comp_41" style="width: 100%; display: flex; justify-content: center">
+        <div class="dars-container" id="comp_42" style="background-color: #2a3b2f; padding: 40px; border-radius: 10px; max-width: 800px; margin: 0 auto">
+         <span class="dars-text" id="comp_43" style="font-size: 1.4rem; font-weight: bold; color: #00d68f; margin-bottom: 10px; text-align: center">
           1. Install Dars
          </span>
-         <div class="dars-container" id="component_2670315517328" style="margin-bottom: 30px">
-          <span class="dars-text" id="component_2670315516368" style="color: #b2ffe5; margin-bottom: 15px; line-height: 1.6; text-align: center">
+         <div class="dars-container" id="comp_44" style="margin-bottom: 30px">
+          <span class="dars-text" id="comp_45" style="color: #b2ffe5; margin-bottom: 15px; line-height: 1.6; text-align: center">
            Get started by installing the framework
           </span>
-          <div class="dars-container" id="component_2670309276752" style="text-align: center">
-           <a class="dars-link" href="https://ztamdev.github.io/Dars-Framework/downloads.html" id="component_2670315516880" style="color: #00d68f; text-decoration: none; font-weight: bold; display: inline-block; padding: 10px 15px; border: 2px solid #00d68f; border-radius: 5px" target="_self">
+          <div class="dars-container" id="comp_46" style="text-align: center">
+           <a class="dars-link" href="https://ztamdev.github.io/Dars-Framework/downloads.html" id="comp_47" style="color: #00d68f; text-decoration: none; font-weight: bold; display: inline-block; padding: 10px 15px; border: 2px solid #00d68f; border-radius: 5px" target="_self">
             View Installation Instructions
            </a>
           </div>
          </div>
-         <span class="dars-text" id="component_2670315517584" style="font-size: 1.4rem; font-weight: bold; color: #00d68f; margin-bottom: 10px; text-align: center">
+         <span class="dars-text" id="comp_48" style="font-size: 1.4rem; font-weight: bold; color: #00d68f; margin-bottom: 10px; text-align: center">
           2. Explore Components
          </span>
-         <div class="dars-container" id="component_2670315518608" style="margin-bottom: 30px">
-          <span class="dars-text" id="component_2670315517840" style="color: #b2ffe5; margin-bottom: 15px; line-height: 1.6; text-align: center">
+         <div class="dars-container" id="comp_49" style="margin-bottom: 30px">
+          <span class="dars-text" id="comp_50" style="color: #b2ffe5; margin-bottom: 15px; line-height: 1.6; text-align: center">
            Discover all available UI components
           </span>
-          <div class="dars-container" id="component_2670315518288" style="text-align: center">
-           <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework/blob/CrystalMain/dars/docs/components.md" id="component_2670315518096" style="color: #00d68f; text-decoration: none; font-weight: bold; display: inline-block; padding: 10px 15px; border: 2px solid #00d68f; border-radius: 5px" target="_self">
+          <div class="dars-container" id="comp_51" style="text-align: center">
+           <a class="dars-link" href="https://ztamdev.github.io/Dars-Framework/documentation.html#dars-components-documentation" id="comp_52" style="color: #00d68f; text-decoration: none; font-weight: bold; display: inline-block; padding: 10px 15px; border: 2px solid #00d68f; border-radius: 5px" target="_self">
             Browse Components
            </a>
           </div>
          </div>
-         <span class="dars-text" id="component_2670315518864" style="font-size: 1.4rem; font-weight: bold; color: #00d68f; margin-bottom: 10px; text-align: center">
+         <span class="dars-text" id="comp_53" style="font-size: 1.4rem; font-weight: bold; color: #00d68f; margin-bottom: 10px; text-align: center">
           3. Command-Line Usage
          </span>
-         <div class="dars-container" id="component_2670315519696" style="margin-bottom: 30px">
-          <span class="dars-text" id="component_2670315519120" style="color: #b2ffe5; margin-bottom: 15px; line-height: 1.6; text-align: center">
+         <div class="dars-container" id="comp_54" style="margin-bottom: 30px">
+          <span class="dars-text" id="comp_55" style="color: #b2ffe5; margin-bottom: 15px; line-height: 1.6; text-align: center">
            Learn CLI commands and workflows
           </span>
-          <div class="dars-container" id="component_2670315519760" style="text-align: center">
-           <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework/blob/CrystalMain/dars/docs/cli.md" id="component_2670315519248" style="color: #00d68f; text-decoration: none; font-weight: bold; display: inline-block; padding: 10px 15px; border: 2px solid #00d68f; border-radius: 5px" target="_self">
+          <div class="dars-container" id="comp_56" style="text-align: center">
+           <a class="dars-link" href="https://ztamdev.github.io/Dars-Framework/documentation.html#dars-cli-reference" id="comp_57" style="color: #00d68f; text-decoration: none; font-weight: bold; display: inline-block; padding: 10px 15px; border: 2px solid #00d68f; border-radius: 5px" target="_self">
             CLI Documentation
            </a>
           </div>
          </div>
-         <span class="dars-text" id="component_2670313735696" style="font-size: 1.4rem; font-weight: bold; color: #00d68f; margin-bottom: 10px; text-align: center">
+         <span class="dars-text" id="comp_58" style="font-size: 1.4rem; font-weight: bold; color: #00d68f; margin-bottom: 10px; text-align: center">
           4. Project Structure
          </span>
-         <div class="dars-container" id="component_2670313863952" style="margin-bottom: 30px">
-          <span class="dars-text" id="component_2670313739536" style="color: #b2ffe5; margin-bottom: 15px; line-height: 1.6; text-align: center">
+         <div class="dars-container" id="comp_59" style="margin-bottom: 30px">
+          <span class="dars-text" id="comp_60" style="color: #b2ffe5; margin-bottom: 15px; line-height: 1.6; text-align: center">
            Understand the framework's internal layout
           </span>
-          <div class="dars-container" id="component_2670313856784" style="text-align: center">
-           <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework/blob/CrystalMain/STRUCTURE.md" id="component_2670313747152" style="color: #00d68f; text-decoration: none; font-weight: bold; display: inline-block; padding: 10px 15px; border: 2px solid #00d68f; border-radius: 5px" target="_self">
+          <div class="dars-container" id="comp_61" style="text-align: center">
+           <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework/blob/CrystalMain/STRUCTURE.md" id="comp_62" style="color: #00d68f; text-decoration: none; font-weight: bold; display: inline-block; padding: 10px 15px; border: 2px solid #00d68f; border-radius: 5px" target="_self">
             Project Structure Guide
            </a>
           </div>
@@ -203,39 +220,39 @@
        </div>
       </div>
      </div>
-     <div class="dars-container" id="component_2670315842000" style="text-align: center; padding: 40px; background-color: #1e2b23; border-radius: 10px; border: 2px solid #00d68f; max-width: 800px; margin: 0 auto">
-      <span class="dars-text" id="component_2670313851216" style="font-size: 1.8rem; font-weight: bold; color: #00d68f; margin-bottom: 20px; text-align: center">
+     <div class="dars-container" id="comp_63" style="text-align: center; padding: 40px; background-color: #1e2b23; border-radius: 10px; border: 2px solid #00d68f; max-width: 800px; margin: 0 auto">
+      <span class="dars-text" id="comp_64" style="font-size: 1.8rem; font-weight: bold; color: #00d68f; margin-bottom: 20px; text-align: center">
        Need More Help?
       </span>
-      <span class="dars-text" id="component_2670313860240" style="color: #b2ffe5; margin-bottom: 30px; text-align: center; line-height: 1.6">
+      <span class="dars-text" id="comp_65" style="color: #b2ffe5; margin-bottom: 30px; text-align: center; line-height: 1.6">
        For advanced topics and support, check our comprehensive documentation and community resources.
       </span>
-      <div class="dars-container" id="component_2670313856528" style="text-align: center">
-       <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework" id="component_2670313850704" style="background-color: #00d68f; color: #212529; padding: 12px 24px; border-radius: 5px; text-decoration: none; font-weight: bold; display: inline-block" target="_self">
+      <div class="dars-container" id="comp_66" style="text-align: center">
+       <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework" id="comp_67" style="background-color: #00d68f; color: #212529; padding: 12px 24px; border-radius: 5px; text-decoration: none; font-weight: bold; display: inline-block" target="_self">
         Visit GitHub Repository
        </a>
       </div>
      </div>
     </div>
    </div>
-   <div class="dars-container" id="component_2670315537936" style="background-color: #1e2b23; margin-top: auto">
-    <div class="dars-container" id="component_2670315537424" style="text-align: center; padding: 30px 20px; border-top: 1px solid #304635">
-     <span class="dars-text" id="component_2670314584848" style="color: #b2ffe5; display: inline; margin-right: 5px">
+   <div class="dars-container" id="comp_68" style="background-color: #1e2b23; margin-top: auto">
+    <div class="dars-container" id="comp_69" style="text-align: center; padding: 30px 20px; border-top: 1px solid #304635">
+     <span class="dars-text" id="comp_70" style="color: #b2ffe5; display: inline; margin-right: 5px">
       Created with
      </span>
-     <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework" id="component_2670314585360" style="color: #00d68f; text-decoration: none; font-weight: bold; display: inline" target="_self">
+     <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework" id="comp_71" style="color: #00d68f; text-decoration: none; font-weight: bold; display: inline" target="_self">
       Dars Framework
      </a>
-     <span class="dars-text" id="component_2670314585936" style="color: #b2ffe5; display: inline; margin: 0 5px">
+     <span class="dars-text" id="comp_72" style="color: #b2ffe5; display: inline; margin: 0 5px">
       • Documentation:
      </span>
-     <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework/blob/CrystalMain/dars/docs/getting_started.md" id="component_2670315536592" style="color: #00d68f; text-decoration: none; font-weight: bold; display: inline" target="_self">
+     <a class="dars-link" href="https://ztamdev.github.io/Dars-Framework/documentation.html" id="comp_73" style="color: #00d68f; text-decoration: none; font-weight: bold; display: inline" target="_self">
       Getting Started
      </a>
-     <span class="dars-text" id="component_2670315536528" style="color: #b2ffe5; display: inline; margin: 0 5px">
+     <span class="dars-text" id="comp_74" style="color: #b2ffe5; display: inline; margin: 0 5px">
       • Developer:
      </span>
-     <a class="dars-link" href="https://github.com/ZtaMDev" id="component_2670315537232" style="color: #00d68f; text-decoration: none; font-weight: bold; display: inline" target="_self">
+     <a class="dars-link" href="https://github.com/ZtaMDev" id="comp_75" style="color: #00d68f; text-decoration: none; font-weight: bold; display: inline" target="_self">
       ZtaDev
      </a>
     </div>

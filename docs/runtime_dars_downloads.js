@@ -7,18 +7,18 @@
     });
 
     function initializeEvents() {
-        // Los eventos específicos se agregarán aquí
-    }
-
-// Asociación automática de eventos Script para esta página
-document.getElementById('comp_f2cb9337').onclick = function(event) {
+        // Asociación automática de eventos para componentes (bindings generados)
+    var el = document.getElementById('comp_179'); if (el) el.addEventListener('click', function(event) {
 navigator.clipboard.writeText('pip install dars-framework')
                                         .then(() => alert('Command copied to clipboard!'))
                                         .catch(err => console.error('Failed to copy: ', err));
-};
-document.getElementById('comp_49acef48').onclick = function(event) {
-window.location.href = 'https://github.com/ZtaMDev/Dars-Framework/tree/CrystalMain/dars/docs/getting_started.md';
-};
-document.getElementById('comp_21dc88ed').onclick = function(event) {
+});
+    var el = document.getElementById('comp_231'); if (el) el.addEventListener('click', function(event) {
+window.location.href = 'https://ztamdev.github.io/Dars-Framework/documentation.html#getting-started-with-dars';
+});
+    var el = document.getElementById('comp_232'); if (el) el.addEventListener('click', function(event) {
 window.open('https://github.com/ZtaMDev/Dars-Framework/tree/CrystalMain/dars/templates/examples', '_blank');
-};
+});
+}
+
+// Fin del runtime generado para esta página

@@ -8,11 +8,13 @@
 
     function initializeEvents() {
         // Asociación automática de eventos para componentes (bindings generados)
-    var el = document.getElementById('comp_148'); if (el) el.addEventListener('click', function(event) {
-window.open('https://ztamdev.github.io/Dars-Framework/documentation.html#getting-started-with-dars', '_blank');
-});
-    var el = document.getElementById('comp_149'); if (el) el.addEventListener('click', function(event) {
-window.open('https://github.com/ZtaMDev/Dars-Framework', '_blank');
+    var el = document.getElementById('comp_249'); if (el) el.addEventListener('click', function(event) {
+const sidebar = document.getElementById('sidebar-links');
+            if (sidebar.style.display === 'none' || sidebar.style.display === '') {
+                sidebar.style.display = 'block';
+            } else {
+                sidebar.style.display = 'none';
+            }
 });
 }
 
