@@ -8,7 +8,7 @@ pip install dars-framework
 
 > Some Javascript or frontend stack required.
 
-Try dars without installing nothing just visit the [Dars Playground)](https://dars-playground.vercel.app/)
+Try dars without installing nothing just visit the [Dars Playground](https://dars-playground.vercel.app/)
 
 ## How It Works
 - Build your UI using Python classes and components (like Text, Button, Container, Page, etc).
