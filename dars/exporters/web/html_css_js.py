@@ -1256,6 +1256,15 @@ body {
             css_content += f"{selector} {{\n"
             css_content += f"    {self.render_styles(styles)}\n"
             css_content += "}\n\n"
+
+        # Agregar contenido de archivos CSS globales
+        for file_path in app.global_style_files:
+            try:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    css_content += f.read() + "\n\n"
+            except Exception as e:
+                print(f"[Dars] Warning: could not read CSS file '{file_path}': {e}")
+
             
         return css_content
         

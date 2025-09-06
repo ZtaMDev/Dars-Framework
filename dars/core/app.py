@@ -127,7 +127,7 @@ class Page:
 class App:
     """Main class that represents a Dars application"""
 
-    def rTimeCompile(self, exporter=None, port=None, add_file_types=None):
+    def rTimeCompile(self, exporter=None, port=None, add_file_types=".py, .js, .css"):
         """
         Generates a quick preview of the app on a local server using an exporter  
         (default: HTMLCSSJSExporter) and serving the files from a temporary directory.  
@@ -368,7 +368,7 @@ class App:
                                             pass
 
                                 if not new_app:
-                                    (console.print("[red]No App instance found after reload.[/red]")
+                                    (console.print("[red]No App instance found after reload.")
                                     if console else print("[Dars] No App instance found after reload."))
                                     return
 
@@ -480,7 +480,7 @@ class App:
 
     
     def __init__(
-        self, 
+        self,
         title: str = "Dars App",
         description: str = "",
         author: str = "",
@@ -554,6 +554,7 @@ class App:
         self._index_page: str = None           # Nombre de la página principal (si existe)
         self.scripts: List['Script'] = []
         self.global_styles: Dict[str, Any] = {}
+        self.global_style_files: List[str] = []
         self.event_manager = EventManager()
         self.config = config
         
@@ -618,9 +619,26 @@ class App:
         """Adds a script to the app"""
         self.scripts.append(script)
         
-    def add_global_style(self, selector: str, styles: Dict[str, Any]):
-        """Adds a global style to the app"""
+    def add_global_style(self, selector: str = None, styles: Dict[str, Any] = None, file_path: str = None):
+        """
+        Adds a global style to the app.
+        
+        - If file_path is provided, the CSS file is read and stored.
+        - If selector and styles are provided, they are stored as inline CSS rules.
+        - It is invalid to mix file_path with selector/styles.
+        """
+        if file_path:
+            if selector or styles:
+                raise ValueError("Cannot use selector/styles when file_path is provided.")
+            if file_path not in self.global_style_files:
+                self.global_style_files.append(file_path)
+            return self
+
+        if not selector or not styles:
+            raise ValueError("Must provide selector and styles when file_path is not used.")
+        
         self.global_styles[selector] = styles
+        return self
         
     def set_theme(self, theme: str):
         """Set the theme for the app"""
