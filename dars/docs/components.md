@@ -19,13 +19,13 @@ This simplifies integration and improves the developer experience.
 
 Components are the fundamental elements of Dars that represent UI elements. Each component encapsulates its appearance, behavior, and state, allowing you to create complex interfaces by composing simple elements.
 
-To learn how to create your own custom components, refer to the documentation in [Custom Components](custom_components.md).
+To learn how to create your own custom components, refer to the documentation in [Custom Components](#custom-components-in-dars-framework).
 
 ## Event Handling with dScript
 
 Dars provides a powerful way to handle user interactions through the `dScript` class. You can attach event handlers to interactive components like `Button` and `Input` to create dynamic and responsive user interfaces.
 
-For a complete list of available event types and how to use them, refer to the documentation in [Events](events.md).
+For a complete list of available event types and how to use them, refer to the documentation in [Events](#events-in-dars).
 
 ### Basic Usage
 
@@ -87,34 +87,34 @@ input_field = Input(
 ### Quick Access
 
 - [Base Component Class](#base-component-class)
-- [Component Search](#Component-Search-and-Modification)
-- [Page](#Page)
-- [Text](#Text)
-- [Button](#Button)
-- [Input](#Input)
-- [Container](#Container)
-- [Markdown](#Markdown)
-- [Image](#Image)
-- [Link](#Link)
-- [Textarea](#Textarea)
-- [Checkbox](#Checkbox)
-- [RadioButton](#RadioButton)
-- [Select](#Select)
-- [Slider](#Slider)
-- [ProgressBar](#ProgressBar)
-- [Tooltip](#Tooltip)
-- [DatePicker](#DatePicker)
-- [Card](#Card)
-- [Modal](#Modal)
-- [Navbar](#Navbar)
-- [Accordion](#Accordion)
-- [Tabs](#Tabs)
-- [Table](#Table)
+- [Component Search](#component-search-and-modification)
+- [Page](#page)
+- [Text](#text)
+- [Button](#button)
+- [Input](#input)
+- [Container](#container)
+- [Markdown](#markdown)
+- [Image](#image)
+- [Link](#link)
+- [Textarea](#textarea)
+- [Checkbox](#checkbox)
+- [RadioButton](#radiobutton)
+- [Select](#select)
+- [Slider](#slider)
+- [ProgressBar](#progressBar)
+- [Tooltip](#tooltip)
+- [DatePicker](#datepicker)
+- [Card](#card)
+- [Modal](#modal)
+- [Navbar](#navbar)
+- [Accordion](#accordion)
+- [Tabs](#tabs)
+- [Table](#table)
 - [Layout Components](#layout-components)
-  - [GridLayout](#GridLayout)
-  - [FlexLayout](#FlexLayout)
-  - [LayoutBase](#LayoutBase)
-  - [AnchorPoint](#AnchorPoint)
+  - [GridLayout](#gridlayout)
+  - [FlexLayout](#flexlayout)
+  - [LayoutBase](#layoutbase)
+  - [AnchorPoint](#anchorpoint)
 
 ---
 
@@ -1674,5 +1674,4 @@ save_button = Button("Guardar", style=PRIMARY_BUTTON_STYLES)
 ```
 
 Components provide a solid foundation for creating modern and responsive user interfaces that can be exported to multiple platforms while maintaining consistency and functionality.
-
 

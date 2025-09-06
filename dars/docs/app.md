@@ -27,6 +27,118 @@ class App:
     ):
 ```
 
+## Global Styles Management
+
+### Enhanced add_global_style() Method
+
+The `App` class now includes an enhanced `add_global_style()` method that supports both inline style definitions and external CSS file imports.
+
+
+#### Usage Examples
+
+**1. Inline Style Definition (Traditional)**
+```python
+app.add_global_style(
+    selector=".my-button",
+    styles={
+        "background-color": "#4CAF50",
+        "color": "white",
+        "padding": "10px 20px",
+        "border-radius": "5px"
+    }
+)
+```
+
+**2. External CSS File Import (New in v1.1.2)**
+```python
+app.add_global_style(file_path="styles.css")
+```
+
+**3. Combined Usage**
+```python
+# Add inline styles
+app.add_global_style(
+    selector=".primary-btn",
+    styles={
+        "background-color": "#007bff",
+        "color": "white"
+    }
+)
+
+# Import external CSS file
+app.add_global_style(file_path="components.css")
+```
+
+#### Practical Example with External CSS
+
+**main.py:**
+```python
+from dars.all import *
+
+app = App(title="Dars Styling Test")
+
+index = Page(
+    Container(
+        Button("Styled Button", class_name="button-styling-test"),
+        id="page_sub_container"
+    )
+)
+
+app.add_page(name="index", root=index, title="index", index=True)
+app.add_global_style(file_path="styles.css")
+
+if __name__ == "__main__":
+    app.rTimeCompile(add_file_types=".py, .css")
+```
+
+**styles.css:**
+```css
+.button-styling-test {
+    background-color: rgb(51, 255, 0);
+    padding: 15px 30px;
+    border-radius: 8px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.button-styling-test:hover {
+    background-color: rgb(30, 200, 0);
+    transform: scale(1.05);
+}
+
+#page_sub_container {
+    padding: 20px;
+    background-color: #f5f5f5;
+    min-height: 100vh;
+}
+```
+
+### Hot Reload for CSS Files
+
+When using `app.rTimeCompile()` with the `add_file_types=".css"` parameter, the development server automatically watches for changes in CSS files and reloads the application when modifications are detected.
+
+```python
+# Watch for both Python and CSS file changes
+app.rTimeCompile(add_file_types=".py, .css")
+
+# Or watch for CSS files only
+app.rTimeCompile(add_file_types=".css")
+```
+
+### Benefits of External CSS Import
+
+1. **Separation of Concerns**: Keep styles separate from application logic
+2. **Better Organization**: Maintain complex stylesheets in dedicated files
+3. **Team Collaboration**: Designers and developers can work simultaneously
+4. **CSS Preprocessors**: Use SASS, LESS, or other preprocessors
+5. **Performance**: Browser caching for external CSS files
+
+### Backward Compatibility
+
+The enhanced method maintains full backward compatibility - existing code using `add_global_style(selector, styles)` will continue to work without modification.
+
+
 ## PWA Configuration Properties
 
 The App class includes these PWA-specific properties:

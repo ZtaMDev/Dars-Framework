@@ -503,6 +503,196 @@ dars<span class="w"> </span>preview<span class="w"> </span>./output_directory
     <span class="p">):</span>
 </code></pre>
     </div>
+    <h2 id="global-styles-management">
+     Global Styles Management
+    </h2>
+    <h3 id="enhanced-add_global_style-method">
+     Enhanced add
+     <em>
+      global
+     </em>
+     style() Method
+    </h3>
+    <p>
+     The
+     <code>
+      App
+     </code>
+     class now includes an enhanced
+     <code>
+      add_global_style()
+     </code>
+     method that supports both inline style definitions and external CSS file imports.
+    </p>
+    <h4 id="usage-examples">
+     Usage Examples
+    </h4>
+    <p>
+     <strong>
+      1. Inline Style Definition (Traditional)
+     </strong>
+    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="n">app</span><span class="o">.</span><span class="n">add_global_style</span><span class="p">(</span>
+    <span class="n">selector</span><span class="o">=</span><span class="s2">".my-button"</span><span class="p">,</span>
+    <span class="n">styles</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">"background-color"</span><span class="p">:</span> <span class="s2">"#4CAF50"</span><span class="p">,</span>
+        <span class="s2">"color"</span><span class="p">:</span> <span class="s2">"white"</span><span class="p">,</span>
+        <span class="s2">"padding"</span><span class="p">:</span> <span class="s2">"10px 20px"</span><span class="p">,</span>
+        <span class="s2">"border-radius"</span><span class="p">:</span> <span class="s2">"5px"</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+</code></pre>
+    </div>
+    <p>
+     <strong>
+      2. External CSS File Import (New in v1.1.2)
+     </strong>
+    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="n">app</span><span class="o">.</span><span class="n">add_global_style</span><span class="p">(</span><span class="n">file_path</span><span class="o">=</span><span class="s2">"styles.css"</span><span class="p">)</span>
+</code></pre>
+    </div>
+    <p>
+     <strong>
+      3. Combined Usage
+     </strong>
+    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="c1"># Add inline styles</span>
+<span class="n">app</span><span class="o">.</span><span class="n">add_global_style</span><span class="p">(</span>
+    <span class="n">selector</span><span class="o">=</span><span class="s2">".primary-btn"</span><span class="p">,</span>
+    <span class="n">styles</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">"background-color"</span><span class="p">:</span> <span class="s2">"#007bff"</span><span class="p">,</span>
+        <span class="s2">"color"</span><span class="p">:</span> <span class="s2">"white"</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="c1"># Import external CSS file</span>
+<span class="n">app</span><span class="o">.</span><span class="n">add_global_style</span><span class="p">(</span><span class="n">file_path</span><span class="o">=</span><span class="s2">"components.css"</span><span class="p">)</span>
+</code></pre>
+    </div>
+    <h4 id="practical-example-with-external-css">
+     Practical Example with External CSS
+    </h4>
+    <p>
+     <strong>
+      main.py:
+     </strong>
+    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"Dars Styling Test"</span><span class="p">)</span>
+
+<span class="n">index</span> <span class="o">=</span> <span class="n">Page</span><span class="p">(</span>
+    <span class="n">Container</span><span class="p">(</span>
+        <span class="n">Button</span><span class="p">(</span><span class="s2">"Styled Button"</span><span class="p">,</span> <span class="n">class_name</span><span class="o">=</span><span class="s2">"button-styling-test"</span><span class="p">),</span>
+        <span class="nb">id</span><span class="o">=</span><span class="s2">"page_sub_container"</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"index"</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">index</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"index"</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">add_global_style</span><span class="p">(</span><span class="n">file_path</span><span class="o">=</span><span class="s2">"styles.css"</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">rTimeCompile</span><span class="p">(</span><span class="n">add_file_types</span><span class="o">=</span><span class="s2">".py, .css"</span><span class="p">)</span>
+</code></pre>
+    </div>
+    <p>
+     <strong>
+      styles.css:
+     </strong>
+    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="p">.</span><span class="nc">button-styling-test</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">background-color</span><span class="p">:</span><span class="w"> </span><span class="nb">rgb</span><span class="p">(</span><span class="mi">51</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">    </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mi">15</span><span class="kt">px</span><span class="w"> </span><span class="mi">30</span><span class="kt">px</span><span class="p">;</span>
+<span class="w">    </span><span class="k">border-radius</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="kt">px</span><span class="p">;</span>
+<span class="w">    </span><span class="k">border</span><span class="p">:</span><span class="w"> </span><span class="kc">none</span><span class="p">;</span>
+<span class="w">    </span><span class="k">font-weight</span><span class="p">:</span><span class="w"> </span><span class="kc">bold</span><span class="p">;</span>
+<span class="w">    </span><span class="k">cursor</span><span class="p">:</span><span class="w"> </span><span class="kc">pointer</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="p">.</span><span class="nc">button-styling-test</span><span class="p">:</span><span class="nd">hover</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">background-color</span><span class="p">:</span><span class="w"> </span><span class="nb">rgb</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span><span class="w"> </span><span class="mi">200</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">    </span><span class="k">transform</span><span class="p">:</span><span class="w"> </span><span class="nb">scale</span><span class="p">(</span><span class="mf">1.05</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="p">#</span><span class="nn">page_sub_container</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="kt">px</span><span class="p">;</span>
+<span class="w">    </span><span class="k">background-color</span><span class="p">:</span><span class="w"> </span><span class="mh">#f5f5f5</span><span class="p">;</span>
+<span class="w">    </span><span class="k">min-height</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="kt">vh</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+    </div>
+    <h3 id="hot-reload-for-css-files">
+     Hot Reload for CSS Files
+    </h3>
+    <p>
+     When using
+     <code>
+      app.rTimeCompile()
+     </code>
+     with the
+     <code>
+      add_file_types=".css"
+     </code>
+     parameter, the development server automatically watches for changes in CSS files and reloads the application when modifications are detected.
+    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="c1"># Watch for both Python and CSS file changes</span>
+<span class="n">app</span><span class="o">.</span><span class="n">rTimeCompile</span><span class="p">(</span><span class="n">add_file_types</span><span class="o">=</span><span class="s2">".py, .css"</span><span class="p">)</span>
+
+<span class="c1"># Or watch for CSS files only</span>
+<span class="n">app</span><span class="o">.</span><span class="n">rTimeCompile</span><span class="p">(</span><span class="n">add_file_types</span><span class="o">=</span><span class="s2">".css"</span><span class="p">)</span>
+</code></pre>
+    </div>
+    <h3 id="benefits-of-external-css-import">
+     Benefits of External CSS Import
+    </h3>
+    <ol>
+     <li>
+      <strong>
+       Separation of Concerns
+      </strong>
+      : Keep styles separate from application logic
+     </li>
+     <li>
+      <strong>
+       Better Organization
+      </strong>
+      : Maintain complex stylesheets in dedicated files
+     </li>
+     <li>
+      <strong>
+       Team Collaboration
+      </strong>
+      : Designers and developers can work simultaneously
+     </li>
+     <li>
+      <strong>
+       CSS Preprocessors
+      </strong>
+      : Use SASS, LESS, or other preprocessors
+     </li>
+     <li>
+      <strong>
+       Performance
+      </strong>
+      : Browser caching for external CSS files
+     </li>
+    </ol>
+    <h3 id="backward-compatibility">
+     Backward Compatibility
+    </h3>
+    <p>
+     The enhanced method maintains full backward compatibility - existing code using
+     <code>
+      add_global_style(selector, styles)
+     </code>
+     will continue to work without modification.
+    </p>
     <h2 id="pwa-configuration-properties">
      PWA Configuration Properties
     </h2>
@@ -967,117 +1157,117 @@ dars<span class="w"> </span>preview<span class="w"> </span>./output_directory
       </a>
      </li>
      <li>
-      <a href="#Component-Search-and-Modification">
+      <a href="#component-search-and-modification">
        Component Search
       </a>
      </li>
      <li>
-      <a href="#Page">
+      <a href="#page">
        Page
       </a>
      </li>
      <li>
-      <a href="#Text">
+      <a href="#text">
        Text
       </a>
      </li>
      <li>
-      <a href="#Button">
+      <a href="#button">
        Button
       </a>
      </li>
      <li>
-      <a href="#Input">
+      <a href="#input">
        Input
       </a>
      </li>
      <li>
-      <a href="#Container">
+      <a href="#container">
        Container
       </a>
      </li>
      <li>
-      <a href="#Markdown">
+      <a href="#markdown">
        Markdown
       </a>
      </li>
      <li>
-      <a href="#Image">
+      <a href="#image">
        Image
       </a>
      </li>
      <li>
-      <a href="#Link">
+      <a href="#link">
        Link
       </a>
      </li>
      <li>
-      <a href="#Textarea">
+      <a href="#textarea">
        Textarea
       </a>
      </li>
      <li>
-      <a href="#Checkbox">
+      <a href="#checkbox">
        Checkbox
       </a>
      </li>
      <li>
-      <a href="#RadioButton">
+      <a href="#radiobutton">
        RadioButton
       </a>
      </li>
      <li>
-      <a href="#Select">
+      <a href="#select">
        Select
       </a>
      </li>
      <li>
-      <a href="#Slider">
+      <a href="#slider">
        Slider
       </a>
      </li>
      <li>
-      <a href="#ProgressBar">
+      <a href="#progressBar">
        ProgressBar
       </a>
      </li>
      <li>
-      <a href="#Tooltip">
+      <a href="#tooltip">
        Tooltip
       </a>
      </li>
      <li>
-      <a href="#DatePicker">
+      <a href="#datepicker">
        DatePicker
       </a>
      </li>
      <li>
-      <a href="#Card">
+      <a href="#card">
        Card
       </a>
      </li>
      <li>
-      <a href="#Modal">
+      <a href="#modal">
        Modal
       </a>
      </li>
      <li>
-      <a href="#Navbar">
+      <a href="#navbar">
        Navbar
       </a>
      </li>
      <li>
-      <a href="#Accordion">
+      <a href="#accordion">
        Accordion
       </a>
      </li>
      <li>
-      <a href="#Tabs">
+      <a href="#tabs">
        Tabs
       </a>
      </li>
      <li>
-      <a href="#Table">
+      <a href="#table">
        Table
       </a>
      </li>
