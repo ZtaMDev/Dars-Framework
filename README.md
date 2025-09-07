@@ -75,7 +75,7 @@ if __name__ == "__main__":
 ## More
 
 - Visit dars [official website](https://ztamdev.github.io/Dars-Framework/)
-- Visit the dars official [Documentation](https://ztamdev.github.io/Dars-Framework/documentation.html) now on separete website.
+- Visit the dars official [Documentation](https://ztamdev.github.io/Dars-Framework/documentation.html) now on separate website.
 - Try dars without installing nothing just visit the [Dars Playground](https://dars-playground.vercel.app/)
 
 ## Local Execution and Live Preview
