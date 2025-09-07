@@ -15,7 +15,7 @@ Try dars without installing nothing just visit the [Dars Playground](https://dar
 - Preview instantly with hot-reload using `app.rTimeCompile()`.
 - Export your app to static web files with a single CLI command.
 - Use multipage, layouts, scripts, and more—see docs for advanced features.
-- For mor information visit the [Documentation](dars/docs/index.md)
+- For mor information visit the [Documentation](https://ztamdev.github.io/Dars-Framework/documentation.html)
 
 ## Quick Example: Your First App
 > Note: this is an single page example but you can build multipage apps with Page component see the [Components Documentation](dars/docs/components.md) to know more.
@@ -73,18 +73,10 @@ if __name__ == "__main__":
 | `dars --help`                           | Show help and all CLI options               |
 
 ## More
-- [Project Roadmap](ROADMAP.md)
-- [Getting Started](dars/docs/getting_started.md)
-- [App Class and PWA](dars/docs/app.md)
-- [Components Documentation](dars/docs/components.md)
-- [Custom Components](dars/docs/custom_components.md)
-- [Event Handling](dars/docs/events.md)
-- [Exporters](dars/docs/exporters.md)
-- [Scripts System](dars/docs/scripts.md)
-- [CLI usage and commands](dars/docs/cli.md)
-- [Project Structure](STRUCTURE.md)
-- [Architecture](DARS_ARCHITECTURE.md)
-- [Installation Guide](INSTALL.md)
+
+- Visit dars [official website](https://ztamdev.github.io/Dars-Framework/)
+- Visit the dars official [Documentation](https://ztamdev.github.io/Dars-Framework/documentation.html) now on separete website.
+- Try dars without installing nothing just visit the [Dars Playground](https://dars-playground.vercel.app/)
 
 ## Local Execution and Live Preview
 
