@@ -368,7 +368,6 @@ class DarsExporter:
         info_table.add_row(translator.get('scripts'), str(stats['scripts_count']))
         info_table.add_row(translator.get('global_styles'), str(stats['global_styles_count']))
         info_table.add_row(translator.get('theme'), app.config.get('theme', 'light'))
-        info_table.add_row(translator.get('responsive'), str(app.config.get('responsive', True)))
         
         console.print(info_table)
         

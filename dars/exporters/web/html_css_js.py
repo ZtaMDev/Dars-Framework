@@ -80,9 +80,11 @@ class HTMLCSSJSExporter(Exporter):
                     shutil.copy2(os.path.join(project_root, src), os.path.join(output_path, os.path.basename(src)))
             # NOTA: No copiar ejecutables ni nada fuera del proyecto
 
-            # Generar CSS global (compartido)
-            css_content = self.generate_css(app)
-            self.write_file(os.path.join(output_path, "styles.css"), css_content)
+            base_css_content = self.generate_base_css()  # Nuevo método para estilos base
+            custom_css_content = self.generate_custom_css(app)  # Nuevo método para estilos personalizados
+
+            self.write_file(os.path.join(output_path, "runtime_css.css"), base_css_content)
+            self.write_file(os.path.join(output_path, "styles.css"), custom_css_content)
 
             # Multipágina: exportar un HTML, CSS y JS por cada página registrada
             if hasattr(app, "is_multipage") and app.is_multipage():
@@ -493,7 +495,7 @@ self.addEventListener('fetch', event => {
     {links_html}
     {og_tags_html}
     {twitter_tags_html}
-    <link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css\">\n    <link rel=\"stylesheet\" href=\"{css_file}\">
+    <link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css\">\n    <link rel=\"stylesheet\" href=\"runtime_css.css\">\n    <link rel=\"stylesheet\" href=\"{css_file}\">
 </head>
 <body>
     {body_content}
@@ -548,6 +550,25 @@ if ('serviceWorker' in navigator) {
 </script>
 """)
         return "\n    ".join(links)
+    def generate_custom_css(self, app: App) -> str:
+        """Genera solo los estilos personalizados de la aplicación"""
+        css_content = ""
+        
+        # Agregar estilos globales de la aplicación definidos por el usuario
+        for selector, styles in app.global_styles.items():
+            css_content += f"{selector} {{\n"
+            css_content += f"    {self.render_styles(styles)}\n"
+            css_content += "}\n\n"
+
+        # Agregar contenido de archivos CSS globales
+        for file_path in app.global_style_files:
+            try:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    css_content += f.read() + "\n\n"
+            except Exception as e:
+                print(f"[Dars] Warning: could not read CSS file '{file_path}': {e}")
+                
+        return css_content
 
     def _generate_open_graph_tags(self, app: App) -> str:
         """Genera todos los tags Open Graph para redes sociales"""
@@ -571,9 +592,9 @@ if ('serviceWorker' in navigator) {
         
         return '\n'.join(twitter_html)
         
-    def generate_css(self, app: App) -> str:
-        """Genera el contenido CSS"""
-        css_content = """/* Estilos base de Dars */
+    def generate_base_css(self) -> str:
+        """Genera el contenido CSS base"""
+        return """/* Estilos base de Dars */
 * {
     box-sizing: border-box;
 }
@@ -1250,24 +1271,7 @@ body {
     background-color: #444;
 }
 """
-        
-        # Agregar estilos globales de la aplicación definidos por el usuario
-        for selector, styles in app.global_styles.items():
-            css_content += f"{selector} {{\n"
-            css_content += f"    {self.render_styles(styles)}\n"
-            css_content += "}\n\n"
 
-        # Agregar contenido de archivos CSS globales
-        for file_path in app.global_style_files:
-            try:
-                with open(file_path, "r", encoding="utf-8") as f:
-                    css_content += f.read() + "\n\n"
-            except Exception as e:
-                print(f"[Dars] Warning: could not read CSS file '{file_path}': {e}")
-
-            
-        return css_content
-        
     def generate_javascript(self, app: App, page_root: Component) -> str:
         """Genera el contenido JavaScript específico para una página"""
         js_content = """// Dars Runtime - Página específica

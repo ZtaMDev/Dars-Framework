@@ -127,7 +127,7 @@ class Page:
 class App:
     """Main class that represents a Dars application"""
 
-    def rTimeCompile(self, exporter=None, port=None, add_file_types=".py, .js, .css"):
+    def rTimeCompile(self, exporter=None, port=None, add_file_types=".py, .js, .css", watchfiledialog=False):
         """
         Generates a quick preview of the app on a local server using an exporter  
         (default: HTMLCSSJSExporter) and serving the files from a temporary directory.  
@@ -144,6 +144,8 @@ class App:
         from contextlib import contextmanager
         import shutil
         import traceback
+
+        self.watchfiledialog = watchfiledialog
 
         @contextmanager
         def pushd(path):
@@ -425,11 +427,13 @@ class App:
                         subtitle=f"Project root: {os.path.basename(project_root)}",
                         border_style="magenta"
                     )
-                    console.print(panel)
+                    if self.watchfiledialog:
+                        console.print(panel)
                 else:
-                    print(f"[Dars] Watching {len(files_to_watch)} files in {project_root}:")
-                    for f in files_to_watch:
-                        print("  -", os.path.relpath(f, project_root))
+                    if self.watchfiledialog:
+                        print(f"[Dars] Watching {len(files_to_watch)} files in {project_root}:")
+                        for f in files_to_watch:
+                            print("  -", os.path.relpath(f, project_root))
 
                 # Loop principal: espera a Ctrl+C
                 while not shutdown_event.is_set():

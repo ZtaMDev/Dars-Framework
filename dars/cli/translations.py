@@ -17,6 +17,8 @@ translations = {
         'info_help': "Show application information",
         'formats_help': "Show supported formats",
         'preview_help': "Preview information",
+        'property_column': "Property",
+        'value_column': "Value",
         'preview_cmd_help': "Preview exported application",
         'init_help': "Create a Dars project",
         'template_not_found': "Template '{template}' not found",
@@ -171,6 +173,8 @@ translations = {
         'preview_help': "Información de preview",
         'preview_cmd_help': "Previsualizar aplicación exportada",
         'init_help': "Crea un proyecto Dars",
+        'property_column': "Propiedad",
+        'value_column': "Valor",
         
         # Export command
         'file_help': "Archivo Python con la aplicación Dars",
