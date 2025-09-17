@@ -1,3 +1,5 @@
+The documentstion of dars is moving to the documentation official website please visit https://ztamdev.github.io/Dars-Framework/documentation.html because this documents will be deprecated in some time...
+
 # Dars - Components Documentation
 
 ---
