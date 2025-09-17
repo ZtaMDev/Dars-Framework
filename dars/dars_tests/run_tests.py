@@ -3,6 +3,7 @@ import runpy, glob, importlib.util, os, sys, traceback, subprocess, time, thread
 import requests
 import signal
 import webbrowser
+import shutil
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
@@ -10,9 +11,15 @@ from rich.prompt import Prompt
 
 console = Console()
 
-def run_unit_tests():
-    """Run all unit test files"""
-    tests = sorted(glob.glob(os.path.join(os.path.dirname(__file__), 'tests', 'test_*.py')))
+def run_unit_tests(unit_test_paths=None):
+    """Run unit test files, optionally from specific paths"""
+    if unit_test_paths is None:
+        # Default behavior: run all tests in tests directory
+        tests = sorted(glob.glob(os.path.join(os.path.dirname(__file__), 'tests', 'test_*.py')))
+    else:
+        # Use provided test paths
+        tests = unit_test_paths
+    
     results = []
     for t in tests:
         name = os.path.basename(t)
@@ -92,23 +99,21 @@ def safe_read_file(file_path):
     # Si todas las codificaciones fallan, usar modo binario con reemplazo de errores
     with open(file_path, 'rb') as f:
         return f.read().decode('utf-8', errors='replace')
-import runpy, glob, importlib.util, os, sys, traceback, subprocess, time, threading
-import requests
-import signal
-import webbrowser
-import shutil
-from rich.console import Console
-from rich.table import Table
-from rich.panel import Panel
-from rich.prompt import Prompt
-def run_app_tests():
-    """Run Dars application tests that use rTimeCompile"""
-    apps_test_dir = os.path.join(os.path.dirname(__file__), 'apps_test')
-    if not os.path.exists(apps_test_dir):
-        console.print(f"[yellow]apps_test directory not found: {apps_test_dir}[/yellow]")
-        return []
+
+def run_app_tests(app_test_paths=None):
+    """Run Dars application tests that use rTimeCompile, optionally from specific paths"""
+    if app_test_paths is None:
+        # Default behavior: run all apps in apps_test directory
+        apps_test_dir = os.path.join(os.path.dirname(__file__), 'apps_test')
+        if not os.path.exists(apps_test_dir):
+            console.print(f"[yellow]apps_test directory not found: {apps_test_dir}[/yellow]")
+            return []
+        
+        apps = sorted(glob.glob(os.path.join(apps_test_dir, '*.py')))
+    else:
+        # Use provided app paths
+        apps = app_test_paths
     
-    apps = sorted(glob.glob(os.path.join(apps_test_dir, '*.py')))
     results = []
     
     for app_file in apps:
@@ -206,14 +211,21 @@ def run_app_tests():
     
     return results
 
-def main():
+def main(unit_test_paths=None, app_test_paths=None):
+    """
+    Run Dars test suite with optional specific test paths
+    
+    Args:
+        unit_test_paths (list): Optional list of paths to unit test files
+        app_test_paths (list): Optional list of paths to application test files
+    """
     # Run unit tests
     console.print(Panel("Running Unit Tests", style="cyan"))
-    unit_results = run_unit_tests()
+    unit_results = run_unit_tests(unit_test_paths)
     
     # Run app tests
     console.print(Panel("Running App Tests (rTimeCompile)", style="magenta"))
-    app_results = run_app_tests()
+    app_results = run_app_tests(app_test_paths)
     
     # Combine results
     all_results = unit_results + app_results
@@ -238,4 +250,13 @@ def main():
         console.print('[bold green]All tests passed.[/bold green]')
 
 if __name__ == '__main__':
-    main()
+    # Parse command line arguments for custom test paths
+    import argparse
+    parser = argparse.ArgumentParser(description='Run Dars Framework tests')
+    parser.add_argument('--unit-tests', nargs='+', help='Paths to specific unit test files')
+    parser.add_argument('--app-tests', nargs='+', help='Paths to specific application test files')
+    
+    args = parser.parse_args()
+    
+    # Run tests with optional paths
+    main(unit_test_paths=args.unit_tests, app_test_paths=args.app_tests)
