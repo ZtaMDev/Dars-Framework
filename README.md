@@ -21,7 +21,7 @@ Try dars without installing nothing just visit the [Dars Playground](https://dar
 > Note: this is an single page example but you can build multipage apps with Page component see the [Components Documentation](https://ztamdev.github.io/Dars-Framework/documentation.html#dars-components-documentation) to know more.
 
 ```python
-from dars import App, Container, Text, Button, InlineScript
+from dars.all import *
 
 app = App()
 
