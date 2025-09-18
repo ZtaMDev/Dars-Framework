@@ -49,15 +49,16 @@ def check_server(port=8000, timeout=10):
 def run_app_with_timeout(app_file, timeout=15):
     """Run a Dars app with rTimeCompile and capture its output with a timeout"""
     try:
-        # Redirigir stdout y stderr a archivos temporales o a devnull
-        with open(os.devnull, 'w') as devnull:
-            process = subprocess.Popen(
-                [sys.executable, app_file],
-                stdout=devnull,  # Redirigir stdout a devnull
-                stderr=devnull,  # Redirigir stderr a devnull
-                cwd=os.path.dirname(app_file),
-                env={**os.environ, 'PYTHONIOENCODING': 'utf-8'},  # Establecer codificación
-            )
+        env = os.environ.copy()
+        env['PYTHONIOENCODING'] = 'utf-8'
+
+        process = subprocess.Popen(
+            [sys.executable, app_file],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            cwd=os.path.dirname(app_file) or None,  # evita cwd = "" en Windows
+            env=env,
+        )
         
         # Esperar a que el servidor se inicie o timeout
         server_started = False
@@ -67,14 +68,25 @@ def run_app_with_timeout(app_file, timeout=15):
             if check_server(8000, 2):
                 server_started = True
                 break
+            # Verificar si el proceso ha terminado (lo que indicaría un error)
+            if process.poll() is not None:
+                break
             time.sleep(1)
         
-        # Devolver resultados
+        # Recoger la salida (aunque no haya terminado, para capturar errores iniciales)
+        try:
+            stdout, stderr = process.communicate(timeout=2)
+        except subprocess.TimeoutExpired:
+            stdout, stderr = b"", b""
+        
+        stdout_str = stdout.decode('utf-8', errors='replace') if stdout else ''
+        stderr_str = stderr.decode('utf-8', errors='replace') if stderr else ''
+        
         return {
             'success': server_started,
             'process': process,
-            'stdout': '',
-            'stderr': ''
+            'stdout': stdout_str,
+            'stderr': stderr_str
         }
         
     except Exception as e:
@@ -84,6 +96,7 @@ def run_app_with_timeout(app_file, timeout=15):
             'stdout': '',
             'stderr': ''
         }
+
 
 def safe_read_file(file_path):
     """Leer un archivo de forma segura manejando diferentes codificaciones"""
