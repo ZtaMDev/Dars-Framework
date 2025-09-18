@@ -1,10 +1,10 @@
 from dars.all import *
 
-app = App(title="Hello World", theme="dark")
+app = App(title="Dars-HealthCheck", theme="dark")
 # Crear componentes
 container = Container(
     Text(
-        text="Hello World",
+        text="Dars Health Check",
         style={
             'font-size': '48px',
             'color': '#2c3e50',
@@ -14,7 +14,7 @@ container = Container(
         }
     ),
     Text(
-        text="Hello World",
+        text="Dars Health Check",
         style={
             'font-size': '20px',
             'color': '#7f8c8d',
@@ -24,10 +24,10 @@ container = Container(
     ),
 
     Button(
-        text="Click Me!",
-        on_click= dScript("alert('Hello World')"),
-        on_mouse_enter=dScript("this.style.backgroundColor = '#2980b9';"),
-        on_mouse_leave=dScript("this.style.backgroundColor = '#3498db';"),
+        text="Check",
+        on_click= dScript("""alert('Health Check')"""),
+        on_mouse_enter=dScript("""this.style.backgroundColor = '#2980b9';"""),
+        on_mouse_leave=dScript("""this.style.backgroundColor = '#3498db';"""),
         style={
             'background-color': '#3498db',
             'color': 'white',

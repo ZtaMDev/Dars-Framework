@@ -429,41 +429,61 @@ class DarsExporter:
         else:
             # Default hello world code (sin template)
             HELLO_WORLD_CODE = """
-from dars.core.app import App
-from dars.components.basic.text import Text
-from dars.components.basic.button import Button
-from dars.components.basic.container import Container
-from dars.scripts.script import InlineScript
+from dars.all import *
 
-app = App(title="Hello World - Dars")
+app = App(title="Hello World", theme="dark")
+# Crear componentes
+container = Container(
+    Text(
+        text="Hello World",
+        style={
+            'font-size': '48px',
+            'color': '#2c3e50',
+            'margin-bottom': '20px',
+            'font-weight': 'bold',
+            'text-align': 'center'
+        }
+    ),
+    Text(
+        text="Hello World",
+        style={
+            'font-size': '20px',
+            'color': '#7f8c8d',
+            'margin-bottom': '40px',
+            'text-align': 'center'
+        }
+    ),
 
-container = Container(style={
-    'display': 'flex',
-    'flex-direction': 'column',
-    'align-items': 'center',
-    'justify-content': 'center',
-    'min-height': '100vh',
-    'background-color': '#f0f2f5',
-    'font-family': 'Arial, sans-serif'
-})
+    Button(
+        text="Click Me!",
+        on_click= dScript("alert('Hello World')"),
+        on_mouse_enter=dScript("this.style.backgroundColor = '#2980b9';"),
+        on_mouse_leave=dScript("this.style.backgroundColor = '#3498db';"),
+        style={
+            'background-color': '#3498db',
+            'color': 'white',
+            'padding': '15px 30px',
+            'border': 'none',
+            'border-radius': '8px',
+            'font-size': '18px',
+            'cursor': 'pointer',
+            'transition': 'background-color 0.3s'
+        }
+    ),
+    style={
+        'display': 'flex',
+        'flex-direction': 'column',
+        'align-items': 'center',
+        'justify-content': 'center',
+        'min-height': '100vh',
+        'background-color': '#f0f2f5',
+        'font-family': 'Arial, sans-serif'
+    }
+) 
 
-title_text = Text("Hello World!", style={'font-size': '48px', 'color': '#2c3e50'})
-subtitle_text = Text("Your first Dars application", style={'font-size': '20px', 'color': '#7f8c8d'})
-button = Button("Click here!", style={'background-color': '#3498db', 'color': 'white'})
-
-script = InlineScript(\"""
-document.querySelector('button')?.addEventListener('click', () => {
-    alert('Congratulations! You have created your first Dars application');
-});
-\""")
-
-container.add_child(title_text)
-container.add_child(subtitle_text)
-container.add_child(button)
 app.set_root(container)
-app.add_script(script)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.rTimeCompile()
 """
             main_py = Path(name) / "main.py"
