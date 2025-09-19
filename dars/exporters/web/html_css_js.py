@@ -466,6 +466,12 @@ self.addEventListener('fetch', event => {
         if root_component:
             body_content = self.render_component(root_component)
         
+        # VDOM snapshot para hidratación
+        try:
+            vdom_snapshot_json = self.generate_vdom_snapshot(root_component) if root_component else '{}'
+        except Exception:
+            vdom_snapshot_json = '{}'
+        
         # Generar meta tags
         meta_tags_html = self._generate_meta_tags(app)
         
@@ -499,6 +505,7 @@ self.addEventListener('fetch', event => {
 </head>
 <body>
     {body_content}
+    <script>window.__DARS_VDOM__ = {vdom_snapshot_json};</script>
     <script src=\"{runtime_file}\"></script>\n{extra_scripts_html}    <script src=\"{script_file}\"></script>
 </body>
 </html>"""
@@ -1272,143 +1279,161 @@ body {
 }
 """
 
+    def build_vdom_tree(self, component: Component) -> dict:
+        """Serializa un componente Dars a un VNode (snapshot VDOM para hidratación)."""
+        try:
+            comp_type = component.__class__.__name__
+        except Exception:
+            comp_type = 'Component'
+
+        comp_id = self.get_component_id(component)
+
+        # Serializar eventos (solo inline ejecutable en cliente)
+        events_payload = {}
+        try:
+            events = getattr(component, 'events', {}) or {}
+            for ev_name, handler in events.items():
+                code = None
+                try:
+                    if hasattr(handler, 'get_code'):
+                        code = handler.get_code()
+                    elif hasattr(handler, 'code'):
+                        code = getattr(handler, 'code')
+                    elif hasattr(handler, 'to_js'):
+                        code = handler.to_js()
+                    elif isinstance(handler, str):
+                        code = handler
+                except Exception:
+                    code = None
+                if code:
+                    try:
+                        code_str = str(code)
+                    except Exception:
+                        code_str = ''
+                    if code_str:
+                        events_payload[ev_name] = { 'type': 'inline', 'code': code_str }
+        except Exception:
+            events_payload = {}
+
+        # Props seguros (evitar funciones y objetos no serializables)
+        safe_props = {}
+        try:
+            for k, v in (getattr(component, 'props', {}) or {}).items():
+                if callable(v):
+                    continue
+                if isinstance(v, (str, int, float, bool)) or v is None:
+                    safe_props[k] = v
+        except Exception:
+            pass
+
+        # Soporte para componentes de texto
+        text_value = None
+        try:
+            if comp_type == 'Text' and hasattr(component, 'text'):
+                text_value = component.text
+        except Exception:
+            pass
+
+        # Hijos
+        children_nodes = []
+        try:
+            for child in getattr(component, 'children', []) or []:
+                if child is None:
+                    continue
+                children_nodes.append(self.build_vdom_tree(child))
+        except Exception:
+            children_nodes = []
+
+        vnode = {
+            'type': comp_type,
+            'id': comp_id,
+            'key': getattr(component, 'key', None),
+            'class': getattr(component, 'class_name', None),
+            'style': getattr(component, 'style', {}) or {},
+            'props': safe_props,
+            'events': events_payload if events_payload else None,
+            'children': children_nodes if children_nodes else []
+        }
+        if text_value is not None:
+            vnode['text'] = text_value
+        return vnode
+
+    def generate_vdom_snapshot(self, root_component: Component) -> str:
+        """Genera el snapshot VDOM (JSON) a partir del componente raíz."""
+        import json
+        try:
+            vnode = self.build_vdom_tree(root_component)
+        except Exception:
+            vnode = {'type': 'Root', 'id': None, 'children': []}
+        return json.dumps(vnode, ensure_ascii=False)
+
     def generate_javascript(self, app: App, page_root: Component) -> str:
-        """Genera el contenido JavaScript específico para una página"""
-        js_content = """// Dars Runtime - Página específica
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('Dars App loaded');
-        
-        // Inicializar eventos de componentes
-        initializeEvents();
+        """Genera un runtime modular para hidratación + delegación de eventos (Fase 1 VDOM)."""
+        runtime = r"""// Dars Runtime (Hydration + Delegated Events)
+(function(){
+  const eventMap = new Map(); // id -> {ev: fn}
+
+  function walk(v, fn){
+    if(!v) return;
+    fn(v);
+    const ch = v.children || [];
+    for(let i=0;i<ch.length;i++){ walk(ch[i], fn); }
+  }
+
+  function delegate(eventName, root){
+    (root||document).addEventListener(eventName, function(e){
+      let node = e.target;
+      const boundary = root||document;
+      while(node && node !== boundary){
+        const id = node.id;
+        if(id && eventMap.has(id)){
+          const handlers = eventMap.get(id);
+          const h = handlers[eventName];
+          if(typeof h === 'function'){
+            try { h.call(node, e); } catch(err){ console.error('[Dars] handler error', err); }
+            return;
+          }
+        }
+        node = node.parentNode;
+      }
+    }, true);
+  }
+
+  function hydrate(snapshot){
+    // Construir tabla de eventos a partir del snapshot
+    walk(snapshot, (v)=>{
+      if(v && v.id && v.events){
+        const handlers = {};
+        for(const ev in v.events){
+          const spec = v.events[ev];
+          if(spec && spec.type === 'inline' && spec.code){
+            try {
+              handlers[ev] = new Function('event', spec.code);
+            } catch(err){
+              console.warn('[Dars] could not compile inline handler for', v.id, ev, err);
+            }
+          }
+        }
+        if(Object.keys(handlers).length){
+          eventMap.set(v.id, handlers);
+        }
+      }
     });
 
-    function initializeEvents() {
-    """
+    // Delegar eventos comunes (se puede extender)
+    ['click','input','change','submit'].forEach(ev => delegate(ev, document));
+  }
 
-        # Función para detectar componentes con lógica mínima
-        def has_component_type_with_logic(component, cls):
-            if isinstance(component, cls) and getattr(component, 'minimum_logic', True):
-                return True
-
-            # Recursión para buscar en hijos
-            children = getattr(component, 'children', [])
-            if not isinstance(children, (list, tuple)):
-                children = []
-
-            for child in children:
-                if child is not None and has_component_type_with_logic(child, cls):
-                    return True
-            return False
-
-        # Verificar si la página contiene componentes específicos
-        has_tabs_logic = has_component_type_with_logic(page_root, Tabs)
-        has_accordion_logic = has_component_type_with_logic(page_root, Accordion)
-
-        # Añadir lógica de tabs y accordion dentro de initializeEvents
-        if has_tabs_logic:
-            js_content += "    // Tabs interactivas\n"
-            js_content += """    document.querySelectorAll('.dars-tabs').forEach(function(tabsEl) {
-            const tabButtons = tabsEl.querySelectorAll('.dars-tab');
-            const panels = tabsEl.querySelectorAll('.dars-tab-panel');
-            tabButtons.forEach(function(btn, i) {
-                btn.addEventListener('click', function() {
-                    tabButtons.forEach(b => b.classList.remove('dars-tab-active'));
-                    panels.forEach(p => p.classList.remove('dars-tab-panel-active'));
-                    btn.classList.add('dars-tab-active');
-                    if (panels[i]) panels[i].classList.add('dars-tab-panel-active');
-                });
-            });
-        });\n"""
-
-        if has_accordion_logic:
-            js_content += "    // Accordion interactivo\n"
-            js_content += """    document.querySelectorAll('.dars-accordion').forEach(function(accEl) {
-            accEl.querySelectorAll('.dars-accordion-title').forEach(function(titleEl) {
-                titleEl.addEventListener('click', function() {
-                    const section = titleEl.parentElement;
-                    const isOpen = section.classList.contains('dars-accordion-open');
-                    if (isOpen) {
-                        section.classList.remove('dars-accordion-open');
-                    } else {
-                        // Si es acordeón exclusivo, cerrar otros
-                        accEl.querySelectorAll('.dars-accordion-section').forEach(function(sec) {
-                            sec.classList.remove('dars-accordion-open');
-                        });
-                        section.classList.add('dars-accordion-open');
-                    }
-                });
-            });
-        });\n"""
-
-        # Ahora construir las asociaciones automáticas (pero *no* ejecutarlas aún)
-        from dars.scripts.script import Script
-
-        def traverse_and_build_bindings(component, js_lines):
-            # SIEMPRE obtener el id con la misma función que usa el render
-            from dars.core.component import Component
-            if isinstance(component, Component):
-                comp_id = self.get_component_id(component)  # <-- usa SIEMPRE esta
-            else:
-                comp_id = getattr(component, "id", None)
-
-            if comp_id and hasattr(component, 'events') and component.events:
-                events = getattr(component, 'events', {})
-                for event_name, handler in events.items():
-                    dom_event = event_name.lower()
-                    from dars.scripts.script import Script
-                    if isinstance(handler, Script) or hasattr(handler, 'get_code'):
-                        try:
-                            code = handler.get_code().strip()
-                        except Exception:
-                            code = str(handler)
-                        # chequear si define una función nombrada
-                        import re
-                        m = re.search(r"function\s+([a-zA-Z0-9_]+)\s*\(", code)
-                        if m:
-                            func_name = m.group(1)
-                            js_lines.append(code)
-                            js_lines.append(
-                                f"var el = document.getElementById('{comp_id}'); if (el) el.addEventListener('{dom_event}', {func_name});"
-                            )
-                        else:
-                            func_wrapper = f"function(event) {{\n{code}\n}}"
-                            js_lines.append(
-                                f"var el = document.getElementById('{comp_id}'); if (el) el.addEventListener('{dom_event}', {func_wrapper});"
-                            )
-                    else:
-                        code = str(handler).strip()
-                        if code:
-                            js_lines.append(
-                                f"var el = document.getElementById('{comp_id}'); if (el) el.addEventListener('{dom_event}', function(event) {{\n{code}\n}});"
-                            )
-
-            # Recorrer hijos
-            children = getattr(component, "children", [])
-            if children and isinstance(children, (list, tuple)):
-                for child in children:
-                    if child is not None:
-                        traverse_and_build_bindings(child, js_lines)
-
-
-        # Recolectar bindings
-        js_lines = []
-        traverse_and_build_bindings(page_root, js_lines)
-
-        # Insertar las líneas de binding dentro de initializeEvents (con indentación)
-        if js_lines:
-            js_content += "    // Asociación automática de eventos para componentes (bindings generados)\n"
-            for line in js_lines:
-                # Añadir cada línea con 4 espacios de indent para estar dentro de initializeEvents
-                # Aseguramos nueva línea final si no existe
-                js_content += "    " + line + "\n"
-
-        # Cerrar initializeEvents
-        js_content += "}\n\n"
-
-        # Si quieres, también añadimos comentarios / debug global
-        js_content += "// Fin del runtime generado para esta página\n"
-
-        return js_content
+  document.addEventListener('DOMContentLoaded', function(){
+    if(window.__DARS_VDOM__){
+      hydrate(window.__DARS_VDOM__);
+    } else {
+      console.warn('[Dars] No VDOM snapshot found for hydration');
+    }
+  });
+})();
+"""
+        return runtime
 
     def get_component_id(self, component, prefix="comp"):
         """

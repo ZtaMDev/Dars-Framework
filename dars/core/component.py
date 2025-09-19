@@ -81,6 +81,8 @@ class Component(ABC):
         self.class_name: str = props.get("class_name", self.__class__.__name__)
         self.style: Dict[str, Any] = props.get('style', {})
         self.events: Dict[str, Callable] = {}
+        # Stable identity hint for children reconciliation in VDOM (optional)
+        self.key: Optional[str] = props.get('key')
         
     def add_child(self, child: 'Component'):
         if isinstance(child, type) and issubclass(child, Component):
