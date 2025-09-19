@@ -50,7 +50,7 @@ from dars.core.events import EventHandler,  EventEmitter,  EventManager
 
 from dars.version import __version__
 from dars.dars_tests import *
-from dars.dars_tests.run_tests import *
+from dars.dars_tests.run_tests import run_app_tests, run_unit_tests, main
 # CLI (optional, for advanced usage)
 # from dars.cli.main import main as dars_cli_main
 
@@ -63,5 +63,5 @@ __all__ = [
     'InlineScript', 'FileScript', 'dScript', 'HTMLCSSJSExporter',
     'EventTypes', 'EventHandler', 'EventEmitter', 'EventManager', 'Markdown',
     '__version__',
-    'run_tests',
+    'run_app_tests', 'run_unit_tests', 'main',
 ]

@@ -27,6 +27,7 @@ from dars.components.basic.markdown import Markdown
 from typing import Dict, Any
 import os
 from bs4 import BeautifulSoup
+from dars.exporters.web.vdom import VDomBuilder
 
 class HTMLCSSJSExporter(Exporter):
     """Exportador para HTML, CSS y JavaScript"""
@@ -112,6 +113,15 @@ class HTMLCSSJSExporter(Exporter):
                     runtime_js = self.generate_javascript(page_app, page.root)
                     runtime_name = f"runtime_dars_{slug}.js" if slug != "index" else "runtime_dars.js"
                     self.write_file(os.path.join(output_path, runtime_name), runtime_js)
+                    # Generar VDOM Tree JS (externo)
+                    try:
+                        vdom_dict = VDomBuilder(id_provider=self.get_component_id).build(page_app.root)
+                        import json
+                        vdom_js = "window.__DARS_VDOM__ = " + json.dumps(vdom_dict, ensure_ascii=False) + ";\n"
+                    except Exception:
+                        vdom_js = "window.__DARS_VDOM__ = { };\n"
+                    vdom_name = f"vdom_tree_{slug}.js" if slug != "index" else "vdom_tree.js"
+                    self.write_file(os.path.join(output_path, vdom_name), vdom_js)
                     # Fase 2: escribir snapshot/version por página (solo en dev, no bundle)
                     if not bundle:
                         try:
@@ -156,7 +166,7 @@ class HTMLCSSJSExporter(Exporter):
                         html_content = self.generate_html(page_app, css_file="styles.css",
                                                         script_file="script.js",
                                                         runtime_file="runtime_dars.js",
-                                                        extra_script_srcs=external_srcs, bundle=bundle)
+                                                        extra_script_srcs=external_srcs, bundle=bundle, vdom_script=vdom_name)
                         filename = "index.html"
                     else:
                         # Otras páginas
@@ -165,7 +175,7 @@ class HTMLCSSJSExporter(Exporter):
                         html_content = self.generate_html(page_app, css_file="styles.css",
                                                         script_file=script_name,
                                                         runtime_file=runtime_name,
-                                                        extra_script_srcs=external_srcs, bundle=bundle)
+                                                        extra_script_srcs=external_srcs, bundle=bundle, vdom_script=vdom_name)
                         filename = f"{slug}.html"
                     
                     # Mejorar formato HTML si es posible
@@ -184,11 +194,20 @@ class HTMLCSSJSExporter(Exporter):
                 user_scripts = list(getattr(app, 'scripts', []))
                 combined_js, external_srcs = self._prepare_page_scripts(user_scripts, output_path, project_root)
                 self.write_file(os.path.join(output_path, "script.js"), combined_js)
+                # Generar VDOM Tree JS (externo) para single-page
+                try:
+                    vdom_dict = VDomBuilder(id_provider=self.get_component_id).build(app.root)
+                    import json
+                    vdom_js = "window.__DARS_VDOM__ = " + json.dumps(vdom_dict, ensure_ascii=False) + ";\n"
+                except Exception:
+                    vdom_js = "window.__DARS_VDOM__ = { };\n"
+                vdom_name = "vdom_tree.js"
+                self.write_file(os.path.join(output_path, vdom_name), vdom_js)
 
                 html_content = self.generate_html(app, css_file="styles.css",
                                                 script_file="script.js",
                                                 runtime_file="runtime_dars.js",
-                                                extra_script_srcs=external_srcs, bundle=bundle)
+                                                extra_script_srcs=external_srcs, bundle=bundle, vdom_script=vdom_name)
                 soup = BeautifulSoup(html_content, "html.parser")
                 html_content = soup.prettify()
                 
@@ -487,7 +506,7 @@ self.addEventListener('fetch', event => {
         return combined_js
 
     def generate_html(self, app: App, css_file: str = "styles.css", 
-                 script_file: str = "script.js", runtime_file: str = "runtime_dars.js", extra_script_srcs: list = None, bundle: bool = False) -> str:
+                 script_file: str = "script.js", runtime_file: str = "runtime_dars.js", extra_script_srcs: list = None, bundle: bool = False, vdom_script: str = "vdom_tree.js") -> str:
         """Genera el contenido HTML con todas las propiedades de la aplicación"""
         body_content = ""
         from dars.components.basic.container import Container
@@ -498,11 +517,7 @@ self.addEventListener('fetch', event => {
         if root_component:
             body_content = self.render_component(root_component)
         
-        # VDOM snapshot para hidratación
-        try:
-            vdom_snapshot_json = self.generate_vdom_snapshot(root_component) if root_component else '{}'
-        except Exception:
-            vdom_snapshot_json = '{}'
+        # VDOM snapshot ahora se sirve desde un archivo externo (vdom_script)
         
         # Generar meta tags
         meta_tags_html = self._generate_meta_tags(app)
@@ -552,7 +567,7 @@ self.addEventListener('fetch', event => {
 </head>
 <body>
     {body_content}
-    <script>window.__DARS_VDOM__ = {vdom_snapshot_json};</script>
+    <script src=\"{vdom_script}\"></script>
     {version_vars_html}
     <script src=\"{runtime_file}\"></script>\n{extra_scripts_html}    <script src=\"{script_file}\"></script>
 </body>
@@ -1407,13 +1422,15 @@ body {
         return vnode
 
     def generate_vdom_snapshot(self, root_component: Component) -> str:
-        """Genera el snapshot VDOM (JSON) a partir del componente raíz."""
+        """Genera el snapshot VDOM (JSON) a partir del componente raíz.
+        Usa VDomBuilder para mantener consistencia con el vdom_tree.js externo.
+        """
         import json
         try:
-            vnode = self.build_vdom_tree(root_component)
+            vdom_dict = VDomBuilder(id_provider=self.get_component_id).build(root_component)
         except Exception:
-            vnode = {'type': 'Root', 'id': None, 'children': []}
-        return json.dumps(vnode, ensure_ascii=False)
+            vdom_dict = {'type': 'Root', 'id': None, 'children': []}
+        return json.dumps(vdom_dict, ensure_ascii=False)
 
     def generate_javascript(self, app: App, page_root: Component) -> str:
         """Genera un runtime modular: hidratación + delegación de eventos + diff/patch + hot-reload incremental (polling)."""
@@ -1585,19 +1602,55 @@ body {
     const vurl = (window.__DARS_VERSION_URL || 'version.txt');
     const surl = (window.__DARS_SNAPSHOT_URL || 'snapshot.json');
     let timer = null;
-    function tick(){
-      fetch(vurl, { cache: 'no-store' })
-        .then(r=>r.text())
-        .then(ver=>{
-          ver = (ver||'').trim();
-          if(!currentVersion){ currentVersion = ver; }
-          if(ver && ver !== currentVersion){
-            currentVersion = ver;
-            return fetch(surl, { cache: 'no-store' }).then(r=>r.json()).then(js=>{ update(js); });
+    let warnedVersionMissing = false;
+    let warnedSnapshotMissing = false;
+
+    function httpGet(url, onSuccess, onError, responseType){
+      try{
+        const xhr = new XMLHttpRequest();
+        if(responseType){ xhr.responseType = responseType; }
+        xhr.open('GET', url, true);
+        xhr.timeout = 5000;
+        xhr.onreadystatechange = function(){
+          if(xhr.readyState === 4){
+            if(xhr.status >= 200 && xhr.status < 300){
+              onSuccess(xhr.response);
+            } else {
+              onError();
+            }
           }
-        })
-        .catch(()=>{})
-        .finally(()=>{ timer = setTimeout(tick, 600); });
+        };
+        xhr.onerror = onError;
+        xhr.ontimeout = onError;
+        xhr.setRequestHeader('Cache-Control', 'no-store');
+        xhr.send();
+      }catch(e){ onError(); }
+    }
+
+    function tick(){
+      httpGet(vurl, function(text){
+        let ver = (text || '').toString().trim();
+        if(ver){ warnedVersionMissing = false; }
+        if(!currentVersion){ currentVersion = ver; }
+        if(ver && ver !== currentVersion){
+          currentVersion = ver;
+          httpGet(surl, function(jsonText){
+            try{
+              const js = JSON.parse(jsonText);
+              warnedSnapshotMissing = false;
+              update(js);
+            }catch(_){
+              if(!warnedSnapshotMissing){ console.log('[Dars] waiting for snapshot.json'); warnedSnapshotMissing = true; }
+            }
+          }, function(){
+            if(!warnedSnapshotMissing){ console.log('[Dars] waiting for snapshot.json'); warnedSnapshotMissing = true; }
+          }, 'text');
+        }
+        timer = setTimeout(tick, 600);
+      }, function(){
+        if(!warnedVersionMissing){ console.log('[Dars] waiting for version.txt'); warnedVersionMissing = true; }
+        timer = setTimeout(tick, 600);
+      }, 'text');
     }
     tick();
     return ()=>{ if(timer) clearTimeout(timer); };
