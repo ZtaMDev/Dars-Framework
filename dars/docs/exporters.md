@@ -60,13 +60,16 @@ The HTML exporter generates standard web applications that can run in any browse
 dars export my_app.py --format html --output ./dist
 ```
 
+By default, the `dars export` command generates a production bundle (no hot-reload). See Bundling vs Dev Preview below.
+
 #### Generated Structure
 
 ```
 dist/
 ├── index.html      # Main page
 ├── styles.css      # CSS styles
-└── script.js       # JavaScript logic
+├── script.js       # JavaScript logic
+└── runtime_dars.js # Dars runtime
 ```
 
 #### Example Output
@@ -87,6 +90,7 @@ dist/
         <button id="button_789" class="dars-button" style="background-color: #007bff; color: white;">Click</button>
     </div>
     <script src="script.js"></script>
+    <script src="runtime_dars.js"></script>
 </body>
 </html>
 ```

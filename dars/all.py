@@ -47,6 +47,10 @@ from dars.scripts.dscript import dScript
 from dars.exporters.web.html_css_js import HTMLCSSJSExporter
 from dars.core.events import EventTypes
 from dars.core.events import EventHandler,  EventEmitter,  EventManager
+
+from dars.version import __version__
+from dars.dars_tests import *
+from dars.dars_tests.run_tests import *
 # CLI (optional, for advanced usage)
 # from dars.cli.main import main as dars_cli_main
 
@@ -57,5 +61,7 @@ __all__ = [
     'Accordion', 'Card', 'Modal', 'Navbar', 'Table', 'Tabs',
     'GridLayout', 'FlexLayout', 'LayoutBase', 'AnchorPoint',
     'InlineScript', 'FileScript', 'dScript', 'HTMLCSSJSExporter',
-    'EventTypes', 'EventHandler', 'EventEmitter', 'EventManager', 'Markdown'
+    'EventTypes', 'EventHandler', 'EventEmitter', 'EventManager', 'Markdown',
+    '__version__',
+    'run_tests',
 ]
