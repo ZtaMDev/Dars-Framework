@@ -34,7 +34,7 @@ class HTMLCSSJSExporter(Exporter):
     def get_platform(self) -> str:
         return "html"
         
-    def export(self, app: App, output_path: str) -> bool:
+    def export(self, app: App, output_path: str, bundle: bool = False) -> bool:
         """Exporta la aplicación a HTML/CSS/JS (soporta multipágina)."""
         try:
             self.create_output_directory(output_path)
@@ -112,6 +112,25 @@ class HTMLCSSJSExporter(Exporter):
                     runtime_js = self.generate_javascript(page_app, page.root)
                     runtime_name = f"runtime_dars_{slug}.js" if slug != "index" else "runtime_dars.js"
                     self.write_file(os.path.join(output_path, runtime_name), runtime_js)
+                    # Fase 2: escribir snapshot/version por página (solo en dev, no bundle)
+                    if not bundle:
+                        try:
+                            vdom_json = self.generate_vdom_snapshot(page_app.root)
+                        except Exception:
+                            vdom_json = '{}'
+                        if slug != 'index':
+                            snapshot_name = f"snapshot_{slug}.json"
+                            version_name = f"version_{slug}.txt"
+                        else:
+                            snapshot_name = "snapshot.json"
+                            version_name = "version.txt"
+                        self.write_file(os.path.join(output_path, snapshot_name), vdom_json)
+                        try:
+                            import time
+                            version_val = str(int(time.time()*1000))
+                        except Exception:
+                            version_val = "1"
+                        self.write_file(os.path.join(output_path, version_name), version_val)
                     
                     # Generar scripts específicos de esta página
                     page_scripts = []
@@ -137,7 +156,7 @@ class HTMLCSSJSExporter(Exporter):
                         html_content = self.generate_html(page_app, css_file="styles.css",
                                                         script_file="script.js",
                                                         runtime_file="runtime_dars.js",
-                                                        extra_script_srcs=external_srcs)
+                                                        extra_script_srcs=external_srcs, bundle=bundle)
                         filename = "index.html"
                     else:
                         # Otras páginas
@@ -146,7 +165,7 @@ class HTMLCSSJSExporter(Exporter):
                         html_content = self.generate_html(page_app, css_file="styles.css",
                                                         script_file=script_name,
                                                         runtime_file=runtime_name,
-                                                        extra_script_srcs=external_srcs)
+                                                        extra_script_srcs=external_srcs, bundle=bundle)
                         filename = f"{slug}.html"
                     
                     # Mejorar formato HTML si es posible
@@ -169,11 +188,24 @@ class HTMLCSSJSExporter(Exporter):
                 html_content = self.generate_html(app, css_file="styles.css",
                                                 script_file="script.js",
                                                 runtime_file="runtime_dars.js",
-                                                extra_script_srcs=external_srcs)
+                                                extra_script_srcs=external_srcs, bundle=bundle)
                 soup = BeautifulSoup(html_content, "html.parser")
                 html_content = soup.prettify()
                 
                 self.write_file(os.path.join(output_path, "index.html"), html_content)
+                # Fase 2: snapshot/version para single-page (solo en dev, no bundle)
+                if not bundle:
+                    try:
+                        vdom_json = self.generate_vdom_snapshot(app.root)
+                    except Exception:
+                        vdom_json = '{}'
+                    self.write_file(os.path.join(output_path, "snapshot.json"), vdom_json)
+                    try:
+                        import time
+                        version_val = str(int(time.time()*1000))
+                    except Exception:
+                        version_val = "1"
+                    self.write_file(os.path.join(output_path, "version.txt"), version_val)
 
             # Generar archivos PWA si está habilitado
             if getattr(app, 'pwa_enabled', False):
@@ -455,7 +487,7 @@ self.addEventListener('fetch', event => {
         return combined_js
 
     def generate_html(self, app: App, css_file: str = "styles.css", 
-                 script_file: str = "script.js", runtime_file: str = "runtime_dars.js", extra_script_srcs: list = None) -> str:
+                 script_file: str = "script.js", runtime_file: str = "runtime_dars.js", extra_script_srcs: list = None, bundle: bool = False) -> str:
         """Genera el contenido HTML con todas las propiedades de la aplicación"""
         body_content = ""
         from dars.components.basic.container import Container
@@ -492,6 +524,21 @@ self.addEventListener('fetch', event => {
                 # si es ruta absoluta o URL la dejamos tal cual; si es solo nombre lo usamos relativo
                 extra_scripts_html += f'    <script src="{src}"></script>\n'
 
+        # Derivar nombres para hot-reload incremental (opcional)
+        def _derive_snapshot_and_version(runtime_name: str):
+            if runtime_name == 'runtime_dars.js':
+                return ('snapshot.json', 'version.txt')
+            if runtime_name.startswith('runtime_dars_') and runtime_name.endswith('.js'):
+                slug = runtime_name[len('runtime_dars_'):-3]
+                return (f'snapshot_{slug}.json', f'version_{slug}.txt')
+            return ('snapshot.json', 'version.txt')
+
+        snapshot_name, version_name = _derive_snapshot_and_version(runtime_file)
+        # Incluir variables de hot-reload solo en modo dev (no bundle)
+        version_vars_html = ""
+        if not bundle:
+            version_vars_html = f"<script>window.__DARS_SNAPSHOT_URL = '{snapshot_name}'; window.__DARS_VERSION_URL = '{version_name}';</script>"
+
         html_template = f"""<!DOCTYPE html>
 <html lang="{app.language}">
 <head>
@@ -506,6 +553,7 @@ self.addEventListener('fetch', event => {
 <body>
     {body_content}
     <script>window.__DARS_VDOM__ = {vdom_snapshot_json};</script>
+    {version_vars_html}
     <script src=\"{runtime_file}\"></script>\n{extra_scripts_html}    <script src=\"{script_file}\"></script>
 </body>
 </html>"""
@@ -1368,10 +1416,12 @@ body {
         return json.dumps(vnode, ensure_ascii=False)
 
     def generate_javascript(self, app: App, page_root: Component) -> str:
-        """Genera un runtime modular para hidratación + delegación de eventos (Fase 1 VDOM)."""
-        runtime = r"""// Dars Runtime (Hydration + Delegated Events)
+        """Genera un runtime modular: hidratación + delegación de eventos + diff/patch + hot-reload incremental (polling)."""
+        runtime = r"""// Dars Runtime (Hydration + Delegated Events + Diff/Patch + Hot Reload)
 (function(){
   const eventMap = new Map(); // id -> {ev: fn}
+  let currentSnapshot = null;
+  let currentVersion = null;
 
   function walk(v, fn){
     if(!v) return;
@@ -1380,6 +1430,47 @@ body {
     for(let i=0;i<ch.length;i++){ walk(ch[i], fn); }
   }
 
+  function bindEventsFromVNode(snapshot){
+    // Construir tabla de eventos a partir del snapshot
+    walk(snapshot, (v)=>{
+      if(v && v.id && v.events){
+        const handlers = {};
+        for(const ev in v.events){
+          const spec = v.events[ev];
+          if(spec && spec.type==='inline' && spec.code){
+            try { handlers[ev] = new Function('event', spec.code); } catch(err){ /* ignore compile error */ }
+          }
+        }
+        if(Object.keys(handlers).length){ eventMap.set(v.id, handlers); } else { eventMap.delete(v.id); }
+      }
+    });
+  }
+
+  // Utilities
+  function setProps(el, props){
+    if(!el || !props) return;
+    for(const [k,v] of Object.entries(props)){
+      try {
+        if(v === false || v === null || typeof v === 'undefined'){
+          el.removeAttribute(k);
+        } else {
+          el.setAttribute(k, String(v));
+        }
+      } catch(err) { /* ignore */ }
+    }
+  }
+  function diffProps(el, oldP={}, newP={}){
+    // remove
+    for(const k in oldP){ if(!(k in newP)){ try{ el.removeAttribute(k); }catch{} } }
+    // add/update
+    for(const k in newP){ const v=newP[k]; try{ if(v===false||v===null||typeof v==='undefined'){ el.removeAttribute(k);} else { el.setAttribute(k, String(v)); } }catch{} }
+  }
+  function diffStyles(el, oldS={}, newS={}){
+    for(const k in oldS){ if(!(k in newS)){ try{ el.style.removeProperty(k.replace(/_/g,'-')); }catch{} } }
+    for(const k in newS){ const v=newS[k]; try{ el.style.setProperty(k.replace(/_/g,'-'), String(v)); }catch{} }
+  }
+
+  // Event delegation helper (restored)
   function delegate(eventName, root){
     (root||document).addEventListener(eventName, function(e){
       let node = e.target;
@@ -1399,29 +1490,117 @@ body {
     }, true);
   }
 
-  function hydrate(snapshot){
-    // Construir tabla de eventos a partir del snapshot
-    walk(snapshot, (v)=>{
-      if(v && v.id && v.events){
-        const handlers = {};
-        for(const ev in v.events){
-          const spec = v.events[ev];
-          if(spec && spec.type === 'inline' && spec.code){
-            try {
-              handlers[ev] = new Function('event', spec.code);
-            } catch(err){
-              console.warn('[Dars] could not compile inline handler for', v.id, ev, err);
-            }
-          }
-        }
-        if(Object.keys(handlers).length){
-          eventMap.set(v.id, handlers);
+  function typesDiffer(a,b){ return (a && b) ? a.type !== b.type : a!==b; }
+
+  function updateNode(oldV, newV){
+    if(!newV || !newV.id){ return { ok:false, reason:'missing-new' }; }
+    const el = document.getElementById(newV.id);
+    if(!el){ return { ok:false, reason:'missing-el' }; }
+
+    // Si cambia el tipo, estructura u orden de hijos, pedimos reload completo (fase 2 simplificada)
+    if(typesDiffer(oldV, newV)){
+      return { ok:false, reason:'type-changed' };
+    }
+
+    // class -> atributo className
+    if(newV.class){ el.className = newV.class; }
+
+    // props
+    diffProps(el, (oldV&&oldV.props)||{}, newV.props||{});
+
+    // styles
+    diffStyles(el, (oldV&&oldV.style)||{}, newV.style||{});
+
+    // text
+    if(Object.prototype.hasOwnProperty.call(newV, 'text')){
+      if(el.textContent !== String(newV.text||'')){
+        el.textContent = String(newV.text||'');
+      }
+    }
+
+    // events
+    if(newV.events){
+      const handlers = {};
+      for(const ev in newV.events){
+        const spec = newV.events[ev];
+        if(spec && spec.type==='inline' && spec.code){
+          try { handlers[ev] = new Function('event', spec.code); } catch(err){ /* ignore compile error */ }
         }
       }
+      if(Object.keys(handlers).length){ eventMap.set(newV.id, handlers); } else { eventMap.delete(newV.id); }
+    } else {
+      eventMap.delete(newV.id);
+    }
+
+    // hijos (reconciliación por índice; si difiere la longitud => reload sugerido)
+    const oldC = (oldV && oldV.children) ? oldV.children : [];
+    const newC = (newV.children) ? newV.children : [];
+    const n = Math.min(oldC.length, newC.length);
+    for(let i=0;i<n;i++){
+      const r = updateNode(oldC[i], newC[i]);
+      if(!r.ok){ return r; }
+    }
+    if(oldC.length !== newC.length){
+      return { ok:false, reason:'structure-changed' };
+    }
+    return { ok:true };
+  }
+
+  function schedule(fn){
+    if(typeof requestAnimationFrame === 'function'){
+      requestAnimationFrame(fn);
+    } else { setTimeout(fn, 16); }
+  }
+
+  function update(newSnapshot){
+    const old = currentSnapshot;
+    if(!old){
+      // primera vez: solo (re)hidratar eventos
+      bindEventsFromVNode(newSnapshot);
+      currentSnapshot = newSnapshot;
+      return;
+    }
+    schedule(()=>{
+      const res = updateNode(old, newSnapshot);
+      if(!res.ok){
+        console.warn('[Dars] Structural change detected (', res.reason, '), reloading...');
+        try { location.reload(); } catch(e) { /* ignore */ }
+        return;
+      }
+      // Re-vincular mapa de eventos por si cambió
+      bindEventsFromVNode(newSnapshot);
+      currentSnapshot = newSnapshot;
     });
+  }
+
+  function hydrate(snapshot){
+    bindEventsFromVNode(snapshot);
+    currentSnapshot = snapshot;
 
     // Delegar eventos comunes (se puede extender)
     ['click','input','change','submit'].forEach(ev => delegate(ev, document));
+  }
+
+  function startHotReload(){
+    const vurl = (window.__DARS_VERSION_URL || 'version.txt');
+    const surl = (window.__DARS_SNAPSHOT_URL || 'snapshot.json');
+    let timer = null;
+    function tick(){
+      fetch(vurl, { cache: 'no-store' })
+        .then(r=>r.text())
+        .then(ver=>{
+          ver = (ver||'').trim();
+          if(!currentVersion){ currentVersion = ver; }
+          if(ver && ver !== currentVersion){
+            currentVersion = ver;
+            return fetch(surl, { cache: 'no-store' }).then(r=>r.json()).then(js=>{ update(js); });
+          }
+        })
+        .catch(()=>{})
+        .finally(()=>{ timer = setTimeout(tick, 600); });
+    }
+    tick();
+    return ()=>{ if(timer) clearTimeout(timer); };
   }
 
   document.addEventListener('DOMContentLoaded', function(){
@@ -1429,6 +1608,10 @@ body {
       hydrate(window.__DARS_VDOM__);
     } else {
       console.warn('[Dars] No VDOM snapshot found for hydration');
+    }
+    // Activar hot-reload incremental en dev si hay URLs definidas
+    if(window.__DARS_VERSION_URL && window.__DARS_SNAPSHOT_URL){
+      startHotReload();
     }
   });
 })();

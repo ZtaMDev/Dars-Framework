@@ -285,7 +285,8 @@ class DarsExporter:
             progress.update(task2, advance=20)
             
             try:
-                success = exporter.export(app, output_path)
+                # En CLI 'dars export', generamos un bundle final (sin hot-reload dev)
+                success = exporter.export(app, output_path, bundle=True)
                 progress.update(task2, advance=80)
                 
                 if success:

@@ -34,6 +34,16 @@ class PreviewServer:
             if path.endswith('sw.js'):
                 return 'application/javascript'
             return super().guess_type(path)
+        def log_request(self, code='-', size='-'):
+            """Silencia logs para peticiones frecuentes del hot-reload (version.txt)."""
+            try:
+                p = getattr(self, 'path', '') or ''
+                # Coincidir /version.txt o /version_<slug>.txt
+                if p.endswith('version.txt') or (p.startswith('/version_') and p.endswith('.txt')):
+                    return  # no loggear
+            except Exception:
+                pass
+            return super().log_request(code, size)
     
     def __init__(self, directory: str, port: int = 8000):
         self.directory = os.path.abspath(directory)
