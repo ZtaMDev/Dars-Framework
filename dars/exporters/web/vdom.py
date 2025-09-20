@@ -31,6 +31,7 @@ class VNode:
         events: Optional[Dict[str, Any]],
         children: Optional[List["VNode"]] = None,
         text: Optional[str] = None,
+        is_island: bool = False,
     ) -> None:
         self.type = type_name
         self.id = id
@@ -41,6 +42,7 @@ class VNode:
         self.events = events or None
         self.children = children or []
         self.text = text
+        self.isIsland = is_island
 
     def to_dict(self) -> Dict[str, Any]:
         d: Dict[str, Any] = {
@@ -55,6 +57,8 @@ class VNode:
         }
         if self.text is not None:
             d["text"] = self.text
+        # Siempre incluimos isIsland para que el runtime pueda tomar decisiones
+        d["isIsland"] = bool(self.isIsland)
         return d
 
 
@@ -73,7 +77,7 @@ class VDomBuilder:
         self.id_provider = id_provider
 
     def build(self, component: Component) -> Dict[str, Any]:
-        vnode = self._build_vnode(component)
+        vnode = self._build_vnode(component, path=["0"])  # raíz con path estable
         return vnode.to_dict()
 
     # --- internals ---
@@ -180,7 +184,7 @@ class VDomBuilder:
             pass
         return None
 
-    def _build_vnode(self, component: Component) -> VNode:
+    def _build_vnode(self, component: Component, path: list) -> VNode:
         try:
             comp_type = component.__class__.__name__
         except Exception:
@@ -206,25 +210,42 @@ class VDomBuilder:
         # Children
         children_nodes: List[VNode] = []
         try:
-            for child in getattr(component, 'children', []) or []:
+            for idx, child in enumerate(getattr(component, 'children', []) or []):
                 if child is None:
                     continue
-                children_nodes.append(self._build_vnode(child))
+                child_path = path + [str(idx)]
+                children_nodes.append(self._build_vnode(child, child_path))
         except Exception:
             children_nodes = []
 
         # Text (optional)
         text_value = self._text_value(component)
 
+        # Heurística para saber si es componente "isla" (custom)
+        is_island = False
+        try:
+            mod = getattr(component.__class__, '__module__', '') or ''
+            # Si no pertenece al paquete de componentes built-in, lo tratamos como isla
+            if not mod.startswith('dars.components.'):
+                is_island = True
+        except Exception:
+            is_island = False
+
+        # Clave estable: si no hay id ni key definidos, usamos el path del árbol
+        stable_key = getattr(component, 'key', None)
+        if not stable_key and not comp_id:
+            stable_key = "/".join(path)
+
         vnode = VNode(
             type_name=comp_type,
             id=comp_id,
-            key=getattr(component, 'key', None),
+            key=stable_key,
             class_name=getattr(component, 'class_name', None),
             style=getattr(component, 'style', {}) or {},
             props=safe_props,
             events=events_payload,
             children=children_nodes,
             text=text_value,
+            is_island=is_island,
         )
         return vnode

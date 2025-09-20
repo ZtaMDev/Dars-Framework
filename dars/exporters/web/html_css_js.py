@@ -1440,6 +1440,37 @@ body {
   let currentSnapshot = null;
   let currentVersion = null;
 
+  // Registro de componentes (skeleton). En siguientes iteraciones añadiremos create/patch por tipo built-in
+  const registry = {
+    // Implementación mínima segura para crear nodos cuando se agregan hijos
+    'Text': {
+      create(v){
+        if(!v || v.isIsland) return null;
+        const el = document.createElement('span');
+        if(v.id) el.id = v.id;
+        if(v.class) el.className = v.class;
+        if(v.style){ for(const k in v.style){ try{ el.style.setProperty(k.replace(/_/g,'-'), String(v.style[k])); }catch{} } }
+        if(Object.prototype.hasOwnProperty.call(v,'text')){ el.textContent = String(v.text||''); }
+        // props
+        if(v.props){ for(const k in v.props){ const val=v.props[k]; try{ if(val===false||val===null||typeof val==='undefined'){ el.removeAttribute(k);} else { el.setAttribute(k, String(val)); } }catch{} } }
+        return el;
+      }
+    },
+    'Container': {
+      create(v){
+        if(!v || v.isIsland) return null;
+        const el = document.createElement('div');
+        if(v.id) el.id = v.id;
+        const base = 'dars-container';
+        el.className = (v.class ? (base + ' ' + v.class) : base);
+        if(v.style){ for(const k in v.style){ try{ el.style.setProperty(k.replace(/_/g,'-'), String(v.style[k])); }catch{} } }
+        // props
+        if(v.props){ for(const k in v.props){ const val=v.props[k]; try{ if(val===false||val===null||typeof val==='undefined'){ el.removeAttribute(k);} else { el.setAttribute(k, String(val)); } }catch{} } }
+        return el;
+      }
+    },
+  };
+
   function walk(v, fn){
     if(!v) return;
     fn(v);
@@ -1509,9 +1540,26 @@ body {
 
   function typesDiffer(a,b){ return (a && b) ? a.type !== b.type : a!==b; }
 
+  // Elimina un subárbol del DOM (y del mapa de eventos) usando los ids del VDOM
+  function removeSubtree(v){
+    if(!v) return;
+    // eliminar hijos primero (postorden)
+    const ch = (v.children||[]);
+    for(let i=0;i<ch.length;i++){ removeSubtree(ch[i]); }
+    // limpiar handlers
+    if(v.id){ eventMap.delete(v.id); }
+    // quitar elemento del DOM
+    if(v.id){ const el = document.getElementById(v.id); if(el && el.parentNode){ try{ el.parentNode.removeChild(el); }catch(_){} }}
+  }
+
   function updateNode(oldV, newV){
     if(!newV || !newV.id){ return { ok:false, reason:'missing-new' }; }
-    const el = document.getElementById(newV.id);
+    let el = document.getElementById(newV.id);
+    if(!el){
+      // Fallback: si cambió el id entre snapshots pero es el mismo nodo lógico, reasignamos id
+      const oldEl = (oldV && oldV.id) ? document.getElementById(oldV.id) : null;
+      if(oldEl){ try { oldEl.id = newV.id; el = oldEl; } catch(_){} }
+    }
     if(!el){ return { ok:false, reason:'missing-el' }; }
 
     // Si cambia el tipo, estructura u orden de hijos, pedimos reload completo (fase 2 simplificada)
@@ -1519,17 +1567,19 @@ body {
       return { ok:false, reason:'type-changed' };
     }
 
+    const isIsland = !!newV.isIsland;
+
     // class -> atributo className
-    if(newV.class){ el.className = newV.class; }
+    if(!isIsland && newV.class){ el.className = newV.class; }
 
     // props
-    diffProps(el, (oldV&&oldV.props)||{}, newV.props||{});
+    if(!isIsland){ diffProps(el, (oldV&&oldV.props)||{}, newV.props||{}); }
 
     // styles
-    diffStyles(el, (oldV&&oldV.style)||{}, newV.style||{});
+    if(!isIsland){ diffStyles(el, (oldV&&oldV.style)||{}, newV.style||{}); }
 
     // text
-    if(Object.prototype.hasOwnProperty.call(newV, 'text')){
+    if(!isIsland && Object.prototype.hasOwnProperty.call(newV, 'text')){
       if(el.textContent !== String(newV.text||'')){
         el.textContent = String(newV.text||'');
       }
@@ -1549,16 +1599,81 @@ body {
       eventMap.delete(newV.id);
     }
 
-    // hijos (reconciliación por índice; si difiere la longitud => reload sugerido)
+    // hijos (reconciliación por id/key). Para islas, tratamos el subárbol como opaco.
+    if(isIsland){ return { ok:true }; }
+
+    // Permitimos REMOCIONES sin recarga.
     const oldC = (oldV && oldV.children) ? oldV.children : [];
     const newC = (newV.children) ? newV.children : [];
-    const n = Math.min(oldC.length, newC.length);
-    for(let i=0;i<n;i++){
-      const r = updateNode(oldC[i], newC[i]);
-      if(!r.ok){ return r; }
+
+    // Construir índice de hijos viejos por id o key
+    const oldIndex = new Map(); // clave -> vnode viejo
+    for(let i=0;i<oldC.length;i++){
+      const k = (oldC[i] && (oldC[i].id || oldC[i].key)) || null;
+      if(k){ oldIndex.set(String(k), oldC[i]); }
     }
-    if(oldC.length !== newC.length){
-      return { ok:false, reason:'structure-changed' };
+
+    // Seguimiento de cuáles viejos fueron actualizados
+    const seenOld = new Set();
+
+    // Actualizar/validar hijos nuevos
+    for(let i=0;i<newC.length;i++){
+      const newChild = newC[i];
+      const k = (newChild && (newChild.id || newChild.key)) || null;
+      if(!k){
+        // sin id/key fiable: conservador => usar reconciliación por índice si existe par
+        if(i < oldC.length){
+          const r = updateNode(oldC[i], newChild);
+          if(!r.ok){ return r; }
+          seenOld.add(oldC[i]);
+          continue;
+        } else {
+          // no podemos crear de forma segura
+          return { ok:false, reason:'children-added' };
+        }
+      }
+      const oldChild = oldIndex.get(String(k));
+      if(oldChild){
+        const r = updateNode(oldChild, newChild);
+        if(!r.ok){ return r; }
+        seenOld.add(oldChild);
+      } else {
+        // Fallback conservador: si hay viejo en la misma posición y el tipo coincide, lo reutilizamos
+        if(i < oldC.length){
+          const candidate = oldC[i];
+          if(!typesDiffer(candidate, newChild)){
+            const r = updateNode(candidate, newChild);
+            if(!r.ok){ return r; }
+            seenOld.add(candidate);
+            continue;
+          }
+        }
+        // Intentar crear subárbol si es un tipo soportado por el registry (no isla)
+        const subtree = createSubtree(newChild);
+        if(subtree){
+          // insertar en la posición i dentro del DOM
+          const refChildVNode = (i < oldC.length) ? oldC[i] : null;
+          if(refChildVNode && refChildVNode.id){
+            const refEl = document.getElementById(refChildVNode.id);
+            if(refEl && refEl.parentNode){ refEl.parentNode.insertBefore(subtree, refEl); }
+            else { el.appendChild(subtree); }
+          } else {
+            el.appendChild(subtree);
+          }
+          // marcar como visto (no había old), nada que añadir a seenOld
+          continue;
+        }
+        // hijo nuevo de tipo no soportado => recarga por seguridad
+        return { ok:false, reason:'children-added' };
+      }
+    }
+
+    // Eliminar los viejos no vistos (removidos)
+    for(let i=0;i<oldC.length;i++){
+      const v = oldC[i];
+      if(!seenOld.has(v)){
+        removeSubtree(v);
+      }
     }
     return { ok:true };
   }
@@ -1575,6 +1690,7 @@ body {
       // primera vez: solo (re)hidratar eventos
       bindEventsFromVNode(newSnapshot);
       currentSnapshot = newSnapshot;
+      try{ window.__DARS_VDOM__ = newSnapshot; }catch(_){ /* ignore */ }
       return;
     }
     schedule(()=>{
@@ -1587,12 +1703,14 @@ body {
       // Re-vincular mapa de eventos por si cambió
       bindEventsFromVNode(newSnapshot);
       currentSnapshot = newSnapshot;
+      try{ window.__DARS_VDOM__ = newSnapshot; }catch(_){ /* ignore */ }
     });
   }
 
   function hydrate(snapshot){
     bindEventsFromVNode(snapshot);
     currentSnapshot = snapshot;
+    try{ window.__DARS_VDOM__ = snapshot; }catch(_){ /* ignore */ }
 
     // Delegar eventos comunes (se puede extender)
     ['click','input','change','submit'].forEach(ev => delegate(ev, document));
@@ -1600,10 +1718,8 @@ body {
 
   function startHotReload(){
     const vurl = (window.__DARS_VERSION_URL || 'version.txt');
-    const surl = (window.__DARS_SNAPSHOT_URL || 'snapshot.json');
     let timer = null;
     let warnedVersionMissing = false;
-    let warnedSnapshotMissing = false;
 
     function httpGet(url, onSuccess, onError, responseType){
       try{
@@ -1634,17 +1750,9 @@ body {
         if(!currentVersion){ currentVersion = ver; }
         if(ver && ver !== currentVersion){
           currentVersion = ver;
-          httpGet(surl, function(jsonText){
-            try{
-              const js = JSON.parse(jsonText);
-              warnedSnapshotMissing = false;
-              update(js);
-            }catch(_){
-              if(!warnedSnapshotMissing){ console.log('[Dars] waiting for snapshot.json'); warnedSnapshotMissing = true; }
-            }
-          }, function(){
-            if(!warnedSnapshotMissing){ console.log('[Dars] waiting for snapshot.json'); warnedSnapshotMissing = true; }
-          }, 'text');
+          // Política solicitada: siempre recargar por completo al detectar nueva versión
+          try { location.reload(); } catch(_) {}
+          return;
         }
         timer = setTimeout(tick, 600);
       }, function(){
