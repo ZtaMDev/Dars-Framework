@@ -1,4 +1,7 @@
 from typing import Optional, List, Dict, Any
+
+from dars.exporters.base import Exporter
+from dars.scripts.script import Script
 from .component import Component
 from .events import EventManager
 
@@ -260,9 +263,22 @@ class App:
 
             os.makedirs(preview_dir, exist_ok=True)
 
+            # Advertir si no hay archivo de configuración
+            try:
+                from dars.config import load_config
+                cfg, cfg_found = load_config(project_root)
+            except Exception:
+                cfg, cfg_found = ({}, False)
+            if not cfg_found:
+                warn_msg = "[Dars] Warning: dars.config.json not found. Run 'dars init --update' to create it in existing projects."
+                if console:
+                    console.print(f"[yellow]{warn_msg}[/yellow]")
+                else:
+                    print(warn_msg)
+
             # export inicial desde el root usando la instancia actual (self)
             with pushd(project_root):
-                exporter.export(self, preview_dir)
+                exporter.export(self, preview_dir, bundle=True)
 
             url = f"http://localhost:{port}"
             app_title = getattr(self, 'title', 'Dars App')
@@ -375,7 +391,7 @@ class App:
                                     return
 
                                 # Exportar la nueva instancia
-                                exporter.export(new_app, preview_dir)
+                                exporter.export(new_app, preview_dir, bundle=True)
 
                             (console.print("[green]App reloaded and re-exported successfully.[/green]")
                             if console else print("[Dars] App reloaded and re-exported successfully."))

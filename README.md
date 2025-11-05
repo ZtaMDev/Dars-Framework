@@ -1,6 +1,12 @@
-# Dars Framework
+<h1 align="center">Dars Framework</h1>
+ 
+<p align="center">
+  <img src="./Dars-logo.png" alt="Dars Framework Logo" width="160" />
+</p>
 
-Dars is a Python UI framework for building modern, interactive web apps with Python code. Write your interface in Python, export it to static HTML/CSS/JS, and deploy anywhere.
+<p align="center">
+  <em>Dars is a Python UI framework for building modern, interactive web apps with Python code. Write your interface in Python, export it to static HTML/CSS/JS, and deploy anywhere.</em>
+</p>
 
 ```bash
 pip install dars-framework
@@ -67,7 +73,10 @@ if __name__ == "__main__":
 |-----------------------------------------|--------------------------------------------|
 | `dars export my_app.py --format html`   | Export app to HTML/CSS/JS in `./my_app_web` |
 | `dars preview ./my_app_web`             | Preview exported app locally                |
-| `dars init my_project`                  | Create a new Dars project                   |
+| `dars init my_project`                  | Create a new Dars project (also creates dars.config.json) |
+| `dars init --update`                    | Create/Update dars.config.json in current dir |
+| `dars build`                            | Build using dars.config.json (entry/outdir/format) |
+| `dars config validate`                  | Validate dars.config.json and print report   |
 | `dars info my_app.py`                   | Show info about your app                    |
 | `dars formats`                          | List supported export formats               |
 | `dars --help`                           | Show help and all CLI options               |
@@ -108,4 +117,49 @@ dars preview ./my_exported_app
 ```
 
 This will start a local server at http://localhost:8000 to view your exported app in the browser.
+
+---
+
+## Project Configuration (dars.config.json)
+
+Dars can read build/export settings from a `dars.config.json` at your project root. It is created automatically by `dars init`, and you can add it to existing projects with `dars init --update`.
+
+Example default:
+
+```json
+{
+  "entry": "main.py",
+  "format": "html",
+  "outdir": "dist",
+  "publicDir": null,
+  "include": [],
+  "exclude": ["**/__pycache__", ".git", ".venv", "node_modules"],
+  "bundle": false
+}
+```
+
+- `entry`: Python entry file. Used by `dars build` and `dars export config`.
+- `format`: Export format. Currently only `html` is supported.
+- `outdir`: Output directory. Used by `dars build` and default for `dars export` when not overridden.
+- `publicDir`: Folder (e.g., `public/` or `assets/`) copied into the output. If null, it is autodetected.
+- `include`/`exclude`: Basic filters for copying from `publicDir`.
+- `bundle`: Reserved for future use. CLI exports and build already bundle appropriately.
+
+Validate your config:
+
+```bash
+dars config validate
+```
+
+Build using config:
+
+```bash
+dars build
+```
+
+Export using the config entry and outdir:
+
+```bash
+dars export config --format html
+```
 

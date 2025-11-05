@@ -28,6 +28,7 @@ from typing import Dict, Any
 import os
 from bs4 import BeautifulSoup
 from dars.exporters.web.vdom import VDomBuilder
+from dars.config import load_config, resolve_paths, copy_public_dir
 
 class HTMLCSSJSExporter(Exporter):
     """Exportador para HTML, CSS y JavaScript"""
@@ -52,6 +53,35 @@ class HTMLCSSJSExporter(Exporter):
                 project_root = os.getcwd()
             else:
                 project_root = os.path.dirname(os.path.abspath(app_source))
+
+            # --- Cargar configuración si existe y copiar public/assets ---
+            try:
+                cfg, cfg_found = load_config(project_root)
+            except Exception:
+                cfg, cfg_found = ({}, False)
+            try:
+                resolved = resolve_paths(cfg if cfg else {}, project_root)
+            except Exception:
+                resolved = {"public_abs": None, "include": [], "exclude": []}
+
+            # Copiar public/assets completos al output (tanto en preview como en bundle)
+            try:
+                public_abs = resolved.get("public_abs")
+                include = cfg.get("include", []) if cfg else []
+                exclude = cfg.get("exclude", []) if cfg else []
+                if not public_abs:
+                    # autodetect simple si no viene en config
+                    cand_public = os.path.join(project_root, "public")
+                    cand_assets = os.path.join(project_root, "assets")
+                    if os.path.isdir(cand_public):
+                        public_abs = cand_public
+                    elif os.path.isdir(cand_assets):
+                        public_abs = cand_assets
+                if public_abs and os.path.isdir(public_abs):
+                    copy_public_dir(public_abs, output_path, include=include, exclude=exclude)
+            except Exception:
+                # Mejor esfuerzo, no romper export
+                pass
 
             os.makedirs(output_path, exist_ok=True)
 

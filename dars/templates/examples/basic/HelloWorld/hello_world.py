@@ -2,7 +2,7 @@ from dars.all import *
 
 app = App(title="Hello World", theme="dark")
 # Crear componentes
-container = Container(
+index = Page(
     Text(
         text="Hello World",
         style={
@@ -50,7 +50,7 @@ container = Container(
     }
 ) 
 
-app.set_root(container)
+app.add_page("index", index, title="Hello World", index=True)
 
 if __name__ == "__main__":
     app.rTimeCompile()

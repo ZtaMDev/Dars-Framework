@@ -30,6 +30,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from dars.core.app import App
 from dars.exporters.web.html_css_js import HTMLCSSJSExporter
 from dars.cli.translations import translator
+from dars.config import load_config, resolve_paths, write_default_config, update_config
 
 console = Console()
 
@@ -434,7 +435,7 @@ from dars.all import *
 
 app = App(title="Hello World", theme="dark")
 # Crear componentes
-container = Container(
+index = Page(
     Text(
         text="Hello World",
         style={
@@ -482,7 +483,7 @@ container = Container(
     }
 ) 
 
-app.set_root(container)
+app.add_page("index", index, title="Hello World", index=True)
 
 if __name__ == "__main__":
     app.rTimeCompile()
@@ -490,6 +491,14 @@ if __name__ == "__main__":
             main_py = Path(name) / "main.py"
             main_py.write_text(HELLO_WORLD_CODE.strip(), encoding="utf-8")
             console.print(f"[green]✔ {translator.get('main_py_created')}[/green]")
+
+        # Create default dars.config.json for the new project
+        try:
+            write_default_config(os.path.abspath(name), overwrite=False)
+            console.print("[green]✔ dars.config.json created[/green]")
+        except Exception:
+            # Non-fatal; keep init working even if config write fails
+            pass
 
         # Final instructions
         console.print(f"\n[bold cyan]🎉 {translator.get('project_initialized')}[/bold cyan]")
@@ -574,8 +583,25 @@ def create_parser() -> argparse.ArgumentParser:
         '--template', '-t',
         help=translator.get('template_help')
     )
+    init_parser.add_argument(
+        '--update', '-u',
+        action='store_true',
+        help='Create or update dars.config.json in the target (or current) directory'
+    )
+
+    # Build command (config-driven)
+    build_parser = subparsers.add_parser('build', help='Build using dars.config.json')
+    build_parser.add_argument(
+        '--project', '-p', default='.', help='Project root where dars.config.json resides (default: .)'
+    )
+
+    # Config command (validate)
+    config_parser = subparsers.add_parser('config', help='Manage and validate dars.config.json')
+    cfg_subparsers = config_parser.add_subparsers(dest='config_command')
+    cfg_validate = cfg_subparsers.add_parser('validate', help='Validate dars.config.json in a project')
+    cfg_validate.add_argument('--project', '-p', default='.', help='Project root (default: .)')
     # Add language option to all subparsers
-    for subparser in [export_parser, info_parser, formats_parser, preview_parser, init_parser]:
+    for subparser in [export_parser, info_parser, formats_parser, preview_parser, init_parser, build_parser, config_parser, cfg_validate]:
         subparser.add_argument('--lang', '-l', choices=['en', 'es'], default='en',
                               help=translator.get('lang_help'))
     
@@ -759,13 +785,47 @@ def main():
     exporter = DarsExporter()
     
     if args.command == 'export':
+        # If file points to config, resolve from dars.config.json
+        file_arg = args.file
+        if file_arg in ('.', 'config', 'cfg'):
+            project_root = os.getcwd()
+            cfg, _found = load_config(project_root)
+            resolved = resolve_paths(cfg, project_root)
+            file_arg = resolved.get('entry_abs') or os.path.join(project_root, cfg.get('entry', 'main.py'))
+
+        # Validate entry file exists
+        if not os.path.exists(file_arg):
+            console.print(f"[red]{translator.get('error_entry_not_found_in_config')}: {file_arg}[/red]")
+            console.print(f"[yellow]{translator.get('edit_config_hint')}[/yellow]")
+            sys.exit(1)
+
         # Load application
-        app = exporter.load_app_from_file(args.file)
+        app = exporter.load_app_from_file(file_arg)
         if app is None:
             sys.exit(1)
             
         # Export
-        success = exporter.export_app(app, args.format, args.output, args.preview)
+        # If config exists and user didn't override output explicitly, use cfg.outdir
+        project_root = os.path.dirname(os.path.abspath(file_arg))
+        cfg, cfg_found = load_config(project_root)
+        outdir = args.output
+        if cfg_found and (args.output == './dist' or args.output == 'dist'):
+            resolved = resolve_paths(cfg, project_root)
+            outdir = resolved.get('outdir_abs') or outdir
+
+        # Validate format (currently only html)
+        if args.format not in ['html']:
+            console.print(f"[red]{translator.get('error_format_only_html')}[/red]")
+            sys.exit(1)
+
+        # Ensure outdir can be created
+        try:
+            os.makedirs(outdir, exist_ok=True)
+        except Exception as e:
+            console.print(f"[red]{translator.get('error_output_create')}: {outdir} -> {e}[/red]")
+            sys.exit(1)
+
+        success = exporter.export_app(app, args.format, outdir, args.preview)
         sys.exit(0 if success else 1)
         
     elif args.command == 'info':
@@ -783,6 +843,13 @@ def main():
     elif args.command == 'init':
         if args.list_templates:
             list_templates_detailed()
+        elif args.update:
+            # Update or create config in provided name or current directory
+            target_dir = args.name or '.'
+            project_root = os.path.abspath(target_dir)
+            os.makedirs(project_root, exist_ok=True)
+            write_default_config(project_root, overwrite=False)
+            console.print("[green]✔ dars.config.json created/updated[/green]")
         elif not args.name:
             console.print("[red]Error: Project name is required[/red]")
             parser.parse_args(['init', '--help'])
@@ -790,6 +857,40 @@ def main():
             exporter.init_project(args.name, template=args.template)
 
         
+    elif args.command == 'build':
+        project_root = os.path.abspath(getattr(args, 'project', '.'))
+        cfg, found = load_config(project_root)
+        if not found:
+            console.print("[yellow][Dars] Warning: dars.config.json not found. Run 'dars init --update' to create it.[/yellow]")
+        resolved = resolve_paths(cfg, project_root)
+        entry = resolved.get('entry_abs') or os.path.join(project_root, cfg.get('entry', 'main.py'))
+        format_name = cfg.get('format', 'html')
+        outdir = resolved.get('outdir_abs') or os.path.join(project_root, 'dist')
+
+        # Validate entry file exists
+        if not os.path.exists(entry):
+            console.print(f"[red]{translator.get('error_entry_not_found_in_config')}: {entry}[/red]")
+            console.print(f"[yellow]{translator.get('edit_config_hint')}[/yellow]")
+            sys.exit(1)
+
+        # Validate format (currently only html)
+        if format_name not in ['html']:
+            console.print(f"[red]{translator.get('error_format_only_html')}[/red]")
+            sys.exit(1)
+
+        # Ensure outdir can be created
+        try:
+            os.makedirs(outdir, exist_ok=True)
+        except Exception as e:
+            console.print(f"[red]{translator.get('error_output_create')}: {outdir} -> {e}[/red]")
+            sys.exit(1)
+
+        app = exporter.load_app_from_file(entry)
+        if app is None:
+            sys.exit(1)
+        success = exporter.export_app(app, format_name, outdir, show_preview=False)
+        sys.exit(0 if success else 1)
+
     elif args.command == 'preview':
         index_path = os.path.join(args.path, "index.html")
         if os.path.exists(index_path):
@@ -816,6 +917,102 @@ def main():
             console.print(f"[red]{translator.get('index_not_found')} {args.path}[/red]")
 
             
+    elif args.command == 'config':
+        if getattr(args, 'config_command', None) == 'validate':
+            project_root = os.path.abspath(getattr(args, 'project', '.'))
+            cfg, found = load_config(project_root)
+            resolved = resolve_paths(cfg, project_root)
+
+            issues = []
+            def ok(msg):
+                return f"[green]✔ {msg}[/green]"
+            def warn(msg):
+                return f"[yellow]⚠ {msg}[/yellow]"
+            def err(msg):
+                return f"[red]✖ {msg}[/red]"
+
+            if not found:
+                issues.append(warn(translator.get('cfg_not_found_warn')))
+
+            # entry validation
+            entry = resolved.get('entry_abs')
+            if not entry or not os.path.isfile(entry):
+                issues.append(err(translator.get('cfg_entry_missing').format(path=cfg.get('entry'))))
+            else:
+                issues.append(ok(translator.get('cfg_entry_ok').format(path=cfg.get('entry'))))
+
+            # format validation
+            fmt = cfg.get('format')
+            if fmt != 'html':
+                issues.append(err(translator.get('cfg_format_only_html').format(fmt=fmt)))
+            else:
+                issues.append(ok(translator.get('cfg_format_ok').format(fmt=fmt)))
+
+            # outdir validation (creatable)
+            outdir_abs = resolved.get('outdir_abs')
+            try:
+                os.makedirs(outdir_abs, exist_ok=True)
+                issues.append(ok(translator.get('cfg_outdir_ok').format(path=cfg.get('outdir'))))
+            except Exception as e:
+                issues.append(err(translator.get('cfg_outdir_error').format(path=cfg.get('outdir'), error=str(e))))
+
+            # publicDir (if set) existence
+            pub = cfg.get('publicDir')
+            if pub:
+                pub_abs = resolved.get('public_abs')
+                if not pub_abs or not os.path.isdir(pub_abs):
+                    issues.append(err(translator.get('cfg_public_missing').format(path=pub)))
+                else:
+                    issues.append(ok(translator.get('cfg_public_ok').format(path=pub)))
+            else:
+                issues.append(warn(translator.get('cfg_public_autodetect')))
+
+            # include/exclude types
+            if not isinstance(cfg.get('include', []), list):
+                issues.append(err(translator.get('cfg_include_type')))
+            if not isinstance(cfg.get('exclude', []), list):
+                issues.append(err(translator.get('cfg_exclude_type')))
+
+            # bundle is bool
+            if not isinstance(cfg.get('bundle', False), bool):
+                issues.append(err(translator.get('cfg_bundle_type')))
+
+            # Print report
+            report = Table(title=translator.get('cfg_validation_title'))
+            report.add_column(translator.get('cfg_item'), style="cyan")
+            report.add_column(translator.get('cfg_result'), style="white")
+
+            report.add_row('config', translator.get('cfg_found') if found else translator.get('cfg_not_found'))
+            for msg in issues:
+                if 'entry' in msg:
+                    report.add_row('entry', msg)
+                elif 'format' in msg:
+                    report.add_row('format', msg)
+                elif 'outdir' in msg:
+                    report.add_row('outdir', msg)
+                elif 'public' in msg or 'publicDir' in msg:
+                    report.add_row('publicDir', msg)
+                elif 'include' in msg:
+                    report.add_row('include', msg)
+                elif 'exclude' in msg:
+                    report.add_row('exclude', msg)
+                elif 'bundle' in msg:
+                    report.add_row('bundle', msg)
+                else:
+                    report.add_row('note', msg)
+
+            console.print(report)
+            has_errors = any(msg.startswith('[red]') for msg in issues)
+            sys.exit(1 if has_errors else 0)
+        else:
+            # Show help for config subcommands
+            parser = create_parser()
+            subparsers_actions = [action for action in parser._actions if isinstance(action, argparse._SubParsersAction)]
+            for subparsers_action in subparsers_actions:
+                if 'config' in subparsers_action.choices:
+                    RichHelpFormatter.rich_print_help(subparsers_action.choices['config'])
+                    return
+
     else:
         # Usar nuestro formateador personalizado en lugar del estándar
         RichHelpFormatter.rich_print_help(parser)
