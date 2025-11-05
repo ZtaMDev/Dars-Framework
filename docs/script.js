@@ -1,15 +1,59 @@
 // Scripts específicos de esta página (combinados)
 // Script: dScript
-const navRight = document.getElementById('navbar-right');
+document.addEventListener('DOMContentLoaded', function initNav() {
+    const navRight = document.getElementById('navbar-right');
     const burger = document.getElementById('navbar-hamburger');
 
-    burger.addEventListener('click', () => {
-        if (navRight.style.right === '0px') {
-            navRight.style.right = '-100%';
-        } else {
-            navRight.style.right = '0px';
+    // Safety guards in case elements are not present yet
+    if (!burger || !navRight) return;
+
+    // Ensure overlay exists (hidden) so we can reuse it
+    let overlay = document.getElementById('nav-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'nav-overlay';
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100%';
+        overlay.style.height = '100%';
+        overlay.style.background = 'rgba(0,0,0,0.35)';
+        overlay.style.zIndex = '1999';
+        overlay.style.display = 'none';
+        document.body.appendChild(overlay);
+    }
+
+    function openMenu() {
+        navRight.classList.add('open');
+        overlay.style.display = 'block';
+    }
+    function closeMenu() {
+        navRight.classList.remove('open');
+        overlay.style.display = 'none';
+    }
+
+    burger.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (navRight.classList.contains('open')) closeMenu(); else openMenu();
+    });
+
+    // Close when clicking overlay
+    overlay.addEventListener('click', function () {
+        closeMenu();
+    });
+
+    // Close menu when any nav link is clicked (mobile behavior)
+    const links = navRight.querySelectorAll('.nav-link');
+    links.forEach(link => link.addEventListener('click', closeMenu));
+
+    // Also close when tapping outside via document listener
+    document.addEventListener('click', function (ev) {
+        const target = ev.target;
+        if (!navRight.contains(target) && target !== burger) {
+            if (navRight.classList.contains('open')) closeMenu();
         }
     });
+});
 
 // Script: dScript
 window.addEventListener('load', () => {
@@ -62,21 +106,17 @@ function isMobileDevice() {
 }
 
 function handlePlaygroundLink() {
+    // KEEP: Always keep the Playground link visible on all devices
     var playgroundLink = document.getElementById('linkPlayground');
     if (!playgroundLink) return;
-
-    if (isMobileDevice()) {
-        playgroundLink.style.display = "none";  // Ocultar en móviles
-    } else {
-        playgroundLink.style.display = "";      // Mostrar en desktop
-    }
+    playgroundLink.style.display = ""; // ensure visible
 }
 
 function initMobileDetection() {
     // Ejecutar al cargar
     handlePlaygroundLink();
 
-    // Re-verificar al redimensionar
+    // Re-verificar al redimensionar (no ocultaremos el playground)
     window.addEventListener('resize', handlePlaygroundLink);
 }
 
@@ -88,4 +128,4 @@ if (document.readyState === 'loading') {
 }
 
 // Script: dScript
-console.log('Dars-framework version: 1.1.1 running...')
+console.log('Dars-framework version: 1.1.8 running...')
