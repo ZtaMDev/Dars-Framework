@@ -3,8 +3,8 @@ from typing import Optional, Dict, Any, List
 
 class Page(Component):
     """Root component for pages in Dars multipage apps. Allows passing children as positional arguments and scripts per page."""
-    def __init__(self, *children: Component, id: Optional[str] = None, class_name: Optional[str] = None, style: Optional[Dict[str, Any]] = None):
-        super().__init__(id=id, class_name=class_name, style=style)
+    def __init__(self, *children: Component, id: Optional[str] = None, class_name: Optional[str] = None, style: Optional[Dict[str, Any]] = None, **props):
+        super().__init__(id=id, class_name=class_name, style=style, **props)
         self.scripts = []
         for child in children:
             self.add_child(child)

@@ -15,9 +15,10 @@ class RadioButton(Component):
         style: Optional[Dict[str, Any]] = None,
         disabled: bool = False,
         required: bool = False,
-        on_change: Optional[Callable] = None
+        on_change: Optional[Callable] = None,
+        **props
     ):
-        super().__init__(id=id, class_name=class_name, style=style)
+        super().__init__(id=id, class_name=class_name, style=style, **props)
         self.label = label
         self.value = value or label  # Si no se proporciona value, usar label
         self.name = name  # Requerido para agrupar radio buttons

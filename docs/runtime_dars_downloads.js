@@ -276,8 +276,15 @@
     currentSnapshot = snapshot;
     try{ window.__DARS_VDOM__ = snapshot; }catch(_){ /* ignore */ }
 
-    // Delegar eventos comunes (se puede extender)
-    ['click','input','change','submit'].forEach(ev => delegate(ev, document));
+    // Delegar eventos comunes (extendido)
+    const delegated = [
+      'click','dblclick',
+      'mousedown','mouseup','mouseenter','mouseleave','mousemove',
+      'keydown','keyup','keypress',
+      'change','input','submit',
+      'focus','blur'
+    ];
+    delegated.forEach(ev => delegate(ev, document));
   }
 
   function startHotReload(){

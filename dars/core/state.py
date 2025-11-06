@@ -10,16 +10,21 @@ class DarsState:
         self.id = id
         self.states = states or []
         self.is_custom = is_custom
+        self.rules: Dict[str, Dict[str, Any]] = {}
+        self._bootstrap_ref: Optional[Dict[str, Any]] = None
 
     def to_dict(self) -> Dict[str, Any]:
-        return {
+        d = {
             "name": self.name,
             "id": self.id,
             "states": self.states,
             "isCustom": self.is_custom,
         }
+        if self.rules:
+            d["rules"] = self.rules
+        return d
 
-    def state(self, idx: int, cComp: bool = False, render: Optional[Any] = None) -> InlineScript:
+    def state(self, idx: Optional[int] = None, cComp: bool = False, render: Optional[Any] = None, goto: Optional[Any] = None) -> InlineScript:
         """
         Convenience: returns an InlineScript that, when added to a page/app,
         triggers a state change via the JS runtime. Intended for quick prototyping.
@@ -54,12 +59,20 @@ class DarsState:
             except Exception:
                 html_val = None
 
-        payload_parts = [f"id: '{_escape_js_str(target_id)}'", f"state: {idx}"]
+        # Build payload
+        parts = [f"id: '{_escape_js_str(target_id)}'", f"name: '{_escape_js_str(self.name)}'"]
+        if idx is not None:
+            parts.append(f"state: {idx}")
+        if goto is not None:
+            if isinstance(goto, str):
+                parts.append(f"goto: '{_escape_js_str(goto)}'")
+            else:
+                parts.append(f"goto: {goto}")
         if cComp:
             html_str = _escape_js_str(html_val or "")
-            payload_parts.append("useCustomRender: true")
-            payload_parts.append(f"html: '{html_str}'")
-        payload = ", ".join(payload_parts)
+            parts.append("useCustomRender: true")
+            parts.append(f"html: '{html_str}'")
+        payload = ", ".join(parts)
 
         code = (
             "(async () => {\n"
@@ -79,6 +92,136 @@ class DarsState:
             "})();\n"
         )
         return InlineScript(code, module=True)
+
+    # --- cState: define rules/mods for a given state index ---
+    def cState(self, idx: int, mods: Optional[List[Dict[str, Any]]] = None) -> 'CStateRuleBuilder':
+        key = str(idx)
+        if key not in self.rules:
+            self.rules[key] = {}
+        if mods:
+            existing = list(self.rules[key].get('mods', []))
+            existing.extend(mods)
+            self.rules[key]['mods'] = existing
+            # mirror into bootstrap ref if exists
+            if self._bootstrap_ref is not None:
+                self._bootstrap_ref.setdefault('rules', {})
+                self._bootstrap_ref['rules'][key] = self.rules[key]
+        return CStateRuleBuilder(self, key)
+
+    # sugar: direct goto builder for rules
+    def goto(self, value: Any) -> 'CStateRuleBuilder':
+        # attach as default rule for current state if exists, else for state 0
+        key = str(0)
+        if key not in self.rules:
+            self.rules[key] = {}
+        self.rules[key]['goto'] = value
+        if self._bootstrap_ref is not None:
+            self._bootstrap_ref.setdefault('rules', {})
+            self._bootstrap_ref['rules'][key] = self.rules[key]
+        return CStateRuleBuilder(self, key)
+
+
+class Mod:
+    @staticmethod
+    def inc(target: Any, prop: str = 'text', by: int = 1) -> Dict[str, Any]:
+        tid = getattr(target, 'id', None) or str(target)
+        return {"op": "inc", "target": tid, "prop": prop, "by": by}
+
+    @staticmethod
+    def dec(target: Any, prop: str = 'text', by: int = 1) -> Dict[str, Any]:
+        return Mod.inc(target, prop=prop, by=(-abs(by)))
+
+    @staticmethod
+    def set(target: Any, **attrs) -> Dict[str, Any]:
+        tid = getattr(target, 'id', None) or str(target)
+        return {"op": "set", "target": tid, "attrs": attrs}
+
+    @staticmethod
+    def toggle_class(target: Any, name: str, on: Optional[bool] = None) -> Dict[str, Any]:
+        tid = getattr(target, 'id', None) or str(target)
+        d: Dict[str, Any] = {"op": "toggleClass", "target": tid, "name": name}
+        if on is not None:
+            d['on'] = bool(on)
+        return d
+
+    @staticmethod
+    def append_text(target: Any, value: str) -> Dict[str, Any]:
+        tid = getattr(target, 'id', None) or str(target)
+        return {"op": "appendText", "target": tid, "value": value}
+
+    @staticmethod
+    def prepend_text(target: Any, value: str) -> Dict[str, Any]:
+        tid = getattr(target, 'id', None) or str(target)
+        return {"op": "prependText", "target": tid, "value": value}
+
+
+class CStateRuleBuilder:
+    def __init__(self, st: DarsState, key: str):
+        self.st = st
+        self.key = key
+
+    def _ensure(self):
+        if self.key not in self.st.rules:
+            self.st.rules[self.key] = {}
+        if 'mods' not in self.st.rules[self.key]:
+            self.st.rules[self.key]['mods'] = []
+
+    def inc(self, target: Any, prop: str = 'text', by: int = 1) -> 'CStateRuleBuilder':
+        self._ensure()
+        self.st.rules[self.key]['mods'].append(Mod.inc(target, prop, by))
+        if self.st._bootstrap_ref is not None:
+            self.st._bootstrap_ref.setdefault('rules', {})
+            self.st._bootstrap_ref['rules'][self.key] = self.st.rules[self.key]
+        return self
+
+    def dec(self, target: Any, prop: str = 'text', by: int = 1) -> 'CStateRuleBuilder':
+        self._ensure()
+        self.st.rules[self.key]['mods'].append(Mod.dec(target, prop, by))
+        if self.st._bootstrap_ref is not None:
+            self.st._bootstrap_ref.setdefault('rules', {})
+            self.st._bootstrap_ref['rules'][self.key] = self.st.rules[self.key]
+        return self
+
+    def set(self, target: Any, **attrs) -> 'CStateRuleBuilder':
+        self._ensure()
+        self.st.rules[self.key]['mods'].append(Mod.set(target, **attrs))
+        if self.st._bootstrap_ref is not None:
+            self.st._bootstrap_ref.setdefault('rules', {})
+            self.st._bootstrap_ref['rules'][self.key] = self.st.rules[self.key]
+        return self
+
+    def toggle_class(self, target: Any, name: str, on: Optional[bool] = None) -> 'CStateRuleBuilder':
+        self._ensure()
+        self.st.rules[self.key]['mods'].append(Mod.toggle_class(target, name, on))
+        if self.st._bootstrap_ref is not None:
+            self.st._bootstrap_ref.setdefault('rules', {})
+            self.st._bootstrap_ref['rules'][self.key] = self.st.rules[self.key]
+        return self
+
+    def append_text(self, target: Any, value: str) -> 'CStateRuleBuilder':
+        self._ensure()
+        self.st.rules[self.key]['mods'].append(Mod.append_text(target, value))
+        if self.st._bootstrap_ref is not None:
+            self.st._bootstrap_ref.setdefault('rules', {})
+            self.st._bootstrap_ref['rules'][self.key] = self.st.rules[self.key]
+        return self
+
+    def prepend_text(self, target: Any, value: str) -> 'CStateRuleBuilder':
+        self._ensure()
+        self.st.rules[self.key]['mods'].append(Mod.prepend_text(target, value))
+        if self.st._bootstrap_ref is not None:
+            self.st._bootstrap_ref.setdefault('rules', {})
+            self.st._bootstrap_ref['rules'][self.key] = self.st.rules[self.key]
+        return self
+
+    def goto(self, value: Any) -> 'CStateRuleBuilder':
+        if self.key not in self.st.rules:
+            self.st.rules[self.key] = {}
+        self.st.rules[self.key]['goto'] = value
+        if self.st._bootstrap_ref is not None:
+            self.st._bootstrap_ref.setdefault('rules', {})
+            self.st._bootstrap_ref['rules'][self.key] = self.st.rules[self.key]
+        return self
 
 
 def dState(name: str, component: Any = None, id: Optional[str] = None, states: Optional[List[Any]] = None, is_custom: bool = False) -> DarsState:
@@ -104,7 +247,9 @@ def dState(name: str, component: Any = None, id: Optional[str] = None, states: O
 
     st = DarsState(name=name, id=target_id, states=states, is_custom=is_custom)
     try:
-        STATE_BOOTSTRAP.append(st.to_dict())
+        d = st.to_dict()
+        STATE_BOOTSTRAP.append(d)
+        st._bootstrap_ref = d
     except Exception:
         pass
     return st

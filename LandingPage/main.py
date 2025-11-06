@@ -1376,8 +1376,9 @@ sidebar = Container(
     # Contenedor de links oculto
     Container(
         Link("Home", href="#dars-framework-documentation", style=FLOATING_LINK_STYLE),
-        Link("App", href="#app-class-and-pwa-features-in-dars-framework", style=FLOATING_LINK_STYLE),
         Link("Getting started", href="#getting-started-with-dars", style=FLOATING_LINK_STYLE),
+        Link("App", href="#app-class-and-pwa-features-in-dars-framework", style=FLOATING_LINK_STYLE),
+        Link("State Management", href="#state-management-in-dars-dstate-cstate-goto-mods", style=FLOATING_LINK_STYLE),
         Link("Installing", href="#installation-guide-dars-framework", style=FLOATING_LINK_STYLE),
         Link("Components", href="#dars-components-documentation", style=FLOATING_LINK_STYLE),
         Link("Custom Components", href="#custom-components-in-dars-framework", style=FLOATING_LINK_STYLE),
@@ -1476,6 +1477,11 @@ documentation = Page(
     ),
     Markdown(
         file_path="app.md",
+        style={"class": "markdown-docs"},
+        id="markdown_docs"
+    ),
+    Markdown(
+        file_path="state_management.md",
         style={"class": "markdown-docs"},
         id="markdown_docs"
     ),

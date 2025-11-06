@@ -82,6 +82,11 @@
       </a>
      </li>
      <li>
+      <a href="#state-management-in-dars-dstate-cstate-goto-mods">
+       State Management
+      </a>
+     </li>
+     <li>
       <a href="#dars-components-documentation">
        Components
       </a>
@@ -879,6 +884,190 @@ dars<span class="w"> </span>preview<span class="w"> </span>./output_directory
 - Safari (limited support on iOS)
 - Edge (full support)
     </p>
+   </div>
+   <div class="dars-markdown" id="markdown_docs" style="class: markdown-docs">
+    <h1 id="state-management-in-dars-dstate-cstate-goto-mods">
+     State management in Dars (dState, cState, goto, mods)
+    </h1>
+    <p>
+     This document describes the new state system available in Dars 1.1.9.
+    </p>
+    <ul>
+     <li>
+      dState(name, component|id, states): declares a state tied to a DOM target (component id).
+     </li>
+     <li>
+      state(idx=None, goto=None, cComp=False, render=None): triggers a state change from Python by producing a JS inline script.
+     </li>
+     <li>
+      cState(idx, mods=[...]): declares rules to execute when entering a state.
+     </li>
+     <li>
+      Mod helpers: inc, dec, set, toggle
+      <em>
+       class, append
+      </em>
+      text, prepend_text.
+     </li>
+     <li>
+      goto: absolute (e.g. 2) or relative ("+1", "-1") state jumps.
+     </li>
+    </ul>
+    <h2 id="quick-start">
+     Quick start
+    </h2>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dars.core.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">dState</span><span class="p">,</span> <span class="n">Mod</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"State Demo"</span><span class="p">)</span>
+<span class="n">label</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="s2">"0"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"Counter"</span><span class="p">)</span>
+<span class="n">st</span> <span class="o">=</span> <span class="n">dState</span><span class="p">(</span><span class="s2">"counter"</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">states</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+
+<span class="c1"># Rules on state entry</span>
+<span class="n">st</span><span class="o">.</span><span class="n">cState</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="p">[</span><span class="n">Mod</span><span class="o">.</span><span class="n">inc</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">prop</span><span class="o">=</span><span class="s1">'text'</span><span class="p">,</span> <span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">)])</span>
+<span class="n">st</span><span class="o">.</span><span class="n">cState</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="p">[</span><span class="n">Mod</span><span class="o">.</span><span class="n">dec</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">prop</span><span class="o">=</span><span class="s1">'text'</span><span class="p">,</span> <span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">)])</span>
+<span class="n">st</span><span class="o">.</span><span class="n">cState</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="p">[</span><span class="n">Mod</span><span class="o">.</span><span class="n">toggle_class</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'highlight'</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="kc">None</span><span class="p">)])</span>
+
+<span class="c1"># Buttons to navigate</span>
+<span class="n">next_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Next"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">st</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">goto</span><span class="o">=</span><span class="s1">'+1'</span><span class="p">))</span>
+<span class="n">prev_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Prev"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">st</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">goto</span><span class="o">=</span><span class="s1">'-1'</span><span class="p">))</span>
+</code></pre>
+    </div>
+    <h2 id="full-html-replacement-custom-components">
+     Full HTML replacement (custom components)
+    </h2>
+    <p>
+     If you need full HTML replacement on state change:
+    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="n">swap_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span>
+    <span class="s2">"Swap"</span><span class="p">,</span>
+    <span class="n">on_click</span><span class="o">=</span><span class="n">st</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">cComp</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">render</span><span class="o">=</span><span class="n">label</span><span class="o">.</span><span class="n">mod</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">"SWAPPED"</span><span class="p">))</span>
+<span class="p">)</span>
+</code></pre>
+    </div>
+    <p>
+     <code>
+      render
+     </code>
+     accepts:
+- A DeferredAttr produced by
+     <code>
+      component.mod(...)
+     </code>
+     or
+     <code>
+      component.attr(..., defer=True)
+     </code>
+     .
+- A Component instance (will be rendered to HTML at event time).
+- A raw HTML string.
+    </p>
+    <h2 id="runtime-behavior">
+     Runtime behavior
+    </h2>
+    <ul>
+     <li>
+      At export time, state declarations are embedded in the page as a bootstrap JSON.
+     </li>
+     <li>
+      The runtime (dars.min.js) registers states with: id, states, current index, and optional rules.
+     </li>
+     <li>
+      <code>
+       change({...})
+      </code>
+      resolves
+      <code>
+       goto
+      </code>
+      , updates
+      <code>
+       current
+      </code>
+      , applies
+      <code>
+       rules[&lt;state&gt;].mods
+      </code>
+      and optional
+      <code>
+       rules[&lt;state&gt;].goto
+      </code>
+      (single hop), then dispatches a
+      <code>
+       CustomEvent('dars:state', ...)
+      </code>
+      .
+     </li>
+    </ul>
+    <h2 id="mod-operations">
+     Mod operations
+    </h2>
+    <ul>
+     <li>
+      inc/dec(target, prop='text', by=1): increments or decrements a numeric value (textContent by default).
+     </li>
+     <li>
+      set(target, **attrs): sets attributes;
+      <code>
+       text
+      </code>
+      sets textContent;
+      <code>
+       html
+      </code>
+      sets innerHTML; other keys map to element attributes.
+     </li>
+     <li>
+      toggle_class(target, name, on=None): toggles a class; when
+      <code>
+       on
+      </code>
+      is True/False, forces add/remove.
+     </li>
+     <li>
+      append
+      <em>
+       text / prepend
+      </em>
+      text: concatenates to textContent.
+     </li>
+    </ul>
+    <h2 id="best-practices">
+     Best practices
+    </h2>
+    <ul>
+     <li>
+      Keep the label text purely numeric if you plan to use
+      <code>
+       inc/dec
+      </code>
+      on
+      <code>
+       text
+      </code>
+      .
+     </li>
+     <li>
+      Use
+      <code>
+       goto
+      </code>
+      in rules to avoid infinite accumulation when staying at the same state.
+     </li>
+     <li>
+      Prefer
+      <code>
+       mods
+      </code>
+      for small changes; use
+      <code>
+       cComp=True
+      </code>
+      only when you need full HTML replacement.
+     </li>
+    </ul>
    </div>
    <div class="dars-markdown" id="markdown_docs" style="class: markdown-docs">
     <h1 id="dars-components-documentation">
@@ -6991,59 +7180,64 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
      <a class="dars-link" href="#dars-framework-documentation" id="link_244" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
       Home
      </a>
-     <a class="dars-link" href="#app-class-and-pwa-features-in-dars-framework" id="link_245" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
-      App
-     </a>
-     <a class="dars-link" href="#getting-started-with-dars" id="link_246" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
+     <a class="dars-link" href="#getting-started-with-dars" id="link_245" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
       Getting started
      </a>
-     <a class="dars-link" href="#installation-guide-dars-framework" id="link_247" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
+     <a class="dars-link" href="#app-class-and-pwa-features-in-dars-framework" id="link_246" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
+      App
+     </a>
+     <a class="dars-link" href="#state-management-in-dars-dstate-cstate-goto-mods" id="link_247" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
+      State Management
+     </a>
+     <a class="dars-link" href="#installation-guide-dars-framework" id="link_248" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
       Installing
      </a>
-     <a class="dars-link" href="#dars-components-documentation" id="link_248" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
+     <a class="dars-link" href="#dars-components-documentation" id="link_249" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
       Components
      </a>
-     <a class="dars-link" href="#custom-components-in-dars-framework" id="link_249" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
+     <a class="dars-link" href="#custom-components-in-dars-framework" id="link_250" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
       Custom Components
      </a>
-     <a class="dars-link" href="#events-in-dars" id="link_250" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
+     <a class="dars-link" href="#events-in-dars" id="link_251" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
       Events
      </a>
-     <a class="dars-link" href="#dars-exporter-documentation" id="link_251" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
+     <a class="dars-link" href="#dars-exporter-documentation" id="link_252" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
       Exporter
      </a>
-     <a class="dars-link" href="#dars-script-system" id="link_252" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
+     <a class="dars-link" href="#dars-script-system" id="link_253" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
       Scripts
      </a>
-     <a class="dars-link" href="#dars-cli-reference" id="link_253" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
+     <a class="dars-link" href="#dars-cli-reference" id="link_254" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
       Dars CLI
      </a>
     </div>
    </div>
-   <div class="dars-container" id="container_254" style="background-color: #1e2b23; margin-top: auto">
-    <div class="dars-container" id="container_255" style="text-align: center; padding: 30px 20px; border-top: 1px solid #304635">
-     <span class="dars-text" id="text_256" style="color: #b2ffe5; display: inline; margin-right: 5px">
+   <div class="dars-container" id="container_255" style="background-color: #1e2b23; margin-top: auto">
+    <div class="dars-container" id="container_256" style="text-align: center; padding: 30px 20px; border-top: 1px solid #304635">
+     <span class="dars-text" id="text_257" style="color: #b2ffe5; display: inline; margin-right: 5px">
       Created with
      </span>
-     <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework" id="link_257" style="color: #00d68f; text-decoration: none; font-weight: bold; display: inline" target="_self">
+     <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework" id="link_258" style="color: #00d68f; text-decoration: none; font-weight: bold; display: inline" target="_self">
       Dars Framework
      </a>
-     <span class="dars-text" id="text_258" style="color: #b2ffe5; display: inline; margin: 0 5px">
+     <span class="dars-text" id="text_259" style="color: #b2ffe5; display: inline; margin: 0 5px">
       • Documentation:
      </span>
-     <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework/blob/CrystalMain/dars/docs/getting_started.md" id="link_259" style="color: #00d68f; text-decoration: none; font-weight: bold; display: inline" target="_self">
+     <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework/blob/CrystalMain/dars/docs/getting_started.md" id="link_260" style="color: #00d68f; text-decoration: none; font-weight: bold; display: inline" target="_self">
       Getting Started
      </a>
-     <span class="dars-text" id="text_260" style="color: #b2ffe5; display: inline; margin: 0 5px">
+     <span class="dars-text" id="text_261" style="color: #b2ffe5; display: inline; margin: 0 5px">
       • Developer:
      </span>
-     <a class="dars-link" href="https://github.com/ZtaMDev" id="link_261" style="color: #00d68f; text-decoration: none; font-weight: bold; display: inline" target="_self">
+     <a class="dars-link" href="https://github.com/ZtaMDev" id="link_262" style="color: #00d68f; text-decoration: none; font-weight: bold; display: inline" target="_self">
       ZtaDev
      </a>
     </div>
    </div>
   </div>
   <script src="vdom_tree_documentation.js">
+  </script>
+  <script data-dars-lib="" defer="" src="lib/dars.min.js" type="module">
   </script>
   <script src="runtime_dars_documentation.js">
   </script>

@@ -34,3 +34,5 @@ Sugerencias_para_el_Framework_Dars.md
 RELEASE_NOTES_1_0_5.md
 uploadPypiScript.py
 .pydep
+test/
+myapp/
