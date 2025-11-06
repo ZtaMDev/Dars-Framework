@@ -278,7 +278,7 @@ class App:
 
             # export inicial desde el root usando la instancia actual (self)
             with pushd(project_root):
-                exporter.export(self, preview_dir, bundle=True)
+                exporter.export(self, preview_dir, bundle=False)
 
             url = f"http://localhost:{port}"
             app_title = getattr(self, 'title', 'Dars App')
@@ -391,7 +391,7 @@ class App:
                                     return
 
                                 # Exportar la nueva instancia
-                                exporter.export(new_app, preview_dir, bundle=True)
+                                exporter.export(new_app, preview_dir, bundle=False)
 
                             (console.print("[green]App reloaded and re-exported successfully.[/green]")
                             if console else print("[Dars] App reloaded and re-exported successfully."))

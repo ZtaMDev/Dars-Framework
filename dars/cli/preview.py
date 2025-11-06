@@ -7,6 +7,7 @@ import os
 import sys
 import webbrowser
 import http.server
+import mimetypes
 import socketserver
 import threading
 import time
@@ -31,8 +32,11 @@ class PreviewServer:
             self.send_header('Access-Control-Allow-Origin', '*')
             super().end_headers()
         def guess_type(self, path):
-            if path.endswith('sw.js'):
+            # Ensure correct MIME types for JS modules and JSON
+            if path.endswith('.mjs') or path.endswith('.js'):
                 return 'application/javascript'
+            if path.endswith('.json'):
+                return 'application/json'
             return super().guess_type(path)
         def log_request(self, code='-', size='-'):
             """Silencia logs para peticiones frecuentes del hot-reload (version.txt)."""
@@ -58,6 +62,13 @@ class PreviewServer:
             os.chdir(self.directory)
             
             # Create the server
+            # Register mimetypes for strict module loading
+            try:
+                mimetypes.add_type('application/javascript', '.js')
+                mimetypes.add_type('application/javascript', '.mjs')
+                mimetypes.add_type('application/json', '.json')
+            except Exception:
+                pass
             handler = self.DarsRequestHandler
             self.server = socketserver.TCPServer(("", self.port), handler)
             

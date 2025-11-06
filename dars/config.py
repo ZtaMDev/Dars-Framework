@@ -9,7 +9,7 @@ DEFAULT_CONFIG = {
     "publicDir": None,  # autodetect if None: prefers ./public then ./assets
     "include": [],
     "exclude": ["**/__pycache__", ".git", ".venv", "node_modules"],
-    "bundle": False,
+    "bundle": True,
 }
 
 CONFIG_FILENAME = "dars.config.json"

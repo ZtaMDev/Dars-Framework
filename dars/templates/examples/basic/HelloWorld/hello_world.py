@@ -49,7 +49,7 @@ index = Page(
         'font-family': 'Arial, sans-serif'
     }
 ) 
-
+index.attr()
 app.add_page("index", index, title="Hello World", index=True)
 
 if __name__ == "__main__":

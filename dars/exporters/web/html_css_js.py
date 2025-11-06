@@ -54,6 +54,17 @@ class HTMLCSSJSExporter(Exporter):
             else:
                 project_root = os.path.dirname(os.path.abspath(app_source))
 
+            # --- Escribir librería de reactividad (dars.min.js) embebida ---
+            try:
+                lib_dir = os.path.join(output_path, 'lib')
+                os.makedirs(lib_dir, exist_ok=True)
+                dest_js = os.path.join(lib_dir, 'dars.min.js')
+                from dars.js_lib import DARS_MIN_JS
+                with open(dest_js, 'w', encoding='utf-8') as f:
+                    f.write(DARS_MIN_JS)
+            except Exception:
+                pass
+
             # --- Cargar configuración si existe y copiar public/assets ---
             try:
                 cfg, cfg_found = load_config(project_root)
@@ -188,7 +199,7 @@ class HTMLCSSJSExporter(Exporter):
                     
                     # Generar script.js específico para esta página
                     # Preparar y copiar scripts: combinados + externos
-                    combined_js, external_srcs = self._prepare_page_scripts(page_scripts, output_path, project_root)
+                    combined_js, external_srcs, combined_is_module = self._prepare_page_scripts(page_scripts, output_path, project_root)
 
                     if index_page is not None and page is index_page:
                         # Página index
@@ -196,7 +207,8 @@ class HTMLCSSJSExporter(Exporter):
                         html_content = self.generate_html(page_app, css_file="styles.css",
                                                         script_file="script.js",
                                                         runtime_file="runtime_dars.js",
-                                                        extra_script_srcs=external_srcs, bundle=bundle, vdom_script=vdom_name)
+                                                        extra_script_srcs=external_srcs, bundle=bundle, vdom_script=vdom_name,
+                                                        script_is_module=combined_is_module)
                         filename = "index.html"
                     else:
                         # Otras páginas
@@ -205,7 +217,8 @@ class HTMLCSSJSExporter(Exporter):
                         html_content = self.generate_html(page_app, css_file="styles.css",
                                                         script_file=script_name,
                                                         runtime_file=runtime_name,
-                                                        extra_script_srcs=external_srcs, bundle=bundle, vdom_script=vdom_name)
+                                                        extra_script_srcs=external_srcs, bundle=bundle, vdom_script=vdom_name,
+                                                        script_is_module=combined_is_module)
                         filename = f"{slug}.html"
                     
                     # Mejorar formato HTML si es posible
@@ -222,7 +235,7 @@ class HTMLCSSJSExporter(Exporter):
                 self.write_file(os.path.join(output_path, "runtime_dars.js"), runtime_js)
                 
                 user_scripts = list(getattr(app, 'scripts', []))
-                combined_js, external_srcs = self._prepare_page_scripts(user_scripts, output_path, project_root)
+                combined_js, external_srcs, combined_is_module = self._prepare_page_scripts(user_scripts, output_path, project_root)
                 self.write_file(os.path.join(output_path, "script.js"), combined_js)
                 # Generar VDOM Tree JS (externo) para single-page
                 try:
@@ -237,7 +250,8 @@ class HTMLCSSJSExporter(Exporter):
                 html_content = self.generate_html(app, css_file="styles.css",
                                                 script_file="script.js",
                                                 runtime_file="runtime_dars.js",
-                                                extra_script_srcs=external_srcs, bundle=bundle, vdom_script=vdom_name)
+                                                extra_script_srcs=external_srcs, bundle=bundle, vdom_script=vdom_name,
+                                                script_is_module=combined_is_module)
                 soup = BeautifulSoup(html_content, "html.parser")
                 html_content = soup.prettify()
                 
@@ -259,7 +273,14 @@ class HTMLCSSJSExporter(Exporter):
             # Generar archivos PWA si está habilitado
             if getattr(app, 'pwa_enabled', False):
                 self._generate_pwa_files(app, output_path)
-            
+
+            # Limpiar bootstrap de estado para evitar duplicados en siguientes exports
+            try:
+                from dars.core.state import STATE_BOOTSTRAP
+                if isinstance(STATE_BOOTSTRAP, list):
+                    STATE_BOOTSTRAP.clear()
+            except Exception:
+                pass
 
             return True
         except Exception as e:
@@ -443,7 +464,8 @@ self.addEventListener('fetch', event => {
         - strings -> treated as inline code
         """
         combined_lines = []
-        external_srcs = []
+        external_srcs = []  # list of tuples (src, is_module)
+        combined_is_module = False
         import shutil
 
         for script in scripts or []:
@@ -453,6 +475,11 @@ self.addEventListener('fetch', event => {
                     code = script.get_code()
                     if code:
                         combined_lines.append(f"// Script: {getattr(script, '__class__', type(script)).__name__}\n{code.strip()}\n")
+                        try:
+                            if getattr(script, 'module', False):
+                                combined_is_module = True
+                        except Exception:
+                            pass
                     continue
             except Exception:
                 pass
@@ -460,10 +487,13 @@ self.addEventListener('fetch', event => {
             # Dict fallback
             if isinstance(script, dict):
                 stype = script.get('type', '').lower()
+                is_module = bool(script.get('module'))
                 if stype == 'inline' or ('code' in script and not stype):
                     code = script.get('code') or script.get('value') or ''
                     if code:
                         combined_lines.append(f"// Inline dict script\n{code.strip()}\n")
+                        if is_module:
+                            combined_is_module = True
                     continue
                 if stype == 'file' or 'path' in script:
                     path = script.get('path') or script.get('src') or script.get('value')
@@ -475,18 +505,20 @@ self.addEventListener('fetch', event => {
                             dest_path = os.path.join(output_path, dest_name)
                             try:
                                 shutil.copy2(src_path, dest_path)
-                                external_srcs.append(dest_name)
+                                external_srcs.append((dest_name, is_module))
                             except Exception:
                                 pass
                         else:
                             # si no existe en disco, asumimos que es una URL o ya accesible: usar tal cual
-                            external_srcs.append(path)
+                            external_srcs.append((path, is_module))
                     continue
                 # Otros dicts con code
                 if 'code' in script:
                     code = script.get('code')
                     if code:
                         combined_lines.append(f"// Inline dict script\n{code.strip()}\n")
+                        if is_module:
+                            combined_is_module = True
                     continue
 
             # String -> inline code
@@ -511,11 +543,23 @@ self.addEventListener('fetch', event => {
                     dest_path = os.path.join(output_path, dest_name)
                     try:
                         shutil.copy2(src_path, dest_path)
-                        external_srcs.append(dest_name)
+                        is_module = False
+                        try:
+                            if getattr(script, 'module', False):
+                                is_module = True
+                        except Exception:
+                            pass
+                        external_srcs.append((dest_name, is_module))
                     except Exception:
                         pass
                 else:
-                    external_srcs.append(path)
+                    is_module = False
+                    try:
+                        if getattr(script, 'module', False):
+                            is_module = True
+                    except Exception:
+                        pass
+                    external_srcs.append((path, is_module))
                 continue
 
             # Si no sabemos qué es, intentar str() y añadir como inline (fallback)
@@ -528,7 +572,7 @@ self.addEventListener('fetch', event => {
 
         combined_js = "// Scripts específicos de esta página (combinados)\n" + "\n".join(combined_lines)
 
-        return combined_js, external_srcs
+        return combined_js, external_srcs, combined_is_module
     def _generate_combined_script_js(self, scripts):
         """Deprecated internal wrapper: usa _prepare_page_scripts sin copiar archivos.
            Conserva compatibilidad devolviendo solo el combined JS (sin external refs)."""
@@ -536,7 +580,7 @@ self.addEventListener('fetch', event => {
         return combined_js
 
     def generate_html(self, app: App, css_file: str = "styles.css", 
-                 script_file: str = "script.js", runtime_file: str = "runtime_dars.js", extra_script_srcs: list = None, bundle: bool = False, vdom_script: str = "vdom_tree.js") -> str:
+                 script_file: str = "script.js", runtime_file: str = "runtime_dars.js", extra_script_srcs: list = None, bundle: bool = False, vdom_script: str = "vdom_tree.js", script_is_module: bool = False) -> str:
         """Genera el contenido HTML con todas las propiedades de la aplicación"""
         body_content = ""
         from dars.components.basic.container import Container
@@ -565,9 +609,47 @@ self.addEventListener('fetch', event => {
         # Construir string de scripts externos (extra_script_srcs)
         extra_scripts_html = ""
         if extra_script_srcs:
-            for src in extra_script_srcs:
-                # si es ruta absoluta o URL la dejamos tal cual; si es solo nombre lo usamos relativo
-                extra_scripts_html += f'    <script src="{src}"></script>\n'
+            for item in extra_script_srcs:
+                # item can be string (backward compat) or tuple (src, is_module)
+                if isinstance(item, tuple):
+                    src, is_module = item
+                else:
+                    src, is_module = item, False
+                type_attr = ' type="module"' if is_module else ''
+                extra_scripts_html += f'    <script src="{src}"{type_attr}></script>\n'
+        # Incluir dars.min.js (ESM) antes de runtime/script
+        dars_lib_tag = '<script type="module" src="lib/dars.min.js" defer data-dars-lib></script>'
+
+        # State bootstrap: emit JSON + module to register states if present
+        bootstrap_json_tag = ""
+        bootstrap_init_tag = ""
+        try:
+            from dars.core.state import STATE_BOOTSTRAP
+            if STATE_BOOTSTRAP:
+                import json as _json
+                bootstrap_json = _json.dumps(STATE_BOOTSTRAP, ensure_ascii=False)
+                bootstrap_json_tag = f'<script type="application/json" id="dars-state-bootstrap">{bootstrap_json}</script>'
+                # Module that registers the states using ESM if available, else fallback to global
+                bootstrap_init_tag = (
+                    "<script type=\"module\">\n"
+                    "(async () => {\n"
+                    "  if (window.__DARS_STATE_BOOTSTRAPPED__) return;\n"
+                    "  const el = document.getElementById('dars-state-bootstrap');\n"
+                    "  if (!el) { window.__DARS_STATE_BOOTSTRAPPED__ = true; return; }\n"
+                    "  const arr = JSON.parse(el.textContent||'[]');\n"
+                    "  try {\n"
+                    "    const m = await import('./lib/dars.min.js');\n"
+                    "    const reg = m.registerState || (m.default && m.default.registerState);\n"
+                    "    if (typeof reg === 'function') { arr.forEach(s => reg(s.name, s)); }\n"
+                    "  } catch (e) {\n"
+                    "    const D = window.Dars; if (D && typeof D.registerState==='function') { arr.forEach(s => D.registerState(s.name, s)); }\n"
+                    "  }\n"
+                    "  window.__DARS_STATE_BOOTSTRAPPED__ = true;\n"
+                    "})();\n"
+                    "</script>"
+                )
+        except Exception:
+            pass
 
         # Derivar nombres para hot-reload incremental (opcional)
         def _derive_snapshot_and_version(runtime_name: str):
@@ -599,7 +681,10 @@ self.addEventListener('fetch', event => {
     {body_content}
     <script src=\"{vdom_script}\"></script>
     {version_vars_html}
-    <script src=\"{runtime_file}\"></script>\n{extra_scripts_html}    <script src=\"{script_file}\"></script>
+    {bootstrap_json_tag}
+    {dars_lib_tag}
+    {bootstrap_init_tag}
+    <script src=\"{runtime_file}\"></script>\n{extra_scripts_html}    <script src=\"{script_file}\"{' type=\"module\"' if script_is_module else ''}></script>
 </body>
 </html>"""
 
@@ -1742,8 +1827,15 @@ body {
     currentSnapshot = snapshot;
     try{ window.__DARS_VDOM__ = snapshot; }catch(_){ /* ignore */ }
 
-    // Delegar eventos comunes (se puede extender)
-    ['click','input','change','submit'].forEach(ev => delegate(ev, document));
+    // Delegar eventos comunes (extendido)
+    const delegated = [
+      'click','dblclick',
+      'mousedown','mouseup','mouseenter','mouseleave','mousemove',
+      'keydown','keyup','keypress',
+      'change','input','submit',
+      'focus','blur'
+    ];
+    delegated.forEach(ev => delegate(ev, document));
   }
 
   function startHotReload(){

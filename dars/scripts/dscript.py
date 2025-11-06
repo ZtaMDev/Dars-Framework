@@ -6,8 +6,8 @@ class dScript(Script):
     Script that can be defined as inline (JS code in string) or as a reference to an external file.
     Only one of the two must be present.
     """
-    def __init__(self, code: Optional[str] = None, file_path: Optional[str] = None, target_language: str = "javascript"):
-        super().__init__(target_language)
+    def __init__(self, code: Optional[str] = None, file_path: Optional[str] = None, target_language: str = "javascript", module: bool = False):
+        super().__init__(target_language, module=module)
         if (code is None and file_path is None) or (code is not None and file_path is not None):
             raise ValueError("You have to specify only one: 'code' (inline) or 'file_path' (external), but not both.")
         self.code = code

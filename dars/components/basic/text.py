@@ -8,9 +8,10 @@ class Text(Component):
         text: str = "", 
         id: Optional[str] = None, 
         class_name: Optional[str] = None, 
-        style: Optional[Dict[str, Any]] = None
+        style: Optional[Dict[str, Any]] = None,
+        **props
     ):
-        super().__init__(id=id, class_name=class_name, style=style)
+        super().__init__(id=id, class_name=class_name, style=style, **props)
         self.text = text
 
     def render(self, exporter: Any) -> str:

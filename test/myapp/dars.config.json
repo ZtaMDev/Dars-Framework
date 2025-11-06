@@ -1,0 +1,14 @@
+{
+  "entry": "main.py",
+  "format": "html",
+  "outdir": "dist",
+  "publicDir": null,
+  "include": [],
+  "exclude": [
+    "**/__pycache__",
+    ".git",
+    ".venv",
+    "node_modules"
+  ],
+  "bundle": false
+}

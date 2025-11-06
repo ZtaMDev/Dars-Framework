@@ -9,9 +9,10 @@ class Container(Component):
         id: Optional[str] = None, 
         class_name: Optional[str] = None, 
         style: Optional[Dict[str, Any]] = None,
-        additional_children: Optional[List[Component]] = None
+        additional_children: Optional[List[Component]] = None,
+        **props
     ):
-        super().__init__(id=id, class_name=class_name, style=style)
+        super().__init__(id=id, class_name=class_name, style=style, **props)
         
         # Agregar hijos pasados como argumentos posicionales
         for child in children:

@@ -527,14 +527,12 @@ def create_parser() -> argparse.ArgumentParser:
     """Creates the command line argument parser"""
     parser = argparse.ArgumentParser(
         description=translator.get('main_description'),
-        formatter_class=RichHelpFormatter,
-        epilog=""  # Remove epilog to avoid duplication
+        formatter_class=argparse.HelpFormatter,
+        epilog=""
     )
     parser.add_argument('-v', '--version', action='store_true', help='Show Dars version and release link')
     
-    # Add language parameter to the main parser
-    parser.add_argument('--lang', '-l', choices=['en', 'es'], default='en',
-                      help=translator.get('lang_help'))
+    # English-only: no language flag
     
     subparsers = parser.add_subparsers(dest='command', help=translator.get('available_commands'))
     
@@ -600,10 +598,11 @@ def create_parser() -> argparse.ArgumentParser:
     cfg_subparsers = config_parser.add_subparsers(dest='config_command')
     cfg_validate = cfg_subparsers.add_parser('validate', help='Validate dars.config.json in a project')
     cfg_validate.add_argument('--project', '-p', default='.', help='Project root (default: .)')
-    # Add language option to all subparsers
-    for subparser in [export_parser, info_parser, formats_parser, preview_parser, init_parser, build_parser, config_parser, cfg_validate]:
-        subparser.add_argument('--lang', '-l', choices=['en', 'es'], default='en',
-                              help=translator.get('lang_help'))
+
+    # Dev command (run entry in dev mode)
+    dev_parser = subparsers.add_parser('dev', help='Run the configured entry file in development mode')
+    dev_parser.add_argument('--project', '-p', default='.', help='Project root where dars.config.json resides (default: .)')
+    # English-only: no language option on subparsers
     
     return parser
 
@@ -725,42 +724,13 @@ def list_templates_detailed():
     console.print(table)
 def main():
     """Main CLI function"""
-    # Check for language parameter before parsing arguments
-    # If --lang is not specified, it will use the saved preference or default to English
-    for i, arg in enumerate(sys.argv):
-        if arg in ['--lang', '-l'] and i + 1 < len(sys.argv):
-            lang = sys.argv[i + 1]
-            if lang in ['en', 'es']:
-                # Save the language preference when explicitly specified
-                translator.set_language(lang, save=True)
+    # English-only: no language parameter pre-scan
     
-    # Intercept help before parsing arguments
+    # Intercept help before parsing arguments - print simple help without panels
     if len(sys.argv) == 1 or '-h' in sys.argv or '--help' in sys.argv:
         parser = create_parser()
-        
-        # Show banner
-        console.print(Panel(
-            Text("Dars Exporter", style="bold cyan", justify="center"),
-            subtitle=translator.get('main_description'),
-            border_style="cyan"
-        ))
-        
-        # If it's general help
-        if len(sys.argv) == 1 or (len(sys.argv) == 2 and (sys.argv[1] == '-h' or sys.argv[1] == '--help')):
-            RichHelpFormatter.rich_print_help(parser)
-            return
-        
-        # If it's help for a subcommand
-        if len(sys.argv) > 2 and (sys.argv[2] == '-h' or sys.argv[2] == '--help'):
-            subcommand = sys.argv[1]
-            # Get the corresponding subparser
-            subparsers_actions = [action for action in parser._actions 
-                                if isinstance(action, argparse._SubParsersAction)]
-            for subparsers_action in subparsers_actions:
-                for choice, subparser in subparsers_action.choices.items():
-                    if choice == subcommand:
-                        RichHelpFormatter.rich_print_help(subparser)
-                        return
+        parser.print_help()
+        return
     
     # Continue with normal flow if not help
     parser = create_parser()
@@ -775,12 +745,7 @@ def main():
         print_version_info()
         sys.exit(0)
 
-    # Show banner for normal commands
-    console.print(Panel(
-        Text("Dars Exporter", style="bold cyan", justify="center"),
-        subtitle=translator.get('cli_subtitle'),
-        border_style="cyan"
-    ))
+    # No banner for normal commands; keep output minimal
     
     exporter = DarsExporter()
     
@@ -825,6 +790,7 @@ def main():
             console.print(f"[red]{translator.get('error_output_create')}: {outdir} -> {e}[/red]")
             sys.exit(1)
 
+        ensure_dars_lib(project_root)
         success = exporter.export_app(app, args.format, outdir, args.preview)
         sys.exit(0 if success else 1)
         
@@ -849,6 +815,7 @@ def main():
             project_root = os.path.abspath(target_dir)
             os.makedirs(project_root, exist_ok=True)
             write_default_config(project_root, overwrite=False)
+            ensure_dars_lib(project_root)
             console.print("[green]✔ dars.config.json created/updated[/green]")
         elif not args.name:
             console.print("[red]Error: Project name is required[/red]")
@@ -885,6 +852,7 @@ def main():
             console.print(f"[red]{translator.get('error_output_create')}: {outdir} -> {e}[/red]")
             sys.exit(1)
 
+        ensure_dars_lib(project_root)
         app = exporter.load_app_from_file(entry)
         if app is None:
             sys.exit(1)
@@ -1013,9 +981,57 @@ def main():
                     RichHelpFormatter.rich_print_help(subparsers_action.choices['config'])
                     return
 
+    elif args.command == 'dev':
+        # Resolve project and config
+        project_root = os.path.abspath(getattr(args, 'project', '.'))
+        cfg, found = load_config(project_root)
+        if not found:
+            console.print("[yellow][Dars] Warning: dars.config.json not found. Run 'dars init --update' to create it.[/yellow]")
+        resolved = resolve_paths(cfg, project_root)
+        entry = resolved.get('entry_abs') or os.path.join(project_root, cfg.get('entry', 'main.py'))
+
+        if not os.path.exists(entry):
+            console.print(f"[red]{translator.get('error_entry_not_found_in_config')}: {entry}[/red]")
+            console.print(f"[yellow]{translator.get('edit_config_hint')}[/yellow]")
+            sys.exit(1)
+
+        # Ensure dars.min.js exists in project
+        ensure_dars_lib(project_root)
+        # Run entry in development mode (the entry typically calls app.rTimeCompile())
+        import subprocess
+        process = None
+        try:
+            console.print(f"[cyan]Running dev: {entry}[/cyan]")
+            process = subprocess.Popen([sys.executable, entry], cwd=os.path.dirname(entry))
+            process.wait()
+            sys.exit(process.returncode or 0)
+        except KeyboardInterrupt:
+            if process:
+                process.terminate()
+                process.wait()
+            sys.exit(0)
+        except Exception as e:
+            console.print(f"[red]Failed to start dev process: {e}[/red]")
+            sys.exit(1)
+
     else:
-        # Usar nuestro formateador personalizado en lugar del estándar
-        RichHelpFormatter.rich_print_help(parser)
+        # Fallback: print plain help
+        parser.print_help()
+
+# Utility: ensure lib/dars.min.js exists at project root (no overwrite)
+def ensure_dars_lib(project_root: str):
+    try:
+        os.makedirs(os.path.join(project_root, 'lib'), exist_ok=True)
+        dest = os.path.join(project_root, 'lib', 'dars.min.js')
+        if not os.path.exists(dest):
+            try:
+                from dars.js_lib import DARS_MIN_JS
+                with open(dest, 'w', encoding='utf-8') as fdst:
+                    fdst.write(DARS_MIN_JS)
+            except Exception:
+                pass
+    except Exception:
+        pass
 
 if __name__ == "__main__":
     main()

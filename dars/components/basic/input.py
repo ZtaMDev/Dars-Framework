@@ -23,9 +23,10 @@ class Input(Component):
         on_focus: Optional[Callable] = None,
         on_blur: Optional[Callable] = None,
         on_key_down: Optional[Callable] = None,
-        on_key_up: Optional[Callable] = None
+        on_key_up: Optional[Callable] = None,
+        **props
     ):
-        super().__init__(id=id, class_name=class_name, style=style)
+        super().__init__(id=id, class_name=class_name, style=style, **props)
         self.value = value
         self.placeholder = placeholder
         self.input_type = input_type

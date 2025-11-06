@@ -27,7 +27,7 @@
     "dars": "dars.cli.main:main"
   },
   "pyproject": {
+    "_raw": "license = 'MIT'\nreadme = 'README.md'\n\n[tool.setuptools.packages.find]\ninclude = ['dars*']\nexclude = ['LandingPage*']\n"
   },
-  "_raw": "license = { file = 'LICENSE' } \n readme = 'README.md' \n",
   "useGlobalDeps": true
 }

@@ -1,5 +1,6 @@
 from typing import Dict, Any, List, Optional, Callable, Union, Type
 from abc import ABC, abstractmethod
+from dars.core.events import EventTypes
 
 class ComponentQuery:
     def __init__(self, components: List['Component']):
@@ -83,6 +84,43 @@ class Component(ABC):
         self.events: Dict[str, Callable] = {}
         # Stable identity hint for children reconciliation in VDOM (optional)
         self.key: Optional[str] = props.get('key')
+
+        # Generic on_* props -> register as events on any component
+        if props:
+            on_map = {
+                'on_click': EventTypes.CLICK,
+                'on_double_click': EventTypes.DOUBLE_CLICK,
+                'on_mouse_down': EventTypes.MOUSE_DOWN,
+                'on_mouse_up': EventTypes.MOUSE_UP,
+                'on_mouse_enter': EventTypes.MOUSE_ENTER,
+                'on_mouse_leave': EventTypes.MOUSE_LEAVE,
+                'on_mouse_move': EventTypes.MOUSE_MOVE,
+                'on_key_down': EventTypes.KEY_DOWN,
+                'on_key_up': EventTypes.KEY_UP,
+                'on_key_press': EventTypes.KEY_PRESS,
+                'on_change': EventTypes.CHANGE,
+                'on_input': EventTypes.INPUT,
+                'on_submit': EventTypes.SUBMIT,
+                'on_focus': EventTypes.FOCUS,
+                'on_blur': EventTypes.BLUR,
+                'on_load': EventTypes.LOAD,
+                'on_error': EventTypes.ERROR,
+                'on_resize': EventTypes.RESIZE,
+            }
+            for k, v in list(props.items()):
+                if k in on_map and v is not None:
+                    handler = v
+                    # Normalize handler to Script-like if possible
+                    try:
+                        from dars.scripts.script import Script
+                        if not isinstance(handler, Script):
+                            if callable(handler):
+                                from dars.scripts.dscript import dScript
+                                handler = dScript(handler.__code__)
+                    except Exception:
+                        # Best-effort: keep as-is (string or callable)
+                        pass
+                    self.set_event(on_map[k], handler)
         
     def add_child(self, child: 'Component'):
         if isinstance(child, type) and issubclass(child, Component):
@@ -145,6 +183,13 @@ class Component(ABC):
         """
 
         if attrs:
+            if 'defer' in attrs:
+                try:
+                    d = attrs.pop('defer')
+                    if d:
+                        return DeferredAttr(self, attrs)
+                except Exception:
+                    pass
             for key, value in attrs.items():
                 if key == 'style':
                     self.style.update(value)
@@ -155,6 +200,41 @@ class Component(ABC):
                 elif key == 'events':
                     self.events.update(value)
                     continue
+                # Allow setting on_* event properties via attr()
+                if key.startswith('on_') and value is not None:
+                    try:
+                        event_name = {
+                            'on_click': EventTypes.CLICK,
+                            'on_double_click': EventTypes.DOUBLE_CLICK,
+                            'on_mouse_down': EventTypes.MOUSE_DOWN,
+                            'on_mouse_up': EventTypes.MOUSE_UP,
+                            'on_mouse_enter': EventTypes.MOUSE_ENTER,
+                            'on_mouse_leave': EventTypes.MOUSE_LEAVE,
+                            'on_mouse_move': EventTypes.MOUSE_MOVE,
+                            'on_key_down': EventTypes.KEY_DOWN,
+                            'on_key_up': EventTypes.KEY_UP,
+                            'on_key_press': EventTypes.KEY_PRESS,
+                            'on_change': EventTypes.CHANGE,
+                            'on_input': EventTypes.INPUT,
+                            'on_submit': EventTypes.SUBMIT,
+                            'on_focus': EventTypes.FOCUS,
+                            'on_blur': EventTypes.BLUR,
+                            'on_load': EventTypes.LOAD,
+                            'on_error': EventTypes.ERROR,
+                            'on_resize': EventTypes.RESIZE,
+                        }.get(key)
+                        if event_name:
+                            handler = value
+                            from dars.scripts.script import Script
+                            if not isinstance(handler, Script):
+                                if callable(handler):
+                                    from dars.scripts.dscript import dScript
+                                    handler = dScript(handler.__code__)
+                            self.set_event(event_name, handler)
+                            continue
+                    except Exception:
+                        # If any error, fall back to setting as a prop
+                        pass
                 if hasattr(self, key):
                     setattr(self, key, value)
                 else:
@@ -167,6 +247,28 @@ class Component(ABC):
         d['style'] = self.style
         d['events'] = self.events
         return d
+
+    def mod(self, **attrs):
+        return DeferredAttr(self, attrs)
+
+
+class DeferredAttr:
+    def __init__(self, component: 'Component', attrs: Dict[str, Any]):
+        self.component = component
+        self.attrs = attrs or {}
+
+    def clone_with(self) -> 'Component':
+        try:
+            import copy
+            clone = copy.copy(self.component)
+        except Exception:
+            clone = self.component
+        try:
+            if hasattr(clone, 'attr') and callable(getattr(clone, 'attr')):
+                clone.attr(**self.attrs)
+        except Exception:
+            pass
+        return clone
 
     def render_children(self, exporter: 'Exporter') -> str:
         """Render all children of the component using the exporter."""
