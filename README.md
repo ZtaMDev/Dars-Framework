@@ -68,6 +68,41 @@ if __name__ == "__main__":
 
 ```
 
+---
+
+## Reactivity and State System
+
+**Dars Framework** includes a built-in **reactive state system** (`dState` / `cState`) that allows dynamic and modular DOM updates directly from Python.
+It enables fully event-driven interfaces without requiring manual JavaScript.
+
+### Key Concepts
+
+* **`dState(name, component, states)`**
+  Creates a reactive state controller bound to a specific component and a list of possible states.
+
+* **`cState(idx, mods=[...])`**
+  Defines rules (modifications) that are automatically applied when entering a specific state.
+
+* **`Mod` Helpers**
+  A compact way to modify DOM elements on state changes: `inc`, `dec`, `set`, `toggle_class`, `append_text`, `prepend_text`, `goto`, and more.
+
+* **Deferred Mutations**
+  Using `component.attr(..., defer=True)` or `component.mod(...)` inside a `cComp=True` state defers HTML updates until an event occurs, preventing authoring-time mutations.
+
+### Example Template
+
+A complete example demonstrating `dState`, `cState`, `Mod`, and deferred updates is available [here](https://github.com/ZtaMDev/Dars-Framework/blob/CrystalMain/dars/templates/examples/advanced/dState/state_mods_demo.py)
+
+### Features
+
+* Reactive Mod system with compact `Mod` helpers
+* Unified event model — any component can use `on_*` props (`on_click`, `on_input`, `on_change`, etc.)
+* Deferred rendering for safer, predictable state transitions (`cComp=True`)
+* Navigation between states using `goto`, including relative moves (`'+1'`, `'-1'`)
+* Consistent, event-time mutation flow for reliable behavior
+
+---
+
 ## CLI Usage
 | Command                                 | What it does                               |
 |-----------------------------------------|--------------------------------------------|
