@@ -93,6 +93,10 @@ It enables fully event-driven interfaces without requiring manual JavaScript.
 
 A complete example demonstrating `dState`, `cState`, `Mod`, and deferred updates is available [here](https://github.com/ZtaMDev/Dars-Framework/blob/CrystalMain/dars/templates/examples/advanced/dState/state_mods_demo.py)
 
+<img width="384" height="187" alt="imagen" src="https://github.com/user-attachments/assets/7750ee7f-768f-48da-94df-2fa00339a99c" /> <img width="361" height="215" alt="imagen" src="https://github.com/user-attachments/assets/9b8a3e67-2424-49b4-aee0-9f1c0f747d66" />
+
+
+
 ### Features
 
 * Reactive Mod system with compact `Mod` helpers
