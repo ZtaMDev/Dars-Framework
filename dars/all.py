@@ -53,7 +53,7 @@ from dars.dars_tests import *
 from dars.dars_tests.run_tests import run_app_tests, run_unit_tests, main
 # CLI (optional, for advanced usage)
 # from dars.cli.main import main as dars_cli_main
-from dars.core.state import *
+from dars.core.state import dState, Mod
 
 __all__ = [
     'App', 'Component', 'EventManager',
@@ -65,5 +65,5 @@ __all__ = [
     'EventTypes', 'EventHandler', 'EventEmitter', 'EventManager', 'Markdown',
     '__version__',
     'run_app_tests', 'run_unit_tests', 'main',
-    'dState', 'cState', 'Mod', 'state', 'goto', 'mods',
+    'dState', 'Mod',
 ]

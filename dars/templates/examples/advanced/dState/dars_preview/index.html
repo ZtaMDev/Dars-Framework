@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="index, follow" name="robots"/>
+  <meta content="width=device-width, initial-scale=1.0, user-scalable=yes" name="viewport"/>
+  <meta content="#000000" name="theme-color"/>
+  <title>
+   State Mods Demo
+  </title>
+  <link href="" rel="icon" type="image/x-icon"/>
+  <meta content="Dars State Mods Demo" property="og:title"/>
+  <meta content="website" property="og:type"/>
+  <meta content="summary" name="twitter:card"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"/>
+  <link href="runtime_css.css" rel="stylesheet"/>
+  <link href="styles.css" rel="stylesheet"/>
+ </head>
+ <body>
+  <div class="dars-page" id="page_1">
+   <div class="dars-container wrapper" id="container_2" style="display: flex; flex-direction: column; align-items: center; padding: 40px">
+    <span class="dars-text" id="Counter" style="font-size: 48px; font-weight: bold; margin-bottom: 16px">
+     0
+    </span>
+    <span class="dars-text" id="Status" style="margin-bottom: 16px">
+     State: 0
+    </span>
+    <div class="dars-container controls" id="container_3" style="display: flex; gap: 8px">
+     <button class="dars-button" id="NextBtn" type="button">
+      Next (+1)
+     </button>
+     <button class="dars-button" id="PrevBtn" type="button">
+      Prev (-1)
+     </button>
+     <button class="dars-button" id="SwapBtn" type="button">
+      Swap HTML
+     </button>
+    </div>
+   </div>
+  </div>
+  <script src="vdom_tree.js">
+  </script>
+  <script>
+   window.__DARS_SNAPSHOT_URL = 'snapshot.json'; window.__DARS_VERSION_URL = 'version.txt';
+  </script>
+  <script id="dars-state-bootstrap" type="application/json">
+   [{"name": "counter", "id": "Counter", "states": [0, 1, 2, 3], "isCustom": false, "rules": {"1": {"mods": [{"op": "inc", "target": "Counter", "prop": "text", "by": 1}, {"op": "set", "target": "Status", "attrs": {"text": "State: 1"}}]}, "2": {"mods": [{"op": "inc", "target": "Counter", "prop": "text", "by": -1}, {"op": "set", "target": "Status", "attrs": {"text": "State: 2"}}]}, "3": {"mods": [{"op": "toggleClass", "target": "Counter", "name": "highlight"}, {"op": "appendText", "target": "Counter", "value": "!"}, {"op": "set", "target": "Status", "attrs": {"text": "State: 3"}}], "goto": 0}, "0": {"mods": [{"op": "set", "target": "Status", "attrs": {"text": "State: 0"}}]}}}]
+  </script>
+  <script data-dars-lib="" defer="" src="lib/dars.min.js" type="module">
+  </script>
+  <script type="module">
+   (async () => {
+  if (window.__DARS_STATE_BOOTSTRAPPED__) return;
+  const el = document.getElementById('dars-state-bootstrap');
+  if (!el) { window.__DARS_STATE_BOOTSTRAPPED__ = true; return; }
+  const arr = JSON.parse(el.textContent||'[]');
+  try {
+    const m = await import('./lib/dars.min.js');
+    const reg = m.registerState || (m.default && m.default.registerState);
+    if (typeof reg === 'function') { arr.forEach(s => reg(s.name, s)); }
+  } catch (e) {
+    const D = window.Dars; if (D && typeof D.registerState==='function') { arr.forEach(s => D.registerState(s.name, s)); }
+  }
+  window.__DARS_STATE_BOOTSTRAPPED__ = true;
+})();
+  </script>
+  <script src="runtime_dars.js">
+  </script>
+  <script src="script.js">
+  </script>
+ </body>
+</html>

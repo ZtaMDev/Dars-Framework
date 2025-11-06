@@ -155,10 +155,13 @@ class HTMLCSSJSExporter(Exporter):
                     runtime_name = f"runtime_dars_{slug}.js" if slug != "index" else "runtime_dars.js"
                     self.write_file(os.path.join(output_path, runtime_name), runtime_js)
                     # Generar VDOM Tree JS (externo)
+                    vdom_name = None
                     try:
                         vdom_dict = VDomBuilder(id_provider=self.get_component_id).build(page_app.root)
+                        if bundle:
+                            vdom_dict = self._obfuscate_vdom(vdom_dict)
                         import json
-                        vdom_js = "window.__DARS_VDOM__ = " + json.dumps(vdom_dict, ensure_ascii=False) + ";\n"
+                        vdom_js = "window.__DARS_VDOM__ = " + json.dumps(vdom_dict, ensure_ascii=False, separators=(",", ":")) + ";\n"
                     except Exception:
                         vdom_js = "window.__DARS_VDOM__ = { };\n"
                     vdom_name = f"vdom_tree_{slug}.js" if slug != "index" else "vdom_tree.js"
@@ -237,11 +240,14 @@ class HTMLCSSJSExporter(Exporter):
                 user_scripts = list(getattr(app, 'scripts', []))
                 combined_js, external_srcs, combined_is_module = self._prepare_page_scripts(user_scripts, output_path, project_root)
                 self.write_file(os.path.join(output_path, "script.js"), combined_js)
-                # Generar VDOM Tree JS (externo) para single-page
+                # Generar VDOM Tree JS (externo)
+                vdom_name = None
                 try:
                     vdom_dict = VDomBuilder(id_provider=self.get_component_id).build(app.root)
+                    if bundle:
+                        vdom_dict = self._obfuscate_vdom(vdom_dict)
                     import json
-                    vdom_js = "window.__DARS_VDOM__ = " + json.dumps(vdom_dict, ensure_ascii=False) + ";\n"
+                    vdom_js = "window.__DARS_VDOM__ = " + json.dumps(vdom_dict, ensure_ascii=False, separators=(",", ":")) + ";\n"
                 except Exception:
                     vdom_js = "window.__DARS_VDOM__ = { };\n"
                 vdom_name = "vdom_tree.js"
@@ -666,6 +672,10 @@ self.addEventListener('fetch', event => {
         if not bundle:
             version_vars_html = f"<script>window.__DARS_SNAPSHOT_URL = '{snapshot_name}'; window.__DARS_VERSION_URL = '{version_name}';</script>"
 
+        vdom_script_tag = ''
+        if vdom_script:
+            vdom_script_tag = f'<script src="{vdom_script}"></script>'
+
         html_template = f"""<!DOCTYPE html>
 <html lang="{app.language}">
 <head>
@@ -679,16 +689,75 @@ self.addEventListener('fetch', event => {
 </head>
 <body>
     {body_content}
-    <script src=\"{vdom_script}\"></script>
+    {vdom_script_tag}
     {version_vars_html}
     {bootstrap_json_tag}
     {dars_lib_tag}
     {bootstrap_init_tag}
-    <script src=\"{runtime_file}\"></script>\n{extra_scripts_html}    <script src=\"{script_file}\"{' type=\"module\"' if script_is_module else ''}></script>
+    <script src=\"{runtime_file}\"{' type=\"module\"' if script_is_module else ''} defer></script>\n{extra_scripts_html}    <script src=\"{script_file}\"{' type=\"module\"' if script_is_module else ''}></script>
 </body>
 </html>"""
 
         return html_template
+
+    def _obfuscate_vdom(self, vnode: dict) -> dict:
+        """Produce a minimal VDOM structure keeping events but hiding code.
+        - Keeps: type, id, key, class, text, children, events
+        - Events: { evName: {t:'i', b:'<base64>'} }
+        - Strips: style, props, any other keys
+        Recurses through children.
+        """
+        if not isinstance(vnode, dict):
+            return vnode
+        import base64
+        kept = {}
+        for k in ('type', 'id', 'key', 'class', 'text'):
+            if k in vnode:
+                kept[k] = vnode[k]
+        # Obfuscate events
+        evs = vnode.get('events') or None
+        if isinstance(evs, dict) and evs:
+            obf = {}
+            for ev, spec in evs.items():
+                try:
+                    code = None
+                    if isinstance(spec, dict):
+                        # existing shapes: {type:'inline', code:'...'} or short-forms
+                        code = spec.get('code') or spec.get('value')
+                    elif isinstance(spec, str):
+                        code = spec
+                    if code:
+                        b64 = base64.b64encode(code.encode('utf-8')).decode('ascii')
+                        obf[ev] = {'t': 'i', 'b': b64}
+                except Exception:
+                    # if anything fails, skip this event
+                    pass
+            kept['events'] = obf if obf else None
+        # Recurse children
+        ch = vnode.get('children') or []
+        if ch:
+            kept['children'] = [self._obfuscate_vdom(c) for c in ch]
+        return kept
+
+    def generate_custom_css(self, app: App) -> str:
+        """Genera solo los estilos personalizados de la aplicación"""
+        css_content = ""
+        
+        # Agregar estilos globales de la aplicación definidos por el usuario
+        for selector, styles in app.global_styles.items():
+            css_content += f"{selector} {{\n"
+            css_content += f"    {self.render_styles(styles)}\n"
+            css_content += "}\n\n"
+
+        # Agregar contenido de archivos CSS globales
+        for file_path in app.global_style_files:
+            try:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    css_content += f.read() + "\n\n"
+            except Exception as e:
+                print(f"[Dars] Warning: could not read CSS file '{file_path}': {e}")
+                
+        return css_content
 
     
     def _generate_meta_tags(self, app: App) -> str:
@@ -1593,6 +1662,29 @@ body {
     for(let i=0;i<ch.length;i++){ walk(ch[i], fn); }
   }
 
+  function _decodeCodeB64(b64){
+    try {
+      if (typeof atob === 'function') return atob(b64);
+      if (typeof Buffer !== 'undefined') { return Buffer.from(b64, 'base64').toString('utf8'); }
+    } catch(_){ }
+    return '';
+  }
+
+  function _compileHandlerFromSpec(spec){
+    try {
+      if (!spec) return null;
+      if (spec && spec.type === 'inline' && spec.code) {
+        return new Function('event', spec.code);
+      }
+      const b64 = (spec && (spec.b || spec.code_b64)) || null;
+      if (b64){
+        const code = _decodeCodeB64(b64);
+        if (code) return new Function('event', code);
+      }
+    } catch(_){ }
+    return null;
+  }
+
   function bindEventsFromVNode(snapshot){
     // Construir tabla de eventos a partir del snapshot
     walk(snapshot, (v)=>{
@@ -1600,9 +1692,8 @@ body {
         const handlers = {};
         for(const ev in v.events){
           const spec = v.events[ev];
-          if(spec && spec.type==='inline' && spec.code){
-            try { handlers[ev] = new Function('event', spec.code); } catch(err){ /* ignore compile error */ }
-          }
+          const fn = _compileHandlerFromSpec(spec);
+          if (fn) { handlers[ev] = fn; }
         }
         if(Object.keys(handlers).length){ eventMap.set(v.id, handlers); } else { eventMap.delete(v.id); }
       }
@@ -1705,9 +1796,8 @@ body {
       const handlers = {};
       for(const ev in newV.events){
         const spec = newV.events[ev];
-        if(spec && spec.type==='inline' && spec.code){
-          try { handlers[ev] = new Function('event', spec.code); } catch(err){ /* ignore compile error */ }
-        }
+        const fn = _compileHandlerFromSpec(spec);
+        if (fn) { handlers[ev] = fn; }
       }
       if(Object.keys(handlers).length){ eventMap.set(newV.id, handlers); } else { eventMap.delete(newV.id); }
     } else {

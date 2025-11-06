@@ -291,6 +291,16 @@ class DarsExporter:
                 progress.update(task2, advance=80)
                 
                 if success:
+                    # Minification step for bundle
+                    try:
+                        from dars.security import minify_output_dir
+                        task3 = progress.add_task("Applying minification (bundle)", total=100)
+                        # Run minification
+                        count = minify_output_dir(output_path)
+                        progress.update(task3, completed=100)
+                    except Exception:
+                        # Do not fail export on minification errors
+                        pass
                     progress.update(task1, completed=100)
                     progress.update(task2, completed=100)
                     

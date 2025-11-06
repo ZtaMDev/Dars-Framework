@@ -1,0 +1,676 @@
+/* Estilos base de Dars */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+/* Estilos de componentes Dars */
+.dars-container {
+    display: block;
+}
+
+.dars-text {
+    display: inline-block;
+}
+
+.dars-button {
+    display: inline-block;
+    padding: 8px 16px;
+    border: 1px solid #ccc;
+    background-color: #f8f9fa;
+    color: #333;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.dars-button:hover {
+    background-color: #e9ecef;
+}
+
+.dars-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.dars-input {
+    display: inline-block;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.dars-input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.dars-image {
+    max-width: 100%;
+    height: auto;
+}
+
+.dars-link {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.dars-link:hover {
+    text-decoration: underline;
+}
+
+.dars-textarea {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.dars-textarea:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.dars-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.dars-card h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 24px;
+    color: #333;
+}
+
+/* Table */
+.dars-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    background: white;
+}
+.dars-table th, .dars-table td {
+    border: 1px solid #ddd;
+    padding: 8px 12px;
+    text-align: left;
+}
+.dars-table th {
+    background: #f5f5f5;
+    font-weight: bold;
+}
+.dars-table tr:nth-child(even) {
+    background: #fafbfc;
+}
+
+/* Tabs */
+.dars-tabs {
+    margin-bottom: 20px;
+}
+.dars-tabs-header {
+    display: flex;
+    border-bottom: 2px solid #eee;
+    margin-bottom: 10px;
+}
+.dars-tab {
+    background: none;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    color: #555;
+    border-bottom: 2px solid transparent;
+    transition: border 0.2s, color 0.2s;
+}
+.dars-tab-active {
+    color: #007bff;
+    border-bottom: 2px solid #007bff;
+    font-weight: bold;
+}
+.dars-tab-panel {
+    display: none;
+    padding: 16px 0;
+}
+.dars-tab-panel-active {
+    display: block;
+}
+
+/* Accordion */
+.dars-accordion {
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.dars-accordion-section {
+    border-bottom: 1px solid #eee;
+}
+.dars-accordion-title {
+    padding: 14px 20px;
+    background: #f7f7f7;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+.dars-accordion-section.dars-accordion-open .dars-accordion-title {
+    background: #e9ecef;
+}
+.dars-accordion-content {
+    display: none;
+    padding: 16px 20px;
+    background: #fafbfc;
+}
+.dars-accordion-section.dars-accordion-open .dars-accordion-content {
+    display: block;
+}
+
+/* ProgressBar */
+.dars-progressbar {
+    width: 100%;
+    background: #e9ecef;
+    border-radius: 8px;
+    overflow: hidden;
+    height: 20px;
+    margin-bottom: 20px;
+}
+.dars-progressbar-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #007bff, #4a90e2);
+    transition: width 0.3s;
+}
+
+/* Spinner */
+.dars-spinner {
+    border: 4px solid #e9ecef;
+    border-top: 4px solid #007bff;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    animation: dars-spin 1s linear infinite;
+    margin: 10px auto;
+}
+@keyframes dars-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Tooltip */
+.dars-tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+.dars-tooltip .dars-tooltip-text {
+    visibility: hidden;
+    width: max-content;
+    background: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 4px;
+    padding: 6px 10px;
+    position: absolute;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.2s;
+    font-size: 13px;
+    pointer-events: none;
+}
+.dars-tooltip:hover .dars-tooltip-text,
+.dars-tooltip:focus .dars-tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+.dars-tooltip-top .dars-tooltip-text {
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 6px;
+}
+.dars-tooltip-bottom .dars-tooltip-text {
+    top: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 6px;
+}
+.dars-tooltip-left .dars-tooltip-text {
+    right: 125%;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-right: 6px;
+}
+.dars-tooltip-right .dars-tooltip-text {
+    left: 125%;
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    justify-content: center;
+    align-items: center;
+}
+.dars-modal-hidden {
+    display: none !important;
+}
+
+.dars-modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+}
+
+.dars-navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.dars-navbar-brand {
+    font-weight: bold;
+    font-size: 1.25rem;
+    color: #333;
+}
+
+.dars-navbar-nav {
+    display: flex;
+    gap: 1rem;
+}
+
+.dars-navbar-nav a {
+    color: #007bff;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+}
+
+.dars-navbar-nav a:hover {
+    background-color: #e9ecef;
+    border-radius: 4px;
+}
+
+/* Estilos para nuevos componentes básicos */
+
+/* Checkbox */
+.dars-checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 4px 0;
+}
+
+.dars-checkbox {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.dars-checkbox:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.dars-checkbox-wrapper label {
+    cursor: pointer;
+    user-select: none;
+}
+
+/* RadioButton */
+.dars-radio-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 4px 0;
+}
+
+.dars-radio {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.dars-radio:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.dars-radio-wrapper label {
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Select */
+.dars-select {
+    display: inline-block;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: white;
+    cursor: pointer;
+    min-width: 120px;
+}
+
+.dars-select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.dars-select:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: #f8f9fa;
+}
+
+.dars-select option:disabled {
+    color: #6c757d;
+}
+
+/* Slider */
+.dars-slider-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 8px 0;
+}
+
+.dars-slider-wrapper.dars-slider-vertical {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.dars-slider {
+    flex: 1;
+    cursor: pointer;
+}
+
+.dars-slider-horizontal .dars-slider {
+    width: 100%;
+    height: 6px;
+}
+
+.dars-slider-vertical input[type="range"] {
+  width: 8px;
+  height: 160px;
+  writing-mode: vertical-lr;
+  direction: rtl;
+}
+
+.dars-slider:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.dars-slider-value {
+    font-weight: bold;
+    min-width: 40px;
+    text-align: center;
+    padding: 4px 8px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.dars-slider-wrapper label {
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+/* DatePicker */
+.dars-datepicker {
+    display: inline-block;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: white;
+    cursor: pointer;
+}
+
+.dars-datepicker:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.dars-datepicker:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: #f8f9fa;
+}
+
+.dars-datepicker:readonly {
+    background-color: #f8f9fa;
+    cursor: default;
+}
+
+.dars-datepicker-inline {
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 12px;
+    background-color: white;
+}
+
+.dars-datepicker-inline .dars-datepicker {
+    border: none;
+    padding: 0;
+}
+/* Markdown Styles */
+.dars-markdown {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+/* Dark Theme */
+.dars-markdown-dark {
+    color: #e0e0e0;
+    background-color: #1e1e1e;
+}
+
+.dars-markdown h1,
+.dars-markdown h2,
+.dars-markdown h3,
+.dars-markdown h4,
+.dars-markdown h5,
+.dars-markdown h6 {
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+.dars-markdown-dark h1,
+.dars-markdown-dark h2,
+.dars-markdown-dark h3,
+.dars-markdown-dark h4,
+.dars-markdown-dark h5,
+.dars-markdown-dark h6 {
+    color: #ffffff;
+}
+
+.dars-markdown h1 { font-size: 2em; }
+.dars-markdown h2 { font-size: 1.5em; }
+.dars-markdown h3 { font-size: 1.25em; }
+.dars-markdown h4 { font-size: 1em; }
+.dars-markdown h5 { font-size: 0.875em; }
+.dars-markdown h6 { font-size: 0.85em; }
+
+.dars-markdown p {
+    margin-bottom: 1em;
+}
+
+.dars-markdown-dark p {
+    color: #cccccc;
+}
+
+.dars-markdown strong {
+    font-weight: 600;
+}
+
+.dars-markdown em {
+    font-style: italic;
+}
+
+.dars-markdown ul,
+.dars-markdown ol {
+    margin-bottom: 1em;
+    padding-left: 2em;
+}
+
+.dars-markdown-dark ul,
+.dars-markdown-dark ol {
+    color: #cccccc;
+}
+
+.dars-markdown li {
+    margin-bottom: 0.5em;
+}
+
+.dars-markdown code {
+    background-color: #f6f8fa;
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.85em;
+    color: #333;
+}
+
+.dars-markdown-dark code {
+    background-color: #2d2d2d;
+    color: #e0e0e0;
+}
+
+.dars-markdown pre {
+    background-color: #f6f8fa;
+    padding: 1em;
+    border-radius: 3px;
+    overflow: auto;
+    margin-bottom: 1em;
+}
+
+.dars-markdown-dark pre {
+    background-color: #2d2d2d;
+    border: 1px solid #404040;
+}
+
+.dars-markdown pre code {
+    background: none;
+    padding: 0;
+}
+
+.dars-markdown blockquote {
+    border-left: 4px solid #ddd;
+    padding-left: 1em;
+    margin-left: 0;
+    color: #666;
+    font-style: italic;
+    background-color: #f9f9f9;
+    padding: 10px 15px;
+    border-radius: 4px;
+}
+
+.dars-markdown-dark blockquote {
+    border-left-color: #555;
+    color: #bbb;
+    background-color: #2a2a2a;
+}
+
+.dars-markdown table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 1em;
+}
+
+.dars-markdown-dark table {
+    border-color: #444;
+}
+
+.dars-markdown th,
+.dars-markdown td {
+    border: 1px solid #ddd;
+    padding: 0.5em;
+    text-align: left;
+}
+
+.dars-markdown-dark th,
+.dars-markdown-dark td {
+    border-color: #444;
+    color: #e0e0e0;
+}
+
+.dars-markdown th {
+    background-color: #f6f8fa;
+    font-weight: 600;
+}
+
+.dars-markdown-dark th {
+    background-color: #333;
+}
+
+.dars-markdown a {
+    color: #0366d6;
+    text-decoration: none;
+}
+
+.dars-markdown-dark a {
+    color: #4da6ff;
+}
+
+.dars-markdown a:hover {
+    text-decoration: underline;
+}
+
+.dars-markdown-dark a:hover {
+    color: #66b3ff;
+}
+
+.dars-markdown img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+
+.dars-markdown-dark img {
+    filter: brightness(0.9);
+}
+
+/* Horizontal Rule */
+.dars-markdown hr {
+    border: none;
+    height: 1px;
+    background-color: #ddd;
+    margin: 2em 0;
+}
+
+.dars-markdown-dark hr {
+    background-color: #444;
+}

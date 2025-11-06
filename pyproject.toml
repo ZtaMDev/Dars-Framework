@@ -1,0 +1,25 @@
+license = "MIT"
+readme = "README.md"
+
+[build-system]
+requires = [ "setuptools>=42", "wheel",]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dars_framework"
+version = "1.1.9"
+description = "Dars is a Python UI framework for building modern, interactive web apps with only Python code. Write your interface in Python, export it to static HTML/CSS/JS, and deploy anywhere."
+dependencies = [ "rich==14.0.0", "bs4==0.0.2", "uvicorn==0.35.0", "fastapi==0.116.1", "markdown2==2.5.4", "requests==2.32.5",]
+[[project.authors]]
+name = "ztamdev"
+email = "zondax2009@gmail.com"
+
+[project.license]
+text = "MIT"
+
+[project.scripts]
+dars = "dars.cli.main:main"
+
+[tool.setuptools.packages.find]
+include = [ "dars*",]
+exclude = [ "LandingPage*",]
