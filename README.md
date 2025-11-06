@@ -30,6 +30,16 @@ from dars.all import *
 app = App(title="Hello World", theme="dark")
 # Crear componentes
 index = Page(
+     Text(
+        text="Hello World",
+        style={
+            'font-size': '48px',
+            'color': '#2c3e50',
+            'margin-bottom': '20px',
+            'font-weight': 'bold',
+            'text-align': 'center'
+        }
+    ),
     Text(
         text="Hello World",
         style={
