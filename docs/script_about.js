@@ -5,4 +5,4 @@ burger.addEventListener('click',function(e){e.stopPropagation();if(navRight.clas
 function handlePlaygroundLink(){var playgroundLink=document.getElementById('linkPlayground');if(!playgroundLink)return;playgroundLink.style.display="";}
 function initMobileDetection(){handlePlaygroundLink();window.addEventListener('resize',handlePlaygroundLink);}
 if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initMobileDetection);}else{initMobileDetection();}
-console.log('Dars-framework version: 1.1.8 running...')
+console.log('Dars-framework version: 1.2.2 running...')

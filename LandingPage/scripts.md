@@ -292,6 +292,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
 The exporter (`html_css_js.py`) automatically detects and exports all scripts of type `dScript`, `InlineScript`, and `FileScript`. You can safely mix and match them in your app, and all will be included in the generated JS.
 
+New in v1.2.2:
+
+- Script objects embedded in state bootstrap (e.g., inside `Mod.set(..., on_*=...)`) are serialized to a JSON-safe form as `{ "code": "..." }` and reconstituted at runtime.
+- Event attributes (`on_*`) accept a single script or an array of scripts (any mix of InlineScript, FileScript, dScript, or raw JS strings). The runtime runs them sequentially and guarantees a single active dynamic listener per event.
+
 ---
 
 ## FileScript

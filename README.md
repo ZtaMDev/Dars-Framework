@@ -218,3 +218,22 @@ Export using the config entry and outdir:
 dars export config --format html
 ```
 
+
+---
+
+## What's new in v1.2.2
+
+Highlights:
+
+- Cross-dState calls with `Mod.call(...)` to trigger other states.
+- Immutable default state (index `0`) that restores the component's initial DOM when activated.
+- `Mod.set` accepts multiple attributes and `on_*` event arrays (mix InlineScript, FileScript, dScript, or JS strings), executed sequentially.
+- State bootstrap now serializes embedded scripts safely; runtime reconstitutes them.
+
+Upgrade:
+
+```bash
+pip install --upgrade dars-framework
+```
+
+See LandingPage docs for details: state_management.md, events.md, scripts.md.

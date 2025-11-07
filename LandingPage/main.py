@@ -1608,6 +1608,6 @@ app.add_page(name="documentation", root=documentation, title="Dars-Documentation
 #Script
 app.add_script(dScript(code=mobile_detection_script))
 
-app.add_script(dScript(code="console.log('Dars-framework version: 1.1.8 running...')"))
+app.add_script(dScript(code="console.log('Dars framework version: 1.2.2 running...')"))
 if __name__ == "__main__":
     app.rTimeCompile(add_file_types=".js, .md, .css")

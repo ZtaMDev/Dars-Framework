@@ -16,7 +16,8 @@ function diffProps(el,oldP={},newP={}){for(const k in oldP){if(!(k in newP)){try
 for(const k in newP){const v=newP[k];try{if(v===false||v===null||typeof v==='undefined'){el.removeAttribute(k);}else{el.setAttribute(k,String(v));}}catch{}}}
 function diffStyles(el,oldS={},newS={}){for(const k in oldS){if(!(k in newS)){try{el.style.removeProperty(k.replace(/_/g,'-'));}catch{}}}
 for(const k in newS){const v=newS[k];try{el.style.setProperty(k.replace(/_/g,'-'),String(v));}catch{}}}
-function delegate(eventName,root){(root||document).addEventListener(eventName,function(e){let node=e.target;const boundary=root||document;while(node&&node!==boundary){const id=node.id;if(id&&eventMap.has(id)){const handlers=eventMap.get(id);const h=handlers[eventName];if(typeof h==='function'){try{h.call(node,e);}catch(err){console.error('[Dars] handler error',err);}
+function delegate(eventName,root){(root||document).addEventListener(eventName,function(e){let node=e.target;const boundary=root||document;while(node&&node!==boundary){const id=node.id;if(id&&eventMap.has(id)){const handlers=eventMap.get(id);const h=handlers[eventName];if(node&&node.__darsEv&&node.__darsEv[eventName]){return;}
+if(typeof h==='function'){try{h.call(node,e);}catch(err){console.error('[Dars] handler error',err);}
 return;}}
 node=node.parentNode;}},true);}
 function typesDiffer(a,b){return(a&&b)?a.type!==b.type:a!==b;}

@@ -640,7 +640,26 @@ self.addEventListener('fetch', event => {
             from dars.core.state import STATE_BOOTSTRAP
             if STATE_BOOTSTRAP:
                 import json as _json
-                bootstrap_json = _json.dumps(STATE_BOOTSTRAP, ensure_ascii=False)
+                from copy import deepcopy as _deepcopy
+                try:
+                    from dars.scripts.script import Script as _Script
+                except Exception:
+                    _Script = None
+
+                def _ser(v):
+                    try:
+                        if _Script and isinstance(v, _Script):
+                            return {"code": v.get_code()}
+                        if isinstance(v, dict):
+                            return {k: _ser(val) for k, val in v.items()}
+                        if isinstance(v, list):
+                            return [_ser(x) for x in v]
+                        return v
+                    except Exception:
+                        return v
+
+                _clean = _ser(_deepcopy(STATE_BOOTSTRAP))
+                bootstrap_json = _json.dumps(_clean, ensure_ascii=False)
                 if bundle:
                     # Obfuscate: base64-encode the bootstrap JSON
                     import base64 as _b64
@@ -1798,6 +1817,10 @@ body {
         if(id && eventMap.has(id)){
           const handlers = eventMap.get(id);
           const h = handlers[eventName];
+          // If there is a dynamic handler attached on this node for the same event, let it handle and skip default
+          if(node && node.__darsEv && node.__darsEv[eventName]){
+            return;
+          }
           if(typeof h === 'function'){
             try { h.call(node, e); } catch(err){ console.error('[Dars] handler error', err); }
             return;

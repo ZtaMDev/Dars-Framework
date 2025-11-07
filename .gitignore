@@ -36,3 +36,4 @@ uploadPypiScript.py
 .pydep
 test/
 myapp/
+tst/

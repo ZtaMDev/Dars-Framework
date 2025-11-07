@@ -46,3 +46,24 @@ Here are the different event types available:
     - `ERROR = "error"`
     - `RESIZE = "resize"`
 
+
+---
+
+## New in v1.2.2: Event arrays and dynamic handlers
+
+- Any `on_*` attribute can now accept:
+  - A single script (InlineScript, FileScript, dScript) or plain JS string
+  - An array mixing any of the above (executed sequentially)
+
+Example using `Mod.set`:
+
+```python
+Mod.set("btn1", on_click=[st1.state(0), dScript(code="console.log('clicked')")])
+```
+
+Runtime behavior:
+
+- Only one dynamic listener per event is active at a time; subsequent `Mod.set` replaces the previous one.
+- Dynamic handlers run in capture phase and stop propagation for the same event.
+- Returning to the default state (index 0) removes any dynamic listeners from that element and restores its initial DOM.
+

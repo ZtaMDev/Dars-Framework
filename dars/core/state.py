@@ -20,6 +20,12 @@ class DarsState:
             "states": self.states,
             "isCustom": self.is_custom,
         }
+        try:
+            d["defaultIndex"] = 0
+            d["defaultValue"] = (self.states[0] if isinstance(self.states, list) and len(self.states) > 0 else None)
+        except Exception:
+            d["defaultIndex"] = 0
+            d["defaultValue"] = None
         if self.rules:
             d["rules"] = self.rules
         return d
@@ -96,6 +102,11 @@ class DarsState:
     # --- cState: define rules/mods for a given state index ---
     def cState(self, idx: int, mods: Optional[List[Dict[str, Any]]] = None) -> 'CStateRuleBuilder':
         key = str(idx)
+        if idx == 0:
+            raise ValueError(
+                "Default state (index 0) is immutable. Do not define cState(0). "
+                "Configure the component's default directly on the instance instead."
+            )
         if key not in self.rules:
             self.rules[key] = {}
         if mods:
@@ -154,6 +165,40 @@ class Mod:
         tid = getattr(target, 'id', None) or str(target)
         return {"op": "prependText", "target": tid, "value": value}
 
+    @staticmethod
+    def call(target: Any, state: Any = None, goto: Any = None) -> Dict[str, Any]:
+        """Invoke another dState's state change.
+        - target: DarsState instance or state name string; if a component is passed, use its id.
+        - state: target state index/value.
+        - goto: relative/absolute goto directive (e.g., '+1').
+        The runtime will resolve the state by name first (registry), falling back to id.
+        """
+        name: Optional[str] = None
+        sid: Optional[str] = None
+        try:
+            # DarsState instance
+            if hasattr(target, 'name') and hasattr(target, 'id'):
+                name = getattr(target, 'name', None)
+                sid = getattr(target, 'id', None)
+            elif isinstance(target, str):
+                name = target
+            else:
+                # Maybe a component; try id
+                sid = getattr(target, 'id', None) or str(target)
+        except Exception:
+            name = None
+            sid = None
+        d: Dict[str, Any] = {"op": "call"}
+        if name:
+            d['name'] = name
+        if sid:
+            d['id'] = sid
+        if state is not None:
+            d['state'] = state
+        if goto is not None:
+            d['goto'] = goto
+        return d
+
 
 class CStateRuleBuilder:
     def __init__(self, st: DarsState, key: str):
@@ -209,6 +254,15 @@ class CStateRuleBuilder:
     def prepend_text(self, target: Any, value: str) -> 'CStateRuleBuilder':
         self._ensure()
         self.st.rules[self.key]['mods'].append(Mod.prepend_text(target, value))
+        if self.st._bootstrap_ref is not None:
+            self.st._bootstrap_ref.setdefault('rules', {})
+            self.st._bootstrap_ref['rules'][self.key] = self.st.rules[self.key]
+        return self
+
+    def call(self, target: Any, state: Any = None, goto: Any = None) -> 'CStateRuleBuilder':
+        """Append a cross-state call op to this rule."""
+        self._ensure()
+        self.st.rules[self.key]['mods'].append(Mod.call(target, state=state, goto=goto))
         if self.st._bootstrap_ref is not None:
             self.st._bootstrap_ref.setdefault('rules', {})
             self.st._bootstrap_ref['rules'][self.key] = self.st.rules[self.key]
