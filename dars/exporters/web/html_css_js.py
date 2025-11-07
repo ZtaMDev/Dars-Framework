@@ -633,7 +633,7 @@ self.addEventListener('fetch', event => {
         # Incluir dars.min.js (ESM) antes de runtime/script
         dars_lib_tag = '<script type="module" src="lib/dars.min.js" defer data-dars-lib></script>'
 
-        # State bootstrap: emit JSON + module to register states if present
+        # State bootstrap: emit JSON (+ obfuscation in bundle) + module to register states
         bootstrap_json_tag = ""
         bootstrap_init_tag = ""
         try:
@@ -641,26 +641,57 @@ self.addEventListener('fetch', event => {
             if STATE_BOOTSTRAP:
                 import json as _json
                 bootstrap_json = _json.dumps(STATE_BOOTSTRAP, ensure_ascii=False)
-                bootstrap_json_tag = f'<script type="application/json" id="dars-state-bootstrap">{bootstrap_json}</script>'
-                # Module that registers the states using ESM if available, else fallback to global
-                bootstrap_init_tag = (
-                    "<script type=\"module\">\n"
-                    "(async () => {\n"
-                    "  if (window.__DARS_STATE_BOOTSTRAPPED__) return;\n"
-                    "  const el = document.getElementById('dars-state-bootstrap');\n"
-                    "  if (!el) { window.__DARS_STATE_BOOTSTRAPPED__ = true; return; }\n"
-                    "  const arr = JSON.parse(el.textContent||'[]');\n"
-                    "  try {\n"
-                    "    const m = await import('./lib/dars.min.js');\n"
-                    "    const reg = m.registerState || (m.default && m.default.registerState);\n"
-                    "    if (typeof reg === 'function') { arr.forEach(s => reg(s.name, s)); }\n"
-                    "  } catch (e) {\n"
-                    "    const D = window.Dars; if (D && typeof D.registerState==='function') { arr.forEach(s => D.registerState(s.name, s)); }\n"
-                    "  }\n"
-                    "  window.__DARS_STATE_BOOTSTRAPPED__ = true;\n"
-                    "})();\n"
-                    "</script>"
-                )
+                if bundle:
+                    # Obfuscate: base64-encode the bootstrap JSON
+                    import base64 as _b64
+                    _b64data = _b64.b64encode(bootstrap_json.encode('utf-8')).decode('ascii')
+                    bootstrap_json_tag = f'<script type="application/octet-stream" id="dars-state-bootstrap-b64">{_b64data}</script>'
+                    bootstrap_init_tag = (
+                        "<script type=\"module\">\n"
+                        "(async () => {\n"
+                        "  if (window.__DARS_STATE_BOOTSTRAPPED__) return;\n"
+                        "  const el = document.getElementById('dars-state-bootstrap-b64');\n"
+                        "  if (!el) { window.__DARS_STATE_BOOTSTRAPPED__ = true; return; }\n"
+                        "  let arr = [];\n"
+                        "  try {\n"
+                        "    const b64 = el.textContent || '';\n"
+                        "    let json = '';\n"
+                        "    if (typeof atob === 'function') json = atob(b64);\n"
+                        "    else if (typeof Buffer !== 'undefined') json = Buffer.from(b64, 'base64').toString('utf8');\n"
+                        "    arr = JSON.parse(json||'[]');\n"
+                        "  } catch(_) { arr = []; }\n"
+                        "  try {\n"
+                        "    const m = await import('./lib/dars.min.js');\n"
+                        "    const reg = m.registerState || (m.default && m.default.registerState);\n"
+                        "    if (typeof reg === 'function') { arr.forEach(s => reg(s.name, s)); }\n"
+                        "  } catch (e) {\n"
+                        "    const D = window.Dars; if (D && typeof D.registerState==='function') { arr.forEach(s => D.registerState(s.name, s)); }\n"
+                        "  }\n"
+                        "  window.__DARS_STATE_BOOTSTRAPPED__ = true;\n"
+                        "})();\n"
+                        "</script>"
+                    )
+                else:
+                    # Dev: keep readable JSON
+                    bootstrap_json_tag = f'<script type="application/json" id="dars-state-bootstrap">{bootstrap_json}</script>'
+                    bootstrap_init_tag = (
+                        "<script type=\"module\">\n"
+                        "(async () => {\n"
+                        "  if (window.__DARS_STATE_BOOTSTRAPPED__) return;\n"
+                        "  const el = document.getElementById('dars-state-bootstrap');\n"
+                        "  if (!el) { window.__DARS_STATE_BOOTSTRAPPED__ = true; return; }\n"
+                        "  const arr = JSON.parse(el.textContent||'[]');\n"
+                        "  try {\n"
+                        "    const m = await import('./lib/dars.min.js');\n"
+                        "    const reg = m.registerState || (m.default && m.default.registerState);\n"
+                        "    if (typeof reg === 'function') { arr.forEach(s => reg(s.name, s)); }\n"
+                        "  } catch (e) {\n"
+                        "    const D = window.Dars; if (D && typeof D.registerState==='function') { arr.forEach(s => D.registerState(s.name, s)); }\n"
+                        "  }\n"
+                        "  window.__DARS_STATE_BOOTSTRAPPED__ = true;\n"
+                        "})();\n"
+                        "</script>"
+                    )
         except Exception:
             pass
 
