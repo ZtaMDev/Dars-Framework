@@ -94,7 +94,7 @@ class StyleProps:
 
 @dataclass
 class EventProps:
-    """Propiedades de eventos para componentes UI"""
+    """Properties of events for UI components"""
     on_click: Optional[Callable] = None
     on_double_click: Optional[Callable] = None
     on_mouse_enter: Optional[Callable] = None
@@ -112,13 +112,13 @@ class EventProps:
     on_error: Optional[Callable] = None
 
 def normalize_style_value(value: Union[str, int]) -> str:
-    """Normaliza un valor de estilo a string CSS"""
+    """Normalizes a style value to a CSS string"""
     if isinstance(value, int):
         return f"{value}px"
     return str(value)
 
 def merge_styles(*styles: Dict[str, Any]) -> Dict[str, Any]:
-    """Combina múltiples diccionarios de estilos"""
+    """Combines multiple style dictionaries"""
     result = {}
     for style in styles:
         if style:
