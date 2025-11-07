@@ -31,6 +31,8 @@ from dars.core.app import App
 from dars.exporters.web.html_css_js import HTMLCSSJSExporter
 from dars.cli.translations import translator
 from dars.config import load_config, resolve_paths, write_default_config, update_config
+from dars.cli.doctor.preflight import check_and_gate
+from dars.cli.doctor.doctor import run_doctor, run_forcedev
 
 console = Console()
 
@@ -139,6 +141,10 @@ class RichHelpFormatter(argparse.HelpFormatter):
                 examples_table.add_row(Syntax(example.strip(), "bash", theme="monokai"))
         
         console.print(Panel(examples_table, border_style="cyan", padding=(1, 2)))
+
+def pretty_print_help(parser: argparse.ArgumentParser) -> None:
+    # Just print argparse help (no custom header)
+    parser.print_help()
 
 def _print_arguments_table(content):
     """Prints a table of arguments from the text content"""
@@ -294,10 +300,19 @@ class DarsExporter:
                     # Minification step for bundle
                     try:
                         from dars.security import minify_output_dir
-                        task3 = progress.add_task("Applying minification (bundle)", total=100)
-                        # Run minification
-                        count = minify_output_dir(output_path)
-                        progress.update(task3, completed=100)
+                        # Use actual file count progress
+                        task3 = progress.add_task("Applying minification (bundle)", total=1)
+                        totals = {"total": 1, "inited": False}
+                        def _cb(done, total):
+                            # Initialize task total once when known
+                            if not totals["inited"] and total > 0:
+                                progress.update(task3, total=total)
+                                totals["total"] = total
+                                totals["inited"] = True
+                            progress.update(task3, completed=done)
+                        _ = minify_output_dir(output_path, progress_cb=_cb)
+                        # Ensure completed
+                        progress.update(task3, completed=totals.get("total", 1))
                     except Exception:
                         # Do not fail export on minification errors
                         pass
@@ -533,7 +548,7 @@ def print_version_info():
     panel_content = f"[bold cyan]Dars Framework[/bold cyan]\n\n[green]Version:[/green] {version}\n[green]Release notes:[/green] [link={release_url}]{release_url}[/link]"
     console.print(Panel(panel_content, title="Dars Version", border_style="cyan"))
 
-def create_parser() -> argparse.ArgumentParser:
+def create_parser(include_hidden: bool = True) -> argparse.ArgumentParser:
     """Creates the command line argument parser"""
     parser = argparse.ArgumentParser(
         description=translator.get('main_description'),
@@ -544,7 +559,11 @@ def create_parser() -> argparse.ArgumentParser:
     
     # English-only: no language flag
     
-    subparsers = parser.add_subparsers(dest='command', help=translator.get('available_commands'))
+    subparsers = parser.add_subparsers(
+        dest='command',
+        help=translator.get('available_commands'),
+        metavar='{export,info,formats,preview,init,build,config,dev,doctor}'
+    )
     
     # Export command
     export_parser = subparsers.add_parser('export', help=translator.get('export_help'))
@@ -614,6 +633,17 @@ def create_parser() -> argparse.ArgumentParser:
     dev_parser.add_argument('--project', '-p', default='.', help='Project root where dars.config.json resides (default: .)')
     # English-only: no language option on subparsers
     
+    # Doctor command
+    doctor_parser = subparsers.add_parser('doctor', help='Check and install required external tools (Node LTS, Bun) and Python deps')
+    doctor_parser.add_argument('--check', action='store_true', help='Only verify environment and exit non-zero if missing')
+    doctor_parser.add_argument('--yes', '-y', action='store_true', help='Assume yes for all prompts')
+    doctor_parser.add_argument('--all', action='store_true', help='Install all missing items (with --yes for non-interactive)')
+    doctor_parser.add_argument('--force', action='store_true', help='Re-run checks even if environment was previously satisfied')
+
+    # Hidden forced installer (conditionally added to avoid appearing in help)
+    if include_hidden:
+        forcedev_parser = subparsers.add_parser('forcedev', help=argparse.SUPPRESS)
+
     return parser
 
 from pathlib import Path
@@ -736,14 +766,20 @@ def main():
     """Main CLI function"""
     # English-only: no language parameter pre-scan
     
-    # Intercept help before parsing arguments - print simple help without panels
-    if len(sys.argv) == 1 or '-h' in sys.argv or '--help' in sys.argv:
-        parser = create_parser()
-        parser.print_help()
+    # Intercept only when no args provided; otherwise let argparse show the correct subcommand help
+    if len(sys.argv) == 1:
+        parser = create_parser(include_hidden=False)
+        pretty_print_help(parser)
         return
     
     # Continue with normal flow if not help
-    parser = create_parser()
+    # If user asked for top-level help (no subcommand), build parser without hidden commands
+    known_cmds = ['export','info','formats','preview','init','build','config','dev','doctor']
+    top_level_help = ('-h' in sys.argv or '--help' in sys.argv) and not any(cmd in sys.argv for cmd in known_cmds)
+    parser = create_parser(include_hidden=not top_level_help)
+    if top_level_help:
+        pretty_print_help(create_parser(include_hidden=False))
+        return
     args = parser.parse_args()
     
     # Set language from args only if explicitly provided
@@ -758,6 +794,14 @@ def main():
     # No banner for normal commands; keep output minimal
     
     exporter = DarsExporter()
+    
+    # Run preflight gating for all commands except 'doctor'
+    if getattr(args, 'command', None) and args.command != 'doctor':
+        try:
+            check_and_gate(args.command)
+        except SystemExit as e:
+            # If doctor failed or user cancelled, abort the command
+            sys.exit(e.code if isinstance(e.code, int) else 1)
     
     if args.command == 'export':
         # If file points to config, resolve from dars.config.json
@@ -984,11 +1028,11 @@ def main():
             sys.exit(1 if has_errors else 0)
         else:
             # Show help for config subcommands
-            parser = create_parser()
+            parser = create_parser(include_hidden=False)
             subparsers_actions = [action for action in parser._actions if isinstance(action, argparse._SubParsersAction)]
             for subparsers_action in subparsers_actions:
                 if 'config' in subparsers_action.choices:
-                    RichHelpFormatter.rich_print_help(subparsers_action.choices['config'])
+                    pretty_print_help(subparsers_action.choices['config'])
                     return
 
     elif args.command == 'dev':
@@ -1024,9 +1068,24 @@ def main():
             console.print(f"[red]Failed to start dev process: {e}[/red]")
             sys.exit(1)
 
+    elif args.command == 'doctor':
+        # Run doctor with provided flags
+        code = run_doctor(
+            check_only=getattr(args, 'check', False),
+            auto_yes=getattr(args, 'yes', False),
+            install_all=getattr(args, 'all', False),
+            force=getattr(args, 'force', False)
+        )
+        sys.exit(code)
+
+    elif args.command == 'forcedev':
+        # Hidden: force-install Node, Bun, and all Python deps without prompts
+        code = run_forcedev()
+        sys.exit(code)
+
     else:
-        # Fallback: print plain help
-        parser.print_help()
+        # Fallback: pretty help with header
+        pretty_print_help(parser)
 
 # Utility: ensure lib/dars.min.js exists at project root (no overwrite)
 def ensure_dars_lib(project_root: str):
