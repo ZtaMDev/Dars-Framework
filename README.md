@@ -21,7 +21,7 @@ Try dars without installing nothing just visit the [Dars Playground](https://dar
 - Preview instantly with hot-reload using `app.rTimeCompile()`.
 - Export your app to static web files with a single CLI command.
 - Use multipage, layouts, scripts, and more—see docs for advanced features.
-- For mor information visit the [Documentation](https://ztamdev.github.io/Dars-Framework/documentation.html)
+- For more information visit the [Documentation](https://ztamdev.github.io/Dars-Framework/documentation.html)
 
 ## Quick Example: Your First App
 ```python
