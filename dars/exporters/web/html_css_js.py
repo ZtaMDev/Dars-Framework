@@ -39,6 +39,13 @@ class HTMLCSSJSExporter(Exporter):
     def export(self, app: App, output_path: str, bundle: bool = False) -> bool:
         """Exporta la aplicación a HTML/CSS/JS (soporta multipágina)."""
         try:
+            # Initialize obfuscation context for this export
+            # Keep original IDs to avoid breaking CSS/anchors. We still obfuscate types and events.
+            self._hash_ids = False
+            self._id_hash_map = {}
+            self._type_obfuscation = bool(bundle)
+            self._type_map = {}
+            self._type_seq = 0
             self.create_output_directory(output_path)
 
             # --- Copiar recursos adicionales desde la carpeta del proyecto ---
@@ -711,9 +718,22 @@ self.addEventListener('fetch', event => {
             return vnode
         import base64
         kept = {}
-        for k in ('type', 'id', 'key', 'class', 'text'):
-            if k in vnode:
-                kept[k] = vnode[k]
+        # type (obfuscated when enabled)
+        t = vnode.get('type')
+        if t is not None:
+            kept['type'] = self._obf_type(t) if getattr(self, '_type_obfuscation', False) else t
+        # id and key
+        if 'id' in vnode and vnode['id']:
+            kept['id'] = self._hash_id(str(vnode['id'])) if getattr(self, '_hash_ids', False) else vnode['id']
+        if 'key' in vnode and vnode['key']:
+            kept['key'] = str(vnode['key'])
+        # class: drop in obfuscated VDOM to avoid leaking names
+        if not getattr(self, '_type_obfuscation', False):
+            if 'class' in vnode:
+                kept['class'] = vnode.get('class')
+        # text retained (non-sensitive content remains visible by choice)
+        if 'text' in vnode:
+            kept['text'] = vnode.get('text')
         # Obfuscate events
         evs = vnode.get('events') or None
         if isinstance(evs, dict) and evs:
@@ -738,6 +758,19 @@ self.addEventListener('fetch', event => {
         if ch:
             kept['children'] = [self._obfuscate_vdom(c) for c in ch]
         return kept
+
+    def _obf_type(self, name: str) -> str:
+        m = getattr(self, '_type_map', None)
+        if m is None:
+            self._type_map = {}
+            self._type_seq = 0
+            m = self._type_map
+        if name in m:
+            return m[name]
+        self._type_seq += 1
+        obf = f"T{self._type_seq}"
+        m[name] = obf
+        return obf
 
     def generate_custom_css(self, app: App) -> str:
         """Genera solo los estilos personalizados de la aplicación"""
@@ -2005,7 +2038,28 @@ body {
             except Exception:
                 # si el objeto no permite asignar, seguimos usando comp_id local
                 pass
+        # Hash IDs in bundle mode consistently
+        if getattr(self, '_hash_ids', False) and comp_id:
+            hid = self._hash_id(comp_id)
+            try:
+                component.id = hid
+            except Exception:
+                pass
+            return hid
         return comp_id
+
+    def _hash_id(self, original: str) -> str:
+        import hashlib
+        m = getattr(self, '_id_hash_map', None)
+        if m is None:
+            self._id_hash_map = {}
+            m = self._id_hash_map
+        if original in m:
+            return m[original]
+        h = hashlib.sha256(original.encode('utf-8')).hexdigest()[:12]
+        obf = 'd' + h
+        m[original] = obf
+        return obf
 
     def render_component(self, component: Component) -> str:
         if not isinstance(component, Component):

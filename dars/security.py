@@ -38,11 +38,16 @@ _js_string_splitter = re.compile(r'(".*?"|\'.*?\'|`.*?`)', re.DOTALL)
 
 
 def minify_js(src: str) -> str:
+    # Prefer fast/robust rjsmin if available
+    try:
+        import rjsmin  # type: ignore
+        return rjsmin.jsmin(src)
+    except Exception:
+        pass
+    # Fallback conservative regex-based
     try:
         s = _js_block_comments.sub("", src)
         s = _js_line_comments.sub(lambda m: m.group(1), s)
-        # Avoid breaking strings by doing space collapsing outside quotes: basic approach
-        # Split by quotes and process even indices (outside strings)
         parts = _js_string_splitter.split(s)
         for i in range(0, len(parts), 2):
             p = parts[i]
@@ -56,6 +61,12 @@ def minify_js(src: str) -> str:
 
 
 def minify_css(src: str) -> str:
+    # Prefer rcssmin if available
+    try:
+        import rcssmin  # type: ignore
+        return rcssmin.cssmin(src)
+    except Exception:
+        pass
     try:
         s = _css_comments.sub("", src)
         s = _css_punct_spaces.sub(r"\1", s)
@@ -66,11 +77,15 @@ def minify_css(src: str) -> str:
 
 
 def minify_html(src: str) -> str:
+    # Prefer htmlmin if available
+    try:
+        import htmlmin  # type: ignore
+        return htmlmin.minify(src, remove_comments=True, remove_empty_space=True, reduce_boolean_attributes=True)
+    except Exception:
+        pass
     try:
         s = _html_comments.sub("", src)
-        # Collapse whitespace between tags only
         s = re.sub(r">\s+<", "><", s)
-        # Collapse multiple spaces in text nodes conservatively
         s = re.sub(r"\s{2,}", " ", s)
         return s.strip()
     except Exception:
