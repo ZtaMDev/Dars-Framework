@@ -28,14 +28,11 @@ counter.cState(2, mods=[
 counter.cState(3, mods=[
     Mod.toggle_class(counter_text, name='highlight', on=None),
     Mod.append_text(counter_text, value='!'),
-    Mod.set(status_text, text='State: 3'),
+    # Prepare status to show state 0 upon auto-cycle (state 0 is immutable, no rules)
+    Mod.set(status_text, text='State: 0'),
 ])
 # Auto-cycle back to 0 after applying state 3 mods
 counter.cState(3).goto(0)
-# - When entering state 0: reset label
-counter.cState(0, mods=[
-    Mod.set(status_text, text='State: 0'),
-])
 
 # Controls
 inc_btn = Button("Next (+1)", id="NextBtn", on_click=counter.state(goto='+1'))

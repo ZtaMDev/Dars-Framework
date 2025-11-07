@@ -218,7 +218,6 @@ Export using the config entry and outdir:
 dars export config --format html
 ```
 
-
 ---
 
 See LandingPage docs for details: state_management.md, events.md, scripts.md.
