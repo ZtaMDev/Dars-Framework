@@ -31,6 +31,17 @@ def has_bun() -> bool:
     return which("bun") is not None
 
 
+def vite_available() -> bool:
+    # Prefer bun x vite
+    if has_bun():
+        code, out, _ = _run(["bun", "x", "vite", "--version"])
+        if code == 0:
+            return True
+    # Fallback to npx vite
+    code, out, _ = _run(["npx", "--yes", "vite", "--version"])
+    return code == 0
+
+
 def bun_add(packages: List[str], dev: bool = True, cwd: Optional[str] = None) -> bool:
     if not has_bun():
         return False
@@ -97,3 +108,52 @@ def esbuild_minify_js(src_path: str, out_path: Optional[str] = None) -> bool:
 def esbuild_minify_css(src_path: str, out_path: Optional[str] = None) -> bool:
     # esbuild can minify CSS if input is CSS
     return esbuild_minify_js(src_path, out_path)
+
+
+def vite_minify_js(src_path: str, out_path: Optional[str] = None) -> bool:
+    """Use Vite build (Rollup) to minify a single JS entry file.
+    Creates a temp vite.config.mjs pointing to the absolute src_path, builds to a temp outDir, and copies the result to out_path.
+    """
+    if not vite_available():
+        return False
+    try:
+        import json
+        import shutil
+        workdir = tempfile.mkdtemp(prefix="dars_vite_")
+        outdir = os.path.join(workdir, "out")
+        os.makedirs(outdir, exist_ok=True)
+        abs_src = os.path.abspath(src_path)
+        vite_config = os.path.join(workdir, "vite.config.mjs")
+        with open(vite_config, "w", encoding="utf-8") as f:
+            f.write(
+                "export default {\n" 
+                "  build: {\n"
+                "    minify: 'esbuild',\n"
+                "    sourcemap: false,\n"
+                "    rollupOptions: { input: ['" + abs_src.replace('\\', '\\\\') + "'] },\n"
+                "    outDir: 'out',\n"
+                "    emptyOutDir: true\n"
+                "  }\n"
+                "};\n"
+            )
+        # Run vite build
+        cmd = ["bun", "x", "vite", "build", "--config", vite_config] if has_bun() else ["npx", "--yes", "vite", "build", "--config", vite_config]
+        code, _out, _err = _run(cmd, cwd=workdir)
+        if code != 0:
+            shutil.rmtree(workdir, ignore_errors=True)
+            return False
+        # Find a single .js in outdir
+        chosen = None
+        for name in os.listdir(outdir):
+            if name.endswith(".js"):
+                chosen = os.path.join(outdir, name)
+                break
+        if not chosen:
+            shutil.rmtree(workdir, ignore_errors=True)
+            return False
+        target = out_path or src_path
+        shutil.copyfile(chosen, target)
+        shutil.rmtree(workdir, ignore_errors=True)
+        return True
+    except Exception:
+        return False

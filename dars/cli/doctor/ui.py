@@ -31,6 +31,19 @@ def render_report(node: Dict, bun: Dict, py: Dict, esb: Dict = None, vit: Dict =
         bullets = "\n".join([f" • {req}" for req in p_missing])
         console.print(Panel(bullets or "", title="Missing Python packages", border_style="yellow"))
 
+    # Helpful links for optional tools
+    tips: List[str] = []
+    if node is not None and not node.get("ok"):
+        tips.append("Node.js LTS (manual): https://nodejs.org/en/download")
+    if bun is not None and not bun.get("ok"):
+        tips.append("Bun (auto-install available) — Windows: winget / PS: irm bun.sh/install.ps1 | iex — macOS/Linux: curl -fsSL https://bun.sh/install | bash")
+    if esb is not None and not esb.get("ok"):
+        tips.append("esbuild (optional): https://esbuild.github.io/getting-started/")
+    if vit is not None and not vit.get("ok"):
+        tips.append("Vite (optional): https://vite.dev/guide/")
+    if tips:
+        console.print(Panel("\n".join([f" • {t}" for t in tips]), title="How to install (optional)", border_style="cyan"))
+
 
 def prompt_action(has_missing: bool) -> str:
     console.print(Panel("Select an action", border_style="cyan"))

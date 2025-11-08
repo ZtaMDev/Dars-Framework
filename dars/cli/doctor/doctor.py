@@ -1,7 +1,7 @@
 import os, sys
 from typing import Dict, List
 from .detect import detect_node, detect_bun, detect_esbuild, detect_vite, read_pyproject_deps, check_python_deps
-from .installers import install_node, install_bun, install_esbuild, install_vite
+from .installers import install_bun
 from .persist import load_config, save_config
 from .ui import render_report, prompt_action, confirm_install
 from rich.console import Console
@@ -23,11 +23,13 @@ def run_doctor(check_only: bool = False, auto_yes: bool = False, install_all: bo
 
     render_report(node, bun, py, esb, vit)
 
+    # Mandatory only for doctor purposes: Python deps
     missing_items: List[str] = []
-    if not node.get('ok'): missing_items.append('Node.js LTS')
-    if not bun.get('ok'): missing_items.append('Bun stable')
     if py.get('missing'): missing_items.append('Python deps')
+    # Node, Bun, esbuild, vite treated as optional. Bun can be auto-installed if user wants.
     optional_missing: List[str] = []
+    if not node.get('ok'): optional_missing.append('Node.js (optional)')
+    if not bun.get('ok'): optional_missing.append('Bun (optional)')
     if not esb.get('ok'): optional_missing.append('esbuild (optional)')
     if not vit.get('ok'): optional_missing.append('vite (optional)')
 
@@ -73,35 +75,19 @@ def run_doctor(check_only: bool = False, auto_yes: bool = False, install_all: bo
 
     # choice == '1' => Install ALL missing
     summary: List[str] = []
-    if not node.get('ok'): summary.append('Node.js LTS (winget)')
-    if not bun.get('ok'): summary.append('Bun (winget)')
+    # Only Bun and Python deps are installable from doctor; Node/esbuild/vite show links in the report
+    if not bun.get('ok'): summary.append('Bun (winget/installer)')
     if py.get('missing'): summary.append(f"Python deps: {', '.join(py['missing'])}")
-    if optional_missing:
-        summary.extend(optional_missing)
+    # Do not include other optional tools in install summary
 
     if not auto_yes:
         if not confirm_install(summary):
             return 1
 
-    # Installers: always run Node then Bun sequentially (idempotent if already installed)
+    # Installers: only Bun, optionally Python deps
     with console.status("[cyan]Installing selected items...[/cyan]"):
         try:
-            install_node()
-        except Exception:
-            pass
-        try:
             install_bun()
-        except Exception:
-            pass
-        # Optional developer tools
-        try:
-            if not esb.get('ok'):
-                install_esbuild()
-        except Exception:
-            pass
-        try:
-            if not vit.get('ok'):
-                install_vite()
         except Exception:
             pass
 
@@ -124,11 +110,12 @@ def run_doctor(check_only: bool = False, auto_yes: bool = False, install_all: bo
 
     render_report(node2, bun2, py2, esb2, vit2)
 
-    all_ok = node2.get('ok') and bun2.get('ok') and not py2.get('missing')
+    all_ok = not py2.get('missing')
 
     cfg['requirements']['node'].update({'ok': bool(node2.get('ok')), 'version': node2.get('version')})
     cfg['requirements']['bun'].update({'ok': bool(bun2.get('ok')), 'version': bun2.get('version')})
     cfg['python_deps'] = {'ok': not bool(py2.get('missing')), 'missing': py2.get('missing') or []}
+    # doctor satisfaction now tied only to Python deps
     cfg['satisfied'] = bool(all_ok)
     save_config(cfg)
 
@@ -137,16 +124,12 @@ def run_doctor(check_only: bool = False, auto_yes: bool = False, install_all: bo
 
 def run_forcedev() -> int:
     """Force-install everything without initial verification or prompts.
-    - Attempts Node LTS and Bun installers unconditionally (best-effort)
+    - Attempts Bun installer unconditionally (best-effort)
     - Installs/updates all Python deps from pyproject.toml
     - Re-checks and persists satisfied state
     Returns 0 if environment ends OK, else 1.
     """
     # Best-effort installs (no UI)
-    try:
-        install_node()
-    except Exception:
-        pass
     try:
         install_bun()
     except Exception:
@@ -163,11 +146,12 @@ def run_forcedev() -> int:
 
     # Re-check and persist
     cfg = load_config()
-    node2 = detect_node()
     bun2 = detect_bun()
     py2 = check_python_deps(read_pyproject_deps())
-    all_ok = node2.get('ok') and bun2.get('ok') and not py2.get('missing')
+    all_ok = bun2.get('ok') and not py2.get('missing')
 
+    # keep node state updated for UI even if not installed by forcedev
+    node2 = detect_node()
     cfg['requirements']['node'].update({'ok': bool(node2.get('ok')), 'version': node2.get('version')})
     cfg['requirements']['bun'].update({'ok': bool(bun2.get('ok')), 'version': bun2.get('version')})
     cfg['python_deps'] = {'ok': not bool(py2.get('missing')), 'missing': py2.get('missing') or []}

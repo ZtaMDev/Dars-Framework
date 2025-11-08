@@ -10,5 +10,6 @@
     ".venv",
     "node_modules"
   ],
-  "bundle": false
+  "bundle": true,
+  "viteMinify": true
 }

@@ -120,6 +120,7 @@ A complete example demonstrating `dState`, `cState`, `Mod`, and deferred updates
 * Deferred rendering for safer, predictable state transitions (`cComp=True`)
 * Navigation between states using `goto`, including relative moves (`'+1'`, `'-1'`)
 * Consistent, event-time mutation flow for reliable behavior
+* Secure minification for production bundles (strong JS/CSS minifier integrated into the build pipeline)
 
 ---
 
@@ -135,6 +136,8 @@ A complete example demonstrating `dState`, `cState`, `Mod`, and deferred updates
 | `dars info my_app.py`                   | Show info about your app                    |
 | `dars formats`                          | List supported export formats               |
 | `dars --help`                           | Show help and all CLI options               |
+
+Tip: use `dars doctor` to review optional tooling that can enhance bundling/minification.
 
 ## More
 
@@ -189,7 +192,8 @@ Example default:
   "publicDir": null,
   "include": [],
   "exclude": ["**/__pycache__", ".git", ".venv", "node_modules"],
-  "bundle": false
+  "bundle": true,
+  "viteMinify": true
 }
 ```
 
@@ -199,6 +203,7 @@ Example default:
 - `publicDir`: Folder (e.g., `public/` or `assets/`) copied into the output. If null, it is autodetected.
 - `include`/`exclude`: Basic filters for copying from `publicDir`.
 - `bundle`: Reserved for future use. CLI exports and build already bundle appropriately.
+- `viteMinify`: Toggle the Vite-based minifier for JS. When `false`, the build uses esbuild-based minification. If neither is available, a conservative Python fallback is used.
 
 Validate your config:
 

@@ -10,6 +10,7 @@ DEFAULT_CONFIG = {
     "include": [],
     "exclude": ["**/__pycache__", ".git", ".venv", "node_modules"],
     "bundle": True,
+    "viteMinify": True,
 }
 
 CONFIG_FILENAME = "dars.config.json"

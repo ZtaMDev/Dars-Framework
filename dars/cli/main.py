@@ -795,13 +795,6 @@ def main():
     
     exporter = DarsExporter()
     
-    # Run preflight gating for all commands except 'doctor'
-    if getattr(args, 'command', None) and args.command != 'doctor':
-        try:
-            check_and_gate(args.command)
-        except SystemExit as e:
-            # If doctor failed or user cancelled, abort the command
-            sys.exit(e.code if isinstance(e.code, int) else 1)
     
     if args.command == 'export':
         # If file points to config, resolve from dars.config.json
@@ -827,6 +820,12 @@ def main():
         # If config exists and user didn't override output explicitly, use cfg.outdir
         project_root = os.path.dirname(os.path.abspath(file_arg))
         cfg, cfg_found = load_config(project_root)
+        # Apply viteMinify setting to env for downstream minifier
+        try:
+            vite_flag = cfg.get('viteMinify', True)
+            os.environ['DARS_VITE_MINIFY'] = '1' if vite_flag else '0'
+        except Exception:
+            pass
         outdir = args.output
         if cfg_found and (args.output == './dist' or args.output == 'dist'):
             resolved = resolve_paths(cfg, project_root)
@@ -868,7 +867,8 @@ def main():
             target_dir = args.name or '.'
             project_root = os.path.abspath(target_dir)
             os.makedirs(project_root, exist_ok=True)
-            write_default_config(project_root, overwrite=False)
+            # Merge with DEFAULT_CONFIG and write back to ensure new keys (e.g., viteMinify)
+            update_config(project_root, {})
             ensure_dars_lib(project_root)
             console.print("[green]✔ dars.config.json created/updated[/green]")
         elif not args.name:
@@ -884,9 +884,23 @@ def main():
         if not found:
             console.print("[yellow][Dars] Warning: dars.config.json not found. Run 'dars init --update' to create it.[/yellow]")
         resolved = resolve_paths(cfg, project_root)
+        # Apply viteMinify setting to env for downstream minifier
+        try:
+            vite_flag = cfg.get('viteMinify', True)
+            os.environ['DARS_VITE_MINIFY'] = '1' if vite_flag else '0'
+        except Exception:
+            pass
         entry = resolved.get('entry_abs') or os.path.join(project_root, cfg.get('entry', 'main.py'))
         format_name = cfg.get('format', 'html')
         outdir = resolved.get('outdir_abs') or os.path.join(project_root, 'dist')
+
+        # Build-only heads-up: esbuild optional, but recommended for better bundling
+        try:
+            from dars.core.js_bridge import esbuild_available as _esb_ok
+            if not _esb_ok():
+                console.print("[yellow][Dars] Notice: esbuild no está disponible. El bundle se hará con minificación básica. Ejecuta 'dars doctor' para ver requerimientos opcionales.[/yellow]")
+        except Exception:
+            pass
 
         # Validate entry file exists
         if not os.path.exists(entry):

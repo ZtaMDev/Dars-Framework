@@ -1,7 +1,13 @@
 import os
 import re
 from typing import Iterable, Set
-from dars.core.js_bridge import esbuild_minify_js as _esbuild_minify_js, esbuild_minify_css as _esbuild_minify_css, esbuild_available as _esbuild_available
+from dars.core.js_bridge import (
+    esbuild_minify_js as _esbuild_minify_js,
+    esbuild_minify_css as _esbuild_minify_css,
+    esbuild_available as _esbuild_available,
+    vite_minify_js as _vite_minify_js,
+    vite_available as _vite_available,
+)
 
 SAFE_JS_EXT = {'.js', '.mjs', '.cjs'}
 SAFE_CSS_EXT = {'.css'}
@@ -40,8 +46,9 @@ _js_string_splitter = re.compile(r'(".*?"|\'.*?\'|`.*?`)', re.DOTALL)
 
 def minify_js(src: str) -> str:
     """Minify a JS source string. Uses esbuild if available; otherwise Python fallback."""
-    # Fast path: dump to temp file and use esbuild when available
-    if _esbuild_available():
+    # Fast path: dump to temp file and use Vite/esbuild when available
+    _vite_enabled = os.getenv('DARS_VITE_MINIFY', '1') == '1'
+    if (_vite_enabled and _vite_available()) or _esbuild_available():
         try:
             import tempfile
             with tempfile.NamedTemporaryFile('w', delete=False, suffix='.js', encoding='utf-8') as tf_in:
@@ -49,7 +56,12 @@ def minify_js(src: str) -> str:
                 in_path = tf_in.name
             with tempfile.NamedTemporaryFile('r', delete=False, suffix='.js', encoding='utf-8') as tf_out:
                 out_path = tf_out.name
-            if _esbuild_minify_js(in_path, out_path):
+            ok = False
+            if _vite_enabled and _vite_available():
+                ok = _vite_minify_js(in_path, out_path)
+            if not ok and _esbuild_available():
+                ok = _esbuild_minify_js(in_path, out_path)
+            if ok:
                 try:
                     with open(out_path, 'r', encoding='utf-8') as fr:
                         return fr.read()

@@ -214,7 +214,7 @@ app.rTimeCompile().add_file_types = ".js,.css"
 - If you have questions or need support, check the official repository or community channels.
 
 Start building with Dars...
-`},{type:"T9",id:"markdown_docs",text:`# App Class and PWA Features in Dars Framework
+`},{type:"T9",id:"markdown_docs",text:"config.md"},{type:"T9",id:"markdown_docs",text:`# App Class and PWA Features in Dars Framework
 
 ## Overview
 

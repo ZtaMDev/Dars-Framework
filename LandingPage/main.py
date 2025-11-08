@@ -1475,6 +1475,7 @@ documentation = Page(
         style={"class": "markdown-docs"},
         id="markdown_docs"
     ),
+    Markdown("config.md", style={"class": "markdown-docs"}, id="markdown_docs"),
     Markdown(
         file_path="app.md",
         style={"class": "markdown-docs"},
