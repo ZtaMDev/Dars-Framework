@@ -11,6 +11,8 @@ DEFAULT_CONFIG = {
     "exclude": ["**/__pycache__", ".git", ".venv", "node_modules"],
     "bundle": True,
     "viteMinify": True,
+    "markdownHighlight": True,
+    "markdownHighlightTheme": "auto",
 }
 
 CONFIG_FILENAME = "dars.config.json"

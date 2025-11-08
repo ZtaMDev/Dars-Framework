@@ -13,7 +13,8 @@ This file configures how Dars exports and builds your project. It is created by 
   "include": [],
   "exclude": ["**/__pycache__", ".git", ".venv", "node_modules"],
   "bundle": false,
-  "viteMinify": true
+  "viteMinify": true,
+  "markdownHighlight": true
 }
 ```
 
@@ -41,6 +42,11 @@ This file configures how Dars exports and builds your project. It is created by 
   Toggle the advanced JS minifier.
   - `true` (default): prefer the advanced minifier; fall back to the secondary minifier; if neither is available, a conservative built-in fallback is used.
   - `false`: skip the advanced minifier and use the secondary minifier directly; fall back to the conservative built-in if not available.
+
+- markdownHighlight
+  Auto-inject a client-side syntax highlighter for fenced code blocks in Markdown.
+  - `true` (default): injects Prism.js assets once per page and highlights `pre code` blocks.
+  - `false`: no assets injected; you can include your own highlighter or none at all.
 
 ## Behavior and defaults
 

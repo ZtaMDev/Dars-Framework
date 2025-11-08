@@ -2615,7 +2615,12 @@ body {
             # Convert markdown to HTML
             html_content = markdown2.markdown(
                 markdown.content,
-                extras=["fenced-code-blocks", "tables", "header-ids"]
+                extras=[
+                    "fenced-code-blocks",
+                    "code-friendly",
+                    "tables",
+                    "header-ids",
+                ],
             )
         except ImportError:
             # Fallback to basic conversion if markdown2 is not available
@@ -2630,8 +2635,61 @@ body {
         
         class_attr = f'class="{class_name.strip()}"'
         style_attr = f'style="{self.render_styles(markdown.style)}"' if markdown.style else ""
-        
-        return f'<div id="{component_id}" {class_attr} {style_attr}>{html_content}</div>'
+
+        # Normalize code block classes for client highlighters (e.g., Prism)
+        # markdown2 may emit <code class="lang-python">; convert to language-python
+        import re
+        html_content = re.sub(r'<code class="lang-([a-zA-Z0-9_+-]+)">', r'<code class="language-\1">', html_content)
+        # If a <pre><code> lacks a class, add language-none for Prism to process
+        html_content = re.sub(r'<pre([^>]*)>\s*<code(?![^>]*class=)([^>]*)>', r'<pre\1>\n<code class="language-none"\2>', html_content)
+        # Ensure multiline code blocks render correctly even without extra CSS and allow absolute-positioned copy button
+        html_content = html_content.replace(
+            '<pre><code',
+            '<pre style="white-space: pre; overflow:auto; position: relative;"><code'
+        )
+
+        # Auto-inject highlight.js (CSS + JS + init) once per page if enabled in config and not injected
+        assets = ""
+        cfg_hl = True
+        hl_theme = "auto"
+        try:
+            # Try to read config for markdownHighlight; default True if missing/errors
+            app_source = getattr(getattr(self, 'app', None), '__source__', None)
+            project_root = os.getcwd() if not app_source else os.path.dirname(os.path.abspath(app_source))
+            from dars.config import load_config
+            cfg, _ = load_config(project_root)
+            cfg_hl = bool(cfg.get('markdownHighlight', True))
+            hl_theme = str(cfg.get('markdownHighlightTheme', 'auto')).lower()
+        except Exception:
+            cfg_hl = True
+        if cfg_hl and (not hasattr(self, "_hljs_injected") or not getattr(self, "_hljs_injected")):
+            # Prism.js theme CSS selection
+            css_links = ''
+            if hl_theme == 'dark':
+                css_links = '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css">\n'
+            elif hl_theme == 'light':
+                css_links = '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">\n'
+            else:  # auto
+                css_links = (
+                    '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" media="(prefers-color-scheme: light)">\n'
+                    '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" media="(prefers-color-scheme: dark)">\n'
+                )
+            parts = []
+            parts.append(css_links)
+            parts.append('<style>.dars-code-copy{position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.5);color:#fff;border:none;border-radius:6px;padding:4px 8px;font-size:12px;cursor:pointer;opacity:.0;transition:opacity .2s ease;}pre:hover .dars-code-copy{opacity:.9}.dars-code-copy.copied{background:#16a34a}</style>\n')
+            parts.append('<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>\n')
+            parts.append('<script>window.Prism=window.Prism||{};Prism.plugins=Prism.plugins||{};Prism.plugins.autoloader=Prism.plugins.autoloader||{};Prism.plugins.autoloader.languages_path="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/";</script>\n')
+            parts.append('<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>\n')
+            parts.append('<script>(function(){function addCopyButtons(){document.querySelectorAll("pre code").forEach(function(code){var pre=code.parentElement;if(!pre||pre.querySelector(".dars-code-copy"))return;var btn=document.createElement("button");btn.className="dars-code-copy";btn.type="button";btn.textContent="Copy";btn.addEventListener("click",async function(e){e.stopPropagation();try{await navigator.clipboard.writeText(code.innerText);btn.textContent="Copied";btn.classList.add("copied");setTimeout(function(){btn.textContent="Copy";btn.classList.remove("copied")},1200)}catch(err){btn.textContent="Error";setTimeout(function(){btn.textContent="Copy"},1200)}});pre.appendChild(btn);});}function guessLang(text){var t=text.trim();if(/^{[\\s\\S]*}$/.test(t)||/^\\[/.test(t))return "json";if(/^(pip |python |python3 |dars |#|\\$ )/m.test(t))return "bash";if(/\\b(def |class |import |from |print\\(|self\\b)/.test(t))return "python";return null;}function stripPygments(code){if(code && code.innerHTML && code.innerHTML.indexOf("<span")!==-1){code.textContent = code.innerText;}}function prepareAndHighlight(){document.querySelectorAll("pre code").forEach(function(code){stripPygments(code);if(!code.className||code.className.indexOf("language-")===-1){var g=guessLang(code.innerText);code.classList.add("language-"+(g||"none"));}if(window.Prism&&Prism.highlightElement){Prism.highlightElement(code);}});}document.addEventListener("DOMContentLoaded",function(){try{prepareAndHighlight();}catch(e){};try{addCopyButtons()}catch(e){}});})();</script>')
+            assets = ''.join(parts)
+            setattr(self, "_hljs_injected", True)
+
+        # Add stable theme class to container for easier overriding if needed
+        theme_tag = hl_theme if hl_theme in ('light','dark') else 'auto'
+        class_name = f"{class_name} dars-code-theme-{theme_tag}"
+        class_attr = f'class="{class_name.strip()}"'
+
+        return f'{assets}<div id="{component_id}" {class_attr} {style_attr}>{html_content}</div>'
 
     def _basic_markdown_to_html(self, markdown_text: str) -> str:
         """Basic markdown to HTML conversion as fallback"""

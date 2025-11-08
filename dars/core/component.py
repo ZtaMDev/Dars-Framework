@@ -250,6 +250,13 @@ class Component(ABC):
 
     def mod(self, **attrs):
         return DeferredAttr(self, attrs)
+    
+    def render_children(self, exporter: 'Exporter') -> str:
+        """Render all children of the component using the exporter."""
+        children_html = ""
+        for child in self.children:
+            children_html += exporter.render_component(child)
+        return children_html
 
 
 class DeferredAttr:

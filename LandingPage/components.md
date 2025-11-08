@@ -738,6 +738,33 @@ docs_md = Markdown(
 simple_md.update_content(new_content="# Updated\nNew content here")
 ```
 
+### Code blocks and syntax highlighting
+
+The Markdown renderer supports fenced code blocks and emits standard `language-<lang>` classes, e.g. `language-python`.
+
+By default, the exporter auto-injects a client-side highlighter (highlight.js) once per page and highlights all `pre code` blocks. This is controlled by `markdownHighlight` in `dars.config.json`.
+
+Config example:
+
+```json
+{
+  "markdownHighlight": true
+}
+```
+
+- When `true` (default), highlight.js CSS/JS + init are added automatically.
+- When `false`, no assets are injected; include your own highlighter if you want colored code.
+
+Fenced code example:
+
+````
+```python
+import time
+def hello():
+    print("hi")
+```
+````
+
 ## Dependencies
 
 The Markdown component requires the `markdown2` library. Included with the framework.
