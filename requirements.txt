@@ -4,3 +4,4 @@ rich==14.0.0
 uvicorn==0.35.0
 markdown2
 rjsmin==1.2.5
+pydepm==1.1.2
