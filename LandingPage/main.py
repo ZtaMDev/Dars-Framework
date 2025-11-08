@@ -1476,7 +1476,7 @@ documentation = Page(
         id="markdown_docs"
     ),
     Markdown(
-        file_path="config.md", 
+        file_path="config.md",
         style={"class": "markdown-docs"}, 
         id="markdown_docs"
     ),
