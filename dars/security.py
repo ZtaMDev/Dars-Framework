@@ -44,6 +44,30 @@ _html_between_tags = re.compile(r">\s+<")
 _js_string_splitter = re.compile(r'(".*?"|\'.*?\'|`.*?`)', re.DOTALL)
 
 
+_PROTECT_TAGS = ("pre", "code", "textarea", "script", "style")
+
+def _protect_html_blocks(src: str):
+    """Replace whitespace-sensitive blocks with tokens to avoid minifying their contents."""
+    tokens = []
+
+    def _make_repl(match):
+        tokens.append(match.group(0))
+        return f"__DARS_PROTECT_{len(tokens) - 1}__"
+
+    s = src
+    for tag in _PROTECT_TAGS:
+        # Match opening tag with attributes, non-greedy content, then closing tag
+        pat = re.compile(rf"<\s*{tag}\b[^>]*?>.*?<\s*/\s*{tag}\s*>", re.IGNORECASE | re.DOTALL)
+        s = pat.sub(_make_repl, s)
+    return s, tokens
+
+def _restore_html_blocks(src: str, tokens):
+    s = src
+    for i, block in enumerate(tokens):
+        s = s.replace(f"__DARS_PROTECT_{i}__", block)
+    return s
+
+
 def minify_js(src: str) -> str:
     """Minify a JS source string. Uses esbuild if available; otherwise Python fallback."""
     # Fast path: dump to temp file and use Vite/esbuild when available
@@ -131,17 +155,28 @@ def minify_css(src: str) -> str:
 
 
 def minify_html(src: str) -> str:
-    # Prefer htmlmin if available
+    """Conservative HTML minifier that preserves formatting-sensitive blocks.
+
+    Behavior:
+    - If Vite minification is enabled and available, skip HTML minification entirely.
+    - Otherwise, remove non-conditional HTML comments and collapse only inter-tag
+      whitespace outside protected blocks (<pre>, <code>, <textarea>, <script>, <style>).
+    - Does not collapse text-node spaces.
+    """
     try:
-        import htmlmin  # type: ignore
-        return htmlmin.minify(src, remove_comments=True, remove_empty_space=True, reduce_boolean_attributes=True)
+        _vite_enabled = os.getenv('DARS_VITE_MINIFY', '1') == '1'
+        if _vite_enabled and _vite_available():
+            return src
     except Exception:
+        # If detection fails, proceed with conservative fallback below
         pass
     try:
-        s = _html_comments.sub("", src)
-        s = re.sub(r">\s+<", "><", s)
-        s = re.sub(r"\s{2,}", " ", s)
-        return s.strip()
+        protected_src, tokens = _protect_html_blocks(src)
+        s = _html_comments.sub("", protected_src)
+        s = _html_between_tags.sub("><", s)
+        s = s.strip()
+        s = _restore_html_blocks(s, tokens)
+        return s
     except Exception:
         return src
 
