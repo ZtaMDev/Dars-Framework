@@ -229,7 +229,8 @@ This file configures how Dars exports and builds your project. It is created by 
   "include": [],
   "exclude": ["**/__pycache__", ".git", ".venv", "node_modules"],
   "bundle": false,
-  "viteMinify": true
+  "viteMinify": true,
+  "markdownHighlight": true
 }
 \`\`\`
 
@@ -257,6 +258,11 @@ This file configures how Dars exports and builds your project. It is created by 
   Toggle the advanced JS minifier.
   - \`true\` (default): prefer the advanced minifier; fall back to the secondary minifier; if neither is available, a conservative built-in fallback is used.
   - \`false\`: skip the advanced minifier and use the secondary minifier directly; fall back to the conservative built-in if not available.
+
+- markdownHighlight
+  Auto-inject a client-side syntax highlighter for fenced code blocks in Markdown.
+  - \`true\` (default): injects Prism.js assets once per page and highlights \`pre code\` blocks.
+  - \`false\`: no assets injected; you can include your own highlighter or none at all.
 
 ## Behavior and defaults
 
@@ -1407,6 +1413,33 @@ docs_md = Markdown(
 # Update content dynamically
 simple_md.update_content(new_content="# Updated\\nNew content here")
 \`\`\`
+
+### Code blocks and syntax highlighting
+
+The Markdown renderer supports fenced code blocks and emits standard \`language-<lang>\` classes, e.g. \`language-python\`.
+
+By default, the exporter auto-injects a client-side highlighter (highlight.js) once per page and highlights all \`pre code\` blocks. This is controlled by \`markdownHighlight\` in \`dars.config.json\`.
+
+Config example:
+
+\`\`\`json
+{
+  "markdownHighlight": true
+}
+\`\`\`
+
+- When \`true\` (default), highlight.js CSS/JS + init are added automatically.
+- When \`false\`, no assets are injected; include your own highlighter if you want colored code.
+
+Fenced code example:
+
+\`\`\`\`
+\`\`\`python
+import time
+def hello():
+    print("hi")
+\`\`\`
+\`\`\`\`
 
 ## Dependencies
 
