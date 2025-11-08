@@ -146,7 +146,7 @@ function _resolveGoto(cur, goto, statesLen){
   if(goto == null) return cur;
   if(typeof goto === 'number') return goto;
   if(typeof goto === 'string'){
-    if(/^[-+]\d+$/.test(goto)){
+    if(/^[-+]\\d+$/.test(goto)){
       const delta = parseInt(goto, 10);
       const next = cur + delta;
       if(statesLen && statesLen > 0){ return Math.max(0, Math.min(statesLen-1, next)); }
