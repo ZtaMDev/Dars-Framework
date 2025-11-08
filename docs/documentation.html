@@ -480,11 +480,11 @@ dars<span class="w"> </span>preview<span class="w"> </span>./output_directory
     </p>
    </div>
    <div class="dars-markdown dars-code-theme-auto" id="markdown_docs" style="class: markdown-docs">
-    <h1 id="dars-project-configuration-darsconfigjson">
-     Dars Project Configuration (dars.config.json)
+    <h1 id="dars-project-configuration">
+     Dars Project Configuration
     </h1>
     <p>
-     This file configures how Dars exports and builds your project. It is created by
+     The file (dars.config.json) configures how Dars exports and builds your project. It is created by
      <code>
       dars init &lt;name&gt;
      </code>
@@ -506,6 +506,7 @@ dars<span class="w"> </span>preview<span class="w"> </span>./output_directory
 <span class="w">  </span><span class="nt">"include"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
 <span class="w">  </span><span class="nt">"exclude"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"**/__pycache__"</span><span class="p">,</span><span class="w"> </span><span class="s2">".git"</span><span class="p">,</span><span class="w"> </span><span class="s2">".venv"</span><span class="p">,</span><span class="w"> </span><span class="s2">"node_modules"</span><span class="p">],</span>
 <span class="w">  </span><span class="nt">"bundle"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"defaultMinify"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">"viteMinify"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">"markdownHighlight"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
 <span class="p">}</span>
@@ -581,6 +582,30 @@ Reserved for future use. Current exporters already produce a bundled output.
      </li>
      <li>
       <p>
+       defaultMinify
+Toggle the built-in Python minifier (safe and conservative). Controls HTML minification and provides JS/CSS fallback when advanced tools are unavailable.
+      </p>
+      <ul>
+       <li>
+        <code>
+         true
+        </code>
+        (default): run the default Python-side minifier.
+       </li>
+       <li>
+        <code>
+         false
+        </code>
+        : skip the default minifier. You can still use Vite/esbuild via
+        <code>
+         viteMinify
+        </code>
+        .
+       </li>
+      </ul>
+     </li>
+     <li>
+      <p>
        viteMinify
 Toggle the advanced JS minifier.
       </p>
@@ -634,6 +659,10 @@ Auto-inject a client-side syntax highlighter for fenced code blocks in Markdown.
       </code>
       merges your existing config with Dars defaults and writes the result back, adding any new keys (like
       <code>
+       defaultMinify
+      </code>
+      ,
+      <code>
        viteMinify
       </code>
       ) without removing your current settings.
@@ -655,6 +684,17 @@ Auto-inject a client-side syntax highlighter for fenced code blocks in Markdown.
        dars build
       </code>
       , a small notice may appear indicating that a less powerful minifier was used.
+     </li>
+     <li>
+      You can force-skip the default Python minifier per run with
+      <code>
+       --no-minify
+      </code>
+      (does not affect
+      <code>
+       viteMinify
+      </code>
+      ).
      </li>
     </ul>
     <h2 id="tips">
@@ -687,6 +727,19 @@ Auto-inject a client-side syntax highlighter for fenced code blocks in Markdown.
        </code>
        .
       </p>
+      <ul>
+       <li>
+        To disable the default minifier by config, set
+        <code>
+         "defaultMinify": false
+        </code>
+        ; to disable it per-run use
+        <code>
+         --no-minify
+        </code>
+        .
+       </li>
+      </ul>
      </li>
     </ul>
    </div>
@@ -7442,6 +7495,8 @@ app.add_script(form_script)
 
 <span class="c1"># Export to different formats</span>
 <span class="w"> </span>dars<span class="w"> </span><span class="nb">export</span><span class="w"> </span>my_app.py<span class="w"> </span>--format<span class="w"> </span>html<span class="w"> </span>--output<span class="w"> </span>./output
+<span class="w"> </span><span class="c1"># Skip default Python minifier for this run (does not affect viteMinify)</span>
+<span class="w"> </span>dars<span class="w"> </span><span class="nb">export</span><span class="w"> </span>my_app.py<span class="w"> </span>--format<span class="w"> </span>html<span class="w"> </span>--output<span class="w"> </span>./output<span class="w"> </span>--no-minify
 
 <span class="c1"># List supported export formats</span>
 <span class="w"> </span>dars<span class="w"> </span>formats
@@ -7454,6 +7509,11 @@ app.add_script(form_script)
 
 <span class="c1"># Preview an exported app</span>
 <span class="w"> </span>dars<span class="w"> </span>preview<span class="w"> </span>./output_directory
+
+<span class="c1"># Build using project config (dars.config.json)</span>
+<span class="w"> </span>dars<span class="w"> </span>build
+<span class="w"> </span><span class="c1"># Build without the default Python minifier</span>
+<span class="w"> </span>dars<span class="w"> </span>build<span class="w"> </span>--no-minify
 
 <span class="c1"># Help</span>
 <span class="w"> </span>dars<span class="w"> </span>--help
@@ -7493,11 +7553,41 @@ app.add_script(form_script)
       <tr>
        <td>
         <code>
+         dars export my_app.py --format html --no-minify
+        </code>
+       </td>
+       <td>
+        Export skipping default Python minifier
+       </td>
+      </tr>
+      <tr>
+       <td>
+        <code>
          dars preview ./my_app_web
         </code>
        </td>
        <td>
         Preview exported app locally
+       </td>
+      </tr>
+      <tr>
+       <td>
+        <code>
+         dars build
+        </code>
+       </td>
+       <td>
+        Build using dars.config.json
+       </td>
+      </tr>
+      <tr>
+       <td>
+        <code>
+         dars build --no-minify
+        </code>
+       </td>
+       <td>
+        Build skipping default Python minifier
        </td>
       </tr>
       <tr>
@@ -7627,6 +7717,20 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
       .
      </li>
     </ul>
+    <h3 id="minification-labels-in-output">
+     Minification labels in output
+    </h3>
+    <ul>
+     <li>
+      Applying minification (default): default Python-side minifier is active.
+     </li>
+     <li>
+      Applying minification (vite): Vite/esbuild minification is active (JS/CSS) and default is disabled.
+     </li>
+     <li>
+      Applying minification (default + vite): both are active.
+     </li>
+    </ul>
     <p>
      For more, see the
      <a href="getting_started.md">
@@ -7646,53 +7750,56 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
      <a class="dars-link" href="#getting-started-with-dars" id="link_245" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
       Getting started
      </a>
-     <a class="dars-link" href="#app-class-and-pwa-features-in-dars-framework" id="link_246" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
+     <a class="dars-link" href="#dars-project-configuration" id="link_246" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
+      Configuration
+     </a>
+     <a class="dars-link" href="#app-class-and-pwa-features-in-dars-framework" id="link_247" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
       App
      </a>
-     <a class="dars-link" href="#state-management-in-dars-dstate-cstate-goto-mods" id="link_247" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
+     <a class="dars-link" href="#state-management-in-dars-dstate-cstate-goto-mods" id="link_248" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
       State Management
      </a>
-     <a class="dars-link" href="#installation-guide-dars-framework" id="link_248" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
+     <a class="dars-link" href="#installation-guide-dars-framework" id="link_249" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
       Installing
      </a>
-     <a class="dars-link" href="#dars-components-documentation" id="link_249" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
+     <a class="dars-link" href="#dars-components-documentation" id="link_250" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
       Components
      </a>
-     <a class="dars-link" href="#custom-components-in-dars-framework" id="link_250" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
+     <a class="dars-link" href="#custom-components-in-dars-framework" id="link_251" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
       Custom Components
      </a>
-     <a class="dars-link" href="#events-in-dars" id="link_251" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
+     <a class="dars-link" href="#events-in-dars" id="link_252" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
       Events
      </a>
-     <a class="dars-link" href="#dars-exporter-documentation" id="link_252" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
+     <a class="dars-link" href="#dars-exporter-documentation" id="link_253" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
       Exporter
      </a>
-     <a class="dars-link" href="#dars-script-system" id="link_253" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
+     <a class="dars-link" href="#dars-script-system" id="link_254" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
       Scripts
      </a>
-     <a class="dars-link" href="#dars-cli-reference" id="link_254" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
+     <a class="dars-link" href="#dars-cli-reference" id="link_255" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
       Dars CLI
      </a>
     </div>
    </div>
-   <div class="dars-container" id="container_255" style="background-color: #1e2b23; margin-top: auto">
-    <div class="dars-container" id="container_256" style="text-align: center; padding: 30px 20px; border-top: 1px solid #304635">
-     <span class="dars-text" id="text_257" style="color: #b2ffe5; display: inline; margin-right: 5px">
+   <div class="dars-container" id="container_256" style="background-color: #1e2b23; margin-top: auto">
+    <div class="dars-container" id="container_257" style="text-align: center; padding: 30px 20px; border-top: 1px solid #304635">
+     <span class="dars-text" id="text_258" style="color: #b2ffe5; display: inline; margin-right: 5px">
       Created with
      </span>
-     <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework" id="link_258" style="color: #00d68f; text-decoration: none; font-weight: bold; display: inline" target="_self">
+     <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework" id="link_259" style="color: #00d68f; text-decoration: none; font-weight: bold; display: inline" target="_self">
       Dars Framework
      </a>
-     <span class="dars-text" id="text_259" style="color: #b2ffe5; display: inline; margin: 0 5px">
+     <span class="dars-text" id="text_260" style="color: #b2ffe5; display: inline; margin: 0 5px">
       • Documentation:
      </span>
-     <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework/blob/CrystalMain/dars/docs/getting_started.md" id="link_260" style="color: #00d68f; text-decoration: none; font-weight: bold; display: inline" target="_self">
+     <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework/blob/CrystalMain/dars/docs/getting_started.md" id="link_261" style="color: #00d68f; text-decoration: none; font-weight: bold; display: inline" target="_self">
       Getting Started
      </a>
-     <span class="dars-text" id="text_261" style="color: #b2ffe5; display: inline; margin: 0 5px">
+     <span class="dars-text" id="text_262" style="color: #b2ffe5; display: inline; margin: 0 5px">
       • Developer:
      </span>
-     <a class="dars-link" href="https://github.com/ZtaMDev" id="link_262" style="color: #00d68f; text-decoration: none; font-weight: bold; display: inline" target="_self">
+     <a class="dars-link" href="https://github.com/ZtaMDev" id="link_263" style="color: #00d68f; text-decoration: none; font-weight: bold; display: inline" target="_self">
       ZtaDev
      </a>
     </div>

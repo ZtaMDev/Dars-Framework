@@ -72,7 +72,7 @@ def minify_js(src: str) -> str:
     """Minify a JS source string. Uses esbuild if available; otherwise Python fallback."""
     # Fast path: dump to temp file and use Vite/esbuild when available
     _vite_enabled = os.getenv('DARS_VITE_MINIFY', '1') == '1'
-    if (_vite_enabled and _vite_available()) or _esbuild_available():
+    if _vite_enabled and (_vite_available() or _esbuild_available()):
         try:
             import tempfile
             with tempfile.NamedTemporaryFile('w', delete=False, suffix='.js', encoding='utf-8') as tf_in:
@@ -120,7 +120,8 @@ def minify_js(src: str) -> str:
 
 def minify_css(src: str) -> str:
     """Minify a CSS source string. Uses esbuild if available; otherwise Python fallback."""
-    if _esbuild_available():
+    _vite_enabled = os.getenv('DARS_VITE_MINIFY', '1') == '1'
+    if _vite_enabled and _esbuild_available():
         try:
             import tempfile
             with tempfile.NamedTemporaryFile('w', delete=False, suffix='.css', encoding='utf-8') as tf_in:
@@ -158,18 +159,10 @@ def minify_html(src: str) -> str:
     """Conservative HTML minifier that preserves formatting-sensitive blocks.
 
     Behavior:
-    - If Vite minification is enabled and available, skip HTML minification entirely.
-    - Otherwise, remove non-conditional HTML comments and collapse only inter-tag
+    - Always remove non-conditional HTML comments and collapse only inter-tag
       whitespace outside protected blocks (<pre>, <code>, <textarea>, <script>, <style>).
     - Does not collapse text-node spaces.
     """
-    try:
-        _vite_enabled = os.getenv('DARS_VITE_MINIFY', '1') == '1'
-        if _vite_enabled and _vite_available():
-            return src
-    except Exception:
-        # If detection fails, proceed with conservative fallback below
-        pass
     try:
         protected_src, tokens = _protect_html_blocks(src)
         s = _html_comments.sub("", protected_src)
@@ -188,6 +181,15 @@ def minify_output_dir(output_dir: str, extra_skip: Iterable[str] = None, progres
 
     Returns: number of files minified.
     """
+    # Determine modes
+    default_on = True
+    vite_on = False
+    try:
+        default_on = os.environ.get('DARS_DEFAULT_MINIFY', '1') != '0'
+        vite_on = os.environ.get('DARS_VITE_MINIFY', '1') == '1'
+    except Exception:
+        default_on = True
+        vite_on = False
     # Gather candidates first to allow accurate progress reporting
     extra_skip_set: Set[str] = set(extra_skip or [])
     candidates = []
@@ -218,11 +220,16 @@ def minify_output_dir(output_dir: str, extra_skip: Iterable[str] = None, progres
 
         new_content = None
         if ext in SAFE_JS_EXT:
-            new_content = minify_js(content)
+            # JS: process if default_on or vite_on; tool usage is gated inside minify_js by vite flag
+            if default_on or vite_on:
+                new_content = minify_js(content)
         elif ext in SAFE_CSS_EXT:
-            new_content = minify_css(content)
+            if default_on or vite_on:
+                new_content = minify_css(content)
         elif ext in SAFE_HTML_EXT:
-            new_content = minify_html(content)
+            # HTML only when default minifier is enabled
+            if default_on:
+                new_content = minify_html(content)
 
         if new_content is not None and new_content != content:
             try:

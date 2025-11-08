@@ -1,6 +1,6 @@
-# Dars Project Configuration (dars.config.json)
+# Dars Project Configuration
 
-This file configures how Dars exports and builds your project. It is created by `dars init <name>` for new projects and can be merged/updated in existing projects with `dars init --update`.
+The file (dars.config.json) configures how Dars exports and builds your project. It is created by `dars init <name>` for new projects and can be merged/updated in existing projects with `dars init --update`.
 
 ## Example
 
@@ -13,6 +13,7 @@ This file configures how Dars exports and builds your project. It is created by 
   "include": [],
   "exclude": ["**/__pycache__", ".git", ".venv", "node_modules"],
   "bundle": false,
+  "defaultMinify": true,
   "viteMinify": true,
   "markdownHighlight": true
 }
@@ -38,6 +39,11 @@ This file configures how Dars exports and builds your project. It is created by 
 - bundle
   Reserved for future use. Current exporters already produce a bundled output.
 
+- defaultMinify
+  Toggle the built-in Python minifier (safe and conservative). Controls HTML minification and provides JS/CSS fallback when advanced tools are unavailable.
+  - `true` (default): run the default Python-side minifier.
+  - `false`: skip the default minifier. You can still use Vite/esbuild via `viteMinify`.
+
 - viteMinify
   Toggle the advanced JS minifier.
   - `true` (default): prefer the advanced minifier; fall back to the secondary minifier; if neither is available, a conservative built-in fallback is used.
@@ -50,9 +56,10 @@ This file configures how Dars exports and builds your project. It is created by 
 
 ## Behavior and defaults
 
-- `dars init --update` merges your existing config with Dars defaults and writes the result back, adding any new keys (like `viteMinify`) without removing your current settings.
+- `dars init --update` merges your existing config with Dars defaults and writes the result back, adding any new keys (like `defaultMinify`, `viteMinify`) without removing your current settings.
 - During `dars export` and `dars build`, Dars reads this file and configures the minification pipeline accordingly.
 - If advanced minifiers are not available, builds still complete with a conservative fallback. On `dars build`, a small notice may appear indicating that a less powerful minifier was used.
+- You can force-skip the default Python minifier per run with `--no-minify` (does not affect `viteMinify`).
 
 ## Tips
 
@@ -65,3 +72,4 @@ This file configures how Dars exports and builds your project. It is created by 
   dars doctor
   ```
 - If you want to force using only the secondary minifier, set `"viteMinify": false`.
+ - To disable the default minifier by config, set `"defaultMinify": false`; to disable it per-run use `--no-minify`.

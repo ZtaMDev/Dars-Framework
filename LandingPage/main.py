@@ -1377,6 +1377,7 @@ sidebar = Container(
     Container(
         Link("Home", href="#dars-framework-documentation", style=FLOATING_LINK_STYLE),
         Link("Getting started", href="#getting-started-with-dars", style=FLOATING_LINK_STYLE),
+        Link("Configuration", href="#dars-project-configuration", style=FLOATING_LINK_STYLE),
         Link("App", href="#app-class-and-pwa-features-in-dars-framework", style=FLOATING_LINK_STYLE),
         Link("State Management", href="#state-management-in-dars-dstate-cstate-goto-mods", style=FLOATING_LINK_STYLE),
         Link("Installing", href="#installation-guide-dars-framework", style=FLOATING_LINK_STYLE),

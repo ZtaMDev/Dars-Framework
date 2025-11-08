@@ -214,9 +214,9 @@ app.rTimeCompile().add_file_types = ".js,.css"
 - If you have questions or need support, check the official repository or community channels.
 
 Start building with Dars...
-`},{type:"T9",id:"markdown_docs",text:`# Dars Project Configuration (dars.config.json)
+`},{type:"T9",id:"markdown_docs",text:`# Dars Project Configuration
 
-This file configures how Dars exports and builds your project. It is created by \`dars init <name>\` for new projects and can be merged/updated in existing projects with \`dars init --update\`.
+The file (dars.config.json) configures how Dars exports and builds your project. It is created by \`dars init <name>\` for new projects and can be merged/updated in existing projects with \`dars init --update\`.
 
 ## Example
 
@@ -229,6 +229,7 @@ This file configures how Dars exports and builds your project. It is created by 
   "include": [],
   "exclude": ["**/__pycache__", ".git", ".venv", "node_modules"],
   "bundle": false,
+  "defaultMinify": true,
   "viteMinify": true,
   "markdownHighlight": true
 }
@@ -254,6 +255,11 @@ This file configures how Dars exports and builds your project. It is created by 
 - bundle
   Reserved for future use. Current exporters already produce a bundled output.
 
+- defaultMinify
+  Toggle the built-in Python minifier (safe and conservative). Controls HTML minification and provides JS/CSS fallback when advanced tools are unavailable.
+  - \`true\` (default): run the default Python-side minifier.
+  - \`false\`: skip the default minifier. You can still use Vite/esbuild via \`viteMinify\`.
+
 - viteMinify
   Toggle the advanced JS minifier.
   - \`true\` (default): prefer the advanced minifier; fall back to the secondary minifier; if neither is available, a conservative built-in fallback is used.
@@ -266,9 +272,10 @@ This file configures how Dars exports and builds your project. It is created by 
 
 ## Behavior and defaults
 
-- \`dars init --update\` merges your existing config with Dars defaults and writes the result back, adding any new keys (like \`viteMinify\`) without removing your current settings.
+- \`dars init --update\` merges your existing config with Dars defaults and writes the result back, adding any new keys (like \`defaultMinify\`, \`viteMinify\`) without removing your current settings.
 - During \`dars export\` and \`dars build\`, Dars reads this file and configures the minification pipeline accordingly.
 - If advanced minifiers are not available, builds still complete with a conservative fallback. On \`dars build\`, a small notice may appear indicating that a less powerful minifier was used.
+- You can force-skip the default Python minifier per run with \`--no-minify\` (does not affect \`viteMinify\`).
 
 ## Tips
 
@@ -281,6 +288,7 @@ This file configures how Dars exports and builds your project. It is created by 
   dars doctor
   \`\`\`
 - If you want to force using only the secondary minifier, set \`"viteMinify": false\`.
+ - To disable the default minifier by config, set \`"defaultMinify": false\`; to disable it per-run use \`--no-minify\`.
 `},{type:"T9",id:"markdown_docs",text:`# App Class and PWA Features in Dars Framework
 
 ## Overview
@@ -3247,6 +3255,8 @@ Open your terminal in your project directory and use any of the following comman
 
 # Export to different formats
  dars export my_app.py --format html --output ./output
+ # Skip default Python minifier for this run (does not affect viteMinify)
+ dars export my_app.py --format html --output ./output --no-minify
 
 # List supported export formats
  dars formats
@@ -3260,6 +3270,11 @@ Open your terminal in your project directory and use any of the following comman
 # Preview an exported app
  dars preview ./output_directory
 
+# Build using project config (dars.config.json)
+ dars build
+ # Build without the default Python minifier
+ dars build --no-minify
+
 # Help
  dars --help
 
@@ -3271,7 +3286,10 @@ Open your terminal in your project directory and use any of the following comman
 | Command                                 | What it does                               |
 |-----------------------------------------|--------------------------------------------|
 | \`dars export my_app.py --format html\`   | Export app to HTML/CSS/JS in \`./my_app_web\` |
+| \`dars export my_app.py --format html --no-minify\` | Export skipping default Python minifier |
 | \`dars preview ./my_app_web\`             | Preview exported app locally                |
+| \`dars build\`                            | Build using dars.config.json                |
+| \`dars build --no-minify\`                | Build skipping default Python minifier      |
 | \`dars init my_project\`                  | Create a new Dars project                   |
 | \`dars info my_app.py\`                   | Show info about your app                    |
 | \`dars formats\`                          | List supported export formats               |
@@ -3312,4 +3330,9 @@ dars init  -L
 - You can preview apps either live (with \`app.rTimeCompile()\`) or from exported files with \`dars preview\`.
 - Templates are available for quick project setup: use \`dars init my_project -t <template>\`.
 
-For more, see the [Getting Started](getting_started.md) guide and the main documentation index.`},{type:"T4",id:"sidebar-floating",children:[{type:"T8",id:"button_243",text:"\u2630 Contents",events:{click:{t:"i",b:"CiAgICAgICAgICAgIGNvbnN0IHNpZGViYXIgPSBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnc2lkZWJhci1saW5rcycpOwogICAgICAgICAgICBpZiAoc2lkZWJhci5zdHlsZS5kaXNwbGF5ID09PSAnbm9uZScgfHwgc2lkZWJhci5zdHlsZS5kaXNwbGF5ID09PSAnJykgewogICAgICAgICAgICAgICAgc2lkZWJhci5zdHlsZS5kaXNwbGF5ID0gJ2Jsb2NrJzsKICAgICAgICAgICAgfSBlbHNlIHsKICAgICAgICAgICAgICAgIHNpZGViYXIuc3R5bGUuZGlzcGxheSA9ICdub25lJzsKICAgICAgICAgICAgfQogICAgICAgIA=="}}},{type:"T4",id:"sidebar-links",children:[{type:"T7",id:"link_244",text:"Home"},{type:"T7",id:"link_245",text:"Getting started"},{type:"T7",id:"link_246",text:"App"},{type:"T7",id:"link_247",text:"State Management"},{type:"T7",id:"link_248",text:"Installing"},{type:"T7",id:"link_249",text:"Components"},{type:"T7",id:"link_250",text:"Custom Components"},{type:"T7",id:"link_251",text:"Events"},{type:"T7",id:"link_252",text:"Exporter"},{type:"T7",id:"link_253",text:"Scripts"},{type:"T7",id:"link_254",text:"Dars CLI"}]}]},{type:"T4",id:"container_255",children:[{type:"T4",id:"container_256",children:[{type:"T6",id:"text_257",text:"Created with "},{type:"T7",id:"link_258",text:"Dars Framework"},{type:"T6",id:"text_259",text:" \u2022 Documentation: "},{type:"T7",id:"link_260",text:"Getting Started"},{type:"T6",id:"text_261",text:" \u2022 Developer: "},{type:"T7",id:"link_262",text:"ZtaDev"}]}]}]};
+### Minification labels in output
+- Applying minification (default): default Python-side minifier is active.
+- Applying minification (vite): Vite/esbuild minification is active (JS/CSS) and default is disabled.
+- Applying minification (default + vite): both are active.
+
+For more, see the [Getting Started](getting_started.md) guide and the main documentation index.`},{type:"T4",id:"sidebar-floating",children:[{type:"T8",id:"button_243",text:"\u2630 Contents",events:{click:{t:"i",b:"CiAgICAgICAgICAgIGNvbnN0IHNpZGViYXIgPSBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnc2lkZWJhci1saW5rcycpOwogICAgICAgICAgICBpZiAoc2lkZWJhci5zdHlsZS5kaXNwbGF5ID09PSAnbm9uZScgfHwgc2lkZWJhci5zdHlsZS5kaXNwbGF5ID09PSAnJykgewogICAgICAgICAgICAgICAgc2lkZWJhci5zdHlsZS5kaXNwbGF5ID0gJ2Jsb2NrJzsKICAgICAgICAgICAgfSBlbHNlIHsKICAgICAgICAgICAgICAgIHNpZGViYXIuc3R5bGUuZGlzcGxheSA9ICdub25lJzsKICAgICAgICAgICAgfQogICAgICAgIA=="}}},{type:"T4",id:"sidebar-links",children:[{type:"T7",id:"link_244",text:"Home"},{type:"T7",id:"link_245",text:"Getting started"},{type:"T7",id:"link_246",text:"Configuration"},{type:"T7",id:"link_247",text:"App"},{type:"T7",id:"link_248",text:"State Management"},{type:"T7",id:"link_249",text:"Installing"},{type:"T7",id:"link_250",text:"Components"},{type:"T7",id:"link_251",text:"Custom Components"},{type:"T7",id:"link_252",text:"Events"},{type:"T7",id:"link_253",text:"Exporter"},{type:"T7",id:"link_254",text:"Scripts"},{type:"T7",id:"link_255",text:"Dars CLI"}]}]},{type:"T4",id:"container_256",children:[{type:"T4",id:"container_257",children:[{type:"T6",id:"text_258",text:"Created with "},{type:"T7",id:"link_259",text:"Dars Framework"},{type:"T6",id:"text_260",text:" \u2022 Documentation: "},{type:"T7",id:"link_261",text:"Getting Started"},{type:"T6",id:"text_262",text:" \u2022 Developer: "},{type:"T7",id:"link_263",text:"ZtaDev"}]}]}]};

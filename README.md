@@ -193,6 +193,7 @@ Example default:
   "include": [],
   "exclude": ["**/__pycache__", ".git", ".venv", "node_modules"],
   "bundle": true,
+  "defaultMinify": true,
   "viteMinify": true
 }
 ```
@@ -203,7 +204,8 @@ Example default:
 - `publicDir`: Folder (e.g., `public/` or `assets/`) copied into the output. If null, it is autodetected.
 - `include`/`exclude`: Basic filters for copying from `publicDir`.
 - `bundle`: Reserved for future use. CLI exports and build already bundle appropriately.
-- `viteMinify`: Toggle the Vite-based minifier for JS. When `false`, the build uses esbuild-based minification. If neither is available, a conservative Python fallback is used.
+- `defaultMinify`: Toggle the built-in Python minifier (safe, conservatively preserves `<pre>`, `<code>`, `script`, `style`, `textarea`). Controls HTML minification and provides JS/CSS fallback when advanced tools are unavailable. Default `true`.
+- `viteMinify`: Toggle the Vite/esbuild minifier for JS/CSS. Default `true`.
 
 Validate your config:
 
@@ -226,3 +228,40 @@ dars export config --format html
 ---
 
 See LandingPage docs for details: state_management.md, events.md, scripts.md.
+
+## More
+
+- Visit dars [official website](https://ztamdev.github.io/Dars-Framework/)
+- Visit the dars official [Documentation](https://ztamdev.github.io/Dars-Framework/documentation.html) now on separate website.
+- Try dars without installing nothing just visit the [Dars Playground](https://dars-playground.vercel.app/)
+
+## Local Execution and Live Preview
+
+To test your app locally before exporting, use the hot-reload preview from any Python file that defines your app:
+
+```python
+if __name__ == "__main__":
+    app.rTimeCompile()
+```
+
+Then run your file directly:
+
+```bash
+python my_app.py
+```
+
+This will start a local server at http://localhost:8000 so you can view your app in the browser—no manual export needed. You can change the port with:
+
+```bash
+python my_app.py --port 8088
+```
+
+---
+
+You can also use the CLI preview command on an exported app:
+
+```bash
+dars preview ./my_exported_app
+```
+
+This will start a local server at http://localhost:8000 to view your exported app in the browser.

@@ -299,26 +299,59 @@ class DarsExporter:
                 progress.update(task2, advance=80)
                 
                 if success:
-                    # Minification step for bundle
+                    # Minification progress display: prefer precomputed label
                     try:
-                        # Only run minification when bundling is enabled and Vite minify flag allows it
                         from dars.security import minify_output_dir
-                        vite_flag = os.environ.get('DARS_VITE_MINIFY', '1')
-                        if effective_bundle and vite_flag != '0':
-                            task3 = progress.add_task("Applying minification (bundle)", total=1)
+                        label_key = os.environ.get('DARS_MINIFY_LABEL', '')
+                        label = None
+                        if label_key == 'default+vite':
+                            label = "Applying minification (default + vite)"
+                        elif label_key == 'default':
+                            label = "Applying minification (default)"
+                        elif label_key == 'vite':
+                            label = "Applying minification (vite)"
+                        if label is None:
+                            # Fallback detection
+                            default_min = os.environ.get('DARS_DEFAULT_MINIFY', '1') != '0'
+                            vite_enabled_env = os.environ.get('DARS_VITE_MINIFY', '1') == '1'
+                            use_vite = False
+                            try:
+                                from dars.core.js_bridge import vite_available as _vite_available, esbuild_available as _esbuild_available
+                                use_vite = vite_enabled_env and (_vite_available() or _esbuild_available())
+                            except Exception:
+                                use_vite = False
+                            if default_min and use_vite:
+                                label = "Applying minification (default + vite)"
+                            elif default_min:
+                                label = "Applying minification (default)"
+                            elif use_vite:
+                                label = "Applying minification (vite)"
+
+                        default_min_run = os.environ.get('DARS_DEFAULT_MINIFY', '1') != '0'
+                        if default_min_run and label:
+                            task3 = progress.add_task(label, total=1)
                             totals = {"total": 1, "inited": False}
                             def _cb(done, total):
-                                # Initialize task total once when known
                                 if not totals["inited"] and total > 0:
                                     progress.update(task3, total=total)
                                     totals["total"] = total
                                     totals["inited"] = True
                                 progress.update(task3, completed=done)
                             _ = minify_output_dir(output_path, progress_cb=_cb)
-                            # Ensure completed
+                            progress.update(task3, completed=totals.get("total", 1))
+                        elif label == "Applying minification (vite)":
+                            # Run vite-only minification over JS/CSS via security (HTML will be skipped)
+                            task3 = progress.add_task(label, total=1)
+                            totals = {"total": 1, "inited": False}
+                            def _cb(done, total):
+                                if not totals["inited"] and total > 0:
+                                    progress.update(task3, total=total)
+                                    totals["total"] = total
+                                    totals["inited"] = True
+                                progress.update(task3, completed=done)
+                            _ = minify_output_dir(output_path, progress_cb=_cb)
                             progress.update(task3, completed=totals.get("total", 1))
                     except Exception:
-                        # Do not fail export on minification errors
                         pass
                     progress.update(task1, completed=100)
                     progress.update(task2, completed=100)
@@ -590,6 +623,8 @@ def create_parser(include_hidden: bool = True) -> argparse.ArgumentParser:
 
     export_parser.add_argument('--preview', '-p', action='store_true',
                             help=translator.get('preview_help'))
+    # disable python-side default minifier
+    export_parser.add_argument('--no-minify', action='store_true', help='Disable default Python minifier for this run')
 
     
     # Info command
@@ -625,6 +660,8 @@ def create_parser(include_hidden: bool = True) -> argparse.ArgumentParser:
     build_parser.add_argument(
         '--project', '-p', default='.', help='Project root where dars.config.json resides (default: .)'
     )
+    # disable python-side default minifier
+    build_parser.add_argument('--no-minify', action='store_true', help='Disable default Python minifier for this build')
 
     # Config command (validate)
     config_parser = subparsers.add_parser('config', help='Manage and validate dars.config.json')
@@ -830,6 +867,90 @@ def main():
             os.environ['DARS_VITE_MINIFY'] = '1' if vite_flag else '0'
         except Exception:
             pass
+        # Apply defaultMinify from config and CLI override
+        try:
+            default_min = cfg.get('defaultMinify', True)
+            if getattr(args, 'no_minify', False):
+                os.environ['DARS_DEFAULT_MINIFY'] = '0'
+            else:
+                os.environ['DARS_DEFAULT_MINIFY'] = '1' if default_min else '0'
+        except Exception:
+            pass
+        # Ensure default minifier uses fallback-only (no external tools) when enabled
+        try:
+            os.environ['DARS_DEFAULT_MINIFY_ONLY_FALLBACK'] = '1' if os.environ.get('DARS_DEFAULT_MINIFY', '1') != '0' else '0'
+        except Exception:
+            pass
+        # Precompute label for exporter
+        try:
+            from dars.core.js_bridge import vite_available as _vite_available, esbuild_available as _esbuild_available
+            use_vite = (os.environ.get('DARS_VITE_MINIFY', '1') == '1') and (_vite_available() or _esbuild_available())
+            use_default = (os.environ.get('DARS_DEFAULT_MINIFY', '1') != '0')
+            if use_default and use_vite:
+                os.environ['DARS_MINIFY_LABEL'] = 'default+vite'
+            elif use_default:
+                os.environ['DARS_MINIFY_LABEL'] = 'default'
+            elif use_vite:
+                os.environ['DARS_MINIFY_LABEL'] = 'vite'
+            else:
+                os.environ['DARS_MINIFY_LABEL'] = ''
+        except Exception:
+            os.environ['DARS_MINIFY_LABEL'] = ''
+        # Apply defaultMinify from config and CLI override
+        try:
+            default_min = cfg.get('defaultMinify', True)
+            if getattr(args, 'no_minify', False):
+                os.environ['DARS_DEFAULT_MINIFY'] = '0'
+            else:
+                os.environ['DARS_DEFAULT_MINIFY'] = '1' if default_min else '0'
+        except Exception:
+            pass
+        # Ensure default minifier uses fallback-only (no external tools) when enabled
+        try:
+            os.environ['DARS_DEFAULT_MINIFY_ONLY_FALLBACK'] = '1' if os.environ.get('DARS_DEFAULT_MINIFY', '1') != '0' else '0'
+        except Exception:
+            pass
+        # Precompute label for exporter
+        try:
+            from dars.core.js_bridge import vite_available as _vite_available, esbuild_available as _esbuild_available
+            use_vite = (os.environ.get('DARS_VITE_MINIFY', '1') == '1') and (_vite_available() or _esbuild_available())
+            use_default = (os.environ.get('DARS_DEFAULT_MINIFY', '1') != '0')
+            if use_default and use_vite:
+                os.environ['DARS_MINIFY_LABEL'] = 'default+vite'
+            elif use_default:
+                os.environ['DARS_MINIFY_LABEL'] = 'default'
+            elif use_vite:
+                os.environ['DARS_MINIFY_LABEL'] = 'vite'
+            else:
+                os.environ['DARS_MINIFY_LABEL'] = ''
+        except Exception:
+            os.environ['DARS_MINIFY_LABEL'] = ''
+        # Apply defaultMinify from config and CLI override
+        try:
+            default_min = cfg.get('defaultMinify', True)
+            if getattr(args, 'no_minify', False):
+                os.environ['DARS_DEFAULT_MINIFY'] = '0'
+            else:
+                os.environ['DARS_DEFAULT_MINIFY'] = '1' if default_min else '0'
+        except Exception:
+            pass
+        # Precompute label for exporter
+        try:
+            from dars.core.js_bridge import vite_available as _vite_available, esbuild_available as _esbuild_available
+            use_vite = (os.environ.get('DARS_VITE_MINIFY', '1') == '1') and (_vite_available() or _esbuild_available())
+            use_default = (os.environ.get('DARS_DEFAULT_MINIFY', '1') != '0')
+            use_vite = (os.environ.get('DARS_VITE_MINIFY', '1') == '1') and (_vite_available() or _esbuild_available())
+            use_default = (os.environ.get('DARS_DEFAULT_MINIFY', '1') != '0')
+            if use_default and use_vite:
+                os.environ['DARS_MINIFY_LABEL'] = 'default+vite'
+            elif use_default:
+                os.environ['DARS_MINIFY_LABEL'] = 'default'
+            elif use_vite:
+                os.environ['DARS_MINIFY_LABEL'] = 'vite'
+            else:
+                os.environ['DARS_MINIFY_LABEL'] = ''
+        except Exception:
+            os.environ['DARS_MINIFY_LABEL'] = ''
         outdir = args.output
         if cfg_found and (args.output == './dist' or args.output == 'dist'):
             resolved = resolve_paths(cfg, project_root)
@@ -894,6 +1015,35 @@ def main():
             os.environ['DARS_VITE_MINIFY'] = '1' if vite_flag else '0'
         except Exception:
             pass
+        # Apply defaultMinify from config and CLI override
+        try:
+            default_min = cfg.get('defaultMinify', True)
+            if getattr(args, 'no_minify', False):
+                os.environ['DARS_DEFAULT_MINIFY'] = '0'
+            else:
+                os.environ['DARS_DEFAULT_MINIFY'] = '1' if default_min else '0'
+        except Exception:
+            pass
+        # Ensure default minifier uses fallback-only (no external tools) when enabled
+        try:
+            os.environ['DARS_DEFAULT_MINIFY_ONLY_FALLBACK'] = '1' if os.environ.get('DARS_DEFAULT_MINIFY', '1') != '0' else '0'
+        except Exception:
+            pass
+        # Precompute label for exporter
+        try:
+            from dars.core.js_bridge import vite_available as _vite_available, esbuild_available as _esbuild_available
+            use_vite = (os.environ.get('DARS_VITE_MINIFY', '1') == '1') and (_vite_available() or _esbuild_available())
+            use_default = (os.environ.get('DARS_DEFAULT_MINIFY', '1') != '0')
+            if use_default and use_vite:
+                os.environ['DARS_MINIFY_LABEL'] = 'default+vite'
+            elif use_default:
+                os.environ['DARS_MINIFY_LABEL'] = 'default'
+            elif use_vite:
+                os.environ['DARS_MINIFY_LABEL'] = 'vite'
+            else:
+                os.environ['DARS_MINIFY_LABEL'] = ''
+        except Exception:
+            os.environ['DARS_MINIFY_LABEL'] = ''
         entry = resolved.get('entry_abs') or os.path.join(project_root, cfg.get('entry', 'main.py'))
         format_name = cfg.get('format', 'html')
         outdir = resolved.get('outdir_abs') or os.path.join(project_root, 'dist')
@@ -1022,6 +1172,9 @@ def main():
             # bundle is bool
             if not isinstance(cfg.get('bundle', False), bool):
                 issues.append(err(translator.get('cfg_bundle_type')))
+            # defaultMinify is bool
+            if not isinstance(cfg.get('defaultMinify', True), bool):
+                issues.append(err('defaultMinify must be a boolean'))
 
             # Print report
             report = Table(title=translator.get('cfg_validation_title'))

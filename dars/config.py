@@ -10,6 +10,7 @@ DEFAULT_CONFIG = {
     "include": [],
     "exclude": ["**/__pycache__", ".git", ".venv", "node_modules"],
     "bundle": True,
+    "defaultMinify": True,
     "viteMinify": True,
     "markdownHighlight": True,
     "markdownHighlightTheme": "auto",

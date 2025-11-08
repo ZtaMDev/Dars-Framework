@@ -12,6 +12,8 @@ Open your terminal in your project directory and use any of the following comman
 
 # Export to different formats
  dars export my_app.py --format html --output ./output
+ # Skip default Python minifier for this run (does not affect viteMinify)
+ dars export my_app.py --format html --output ./output --no-minify
 
 # List supported export formats
  dars formats
@@ -25,6 +27,11 @@ Open your terminal in your project directory and use any of the following comman
 # Preview an exported app
  dars preview ./output_directory
 
+# Build using project config (dars.config.json)
+ dars build
+ # Build without the default Python minifier
+ dars build --no-minify
+
 # Help
  dars --help
 
@@ -36,7 +43,10 @@ Open your terminal in your project directory and use any of the following comman
 | Command                                 | What it does                               |
 |-----------------------------------------|--------------------------------------------|
 | `dars export my_app.py --format html`   | Export app to HTML/CSS/JS in `./my_app_web` |
+| `dars export my_app.py --format html --no-minify` | Export skipping default Python minifier |
 | `dars preview ./my_app_web`             | Preview exported app locally                |
+| `dars build`                            | Build using dars.config.json                |
+| `dars build --no-minify`                | Build skipping default Python minifier      |
 | `dars init my_project`                  | Create a new Dars project                   |
 | `dars info my_app.py`                   | Show info about your app                    |
 | `dars formats`                          | List supported export formats               |
@@ -76,5 +86,10 @@ dars init  -L
 - Use `dars --help` for a full list of commands and options.
 - You can preview apps either live (with `app.rTimeCompile()`) or from exported files with `dars preview`.
 - Templates are available for quick project setup: use `dars init my_project -t <template>`.
+
+### Minification labels in output
+- Applying minification (default): default Python-side minifier is active.
+- Applying minification (vite): Vite/esbuild minification is active (JS/CSS) and default is disabled.
+- Applying minification (default + vite): both are active.
 
 For more, see the [Getting Started](getting_started.md) guide and the main documentation index.
