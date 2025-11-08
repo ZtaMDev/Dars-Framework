@@ -37,3 +37,4 @@ uploadPypiScript.py
 test/
 myapp/
 tst/
+dpm.py
