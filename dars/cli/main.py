@@ -259,7 +259,7 @@ class DarsExporter:
             
         return True
         
-    def export_app(self, app: App, format_name: str, output_path: str, show_preview: bool = False) -> bool:
+    def export_app(self, app: App, format_name: str, output_path: str, show_preview: bool = False, bundle: Optional[bool] = None) -> bool:
         """Exports an application to the specified format"""
         
         if format_name not in self.exporters:
@@ -292,27 +292,31 @@ class DarsExporter:
             progress.update(task2, advance=20)
             
             try:
-                # En CLI 'dars export', generamos un bundle final (sin hot-reload dev)
-                success = exporter.export(app, output_path, bundle=True)
+                # Determine effective bundle behavior: explicit param overrides default
+                effective_bundle = True if bundle is None else bool(bundle)
+                # En CLI 'dars export' default is to generate a bundle (bundle=True)
+                success = exporter.export(app, output_path, bundle=effective_bundle)
                 progress.update(task2, advance=80)
                 
                 if success:
                     # Minification step for bundle
                     try:
+                        # Only run minification when bundling is enabled and Vite minify flag allows it
                         from dars.security import minify_output_dir
-                        # Use actual file count progress
-                        task3 = progress.add_task("Applying minification (bundle)", total=1)
-                        totals = {"total": 1, "inited": False}
-                        def _cb(done, total):
-                            # Initialize task total once when known
-                            if not totals["inited"] and total > 0:
-                                progress.update(task3, total=total)
-                                totals["total"] = total
-                                totals["inited"] = True
-                            progress.update(task3, completed=done)
-                        _ = minify_output_dir(output_path, progress_cb=_cb)
-                        # Ensure completed
-                        progress.update(task3, completed=totals.get("total", 1))
+                        vite_flag = os.environ.get('DARS_VITE_MINIFY', '1')
+                        if effective_bundle and vite_flag != '0':
+                            task3 = progress.add_task("Applying minification (bundle)", total=1)
+                            totals = {"total": 1, "inited": False}
+                            def _cb(done, total):
+                                # Initialize task total once when known
+                                if not totals["inited"] and total > 0:
+                                    progress.update(task3, total=total)
+                                    totals["total"] = total
+                                    totals["inited"] = True
+                                progress.update(task3, completed=done)
+                            _ = minify_output_dir(output_path, progress_cb=_cb)
+                            # Ensure completed
+                            progress.update(task3, completed=totals.get("total", 1))
                     except Exception:
                         # Do not fail export on minification errors
                         pass
@@ -924,7 +928,13 @@ def main():
         app = exporter.load_app_from_file(entry)
         if app is None:
             sys.exit(1)
-        success = exporter.export_app(app, format_name, outdir, show_preview=False)
+        # Respect dars.config.json bundle flag when running `dars build`
+        bundle_flag = True
+        try:
+            bundle_flag = bool(cfg.get('bundle', True))
+        except Exception:
+            bundle_flag = True
+        success = exporter.export_app(app, format_name, outdir, show_preview=False, bundle=bundle_flag)
         sys.exit(0 if success else 1)
 
     elif args.command == 'preview':
