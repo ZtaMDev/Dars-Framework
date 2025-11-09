@@ -221,12 +221,11 @@ class App:
                 return
             exporter = HTMLCSSJSExporter()
 
-        # Importar PreviewServer
+        # Importar PreviewServer (para modo web)
         try:
             from dars.cli.preview import PreviewServer
         except ImportError:
-            print("Could not import PreviewServer")
-            return
+            PreviewServer = None
 
         shutdown_event = threading.Event()
         watchers = []  # aquí guardaremos todos los watchers
@@ -276,9 +275,42 @@ class App:
                 else:
                     print(warn_msg)
 
-            # export inicial desde el root usando la instancia actual (self)
+            # Detectar formato desktop por config o atributo
+            fmt = str(cfg.get('format', '')).lower() if cfg else ''
+            is_desktop = bool(getattr(self, 'desktop', False) or fmt == 'desktop')
+
+            if is_desktop:
+                # --- Desktop dev: exportar Electron y lanzar Electron ---
+                try:
+                    from dars.exporters.desktop.electron import ElectronExporter
+                    from dars.core import js_bridge as jsb
+                except Exception as e:
+                    (console.print(f"[red]Desktop dev setup failed: {e}[/red]") if console else print(f"[Dars] Desktop dev setup failed: {e}"))
+                    return
+
+                with pushd(project_root):
+                    elec_exporter = ElectronExporter()
+                    ok = elec_exporter.export(self, preview_dir, bundle=False)
+                    if not ok:
+                        (console.print("[red]Electron export failed.[/red]") if console else print("[Dars] Electron export failed."))
+                        return
+                # Intentar lanzar Electron
+                if not jsb.electron_available():
+                    (console.print("[yellow]⚠ Electron no encontrado. Ejecuta: dars doctor --all --yes[/yellow]") if console else print("[Dars] Electron not found. Run: dars doctor --all --yes"))
+                    return
+                (console.print("[cyan]Launching Electron (dev)...[/cyan]") if console else print("[Dars] Launching Electron (dev)..."))
+                code, out, err = jsb.electron_dev(cwd=preview_dir)
+                if code != 0:
+                    (console.print(f"[red]Electron exited with code {code}: {err}[/red]") if console else print(f"[Dars] Electron exited with code {code}: {err}"))
+                return
+
+            # --- Web dev por defecto ---
             with pushd(project_root):
                 exporter.export(self, preview_dir, bundle=False)
+
+            if not PreviewServer:
+                (console.print("[red]Preview server module not available.[/red]") if console else print("[Dars] Preview server module not available."))
+                return
 
             url = f"http://localhost:{port}"
             app_title = getattr(self, 'title', 'Dars App')

@@ -4,7 +4,7 @@ from typing import Tuple, Dict, Any
 
 DEFAULT_CONFIG = {
     "entry": "main.py",
-    "format": "html",
+    "format": "web",
     "outdir": "dist",
     "publicDir": None,  # autodetect if None: prefers ./public then ./assets
     "include": [],
@@ -14,6 +14,7 @@ DEFAULT_CONFIG = {
     "viteMinify": True,
     "markdownHighlight": True,
     "markdownHighlightTheme": "auto",
+    "targetPlatform": "auto",  # Desktop-only option: platform target for Electron build (auto|windows|linux|macos)
 }
 
 CONFIG_FILENAME = "dars.config.json"

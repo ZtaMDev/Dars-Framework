@@ -1,6 +1,15 @@
 import os, sys
 from typing import Dict, List
-from .detect import detect_node, detect_bun, detect_esbuild, detect_vite, read_pyproject_deps, check_python_deps
+from .detect import (
+    detect_node,
+    detect_bun,
+    detect_esbuild,
+    detect_vite,
+    detect_electron,
+    detect_electron_builder,
+    read_pyproject_deps,
+    check_python_deps,
+)
 from .installers import install_bun
 from .persist import load_config, save_config
 from .ui import render_report, prompt_action, confirm_install
@@ -18,10 +27,12 @@ def run_doctor(check_only: bool = False, auto_yes: bool = False, install_all: bo
         bun = detect_bun()
         esb = detect_esbuild()
         vit = detect_vite()
+        elec = detect_electron()
+        builder = detect_electron_builder()
         reqs = read_pyproject_deps()
         py = check_python_deps(reqs)
 
-    render_report(node, bun, py, esb, vit)
+    render_report(node, bun, py, esb, vit, elec, builder)
 
     # Mandatory only for doctor purposes: Python deps
     missing_items: List[str] = []
@@ -32,15 +43,19 @@ def run_doctor(check_only: bool = False, auto_yes: bool = False, install_all: bo
     if not bun.get('ok'): optional_missing.append('Bun (optional)')
     if not esb.get('ok'): optional_missing.append('esbuild (optional)')
     if not vit.get('ok'): optional_missing.append('vite (optional)')
+    if not elec.get('ok'): optional_missing.append('Electron (optional)')
+    if not builder.get('ok'): optional_missing.append('electron-builder (optional)')
 
     if check_only:
-        return 0 if not missing_items else 1
+        # Fail if Python deps missing OR Electron tooling missing
+        return 0 if (not missing_items and elec.get('ok') and builder.get('ok')) else 1
 
     # Decide next steps
     has_missing = bool(missing_items)
 
     # Always show a small action menu; if nothing missing, offer re-run/quit
     if not check_only:
+        # Show menu; do not auto-install after exit
         choice = '1' if (auto_yes and install_all and has_missing) else prompt_action(has_missing)
         if has_missing:
             if choice == '3':
@@ -73,23 +88,35 @@ def run_doctor(check_only: bool = False, auto_yes: bool = False, install_all: bo
         # Re-run immediately
         return run_doctor(check_only=False, auto_yes=auto_yes, install_all=install_all, force=True)
 
-    # choice == '1' => Install ALL missing
+    # choice == '1' => Install ALL missing (and optional desktop tooling if requested via --all)
     summary: List[str] = []
-    # Only Bun and Python deps are installable from doctor; Node/esbuild/vite show links in the report
+    # Installers: Bun, Python deps; desktop tooling via Bun
     if not bun.get('ok'): summary.append('Bun (winget/installer)')
     if py.get('missing'): summary.append(f"Python deps: {', '.join(py['missing'])}")
-    # Do not include other optional tools in install summary
+    if install_all:
+        if not elec.get('ok'): summary.append('Electron (bun add -d electron)')
+        if not builder.get('ok'): summary.append('electron-builder (bun add -d electron-builder)')
 
     if not auto_yes:
         if not confirm_install(summary):
             return 1
 
-    # Installers: only Bun, optionally Python deps
+    # Installers: Bun, optionally Python deps and desktop tooling
     with console.status("[cyan]Installing selected items...[/cyan]"):
         try:
             install_bun()
         except Exception:
             pass
+        # Install desktop tooling via Bun if requested and available
+        if install_all:
+            try:
+                from dars.core.js_bridge import ensure_electron, ensure_electron_builder
+                if not elec.get('ok'):
+                    ensure_electron()
+                if not builder.get('ok'):
+                    ensure_electron_builder()
+            except Exception:
+                pass
 
     # Python deps via pip
     if py.get('missing'):
@@ -106,10 +133,13 @@ def run_doctor(check_only: bool = False, auto_yes: bool = False, install_all: bo
         bun2 = detect_bun()
         esb2 = detect_esbuild()
         vit2 = detect_vite()
+        elec2 = detect_electron()
+        builder2 = detect_electron_builder()
         py2 = check_python_deps(read_pyproject_deps())
 
-    render_report(node2, bun2, py2, esb2, vit2)
+    render_report(node2, bun2, py2, esb2, vit2, elec2, builder2)
 
+    # Consider satisfied if Python deps OK; optional tools do not gate satisfaction
     all_ok = not py2.get('missing')
 
     cfg['requirements']['node'].update({'ok': bool(node2.get('ok')), 'version': node2.get('version')})

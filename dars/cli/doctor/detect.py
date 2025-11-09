@@ -39,6 +39,37 @@ def detect_node() -> Dict[str, Optional[str]]:
     return {"ok": bool(ver), "version": ver, "path": path}
 
 
+def detect_electron() -> Dict[str, Optional[str]]:
+    # Prefer bun x electron --version
+    if has_bun():
+        code, out, err = js_run(["bun", "x", "electron", "--version"])  # type: ignore
+        if code == 0:
+            ver = parse_semver(out) or out.strip()
+            return {"ok": True, "version": ver, "path": "bun x electron"}
+    if has_node():
+        code, out, err = js_run(["npx", "--yes", "electron", "--version"])  # type: ignore
+        if code == 0:
+            ver = parse_semver(out) or out.strip()
+            return {"ok": True, "version": ver, "path": "npx electron"}
+    return {"ok": False, "version": None, "path": None}
+
+
+def detect_electron_builder() -> Dict[str, Optional[str]]:
+    # Prefer bun x electron-builder --version
+    if has_bun():
+        code, out, err = js_run(["bun", "x", "electron-builder", "--version"])  # type: ignore
+        if code == 0:
+            ver = parse_semver(out) or out.strip()
+            return {"ok": True, "version": ver, "path": "bun x electron-builder"}
+    if has_node():
+        code, out, err = js_run(["npx", "--yes", "electron-builder", "--version"])  # type: ignore
+        if code == 0:
+            ver = parse_semver(out) or out.strip()
+            return {"ok": True, "version": ver, "path": "npx electron-builder"}
+    return {"ok": False, "version": None, "path": None}
+    
+
+
 def detect_esbuild() -> Dict[str, Optional[str]]:
     # Prefer bun x esbuild --version
     if has_bun():
@@ -63,6 +94,36 @@ def detect_vite() -> Dict[str, Optional[str]]:
         code, out, err = js_run(["npx", "--yes", "vite", "--version"])  # type: ignore
         if code == 0:
             return {"ok": True, "version": out.strip() or "unknown", "path": "npx vite"}
+    return {"ok": False, "version": None, "path": None}
+
+
+def detect_electron() -> Dict[str, Optional[str]]:
+    # Prefer bun x electron --version
+    if has_bun():
+        code, out, err = js_run(["bun", "x", "electron", "--version"])  # type: ignore
+        if code == 0:
+            ver = parse_semver(out) or out.strip()
+            return {"ok": True, "version": ver, "path": "bun x electron"}
+    if has_node():
+        code, out, err = js_run(["npx", "--yes", "electron", "--version"])  # type: ignore
+        if code == 0:
+            ver = parse_semver(out) or out.strip()
+            return {"ok": True, "version": ver, "path": "npx electron"}
+    return {"ok": False, "version": None, "path": None}
+
+
+def detect_electron_builder() -> Dict[str, Optional[str]]:
+    # Prefer bun x electron-builder --version
+    if has_bun():
+        code, out, err = js_run(["bun", "x", "electron-builder", "--version"])  # type: ignore
+        if code == 0:
+            ver = parse_semver(out) or out.strip()
+            return {"ok": True, "version": ver, "path": "bun x electron-builder"}
+    if has_node():
+        code, out, err = js_run(["npx", "--yes", "electron-builder", "--version"])  # type: ignore
+        if code == 0:
+            ver = parse_semver(out) or out.strip()
+            return {"ok": True, "version": ver, "path": "npx electron-builder"}
     return {"ok": False, "version": None, "path": None}
 
 

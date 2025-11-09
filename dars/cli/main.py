@@ -29,6 +29,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from dars.core.app import App
 from dars.exporters.web.html_css_js import HTMLCSSJSExporter
+from dars.exporters.desktop.electron import ElectronExporter
 from dars.cli.translations import translator
 from dars.config import load_config, resolve_paths, write_default_config, update_config
 from dars.cli.doctor.preflight import check_and_gate
@@ -211,7 +212,9 @@ class DarsExporter:
     
     def __init__(self):
         self.exporters = {
-            'html': HTMLCSSJSExporter()
+            'html': HTMLCSSJSExporter(),  # legacy alias
+            'web': HTMLCSSJSExporter(),   # preferred alias
+            'desktop': ElectronExporter(),
         }
         
     def load_app_from_file(self, file_path: str) -> Optional[App]:
@@ -261,12 +264,14 @@ class DarsExporter:
         
     def export_app(self, app: App, format_name: str, output_path: str, show_preview: bool = False, bundle: Optional[bool] = None) -> bool:
         """Exports an application to the specified format"""
-        
+        # Normalize early so availability check works
+        if format_name == 'html':
+            format_name = 'web'
+
         if format_name not in self.exporters:
             console.print(f"[red]{translator.get('error_format_not_supported')} '{format_name}'[/red]")
             self.show_supported_formats()
             return False
-            
         exporter = self.exporters[format_name]
         
         with Progress(
@@ -379,7 +384,9 @@ class DarsExporter:
         table.add_column(translator.get('html_description'), style="green")
         
         formats_info = {
-            'html': ('HTML/CSS/JavaScript', 'Web'),
+            'web': ('HTML/CSS/JavaScript', 'Web'),
+            'html': ('HTML/CSS/JavaScript (legacy alias)', 'Web'),
+            'desktop': ('Electron (HTML/CSS/JS + Bridge)', 'Desktop'),
         }
         
         for format_name, (description, platform) in formats_info.items():
@@ -452,7 +459,7 @@ class DarsExporter:
             self.print_component_tree(child, level + 1)
     
 
-    def init_project(self, name: str, template: Optional[str] = None):
+    def init_project(self, name: str, template: Optional[str] = None, proj_type: str = 'web'):
         """Initializes a base Dars project, optionally using a template"""
         if os.path.exists(name):
             console.print(f"[red]❌ {translator.get('directory_exists').format(name=name)}[/red]")
@@ -495,7 +502,7 @@ class DarsExporter:
             HELLO_WORLD_CODE = """
 from dars.all import *
 
-app = App(title="Hello World", theme="dark")
+app = App(title="Hello World", theme="dark"%s)
 # Crear componentes
 index = Page(
     Text(
@@ -550,25 +557,76 @@ app.add_page("index", index, title="Hello World", index=True)
 if __name__ == "__main__":
     app.rTimeCompile()
 """
+            # Include desktop=True when requested
+            desktop_suffix = ", desktop=True" if str(proj_type).lower() == 'desktop' else ""
+            HELLO_WORLD_CODE = HELLO_WORLD_CODE.replace('%s', desktop_suffix)
             main_py = Path(name) / "main.py"
             main_py.write_text(HELLO_WORLD_CODE.strip(), encoding="utf-8")
             console.print(f"[green]✔ {translator.get('main_py_created')}[/green]")
 
         # Create default dars.config.json for the new project
         try:
-            write_default_config(os.path.abspath(name), overwrite=False)
+            project_root = os.path.abspath(name)
+            write_default_config(project_root, overwrite=False)
+            if str(proj_type).lower() == 'desktop':
+                try:
+                    update_config(project_root, {"format": "desktop"})
+                except Exception:
+                    pass
             console.print("[green]✔ dars.config.json created[/green]")
         except Exception:
             # Non-fatal; keep init working even if config write fails
             pass
 
-        # Final instructions
-        console.print(f"\n[bold cyan]🎉 {translator.get('project_initialized')}[/bold cyan]")
-        console.print(Syntax(f"cd {name}", "bash"))
-        console.print(Syntax(f"\n{translator.get('export_command')}:", "bash"))
-        console.print(Syntax(f"dars export (python file) --format html --output build", "bash"))
-        console.print(Syntax(f"\n{translator.get('preview_command')}:", "bash"))
-        console.print(Syntax(f"python (python file)", "bash"))
+        # Desktop backend scaffold
+        if str(proj_type).lower() == 'desktop':
+            try:
+                backend_dir = Path(name) / 'backend'
+                backend_dir.mkdir(parents=True, exist_ok=True)
+                # package.json (CJS)
+                backend_pkg = '{\n' + \
+                    '  "name": "dars-electron-backend",\n' + \
+                    '  "private": true,\n' + \
+                    '  "main": "main.js",\n' + \
+                    '  "scripts": {"start": "electron ."},\n' + \
+                    '  "devDependencies": {"electron": "latest"}\n' + \
+                '}\n'
+                (backend_dir / 'package.json').write_text(backend_pkg, encoding='utf-8')
+                # main.js
+                backend_main = "const { app, BrowserWindow, Menu } = require('electron');\n" + \
+                    "const path = require('path');\n\n" + \
+                    "function createWindow() {\n" + \
+                    "  const win = new BrowserWindow({\n" + \
+                    "    width: 1000, height: 700,\n" + \
+                    "    webPreferences: {\n" + \
+                    "      contextIsolation: true,\n" + \
+                    "      preload: path.join(__dirname, 'preload.js')\n" + \
+                    "    }\n" + \
+                    "  });\n" + \
+                    "  Menu.setApplicationMenu(null);\n" + \
+                    "  win.loadFile(path.join(__dirname, 'app', 'index.html'));\n" + \
+                    "}\n\n" + \
+                    "app.whenReady().then(() => {\n" + \
+                    "  createWindow();\n" + \
+                    "  app.on('activate', function () {\n" + \
+                    "    if (BrowserWindow.getAllWindows().length === 0) createWindow();\n" + \
+                    "  });\n" + \
+                    "});\n\n" + \
+                    "app.on('window-all-closed', function () {\n" + \
+                    "  if (process.platform !== 'darwin') app.quit();\n" + \
+                    "});\n"
+                (backend_dir / 'main.js').write_text(backend_main, encoding='utf-8')
+                # preload.js
+                backend_preload = "const { contextBridge, ipcRenderer } = require('electron');\n" + \
+                    "contextBridge.exposeInMainWorld('DarsIPC', {\n" + \
+                    "  invoke: (channel, ...args) => ipcRenderer.invoke(channel, ...args)\n" + \
+                    "});\n"
+                (backend_dir / 'preload.js').write_text(backend_preload, encoding='utf-8')
+                console.print("[green]✔ backend/ scaffold created[/green]")
+            except Exception as e:
+                console.print(f"[yellow]Warning: could not create backend scaffold: {e}[/yellow]")
+
+        # Final instructions removed per request
 
 def print_version_info():
     import importlib.util
@@ -609,9 +667,9 @@ def create_parser(include_hidden: bool = True) -> argparse.ArgumentParser:
     # --format opcional (default: html)
     export_parser.add_argument(
         '--format', '-f',
-        choices=["html"],
-        default="html",
-        help=translator.get('format_help') + " (default: html)"
+        choices=["web", "html", "desktop"],
+        default="web",
+        help=translator.get('format_help') + " (default: web)"
     )
 
     # --output opcional (default: ./dist)
@@ -653,6 +711,10 @@ def create_parser(include_hidden: bool = True) -> argparse.ArgumentParser:
         '--update', '-u',
         action='store_true',
         help='Create or update dars.config.json in the target (or current) directory'
+    )
+    init_parser.add_argument(
+        '--type', '-T', choices=['web', 'desktop'], default='web',
+        help='Project type scaffold (web | desktop). Default: web'
     )
 
     # Build command (config-driven)
@@ -956,10 +1018,15 @@ def main():
             resolved = resolve_paths(cfg, project_root)
             outdir = resolved.get('outdir_abs') or outdir
 
-        # Validate format (currently only html)
-        if args.format not in ['html']:
+        # Normalize format aliases
+        fmt_cli = args.format
+        if fmt_cli == 'html':
+            fmt_cli = 'web'
+        # Validate format
+        if fmt_cli not in ['web', 'desktop']:
             console.print(f"[red]{translator.get('error_format_only_html')}[/red]")
             sys.exit(1)
+        # proceed (desktop is implemented)
 
         # Ensure outdir can be created
         try:
@@ -994,13 +1061,73 @@ def main():
             os.makedirs(project_root, exist_ok=True)
             # Merge with DEFAULT_CONFIG and write back to ensure new keys (e.g., viteMinify)
             update_config(project_root, {})
+            # Migrate legacy format html -> web (idempotente)
+            try:
+                cfg, _ = load_config(project_root)
+                if str(cfg.get('format', '')).lower() == 'html':
+                    update_config(project_root, {"format": "web"})
+            except Exception:
+                pass
             ensure_dars_lib(project_root)
             console.print("[green]✔ dars.config.json created/updated[/green]")
+            # If desktop format, ensure backend scaffold exists
+            try:
+                cfg2, _ = load_config(project_root)
+                if str(cfg2.get('format', '')).lower() == 'desktop':
+                    backend_dir = Path(project_root) / 'backend'
+                    backend_dir.mkdir(parents=True, exist_ok=True)
+                    # package.json (CJS)
+                    pkg_path = backend_dir / 'package.json'
+                    if not pkg_path.exists():
+                        pkg_path.write_text('{\n' +
+                                            '  "name": "dars-electron-backend",\n' +
+                                            '  "private": true,\n' +
+                                            '  "main": "main.js",\n' +
+                                            '  "scripts": {"start": "electron ."},\n' +
+                                            '  "devDependencies": {"electron": "latest"}\n' +
+                                            '}\n', encoding='utf-8')
+                    # main.js
+                    main_js_path = backend_dir / 'main.js'
+                    if not main_js_path.exists():
+                        main_js_path.write_text(
+                            "const { app, BrowserWindow, Menu } = require('electron');\n" +
+                            "const path = require('path');\n\n" +
+                            "function createWindow() {\n" +
+                            "  const win = new BrowserWindow({\n" +
+                            "    width: 1000, height: 700,\n" +
+                            "    webPreferences: {\n" +
+                            "      contextIsolation: true,\n" +
+                            "      preload: path.join(__dirname, 'preload.js')\n" +
+                            "    }\n" +
+                            "  });\n" +
+                            "  Menu.setApplicationMenu(null);\n" +
+                            "  win.loadFile(path.join(__dirname, 'app', 'index.html'));\n" +
+                            "}\n\n" +
+                            "app.whenReady().then(() => {\n" +
+                            "  createWindow();\n" +
+                            "  app.on('activate', function () {\n" +
+                            "    if (BrowserWindow.getAllWindows().length === 0) createWindow();\n" +
+                            "  });\n" +
+                            "});\n\n" +
+                            "app.on('window-all-closed', function () {\n" +
+                            "  if (process.platform !== 'darwin') app.quit();\n" +
+                            "});\n", encoding='utf-8')
+                    # preload.js
+                    preload_path = backend_dir / 'preload.js'
+                    if not preload_path.exists():
+                        preload_path.write_text(
+                            "const { contextBridge, ipcRenderer } = require('electron');\n" +
+                            "contextBridge.exposeInMainWorld('DarsIPC', {\n" +
+                            "  invoke: (channel, ...args) => ipcRenderer.invoke(channel, ...args)\n" +
+                            "});\n", encoding='utf-8')
+                    console.print("[green]✔ backend/ scaffold ensured[/green]")
+            except Exception:
+                pass
         elif not args.name:
             console.print("[red]Error: Project name is required[/red]")
             parser.parse_args(['init', '--help'])
         else:
-            exporter.init_project(args.name, template=args.template)
+            exporter.init_project(args.name, template=args.template, proj_type=getattr(args, 'type', 'web'))
 
         
     elif args.command == 'build':
@@ -1062,10 +1189,14 @@ def main():
             console.print(f"[yellow]{translator.get('edit_config_hint')}[/yellow]")
             sys.exit(1)
 
-        # Validate format (currently only html)
-        if format_name not in ['html']:
+        # Normalize alias
+        if format_name == 'html':
+            format_name = 'web'
+        # Validate format
+        if format_name not in ['web', 'desktop']:
             console.print(f"[red]{translator.get('error_format_only_html')}[/red]")
             sys.exit(1)
+        # proceed (desktop is implemented)
 
         # Ensure outdir can be created
         try:
@@ -1078,14 +1209,68 @@ def main():
         app = exporter.load_app_from_file(entry)
         if app is None:
             sys.exit(1)
-        # Respect dars.config.json bundle flag when running `dars build`
+        # Respect bundle flag for web; force bundle for desktop to generate source-electron
         bundle_flag = True
         try:
             bundle_flag = bool(cfg.get('bundle', True))
         except Exception:
             bundle_flag = True
+        if format_name == 'desktop':
+            bundle_flag = True
         success = exporter.export_app(app, format_name, outdir, show_preview=False, bundle=bundle_flag)
-        sys.exit(0 if success else 1)
+        if not success:
+            sys.exit(1)
+
+        # If desktop, run electron-builder to generate executable according to targetPlatform
+        if format_name == 'desktop':
+            try:
+                import sys as _sys
+                from dars.core import js_bridge as jsb
+                # Determine platform target
+                target = str(cfg.get('targetPlatform', 'auto')).lower()
+                if target not in ('auto', 'windows', 'linux', 'macos'):
+                    console.print("[yellow][Dars] Warning: invalid targetPlatform. Using 'auto'.[/yellow]")
+                    target = 'auto'
+                if target == 'auto':
+                    if _sys.platform.startswith('win'):
+                        target = 'windows'
+                    elif _sys.platform.startswith('linux'):
+                        target = 'linux'
+                    elif _sys.platform == 'darwin':
+                        target = 'macos'
+                    else:
+                        target = 'windows'
+                if target == 'macos' and _sys.platform != 'darwin':
+                    console.print("[red]✖ Cannot build macOS from a non-mac host. Use a macOS machine.[/red]")
+                    sys.exit(1)
+
+                # Ensure electron-builder available (best effort)
+                if not jsb.electron_builder_available():
+                    console.print("[yellow][Dars] electron-builder not found. Attempting to use Bun runner...[/yellow]")
+                # Compute cwd where package.json lives
+                src_dir = os.path.join(outdir, 'source-electron')
+                if not os.path.isdir(src_dir):
+                    src_dir = outdir
+                # Build args
+                build_args = []
+                if target == 'windows':
+                    build_args = ["--windows"]
+                elif target == 'linux':
+                    build_args = ["--linux"]
+                elif target == 'macos':
+                    build_args = ["--mac"]
+
+                console.print(f"[cyan][Dars] Packaging Electron app for {target}...[/cyan]")
+                code, _out, err = jsb.electron_build(cwd=src_dir, extra_args=build_args)
+                if code != 0:
+                    console.print(f"[red]✖ electron-builder failed: {err}[/red]")
+                    sys.exit(1)
+                console.print("[green]✔ Electron package created in dist/[/green]")
+            except Exception as e:
+                console.print(f"[red]Desktop build failed: {e}[/red]")
+                sys.exit(1)
+
+        sys.exit(0)
 
     elif args.command == 'preview':
         index_path = os.path.join(args.path, "index.html")
@@ -1137,12 +1322,14 @@ def main():
             else:
                 issues.append(ok(translator.get('cfg_entry_ok').format(path=cfg.get('entry'))))
 
-            # format validation
+            # format validation: accept 'web', legacy 'html' and 'desktop'.
             fmt = cfg.get('format')
-            if fmt != 'html':
-                issues.append(err(translator.get('cfg_format_only_html').format(fmt=fmt)))
-            else:
+            if fmt == 'web' or fmt == 'html':
                 issues.append(ok(translator.get('cfg_format_ok').format(fmt=fmt)))
+            elif fmt == 'desktop':
+                issues.append(ok(translator.get('cfg_format_ok').format(fmt=fmt)))
+            else:
+                issues.append(err(translator.get('cfg_format_only_html').format(fmt=fmt)))
 
             # outdir validation (creatable)
             outdir_abs = resolved.get('outdir_abs')
@@ -1246,11 +1433,52 @@ def main():
             sys.exit(1)
 
     elif args.command == 'doctor':
-        # Run doctor with provided flags
+        try:
+            from dars.core.js_bridge import electron_available, electron_builder_available, ensure_electron, ensure_electron_builder
+        except Exception:
+            # If js bridge is not available, fall back to base doctor
+            code = run_doctor(
+                check_only=getattr(args, 'check', False),
+                auto_yes=getattr(args, 'yes', False),
+                install_all=getattr(args, 'all', False),
+                force=getattr(args, 'force', False)
+            )
+            sys.exit(code)
+
+        check_only = bool(getattr(args, 'check', False))
+        wants_install = bool(getattr(args, 'all', False))
+        auto_yes = bool(getattr(args, 'yes', False))
+
+        # Non-interactive: --check => print Electron status and return combined code
+        if check_only:
+            elec_ok = electron_available()
+            builder_ok = electron_builder_available()
+            # Pretty status lines to match doctor style
+            console.print("[bold]Electron (optional):[/bold] " + ("[green]OK[/green]" if elec_ok else "[yellow]MISSING[/yellow]"))
+            console.print("[bold]electron-builder (optional):[/bold] " + ("[green]OK[/green]" if builder_ok else "[yellow]MISSING[/yellow]"))
+            base = run_doctor(check_only=True, auto_yes=auto_yes, install_all=False, force=getattr(args, 'force', False))
+            missing = not (elec_ok and builder_ok)
+            sys.exit(1 if (base != 0 or missing) else 0)
+
+        # Non-interactive: --all (optionally with --yes) => install Electron tools up-front, then run base doctor
+        if wants_install:
+            elec_ok = electron_available()
+            if not elec_ok:
+                if auto_yes or Confirm.ask("¿Instalar Electron con Bun (devDependency)?", default=True):
+                    ensure_electron()
+            builder_ok = electron_builder_available()
+            if not builder_ok:
+                if auto_yes or Confirm.ask("¿Instalar electron-builder con Bun (devDependency)?", default=True):
+                    ensure_electron_builder()
+            # After attempting installs, run base doctor (which may show interactive UI)
+            code = run_doctor(check_only=False, auto_yes=auto_yes, install_all=True, force=getattr(args, 'force', False))
+            sys.exit(code)
+
+        # Interactive mode: delegate entirely to base doctor; no extra prints or installs
         code = run_doctor(
-            check_only=getattr(args, 'check', False),
-            auto_yes=getattr(args, 'yes', False),
-            install_all=getattr(args, 'all', False),
+            check_only=False,
+            auto_yes=auto_yes,
+            install_all=False,
             force=getattr(args, 'force', False)
         )
         sys.exit(code)

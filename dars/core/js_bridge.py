@@ -42,6 +42,15 @@ def vite_available() -> bool:
     return code == 0
 
 
+def has_npm() -> bool:
+    return which("npm") is not None
+
+
+def npm_install_global(packages: List[str]) -> bool:
+    # Deprecated path for performance reasons; prefer Bun installs
+    return False
+
+
 def bun_add(packages: List[str], dev: bool = True, cwd: Optional[str] = None) -> bool:
     if not has_bun():
         return False
@@ -51,6 +60,72 @@ def bun_add(packages: List[str], dev: bool = True, cwd: Optional[str] = None) ->
     args.extend(packages)
     code, _, _ = _run(args, cwd=cwd, live=True)
     return code == 0
+
+
+def electron_available() -> bool:
+    # Prefer bun x electron
+    if has_bun():
+        code, _, _ = _run(["bun", "x", "electron", "--version"])
+        if code == 0:
+            return True
+    # Try direct binary
+    if which("electron"):
+        return True
+    # Fallback npx
+    code, _, _ = _run(["npx", "--yes", "electron", "--version"])
+    return code == 0
+
+
+def electron_builder_available() -> bool:
+    if has_bun():
+        code, _, _ = _run(["bun", "x", "electron-builder", "--version"])
+        if code == 0:
+            return True
+    if which("electron-builder"):
+        return True
+    code, _, _ = _run(["npx", "--yes", "electron-builder", "--version"])
+    return code == 0
+
+
+def ensure_electron(cwd: Optional[str] = None) -> bool:
+    # If any runner works, consider available
+    if electron_available():
+        return True
+    # Try to add as dev dependency with Bun in the working directory
+    workdir = cwd or os.getcwd()
+    if has_bun():
+        ok = bun_add(["electron"], dev=True, cwd=workdir)
+        return ok and electron_available()
+    return False
+
+
+def ensure_electron_builder(cwd: Optional[str] = None) -> bool:
+    if electron_builder_available():
+        return True
+    workdir = cwd or os.getcwd()
+    if has_bun():
+        ok = bun_add(["electron-builder"], dev=True, cwd=workdir)
+        return ok and electron_builder_available()
+    return False
+
+
+def electron_dev(cwd: Optional[str] = None) -> Tuple[int, str, str]:
+    """Run Electron in dev mode (expects package.json/main.js present in cwd)."""
+    if has_bun():
+        return _run(["bun", "x", "electron", "."], cwd=cwd)
+    if which("electron"):
+        return _run(["electron", "."], cwd=cwd)
+    return _run(["npx", "--yes", "electron", "."], cwd=cwd)
+
+
+def electron_build(cwd: Optional[str] = None, extra_args: Optional[List[str]] = None) -> Tuple[int, str, str]:
+    """Run electron-builder build in cwd."""
+    args = extra_args or ["--dir"]
+    if has_bun():
+        return _run(["bun", "x", "electron-builder", *args], cwd=cwd)
+    if which("electron-builder"):
+        return _run(["electron-builder", *args], cwd=cwd)
+    return _run(["npx", "--yes", "electron-builder", *args], cwd=cwd)
 
 
 def node_run(code: str) -> Tuple[int, str, str]:

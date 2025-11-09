@@ -6,7 +6,7 @@ from rich.prompt import Prompt, Confirm
 
 console = Console()
 
-def render_report(node: Dict, bun: Dict, py: Dict, esb: Dict = None, vit: Dict = None):
+def render_report(node: Dict, bun: Dict, py: Dict, esb: Dict = None, vit: Dict = None, elec: Dict = None, builder: Dict = None):
     table = Table(title="Dars Doctor — Environment Report", box=None)
     table.add_column("Component", style="cyan")
     table.add_column("Required", style="white")
@@ -25,6 +25,10 @@ def render_report(node: Dict, bun: Dict, py: Dict, esb: Dict = None, vit: Dict =
         table.add_row("esbuild", "optional", (esb.get("version") if esb else "-") or "-", "OK" if esb and esb.get("ok") else "MISSING")
     if vit is not None:
         table.add_row("vite", "optional", (vit.get("version") if vit else "-") or "-", "OK" if vit and vit.get("ok") else "MISSING")
+    if elec is not None:
+        table.add_row("Electron", "optional", (elec.get("version") if elec else "-") or "-", "OK" if elec and elec.get("ok") else "MISSING")
+    if builder is not None:
+        table.add_row("electron-builder", "optional", (builder.get("version") if builder else "-") or "-", "OK" if builder and builder.get("ok") else "MISSING")
 
     console.print(table)
     if p_missing:
@@ -41,6 +45,10 @@ def render_report(node: Dict, bun: Dict, py: Dict, esb: Dict = None, vit: Dict =
         tips.append("esbuild (optional): https://esbuild.github.io/getting-started/")
     if vit is not None and not vit.get("ok"):
         tips.append("Vite (optional): https://vite.dev/guide/")
+    if elec is not None and not elec.get("ok"):
+        tips.append("Electron (optional) via Bun: bun add -d electron")
+    if builder is not None and not builder.get("ok"):
+        tips.append("electron-builder (optional) via Bun: bun add -d electron-builder")
     if tips:
         console.print(Panel("\n".join([f" • {t}" for t in tips]), title="How to install (optional)", border_style="cyan"))
 
