@@ -132,10 +132,10 @@ class App:
 
     def rTimeCompile(self, exporter=None, port=None, add_file_types=".py, .js, .css", watchfiledialog=False):
         """
-        Generates a quick preview of the app on a local server using an exporter  
-        (default: HTMLCSSJSExporter) and serving the files from a temporary directory.  
-        Does not open the browser automatically. The server stops with Ctrl+C.  
-        You can pass the port as a command-line argument: python main.py --port 8080  
+        Generates a quick preview of the app on a local server using an exporter
+        (default: HTMLCSSJSExporter) and serving the files from a temporary directory.
+        Does not open the browser automatically. The server stops with Ctrl+C.
+        You can pass the port as a command-line argument: python main.py --port 8080
         """
         import threading
         import time
@@ -143,6 +143,8 @@ class App:
         import os
         import inspect
         import importlib.util
+        import signal
+        import subprocess
         from pathlib import Path
         from contextlib import contextmanager
         import shutil
@@ -298,11 +300,285 @@ class App:
                 if not jsb.electron_available():
                     (console.print("[yellow]⚠ Electron no encontrado. Ejecuta: dars doctor --all --yes[/yellow]") if console else print("[Dars] Electron not found. Run: dars doctor --all --yes"))
                     return
-                (console.print("[cyan]Launching Electron (dev)...[/cyan]") if console else print("[Dars] Launching Electron (dev)..."))
-                code, out, err = jsb.electron_dev(cwd=preview_dir)
-                if code != 0:
-                    (console.print(f"[red]Electron exited with code {code}: {err}[/red]") if console else print(f"[Dars] Electron exited with code {code}: {err}"))
-                return
+                # Show running file info and then launch Electron subprocess (spawn) so we can stream logs
+                run_msg = f"Running dev: {app_file}\nLaunching Electron (dev)..."
+                if console:
+                    console.print(f"[cyan]{run_msg}[/cyan]")
+                else:
+                    print(run_msg)
+
+                # Prepare file watching for hot reload (desktop). We'll re-export and restart Electron on changes.
+                from dars.cli.hot_reload import FileWatcher
+                import threading
+
+                def _collect_project_files_by_ext(root, exts):
+                    files = []
+                    for dirpath, dirnames, filenames in os.walk(root):
+                        # exclude preview_dir, .git and __pycache__
+                        if os.path.abspath(dirpath).startswith(os.path.abspath(preview_dir)):
+                            continue
+                        if '.git' in dirpath or '__pycache__' in dirpath:
+                            continue
+                        for fname in filenames:
+                            for ext in exts:
+                                if fname.lower().endswith(ext):
+                                    files.append(os.path.join(dirpath, fname))
+                                    break
+                    return files
+
+                files_to_watch = _collect_project_files_by_ext(project_root, watch_exts)
+                if not files_to_watch:
+                    files_to_watch = [app_file]
+
+                electron_proc = None
+                stream_threads = []
+                control_port = None
+                # Flag to indicate that a restart was requested by the watcher (reload)
+                restart_triggered = False
+
+                def start_electron():
+                    nonlocal electron_proc, stream_threads
+                    nonlocal control_port
+                    try:
+                        # pick an ephemeral control port for graceful shutdown and pass via env
+                        try:
+                            import socket as _socket
+                            s = _socket.socket()
+                            s.bind(('127.0.0.1', 0))
+                            picked = s.getsockname()[1]
+                            s.close()
+                        except Exception:
+                            picked = None
+                        env = os.environ.copy()
+                        if picked:
+                            env['DARS_CONTROL_PORT'] = str(picked)
+                        p, cmd = jsb.electron_dev_spawn(cwd=preview_dir, env=env)
+                        if p and picked:
+                            control_port = picked
+                    except Exception:
+                        p = None
+                        cmd = None
+                    if not p:
+                        msg = f"Could not start Electron (cmd: {cmd}). Ensure Electron is installed."
+                        (console.print(f"[red]{msg}[/red]") if console else print(msg))
+                        return False
+
+                    def _stream_output(pipe, is_err=False):
+                        try:
+                            for line in iter(pipe.readline, ''):
+                                if not line:
+                                    break
+                                text = line.rstrip('\n')
+                                if is_err and ("Uncaught" in text or "Error" in text or "TypeError" in text or "ReferenceError" in text):
+                                    if console:
+                                        console.print(f"[red][Electron STDERR][/red] {text}")
+                                    else:
+                                        print(f"[Electron STDERR] {text}")
+                                else:
+                                    if console:
+                                        console.print(f"[Electron] {text}")
+                                    else:
+                                        print(f"[Electron] {text}")
+                        except Exception:
+                            pass
+
+                    t_out = threading.Thread(target=_stream_output, args=(p.stdout, False), daemon=True)
+                    t_err = threading.Thread(target=_stream_output, args=(p.stderr, True), daemon=True)
+                    t_out.start(); t_err.start()
+                    stream_threads = [t_out, t_err]
+                    electron_proc = p
+                    # Report PID for easier debugging
+                    try:
+                        if console:
+                            console.print(f"[magenta]Electron PID: {p.pid}[/magenta]")
+                        else:
+                            print(f"[Dars] Electron PID: {p.pid}")
+                    except Exception:
+                        pass
+                    # Reset restart flag on fresh start
+                    nonlocal restart_triggered
+                    restart_triggered = False
+                    return True
+
+                def stop_electron():
+                    nonlocal electron_proc
+                    if electron_proc:
+                        # First attempt graceful shutdown via control HTTP endpoint if available
+                        try:
+                            if control_port:
+                                try:
+                                    import urllib.request as _ur
+                                    url = f"http://127.0.0.1:{control_port}/__dars_shutdown"
+                                    req = _ur.Request(url, method='POST')
+                                    with _ur.urlopen(req, timeout=1) as _res:
+                                        pass
+                                except Exception:
+                                    # ignore network errors and fall back to killing
+                                    pass
+                        except Exception:
+                            pass
+
+                        try:
+                            pid = electron_proc.pid
+                            # Try graceful terminate of the whole process group / tree
+                            if os.name == 'nt':
+                                # taskkill /T /F will kill child processes as well
+                                try:
+                                    subprocess.run(["taskkill", "/F", "/T", "/PID", str(pid)], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                                except Exception:
+                                    try:
+                                        electron_proc.terminate()
+                                    except Exception:
+                                        pass
+                            else:
+                                try:
+                                    os.killpg(os.getpgid(pid), signal.SIGTERM)
+                                except Exception:
+                                    try:
+                                        electron_proc.terminate()
+                                    except Exception:
+                                        pass
+                            try:
+                                electron_proc.wait(timeout=3)
+                            except Exception:
+                                try:
+                                    electron_proc.kill()
+                                except Exception:
+                                    pass
+                        except Exception:
+                            try:
+                                electron_proc.terminate()
+                            except Exception:
+                                pass
+                        finally:
+                            electron_proc = None
+
+                def reload_and_restart(changed_file=None):
+                    nonlocal last_reload_at
+                    nonlocal restart_triggered
+                    now = time.time()
+                    if now - last_reload_at < MIN_RELOAD_INTERVAL:
+                        return
+                    with reload_lock:
+                        last_reload_at = time.time()
+                        if console:
+                            console.print(f"[yellow]Detected change in {changed_file}. Rebuilding and restarting Electron...[/yellow]")
+                        else:
+                            print(f"[Dars] Detected change in {changed_file}. Rebuilding and restarting Electron...")
+
+                        try:
+                            if project_root not in sys.path:
+                                sys.path.insert(0, project_root)
+                            with pushd(project_root):
+                                # Clear project modules from sys.modules
+                                to_remove = []
+                                for name, mod in list(sys.modules.items()):
+                                    try:
+                                        mod_file = getattr(mod, '__file__', None)
+                                        if not mod_file:
+                                            continue
+                                        mod_file_abs = os.path.abspath(mod_file)
+                                        if mod_file_abs.startswith(os.path.abspath(project_root)):
+                                            to_remove.append(name)
+                                    except Exception:
+                                        continue
+                                for name in to_remove:
+                                    try:
+                                        del sys.modules[name]
+                                    except Exception:
+                                        pass
+                                sys.modules.pop("dars_app", None)
+
+                                unique_name = f"dars_app_reload_{int(time.time()*1000)}"
+                                spec = importlib.util.spec_from_file_location(unique_name, app_file)
+                                module = importlib.util.module_from_spec(spec)
+                                spec.loader.exec_module(module)
+
+                                # Find App instance
+                                new_app = None
+                                for v in vars(module).values():
+                                    try:
+                                        if isinstance(v, App):
+                                            new_app = v
+                                            break
+                                    except Exception:
+                                        pass
+                                if not new_app:
+                                    for v in vars(module).values():
+                                        try:
+                                            if hasattr(v, '__class__') and v.__class__.__name__ == 'App':
+                                                new_app = v
+                                                break
+                                        except Exception:
+                                            pass
+                                if not new_app:
+                                    (console.print("[red]No App instance found after reload.") if console else print("[Dars] No App instance found after reload."))
+                                    return
+
+                                # Export and restart electron
+                                with pushd(project_root):
+                                    elec_exporter.export(new_app, preview_dir, bundle=False)
+
+                            # mark that restart was triggered by file change
+                            restart_triggered = True
+                            stop_electron()
+                            start_electron()
+                            (console.print("[green]Re-exported and restarted Electron successfully.[/green]") if console else print("[Dars] Re-exported and restarted Electron successfully."))
+                        except Exception as e:
+                            tb = traceback.format_exc()
+                            (console.print(f"[red]Hot reload failed: {e}\n{tb}[/red]") if console else print(f"[Dars] Hot reload failed: {e}\n{tb}"))
+
+                # Create watchers
+                for f in files_to_watch:
+                    try:
+                        w = FileWatcher(f, lambda f=f: reload_and_restart(f))
+                        w.start()
+                        watchers.append(w)
+                    except Exception as e:
+                        if console:
+                            console.print(f"[yellow]Warning: could not watch {f}: {e}[/yellow]")
+                        else:
+                            print(f"[Dars] Warning: could not watch {f}: {e}")
+
+                # Start Electron initially
+                if not start_electron():
+                    # Starting electron failed, cleanup watchers
+                    for w in watchers:
+                        try:
+                            w.stop()
+                        except Exception:
+                            pass
+                    return
+
+                # Wait until process ends or user interrupts; background watchers will restart it as needed
+                try:
+                    while not shutdown_event.is_set():
+                        # If electron process ended
+                        if electron_proc and electron_proc.poll() is not None:
+                            code = electron_proc.returncode
+                            # If the restart was triggered by our watcher, perform restart and clear flag
+                            if restart_triggered:
+                                (console.print(f"[red]Electron exited with code {code}. Restarting...[/red]") if console else print(f"[Dars] Electron exited with code {code}. Restarting..."))
+                                restart_triggered = False
+                                stop_electron()
+                                start_electron()
+                            else:
+                                # Likely user closed the window: stop watchers and exit the dev loop
+                                (console.print(f"[cyan]Electron closed by user (code {code}). Stopping dev mode...[/cyan]") if console else print(f"[Dars] Electron closed by user (code {code}). Stopping dev mode..."))
+                                shutdown_event.set()
+                                break
+                        shutdown_event.wait(timeout=1)
+                except KeyboardInterrupt:
+                    shutdown_event.set()
+                finally:
+                    # cleanup
+                    stop_electron()
+                    for w in watchers:
+                        try:
+                            w.stop()
+                        except Exception:
+                            pass
+                    return
 
             # --- Web dev por defecto ---
             with pushd(project_root):

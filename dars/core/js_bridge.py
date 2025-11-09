@@ -119,6 +119,36 @@ def electron_dev(cwd: Optional[str] = None) -> Tuple[int, str, str]:
     return _run([npx, "--yes", "electron", "."], cwd=cwd)
 
 
+def electron_dev_spawn(cwd: Optional[str] = None, env: Optional[dict] = None):
+    """Spawn Electron in dev mode and return (Popen, cmd).
+
+    The caller is responsible for reading stdout/stderr and terminating the process.
+    """
+    # Prefer direct electron binary when available so the spawned Popen is the electron process
+    electron_bin = which("electron") or which("electron.cmd")
+    if electron_bin:
+        cmd = [electron_bin, "."]
+    elif has_bun():
+        cmd = ["bun", "x", "electron", "."]
+    else:
+        npx = which("npx.cmd") or which("npx") or "npx"
+        cmd = [npx, "--yes", "electron", "."]
+
+    try:
+        # On Windows create a new process group so we can terminate the whole tree; on POSIX use setsid
+        kwargs = dict(cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        if env is not None:
+            kwargs['env'] = env
+        if os.name == 'nt':
+            kwargs['creationflags'] = subprocess.CREATE_NEW_PROCESS_GROUP
+        else:
+            kwargs['preexec_fn'] = os.setsid
+        p = subprocess.Popen(cmd, **kwargs)
+        return p, cmd
+    except Exception:
+        return None, cmd
+
+
 def electron_build(cwd: Optional[str] = None, extra_args: Optional[List[str]] = None) -> Tuple[int, str, str]:
     """Run electron-builder build in cwd."""
     args = extra_args or ["--dir"]

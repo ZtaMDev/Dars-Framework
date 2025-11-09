@@ -39,11 +39,45 @@ def generate_preload_js(schema: Dict[str, Dict[str, str]]) -> str:
 
 
 def _gen_stub_impl(schema: Dict[str, Dict[str, str]]) -> str:
-    lines = [
-        "// Runtime stub for Renderer (Dars) to call into preload-exposed API",
-        "export const DarsDesktopAPI = (typeof window !== 'undefined' && window.DarsDesktopAPI) ? window.DarsDesktopAPI : {};",
-    ]
-    return "\n".join(lines)
+    # Build a runtime stub that prefers a preload-exposed `DarsDesktopAPI`,
+    # but falls back to using a lightweight `DarsIPC.invoke` bridge if present
+    # (some dev preload scripts expose `DarsIPC.invoke`). If neither exists,
+    # the methods will throw a helpful error when called.
+    import json
+    # Convert schema to a JS-friendly shape: namespace -> [method, ...]
+    js_schema = {ns: list(methods.keys()) for ns, methods in schema.items()}
+    js_schema_literal = json.dumps(js_schema)
+
+    lines = []
+    lines.append("// Runtime stub for Renderer (Dars) to call into preload-exposed API")
+    lines.append(f"const _DARS_SCHEMA = {js_schema_literal};")
+    lines.append("const _make_api_from_schema = (schema) => {")
+    lines.append("  const api = {};")
+    lines.append("  for (const ns of Object.keys(schema)) {")
+    lines.append("    api[ns] = {};")
+    lines.append("    for (const m of schema[ns]) {")
+    lines.append("      api[ns][m] = (...args) => {")
+    lines.append("        // Prefer preload-exposed DarsDesktopAPI if available")
+    lines.append("        try {")
+    lines.append("          if (typeof window !== 'undefined' && window.DarsDesktopAPI && window.DarsDesktopAPI[ns] && typeof window.DarsDesktopAPI[ns][m] === 'function') {")
+    lines.append("            return window.DarsDesktopAPI[ns][m](...args);")
+    lines.append("          }")
+    lines.append("        } catch (_) {}")
+    lines.append("        // Fallback: if a DarsIPC bridge with invoke is present, use it")
+    lines.append("        try {")
+    lines.append("          if (typeof globalThis !== 'undefined' && globalThis.DarsIPC && typeof globalThis.DarsIPC.invoke === 'function') {")
+    lines.append("            return globalThis.DarsIPC.invoke(`dars::${ns}::${m}`, ...args);")
+    lines.append("          }")
+    lines.append("        } catch (_) {}")
+    lines.append("        throw new Error('Dars desktop API not available: ensure preload exposes DarsDesktopAPI or DarsIPC.invoke');")
+    lines.append("      };")
+    lines.append("    }")
+    lines.append("  }")
+    lines.append("  return api;")
+    lines.append("};")
+    lines.append("")
+    lines.append("export const DarsDesktopAPI = _make_api_from_schema(_DARS_SCHEMA);")
+    return "\n".join(lines) + "\n"
 
 
 def generate_stub_js(schema: Dict[str, Dict[str, str]]) -> str:

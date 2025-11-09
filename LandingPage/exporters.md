@@ -161,10 +161,10 @@ The desktop exporter allows you to package your Dars app as a native desktop app
 
 ### Status and Scope
 
-- BETA: Many options and integrations are still evolving (auto‑update, advanced packaging, signing, etc.).
-- Cross‑platform targets supported: Windows, Linux, macOS (host restrictions apply for macOS signing).
+- BETA: Many options and integrations are still evolving (advanced packaging, signing, etc.).
+- Cross‑platform targets supported: Windows, Linux, macOS (host restrictions apply for macOS signing, and linux if you don't have docker).
 - Underlying tech: Electron is used to deliver a native desktop container for your web UI.
-
+- Hot Reload: `dars dev` with desktop apps is fully supported, but for now it closes and reopen the electron dev app when a file change is detected.
 ### Quickstart
 
 1. Initialize or update your project for desktop:
@@ -199,6 +199,28 @@ The desktop exporter allows you to package your Dars app as a native desktop app
    ```
 
 Artifacts will be placed in `dist/`. The desktop source (used for packaging) is emitted to `dist/source-electron/`.
+
+### Native Functions
+
+You can acces native functions via `dars.desktop` module:
+
+```python
+from dars.desktop import *
+```
+
+With this module you can acces for now 2 main functions:
+
+```python 
+write_text("./app/lib/hello.txt", "Hello Text")
+```
+and
+
+```python
+read_text("./app/lib/hello.txt")
+```
+
+This two functions allows you to read and write text files in your desktop application filesystem, both returns an dScript() with the code to be executed in the desktop app.
+also you can use dScripts to run custom javascript code in the desktop app. and for now 'dars dev' is supported but python main.py with rTimeCompile() is not supported because it have issues with relative paths and also it can be used in events of any component.
 
 ### Platform Targeting
 

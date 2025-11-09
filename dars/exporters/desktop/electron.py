@@ -1,11 +1,13 @@
 from typing import Optional
 import os
 
+from dars.core.app import App
+from dars.core.component import Component
 from dars.exporters.base import Exporter
 from dars.exporters.web.html_css_js import HTMLCSSJSExporter
 from dars.desktop.api import get_schema
 from dars.desktop.js_generator import generate_preload_js, generate_stub_js
-
+import shutil
 
 class ElectronExporter(Exporter):
     """Electron exporter (Phase 3)

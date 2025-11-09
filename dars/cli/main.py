@@ -560,6 +560,10 @@ if __name__ == "__main__":
             # Include desktop=True when requested
             desktop_suffix = ", desktop=True" if str(proj_type).lower() == 'desktop' else ""
             HELLO_WORLD_CODE = HELLO_WORLD_CODE.replace('%s', desktop_suffix)
+            # If this is a desktop scaffold, also include the desktop API imports
+            if str(proj_type).lower() == 'desktop':
+                # Add `from dars.desktop import *` right after the dars.all import
+                HELLO_WORLD_CODE = HELLO_WORLD_CODE.replace('from dars.all import *', 'from dars.all import *\nfrom dars.desktop import *', 1)
             main_py = Path(name) / "main.py"
             main_py.write_text(HELLO_WORLD_CODE.strip(), encoding="utf-8")
             console.print(f"[green]✔ {translator.get('main_py_created')}[/green]")
@@ -593,8 +597,10 @@ if __name__ == "__main__":
                 '}\n'
                 (backend_dir / 'package.json').write_text(backend_pkg, encoding='utf-8')
                 # main.js
-                backend_main = "const { app, BrowserWindow, Menu } = require('electron');\n" + \
-                    "const path = require('path');\n\n" + \
+                backend_main = "const { app, BrowserWindow, Menu, ipcMain } = require('electron');\n" + \
+                    "const path = require('path');\n" + \
+                    "const fs = require('fs').promises;\n" + \
+                    "const http = require('http');\n\n" + \
                     "function createWindow() {\n" + \
                     "  const win = new BrowserWindow({\n" + \
                     "    width: 1000, height: 700,\n" + \
@@ -612,14 +618,70 @@ if __name__ == "__main__":
                     "    if (BrowserWindow.getAllWindows().length === 0) createWindow();\n" + \
                     "  });\n" + \
                     "});\n\n" + \
-                    "app.on('window-all-closed', function () {\n" + \
-                    "  if (process.platform !== 'darwin') app.quit();\n" + \
-                    "});\n"
+                                        "// Utility to resolve paths: absolute paths are used as-is; relative paths resolve against process.cwd()\n" + \
+                                        "function resolvePath(p) {\n" + \
+                                        "  if (!p || typeof p !== 'string') throw new Error('filePath must be a string');\n" + \
+                                        "  if (path.isAbsolute(p)) return p;\n" + \
+                                        "  return path.resolve(process.cwd(), p);\n" + \
+                                        "}\n\n" + \
+                                        "function closeAllAndExit() {\n" + \
+                                        "  try {\n" + \
+                                        "    const wins = BrowserWindow.getAllWindows();\n" + \
+                                        "    wins.forEach(w => { try { w.close(); } catch(e) {} });\n" + \
+                                        "  } catch (e) {}\n" + \
+                                        "  setTimeout(() => { try { app.quit(); } catch(e) {} }, 300);\n" + \
+                                        "}\n\n" + \
+                                        "// Allow renderer to request graceful shutdown\n" + \
+                                        "ipcMain.handle('dars::dev::shutdown', async () => {\n" + \
+                                        "  closeAllAndExit();\n" + \
+                                        "  return true;\n" + \
+                                        "});\n\n" + \
+                                        "// HTTP control server for external processes (e.g., Python dev launcher)\n" + \
+                                        "const controlPort = process.env.DARS_CONTROL_PORT;\n" + \
+                                        "if (controlPort) {\n" + \
+                                        "  try {\n" + \
+                                        "    const server = http.createServer((req, res) => {\n" + \
+                                        "      if (req.method === 'POST' && req.url === '/__dars_shutdown') {\n" + \
+                                        "        closeAllAndExit();\n" + \
+                                        "        res.writeHead(200); res.end('ok');\n" + \
+                                        "        return;\n" + \
+                                        "      }\n" + \
+                                        "      res.writeHead(404); res.end('not-found');\n" + \
+                                        "    });\n" + \
+                                        "    server.listen(Number(controlPort), '127.0.0.1');\n" + \
+                                        "  } catch (e) { /* ignore */ }\n" + \
+                                        "}\n\n" + \
+                                        "// IPC handlers for Dars desktop API\n" + \
+                                        "ipcMain.handle('dars::FileSystem::read_text', async (_e, filePath, encoding = 'utf-8') => {\n" + \
+                                        "  const resolved = resolvePath(filePath);\n" + \
+                                        "  const content = await fs.readFile(resolved, { encoding });\n" + \
+                                        "  return content;\n" + \
+                                        "});\n\n" + \
+                                        "ipcMain.handle('dars::FileSystem::write_text', async (_e, filePath, data, encoding = 'utf-8') => {\n" + \
+                                        "  const resolved = resolvePath(filePath);\n" + \
+                                        "  if (typeof data !== 'string') data = String(data ?? '');\n" + \
+                                        "  await fs.writeFile(resolved, data, { encoding });\n" + \
+                                        "  return true;\n" + \
+                                        "});\n\n" + \
+                                        "app.on('window-all-closed', function () {\n" + \
+                                        "  if (process.platform !== 'darwin') app.quit();\n" + \
+                                        "});\n"
                 (backend_dir / 'main.js').write_text(backend_main, encoding='utf-8')
                 # preload.js
                 backend_preload = "const { contextBridge, ipcRenderer } = require('electron');\n" + \
                     "contextBridge.exposeInMainWorld('DarsIPC', {\n" + \
                     "  invoke: (channel, ...args) => ipcRenderer.invoke(channel, ...args)\n" + \
+                    "});\n" + \
+                    "// Also expose a minimal DarsDesktopAPI for renderer convenience\n" + \
+                    "contextBridge.exposeInMainWorld('DarsDesktopAPI', {\n" + \
+                    "  FileSystem: {\n" + \
+                    "    read_text: (...args) => ipcRenderer.invoke('dars::FileSystem::read_text', ...args),\n" + \
+                    "    write_text: (...args) => ipcRenderer.invoke('dars::FileSystem::write_text', ...args)\n" + \
+                    "  }\n" + \
+                    "});\n" + \
+                    "// Dev helpers: request graceful shutdown from Python dev launcher\n" + \
+                    "contextBridge.exposeInMainWorld('DarsDev', {\n" + \
+                    "  shutdown: () => ipcRenderer.invoke('dars::dev::shutdown')\n" + \
                     "});\n"
                 (backend_dir / 'preload.js').write_text(backend_preload, encoding='utf-8')
                 console.print("[green]✔ backend/ scaffold created[/green]")
@@ -1090,28 +1152,73 @@ def main():
                     main_js_path = backend_dir / 'main.js'
                     if not main_js_path.exists():
                         main_js_path.write_text(
-                            "const { app, BrowserWindow, Menu } = require('electron');\n" +
-                            "const path = require('path');\n\n" +
-                            "function createWindow() {\n" +
-                            "  const win = new BrowserWindow({\n" +
-                            "    width: 1000, height: 700,\n" +
-                            "    webPreferences: {\n" +
-                            "      contextIsolation: true,\n" +
-                            "      preload: path.join(__dirname, 'preload.js')\n" +
-                            "    }\n" +
-                            "  });\n" +
-                            "  Menu.setApplicationMenu(null);\n" +
-                            "  win.loadFile(path.join(__dirname, 'app', 'index.html'));\n" +
-                            "}\n\n" +
-                            "app.whenReady().then(() => {\n" +
-                            "  createWindow();\n" +
-                            "  app.on('activate', function () {\n" +
-                            "    if (BrowserWindow.getAllWindows().length === 0) createWindow();\n" +
-                            "  });\n" +
-                            "});\n\n" +
-                            "app.on('window-all-closed', function () {\n" +
-                            "  if (process.platform !== 'darwin') app.quit();\n" +
-                            "});\n", encoding='utf-8')
+                    "const { app, BrowserWindow, Menu, ipcMain } = require('electron');\n" +
+                    "const path = require('path');\n" +
+                    "const fs = require('fs').promises;\n" +
+                    "const http = require('http');\n\n" +
+                    "function createWindow() {\n" +
+                    "  const win = new BrowserWindow({\n" +
+                    "    width: 1000, height: 700,\n" +
+                    "    webPreferences: {\n" +
+                    "      contextIsolation: true,\n" +
+                    "      preload: path.join(__dirname, 'preload.js')\n" +
+                    "    }\n" +
+                    "  });\n" +
+                    "  Menu.setApplicationMenu(null);\n" +
+                    "  win.loadFile(path.join(__dirname, 'app', 'index.html'));\n" +
+                    "}\n\n" +
+                    "app.whenReady().then(() => {\n" +
+                    "  createWindow();\n" +
+                    "  app.on('activate', function () {\n" +
+                    "    if (BrowserWindow.getAllWindows().length === 0) createWindow();\n" +
+                    "  });\n" +
+                    "});\n\n" +
+                    "// Utility to resolve paths: absolute paths are used as-is; relative paths resolve against process.cwd()\n" +
+                    "function resolvePath(p) {\n" +
+                    "  if (!p || typeof p !== 'string') throw new Error('filePath must be a string');\n" +
+                    "  if (path.isAbsolute(p)) return p;\n" +
+                    "  return path.resolve(process.cwd(), p);\n" +
+                    "}\n\n" +
+                    "function closeAllAndExit() {\n" +
+                    "  try {\n" +
+                    "    const wins = BrowserWindow.getAllWindows();\n" +
+                    "    wins.forEach(w => { try { w.close(); } catch(e) {} });\n" +
+                    "  } catch (e) {}\n" +
+                    "  setTimeout(() => { try { app.quit(); } catch(e) {} }, 300);\n" +
+                    "}\n\n" +
+                    "ipcMain.handle('dars::dev::shutdown', async () => {\n" +
+                    "  closeAllAndExit();\n" +
+                    "  return true;\n" +
+                    "});\n\n" +
+                    "const controlPort = process.env.DARS_CONTROL_PORT;\n" +
+                    "if (controlPort) {\n" +
+                    "  try {\n" +
+                    "    const server = http.createServer((req, res) => {\n" +
+                    "      if (req.method === 'POST' && req.url === '/__dars_shutdown') {\n" +
+                    "        closeAllAndExit();\n" +
+                    "        res.writeHead(200); res.end('ok');\n" +
+                    "        return;\n" +
+                    "      }\n" +
+                    "      res.writeHead(404); res.end('not-found');\n" +
+                    "    });\n" +
+                    "    server.listen(Number(controlPort), '127.0.0.1');\n" +
+                    "  } catch (e) { /* ignore */ }\n" +
+                    "}\n\n" +
+                    "// IPC handlers for Dars desktop API\n" +
+                    "ipcMain.handle('dars::FileSystem::read_text', async (_e, filePath, encoding = 'utf-8') => {\n" +
+                    "  const resolved = resolvePath(filePath);\n" +
+                    "  const content = await fs.readFile(resolved, { encoding });\n" +
+                    "  return content;\n" +
+                    "});\n\n" +
+                    "ipcMain.handle('dars::FileSystem::write_text', async (_e, filePath, data, encoding = 'utf-8') => {\n" +
+                    "  const resolved = resolvePath(filePath);\n" +
+                    "  if (typeof data !== 'string') data = String(data ?? '');\n" +
+                    "  await fs.writeFile(resolved, data, { encoding });\n" +
+                    "  return true;\n" +
+                    "});\n\n" +
+                    "app.on('window-all-closed', function () {\n" +
+                    "  if (process.platform !== 'darwin') app.quit();\n" +
+                    "});\n", encoding='utf-8')
                     # preload.js
                     preload_path = backend_dir / 'preload.js'
                     if not preload_path.exists():
@@ -1119,7 +1226,19 @@ def main():
                             "const { contextBridge, ipcRenderer } = require('electron');\n" +
                             "contextBridge.exposeInMainWorld('DarsIPC', {\n" +
                             "  invoke: (channel, ...args) => ipcRenderer.invoke(channel, ...args)\n" +
-                            "});\n", encoding='utf-8')
+                            "});\n" +
+                            "// Also expose a minimal DarsDesktopAPI for renderer convenience\n" +
+                            "contextBridge.exposeInMainWorld('DarsDesktopAPI', {\n" +
+                            "  FileSystem: {\n" +
+                            "    read_text: (...args) => ipcRenderer.invoke('dars::FileSystem::read_text', ...args),\n" +
+                            "    write_text: (...args) => ipcRenderer.invoke('dars::FileSystem::write_text', ...args)\n" +
+                            "  }\n" +
+                            "});\n" +
+                            "// Dev helpers: request graceful shutdown from Python dev launcher\n" +
+                            "contextBridge.exposeInMainWorld('DarsDev', {\n" +
+                            "  shutdown: () => ipcRenderer.invoke('dars::dev::shutdown')\n" +
+                            "});\n",
+                            encoding='utf-8')
                     console.print("[green]✔ backend/ scaffold ensured[/green]")
             except Exception:
                 pass
@@ -1451,7 +1570,9 @@ def main():
         import subprocess
         process = None
         try:
-            console.print(f"[cyan]Running dev: {entry}[/cyan]")
+            # Avoid duplicating the same 'Running dev' message that the app itself prints.
+            # The child process (app.rTimeCompile) will emit a detailed "Running dev:" message.
+            console.print(f"[cyan]Starting dev process: {entry}[/cyan]")
             process = subprocess.Popen([sys.executable, entry], cwd=os.path.dirname(entry))
             process.wait()
             sys.exit(process.returncode or 0)

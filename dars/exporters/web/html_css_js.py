@@ -206,6 +206,16 @@ class HTMLCSSJSExporter(Exporter):
                     # Scripts de componentes dentro de la página
                     if hasattr(page_app.root, 'get_scripts'):
                         page_scripts.extend(page_app.root.get_scripts())
+
+                    # Incluir scripts automáticos generados por helpers de escritorio (p.ej. dars.desktop)
+                    try:
+                        import dars.desktop as _dars_desktop
+                        auto = getattr(_dars_desktop, '_auto_scripts', None)
+                        if auto:
+                            page_scripts.extend(auto)
+                    except Exception:
+                        # No importa si dars.desktop no está disponible (p.ej. web-only projects)
+                        pass
                     
                     # Generar script.js específico para esta página
                     # Preparar y copiar scripts: combinados + externos
@@ -245,6 +255,14 @@ class HTMLCSSJSExporter(Exporter):
                 self.write_file(os.path.join(output_path, "runtime_dars.js"), runtime_js)
                 
                 user_scripts = list(getattr(app, 'scripts', []))
+                # Incluir scripts automáticos generados por helpers de escritorio
+                try:
+                    import dars.desktop as _dars_desktop
+                    auto = getattr(_dars_desktop, '_auto_scripts', None)
+                    if auto:
+                        user_scripts.extend(auto)
+                except Exception:
+                    pass
                 combined_js, external_srcs, combined_is_module = self._prepare_page_scripts(user_scripts, output_path, project_root)
                 self.write_file(os.path.join(output_path, "script.js"), combined_js)
                 # Generar VDOM Tree JS (externo)
@@ -292,6 +310,15 @@ class HTMLCSSJSExporter(Exporter):
                 from dars.core.state import STATE_BOOTSTRAP
                 if isinstance(STATE_BOOTSTRAP, list):
                     STATE_BOOTSTRAP.clear()
+            except Exception:
+                pass
+
+            # Limpiar scripts automáticos generados por dars.desktop helpers (si existen)
+            try:
+                import dars.desktop as _dars_desktop
+                auto = getattr(_dars_desktop, '_auto_scripts', None)
+                if isinstance(auto, list):
+                    auto.clear()
             except Exception:
                 pass
 

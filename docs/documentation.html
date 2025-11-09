@@ -6865,18 +6865,25 @@ def hello():
     </h3>
     <ul>
      <li>
-      BETA: Many options and integrations are still evolving (auto‑update, advanced packaging, signing, etc.).
+      BETA: Many options and integrations are still evolving (advanced packaging, signing, etc.).
      </li>
      <li>
-      Cross‑platform targets supported: Windows, Linux, macOS (host restrictions apply for macOS signing).
+      Cross‑platform targets supported: Windows, Linux, macOS (host restrictions apply for macOS signing, and linux if you don't have docker).
      </li>
      <li>
       Underlying tech: Electron is used to deliver a native desktop container for your web UI.
      </li>
+     <li>
+      Hot Reload:
+      <code>
+       dars dev
+      </code>
+      with desktop apps is fully supported, but for now it closes and reopen the electron dev app when a file change is detected.
+      <h3 id="quickstart">
+       Quickstart
+      </h3>
+     </li>
     </ul>
-    <h3 id="quickstart">
-     Quickstart
-    </h3>
     <ol>
      <li>
       <p>
@@ -6932,6 +6939,38 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
       dist/source-electron/
      </code>
      .
+    </p>
+    <h3 id="native-functions">
+     Native Functions
+    </h3>
+    <p>
+     You can acces native functions via
+     <code>
+      dars.desktop
+     </code>
+     module:
+    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.desktop</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+</code></pre>
+    </div>
+    <p>
+     With this module you can acces for now 2 main functions:
+    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="n">write_text</span><span class="p">(</span><span class="s2">"./app/lib/hello.txt"</span><span class="p">,</span> <span class="s2">"Hello Text"</span><span class="p">)</span>
+</code></pre>
+    </div>
+    <p>
+     and
+    </p>
+    <div class="codehilite">
+     <pre><span></span><code><span class="n">read_text</span><span class="p">(</span><span class="s2">"./app/lib/hello.txt"</span><span class="p">)</span>
+</code></pre>
+    </div>
+    <p>
+     This two functions allows you to read and write text files in your desktop application filesystem, both returns an dScript() with the code to be executed in the desktop app.
+also you can use dScripts to run custom javascript code in the desktop app. and for now 'dars dev' is supported but python main.py with rTimeCompile() is not supported because it have issues with relative paths and also it can be used in events of any component.
     </p>
     <h3 id="platform-targeting">
      Platform Targeting
