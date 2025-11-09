@@ -61,6 +61,10 @@ class ElectronExporter(Exporter):
             backend_dir = os.path.join(os.getcwd(), 'backend')
             # Compute metadata from App
             app_title = getattr(app, 'title', 'Dars App') or 'Dars App'
+            app_desc = getattr(app, 'description', '') or 'Built with Dars'
+            app_author = getattr(app, 'author', '') or 'Unknown'
+            app_version = getattr(app, 'version', '') or ''
+            default_version = app_version if app_version else '0.1.0'
             def _slugify(s: str) -> str:
                 import re
                 slug = re.sub(r"[^a-z0-9]+", "-", (s or '').lower())
@@ -82,7 +86,7 @@ class ElectronExporter(Exporter):
                         src = os.path.join(backend_dir, fname)
                         if os.path.isfile(src):
                             shutil.copy2(src, os.path.join(base_out, fname))
-                    # Override package.json name and ensure build output dir
+                    # Override package.json name and ensure build fields
                     try:
                         import json
                         pkg_path = os.path.join(base_out, 'package.json')
@@ -90,10 +94,33 @@ class ElectronExporter(Exporter):
                             with open(pkg_path, 'r', encoding='utf-8') as pf:
                                 data = json.load(pf)
                             data['name'] = pkg_name
+                            # basic metadata
+                            if not data.get('description') and app_desc:
+                                data['description'] = app_desc
+                            if not data.get('author') and app_author:
+                                data['author'] = app_author
+                            # version (required by electron-builder)
+                            if not data.get('version'):
+                                data['version'] = default_version
+                            # devDeps: ensure electron-builder present
+                            devd = data.get('devDependencies') or {}
+                            devd.setdefault('electron-builder', 'latest')
+                            # prefer a pinned electron version if missing or not exact
+                            if not devd.get('electron') or devd.get('electron').startswith(('^','~','latest')):
+                                devd['electron'] = '39.1.1'
+                            data['devDependencies'] = devd
+                            # Force npm to avoid bun ENOENT inside electron-builder
+                            if not data.get('packageManager'):
+                                data['packageManager'] = 'npm@10'
+                            # build fields
                             b = data.get('build') or {}
+                            # Ensure explicit electronVersion for electron-builder
+                            b.setdefault('electronVersion', '39.1.1')
                             dirs = b.get('directories') or {}
                             dirs['output'] = '../'
                             b['directories'] = dirs
+                            b.setdefault('appId', f"com.dars.{pkg_name}")
+                            b.setdefault('productName', app_title)
                             data['build'] = b
                             with open(pkg_path, 'w', encoding='utf-8') as pf:
                                 json.dump(data, pf, indent=2)
@@ -109,11 +136,17 @@ class ElectronExporter(Exporter):
                     # Use CommonJS for Electron main process
                     "main": "main.js",
                     "scripts": {"start": "electron ."},
-                    "devDependencies": {"electron": "latest"},
-                    "build": {"directories": {"output": "../"}}
+                    "devDependencies": {"electron": "39.1.1", "electron-builder": "latest"},
+                    "packageManager": "npm@10",
+                    "description": app_desc,
+                    "author": app_author,
+                    "version": default_version,
+                    "build": {"directories": {"output": "../"}, "electronVersion": "39.1.1", "appId": "com.dars.TBD", "productName": "TBD"}
                 }
                 import json
                 pkg['name'] = pkg_name
+                pkg['build']['appId'] = f"com.dars.{pkg_name}"
+                pkg['build']['productName'] = app_title
                 with open(os.path.join(base_out, 'package.json'), 'w', encoding='utf-8') as f:
                     json.dump(pkg, f, indent=2)
 

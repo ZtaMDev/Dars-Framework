@@ -1209,6 +1209,13 @@ def main():
         app = exporter.load_app_from_file(entry)
         if app is None:
             sys.exit(1)
+        # Warn if desktop and no app.version set
+        if format_name == 'desktop':
+            try:
+                if not getattr(app, 'version', ''):
+                    console.print("[yellow][Dars] Notice: no App.version set. Using default 0.1.0 for desktop package.json. It's recommended to set and increment version for production builds.[/yellow]")
+            except Exception:
+                pass
         # Respect bundle flag for web; force bundle for desktop to generate source-electron
         bundle_flag = True
         try:
@@ -1251,10 +1258,24 @@ def main():
                 src_dir = os.path.join(outdir, 'source-electron')
                 if not os.path.isdir(src_dir):
                     src_dir = outdir
+                # Ensure production deps. Prefer npm; fallback to bun if npm not present
+                try:
+                    from dars.core.js_bridge import has_node, has_npm, has_bun, which, _run as _jsrun
+                    ran_installer = False
+                    if has_node() and has_npm():
+                        npm_bin = which("npm.cmd") or which("npm") or "npm"
+                        console.print("[cyan][Dars] Installing production dependencies in source-electron (npm) ...[/cyan]")
+                        _jsrun([npm_bin, "install", "--production"], cwd=src_dir)
+                        ran_installer = True
+                    if not ran_installer and has_bun():
+                        console.print("[cyan][Dars] Installing production dependencies in source-electron (bun) ...[/cyan]")
+                        _jsrun(["bun", "install", "--production"], cwd=src_dir)
+                except Exception:
+                    pass
                 # Build args
                 build_args = []
                 if target == 'windows':
-                    build_args = ["--windows"]
+                    build_args = ["--win"]
                 elif target == 'linux':
                     build_args = ["--linux"]
                 elif target == 'macos':
@@ -1263,7 +1284,7 @@ def main():
                 console.print(f"[cyan][Dars] Packaging Electron app for {target}...[/cyan]")
                 code, _out, err = jsb.electron_build(cwd=src_dir, extra_args=build_args)
                 if code != 0:
-                    console.print(f"[red]✖ electron-builder failed: {err}[/red]")
+                    console.print(f"[red]✖ electron-builder failed.\nSTDOUT:\n{_out}\nSTDERR:\n{err}[/red]")
                     sys.exit(1)
                 console.print("[green]✔ Electron package created in dist/[/green]")
             except Exception as e:

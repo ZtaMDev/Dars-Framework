@@ -112,20 +112,25 @@ def ensure_electron_builder(cwd: Optional[str] = None) -> bool:
 def electron_dev(cwd: Optional[str] = None) -> Tuple[int, str, str]:
     """Run Electron in dev mode (expects package.json/main.js present in cwd)."""
     if has_bun():
+        # Prefer 'bun x' to avoid missing bunx shim on Windows
         return _run(["bun", "x", "electron", "."], cwd=cwd)
-    if which("electron"):
-        return _run(["electron", "."], cwd=cwd)
-    return _run(["npx", "--yes", "electron", "."], cwd=cwd)
+    # Resolve npx path robustly on Windows
+    npx = which("npx.cmd") or which("npx") or "npx"
+    return _run([npx, "--yes", "electron", "."], cwd=cwd)
 
 
 def electron_build(cwd: Optional[str] = None, extra_args: Optional[List[str]] = None) -> Tuple[int, str, str]:
     """Run electron-builder build in cwd."""
     args = extra_args or ["--dir"]
+    # Prefer npx; fallback to bun x if npx not available in PATH
+    npx = which("npx.cmd") or which("npx")
+    if npx:
+        return _run([npx, "--yes", "electron-builder", *args], cwd=cwd)
     if has_bun():
         return _run(["bun", "x", "electron-builder", *args], cwd=cwd)
-    if which("electron-builder"):
-        return _run(["electron-builder", *args], cwd=cwd)
-    return _run(["npx", "--yes", "electron-builder", *args], cwd=cwd)
+    # Last resort: try plain electron-builder if present
+    eb = which("electron-builder") or "electron-builder"
+    return _run([eb, *args], cwd=cwd)
 
 
 def node_run(code: str) -> Tuple[int, str, str]:

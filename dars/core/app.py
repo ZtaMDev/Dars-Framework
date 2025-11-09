@@ -536,6 +536,7 @@ class App:
         title: str = "Dars App",
         description: str = "",
         author: str = "",
+        version: str = "",
         keywords: List[str] = None,
         language: str = "en",
         favicon: str = "",
@@ -552,6 +553,8 @@ class App:
         self.title = title
         self.description = description
         self.author = author
+        # Optional app version (used for desktop package.json if present)
+        self.version = version
         self.keywords = keywords or []
         self.language = language
         

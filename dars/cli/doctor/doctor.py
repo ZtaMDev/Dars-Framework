@@ -110,11 +110,31 @@ def run_doctor(check_only: bool = False, auto_yes: bool = False, install_all: bo
         # Install desktop tooling via Bun if requested and available
         if install_all:
             try:
-                from dars.core.js_bridge import ensure_electron, ensure_electron_builder
+                from dars.core.js_bridge import ensure_electron, ensure_electron_builder, bun_add
                 if not elec.get('ok'):
                     ensure_electron()
                 if not builder.get('ok'):
                     ensure_electron_builder()
+                # Pin Electron version in project package.json if needed
+                try:
+                    import os, json
+                    proj = os.getcwd()
+                    pkg_dir = proj
+                    # Prefer backend/package.json if exists
+                    if os.path.isfile(os.path.join(proj, 'backend', 'package.json')):
+                        pkg_dir = os.path.join(proj, 'backend')
+                    pkg_path = os.path.join(pkg_dir, 'package.json')
+                    if os.path.isfile(pkg_path):
+                        with open(pkg_path, 'r', encoding='utf-8') as pf:
+                            data = json.load(pf)
+                        devd = data.get('devDependencies') or {}
+                        ev = (devd.get('electron') or '').strip().lower()
+                        needs_pin = (not ev) or ev.startswith(('^','~')) or ev == 'latest'
+                        if needs_pin:
+                            console.print("[cyan]Pinning Electron version (39.1.1) in project devDependencies...[/cyan]")
+                            bun_add(["electron@39.1.1"], dev=True, cwd=pkg_dir)
+                except Exception:
+                    pass
             except Exception:
                 pass
 
