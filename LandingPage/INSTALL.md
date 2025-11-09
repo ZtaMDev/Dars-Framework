@@ -129,3 +129,35 @@ dars preview ./output_directory
 Congratulations! Dars is ready to use.
 
 ---
+
+## Desktop (BETA)
+
+You can build native desktop apps from Dars projects. This capability is in **BETA** and is not recommended for production yet, but it is usable for testing.
+
+### Quickstart
+
+```bash
+# Scaffold or update a desktop-capable project
+dars init --type desktop
+# or
+dars init --update
+
+# Verify optional tooling (Node/Bun and packager)
+dars doctor --all --yes
+
+# Ensure your config sets the desktop format and target
+# dars.config.json
+{
+  "entry": "main.py",
+  "format": "desktop",
+  "outdir": "dist",
+  "targetPlatform": "auto"
+}
+
+# Build desktop artifacts
+dars build
+```
+
+Notes:
+- Desktop support is under active development; configuration keys and defaults may change.
+- Some platform targets (like macOS) require building on that OS for signing.

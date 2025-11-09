@@ -20,7 +20,7 @@
   <link href="styles.css" rel="stylesheet"/>
  </head>
  <body>
-  <div class="dars-page" id="page_235" style="background: 
+  <div class="dars-page" id="page_240" style="background: 
         linear-gradient(135deg, #212529 0%, #1e2b23 40%, #304635 70%, #00d68f20 100%),
         repeating-radial-gradient(circle at 0 0, #00d68f05, #00d68f05 2px, transparent 2px, transparent 20px)
     ; min-height: 100vh; background-attachment: fixed">
@@ -29,30 +29,30 @@
      <nav class="dars-navbar" id="dars-navbar">
       <div class="dars-navbar-nav">
        <div class="dars-container" id="navbar-left">
-        <img alt="Logo" class="dars-image" height="40px" id="image_236" src="Dars-logo.png" style="object-fit: contain; margin-right: 10px" width="40px"/>
-        <span class="dars-text" id="text_237" style="font-size: 20px; font-weight: 700; color: #b2ffe5; margin: 0">
+        <img alt="Logo" class="dars-image" height="40px" id="image_241" src="Dars-logo.png" style="object-fit: contain; margin-right: 10px" width="40px"/>
+        <span class="dars-text" id="text_242" style="font-size: 20px; font-weight: 700; color: #b2ffe5; margin: 0">
          Dars Framework
         </span>
        </div>
        <div class="dars-container dars-navbar-nav" id="navbar-right">
-        <a class="dars-link nav-link" href="https://ztamdev.github.io/Dars-Framework/" id="link_238" target="_self">
+        <a class="dars-link nav-link" href="https://ztamdev.github.io/Dars-Framework/" id="link_243" target="_self">
          Home
         </a>
-        <a class="dars-link nav-link" href="https://ztamdev.github.io/Dars-Framework/about.html" id="link_239" target="_self">
+        <a class="dars-link nav-link" href="https://ztamdev.github.io/Dars-Framework/about.html" id="link_244" target="_self">
          About
         </a>
-        <a class="dars-link nav-link" href="https://ztamdev.github.io/Dars-Framework/downloads.html" id="link_240" target="_self">
+        <a class="dars-link nav-link" href="https://ztamdev.github.io/Dars-Framework/downloads.html" id="link_245" target="_self">
          Download
         </a>
         <a class="dars-link nav-link" href="https://dars-playground.vercel.app/" id="linkPlayground" target="_self">
          Playground
         </a>
-        <a class="dars-link nav-link" href="https://ztamdev.github.io/Dars-Framework/documentation.html" id="link_241" target="_self">
+        <a class="dars-link nav-link" href="https://ztamdev.github.io/Dars-Framework/documentation.html" id="link_246" target="_self">
          Documentation
         </a>
        </div>
        <div class="dars-container" id="navbar-hamburger" style="display: none">
-        <span class="dars-text" id="text_242" style="font-size: 28px; color: #b2ffe5; cursor: pointer; padding: 5px 10px">
+        <span class="dars-text" id="text_247" style="font-size: 28px; color: #b2ffe5; cursor: pointer; padding: 5px 10px">
          ☰
         </span>
        </div>
@@ -120,6 +120,11 @@
       <a href="#dars-exporter-documentation">
        Exporters
       </a>
+      <ul>
+       <li>
+        See Desktop Export (BETA) in Exporters
+       </li>
+      </ul>
      </li>
      <li>
       <a href="#dars-script-system">
@@ -350,6 +355,46 @@ dars<span class="w"> </span>preview<span class="w"> </span>./output_directory
      Congratulations! Dars is ready to use.
     </p>
     <hr/>
+    <h2 id="desktop-beta">
+     Desktop (BETA)
+    </h2>
+    <p>
+     You can build native desktop apps from Dars projects. This capability is in
+     <strong>
+      BETA
+     </strong>
+     and is not recommended for production yet, but it is usable for testing.
+    </p>
+    <h3 id="quickstart">
+     Quickstart
+    </h3>
+    <div class="codehilite">
+     <pre><span></span><code><span class="c1"># Scaffold or update a desktop-capable project</span>
+dars<span class="w"> </span>init<span class="w"> </span>--type<span class="w"> </span>desktop
+<span class="c1"># or</span>
+dars<span class="w"> </span>init<span class="w"> </span>--update
+
+<span class="c1"># Verify optional tooling (Node/Bun and packager)</span>
+dars<span class="w"> </span>doctor<span class="w"> </span>--all<span class="w"> </span>--yes
+
+<span class="c1"># Ensure your config sets the desktop format and target</span>
+<span class="c1"># dars.config.json</span>
+<span class="o">{</span>
+<span class="w">  </span><span class="s2">"entry"</span>:<span class="w"> </span><span class="s2">"main.py"</span>,
+<span class="w">  </span><span class="s2">"format"</span>:<span class="w"> </span><span class="s2">"desktop"</span>,
+<span class="w">  </span><span class="s2">"outdir"</span>:<span class="w"> </span><span class="s2">"dist"</span>,
+<span class="w">  </span><span class="s2">"targetPlatform"</span>:<span class="w"> </span><span class="s2">"auto"</span>
+<span class="o">}</span>
+
+<span class="c1"># Build desktop artifacts</span>
+dars<span class="w"> </span>build
+</code></pre>
+    </div>
+    <p>
+     Notes:
+- Desktop support is under active development; configuration keys and defaults may change.
+- Some platform targets (like macOS) require building on that OS for signing.
+    </p>
    </div>
    <div class="dars-markdown dars-code-theme-auto" id="markdown_docs" style="class: markdown-docs">
     <h1 id="getting-started-with-dars">
@@ -533,11 +578,19 @@ Python entry file for your app. Used by
      <li>
       <p>
        format
-Export format. Currently only
+Export format. Supported:
        <code>
         html
        </code>
-       is supported.
+       and
+       <code>
+        desktop
+       </code>
+       (BETA). When set to
+       <code>
+        desktop
+       </code>
+       , the build command will produce native desktop artifacts.
       </p>
      </li>
      <li>
@@ -649,6 +702,52 @@ Auto-inject a client-side syntax highlighter for fenced code blocks in Markdown.
       </ul>
      </li>
     </ul>
+    <h2 id="desktop-specific-beta">
+     Desktop-specific (BETA)
+    </h2>
+    <ul>
+     <li>
+      targetPlatform
+Desktop build target. Only effective when
+      <code>
+       format
+      </code>
+      is
+      <code>
+       desktop
+      </code>
+      .
+      <ul>
+       <li>
+        Values:
+        <code>
+         auto
+        </code>
+        (default),
+        <code>
+         windows
+        </code>
+        ,
+        <code>
+         linux
+        </code>
+        ,
+        <code>
+         macos
+        </code>
+        .
+       </li>
+       <li>
+        Note: macOS targets must be built on macOS for signing.
+       </li>
+      </ul>
+     </li>
+    </ul>
+    <blockquote>
+     <p>
+      Desktop export is BETA: suitable for testing, not recommended for production yet. Configuration keys and defaults may change.
+     </p>
+    </blockquote>
     <h2 id="behavior-and-defaults">
      Behavior and defaults
     </h2>
@@ -6755,6 +6854,151 @@ def hello():
         <span class="k">return</span> <span class="s2">"generated_code"</span>
 </code></pre>
     </div>
+    <h2 id="desktop-export-beta">
+     Desktop Export (BETA)
+    </h2>
+    <p>
+     The desktop exporter allows you to package your Dars app as a native desktop application. This feature is currently in BETA: usable for testing and internal tooling, but not recommended for production deployments yet.
+    </p>
+    <h3 id="status-and-scope">
+     Status and Scope
+    </h3>
+    <ul>
+     <li>
+      BETA: Many options and integrations are still evolving (auto‑update, advanced packaging, signing, etc.).
+     </li>
+     <li>
+      Cross‑platform targets supported: Windows, Linux, macOS (host restrictions apply for macOS signing).
+     </li>
+     <li>
+      Underlying tech: Electron is used to deliver a native desktop container for your web UI.
+     </li>
+    </ul>
+    <h3 id="quickstart">
+     Quickstart
+    </h3>
+    <ol>
+     <li>
+      <p>
+       Initialize or update your project for desktop:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code>dars<span class="w"> </span>init<span class="w"> </span>--type<span class="w"> </span>desktop
+<span class="c1"># or if you already have a project</span>
+dars<span class="w"> </span>init<span class="w"> </span>--update
+</code></pre>
+      </div>
+     </li>
+     <li>
+      <p>
+       Ensure your project config has desktop format:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"entry"</span><span class="p">:</span><span class="w"> </span><span class="s2">"main.py"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"format"</span><span class="p">:</span><span class="w"> </span><span class="s2">"desktop"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"outdir"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dist"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"targetPlatform"</span><span class="p">:</span><span class="w"> </span><span class="s2">"auto"</span>
+<span class="p">}</span>
+</code></pre>
+      </div>
+     </li>
+     <li>
+      <p>
+       Verify optional tooling (Node/Bun, Electron, electron‑builder):
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code>dars<span class="w"> </span>doctor<span class="w"> </span>--all<span class="w"> </span>--yes
+</code></pre>
+      </div>
+     </li>
+     <li>
+      <p>
+       Build your desktop app:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code>dars<span class="w"> </span>build
+</code></pre>
+      </div>
+     </li>
+    </ol>
+    <p>
+     Artifacts will be placed in
+     <code>
+      dist/
+     </code>
+     . The desktop source (used for packaging) is emitted to
+     <code>
+      dist/source-electron/
+     </code>
+     .
+    </p>
+    <h3 id="platform-targeting">
+     Platform Targeting
+    </h3>
+    <ul>
+     <li>
+      <code>
+       targetPlatform
+      </code>
+      :
+      <code>
+       auto
+      </code>
+      |
+      <code>
+       windows
+      </code>
+      |
+      <code>
+       linux
+      </code>
+      |
+      <code>
+       macos
+      </code>
+      .
+     </li>
+     <li>
+      On non‑mac hosts, building for macOS is not supported.
+     </li>
+    </ul>
+    <h3 id="metadata-and-packaging-notes">
+     Metadata and Packaging Notes
+    </h3>
+    <ul>
+     <li>
+      App metadata is taken from your
+      <code>
+       App
+      </code>
+      instance when available: title, description, author, version.
+     </li>
+     <li>
+      If version is not set, a default
+      <code>
+       0.1.0
+      </code>
+      is used and a warning is shown.
+     </li>
+     <li>
+      Package manager and Electron version are pinned by the exporter to make builds predictable.
+     </li>
+    </ul>
+    <h3 id="caveats-beta">
+     Caveats (BETA)
+    </h3>
+    <ul>
+     <li>
+      Not yet recommended for production.
+     </li>
+     <li>
+      Some advanced packaging and signing options may require manual configuration.
+     </li>
+     <li>
+      Expect changes to configuration keys and defaults as the feature matures.
+     </li>
+    </ul>
    </div>
    <div class="dars-markdown dars-code-theme-auto" id="markdown_docs" style="class: markdown-docs">
     <h1 id="dars-script-system">
@@ -7493,7 +7737,7 @@ app.add_script(form_script)
      <pre><span></span><code><span class="c1"># Show information about your app</span>
 <span class="w"> </span>dars<span class="w"> </span>info<span class="w"> </span>my_app.py
 
-<span class="c1"># Export to different formats</span>
+<span class="c1"># Export to different formats (web)</span>
 <span class="w"> </span>dars<span class="w"> </span><span class="nb">export</span><span class="w"> </span>my_app.py<span class="w"> </span>--format<span class="w"> </span>html<span class="w"> </span>--output<span class="w"> </span>./output
 <span class="w"> </span><span class="c1"># Skip default Python minifier for this run (does not affect viteMinify)</span>
 <span class="w"> </span>dars<span class="w"> </span><span class="nb">export</span><span class="w"> </span>my_app.py<span class="w"> </span>--format<span class="w"> </span>html<span class="w"> </span>--output<span class="w"> </span>./output<span class="w"> </span>--no-minify
@@ -7511,6 +7755,8 @@ app.add_script(form_script)
 <span class="w"> </span>dars<span class="w"> </span>preview<span class="w"> </span>./output_directory
 
 <span class="c1"># Build using project config (dars.config.json)</span>
+<span class="w"> </span>dars<span class="w"> </span>build
+<span class="w"> </span><span class="c1"># Build desktop (BETA) when format is desktop in config</span>
 <span class="w"> </span>dars<span class="w"> </span>build
 <span class="w"> </span><span class="c1"># Build without the default Python minifier</span>
 <span class="w"> </span>dars<span class="w"> </span>build<span class="w"> </span>--no-minify
@@ -7578,6 +7824,27 @@ app.add_script(form_script)
        </td>
        <td>
         Build using dars.config.json
+       </td>
+      </tr>
+      <tr>
+       <td>
+        <code>
+         dars init --type desktop
+        </code>
+       </td>
+       <td>
+        Scaffold desktop-capable project (BETA)
+       </td>
+      </tr>
+      <tr>
+       <td>
+        <code>
+         dars build
+        </code>
+        (desktop config)
+       </td>
+       <td>
+        Build desktop app artifacts (BETA)
        </td>
       </tr>
       <tr>
@@ -7717,6 +7984,47 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
       .
      </li>
     </ul>
+    <h3 id="desktop-beta">
+     Desktop (BETA)
+    </h3>
+    <ul>
+     <li>
+      Mark your project with
+      <code>
+       "format": "desktop"
+      </code>
+      in
+      <code>
+       dars.config.json
+      </code>
+      .
+     </li>
+     <li>
+      Use
+      <code>
+       dars init --type desktop
+      </code>
+      (or
+      <code>
+       --update
+      </code>
+      ) to scaffold backend files.
+     </li>
+     <li>
+      Run
+      <code>
+       dars doctor --all --yes
+      </code>
+      to set up optional tooling.
+     </li>
+     <li>
+      Build with
+      <code>
+       dars build
+      </code>
+      . This feature is in BETA: suitable for testing, not yet for production.
+     </li>
+    </ul>
     <h3 id="minification-labels-in-output">
      Minification labels in output
     </h3>
@@ -7740,66 +8048,66 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
     </p>
    </div>
    <div class="dars-container" id="sidebar-floating">
-    <button class="dars-button" id="button_243" style="background-color: #00d68f; color: #212529; border: none; padding: 12px 16px; border-radius: 5px; cursor: pointer; font-weight: bold; position: fixed; bottom: 20px; right: 20px; z-index: 1000" type="button">
+    <button class="dars-button" id="button_248" style="background-color: #00d68f; color: #212529; border: none; padding: 12px 16px; border-radius: 5px; cursor: pointer; font-weight: bold; position: fixed; bottom: 20px; right: 20px; z-index: 1000" type="button">
      ☰ Contents
     </button>
     <div class="dars-container" id="sidebar-links" style="display: none; position: fixed; bottom: 70px; right: 20px; background-color: #1e2b23; padding: 15px; border-radius: 8px; border: 2px solid #00d68f; z-index: 999; box-shadow: 0 4px 12px rgba(0,0,0,0.3)">
-     <a class="dars-link" href="#dars-framework-documentation" id="link_244" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
+     <a class="dars-link" href="#dars-framework-documentation" id="link_249" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
       Home
      </a>
-     <a class="dars-link" href="#getting-started-with-dars" id="link_245" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
+     <a class="dars-link" href="#getting-started-with-dars" id="link_250" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
       Getting started
      </a>
-     <a class="dars-link" href="#dars-project-configuration" id="link_246" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
+     <a class="dars-link" href="#dars-project-configuration" id="link_251" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
       Configuration
      </a>
-     <a class="dars-link" href="#app-class-and-pwa-features-in-dars-framework" id="link_247" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
+     <a class="dars-link" href="#app-class-and-pwa-features-in-dars-framework" id="link_252" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
       App
      </a>
-     <a class="dars-link" href="#state-management-in-dars-dstate-cstate-goto-mods" id="link_248" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
+     <a class="dars-link" href="#state-management-in-dars-dstate-cstate-goto-mods" id="link_253" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
       State Management
      </a>
-     <a class="dars-link" href="#installation-guide-dars-framework" id="link_249" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
+     <a class="dars-link" href="#installation-guide-dars-framework" id="link_254" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
       Installing
      </a>
-     <a class="dars-link" href="#dars-components-documentation" id="link_250" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
+     <a class="dars-link" href="#dars-components-documentation" id="link_255" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
       Components
      </a>
-     <a class="dars-link" href="#custom-components-in-dars-framework" id="link_251" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
+     <a class="dars-link" href="#custom-components-in-dars-framework" id="link_256" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
       Custom Components
      </a>
-     <a class="dars-link" href="#events-in-dars" id="link_252" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
+     <a class="dars-link" href="#events-in-dars" id="link_257" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
       Events
      </a>
-     <a class="dars-link" href="#dars-exporter-documentation" id="link_253" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
+     <a class="dars-link" href="#dars-exporter-documentation" id="link_258" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
       Exporter
      </a>
-     <a class="dars-link" href="#dars-script-system" id="link_254" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
+     <a class="dars-link" href="#dars-script-system" id="link_259" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
       Scripts
      </a>
-     <a class="dars-link" href="#dars-cli-reference" id="link_255" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
+     <a class="dars-link" href="#dars-cli-reference" id="link_260" style="display: block; color: #00d68f; text-decoration: none; margin-bottom: 10px; font-weight: bold" target="_self">
       Dars CLI
      </a>
     </div>
    </div>
-   <div class="dars-container" id="container_256" style="background-color: #1e2b23; margin-top: auto">
-    <div class="dars-container" id="container_257" style="text-align: center; padding: 30px 20px; border-top: 1px solid #304635">
-     <span class="dars-text" id="text_258" style="color: #b2ffe5; display: inline; margin-right: 5px">
+   <div class="dars-container" id="container_261" style="background-color: #1e2b23; margin-top: auto">
+    <div class="dars-container" id="container_262" style="text-align: center; padding: 30px 20px; border-top: 1px solid #304635">
+     <span class="dars-text" id="text_263" style="color: #b2ffe5; display: inline; margin-right: 5px">
       Created with
      </span>
-     <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework" id="link_259" style="color: #00d68f; text-decoration: none; font-weight: bold; display: inline" target="_self">
+     <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework" id="link_264" style="color: #00d68f; text-decoration: none; font-weight: bold; display: inline" target="_self">
       Dars Framework
      </a>
-     <span class="dars-text" id="text_260" style="color: #b2ffe5; display: inline; margin: 0 5px">
+     <span class="dars-text" id="text_265" style="color: #b2ffe5; display: inline; margin: 0 5px">
       • Documentation:
      </span>
-     <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework/blob/CrystalMain/dars/docs/getting_started.md" id="link_261" style="color: #00d68f; text-decoration: none; font-weight: bold; display: inline" target="_self">
+     <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework/blob/CrystalMain/dars/docs/getting_started.md" id="link_266" style="color: #00d68f; text-decoration: none; font-weight: bold; display: inline" target="_self">
       Getting Started
      </a>
-     <span class="dars-text" id="text_262" style="color: #b2ffe5; display: inline; margin: 0 5px">
+     <span class="dars-text" id="text_267" style="color: #b2ffe5; display: inline; margin: 0 5px">
       • Developer:
      </span>
-     <a class="dars-link" href="https://github.com/ZtaMDev" id="link_263" style="color: #00d68f; text-decoration: none; font-weight: bold; display: inline" target="_self">
+     <a class="dars-link" href="https://github.com/ZtaMDev" id="link_268" style="color: #00d68f; text-decoration: none; font-weight: bold; display: inline" target="_self">
       ZtaDev
      </a>
     </div>

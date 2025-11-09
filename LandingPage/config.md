@@ -25,7 +25,7 @@ The file (dars.config.json) configures how Dars exports and builds your project.
   Python entry file for your app. Used by `dars build` and by `dars export config`.
 
 - format
-  Export format. Currently only `html` is supported.
+  Export format. Supported: `html` and `desktop` (BETA). When set to `desktop`, the build command will produce native desktop artifacts.
 
 - outdir
   Directory where the exported files are written.
@@ -53,6 +53,15 @@ The file (dars.config.json) configures how Dars exports and builds your project.
   Auto-inject a client-side syntax highlighter for fenced code blocks in Markdown.
   - `true` (default): injects Prism.js assets once per page and highlights `pre code` blocks.
   - `false`: no assets injected; you can include your own highlighter or none at all.
+
+## Desktop-specific (BETA)
+
+- targetPlatform
+  Desktop build target. Only effective when `format` is `desktop`.
+  - Values: `auto` (default), `windows`, `linux`, `macos`.
+  - Note: macOS targets must be built on macOS for signing.
+
+> Desktop export is BETA: suitable for testing, not recommended for production yet. Configuration keys and defaults may change.
 
 ## Behavior and defaults
 

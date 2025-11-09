@@ -1,4 +1,4 @@
-window.__DARS_VDOM__={type:"T1",id:"page_235",children:[{type:"T2",id:"navbar-container",children:[{type:"T3",id:"dars-navbar",children:[{type:"T4",id:"navbar-left",children:[{type:"T5",id:"image_236"},{type:"T6",id:"text_237",text:"Dars Framework"}]},{type:"T4",id:"navbar-right",children:[{type:"T7",id:"link_238",text:"Home"},{type:"T7",id:"link_239",text:"About"},{type:"T7",id:"link_240",text:"Download"},{type:"T7",id:"linkPlayground",text:"Playground"},{type:"T7",id:"link_241",text:"Documentation"}]},{type:"T4",id:"navbar-hamburger",children:[{type:"T6",id:"text_242",text:"\u2630"}]}]}]},{type:"T9",id:"markdown_docs",text:`# Dars Framework Documentation
+window.__DARS_VDOM__={type:"T1",id:"page_240",children:[{type:"T2",id:"navbar-container",children:[{type:"T3",id:"dars-navbar",children:[{type:"T4",id:"navbar-left",children:[{type:"T5",id:"image_241"},{type:"T6",id:"text_242",text:"Dars Framework"}]},{type:"T4",id:"navbar-right",children:[{type:"T7",id:"link_243",text:"Home"},{type:"T7",id:"link_244",text:"About"},{type:"T7",id:"link_245",text:"Download"},{type:"T7",id:"linkPlayground",text:"Playground"},{type:"T7",id:"link_246",text:"Documentation"}]},{type:"T4",id:"navbar-hamburger",children:[{type:"T6",id:"text_247",text:"\u2630"}]}]}]},{type:"T9",id:"markdown_docs",text:`# Dars Framework Documentation
 
 Welcome to the official Dars Framework documentation. Here you will find detailed guides and references to help you build modern web applications with Python.
 
@@ -11,6 +11,7 @@ Welcome to the official Dars Framework documentation. Here you will find detaile
 - [Custom Components](#custom-components-in-dars-framework)
 - [Event Handling](#events-in-dars)
 - [Exporters](#dars-exporter-documentation)
+  - See Desktop Export (BETA) in Exporters
 - [Scripts System](#dars-script-system)
 - [CLI Usage and Commands](#dars-cli-reference)
 
@@ -145,6 +146,38 @@ dars preview ./output_directory
 Congratulations! Dars is ready to use.
 
 ---
+
+## Desktop (BETA)
+
+You can build native desktop apps from Dars projects. This capability is in **BETA** and is not recommended for production yet, but it is usable for testing.
+
+### Quickstart
+
+\`\`\`bash
+# Scaffold or update a desktop-capable project
+dars init --type desktop
+# or
+dars init --update
+
+# Verify optional tooling (Node/Bun and packager)
+dars doctor --all --yes
+
+# Ensure your config sets the desktop format and target
+# dars.config.json
+{
+  "entry": "main.py",
+  "format": "desktop",
+  "outdir": "dist",
+  "targetPlatform": "auto"
+}
+
+# Build desktop artifacts
+dars build
+\`\`\`
+
+Notes:
+- Desktop support is under active development; configuration keys and defaults may change.
+- Some platform targets (like macOS) require building on that OS for signing.
 `},{type:"T9",id:"markdown_docs",text:`# Getting Started with Dars
 
 Welcome to Dars, a modern Python framework for building web applications with reusable UI components.
@@ -214,82 +247,7 @@ app.rTimeCompile().add_file_types = ".js,.css"
 - If you have questions or need support, check the official repository or community channels.
 
 Start building with Dars...
-`},{type:"T9",id:"markdown_docs",text:`# Dars Project Configuration
-
-The file (dars.config.json) configures how Dars exports and builds your project. It is created by \`dars init <name>\` for new projects and can be merged/updated in existing projects with \`dars init --update\`.
-
-## Example
-
-\`\`\`json
-{
-  "entry": "main.py",
-  "format": "html",
-  "outdir": "dist",
-  "publicDir": null,
-  "include": [],
-  "exclude": ["**/__pycache__", ".git", ".venv", "node_modules"],
-  "bundle": false,
-  "defaultMinify": true,
-  "viteMinify": true,
-  "markdownHighlight": true
-}
-\`\`\`
-
-## Fields
-
-- entry
-  Python entry file for your app. Used by \`dars build\` and by \`dars export config\`.
-
-- format
-  Export format. Currently only \`html\` is supported.
-
-- outdir
-  Directory where the exported files are written.
-
-- publicDir
-  Directory whose contents are copied as-is into the output (e.g. \`public/\` or \`assets/\`). If \`null\`, Dars will try to autodetect common locations.
-
-- include / exclude
-  Simple filters (by substring) applied when copying from \`publicDir\`.
-
-- bundle
-  Reserved for future use. Current exporters already produce a bundled output.
-
-- defaultMinify
-  Toggle the built-in Python minifier (safe and conservative). Controls HTML minification and provides JS/CSS fallback when advanced tools are unavailable.
-  - \`true\` (default): run the default Python-side minifier.
-  - \`false\`: skip the default minifier. You can still use Vite/esbuild via \`viteMinify\`.
-
-- viteMinify
-  Toggle the advanced JS minifier.
-  - \`true\` (default): prefer the advanced minifier; fall back to the secondary minifier; if neither is available, a conservative built-in fallback is used.
-  - \`false\`: skip the advanced minifier and use the secondary minifier directly; fall back to the conservative built-in if not available.
-
-- markdownHighlight
-  Auto-inject a client-side syntax highlighter for fenced code blocks in Markdown.
-  - \`true\` (default): injects Prism.js assets once per page and highlights \`pre code\` blocks.
-  - \`false\`: no assets injected; you can include your own highlighter or none at all.
-
-## Behavior and defaults
-
-- \`dars init --update\` merges your existing config with Dars defaults and writes the result back, adding any new keys (like \`defaultMinify\`, \`viteMinify\`) without removing your current settings.
-- During \`dars export\` and \`dars build\`, Dars reads this file and configures the minification pipeline accordingly.
-- If advanced minifiers are not available, builds still complete with a conservative fallback. On \`dars build\`, a small notice may appear indicating that a less powerful minifier was used.
-- You can force-skip the default Python minifier per run with \`--no-minify\` (does not affect \`viteMinify\`).
-
-## Tips
-
-- To add or refresh the config in an existing project:
-  \`\`\`bash
-  dars init --update
-  \`\`\`
-- To review optional tooling that can enhance bundling/minification, run:
-  \`\`\`bash
-  dars doctor
-  \`\`\`
-- If you want to force using only the secondary minifier, set \`"viteMinify": false\`.
- - To disable the default minifier by config, set \`"defaultMinify": false\`; to disable it per-run use \`--no-minify\`.
-`},{type:"T9",id:"markdown_docs",text:`# App Class and PWA Features in Dars Framework
+`},{type:"T9",id:"markdown_docs",text:'# Dars Project Configuration\n\nThe file (dars.config.json) configures how Dars exports and builds your project. It is created by `dars init <name>` for new projects and can be merged/updated in existing projects with `dars init --update`.\n\n## Example\n\n```json\n{\n  "entry": "main.py",\n  "format": "html",\n  "outdir": "dist",\n  "publicDir": null,\n  "include": [],\n  "exclude": ["**/__pycache__", ".git", ".venv", "node_modules"],\n  "bundle": false,\n  "defaultMinify": true,\n  "viteMinify": true,\n  "markdownHighlight": true\n}\n```\n\n## Fields\n\n- entry\n  Python entry file for your app. Used by `dars build` and by `dars export config`.\n\n- format\n  Export format. Supported: `html` and `desktop` (BETA). When set to `desktop`, the build command will produce native desktop artifacts.\n\n- outdir\n  Directory where the exported files are written.\n\n- publicDir\n  Directory whose contents are copied as-is into the output (e.g. `public/` or `assets/`). If `null`, Dars will try to autodetect common locations.\n\n- include / exclude\n  Simple filters (by substring) applied when copying from `publicDir`.\n\n- bundle\n  Reserved for future use. Current exporters already produce a bundled output.\n\n- defaultMinify\n  Toggle the built-in Python minifier (safe and conservative). Controls HTML minification and provides JS/CSS fallback when advanced tools are unavailable.\n  - `true` (default): run the default Python-side minifier.\n  - `false`: skip the default minifier. You can still use Vite/esbuild via `viteMinify`.\n\n- viteMinify\n  Toggle the advanced JS minifier.\n  - `true` (default): prefer the advanced minifier; fall back to the secondary minifier; if neither is available, a conservative built-in fallback is used.\n  - `false`: skip the advanced minifier and use the secondary minifier directly; fall back to the conservative built-in if not available.\n\n- markdownHighlight\n  Auto-inject a client-side syntax highlighter for fenced code blocks in Markdown.\n  - `true` (default): injects Prism.js assets once per page and highlights `pre code` blocks.\n  - `false`: no assets injected; you can include your own highlighter or none at all.\n\n## Desktop-specific (BETA)\n\n- targetPlatform\n  Desktop build target. Only effective when `format` is `desktop`.\n  - Values: `auto` (default), `windows`, `linux`, `macos`.\n  - Note: macOS targets must be built on macOS for signing.\n\n> Desktop export is BETA: suitable for testing, not recommended for production yet. Configuration keys and defaults may change.\n\n## Behavior and defaults\n\n- `dars init --update` merges your existing config with Dars defaults and writes the result back, adding any new keys (like `defaultMinify`, `viteMinify`) without removing your current settings.\n- During `dars export` and `dars build`, Dars reads this file and configures the minification pipeline accordingly.\n- If advanced minifiers are not available, builds still complete with a conservative fallback. On `dars build`, a small notice may appear indicating that a less powerful minifier was used.\n- You can force-skip the default Python minifier per run with `--no-minify` (does not affect `viteMinify`).\n\n## Tips\n\n- To add or refresh the config in an existing project:\n  ```bash\n  dars init --update\n  ```\n- To review optional tooling that can enhance bundling/minification, run:\n  ```bash\n  dars doctor\n  ```\n- If you want to force using only the secondary minifier, set `"viteMinify": false`.\n - To disable the default minifier by config, set `"defaultMinify": false`; to disable it per-run use `--no-minify`.\n'},{type:"T9",id:"markdown_docs",text:`# App Class and PWA Features in Dars Framework
 
 ## Overview
 
@@ -2643,6 +2601,67 @@ class MyCustomExporter(Exporter):
         return "generated_code"
 \`\`\`
 
+## Desktop Export (BETA)
+
+The desktop exporter allows you to package your Dars app as a native desktop application. This feature is currently in BETA: usable for testing and internal tooling, but not recommended for production deployments yet.
+
+### Status and Scope
+
+- BETA: Many options and integrations are still evolving (auto\u2011update, advanced packaging, signing, etc.).
+- Cross\u2011platform targets supported: Windows, Linux, macOS (host restrictions apply for macOS signing).
+- Underlying tech: Electron is used to deliver a native desktop container for your web UI.
+
+### Quickstart
+
+1. Initialize or update your project for desktop:
+
+   \`\`\`bash
+   dars init --type desktop
+   # or if you already have a project
+   dars init --update
+   \`\`\`
+
+2. Ensure your project config has desktop format:
+
+   \`\`\`json
+   {
+     "entry": "main.py",
+     "format": "desktop",
+     "outdir": "dist",
+     "targetPlatform": "auto"
+   }
+   \`\`\`
+
+3. Verify optional tooling (Node/Bun, Electron, electron\u2011builder):
+
+   \`\`\`bash
+   dars doctor --all --yes
+   \`\`\`
+
+4. Build your desktop app:
+
+   \`\`\`bash
+   dars build
+   \`\`\`
+
+Artifacts will be placed in \`dist/\`. The desktop source (used for packaging) is emitted to \`dist/source-electron/\`.
+
+### Platform Targeting
+
+- \`targetPlatform\`: \`auto\` | \`windows\` | \`linux\` | \`macos\`.
+- On non\u2011mac hosts, building for macOS is not supported.
+
+### Metadata and Packaging Notes
+
+- App metadata is taken from your \`App\` instance when available: title, description, author, version.
+- If version is not set, a default \`0.1.0\` is used and a warning is shown.
+- Package manager and Electron version are pinned by the exporter to make builds predictable.
+
+### Caveats (BETA)
+
+- Not yet recommended for production.
+- Some advanced packaging and signing options may require manual configuration.
+- Expect changes to configuration keys and defaults as the feature matures.
 `},{type:"T9",id:"markdown_docs",text:`# Dars - Script System
 
 ## Introduction
@@ -3253,7 +3272,7 @@ Open your terminal in your project directory and use any of the following comman
 # Show information about your app
  dars info my_app.py
 
-# Export to different formats
+# Export to different formats (web)
  dars export my_app.py --format html --output ./output
  # Skip default Python minifier for this run (does not affect viteMinify)
  dars export my_app.py --format html --output ./output --no-minify
@@ -3272,6 +3291,8 @@ Open your terminal in your project directory and use any of the following comman
 
 # Build using project config (dars.config.json)
  dars build
+ # Build desktop (BETA) when format is desktop in config
+ dars build
  # Build without the default Python minifier
  dars build --no-minify
 
@@ -3289,6 +3310,8 @@ Open your terminal in your project directory and use any of the following comman
 | \`dars export my_app.py --format html --no-minify\` | Export skipping default Python minifier |
 | \`dars preview ./my_app_web\`             | Preview exported app locally                |
 | \`dars build\`                            | Build using dars.config.json                |
+| \`dars init --type desktop\`              | Scaffold desktop-capable project (BETA)     |
+| \`dars build\` (desktop config)           | Build desktop app artifacts (BETA)          |
 | \`dars build --no-minify\`                | Build skipping default Python minifier      |
 | \`dars init my_project\`                  | Create a new Dars project                   |
 | \`dars info my_app.py\`                   | Show info about your app                    |
@@ -3330,9 +3353,16 @@ dars init  -L
 - You can preview apps either live (with \`app.rTimeCompile()\`) or from exported files with \`dars preview\`.
 - Templates are available for quick project setup: use \`dars init my_project -t <template>\`.
 
+### Desktop (BETA)
+
+- Mark your project with \`"format": "desktop"\` in \`dars.config.json\`.
+- Use \`dars init --type desktop\` (or \`--update\`) to scaffold backend files.
+- Run \`dars doctor --all --yes\` to set up optional tooling.
+- Build with \`dars build\`. This feature is in BETA: suitable for testing, not yet for production.
+
 ### Minification labels in output
 - Applying minification (default): default Python-side minifier is active.
 - Applying minification (vite): Vite/esbuild minification is active (JS/CSS) and default is disabled.
 - Applying minification (default + vite): both are active.
 
-For more, see the [Getting Started](getting_started.md) guide and the main documentation index.`},{type:"T4",id:"sidebar-floating",children:[{type:"T8",id:"button_243",text:"\u2630 Contents",events:{click:{t:"i",b:"CiAgICAgICAgICAgIGNvbnN0IHNpZGViYXIgPSBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnc2lkZWJhci1saW5rcycpOwogICAgICAgICAgICBpZiAoc2lkZWJhci5zdHlsZS5kaXNwbGF5ID09PSAnbm9uZScgfHwgc2lkZWJhci5zdHlsZS5kaXNwbGF5ID09PSAnJykgewogICAgICAgICAgICAgICAgc2lkZWJhci5zdHlsZS5kaXNwbGF5ID0gJ2Jsb2NrJzsKICAgICAgICAgICAgfSBlbHNlIHsKICAgICAgICAgICAgICAgIHNpZGViYXIuc3R5bGUuZGlzcGxheSA9ICdub25lJzsKICAgICAgICAgICAgfQogICAgICAgIA=="}}},{type:"T4",id:"sidebar-links",children:[{type:"T7",id:"link_244",text:"Home"},{type:"T7",id:"link_245",text:"Getting started"},{type:"T7",id:"link_246",text:"Configuration"},{type:"T7",id:"link_247",text:"App"},{type:"T7",id:"link_248",text:"State Management"},{type:"T7",id:"link_249",text:"Installing"},{type:"T7",id:"link_250",text:"Components"},{type:"T7",id:"link_251",text:"Custom Components"},{type:"T7",id:"link_252",text:"Events"},{type:"T7",id:"link_253",text:"Exporter"},{type:"T7",id:"link_254",text:"Scripts"},{type:"T7",id:"link_255",text:"Dars CLI"}]}]},{type:"T4",id:"container_256",children:[{type:"T4",id:"container_257",children:[{type:"T6",id:"text_258",text:"Created with "},{type:"T7",id:"link_259",text:"Dars Framework"},{type:"T6",id:"text_260",text:" \u2022 Documentation: "},{type:"T7",id:"link_261",text:"Getting Started"},{type:"T6",id:"text_262",text:" \u2022 Developer: "},{type:"T7",id:"link_263",text:"ZtaDev"}]}]}]};
+For more, see the [Getting Started](getting_started.md) guide and the main documentation index.`},{type:"T4",id:"sidebar-floating",children:[{type:"T8",id:"button_248",text:"\u2630 Contents",events:{click:{t:"i",b:"CiAgICAgICAgICAgIGNvbnN0IHNpZGViYXIgPSBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnc2lkZWJhci1saW5rcycpOwogICAgICAgICAgICBpZiAoc2lkZWJhci5zdHlsZS5kaXNwbGF5ID09PSAnbm9uZScgfHwgc2lkZWJhci5zdHlsZS5kaXNwbGF5ID09PSAnJykgewogICAgICAgICAgICAgICAgc2lkZWJhci5zdHlsZS5kaXNwbGF5ID0gJ2Jsb2NrJzsKICAgICAgICAgICAgfSBlbHNlIHsKICAgICAgICAgICAgICAgIHNpZGViYXIuc3R5bGUuZGlzcGxheSA9ICdub25lJzsKICAgICAgICAgICAgfQogICAgICAgIA=="}}},{type:"T4",id:"sidebar-links",children:[{type:"T7",id:"link_249",text:"Home"},{type:"T7",id:"link_250",text:"Getting started"},{type:"T7",id:"link_251",text:"Configuration"},{type:"T7",id:"link_252",text:"App"},{type:"T7",id:"link_253",text:"State Management"},{type:"T7",id:"link_254",text:"Installing"},{type:"T7",id:"link_255",text:"Components"},{type:"T7",id:"link_256",text:"Custom Components"},{type:"T7",id:"link_257",text:"Events"},{type:"T7",id:"link_258",text:"Exporter"},{type:"T7",id:"link_259",text:"Scripts"},{type:"T7",id:"link_260",text:"Dars CLI"}]}]},{type:"T4",id:"container_261",children:[{type:"T4",id:"container_262",children:[{type:"T6",id:"text_263",text:"Created with "},{type:"T7",id:"link_264",text:"Dars Framework"},{type:"T6",id:"text_265",text:" \u2022 Documentation: "},{type:"T7",id:"link_266",text:"Getting Started"},{type:"T6",id:"text_267",text:" \u2022 Developer: "},{type:"T7",id:"link_268",text:"ZtaDev"}]}]}]};

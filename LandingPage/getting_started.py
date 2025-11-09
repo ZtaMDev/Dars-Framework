@@ -8,7 +8,7 @@ getting_started_comp = Container(
         Text("Getting Started with Dars Framework", 
              style={"font-size": "2.5rem", "font-weight": "bold", "color": "#00d68f", "text-align": "center", "margin-bottom": "30px"}),
         
-        Text("Welcome to Dars, a modern Python framework for building web applications with reusable UI components.", 
+        Text("Welcome to Dars, a modern Python framework for building web and desktop applications with reusable UI components.", 
              style={"font-size": "1.2rem", "color": "#b2ffe5", "text-align": "center", "margin-bottom": "50px", "line-height": "1.6"}),
         
         # Quick Start Section - MODIFICADA
@@ -55,6 +55,20 @@ getting_started_comp = Container(
                             Container(
                                 Link("CLI Documentation", 
                                      href="https://ztamdev.github.io/Dars-Framework/documentation.html#dars-cli-reference", 
+                                     style={"color": "#00d68f", "text-decoration": "none", "font-weight": "bold", "display": "inline-block", "padding": "10px 15px", "border": "2px solid #00d68f", "border-radius": "5px"}),
+                                style={"text-align": "center"}
+                            ),
+                            style={"margin-bottom": "30px"}
+                        ),
+                        
+                        Text("4. Export to Web and Desktop", 
+                             style={"font-size": "1.4rem", "font-weight": "bold", "color": "#00d68f", "margin-bottom": "10px", "text-align": "center"}),
+                        Container(
+                            Text("Export your app to static web files or build native desktop apps.", 
+                                 style={"color": "#b2ffe5", "margin-bottom": "15px", "line-height": "1.6", "text-align": "center"}),
+                            Container(
+                                Link("Exporters Documentation", 
+                                     href="https://ztamdev.github.io/Dars-Framework/documentation.html#dars-exporter-documentation", 
                                      style={"color": "#00d68f", "text-decoration": "none", "font-weight": "bold", "display": "inline-block", "padding": "10px 15px", "border": "2px solid #00d68f", "border-radius": "5px"}),
                                 style={"text-align": "center"}
                             ),

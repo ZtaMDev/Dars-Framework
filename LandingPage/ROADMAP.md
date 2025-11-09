@@ -43,35 +43,35 @@ The following features and components have been successfully implemented in Dars
 
 This phase will focus on strengthening the framework's current foundation, improving performance and stability, and optimizing the developer experience.
 
-- [ ] **Framework Core Enhancements**
-    - [ ] **Rendering Optimization**: Research and apply techniques to improve the `render` method's performance, especially for applications with many elements or frequent updates. Consider implementing a Virtual DOM or an efficient reconciliation mechanism to minimize direct DOM manipulations.
-    - [ ] **Reactive State Management**: Develop a robust system for global and local application state management, enabling efficient reactive UI updates. This could include implementing an observable system, a unidirectional data flow pattern, or integrations with existing Python state management libraries.
-    - [ ] **Improved Property Typing and Validation**: Extend the property system to include more complex validations and clear error messages at development time, facilitating debugging.
-    - [ ] **Error Handling and Debugging**: Implement robust tools and mechanisms for runtime error handling and facilitate debugging of Dars applications, both in Python and in the generated JavaScript code.
+- [x] **Framework Core Enhancements**
+    - [x] **Rendering Optimization**: Research and apply techniques to improve the `render` method's performance, especially for applications with many elements or frequent updates. Consider implementing a Virtual DOM or an efficient reconciliation mechanism to minimize direct DOM manipulations.
+    - [x] **Reactive State Management**: Develop a robust system for global and local application state management, enabling efficient reactive UI updates. This could include implementing an observable system, a unidirectional data flow pattern, or integrations with existing Python state management libraries.
+    - [x] **Improved Property Typing and Validation**: Extend the property system to include more complex validations and clear error messages at development time, facilitating debugging.
+    - [x] **Error Handling and Debugging**: Implement robust tools and mechanisms for runtime error handling and facilitate debugging of Dars applications, both in Python and in the generated JavaScript code.
 
 - [ ] **Component System Enhancements**
     - [ ] **Component Lifecycle**: Define and document a clear lifecycle for components (mounting, updating, unmounting) that allows developers to execute logic at specific times.
-    - [ ] **Hooks or Mixins**: Explore the implementation of patterns like Hooks or Mixins to reuse state and behavior logic between components more cleanly and modularly.
+    - [x] **Hooks or Mixins**: Explore the implementation of patterns like Hooks or Mixins to reuse state and behavior logic between components more cleanly and modularly.
     - [ ] **Higher-Order Components (HOCs)**: Facilitate the creation of HOCs for logic reuse and component composition.
 
-- [ ] **HTML/CSS/JS Exporter Optimization**
-    - [ ] **Minification and Bundling**: Integrate minification and bundling tools (e.g., based on `esbuild` or `rollup` via Python) to reduce the size of generated JavaScript and CSS files, improving loading times.
-    - [ ] **Asset Optimization**: Implement automatic optimization of images and other static assets during the export process.
-    - [ ] **Scoped CSS Generation**: Explore options for generating CSS with scope limited to components, avoiding style conflicts and facilitating the development of reusable components.
+- [x] **HTML/CSS/JS Exporter Optimization**
+    - [x] **Minification and Bundling**: Integrate minification and bundling tools (e.g., based on `esbuild` or `rollup` via Python) to reduce the size of generated JavaScript and CSS files, improving loading times.
+    - [x] **Asset Optimization**: Implement automatic optimization of images and other static assets during the export process.
+    - [x] **Scoped CSS Generation**: Explore options for generating CSS with scope limited to components, avoiding style conflicts and facilitating the development of reusable components.
 
-- [ ] **CLI Enhancements**
-    - [ ] **Additional Commands**: Add commands for creating new projects (`dars new project`), generating components (`dars generate component`), and managing dependencies.
-    - [ ] **Integration with Testing Tools**: Facilitate the execution of unit and integration tests directly from the CLI.
-    - [ ] **Detailed Feedback**: Improve CLI error messages and feedback to guide the developer more effectively.
+- [x] **CLI Enhancements**
+    - [x] **Additional Commands**: Add commands for creating new projects (`dars init app`)
+    - [x] **Integration with Testing Tools**: Facilitate the execution of unit and integration tests directly from the CLI.
+    - [x] **Detailed Feedback**: Improve CLI error messages and feedback to guide the developer more effectively.
 
-### Phase 2: Ecosystem Expansion and Cross-Platform (Mid-Term)
+### Phase 2: Ecosystem Expansion and Cross-Platform (Mid-Term) RELEASED (IN BETA)
 
 This phase will focus on expanding Dars' capabilities to new platforms and building a richer ecosystem around the framework.
 
-- [ ] **Desktop Application Support with Electron**: Enhance the Dars API with a specialized submodule for integration with Electron, enabling the creation of cross-platform desktop applications from Python. This will include:
-    - [ ] A dedicated submodule in the Dars API to interact with Electron functionalities.
-    - [ ] Handling bidirectional communication between the main Electron process (Node.js) and the rendering process (Python/JS).
-    - [ ] Tools and templates to facilitate the packaging and distribution of Electron applications.
+- [x] **Desktop Application Support with Electron**: Enhance the Dars API with a specialized submodule for integration with Electron, enabling the creation of cross-platform desktop applications from Python. This will include:
+    - [x] A dedicated submodule in the Dars API to interact with Electron functionalities.
+    - [x] Handling bidirectional communication between the main Electron process (Node.js) and the rendering process (Python/JS).
+    - [x] Tools and templates to facilitate the packaging and distribution of Electron applications.
 
 - [ ] **More Integrated Components**
     - [ ] **Data Visualization Components**: `Chart` (integration with libraries like Chart.js or D3.js), `Table` (with pagination, sorting, and filtering).

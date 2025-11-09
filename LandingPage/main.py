@@ -739,8 +739,8 @@ index = Page(
                 # Texto a la derecha
                 Container(
                     Text("Dars Framework", style={"font-size": "2.8rem", "font-weight": "bold", "color": "#00d68f", "margin-bottom": "20px"}),
-                    Text("Dynamic Application Rendering System is an modern Python framework for web development", style={"font-size": "1.3rem", "color": "#b2ffe5", "margin-bottom": "30px", "line-height": "1.5"}),
-                    Text("Dars is designed to make web development simple, fast, and enjoyable. With an intuitive API and powerful features, you can build modern web applications in record time using Python.", style={"font-size": "1.1rem", "color": "#b2ffe5", "margin-bottom": "40px", "line-height": "1.6"}),
+                    Text("Dynamic Application Rendering System is an modern Python framework for web and desktop apps development", style={"font-size": "1.3rem", "color": "#b2ffe5", "margin-bottom": "30px", "line-height": "1.5"}),
+                    Text("Dars is designed to make web and desktop apps development simple, fast, and enjoyable. With an intuitive API and powerful features, you can build modern web and desktop apps in record time using Python.", style={"font-size": "1.1rem", "color": "#b2ffe5", "margin-bottom": "40px", "line-height": "1.6"}),
                     Container(
                         Button(
                             text="Get Started", 
@@ -791,7 +791,7 @@ index = Page(
                 ),
                 Container(
                     Text("3. Deploy", style={"font-size": "1.8rem", "font-weight": "bold", "color": "#00d68f", "margin-bottom": "15px"}),
-                    Text("Deploy your application in the test built-in server or your preferred hosting provider.", style={"color": "#b2ffe5", "line-height": "1.6"}),
+                    Text("Deploy your application in the test built-in server or your preferred hosting provider. or if you export it to desktop it will be a native app.", style={"color": "#b2ffe5", "line-height": "1.6"}),
                     style={"background-color": "#2a3b2f", "padding": "30px", "border-radius": "8px", "flex": "1", "min-width": "250px", "text-align": "center", "box-shadow": "0 4px 6px rgba(0, 0, 0, 0.2)"}
                 ),
                 style={"display": "flex", "flex-wrap": "wrap", "gap": "20px", "justify-content": "center", "max-width": "1000px", "margin": "0 auto"}
@@ -1614,6 +1614,6 @@ app.add_page(name="documentation", root=documentation, title="Dars-Documentation
 #Script
 app.add_script(dScript(code=mobile_detection_script))
 
-app.add_script(dScript(code="console.log('Dars framework version: 1.2.2 running...')"))
+app.add_script(dScript(code="console.log('Dars framework version: 1.3.0 running...')"))
 if __name__ == "__main__":
     app.rTimeCompile(add_file_types=".js, .md, .css")

@@ -155,3 +155,64 @@ class MyCustomExporter(Exporter):
         return "generated_code"
 ```
 
+## Desktop Export (BETA)
+
+The desktop exporter allows you to package your Dars app as a native desktop application. This feature is currently in BETA: usable for testing and internal tooling, but not recommended for production deployments yet.
+
+### Status and Scope
+
+- BETA: Many options and integrations are still evolving (auto‑update, advanced packaging, signing, etc.).
+- Cross‑platform targets supported: Windows, Linux, macOS (host restrictions apply for macOS signing).
+- Underlying tech: Electron is used to deliver a native desktop container for your web UI.
+
+### Quickstart
+
+1. Initialize or update your project for desktop:
+
+   ```bash
+   dars init --type desktop
+   # or if you already have a project
+   dars init --update
+   ```
+
+2. Ensure your project config has desktop format:
+
+   ```json
+   {
+     "entry": "main.py",
+     "format": "desktop",
+     "outdir": "dist",
+     "targetPlatform": "auto"
+   }
+   ```
+
+3. Verify optional tooling (Node/Bun, Electron, electron‑builder):
+
+   ```bash
+   dars doctor --all --yes
+   ```
+
+4. Build your desktop app:
+
+   ```bash
+   dars build
+   ```
+
+Artifacts will be placed in `dist/`. The desktop source (used for packaging) is emitted to `dist/source-electron/`.
+
+### Platform Targeting
+
+- `targetPlatform`: `auto` | `windows` | `linux` | `macos`.
+- On non‑mac hosts, building for macOS is not supported.
+
+### Metadata and Packaging Notes
+
+- App metadata is taken from your `App` instance when available: title, description, author, version.
+- If version is not set, a default `0.1.0` is used and a warning is shown.
+- Package manager and Electron version are pinned by the exporter to make builds predictable.
+
+### Caveats (BETA)
+
+- Not yet recommended for production.
+- Some advanced packaging and signing options may require manual configuration.
+- Expect changes to configuration keys and defaults as the feature matures.

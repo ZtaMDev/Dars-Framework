@@ -6,6 +6,8 @@
 
 <p align="center">
   <em>Dars is a Python UI framework for building modern, interactive web apps with Python code. Write your interface in Python, export it to static HTML/CSS/JS, and deploy anywhere.</em>
+  <br/>
+  <em><strong>New (BETA):</strong> Export to native desktop apps. This capability is in BETA and not yet recommended for production.</em>
 </p>
 
 ```bash
@@ -20,6 +22,7 @@ Try dars without installing nothing just visit the [Dars Playground](https://dar
 - Build your UI using Python classes and components (like Text, Button, Container, Page, etc).
 - Preview instantly with hot-reload using `app.rTimeCompile()`.
 - Export your app to static web files with a single CLI command.
+- Export to native desktop apps (BETA) using project config `format: "desktop"` and `dars build`.
 - Use multipage, layouts, scripts, and more—see docs for advanced features.
 - For more information visit the [Documentation](https://ztamdev.github.io/Dars-Framework/documentation.html)
 
@@ -128,6 +131,8 @@ A complete example demonstrating `dState`, `cState`, `Mod`, and deferred updates
 | Command                                 | What it does                               |
 |-----------------------------------------|--------------------------------------------|
 | `dars export my_app.py --format html`   | Export app to HTML/CSS/JS in `./my_app_web` |
+| `dars init --type desktop`               | Scaffold desktop-capable project (BETA)     |
+| `dars build` (desktop config)            | Build desktop app artifacts (BETA)          |
 | `dars preview ./my_app_web`             | Preview exported app locally                |
 | `dars init my_project`                  | Create a new Dars project (also creates dars.config.json) |
 | `dars init --update`                    | Create/Update dars.config.json in current dir |
@@ -138,6 +143,13 @@ A complete example demonstrating `dState`, `cState`, `Mod`, and deferred updates
 | `dars --help`                           | Show help and all CLI options               |
 
 Tip: use `dars doctor` to review optional tooling that can enhance bundling/minification.
+
+### Desktop Export (BETA)
+
+- Mark your project for desktop in `dars.config.json` with `"format": "desktop"`.
+- Initialize backend scaffolding with `dars init --type desktop` (or `--update`).
+- Build with `dars build` to produce desktop artifacts under `dist/`.
+- This feature is in BETA: usable for testing, not yet recommended for production.
 
 ## More
 
