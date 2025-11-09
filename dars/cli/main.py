@@ -1250,6 +1250,17 @@ def main():
                 if target == 'macos' and _sys.platform != 'darwin':
                     console.print("[red]✖ Cannot build macOS from a non-mac host. Use a macOS machine.[/red]")
                     sys.exit(1)
+                # Guard: Linux targets from non-Linux hosts require Docker
+                if target == 'linux' and not _sys.platform.startswith('linux'):
+                    try:
+                        import shutil as _shutil
+                        has_docker = _shutil.which('docker') is not None
+                    except Exception:
+                        has_docker = False
+                    if not has_docker:
+                        console.print("[red]✖ Cannot build Linux targets from a non-Linux host without Docker.[/red]")
+                        console.print("[yellow]Tip: Install Docker Desktop (enable WSL integration) or build on a Linux/WSL environment, then run dars build again.[/yellow]")
+                        sys.exit(1)
 
                 # Ensure electron-builder available (best effort)
                 if not jsb.electron_builder_available():
