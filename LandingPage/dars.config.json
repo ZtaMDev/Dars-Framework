@@ -2,7 +2,7 @@
   "entry": "index.py",
   "format": "web",
   "outdir": "../docs",
-  "publicDir": "public",
+  "publicDir": null,
   "include": [],
   "exclude": [
     "**/__pycache__",

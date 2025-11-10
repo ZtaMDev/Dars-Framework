@@ -48,7 +48,7 @@ def create_footer():
                         ),
                         Link(
                             "Documentation",
-                            href="/docs.html",
+                            href="https://ztamdev.github.io/Dars-Framework/docs.html",
                             style={
                                 "color": "#a0cfc0",
                                 "text-decoration": "none",
@@ -99,7 +99,7 @@ def create_footer():
                         # THIS NEEDS TO BE UPDATED TO #GETTING STARTED OR SIMILLAR
                         Link(
                             "Getting Started",
-                            href="/docs.html",
+                            href="https://ztamdev.github.io/Dars-Framework/docs.html",
                             style={
                                 "color": "#a0cfc0",
                                 "text-decoration": "none",
@@ -112,7 +112,7 @@ def create_footer():
                         #TODO  I NEED TO UPDATE THAT LINKS TO ITS FINAL VERSION WHEN I FINISH DOCS PAGE
                         Link(
                             "Releases",
-                            href="/releases.html",
+                            href="pip install dars framewor/releases.html",
                             style={
                                 "color": "#a0cfc0",
                                 "text-decoration": "none",

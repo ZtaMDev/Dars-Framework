@@ -4,5 +4,5 @@ if(title){setTimeout(()=>title.classList.add("show"),350);}
 if(desc){setTimeout(()=>desc.classList.add("show"),650);}
 if(pipCommand){setTimeout(()=>pipCommand.classList.add("show"),950);}
 if(btn){setTimeout(()=>btn.classList.add("show"),1250);}
-if(scrollText){setTimeout(()=>scrollText.classList.add("show"),1500);}});function openDocs(){window.open("/docs.html","_self");}
+if(scrollText){setTimeout(()=>scrollText.classList.add("show"),1500);}});function openDocs(){window.open("https://ztamdev.github.io/Dars-Framework/docs.html","_self");}
 function copyPipCommand(){const command='pip install dars framework';navigator.clipboard.writeText(command).then(()=>{const btn=document.querySelector('#copy-btn');const originalText=btn.textContent;btn.textContent='Copied!';btn.style.background="linear-gradient(135deg, #38c49f 0%, #2a6b5b 100%) !important";setTimeout(()=>{btn.textContent=originalText;btn.style.background="linear-gradient(135deg, #1d4a3f 0%, #2a6b5b 100%) !important";},2000);});}

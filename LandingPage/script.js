@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function openDocs() {
-  window.open("/docs.html", "_self");
+  window.open("https://ztamdev.github.io/Dars-Framework/docs.html", "_self");
 }
 
 function copyPipCommand() {

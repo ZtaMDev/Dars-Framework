@@ -1415,20 +1415,6 @@ html, body {
     backdrop-filter: blur(12px);
 }
 
-/* ====== SCROLL MARGIN FOR NAVBAR ====== */
-#markdown-content-container h1,
-#markdown-content-container h2,
-#markdown-content-container h3,
-#markdown-content-container h4,
-#markdown-content-container h5,
-#markdown-content-container h6 {
-    scroll-margin-top: 80px;
-}
-
-.markdown_docs a[href^="#"] {
-    scroll-margin-top: 80px;
-}
-
 /* ====== PIP COMMAND STYLES CORREGIDO ====== */
 #pip-command.show {
     opacity: 1 !important;
