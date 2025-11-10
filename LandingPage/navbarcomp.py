@@ -34,7 +34,7 @@ def create_navbar():
     right_block = Container(
         Link(
             "Home",
-            href="/",
+            href="https://ztamdev.github.io/Dars-Framework/",
             style={
                 "color": "#a0cfc0",
                 "text-decoration": "none",
@@ -48,7 +48,7 @@ def create_navbar():
         ),
         Link(
             "Documentation",
-            href="https://github.com/ZtaMDev/Dars-Framework/docs.html",
+            href="https://ztamdev.github.io/Dars-Framework/docs.html",
             style={
                 "color": "#a0cfc0",
                 "text-decoration": "none",
@@ -62,7 +62,7 @@ def create_navbar():
         ),
         Link(
             "Releases",
-            href="https://github.com/ZtaMDev/Dars-Framework/releases.html",
+            href="https://ztamdev.github.io/Dars-Framework/releases.html",
             style={
                 "color": "#a0cfc0",
                 "text-decoration": "none",
@@ -171,7 +171,7 @@ def create_navbar():
         Container(
             Link(
                 "Home",
-                href="/",
+                href="https://ztamdev.github.io/Dars-Framework/",
                 style={
                     "color": "#a0cfc0",
                     "text-decoration": "none",
@@ -185,7 +185,7 @@ def create_navbar():
             ),
             Link(
                 "Documentation",
-                href="https://github.com/ZtaMDev/Dars-Framework/docs.html",
+                href="https://ztamdev.github.io/Dars-Framework/docs.html",
                 style={
                     "color": "#a0cfc0",
                     "text-decoration": "none",
@@ -199,7 +199,7 @@ def create_navbar():
             ),
             Link(
                 "Releases",
-                href="https://github.com/ZtaMDev/Dars-Framework/releases.html",
+                href="https://ztamdev.github.io/Dars-Framework/releases.html",
                 style={
                     "color": "#a0cfc0",
                     "text-decoration": "none",
