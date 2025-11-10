@@ -48,7 +48,7 @@ def create_navbar():
         ),
         Link(
             "Documentation",
-            href="/docs.html",
+            href="https://github.com/ZtaMDev/Dars-Framework/docs.html",
             style={
                 "color": "#a0cfc0",
                 "text-decoration": "none",
@@ -62,7 +62,7 @@ def create_navbar():
         ),
         Link(
             "Releases",
-            href="/releases.html",
+            href="https://github.com/ZtaMDev/Dars-Framework/releases.html",
             style={
                 "color": "#a0cfc0",
                 "text-decoration": "none",
@@ -185,7 +185,7 @@ def create_navbar():
             ),
             Link(
                 "Documentation",
-                href="/docs.html",
+                href="https://github.com/ZtaMDev/Dars-Framework/docs.html",
                 style={
                     "color": "#a0cfc0",
                     "text-decoration": "none",
@@ -199,7 +199,7 @@ def create_navbar():
             ),
             Link(
                 "Releases",
-                href="/releases.html",
+                href="https://github.com/ZtaMDev/Dars-Framework/releases.html",
                 style={
                     "color": "#a0cfc0",
                     "text-decoration": "none",

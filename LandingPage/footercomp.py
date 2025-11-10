@@ -112,7 +112,7 @@ def create_footer():
                         #TODO  I NEED TO UPDATE THAT LINKS TO ITS FINAL VERSION WHEN I FINISH DOCS PAGE
                         Link(
                             "Releases",
-                            href="pip install dars framewor/releases.html",
+                            href="https://github.com/ZtaMDev/Dars-Framework/releases.html",
                             style={
                                 "color": "#a0cfc0",
                                 "text-decoration": "none",
