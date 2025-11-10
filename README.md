@@ -15,7 +15,7 @@ Documentation [Docs](https://ztamdev.github.io/Dars-Framework/docs.html) |
 
 </div>
 
-<em>Export to native desktop apps. Warning: This capability is in BETA and not yet recommended for production.</em>
+<em>Exporting to native desktop apps. Warning: This capability is in BETA and not yet recommended for production.</em>
 
 
 ```bash
