@@ -14,7 +14,7 @@
 pip install dars-framework
 ```
 
-> Some Javascript or frontend stack required.
+> Some Javascript or frontend stack required. 
 
 Try dars without installing nothing just visit the [Dars Playground](https://dars-playground.vercel.app/)
 
