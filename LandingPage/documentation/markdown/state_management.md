@@ -9,7 +9,7 @@ This document describes the new state system available in Dars 1.1.9.
 - goto: absolute (e.g. 2) or relative ("+1", "-1") state jumps.
 
 
-## Quick start
+## Quick start with states
 
 ```python
 from dars.all import *

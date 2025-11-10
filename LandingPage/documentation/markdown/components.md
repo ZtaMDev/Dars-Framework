@@ -27,7 +27,7 @@ Dars provides a powerful way to handle user interactions through the `dScript` c
 
 For a complete list of available event types and how to use them, refer to the documentation in [Events](#events-in-dars).
 
-### Basic Usage
+### dScript Basic Usage
 
 ```python
 from dars.scripts.dscript import dScript
@@ -75,7 +75,7 @@ input_field = Input(
 | `Input` | `on_key_up` | Triggered when a key is released |
 | `Input` | `on_key_down` | Triggered when a key is pressed |
 
-### Best Practices
+### Events and dScriptBest Practices
 
 1. **Use Named Functions**: Makes debugging easier and allows reusing the same function for multiple events.
 2. **Keep Handlers Small**: Move complex logic to separate functions in your JavaScript code.
@@ -233,7 +233,7 @@ first_button = component.find(type="Button").first()
 
 The `Page` component represents the root of a multipage app. It can contain other components and scripts specific to that page.
 
-#### Syntax
+#### Page Syntax
 
 ```python
 from dars.components.basic import Page, Text, Button
@@ -253,7 +253,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 Use `Page` as the root of each page in the multipage system. Allows passing children directly as arguments and JS scripts per page.
 
-#### Properties
+#### Page Properties 
 
 | Property    | Type   | Description                                         |
 |-------------|--------|-----------------------------------------------------|
@@ -279,7 +279,7 @@ index.add_script(
 
 The `Text` component displays static or dynamic text.
 
-#### Syntax
+#### Text Syntax
 
 ```python
 from dars.components.basic.text import Text
@@ -296,7 +296,7 @@ text = Text(
 )
 ```
 
-#### Properties
+#### Text Properties
 
 | Property | Type | Description | Example |
 |-----------|------|-------------|---------|
@@ -305,7 +305,7 @@ text = Text(
 | `class_name` | str | CSS class | `"text-highlight"` |
 | `style` | dict | CSS styles | `{"color": "red"}` |
 
-#### Common Styles
+#### Text Common Styles
 
 ```python
 # Título principal
@@ -346,7 +346,7 @@ note = Text(
 
 The `Button` component creates interactive buttons that can execute actions.
 
-#### Syntax
+#### Button Syntax
 
 ```python
 from dars.components.basic.button import Button
@@ -370,7 +370,7 @@ boton = Button(
 )
 ```
 
-#### Properties
+#### Button Properties
 
 | Property | Type | Description | Values |
 |-----------|------|-------------|---------|
@@ -449,7 +449,7 @@ disabled_button = Button(
 
 The `Input` component allows user data entry.
 
-#### Syntax
+#### Input Syntax
 
 ```python
 from dars.components.basic.input import Input
@@ -476,7 +476,7 @@ entrada = Input(
 )
 ```
 
-#### Properties
+#### Input Properties
 
 | Property | Type | Description | Values |
 |-----------|------|-------------|---------|
@@ -568,7 +568,7 @@ busqueda = Input(
 
 The `Container` component is a container that can hold other components. It supports multiple ways to add child components.
 
-#### Syntax
+#### Container Syntax
 
 ```python
 from dars.components.basic.container import Container
@@ -608,7 +608,7 @@ container.add_child(Text("Hello"))
 container.add_child(Button("Click me"))
 ```
 
-#### Properties
+#### Container Properties
 
 | Property | Type | Description |
 |-----------|------|-------------|
@@ -675,11 +675,11 @@ sidebar = Container(
 )
 ```
 
-# Markdown
+### Markdown
 
 The `Markdown` component allows you to render markdown content directly in your Dars applications, converting markdown syntax to beautiful HTML with proper styling.
 
-## Syntax
+#### Markdown Syntax
 
 ```python
 from dars.components.basic.markdown import Markdown
@@ -700,7 +700,7 @@ markdown_from_file = Markdown(
 )
 ```
 
-## Properties
+#### Markdown Properties
 
 | Property | Type | Description | Example |
 |-----------|------|-------------|---------|
@@ -711,14 +711,14 @@ markdown_from_file = Markdown(
 | `class_name` | str | CSS class | `"markdown-body"` |
 | `style` | dict | CSS styles | `{"fontSize": "16px"}` |
 
-## Methods
+#### Markdown Methods
 
 | Method | Description | Example |
 |--------|-------------|---------|
 | `update_content(new_content=None, new_file_path=None)` | Update markdown content | `markdown_component.update_content(new_content="# New")` |
 | `set_dark_theme(enabled=True)` | Enable/disable dark theme | `markdown_component.set_dark_theme(True)` |
 
-## Examples
+#### Markdown Examples
 
 ```python
 # Simple markdown from string
@@ -737,8 +737,6 @@ docs_md = Markdown(
 # Update content dynamically
 simple_md.update_content(new_content="# Updated\nNew content here")
 ```
-
-### Code blocks and syntax highlighting
 
 The Markdown renderer supports fenced code blocks and emits standard `language-<lang>` classes, e.g. `language-python`.
 
@@ -765,11 +763,11 @@ def hello():
 ```
 ````
 
-## Dependencies
+#### Markdown Dependencies
 
 The Markdown component requires the `markdown2` library. Included with the framework.
 
-## Supported Markdown Features
+#### Supported Markdown Features
 
 - Headers (`#`, `##`, `###`)
 - **Bold** and *italic* text
@@ -781,7 +779,7 @@ The Markdown component requires the `markdown2` library. Included with the frame
 - Images
 - Horizontal rules
 
-## Styling
+#### Markdown Styling
 
 The Markdown component includes comprehensive default styling for both light and dark themes:
 
@@ -797,14 +795,14 @@ markdown_dark = Markdown(
 )
 ```
 
-## Best Practices
+#### Markdown Best Practices
 
 1. Use file paths for large documentation content
 2. Enable dark theme for better readability in low-light environments
 3. Combine with layout components for responsive designs
 4. Use the update methods for dynamic content changes
 
-## Integration Example
+#### Markdown Integration Example
 
 ```python
 from dars.core.app import App
@@ -835,7 +833,7 @@ This component is perfect for creating documentation pages, blog posts, content 
 
 The `Image` component displays images.
 
-#### Syntax
+#### Image Syntax
 
 ```python
 from dars.components.basic.image import Image
@@ -853,7 +851,7 @@ image = Image(
 )
 ```
 
-#### Properties
+#### Image Properties
 
 | Property | Type | Description | Example |
 |-----------|------|-------------|---------|
@@ -866,7 +864,7 @@ image = Image(
 
 The `Link` component creates navigation links.
 
-#### Syntax
+#### Link Syntax
 
 ```python
 from dars.components.basic.link import Link
@@ -884,7 +882,7 @@ link = Link(
 )
 ```
 
-#### Properties
+#### Link Properties
 
 | Property | Type | Description | Values |
 |-----------|------|-------------|---------|
@@ -896,7 +894,7 @@ link = Link(
 
 The `Textarea` component allows for multi-line text input.
 
-#### Syntax
+#### Textarea Syntax
 
 ```python
 from dars.components.basic.textarea import Textarea
@@ -920,7 +918,7 @@ area_text = Textarea(
 )
 ```
 
-#### Properties
+#### Textarea Properties
 
 | Property | Type | Description | Values |
 |-----------|------|-------------|---------|
@@ -933,7 +931,6 @@ area_text = Textarea(
 | `required` | bool | Campo obligatorio | `True`, `False` |
 | `max_length` | int | Longitud máxima | `500` |
 
----
 
 ---
 
@@ -941,7 +938,7 @@ area_text = Textarea(
 
 The `ProgressBar` component visually displays progress for a task, such as loading or completion percentage.
 
-#### Syntax
+#### ProgressBar Syntax
 
 ```python
 from dars.components.basic.progressbar import ProgressBar
@@ -949,14 +946,14 @@ from dars.components.basic.progressbar import ProgressBar
 progress = ProgressBar(value=40, max_value=100)
 ```
 
-#### Properties
+#### ProgressBar Properties
 
 | Property    | Type | Description                       |
 |-------------|------|-----------------------------------|
 | `value`     | int  | Current progress value            |
 | `max_value` | int  | Maximum value (default: 100)      |
 
-#### Example
+#### ProgressBar Example
 
 ```python
 progress = ProgressBar(value=75, max_value=100)
@@ -968,7 +965,7 @@ progress = ProgressBar(value=75, max_value=100)
 
 The `Tooltip` component displays a tooltip when hovering over a child component.
 
-#### Syntax
+#### Tooltip Syntax
 
 ```python
 from dars.components.basic.tooltip import Tooltip
@@ -980,7 +977,7 @@ tooltip = Tooltip(
 )
 ```
 
-#### Properties
+#### Tooltip Properties
 
 | Property   | Type      | Description                             |
 |------------|-----------|-----------------------------------------|
@@ -988,7 +985,7 @@ tooltip = Tooltip(
 | `child`    | Component | Component to wrap                       |
 | `position` | str       | Tooltip position (e.g., "top")          |
 
-#### Example
+#### Tooltip Example
 
 ```python
 tooltip = Tooltip(text="Help", child=Button(text="?"))
@@ -1000,7 +997,7 @@ tooltip = Tooltip(text="Help", child=Button(text="?"))
 
 The `Accordion` component creates a vertically stacked set of expandable/collapsible panels for organizing content.
 
-#### Syntax
+#### Accordion Syntax
 
 ```python
 from dars.components.advanced.accordion import Accordion
@@ -1014,14 +1011,14 @@ accordion = Accordion(
 )
 ```
 
-#### Properties
+#### Accordion Properties
 
 | Property         | Type    | Description                                         |
 |------------------|---------|-----------------------------------------------------|
 | `items`          | list    | List of dicts with `title` and `content`            |
 | `allow_multiple` | bool    | Allow multiple sections open at once                |
 
-#### Example
+#### Accordion Example
 
 ```python
 accordion = Accordion(
@@ -1041,7 +1038,7 @@ The `Tabs` component allows navigation between different views or content panels
 > **New in 1.0.5:** The exporter now recursively detects Tabs at any nesting level (including inside containers, panels, or multipage apps) for `minimum_logic` and JS injection. You can safely nest Tabs in any structure and the export will work as expected.
 
 
-#### Syntax
+#### Tabs Syntax
 
 ```python
 from dars.components.advanced.tabs import Tabs
@@ -1055,14 +1052,14 @@ tabs = Tabs(
 )
 ```
 
-#### Properties
+#### Tabs Properties
 
 | Property        | Type | Description                              |
 |-----------------|------|------------------------------------------|
 | `tabs`          | list | List of dicts with `label` and `content` |
 | `default_index` | int  | Index of the initially selected tab      |
 
-#### Example
+#### Tabs Example
 
 ```python
 tabs = Tabs(
@@ -1080,7 +1077,7 @@ tabs = Tabs(
 
 The `Table` component displays tabular data with rows and columns.
 
-#### Syntax
+#### Table Syntax
 
 ```python
 from dars.components.advanced.table import Table
@@ -1094,14 +1091,14 @@ table = Table(
 )
 ```
 
-#### Properties
+#### Table Properties
 
 | Property   | Type   | Description                       |
 |------------|--------|-----------------------------------|
 | `columns`  | list   | List of column headers            |
 | `data`     | list   | List of rows (each a list/tuple)  |
 
-#### Example
+#### Table Example
 
 ```python
 table = Table(
@@ -1121,7 +1118,7 @@ table = Table(
 
 The `GridLayout` component provides a responsive grid-based layout with customizable rows, columns, gaps, and anchor points for precise positioning of children.
 
-#### Syntax
+#### GridLayout Syntax
 
 ```python
 from dars.components.layout.grid import GridLayout
@@ -1140,7 +1137,7 @@ grid = GridLayout(
 )
 ```
 
-#### Properties
+#### GridLayout Properties
 
 | Property   | Type   | Description                                 |
 |------------|--------|---------------------------------------------|
@@ -1150,7 +1147,7 @@ grid = GridLayout(
 | `children` | list   | List of child components                    |
 | `anchors`  | dict   | Optional anchor points for child placement  |
 
-#### Example
+#### GridLayout Example
 
 ```python
 grid = GridLayout(
@@ -1167,7 +1164,7 @@ grid = GridLayout(
 
 The `FlexLayout` component provides a responsive flexbox layout, supporting direction, wrap, alignment, and gap between children. Useful for row/column layouts.
 
-#### Syntax
+#### FlexLayout Syntax
 
 ```python
 from dars.components.layout.flex import FlexLayout
@@ -1182,7 +1179,7 @@ flex = FlexLayout(
 )
 ```
 
-#### Properties
+#### FlexLayout Properties
 
 | Property    | Type   | Description                                         |
 |-------------|--------|-----------------------------------------------------|
@@ -1194,7 +1191,7 @@ flex = FlexLayout(
 | `children`  | list   | List of child components                            |
 | `anchors`   | dict   | Optional anchor points for child placement          |
 
-#### Example
+#### FlexLayout Example
 
 ```python
 flex = FlexLayout(
@@ -1210,7 +1207,7 @@ flex = FlexLayout(
 
 The `LayoutBase` component is the base class for all layout components. It allows adding children and anchor/positioning info. You typically use `FlexLayout` or `GridLayout` directly.
 
-#### Syntax
+#### LayoutBase Syntax
 
 ```python
 from dars.components.layout.grid import LayoutBase
@@ -1222,7 +1219,7 @@ layout = LayoutBase(
 )
 ```
 
-#### Properties
+#### LayoutBase Properties
 
 | Property    | Type   | Description                    |
 |-------------|--------|--------------------------------|
@@ -1235,7 +1232,7 @@ layout = LayoutBase(
 
 The `AnchorPoint` class represents an anchor or alignment point for a child in a layout (e.g., top, left, right, bottom, center, percent, or px).
 
-#### Syntax
+#### AnchorPoint Syntax
 
 ```python
 from dars.components.layout.anchor import AnchorPoint
@@ -1243,7 +1240,7 @@ from dars.components.layout.anchor import AnchorPoint
 anchor = AnchorPoint(x="left", y="top", name="top-left")
 ```
 
-#### Properties
+#### AnchorPoint Properties
 
 | Property | Type | Description                                      |
 |----------|------|--------------------------------------------------|
@@ -1251,7 +1248,7 @@ anchor = AnchorPoint(x="left", y="top", name="top-left")
 | `y`      | str  | Vertical alignment (e.g., "top", "center")       |
 | `name`   | str  | Optional semantic name for the anchor            |
 
-#### Example
+#### AnchorPoint Example
 
 ```python
 anchor = AnchorPoint(x="50%", y="50%", name="center")
@@ -1263,7 +1260,7 @@ anchor = AnchorPoint(x="50%", y="50%", name="center")
 
 The `Card` component is a styled container to group related content, such as a title and other components.
 
-#### Syntax
+#### Card Syntax
 
 ```python
 from dars.components.basic.card import Card
@@ -1287,14 +1284,14 @@ my_card = Card(
 )
 ```
 
-#### Properties
+#### Card Properties
 
 | Property | Type | Description |
 |-----------|------|-------------|
 | `title` | str | Card title |
 | `children` | list | List of child components |
 
-#### Example
+#### Card Example
 
 ```python
 my_card = Card(
@@ -1322,7 +1319,7 @@ The `Modal` component creates an overlay window that appears on top of the main 
 
 > **New in 1.0.5:** Modal is now exported as hidden by default (`hidden` attribute and `dars-modal-hidden` class) if `is_open=False`, preventing any visual flicker on page load, even if CSS/JS loads slowly.
 
-#### Syntax
+#### Modal Syntax
 
 ```python
 from dars.components.advanced.modal import Modal
@@ -1343,7 +1340,7 @@ my_modal = Modal(
 )
 ```
 
-#### Properties
+#### Modal Properties
 
 | Property   | Type | Description |
 |------------|------|------------------------------------------------------------|
@@ -1351,7 +1348,7 @@ my_modal = Modal(
 | `is_open`  | bool | Controls modal visibility (`True` to show, `False` to hide). If `False`, modal is hidden from exported HTML. |
 | `children` | list | List of child components |
 
-#### Updated Example
+#### Modal Updated Example
 
 ```python
 my_modal = Modal(
@@ -1376,7 +1373,7 @@ my_modal = Modal(
 
 The `Navbar` component creates a navigation bar, commonly used at the top of pages.
 
-#### Syntax
+#### Navbar Syntax
 
 ```python
 from dars.components.advanced.navbar import Navbar
@@ -1398,7 +1395,7 @@ my_navbar = Navbar(
 )
 ```
 
-#### Properties
+#### Navbar Properties
 
 | Property | Type | Description |
 |-----------|------|-------------|
@@ -1411,7 +1408,7 @@ my_navbar = Navbar(
 
 The `Checkbox` component allows users to select options.
 
-#### Syntax
+#### Checkbox Syntax
 
 ```python
 from dars.components.basic.checkbox import Checkbox
@@ -1425,7 +1422,7 @@ mi_checkbox = Checkbox(
 )
 ```
 
-#### Properties
+#### Checkbox Properties
 
 | Property | Type | Description | Values |
 |-----------|------|-------------|---------|
@@ -1436,7 +1433,7 @@ mi_checkbox = Checkbox(
 
 The `RadioButton` component allows users to select one option from a group of options.
 
-#### Syntax
+#### RadioButton Syntax
 
 ```python
 from dars.components.basic.radio_button import RadioButton
@@ -1451,7 +1448,7 @@ mi_radio_button = RadioButton(
 )
 ```
 
-#### Properties
+#### RadioButton Properties
 
 | Property | Type | Description | Values |
 |-----------|------|-------------|---------|
@@ -1463,7 +1460,7 @@ mi_radio_button = RadioButton(
 
 The `Select` component allows users to select one option from a group of options.
 
-#### Syntax
+#### Select Syntax
 
 ```python
 from dars.components.basic.select import Select
@@ -1479,7 +1476,7 @@ mi_select = Select(
 )
 ```
 
-#### Properties
+#### Select Properties
 
 | Property | Type | Description | Values |
 |-----------|------|-------------|---------|
@@ -1490,7 +1487,7 @@ mi_select = Select(
 
 The `Slider` component allows users to select a value within a range.
 
-#### Syntax
+#### Slider Syntax
 
 ```python
 from dars.components.basic.slider import Slider
@@ -1507,7 +1504,7 @@ mi_slider = Slider(
 )
 ```
 
-#### Properties
+#### Slider Properties
 
 | Property | Type | Description | Values |
 |-----------|------|-------------|---------|
@@ -1521,7 +1518,7 @@ mi_slider = Slider(
 
 The `DatePicker` component allows users to select a date.
 
-#### Syntax
+#### DatePicker Syntax
 
 ```python
 from dars.components.basic.date_picker import DatePicker
@@ -1536,7 +1533,7 @@ mi_date_picker = DatePicker(
 )
 ```
 
-#### Properties
+#### DatePickerProperties
 
 | Property | Type | Description | Values |
 |-----------|------|-------------|---------|
@@ -1637,7 +1634,7 @@ responsive_container = Container(
 
 
 
-## Best Practices
+## Best Practices Styling
 
 ### Component Organization
 

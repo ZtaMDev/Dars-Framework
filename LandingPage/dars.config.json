@@ -1,6 +1,6 @@
 {
-  "entry": "main.py",
-  "format": "html",
+  "entry": "index.py",
+  "format": "web",
   "outdir": "../docs",
   "publicDir": "public",
   "include": [],
@@ -11,8 +11,9 @@
     "node_modules"
   ],
   "bundle": true,
-  "defaultMinify": false,
-  "viteMinify": true,
+  "defaultMinify": true,
+  "viteMinify": false,
   "markdownHighlight": true,
-  "markdownHighlightTheme": "auto"
+  "markdownHighlightTheme": "dark",
+  "targetPlatform": "auto"
 }

@@ -165,7 +165,7 @@ The desktop exporter allows you to package your Dars app as a native desktop app
 - Cross‑platform targets supported: Windows, Linux, macOS (host restrictions apply for macOS signing, and linux if you don't have docker).
 - Underlying tech: Electron is used to deliver a native desktop container for your web UI.
 - Hot Reload: `dars dev` with desktop apps is fully supported, but for now it closes and reopen the electron dev app when a file change is detected.
-### Quickstart
+### Quickstart desktop Export
 
 1. Initialize or update your project for desktop:
 

@@ -86,12 +86,12 @@ dars init  -L
    dars preview ./hello_output
    ```
 
-## Tips
+## Tips CLI
 - Use `dars --help` for a full list of commands and options.
 - You can preview apps either live (with `app.rTimeCompile()`) or from exported files with `dars preview`.
 - Templates are available for quick project setup: use `dars init my_project -t <template>`.
 
-### Desktop (BETA)
+### Desktop (BETA) CLI
 
 - Mark your project with `"format": "desktop"` in `dars.config.json`.
 - Use `dars init --type desktop` (or `--update`) to scaffold backend files.
@@ -103,4 +103,4 @@ dars init  -L
 - Applying minification (vite): Vite/esbuild minification is active (JS/CSS) and default is disabled.
 - Applying minification (default + vite): both are active.
 
-For more, see the [Getting Started](getting_started.md) guide and the main documentation index.
+For more, see the [Getting Started](#getting-started-with-dars) guide and the main documentation index.
