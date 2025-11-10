@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://ztamdev.github.io/Dars-Framework/sitemap.xml

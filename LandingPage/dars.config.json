@@ -11,7 +11,7 @@
     "node_modules"
   ],
   "bundle": true,
-  "defaultMinify": true,
+  "defaultMinify": false,
   "viteMinify": false,
   "markdownHighlight": true,
   "markdownHighlightTheme": "dark",
