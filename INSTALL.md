@@ -44,7 +44,7 @@ dars preview ./my_app_web
 dars init my_new_project
 
 # Project with a specific template
-dars init my_project -t demo/complete_app
+dars init my_project -t basic/Forms
 ```
 
 ### View Application Information
