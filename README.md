@@ -5,8 +5,7 @@
 </p>
 
 <p align="center">
-  <em>Dars is a Python UI framework for building modern, interactive web apps with Python code. Write your interface in Python, export it to static HTML/CSS/JS, and deploy anywhere.</em>
- <em>Export to native desktop apps. This capability is in BETA and not yet recommended for production.</em>
+  <em>Dars is a multiplatform Python UI framework for building modern, interactive web and desktop apps with Python code. Write your interface in Python, export it to static HTML/CSS/JS, and deploy anywhere.</em>
 </p>
 
 <div align="center">
@@ -15,6 +14,7 @@ Official [Website](https://ztamdev.github.io/Dars-Framework/) |
 Documentation [Docs](https://ztamdev.github.io/Dars-Framework/docs.html) | 
 
 </div>
+
 
 ```bash
 pip install dars-framework
