@@ -1,4 +1,120 @@
-window.__DARS_VDOM__={type:"T1",id:"page_152",children:[{type:"T2",id:"container_153",children:[{type:"T3",id:"dars-navbar",children:[{type:"T2",id:"navbar-left",children:[{type:"T4",id:"image_154"},{type:"T5",id:"text_155",text:"Dars Framework"}]},{type:"T2",id:"container_156",children:[{type:"T2",id:"navbar-right",children:[{type:"T6",id:"link_157",text:"Home"},{type:"T6",id:"link_158",text:"Documentation"},{type:"T6",id:"link_159",text:"Releases"},{type:"T6",id:"link_160",text:"PlayGround"},{type:"T6",id:"link_161",text:"GitHub"}]},{type:"T2",id:"hamburger-menu",children:[{type:"T2",id:"hamburger-btn",children:[{type:"T2",id:"container_162",children:[{type:"T2",id:"container_163"},{type:"T2",id:"container_164"},{type:"T2",id:"container_165"}]}]},{type:"T2",id:"mobile-menu",children:[{type:"T6",id:"link_166",text:"Home"},{type:"T6",id:"link_167",text:"Documentation"},{type:"T6",id:"link_168",text:"Releases"},{type:"T6",id:"link_169",text:"PlayGround"},{type:"T6",id:"link_170",text:"GitHub"}]}]}]}]}]},{type:"T2",id:"container_171",children:[{type:"T2",id:"markdown-content-container",children:[{type:"T9",id:"markdown_172",text:`# Release Notes v1.3.1 BETA
+window.__DARS_VDOM__={type:"T1",id:"page_152",children:[{type:"T2",id:"container_153",children:[{type:"T3",id:"dars-navbar",children:[{type:"T2",id:"navbar-left",children:[{type:"T4",id:"image_154"},{type:"T5",id:"text_155",text:"Dars Framework"}]},{type:"T2",id:"container_156",children:[{type:"T2",id:"navbar-right",children:[{type:"T6",id:"link_157",text:"Home"},{type:"T6",id:"link_158",text:"Documentation"},{type:"T6",id:"link_159",text:"Releases"},{type:"T6",id:"link_160",text:"PlayGround"},{type:"T6",id:"link_161",text:"GitHub"}]},{type:"T2",id:"hamburger-menu",children:[{type:"T2",id:"hamburger-btn",children:[{type:"T2",id:"container_162",children:[{type:"T2",id:"container_163"},{type:"T2",id:"container_164"},{type:"T2",id:"container_165"}]}]},{type:"T2",id:"mobile-menu",children:[{type:"T6",id:"link_166",text:"Home"},{type:"T6",id:"link_167",text:"Documentation"},{type:"T6",id:"link_168",text:"Releases"},{type:"T6",id:"link_169",text:"PlayGround"},{type:"T6",id:"link_170",text:"GitHub"}]}]}]}]}]},{type:"T2",id:"container_171",children:[{type:"T2",id:"markdown-content-container",children:[{type:"T9",id:"markdown_172",text:`# Release Notes v1.3.2
+
+> Major minification improvements with combined JS files and optimized event handling. Electron desktop exporter remains in beta.
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+or
+
+\`\`\`bash
+pip install dars-framework==1.3.2
+\`\`\`
+
+## Highlights
+
+### Enhanced Minification System
+
+**Combined JavaScript Bundles:**
+- When \`viteMinify: true\` and \`bundle: true\` are enabled, the exporter now combines all JavaScript files into single optimized bundles
+- Single-page apps: All JS combined into \`app.js\`
+- Multi-page apps: Each page gets its own \`app_{slug}.js\` bundle
+- Eliminates reference issues between separate files during minification
+
+**Optimized Event Handling:**
+- Events are no longer stored in VDOM tree
+- Event handlers are now generated as valid JavaScript directly in runtime
+- Improved compatibility with Vite minification and obfuscation
+- Better performance and smaller bundle sizes
+
+**Smart File Management:**
+- When using combined bundles, individual files (\`runtime_dars.js\`, \`script.js\`, \`vdom_tree.js\`) are not generated
+- HTML files are updated to reference only the combined bundle
+- Backward compatible - falls back to separate files when \`viteMinify: false\`
+
+### Vite Minification Perfection
+
+- Vite can now minify the entire application as a single cohesive unit
+- Resolves function reference issues that previously broke minification
+- Proper obfuscation of all JavaScript code, including event handlers
+- Maintains full functionality while significantly reducing bundle size
+
+### Configuration-Driven Behavior
+
+\`\`\`json
+{
+  "viteMinify": true,
+  "bundle": true,
+  "defaultMinify": true
+}
+\`\`\`
+
+- **viteMinify**: Enables advanced Vite-based minification with combined bundles
+- **bundle**: Required for production-optimized builds
+- **defaultMinify**: Fallback minification when Vite is unavailable
+
+## Bug Fixes
+
+- **Fixed**: Vite minification breaking function references between separate JS files
+- **Fixed**: Event handlers not being properly minified and obfuscated
+- **Improved**: Multi-page application build performance
+
+## Desktop Exporter Status
+
+**Desktop Exporter remains in BETA**
+
+While the web exporter is now stable and production-ready, the Electron desktop exporter continues in beta due to:
+
+- Ongoing refinement of native API integrations
+- Cross-platform packaging and signing requirements
+- Advanced IPC and system integration features still in development
+
+**Current Desktop Capabilities:**
+- Basic file system operations (\`read_text\`, \`write_text\`)
+- Development mode with hot reload
+- Production packaging still experimental
+
+## Migration Notes
+
+### For Existing Projects
+
+**No breaking changes** - existing configurations continue to work. To benefit from the new minification:
+
+1. Update your \`dars.config.json\`:
+\`\`\`json
+{
+  "viteMinify": true,
+  "bundle": true
+}
+\`\`\`
+
+2. Run \`dars build\` or \`dars export\` as usual
+
+### Performance Improvements
+
+- **Bundle Size**: Up to 40% reduction in minified JavaScript
+- **Load Time**: Faster initial page loads with combined bundles
+- **Runtime Performance**: Better optimized event handling
+- **Build Time**: More efficient minification process
+
+## Known Issues
+
+- Electron desktop apps may require additional configuration for native module support
+- Some edge cases in complex component trees being investigated
+
+## Next Steps
+
+We're working on:
+- **v1.4.0**: Production-ready Electron desktop exporter
+- **v1.5.0**: Advanced native desktop APIs and system integrations
+- **Future**: Plugin system and extended component library
+
+---
+
+# Release Notes v1.3.1 BETA
 
 > Native desktop functions and DX improved with dev mode and file system integration.
 
@@ -197,4 +313,4 @@ Upgrade Recommendation: Recommended for all users; especially helpful for projec
 
 # Older release notes can be found
 
-In the github repository [Here](https://github.com/ZtaMDev/Dars-Framework/releases).`}]},{type:"T2",id:"footer-section",children:[{type:"T2",id:"container_173",children:[{type:"T2",id:"container_174",children:[{type:"T2",id:"container_175",children:[{type:"T4",id:"image_176"},{type:"T2",id:"container_177",children:[{type:"T5",id:"text_178",text:"Dars Framework"}]}]},{type:"T2",id:"container_179",children:[{type:"T2",id:"container_180",children:[{type:"T5",id:"text_181",text:"Quick Links"},{type:"T6",id:"link_182",text:"Documentation"},{type:"T6",id:"link_183",text:"GitHub"},{type:"T6",id:"link_184",text:"Examples"}]},{type:"T2",id:"container_185",children:[{type:"T5",id:"text_186",text:"Resources"},{type:"T6",id:"link_187",text:"Getting Started"},{type:"T6",id:"link_188",text:"Releases"}]},{type:"T2",id:"container_189",children:[{type:"T5",id:"text_190",text:"Info: "},{type:"T5",id:"text_191",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_192",children:[{type:"T2",id:"container_193",children:[{type:"T5",id:"text_194",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_195",children:[{type:"T5",id:"text_196",text:"Created with "},{type:"T6",id:"link_197",text:"Dars Framework"},{type:"T5",id:"text_198",text:" by "},{type:"T6",id:"link_199",text:"ZtaDev"}]}]}]}]}]}]},{type:"T10",id:"documentation-sidebar"}]},function(){const d=new Map;let a=null,l=null;function c(){}const b={Text:{create(e){if(!e||e.isIsland)return null;const t=document.createElement("span");if(e.id&&(t.id=e.id),e.class&&(t.className=e.class),e.style)for(const n in e.style)try{t.style.setProperty(n.replace(/_/g,"-"),String(e.style[n]))}catch{}if(Object.prototype.hasOwnProperty.call(e,"text")&&(t.textContent=String(e.text||"")),e.props)for(const n in e.props){const i=e.props[n];try{i===!1||i===null||typeof i>"u"?t.removeAttribute(n):t.setAttribute(n,String(i))}catch{}}return t}},Container:{create(e){if(!e||e.isIsland)return null;const t=document.createElement("div");e.id&&(t.id=e.id);const n="dars-container";if(t.className=e.class?n+" "+e.class:n,e.style)for(const i in e.style)try{t.style.setProperty(i.replace(/_/g,"-"),String(e.style[i]))}catch{}if(e.props)for(const i in e.props){const o=e.props[i];try{o===!1||o===null||typeof o>"u"?t.removeAttribute(i):t.setAttribute(i,String(o))}catch{}}return t}}};function y(e,t){if(!e)return;t(e);const n=e.children||[];for(let i=0;i<n.length;i++)y(n[i],t)}function _(e){try{if(typeof atob=="function")return atob(e);if(typeof Buffer<"u")return Buffer.from(e,"base64").toString("utf8")}catch{}return""}function E(e){try{if(!e)return null;if(e&&e.type==="inline"&&e.code)return new Function("event",e.code);const t=e&&(e.b||e.code_b64)||null;if(t){const n=_(t);if(n)return new Function("event",n)}}catch{}return null}function B(e){y(e,t=>{if(t&&t.id&&t.events&&!d.has(t.id)){const n={};for(const i in t.events){const o=t.events[i],u=E(o);u&&(n[i]=u)}Object.keys(n).length?d.set(t.id,n):d.delete(t.id)}})}function M(e,t){if(!(!e||!t))for(const[n,i]of Object.entries(t))try{i===!1||i===null||typeof i>"u"?e.removeAttribute(n):e.setAttribute(n,String(i))}catch{}}function S(e,t={},n={}){for(const i in t)if(!(i in n))try{e.removeAttribute(i)}catch{}for(const i in n){const o=n[i];try{o===!1||o===null||typeof o>"u"?e.removeAttribute(i):e.setAttribute(i,String(o))}catch{}}}function D(e,t={},n={}){for(const i in t)if(!(i in n))try{e.style.removeProperty(i.replace(/_/g,"-"))}catch{}for(const i in n){const o=n[i];try{e.style.setProperty(i.replace(/_/g,"-"),String(o))}catch{}}}function A(e,t){(t||document).addEventListener(e,function(n){let i=n.target;const o=t||document;for(;i&&i!==o;){const u=i.id;if(u&&d.has(u)){const f=d.get(u)[e];if(i&&i.__darsEv&&i.__darsEv[e])return;if(typeof f=="function"){try{f.call(i,n)}catch(r){console.error("[Dars] handler error",r)}return}}i=i.parentNode}},!0)}function w(e,t){return e&&t?e.type!==t.type:e!==t}function x(e){if(!e)return;const t=e.children||[];for(let n=0;n<t.length;n++)x(t[n]);if(e.id&&d.delete(e.id),e.id){const n=document.getElementById(e.id);if(n&&n.parentNode)try{n.parentNode.removeChild(n)}catch{}}}function k(e,t){if(!t||!t.id)return{ok:!1,reason:"missing-new"};let n=document.getElementById(t.id);if(!n){const r=e&&e.id?document.getElementById(e.id):null;if(r)try{r.id=t.id,n=r}catch{}}if(!n)return{ok:!1,reason:"missing-el"};if(w(e,t))return{ok:!1,reason:"type-changed"};const i=!!t.isIsland;if(!i&&t.class&&(n.className=t.class),i||S(n,e&&e.props||{},t.props||{}),i||D(n,e&&e.style||{},t.style||{}),!i&&Object.prototype.hasOwnProperty.call(t,"text")&&n.textContent!==String(t.text||"")&&(n.textContent=String(t.text||"")),i)return{ok:!0};const o=e&&e.children?e.children:[],u=t.children?t.children:[],p=new Map;for(let r=0;r<o.length;r++){const s=o[r]&&(o[r].id||o[r].key)||null;s&&p.set(String(s),o[r])}const f=new Set;for(let r=0;r<u.length;r++){const s=u[r],v=s&&(s.id||s.key)||null;if(!v)if(r<o.length){const m=k(o[r],s);if(!m.ok)return m;f.add(o[r]);continue}else return{ok:!1,reason:"children-added"};const T=p.get(String(v));if(T){const m=k(T,s);if(!m.ok)return m;f.add(T)}else{if(r<o.length){const h=o[r];if(!w(h,s)){const g=k(h,s);if(!g.ok)return g;f.add(h);continue}}const m=createSubtree(s);if(m){const h=r<o.length?o[r]:null;if(h&&h.id){const g=document.getElementById(h.id);g&&g.parentNode?g.parentNode.insertBefore(m,g):n.appendChild(m)}else n.appendChild(m);continue}return{ok:!1,reason:"children-added"}}}for(let r=0;r<o.length;r++){const s=o[r];f.has(s)||x(s)}return{ok:!0}}function C(e){typeof requestAnimationFrame=="function"?requestAnimationFrame(e):setTimeout(e,16)}function N(e){const t=a;if(!t){a=e;try{window.__DARS_VDOM__=e}catch{}return}C(()=>{const n=k(t,e);if(!n.ok){console.warn("[Dars] Structural change detected (",n.reason,"), reloading...");try{location.reload()}catch{}return}a=e;try{window.__DARS_VDOM__=e}catch{}})}function L(e){a=e;try{window.__DARS_VDOM__=e}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(n=>A(n,document))}function I(){const e=window.__DARS_VERSION_URL||"version.txt";let t=null,n=!1;function i(u,p,f,r){try{const s=new XMLHttpRequest;r&&(s.responseType=r),s.open("GET",u,!0),s.timeout=5e3,s.onreadystatechange=function(){s.readyState===4&&(s.status>=200&&s.status<300?p(s.response):f())},s.onerror=f,s.ontimeout=f,s.setRequestHeader("Cache-Control","no-store"),s.send()}catch{f()}}function o(){i(e,function(u){let p=(u||"").toString().trim();if(p&&(n=!1),l||(l=p),p&&p!==l){l=p;try{location.reload()}catch{}return}t=setTimeout(o,600)},function(){n||(console.log("[Dars] waiting for version.txt"),n=!0),t=setTimeout(o,600)},"text")}return o(),()=>{t&&clearTimeout(t)}}document.addEventListener("DOMContentLoaded",function(){window.__DARS_VDOM__?L(window.__DARS_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL&&I()})}(),window.addEventListener("scroll",()=>{const d=document.getElementById("dars-navbar");window.scrollY>20?d.classList.add("scrolled"):d.classList.remove("scrolled");const a=document.getElementById("features-section");if(a&&!a.classList.contains("visible")){const l=a.getBoundingClientRect().top,c=window.innerHeight/1.5;l<c&&(a.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((y,_)=>{setTimeout(()=>{y.style.opacity="1",y.style.transform="translateY(0)"},_*100)}))}}),document.addEventListener("DOMContentLoaded",()=>{const d=document.getElementById("hero-logo"),a=document.getElementById("hero-title"),l=document.getElementById("hero-description"),c=document.getElementById("pip-command"),b=document.getElementById("get-started-btn"),y=document.getElementById("scroll-text");d&&setTimeout(()=>d.classList.add("show"),5),a&&setTimeout(()=>a.classList.add("show"),350),l&&setTimeout(()=>l.classList.add("show"),650),c&&setTimeout(()=>c.classList.add("show"),950),b&&setTimeout(()=>b.classList.add("show"),1250),y&&setTimeout(()=>y.classList.add("show"),1500)});function R(){window.open("https://ztamdev.github.io/Dars-Framework/docs.html","_self")}function P(){navigator.clipboard.writeText("pip install dars framework").then(()=>{const a=document.querySelector("#copy-btn"),l=a.textContent;a.textContent="Copied!",a.style.background="linear-gradient(135deg, #38c49f 0%, #2a6b5b 100%) !important",setTimeout(()=>{a.textContent=l,a.style.background="linear-gradient(135deg, #1d4a3f 0%, #2a6b5b 100%) !important"},2e3)})}document.addEventListener("DOMContentLoaded",function(){const d=document.getElementById("hamburger-btn"),a=document.getElementById("mobile-menu"),l=document.body;d&&a&&(d.addEventListener("click",function(c){c.stopPropagation(),a.style.display==="flex"?(a.style.display="none",d.classList.remove("menu-open"),l.classList.remove("menu-open")):(a.style.display="flex",d.classList.add("menu-open"),l.classList.add("menu-open"))}),a.querySelectorAll("a").forEach(c=>{c.addEventListener("click",function(){a.style.display="none",d.classList.remove("menu-open"),l.classList.remove("menu-open")})}),document.addEventListener("click",function(c){!d.contains(c.target)&&!a.contains(c.target)&&(a.style.display="none",d.classList.remove("menu-open"),l.classList.remove("menu-open"))}),document.addEventListener("keydown",function(c){c.key==="Escape"&&a.style.display==="flex"&&(a.style.display="none",d.classList.remove("menu-open"),l.classList.remove("menu-open"))}))});
+In the github repository [Here](https://github.com/ZtaMDev/Dars-Framework/releases).`}]},{type:"T2",id:"footer-section",children:[{type:"T2",id:"container_173",children:[{type:"T2",id:"container_174",children:[{type:"T2",id:"container_175",children:[{type:"T4",id:"image_176"},{type:"T2",id:"container_177",children:[{type:"T5",id:"text_178",text:"Dars Framework"}]}]},{type:"T2",id:"container_179",children:[{type:"T2",id:"container_180",children:[{type:"T5",id:"text_181",text:"Quick Links"},{type:"T6",id:"link_182",text:"Documentation"},{type:"T6",id:"link_183",text:"GitHub"},{type:"T6",id:"link_184",text:"Examples"}]},{type:"T2",id:"container_185",children:[{type:"T5",id:"text_186",text:"Resources"},{type:"T6",id:"link_187",text:"Getting Started"},{type:"T6",id:"link_188",text:"Releases"}]},{type:"T2",id:"container_189",children:[{type:"T5",id:"text_190",text:"Info: "},{type:"T5",id:"text_191",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_192",children:[{type:"T2",id:"container_193",children:[{type:"T5",id:"text_194",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_195",children:[{type:"T5",id:"text_196",text:"Created with "},{type:"T6",id:"link_197",text:"Dars Framework"},{type:"T5",id:"text_198",text:" by "},{type:"T6",id:"link_199",text:"ZtaDev"}]}]}]}]}]}]},{type:"T10",id:"documentation-sidebar"}]},function(){const d=new Map;let r=null,l=null;function c(){}const b={Text:{create(e){if(!e||e.isIsland)return null;const n=document.createElement("span");if(e.id&&(n.id=e.id),e.class&&(n.className=e.class),e.style)for(const t in e.style)try{n.style.setProperty(t.replace(/_/g,"-"),String(e.style[t]))}catch{}if(Object.prototype.hasOwnProperty.call(e,"text")&&(n.textContent=String(e.text||"")),e.props)for(const t in e.props){const i=e.props[t];try{i===!1||i===null||typeof i>"u"?n.removeAttribute(t):n.setAttribute(t,String(i))}catch{}}return n}},Container:{create(e){if(!e||e.isIsland)return null;const n=document.createElement("div");e.id&&(n.id=e.id);const t="dars-container";if(n.className=e.class?t+" "+e.class:t,e.style)for(const i in e.style)try{n.style.setProperty(i.replace(/_/g,"-"),String(e.style[i]))}catch{}if(e.props)for(const i in e.props){const o=e.props[i];try{o===!1||o===null||typeof o>"u"?n.removeAttribute(i):n.setAttribute(i,String(o))}catch{}}return n}}};function y(e,n){if(!e)return;n(e);const t=e.children||[];for(let i=0;i<t.length;i++)y(t[i],n)}function v(e){try{if(typeof atob=="function")return atob(e);if(typeof Buffer<"u")return Buffer.from(e,"base64").toString("utf8")}catch{}return""}function E(e){try{if(!e)return null;if(e&&e.type==="inline"&&e.code)return new Function("event",e.code);const n=e&&(e.b||e.code_b64)||null;if(n){const t=v(n);if(t)return new Function("event",t)}}catch{}return null}function I(e){y(e,n=>{if(n&&n.id&&n.events&&!d.has(n.id)){const t={};for(const i in n.events){const o=n.events[i],u=E(o);u&&(t[i]=u)}Object.keys(t).length?d.set(n.id,t):d.delete(n.id)}})}function L(e,n){if(!(!e||!n))for(const[t,i]of Object.entries(n))try{i===!1||i===null||typeof i>"u"?e.removeAttribute(t):e.setAttribute(t,String(i))}catch{}}function S(e,n={},t={}){for(const i in n)if(!(i in t))try{e.removeAttribute(i)}catch{}for(const i in t){const o=t[i];try{o===!1||o===null||typeof o>"u"?e.removeAttribute(i):e.setAttribute(i,String(o))}catch{}}}function D(e,n={},t={}){for(const i in n)if(!(i in t))try{e.style.removeProperty(i.replace(/_/g,"-"))}catch{}for(const i in t){const o=t[i];try{e.style.setProperty(i.replace(/_/g,"-"),String(o))}catch{}}}function M(e,n){(n||document).addEventListener(e,function(t){let i=t.target;const o=n||document;for(;i&&i!==o;){const u=i.id;if(u&&d.has(u)){const f=d.get(u)[e];if(i&&i.__darsEv&&i.__darsEv[e])return;if(typeof f=="function"){try{f.call(i,t)}catch(a){console.error("[Dars] handler error",a)}return}}i=i.parentNode}},!0)}function w(e,n){return e&&n?e.type!==n.type:e!==n}function x(e){if(!e)return;const n=e.children||[];for(let t=0;t<n.length;t++)x(n[t]);if(e.id&&d.delete(e.id),e.id){const t=document.getElementById(e.id);if(t&&t.parentNode)try{t.parentNode.removeChild(t)}catch{}}}function k(e,n){if(!n||!n.id)return{ok:!1,reason:"missing-new"};let t=document.getElementById(n.id);if(!t){const a=e&&e.id?document.getElementById(e.id):null;if(a)try{a.id=n.id,t=a}catch{}}if(!t)return{ok:!1,reason:"missing-el"};if(w(e,n))return{ok:!1,reason:"type-changed"};const i=!!n.isIsland;if(!i&&n.class&&(t.className=n.class),i||S(t,e&&e.props||{},n.props||{}),i||D(t,e&&e.style||{},n.style||{}),!i&&Object.prototype.hasOwnProperty.call(n,"text")&&t.textContent!==String(n.text||"")&&(t.textContent=String(n.text||"")),i)return{ok:!0};const o=e&&e.children?e.children:[],u=n.children?n.children:[],p=new Map;for(let a=0;a<o.length;a++){const s=o[a]&&(o[a].id||o[a].key)||null;s&&p.set(String(s),o[a])}const f=new Set;for(let a=0;a<u.length;a++){const s=u[a],T=s&&(s.id||s.key)||null;if(!T)if(a<o.length){const m=k(o[a],s);if(!m.ok)return m;f.add(o[a]);continue}else return{ok:!1,reason:"children-added"};const _=p.get(String(T));if(_){const m=k(_,s);if(!m.ok)return m;f.add(_)}else{if(a<o.length){const g=o[a];if(!w(g,s)){const h=k(g,s);if(!h.ok)return h;f.add(g);continue}}const m=createSubtree(s);if(m){const g=a<o.length?o[a]:null;if(g&&g.id){const h=document.getElementById(g.id);h&&h.parentNode?h.parentNode.insertBefore(m,h):t.appendChild(m)}else t.appendChild(m);continue}return{ok:!1,reason:"children-added"}}}for(let a=0;a<o.length;a++){const s=o[a];f.has(s)||x(s)}return{ok:!0}}function A(e){typeof requestAnimationFrame=="function"?requestAnimationFrame(e):setTimeout(e,16)}function P(e){const n=r;if(!n){r=e;try{window.__DARS_VDOM__=e}catch{}return}A(()=>{const t=k(n,e);if(!t.ok){console.warn("[Dars] Structural change detected (",t.reason,"), reloading...");try{location.reload()}catch{}return}r=e;try{window.__DARS_VDOM__=e}catch{}})}function C(e){r=e;try{window.__DARS_VDOM__=e}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(t=>M(t,document))}function B(){const e=window.__DARS_VERSION_URL||"version.txt";let n=null,t=!1;function i(u,p,f,a){try{const s=new XMLHttpRequest;a&&(s.responseType=a),s.open("GET",u,!0),s.timeout=5e3,s.onreadystatechange=function(){s.readyState===4&&(s.status>=200&&s.status<300?p(s.response):f())},s.onerror=f,s.ontimeout=f,s.setRequestHeader("Cache-Control","no-store"),s.send()}catch{f()}}function o(){i(e,function(u){let p=(u||"").toString().trim();if(p&&(t=!1),l||(l=p),p&&p!==l){l=p;try{location.reload()}catch{}return}n=setTimeout(o,600)},function(){t||(console.log("[Dars] waiting for version.txt"),t=!0),n=setTimeout(o,600)},"text")}return o(),()=>{n&&clearTimeout(n)}}document.addEventListener("DOMContentLoaded",function(){window.__DARS_VDOM__?C(window.__DARS_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL&&B()})}(),window.addEventListener("scroll",()=>{const d=document.getElementById("dars-navbar");window.scrollY>20?d.classList.add("scrolled"):d.classList.remove("scrolled");const r=document.getElementById("features-section");if(r&&!r.classList.contains("visible")){const l=r.getBoundingClientRect().top,c=window.innerHeight/1.5;l<c&&(r.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((y,v)=>{setTimeout(()=>{y.style.opacity="1",y.style.transform="translateY(0)"},v*100)}))}}),document.addEventListener("DOMContentLoaded",()=>{const d=document.getElementById("hero-logo"),r=document.getElementById("hero-title"),l=document.getElementById("hero-description"),c=document.getElementById("pip-command"),b=document.getElementById("get-started-btn"),y=document.getElementById("scroll-text");d&&setTimeout(()=>d.classList.add("show"),5),r&&setTimeout(()=>r.classList.add("show"),350),l&&setTimeout(()=>l.classList.add("show"),650),c&&setTimeout(()=>c.classList.add("show"),950),b&&setTimeout(()=>b.classList.add("show"),1250),y&&setTimeout(()=>y.classList.add("show"),1500)});function N(){window.open("https://ztamdev.github.io/Dars-Framework/docs.html","_self")}function R(){navigator.clipboard.writeText("pip install dars framework").then(()=>{const r=document.querySelector("#copy-btn"),l=r.textContent;r.textContent="Copied!",r.style.background="linear-gradient(135deg, #38c49f 0%, #2a6b5b 100%) !important",setTimeout(()=>{r.textContent=l,r.style.background="linear-gradient(135deg, #1d4a3f 0%, #2a6b5b 100%) !important"},2e3)})}document.addEventListener("DOMContentLoaded",function(){const d=document.getElementById("hamburger-btn"),r=document.getElementById("mobile-menu"),l=document.body;d&&r&&(d.addEventListener("click",function(c){c.stopPropagation(),r.style.display==="flex"?(r.style.display="none",d.classList.remove("menu-open"),l.classList.remove("menu-open")):(r.style.display="flex",d.classList.add("menu-open"),l.classList.add("menu-open"))}),r.querySelectorAll("a").forEach(c=>{c.addEventListener("click",function(){r.style.display="none",d.classList.remove("menu-open"),l.classList.remove("menu-open")})}),document.addEventListener("click",function(c){!d.contains(c.target)&&!r.contains(c.target)&&(r.style.display="none",d.classList.remove("menu-open"),l.classList.remove("menu-open"))}),document.addEventListener("keydown",function(c){c.key==="Escape"&&r.style.display==="flex"&&(r.style.display="none",d.classList.remove("menu-open"),l.classList.remove("menu-open"))}))});

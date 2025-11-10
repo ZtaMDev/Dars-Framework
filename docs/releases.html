@@ -85,12 +85,12 @@
    <div class="dars-container" id="container_171" style="margin-left: 280px; min-height: 100vh; background: linear-gradient(135deg, #0f1e1a 0%, #132d24 100%); transition: margin-left 0.3s ease">
     <div class="dars-container" id="markdown-content-container" style="max-width: 800px; margin: 0 auto; padding: 40px 20px">
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_172">
-      <h1 id="release-notes-v131-beta">
-       Release Notes v1.3.1 BETA
+      <h1 id="release-notes-v132">
+       Release Notes v1.3.2
       </h1>
       <blockquote>
        <p>
-        Native desktop functions and DX improved with dev mode and file system integration.
+        Major minification improvements with combined JS files and optimized event handling. Electron desktop exporter remains in beta.
        </p>
       </blockquote>
       <h2 id="installation">
@@ -104,10 +104,306 @@
        or
       </p>
       <div class="codehilite">
-       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.1
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.2
 </code></pre>
       </div>
       <h2 id="highlights">
+       Highlights
+      </h2>
+      <h3 id="enhanced-minification-system">
+       Enhanced Minification System
+      </h3>
+      <p>
+       <strong>
+        Combined JavaScript Bundles:
+       </strong>
+       - When
+       <code>
+        viteMinify: true
+       </code>
+       and
+       <code>
+        bundle: true
+       </code>
+       are enabled, the exporter now combines all JavaScript files into single optimized bundles
+- Single-page apps: All JS combined into
+       <code>
+        app.js
+       </code>
+       - Multi-page apps: Each page gets its own
+       <code>
+        app_{slug}.js
+       </code>
+       bundle
+- Eliminates reference issues between separate files during minification
+      </p>
+      <p>
+       <strong>
+        Optimized Event Handling:
+       </strong>
+       - Events are no longer stored in VDOM tree
+- Event handlers are now generated as valid JavaScript directly in runtime
+- Improved compatibility with Vite minification and obfuscation
+- Better performance and smaller bundle sizes
+      </p>
+      <p>
+       <strong>
+        Smart File Management:
+       </strong>
+       - When using combined bundles, individual files (
+       <code>
+        runtime_dars.js
+       </code>
+       ,
+       <code>
+        script.js
+       </code>
+       ,
+       <code>
+        vdom_tree.js
+       </code>
+       ) are not generated
+- HTML files are updated to reference only the combined bundle
+- Backward compatible - falls back to separate files when
+       <code>
+        viteMinify: false
+       </code>
+      </p>
+      <h3 id="vite-minification-perfection">
+       Vite Minification Perfection
+      </h3>
+      <ul>
+       <li>
+        Vite can now minify the entire application as a single cohesive unit
+       </li>
+       <li>
+        Resolves function reference issues that previously broke minification
+       </li>
+       <li>
+        Proper obfuscation of all JavaScript code, including event handlers
+       </li>
+       <li>
+        Maintains full functionality while significantly reducing bundle size
+       </li>
+      </ul>
+      <h3 id="configuration-driven-behavior">
+       Configuration-Driven Behavior
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"viteMinify"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"bundle"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"defaultMinify"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="p">}</span>
+</code></pre>
+      </div>
+      <ul>
+       <li>
+        <strong>
+         viteMinify
+        </strong>
+        : Enables advanced Vite-based minification with combined bundles
+       </li>
+       <li>
+        <strong>
+         bundle
+        </strong>
+        : Required for production-optimized builds
+       </li>
+       <li>
+        <strong>
+         defaultMinify
+        </strong>
+        : Fallback minification when Vite is unavailable
+       </li>
+      </ul>
+      <h2 id="bug-fixes">
+       Bug Fixes
+      </h2>
+      <ul>
+       <li>
+        <strong>
+         Fixed
+        </strong>
+        : Vite minification breaking function references between separate JS files
+       </li>
+       <li>
+        <strong>
+         Fixed
+        </strong>
+        : Event handlers not being properly minified and obfuscated
+       </li>
+       <li>
+        <strong>
+         Improved
+        </strong>
+        : Multi-page application build performance
+       </li>
+      </ul>
+      <h2 id="desktop-exporter-status">
+       Desktop Exporter Status
+      </h2>
+      <p>
+       <strong>
+        Desktop Exporter remains in BETA
+       </strong>
+      </p>
+      <p>
+       While the web exporter is now stable and production-ready, the Electron desktop exporter continues in beta due to:
+      </p>
+      <ul>
+       <li>
+        Ongoing refinement of native API integrations
+       </li>
+       <li>
+        Cross-platform packaging and signing requirements
+       </li>
+       <li>
+        Advanced IPC and system integration features still in development
+       </li>
+      </ul>
+      <p>
+       <strong>
+        Current Desktop Capabilities:
+       </strong>
+       - Basic file system operations (
+       <code>
+        read_text
+       </code>
+       ,
+       <code>
+        write_text
+       </code>
+       )
+- Development mode with hot reload
+- Production packaging still experimental
+      </p>
+      <h2 id="migration-notes">
+       Migration Notes
+      </h2>
+      <h3 id="for-existing-projects">
+       For Existing Projects
+      </h3>
+      <p>
+       <strong>
+        No breaking changes
+       </strong>
+       - existing configurations continue to work. To benefit from the new minification:
+      </p>
+      <ol>
+       <li>
+        Update your
+        <code>
+         dars.config.json
+        </code>
+        :
+       </li>
+      </ol>
+      <div class="codehilite">
+       <pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"viteMinify"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"bundle"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="p">}</span>
+</code></pre>
+      </div>
+      <ol start="2">
+       <li>
+        Run
+        <code>
+         dars build
+        </code>
+        or
+        <code>
+         dars export
+        </code>
+        as usual
+       </li>
+      </ol>
+      <h3 id="performance-improvements">
+       Performance Improvements
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Bundle Size
+        </strong>
+        : Up to 40% reduction in minified JavaScript
+       </li>
+       <li>
+        <strong>
+         Load Time
+        </strong>
+        : Faster initial page loads with combined bundles
+       </li>
+       <li>
+        <strong>
+         Runtime Performance
+        </strong>
+        : Better optimized event handling
+       </li>
+       <li>
+        <strong>
+         Build Time
+        </strong>
+        : More efficient minification process
+       </li>
+      </ul>
+      <h2 id="known-issues">
+       Known Issues
+      </h2>
+      <ul>
+       <li>
+        Electron desktop apps may require additional configuration for native module support
+       </li>
+       <li>
+        Some edge cases in complex component trees being investigated
+       </li>
+      </ul>
+      <h2 id="next-steps">
+       Next Steps
+      </h2>
+      <p>
+       We're working on:
+-
+       <strong>
+        v1.4.0
+       </strong>
+       : Production-ready Electron desktop exporter
+-
+       <strong>
+        v1.5.0
+       </strong>
+       : Advanced native desktop APIs and system integrations
+-
+       <strong>
+        Future
+       </strong>
+       : Plugin system and extended component library
+      </p>
+      <hr/>
+      <h1 id="release-notes-v131-beta">
+       Release Notes v1.3.1 BETA
+      </h1>
+      <blockquote>
+       <p>
+        Native desktop functions and DX improved with dev mode and file system integration.
+       </p>
+      </blockquote>
+      <h2 id="installation-2">
+       Installation
+      </h2>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
+</code></pre>
+      </div>
+      <p>
+       or
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.1
+</code></pre>
+      </div>
+      <h2 id="highlights-2">
        Highlights
       </h2>
       <h3 id="native-functions">
@@ -144,7 +440,7 @@
       <p>
        Also you can use dScripts to run custom javascript code in the desktop app. and for now 'dars dev' is supported but python main.py with rTimeCompile() is not supported because it have issues with relative paths.
       </p>
-      <h2 id="bug-fixes">
+      <h2 id="bug-fixes-2">
        Bug Fixes
       </h2>
       <ul>
@@ -178,7 +474,7 @@
         Native desktop export (BETA), improved CLI and doctor integration, and metadata fixes for packaging. This is a BETA release: usable for testing, not recommended for production.
        </p>
       </blockquote>
-      <h2 id="installation-2">
+      <h2 id="installation-3">
        Installation
       </h2>
       <div class="codehilite">
@@ -192,7 +488,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.0
 </code></pre>
       </div>
-      <h2 id="highlights-2">
+      <h2 id="highlights-3">
        Highlights
       </h2>
       <ul>
@@ -364,7 +660,7 @@ dars<span class="w"> </span>build
 <span class="p">}</span>
 </code></pre>
       </div>
-      <h2 id="bug-fixes-2">
+      <h2 id="bug-fixes-3">
        Bug Fixes
       </h2>
       <ul>
@@ -461,7 +757,7 @@ dars<span class="w"> </span>build
         Optional default minification, precise CLI control, faster builds, and clearer minification status.
        </p>
       </blockquote>
-      <h2 id="installation-3">
+      <h2 id="installation-4">
        Installation
       </h2>
       <div class="codehilite">
@@ -475,7 +771,7 @@ dars<span class="w"> </span>build
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.2.8
 </code></pre>
       </div>
-      <h2 id="highlights-3">
+      <h2 id="highlights-4">
        Highlights
       </h2>
       <ul>
@@ -618,7 +914,7 @@ dars<span class="w"> </span>build
         </ul>
        </li>
       </ul>
-      <h2 id="bug-fixes-3">
+      <h2 id="bug-fixes-4">
        Bug Fixes
       </h2>
       <ul>
@@ -777,6 +1073,45 @@ dars<span class="w"> </span>build
      <div class="sidebar-category">
       Versions
      </div>
+     <a class="sidebar-link sidebar-level-1" href="#release-notes-v132" style="margin-left: 0px">
+      Release Notes v1.3.2
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#installation" style="margin-left: 20px">
+      Installation
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#highlights" style="margin-left: 20px">
+      Highlights
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#enhanced-minification-system" style="margin-left: 40px">
+      Enhanced Minification System
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#vite-minification-perfection" style="margin-left: 40px">
+      Vite Minification Perfection
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#configuration-driven-behavior" style="margin-left: 40px">
+      Configuration-Driven Behavior
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#bug-fixes" style="margin-left: 20px">
+      Bug Fixes
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#desktop-exporter-status" style="margin-left: 20px">
+      Desktop Exporter Status
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#migration-notes" style="margin-left: 20px">
+      Migration Notes
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#for-existing-projects" style="margin-left: 40px">
+      For Existing Projects
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#performance-improvements" style="margin-left: 40px">
+      Performance Improvements
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#known-issues" style="margin-left: 20px">
+      Known Issues
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#next-steps" style="margin-left: 20px">
+      Next Steps
+     </a>
      <a class="sidebar-link sidebar-level-1" href="#release-notes-v131-beta" style="margin-left: 0px">
       Release Notes v1.3.1 BETA
      </a>

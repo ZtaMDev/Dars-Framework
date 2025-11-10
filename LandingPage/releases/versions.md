@@ -1,3 +1,119 @@
+# Release Notes v1.3.2
+
+> Major minification improvements with combined JS files and optimized event handling. Electron desktop exporter remains in beta.
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+or
+
+```bash
+pip install dars-framework==1.3.2
+```
+
+## Highlights
+
+### Enhanced Minification System
+
+**Combined JavaScript Bundles:**
+- When `viteMinify: true` and `bundle: true` are enabled, the exporter now combines all JavaScript files into single optimized bundles
+- Single-page apps: All JS combined into `app.js`
+- Multi-page apps: Each page gets its own `app_{slug}.js` bundle
+- Eliminates reference issues between separate files during minification
+
+**Optimized Event Handling:**
+- Events are no longer stored in VDOM tree
+- Event handlers are now generated as valid JavaScript directly in runtime
+- Improved compatibility with Vite minification and obfuscation
+- Better performance and smaller bundle sizes
+
+**Smart File Management:**
+- When using combined bundles, individual files (`runtime_dars.js`, `script.js`, `vdom_tree.js`) are not generated
+- HTML files are updated to reference only the combined bundle
+- Backward compatible - falls back to separate files when `viteMinify: false`
+
+### Vite Minification Perfection
+
+- Vite can now minify the entire application as a single cohesive unit
+- Resolves function reference issues that previously broke minification
+- Proper obfuscation of all JavaScript code, including event handlers
+- Maintains full functionality while significantly reducing bundle size
+
+### Configuration-Driven Behavior
+
+```json
+{
+  "viteMinify": true,
+  "bundle": true,
+  "defaultMinify": true
+}
+```
+
+- **viteMinify**: Enables advanced Vite-based minification with combined bundles
+- **bundle**: Required for production-optimized builds
+- **defaultMinify**: Fallback minification when Vite is unavailable
+
+## Bug Fixes
+
+- **Fixed**: Vite minification breaking function references between separate JS files
+- **Fixed**: Event handlers not being properly minified and obfuscated
+- **Improved**: Multi-page application build performance
+
+## Desktop Exporter Status
+
+**Desktop Exporter remains in BETA**
+
+While the web exporter is now stable and production-ready, the Electron desktop exporter continues in beta due to:
+
+- Ongoing refinement of native API integrations
+- Cross-platform packaging and signing requirements
+- Advanced IPC and system integration features still in development
+
+**Current Desktop Capabilities:**
+- Basic file system operations (`read_text`, `write_text`)
+- Development mode with hot reload
+- Production packaging still experimental
+
+## Migration Notes
+
+### For Existing Projects
+
+**No breaking changes** - existing configurations continue to work. To benefit from the new minification:
+
+1. Update your `dars.config.json`:
+```json
+{
+  "viteMinify": true,
+  "bundle": true
+}
+```
+
+2. Run `dars build` or `dars export` as usual
+
+### Performance Improvements
+
+- **Bundle Size**: Up to 40% reduction in minified JavaScript
+- **Load Time**: Faster initial page loads with combined bundles
+- **Runtime Performance**: Better optimized event handling
+- **Build Time**: More efficient minification process
+
+## Known Issues
+
+- Electron desktop apps may require additional configuration for native module support
+- Some edge cases in complex component trees being investigated
+
+## Next Steps
+
+We're working on:
+- **v1.4.0**: Production-ready Electron desktop exporter
+- **v1.5.0**: Advanced native desktop APIs and system integrations
+- **Future**: Plugin system and extended component library
+
+---
+
 # Release Notes v1.3.1 BETA
 
 > Native desktop functions and DX improved with dev mode and file system integration.
