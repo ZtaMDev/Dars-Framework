@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <em>Dars is a Python UI framework for building modern, interactive web and desktop(BETA) apps with Python code. Write your interface in Python, export it to static HTML/CSS/JS, and deploy anywhere.</em>
+  <em>Dars is a multiplatform Python UI framework for building modern, interactive web and desktop apps with Python code. Write your interface in Python, export it to static HTML/CSS/JS, and deploy anywhere.</em>
 </p>
 
 <div align="center">
