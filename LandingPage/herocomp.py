@@ -52,7 +52,6 @@ def create_hero():
                 "transition": "all 0.9s ease-out"
             }
         ),
-        # CONTENEDOR CORREGIDO - Sin posicionamiento absoluto
         Container(
             Container(
                 Text(

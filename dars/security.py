@@ -225,11 +225,11 @@ def minify_output_dir(output_dir: str, extra_skip: Iterable[str] = None, progres
                 new_content = minify_js(content)
         elif ext in SAFE_CSS_EXT:
             if default_on or vite_on:
-                new_content = minify_css(content)
+                new_content = None
         elif ext in SAFE_HTML_EXT:
-            # HTML only when default minifier is enabled
-            if default_on:
-                new_content = minify_html(content)
+            # Skip HTML minification completely
+            new_content = minify_html(content)
+
 
         if new_content is not None and new_content != content:
             try:

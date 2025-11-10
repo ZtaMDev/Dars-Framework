@@ -1525,3 +1525,172 @@ html, body {
         padding: 10px !important;
     }
 }
+
+/* ====== HAMBURGER MENU STYLES MEJORADO ====== */
+@media (max-width: 768px) {
+    #navbar-right {
+        display: none !important;
+    }
+    
+    #hamburger-menu {
+        display: flex !important;
+    }
+    
+    #hamburger-btn {
+        display: flex !important;
+        animation: pulse-glow 2s ease-in-out infinite;
+    }
+    
+    #hamburger-btn:hover {
+        background: rgba(162, 255, 226, 0.15) !important;
+        border-color: rgba(162, 255, 226, 0.5) !important;
+        transform: scale(1.05);
+        box-shadow: 0 6px 20px rgba(15, 90, 70, 0.3);
+        animation: none;
+    }
+    
+    #hamburger-btn:active {
+        transform: scale(0.95) !important;
+    }
+    
+    /* Estados del ícono hamburguesa */
+    #hamburger-btn .dars-container .dars-container:nth-child(1) {
+        transition: all 0.3s ease;
+    }
+    
+    #hamburger-btn .dars-container .dars-container:nth-child(2) {
+        transition: all 0.3s ease;
+    }
+    
+    #hamburger-btn .dars-container .dars-container:nth-child(3) {
+        transition: all 0.3s ease;
+    }
+    
+    /* Estado abierto (X) */
+    #hamburger-btn.menu-open {
+        background: rgba(162, 255, 226, 0.2) !important;
+        border-color: rgba(162, 255, 226, 0.6) !important;
+        animation: none;
+    }
+    
+    #hamburger-btn.menu-open .dars-container .dars-container:nth-child(1) {
+        transform: rotate(45deg) translate(6px, 6px);
+        width: 24px !important;
+    }
+    
+    #hamburger-btn.menu-open .dars-container .dars-container:nth-child(2) {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    
+    #hamburger-btn.menu-open .dars-container .dars-container:nth-child(3) {
+        transform: rotate(-45deg) translate(6px, -6px);
+        width: 24px !important;
+    }
+    
+    #mobile-menu {
+        display: none;
+        max-height: calc(100vh - 64px);
+        overflow-y: auto;
+    }
+    
+    #mobile-menu a {
+        transition: all 0.3s ease !important;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    #mobile-menu a::before {
+        content: '';
+        position: absolute;
+        left: -100%;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(162, 255, 226, 0.1), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    #mobile-menu a:hover {
+        background: rgba(162, 255, 226, 0.08) !important;
+        color: #92ffe5 !important;
+        padding-left: 35px !important;
+        text-shadow: 0 0 12px rgba(162, 255, 226, 0.6) !important;
+    }
+    
+    #mobile-menu a:hover::before {
+        left: 100%;
+    }
+}
+
+/* Animación de pulso y brillo */
+@keyframes pulse-glow {
+    0%, 100% {
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 4px 20px rgba(162, 255, 226, 0.3), 0 0 20px rgba(162, 255, 226, 0.2);
+        transform: scale(1.02);
+    }
+}
+
+/* Ajustes para móviles pequeños */
+@media (max-width: 480px) {
+    #dars-navbar {
+        padding: 0 20px !important;
+    }
+    
+    #mobile-menu {
+        top: 64px !important;
+    }
+    
+    #hamburger-btn {
+        width: 40px !important;
+        height: 40px !important;
+    }
+}
+
+/* Asegurar que el contenido no se solape con el navbar */
+body {
+    padding-top: 64px;
+}
+
+/* Prevenir scroll cuando el menú está abierto */
+body.menu-open {
+    overflow: hidden;
+}
+
+/* Animación suave para el menú móvil */
+#mobile-menu {
+    animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Mejorar el scroll del menú móvil */
+#mobile-menu::-webkit-scrollbar {
+    width: 6px;
+}
+
+#mobile-menu::-webkit-scrollbar-track {
+    background: rgba(10, 20, 15, 0.3);
+}
+
+#mobile-menu::-webkit-scrollbar-thumb {
+    background: rgba(162, 255, 226, 0.3);
+    border-radius: 3px;
+}
+
+#mobile-menu::-webkit-scrollbar-thumb:hover {
+    background: rgba(162, 255, 226, 0.5);
+}

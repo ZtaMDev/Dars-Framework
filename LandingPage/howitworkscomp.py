@@ -23,7 +23,7 @@ def create_howitworks():
                 "font-size": "20px",
                 "color": "#a0cfc0",
                 "text-align": "center",
-                "margin-bottom": "40px",  # Reducido de 60px a 40px
+                "margin-bottom": "40px",
                 "max-width": "600px",
                 "margin-left": "auto",
                 "margin-right": "auto"
@@ -209,11 +209,11 @@ def create_howitworks():
         ),
         id="howitworks-section",
         style={
-            "padding": "50px 40px",  # Cambiado de 0px 40px a 80px 40px
+            "padding": "50px 40px",
             "background": "linear-gradient(135deg, #0f1e1a 0%, #132d24 100%)",
-            "min-height": "auto",    # Cambiado de 100vh a auto
+            "min-height": "auto",
             "display": "flex",
             "flex-direction": "column",
-            "justify-content": "flex-start"  # Cambiado de center a flex-start
+            "justify-content": "flex-start"
         }
     )
