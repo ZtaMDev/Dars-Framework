@@ -12,7 +12,7 @@
   ],
   "bundle": true,
   "defaultMinify": true,
-  "viteMinify": false,
+  "viteMinify": true,
   "markdownHighlight": true,
   "markdownHighlightTheme": "dark",
   "targetPlatform": "auto"

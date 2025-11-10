@@ -40,7 +40,6 @@ class HTMLCSSJSExporter(Exporter):
         """Exporta la aplicación a HTML/CSS/JS (soporta multipágina)."""
         try:
             # Initialize obfuscation context for this export
-            # Keep original IDs to avoid breaking CSS/anchors. We still obfuscate types and events.
             self._hash_ids = False
             self._id_hash_map = {}
             self._type_obfuscation = bool(bundle)
@@ -77,12 +76,16 @@ class HTMLCSSJSExporter(Exporter):
                 cfg, cfg_found = load_config(project_root)
             except Exception:
                 cfg, cfg_found = ({}, False)
+            
+            # Obtener configuración de viteMinify
+            vite_minify = cfg.get('viteMinify', True) if cfg else True
+            
             try:
                 resolved = resolve_paths(cfg if cfg else {}, project_root)
             except Exception:
                 resolved = {"public_abs": None, "include": [], "exclude": []}
 
-            # Copiar public/assets completos al output (tanto en preview como en bundle)
+            # Copiar public/assets completos al output
             try:
                 public_abs = resolved.get("public_abs")
                 include = cfg.get("include", []) if cfg else []
@@ -127,13 +130,15 @@ class HTMLCSSJSExporter(Exporter):
                 src = static.get('src') if isinstance(static, dict) else static
                 if src and os.path.isfile(os.path.join(project_root, src)):
                     shutil.copy2(os.path.join(project_root, src), os.path.join(output_path, os.path.basename(src)))
-            # NOTA: No copiar ejecutables ni nada fuera del proyecto
 
-            base_css_content = self.generate_base_css()  # Nuevo método para estilos base
-            custom_css_content = self.generate_custom_css(app)  # Nuevo método para estilos personalizados
+            base_css_content = self.generate_base_css()
+            custom_css_content = self.generate_custom_css(app)
 
             self.write_file(os.path.join(output_path, "runtime_css.css"), base_css_content)
             self.write_file(os.path.join(output_path, "styles.css"), custom_css_content)
+
+            # Verificar si debemos combinar archivos JS
+            should_combine_js = bundle and vite_minify
 
             # Multipágina: exportar un HTML, CSS y JS por cada página registrada
             if hasattr(app, "is_multipage") and app.is_multipage():
@@ -157,23 +162,126 @@ class HTMLCSSJSExporter(Exporter):
                     if isinstance(page_app.root, list):
                         page_app.root = Container(children=page_app.root)
                     
-                    # Generar runtime específico para esta página
-                    runtime_js = self.generate_javascript(page_app, page.root)
-                    runtime_name = f"runtime_dars_{slug}.js" if slug != "index" else "runtime_dars.js"
-                    self.write_file(os.path.join(output_path, runtime_name), runtime_js)
-                    # Generar VDOM Tree JS (externo)
-                    vdom_name = None
+                    # Generar VDOM y obtener eventos
+                    page_events_map = {}
                     try:
-                        vdom_dict = VDomBuilder(id_provider=self.get_component_id).build(page_app.root)
+                        vdom_builder = VDomBuilder(id_provider=self.get_component_id)
+                        vdom_dict = vdom_builder.build(page_app.root)
+                        page_events_map = vdom_builder.events_map
+                        
                         if bundle:
                             vdom_dict = self._obfuscate_vdom(vdom_dict)
                         import json
                         vdom_js = "window.__DARS_VDOM__ = " + json.dumps(vdom_dict, ensure_ascii=False, separators=(",", ":")) + ";\n"
                     except Exception:
                         vdom_js = "window.__DARS_VDOM__ = { };\n"
-                    vdom_name = f"vdom_tree_{slug}.js" if slug != "index" else "vdom_tree.js"
-                    self.write_file(os.path.join(output_path, vdom_name), vdom_js)
-                    # Fase 2: escribir snapshot/version por página (solo en dev, no bundle)
+                        page_events_map = {}
+                    
+                    # Generar runtime JS con eventos
+                    runtime_js = self.generate_javascript(page_app, page.root, page_events_map)
+                    
+                    # Scripts específicos de esta página
+                    page_scripts = []
+                    
+                    # Scripts globales de la app
+                    page_scripts.extend(getattr(app, 'scripts', []))
+                    
+                    # Scripts específicos de esta página
+                    if hasattr(page, 'scripts'):
+                        page_scripts.extend(page.scripts)
+                    
+                    # Scripts de componentes dentro de la página
+                    if hasattr(page_app.root, 'get_scripts'):
+                        page_scripts.extend(page_app.root.get_scripts())
+
+                    # Incluir scripts automáticos generados por helpers de escritorio
+                    try:
+                        import dars.desktop as _dars_desktop
+                        auto = getattr(_dars_desktop, '_auto_scripts', None)
+                        if auto:
+                            page_scripts.extend(auto)
+                    except Exception:
+                        pass
+                    
+                    # Preparar scripts
+                    combined_js, external_srcs, combined_is_module = self._prepare_page_scripts(page_scripts, output_path, project_root)
+
+                    if should_combine_js:
+                        # Combinar runtime + VDOM + scripts en un solo archivo
+                        combined_all_js = f"""// Combined JavaScript for {slug}
+    // VDOM
+    {vdom_js}
+
+    // Runtime
+    {runtime_js}
+
+    // Page Scripts
+    {combined_js}
+    """
+                        app_js_filename = f"app_{slug}.js" if slug != "index" else "app.js"
+                        self.write_file(os.path.join(output_path, app_js_filename), combined_all_js)
+                        
+                        # Generar HTML con solo el archivo combinado
+                        if index_page is not None and page is index_page:
+                            html_content = self.generate_html(page_app, css_file="styles.css",
+                                                            script_file=app_js_filename,
+                                                            runtime_file="",  # Vacío porque está combinado
+                                                            extra_script_srcs=external_srcs, 
+                                                            bundle=bundle, 
+                                                            vdom_script="",  # Vacío porque está combinado
+                                                            script_is_module=combined_is_module,
+                                                            combined_js=True)
+                            filename = "index.html"
+                        else:
+                            html_content = self.generate_html(page_app, css_file="styles.css",
+                                                            script_file=app_js_filename,
+                                                            runtime_file="",  # Vacío porque está combinado
+                                                            extra_script_srcs=external_srcs, 
+                                                            bundle=bundle, 
+                                                            vdom_script="",  # Vacío porque está combinado
+                                                            script_is_module=combined_is_module,
+                                                            combined_js=True)
+                            filename = f"{slug}.html"
+                    else:
+                        # Comportamiento original: archivos separados
+                        vdom_filename = f"vdom_tree_{slug}.js" if slug != "index" else "vdom_tree.js"
+                        self.write_file(os.path.join(output_path, vdom_filename), vdom_js)
+                        
+                        runtime_filename = f"runtime_dars_{slug}.js" if slug != "index" else "runtime_dars.js"
+                        self.write_file(os.path.join(output_path, runtime_filename), runtime_js)
+                        
+                        script_filename = f"script_{slug}.js" if slug != "index" else "script.js"
+                        self.write_file(os.path.join(output_path, script_filename), combined_js)
+                        
+                        if index_page is not None and page is index_page:
+                            html_content = self.generate_html(page_app, css_file="styles.css",
+                                                            script_file=script_filename,
+                                                            runtime_file=runtime_filename,
+                                                            extra_script_srcs=external_srcs, 
+                                                            bundle=bundle, 
+                                                            vdom_script=vdom_filename,
+                                                            script_is_module=combined_is_module)
+                            filename = "index.html"
+                        else:
+                            html_content = self.generate_html(page_app, css_file="styles.css",
+                                                            script_file=script_filename,
+                                                            runtime_file=runtime_filename,
+                                                            extra_script_srcs=external_srcs, 
+                                                            bundle=bundle, 
+                                                            vdom_script=vdom_filename,
+                                                            script_is_module=combined_is_module)
+                            filename = f"{slug}.html"
+                    
+                    # Mejorar formato HTML
+                    try:
+                        soup = BeautifulSoup(html_content, "html.parser")
+                        html_content = soup.prettify()
+                    except ImportError:
+                        pass
+                    
+                    self.write_file(os.path.join(output_path, filename), html_content)
+                    
+                    # Fase 2: snapshot/version por página (solo en dev, no bundle)
                     if not bundle:
                         try:
                             vdom_json = self.generate_vdom_snapshot(page_app.root)
@@ -192,68 +300,26 @@ class HTMLCSSJSExporter(Exporter):
                         except Exception:
                             version_val = "1"
                         self.write_file(os.path.join(output_path, version_name), version_val)
-                    
-                    # Generar scripts específicos de esta página
-                    page_scripts = []
-                    
-                    # Scripts globales de la app
-                    page_scripts.extend(getattr(app, 'scripts', []))
-                    
-                    # Scripts específicos de esta página
-                    if hasattr(page, 'scripts'):
-                        page_scripts.extend(page.scripts)
-                    
-                    # Scripts de componentes dentro de la página
-                    if hasattr(page_app.root, 'get_scripts'):
-                        page_scripts.extend(page_app.root.get_scripts())
-
-                    # Incluir scripts automáticos generados por helpers de escritorio (p.ej. dars.desktop)
-                    try:
-                        import dars.desktop as _dars_desktop
-                        auto = getattr(_dars_desktop, '_auto_scripts', None)
-                        if auto:
-                            page_scripts.extend(auto)
-                    except Exception:
-                        # No importa si dars.desktop no está disponible (p.ej. web-only projects)
-                        pass
-                    
-                    # Generar script.js específico para esta página
-                    # Preparar y copiar scripts: combinados + externos
-                    combined_js, external_srcs, combined_is_module = self._prepare_page_scripts(page_scripts, output_path, project_root)
-
-                    if index_page is not None and page is index_page:
-                        # Página index
-                        self.write_file(os.path.join(output_path, "script.js"), combined_js)
-                        html_content = self.generate_html(page_app, css_file="styles.css",
-                                                        script_file="script.js",
-                                                        runtime_file="runtime_dars.js",
-                                                        extra_script_srcs=external_srcs, bundle=bundle, vdom_script=vdom_name,
-                                                        script_is_module=combined_is_module)
-                        filename = "index.html"
-                    else:
-                        # Otras páginas
-                        script_name = f"script_{slug}.js"
-                        self.write_file(os.path.join(output_path, script_name), combined_js)
-                        html_content = self.generate_html(page_app, css_file="styles.css",
-                                                        script_file=script_name,
-                                                        runtime_file=runtime_name,
-                                                        extra_script_srcs=external_srcs, bundle=bundle, vdom_script=vdom_name,
-                                                        script_is_module=combined_is_module)
-                        filename = f"{slug}.html"
-                    
-                    # Mejorar formato HTML si es posible
-                    try:
-                        soup = BeautifulSoup(html_content, "html.parser")
-                        html_content = soup.prettify()
-                    except ImportError:
-                        pass
-                    
-                    self.write_file(os.path.join(output_path, filename), html_content)
             else:
-                # Single-page clásico (mantener comportamiento existente)
-                runtime_js = self.generate_javascript(app, app.root)
-                self.write_file(os.path.join(output_path, "runtime_dars.js"), runtime_js)
-                
+                # Single-page clásico
+                # Generar VDOM y obtener eventos
+                page_events_map = {}
+                try:
+                    vdom_builder = VDomBuilder(id_provider=self.get_component_id)
+                    vdom_dict = vdom_builder.build(app.root)
+                    page_events_map = vdom_builder.events_map
+                    
+                    if bundle:
+                        vdom_dict = self._obfuscate_vdom(vdom_dict)
+                    import json
+                    vdom_js = "window.__DARS_VDOM__ = " + json.dumps(vdom_dict, ensure_ascii=False, separators=(",", ":")) + ";\n"
+                except Exception:
+                    vdom_js = "window.__DARS_VDOM__ = { };\n"
+                    page_events_map = {}
+
+                # Generar runtime JS con eventos
+                runtime_js = self.generate_javascript(app, app.root, page_events_map)
+
                 user_scripts = list(getattr(app, 'scripts', []))
                 # Incluir scripts automáticos generados por helpers de escritorio
                 try:
@@ -264,29 +330,54 @@ class HTMLCSSJSExporter(Exporter):
                 except Exception:
                     pass
                 combined_js, external_srcs, combined_is_module = self._prepare_page_scripts(user_scripts, output_path, project_root)
-                self.write_file(os.path.join(output_path, "script.js"), combined_js)
-                # Generar VDOM Tree JS (externo)
-                vdom_name = None
-                try:
-                    vdom_dict = VDomBuilder(id_provider=self.get_component_id).build(app.root)
-                    if bundle:
-                        vdom_dict = self._obfuscate_vdom(vdom_dict)
-                    import json
-                    vdom_js = "window.__DARS_VDOM__ = " + json.dumps(vdom_dict, ensure_ascii=False, separators=(",", ":")) + ";\n"
-                except Exception:
-                    vdom_js = "window.__DARS_VDOM__ = { };\n"
-                vdom_name = "vdom_tree.js"
-                self.write_file(os.path.join(output_path, vdom_name), vdom_js)
 
-                html_content = self.generate_html(app, css_file="styles.css",
-                                                script_file="script.js",
-                                                runtime_file="runtime_dars.js",
-                                                extra_script_srcs=external_srcs, bundle=bundle, vdom_script=vdom_name,
-                                                script_is_module=combined_is_module)
+                if should_combine_js:
+                    # Combinar runtime + VDOM + scripts en un solo archivo
+                    combined_all_js = f"""// Combined JavaScript for Single Page App
+    // VDOM
+    {vdom_js}
+
+    // Runtime
+    {runtime_js}
+
+    // Page Scripts
+    {combined_js}
+    """
+                    app_js_filename = "app.js"
+                    self.write_file(os.path.join(output_path, app_js_filename), combined_all_js)
+                    
+                    html_content = self.generate_html(app, css_file="styles.css",
+                                                    script_file=app_js_filename,
+                                                    runtime_file="",  # Vacío porque está combinado
+                                                    extra_script_srcs=external_srcs, 
+                                                    bundle=bundle, 
+                                                    vdom_script="",  # Vacío porque está combinado
+                                                    script_is_module=combined_is_module,
+                                                    combined_js=True)
+                else:
+                    # Comportamiento original: archivos separados
+                    vdom_filename = "vdom_tree.js"
+                    self.write_file(os.path.join(output_path, vdom_filename), vdom_js)
+
+                    runtime_filename = "runtime_dars.js"
+                    self.write_file(os.path.join(output_path, runtime_filename), runtime_js)
+                    
+                    script_filename = "script.js"
+                    self.write_file(os.path.join(output_path, script_filename), combined_js)
+
+                    html_content = self.generate_html(app, css_file="styles.css",
+                                                    script_file=script_filename,
+                                                    runtime_file=runtime_filename,
+                                                    extra_script_srcs=external_srcs, 
+                                                    bundle=bundle, 
+                                                    vdom_script=vdom_filename,
+                                                    script_is_module=combined_is_module)
+
                 soup = BeautifulSoup(html_content, "html.parser")
                 html_content = soup.prettify()
                 
                 self.write_file(os.path.join(output_path, "index.html"), html_content)
+                
                 # Fase 2: snapshot/version para single-page (solo en dev, no bundle)
                 if not bundle:
                     try:
@@ -313,7 +404,7 @@ class HTMLCSSJSExporter(Exporter):
             except Exception:
                 pass
 
-            # Limpiar scripts automáticos generados por dars.desktop helpers (si existen)
+            # Limpiar scripts automáticos generados por dars.desktop helpers
             try:
                 import dars.desktop as _dars_desktop
                 auto = getattr(_dars_desktop, '_auto_scripts', None)
@@ -324,7 +415,7 @@ class HTMLCSSJSExporter(Exporter):
 
             return True
         except Exception as e:
-            print(f"Error al exportar: {e}")
+            print(f"Error at export time: {e}")
             return False
 
             
@@ -620,7 +711,10 @@ self.addEventListener('fetch', event => {
         return combined_js
 
     def generate_html(self, app: App, css_file: str = "styles.css", 
-                 script_file: str = "script.js", runtime_file: str = "runtime_dars.js", extra_script_srcs: list = None, bundle: bool = False, vdom_script: str = "vdom_tree.js", script_is_module: bool = False) -> str:
+                 script_file: str = "script.js", runtime_file: str = "runtime_dars.js", 
+                 extra_script_srcs: list = None, bundle: bool = False, 
+                 vdom_script: str = "vdom_tree.js", script_is_module: bool = False,
+                 combined_js: bool = False) -> str:
         """Genera el contenido HTML con todas las propiedades de la aplicación"""
         body_content = ""
         from dars.components.basic.container import Container
@@ -630,8 +724,6 @@ self.addEventListener('fetch', event => {
             root_component = Container(*root_component)
         if root_component:
             body_content = self.render_component(root_component)
-        
-        # VDOM snapshot ahora se sirve desde un archivo externo (vdom_script)
         
         # Generar meta tags
         meta_tags_html = self._generate_meta_tags(app)
@@ -645,7 +737,6 @@ self.addEventListener('fetch', event => {
         # Generar Twitter Card tags
         twitter_tags_html = self._generate_twitter_tags(app)
         
-
         # Construir string de scripts externos (extra_script_srcs)
         extra_scripts_html = ""
         if extra_script_srcs:
@@ -657,6 +748,7 @@ self.addEventListener('fetch', event => {
                     src, is_module = item, False
                 type_attr = ' type="module"' if is_module else ''
                 extra_scripts_html += f'    <script src="{src}"{type_attr}></script>\n'
+        
         # Incluir dars.min.js (ESM) antes de runtime/script
         dars_lib_tag = '<script type="module" src="lib/dars.min.js" defer data-dars-lib></script>'
 
@@ -756,44 +848,48 @@ self.addEventListener('fetch', event => {
         if not bundle:
             version_vars_html = f"<script>window.__DARS_SNAPSHOT_URL = '{snapshot_name}'; window.__DARS_VERSION_URL = '{version_name}';</script>"
 
-        vdom_script_tag = ''
-        if vdom_script:
-            vdom_script_tag = f'<script src="{vdom_script}"></script>'
+        # NUEVO: Manejar archivos combinados vs separados
+        if combined_js:
+            # Cuando está combinado, solo necesitamos el script_file principal
+            main_script_tag = f'<script src="{script_file}"{" type=\"module\"" if script_is_module else ""} defer></script>'
+            vdom_script_tag = ''
+            runtime_script_tag = ''
+        else:
+            # Comportamiento original: archivos separados
+            vdom_script_tag = f'<script src="{vdom_script}"></script>' if vdom_script else ''
+            runtime_script_tag = f'<script src="{runtime_file}"{" type=\"module\"" if script_is_module else ""} defer></script>' if runtime_file else ''
+            main_script_tag = f'<script src="{script_file}"{" type=\"module\"" if script_is_module else ""}></script>' if script_file else ''
 
         html_template = f"""<!DOCTYPE html>
-<html lang="{app.language}">
-<head>
-    <meta charset="{app.config.get('charset', 'UTF-8')}">
-    {meta_tags_html}
-    <title>{app.title}</title>
-    {links_html}
-    {og_tags_html}
-    {twitter_tags_html}
-    <link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css\">\n    <link rel=\"stylesheet\" href=\"runtime_css.css\">\n    <link rel=\"stylesheet\" href=\"{css_file}\">
-</head>
-<body>
-    {body_content}
-    {vdom_script_tag}
-    {version_vars_html}
-    {bootstrap_json_tag}
-    {dars_lib_tag}
-    {bootstrap_init_tag}
-    <script src=\"{runtime_file}\"{' type=\"module\"' if script_is_module else ''} defer></script>\n{extra_scripts_html}    <script src=\"{script_file}\"{' type=\"module\"' if script_is_module else ''}></script>
-</body>
-</html>"""
+    <html lang="{app.language}">
+    <head>
+        <meta charset="{app.config.get('charset', 'UTF-8')}">
+        {meta_tags_html}
+        <title>{app.title}</title>
+        {links_html}
+        {og_tags_html}
+        {twitter_tags_html}
+        <link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css\">\n    <link rel=\"stylesheet\" href=\"runtime_css.css\">\n    <link rel=\"stylesheet\" href=\"{css_file}\">
+    </head>
+    <body>
+        {body_content}
+        {vdom_script_tag}
+        {version_vars_html}
+        {bootstrap_json_tag}
+        {dars_lib_tag}
+        {bootstrap_init_tag}
+        {runtime_script_tag}
+    {extra_scripts_html}    {main_script_tag}
+    </body>
+    </html>"""
 
         return html_template
 
     def _obfuscate_vdom(self, vnode: dict) -> dict:
-        """Produce a minimal VDOM structure keeping events but hiding code.
-        - Keeps: type, id, key, class, text, children, events
-        - Events: { evName: {t:'i', b:'<base64>'} }
-        - Strips: style, props, any other keys
-        Recurses through children.
-        """
+        """Produce un VDOM mínimo SIN eventos"""
         if not isinstance(vnode, dict):
             return vnode
-        import base64
+        
         kept = {}
         # type (obfuscated when enabled)
         t = vnode.get('type')
@@ -808,28 +904,11 @@ self.addEventListener('fetch', event => {
         if not getattr(self, '_type_obfuscation', False):
             if 'class' in vnode:
                 kept['class'] = vnode.get('class')
-        # text retained (non-sensitive content remains visible by choice)
+        # text retained
         if 'text' in vnode:
             kept['text'] = vnode.get('text')
-        # Obfuscate events
-        evs = vnode.get('events') or None
-        if isinstance(evs, dict) and evs:
-            obf = {}
-            for ev, spec in evs.items():
-                try:
-                    code = None
-                    if isinstance(spec, dict):
-                        # existing shapes: {type:'inline', code:'...'} or short-forms
-                        code = spec.get('code') or spec.get('value')
-                    elif isinstance(spec, str):
-                        code = spec
-                    if code:
-                        b64 = base64.b64encode(code.encode('utf-8')).decode('ascii')
-                        obf[ev] = {'t': 'i', 'b': b64}
-                except Exception:
-                    # if anything fails, skip this event
-                    pass
-            kept['events'] = obf if obf else None
+        
+        
         # Recurse children
         ch = vnode.get('children') or []
         if ch:
@@ -1637,7 +1716,7 @@ body {
 """
 
     def build_vdom_tree(self, component: Component) -> dict:
-        """Serializa un componente Dars a un VNode (snapshot VDOM para hidratación)."""
+        """Serializa componente SIN eventos"""
         try:
             comp_type = component.__class__.__name__
         except Exception:
@@ -1645,34 +1724,9 @@ body {
 
         comp_id = self.get_component_id(component)
 
-        # Serializar eventos (solo inline ejecutable en cliente)
-        events_payload = {}
-        try:
-            events = getattr(component, 'events', {}) or {}
-            for ev_name, handler in events.items():
-                code = None
-                try:
-                    if hasattr(handler, 'get_code'):
-                        code = handler.get_code()
-                    elif hasattr(handler, 'code'):
-                        code = getattr(handler, 'code')
-                    elif hasattr(handler, 'to_js'):
-                        code = handler.to_js()
-                    elif isinstance(handler, str):
-                        code = handler
-                except Exception:
-                    code = None
-                if code:
-                    try:
-                        code_str = str(code)
-                    except Exception:
-                        code_str = ''
-                    if code_str:
-                        events_payload[ev_name] = { 'type': 'inline', 'code': code_str }
-        except Exception:
-            events_payload = {}
-
-        # Props seguros (evitar funciones y objetos no serializables)
+        # NUEVO: NO serializar eventos aquí
+        
+        # Props seguros
         safe_props = {}
         try:
             for k, v in (getattr(component, 'props', {}) or {}).items():
@@ -1708,7 +1762,7 @@ body {
             'class': getattr(component, 'class_name', None),
             'style': getattr(component, 'style', {}) or {},
             'props': safe_props,
-            'events': events_payload if events_payload else None,
+            # NUEVO: REMOVER eventos del VDOM
             'children': children_nodes if children_nodes else []
         }
         if text_value is not None:
@@ -1726,384 +1780,414 @@ body {
             vdom_dict = {'type': 'Root', 'id': None, 'children': []}
         return json.dumps(vdom_dict, ensure_ascii=False)
 
-    def generate_javascript(self, app: App, page_root: Component) -> str:
-        """Genera un runtime modular: hidratación + delegación de eventos + diff/patch + hot-reload incremental (polling)."""
-        runtime = r"""// Dars Runtime (Hydration + Delegated Events + Diff/Patch + Hot Reload)
-(function(){
-  const eventMap = new Map(); // id -> {ev: fn}
-  let currentSnapshot = null;
-  let currentVersion = null;
+    def generate_javascript(self, app: App, page_root: Component, events_map: Dict[str, Dict[str, Any]] = None) -> str:
+        """Genera un runtime modular con eventos integrados directamente en JS"""
+        
+        # Convertir events_map a código JS
+        events_js_code = ""
+        if events_map:
+            events_js_code = self._generate_events_js(events_map)
+        
+        runtime = f"""// Dars Runtime (Hydration + Delegated Events + Diff/Patch + Hot Reload)
+    (function(){{
+    const eventMap = new Map(); // id -> {{ev: fn}}
+    let currentSnapshot = null;
+    let currentVersion = null;
 
-  // Registro de componentes (skeleton). En siguientes iteraciones añadiremos create/patch por tipo built-in
-  const registry = {
-    // Implementación mínima segura para crear nodos cuando se agregan hijos
-    'Text': {
-      create(v){
-        if(!v || v.isIsland) return null;
-        const el = document.createElement('span');
-        if(v.id) el.id = v.id;
-        if(v.class) el.className = v.class;
-        if(v.style){ for(const k in v.style){ try{ el.style.setProperty(k.replace(/_/g,'-'), String(v.style[k])); }catch{} } }
-        if(Object.prototype.hasOwnProperty.call(v,'text')){ el.textContent = String(v.text||''); }
+    // NUEVO: Inicialización de eventos - directamente en JS
+    function initializeEvents() {{
+    {events_js_code}
+    }}
+
+    // Registro de componentes (skeleton). En siguientes iteraciones añadiremos create/patch por tipo built-in
+    const registry = {{
+        // Implementación mínima segura para crear nodos cuando se agregan hijos
+        'Text': {{
+        create(v){{
+            if(!v || v.isIsland) return null;
+            const el = document.createElement('span');
+            if(v.id) el.id = v.id;
+            if(v.class) el.className = v.class;
+            if(v.style){{ for(const k in v.style){{ try{{ el.style.setProperty(k.replace(/_/g,'-'), String(v.style[k])); }}catch{{}} }} }}
+            if(Object.prototype.hasOwnProperty.call(v,'text')){{ el.textContent = String(v.text||''); }}
+            // props
+            if(v.props){{ for(const k in v.props){{ const val=v.props[k]; try{{ if(val===false||val===null||typeof val==='undefined'){{ el.removeAttribute(k);}} else {{ el.setAttribute(k, String(val)); }} }}catch{{}} }} }}
+            return el;
+        }}
+        }},
+        'Container': {{
+        create(v){{
+            if(!v || v.isIsland) return null;
+            const el = document.createElement('div');
+            if(v.id) el.id = v.id;
+            const base = 'dars-container';
+            el.className = (v.class ? (base + ' ' + v.class) : base);
+            if(v.style){{ for(const k in v.style){{ try{{ el.style.setProperty(k.replace(/_/g,'-'), String(v.style[k])); }}catch{{}} }} }}
+            // props
+            if(v.props){{ for(const k in v.props){{ const val=v.props[k]; try{{ if(val===false||val===null||typeof val==='undefined'){{ el.removeAttribute(k);}} else {{ el.setAttribute(k, String(val)); }} }}catch{{}} }} }}
+            return el;
+        }}
+        }},
+    }};
+
+    function walk(v, fn){{
+        if(!v) return;
+        fn(v);
+        const ch = v.children || [];
+        for(let i=0;i<ch.length;i++){{ walk(ch[i], fn); }}
+    }}
+
+    function _decodeCodeB64(b64){{
+        try {{
+        if (typeof atob === 'function') return atob(b64);
+        if (typeof Buffer !== 'undefined') {{ return Buffer.from(b64, 'base64').toString('utf8'); }}
+        }} catch(_){{ }}
+        return '';
+    }}
+
+    function _compileHandlerFromSpec(spec){{
+        try {{
+        if (!spec) return null;
+        if (spec && spec.type === 'inline' && spec.code) {{
+            return new Function('event', spec.code);
+        }}
+        const b64 = (spec && (spec.b || spec.code_b64)) || null;
+        if (b64){{
+            const code = _decodeCodeB64(b64);
+            if (code) return new Function('event', code);
+        }}
+        }} catch(_){{ }}
+        return null;
+    }}
+
+    function bindEventsFromVNode(snapshot){{
+        // NUEVO: Ya no necesitamos construir eventos desde el VDOM
+        // porque están inicializados directamente en JS
+        // Solo necesitamos mantener compatibilidad con eventos dinámicos
+        walk(snapshot, (v)=>{{
+        if(v && v.id && v.events){{
+            // Solo procesar eventos si no están ya en el eventMap
+            if(!eventMap.has(v.id)) {{
+            const handlers = {{}};
+            for(const ev in v.events){{
+                const spec = v.events[ev];
+                const fn = _compileHandlerFromSpec(spec);
+                if (fn) {{ handlers[ev] = fn; }}
+            }}
+            if(Object.keys(handlers).length){{ eventMap.set(v.id, handlers); }} else {{ eventMap.delete(v.id); }}
+            }}
+        }}
+        }});
+    }}
+
+    // Utilities
+    function setProps(el, props){{
+        if(!el || !props) return;
+        for(const [k,v] of Object.entries(props)){{
+        try {{
+            if(v === false || v === null || typeof v === 'undefined'){{
+            el.removeAttribute(k);
+            }} else {{
+            el.setAttribute(k, String(v));
+            }}
+        }} catch(err) {{ /* ignore */ }}
+        }}
+    }}
+    function diffProps(el, oldP={{}}, newP={{}}){{
+        // remove
+        for(const k in oldP){{ if(!(k in newP)){{ try{{ el.removeAttribute(k); }}catch{{}} }} }}
+        // add/update
+        for(const k in newP){{ const v=newP[k]; try{{ if(v===false||v===null||typeof v==='undefined'){{ el.removeAttribute(k);}} else {{ el.setAttribute(k, String(v)); }} }}catch{{}} }}
+    }}
+    function diffStyles(el, oldS={{}}, newS={{}}){{
+        for(const k in oldS){{ if(!(k in newS)){{ try{{ el.style.removeProperty(k.replace(/_/g,'-')); }}catch{{}} }} }}
+        for(const k in newS){{ const v=newS[k]; try{{ el.style.setProperty(k.replace(/_/g,'-'), String(v)); }}catch{{}} }}
+    }}
+
+    // Event delegation helper (restored)
+    function delegate(eventName, root){{
+        (root||document).addEventListener(eventName, function(e){{
+        let node = e.target;
+        const boundary = root||document;
+        while(node && node !== boundary){{
+            const id = node.id;
+            if(id && eventMap.has(id)){{
+            const handlers = eventMap.get(id);
+            const h = handlers[eventName];
+            // If there is a dynamic handler attached on this node for the same event, let it handle and skip default
+            if(node && node.__darsEv && node.__darsEv[eventName]){{
+                return;
+            }}
+            if(typeof h === 'function'){{
+                try {{ h.call(node, e); }} catch(err){{ console.error('[Dars] handler error', err); }}
+                return;
+            }}
+            }}
+            node = node.parentNode;
+        }}
+        }}, true);
+    }}
+
+    function typesDiffer(a,b){{ return (a && b) ? a.type !== b.type : a!==b; }}
+
+    // Elimina un subárbol del DOM (y del mapa de eventos) usando los ids del VDOM
+    function removeSubtree(v){{
+        if(!v) return;
+        // eliminar hijos primero (postorden)
+        const ch = (v.children||[]);
+        for(let i=0;i<ch.length;i++){{ removeSubtree(ch[i]); }}
+        // limpiar handlers
+        if(v.id){{ eventMap.delete(v.id); }}
+        // quitar elemento del DOM
+        if(v.id){{ const el = document.getElementById(v.id); if(el && el.parentNode){{ try{{ el.parentNode.removeChild(el); }}catch(_){{}} }} }}
+    }}
+
+    function updateNode(oldV, newV){{
+        if(!newV || !newV.id){{ return {{ ok:false, reason:'missing-new' }}; }}
+        let el = document.getElementById(newV.id);
+        if(!el){{
+        // Fallback: si cambió el id entre snapshots pero es el mismo nodo lógico, reasignamos id
+        const oldEl = (oldV && oldV.id) ? document.getElementById(oldV.id) : null;
+        if(oldEl){{ try {{ oldEl.id = newV.id; el = oldEl; }} catch(_){{}} }}
+        }}
+        if(!el){{ return {{ ok:false, reason:'missing-el' }}; }}
+
+        // Si cambia el tipo, estructura u orden de hijos, pedimos reload completo (fase 2 simplificada)
+        if(typesDiffer(oldV, newV)){{
+        return {{ ok:false, reason:'type-changed' }};
+        }}
+
+        const isIsland = !!newV.isIsland;
+
+        // class -> atributo className
+        if(!isIsland && newV.class){{ el.className = newV.class; }}
+
         // props
-        if(v.props){ for(const k in v.props){ const val=v.props[k]; try{ if(val===false||val===null||typeof val==='undefined'){ el.removeAttribute(k);} else { el.setAttribute(k, String(val)); } }catch{} } }
-        return el;
-      }
-    },
-    'Container': {
-      create(v){
-        if(!v || v.isIsland) return null;
-        const el = document.createElement('div');
-        if(v.id) el.id = v.id;
-        const base = 'dars-container';
-        el.className = (v.class ? (base + ' ' + v.class) : base);
-        if(v.style){ for(const k in v.style){ try{ el.style.setProperty(k.replace(/_/g,'-'), String(v.style[k])); }catch{} } }
-        // props
-        if(v.props){ for(const k in v.props){ const val=v.props[k]; try{ if(val===false||val===null||typeof val==='undefined'){ el.removeAttribute(k);} else { el.setAttribute(k, String(val)); } }catch{} } }
-        return el;
-      }
-    },
-  };
+        if(!isIsland){{ diffProps(el, (oldV&&oldV.props)||{{}}, newV.props||{{}}); }}
 
-  function walk(v, fn){
-    if(!v) return;
-    fn(v);
-    const ch = v.children || [];
-    for(let i=0;i<ch.length;i++){ walk(ch[i], fn); }
-  }
+        // styles
+        if(!isIsland){{ diffStyles(el, (oldV&&oldV.style)||{{}}, newV.style||{{}}); }}
 
-  function _decodeCodeB64(b64){
-    try {
-      if (typeof atob === 'function') return atob(b64);
-      if (typeof Buffer !== 'undefined') { return Buffer.from(b64, 'base64').toString('utf8'); }
-    } catch(_){ }
-    return '';
-  }
+        // text
+        if(!isIsland && Object.prototype.hasOwnProperty.call(newV, 'text')){{
+        if(el.textContent !== String(newV.text||'')){{
+            el.textContent = String(newV.text||'');
+        }}
+        }}
 
-  function _compileHandlerFromSpec(spec){
-    try {
-      if (!spec) return null;
-      if (spec && spec.type === 'inline' && spec.code) {
-        return new Function('event', spec.code);
-      }
-      const b64 = (spec && (spec.b || spec.code_b64)) || null;
-      if (b64){
-        const code = _decodeCodeB64(b64);
-        if (code) return new Function('event', code);
-      }
-    } catch(_){ }
-    return null;
-  }
+        // NUEVO: Ya no procesamos eventos desde el VDOM durante updates
+        // porque están inicializados directamente en JS
 
-  function bindEventsFromVNode(snapshot){
-    // Construir tabla de eventos a partir del snapshot
-    walk(snapshot, (v)=>{
-      if(v && v.id && v.events){
-        const handlers = {};
-        for(const ev in v.events){
-          const spec = v.events[ev];
-          const fn = _compileHandlerFromSpec(spec);
-          if (fn) { handlers[ev] = fn; }
-        }
-        if(Object.keys(handlers).length){ eventMap.set(v.id, handlers); } else { eventMap.delete(v.id); }
-      }
-    });
-  }
+        // hijos (reconciliación por id/key). Para islas, tratamos el subárbol como opaco.
+        if(isIsland){{ return {{ ok:true }}; }}
 
-  // Utilities
-  function setProps(el, props){
-    if(!el || !props) return;
-    for(const [k,v] of Object.entries(props)){
-      try {
-        if(v === false || v === null || typeof v === 'undefined'){
-          el.removeAttribute(k);
-        } else {
-          el.setAttribute(k, String(v));
-        }
-      } catch(err) { /* ignore */ }
-    }
-  }
-  function diffProps(el, oldP={}, newP={}){
-    // remove
-    for(const k in oldP){ if(!(k in newP)){ try{ el.removeAttribute(k); }catch{} } }
-    // add/update
-    for(const k in newP){ const v=newP[k]; try{ if(v===false||v===null||typeof v==='undefined'){ el.removeAttribute(k);} else { el.setAttribute(k, String(v)); } }catch{} }
-  }
-  function diffStyles(el, oldS={}, newS={}){
-    for(const k in oldS){ if(!(k in newS)){ try{ el.style.removeProperty(k.replace(/_/g,'-')); }catch{} } }
-    for(const k in newS){ const v=newS[k]; try{ el.style.setProperty(k.replace(/_/g,'-'), String(v)); }catch{} }
-  }
+        // Permitimos REMOCIONES sin recarga.
+        const oldC = (oldV && oldV.children) ? oldV.children : [];
+        const newC = (newV.children) ? newV.children : [];
 
-  // Event delegation helper (restored)
-  function delegate(eventName, root){
-    (root||document).addEventListener(eventName, function(e){
-      let node = e.target;
-      const boundary = root||document;
-      while(node && node !== boundary){
-        const id = node.id;
-        if(id && eventMap.has(id)){
-          const handlers = eventMap.get(id);
-          const h = handlers[eventName];
-          // If there is a dynamic handler attached on this node for the same event, let it handle and skip default
-          if(node && node.__darsEv && node.__darsEv[eventName]){
-            return;
-          }
-          if(typeof h === 'function'){
-            try { h.call(node, e); } catch(err){ console.error('[Dars] handler error', err); }
-            return;
-          }
-        }
-        node = node.parentNode;
-      }
-    }, true);
-  }
+        // Construir índice de hijos viejos por id o key
+        const oldIndex = new Map(); // clave -> vnode viejo
+        for(let i=0;i<oldC.length;i++){{
+        const k = (oldC[i] && (oldC[i].id || oldC[i].key)) || null;
+        if(k){{ oldIndex.set(String(k), oldC[i]); }}
+        }}
 
-  function typesDiffer(a,b){ return (a && b) ? a.type !== b.type : a!==b; }
+        // Seguimiento de cuáles viejos fueron actualizados
+        const seenOld = new Set();
 
-  // Elimina un subárbol del DOM (y del mapa de eventos) usando los ids del VDOM
-  function removeSubtree(v){
-    if(!v) return;
-    // eliminar hijos primero (postorden)
-    const ch = (v.children||[]);
-    for(let i=0;i<ch.length;i++){ removeSubtree(ch[i]); }
-    // limpiar handlers
-    if(v.id){ eventMap.delete(v.id); }
-    // quitar elemento del DOM
-    if(v.id){ const el = document.getElementById(v.id); if(el && el.parentNode){ try{ el.parentNode.removeChild(el); }catch(_){} }}
-  }
-
-  function updateNode(oldV, newV){
-    if(!newV || !newV.id){ return { ok:false, reason:'missing-new' }; }
-    let el = document.getElementById(newV.id);
-    if(!el){
-      // Fallback: si cambió el id entre snapshots pero es el mismo nodo lógico, reasignamos id
-      const oldEl = (oldV && oldV.id) ? document.getElementById(oldV.id) : null;
-      if(oldEl){ try { oldEl.id = newV.id; el = oldEl; } catch(_){} }
-    }
-    if(!el){ return { ok:false, reason:'missing-el' }; }
-
-    // Si cambia el tipo, estructura u orden de hijos, pedimos reload completo (fase 2 simplificada)
-    if(typesDiffer(oldV, newV)){
-      return { ok:false, reason:'type-changed' };
-    }
-
-    const isIsland = !!newV.isIsland;
-
-    // class -> atributo className
-    if(!isIsland && newV.class){ el.className = newV.class; }
-
-    // props
-    if(!isIsland){ diffProps(el, (oldV&&oldV.props)||{}, newV.props||{}); }
-
-    // styles
-    if(!isIsland){ diffStyles(el, (oldV&&oldV.style)||{}, newV.style||{}); }
-
-    // text
-    if(!isIsland && Object.prototype.hasOwnProperty.call(newV, 'text')){
-      if(el.textContent !== String(newV.text||'')){
-        el.textContent = String(newV.text||'');
-      }
-    }
-
-    // events
-    if(newV.events){
-      const handlers = {};
-      for(const ev in newV.events){
-        const spec = newV.events[ev];
-        const fn = _compileHandlerFromSpec(spec);
-        if (fn) { handlers[ev] = fn; }
-      }
-      if(Object.keys(handlers).length){ eventMap.set(newV.id, handlers); } else { eventMap.delete(newV.id); }
-    } else {
-      eventMap.delete(newV.id);
-    }
-
-    // hijos (reconciliación por id/key). Para islas, tratamos el subárbol como opaco.
-    if(isIsland){ return { ok:true }; }
-
-    // Permitimos REMOCIONES sin recarga.
-    const oldC = (oldV && oldV.children) ? oldV.children : [];
-    const newC = (newV.children) ? newV.children : [];
-
-    // Construir índice de hijos viejos por id o key
-    const oldIndex = new Map(); // clave -> vnode viejo
-    for(let i=0;i<oldC.length;i++){
-      const k = (oldC[i] && (oldC[i].id || oldC[i].key)) || null;
-      if(k){ oldIndex.set(String(k), oldC[i]); }
-    }
-
-    // Seguimiento de cuáles viejos fueron actualizados
-    const seenOld = new Set();
-
-    // Actualizar/validar hijos nuevos
-    for(let i=0;i<newC.length;i++){
-      const newChild = newC[i];
-      const k = (newChild && (newChild.id || newChild.key)) || null;
-      if(!k){
-        // sin id/key fiable: conservador => usar reconciliación por índice si existe par
-        if(i < oldC.length){
-          const r = updateNode(oldC[i], newChild);
-          if(!r.ok){ return r; }
-          seenOld.add(oldC[i]);
-          continue;
-        } else {
-          // no podemos crear de forma segura
-          return { ok:false, reason:'children-added' };
-        }
-      }
-      const oldChild = oldIndex.get(String(k));
-      if(oldChild){
-        const r = updateNode(oldChild, newChild);
-        if(!r.ok){ return r; }
-        seenOld.add(oldChild);
-      } else {
-        // Fallback conservador: si hay viejo en la misma posición y el tipo coincide, lo reutilizamos
-        if(i < oldC.length){
-          const candidate = oldC[i];
-          if(!typesDiffer(candidate, newChild)){
-            const r = updateNode(candidate, newChild);
-            if(!r.ok){ return r; }
-            seenOld.add(candidate);
+        // Actualizar/validar hijos nuevos
+        for(let i=0;i<newC.length;i++){{
+        const newChild = newC[i];
+        const k = (newChild && (newChild.id || newChild.key)) || null;
+        if(!k){{
+            // sin id/key fiable: conservador => usar reconciliación por índice si existe par
+            if(i < oldC.length){{
+            const r = updateNode(oldC[i], newChild);
+            if(!r.ok){{ return r; }}
+            seenOld.add(oldC[i]);
             continue;
-          }
-        }
-        // Intentar crear subárbol si es un tipo soportado por el registry (no isla)
-        const subtree = createSubtree(newChild);
-        if(subtree){
-          // insertar en la posición i dentro del DOM
-          const refChildVNode = (i < oldC.length) ? oldC[i] : null;
-          if(refChildVNode && refChildVNode.id){
-            const refEl = document.getElementById(refChildVNode.id);
-            if(refEl && refEl.parentNode){ refEl.parentNode.insertBefore(subtree, refEl); }
-            else { el.appendChild(subtree); }
-          } else {
-            el.appendChild(subtree);
-          }
-          // marcar como visto (no había old), nada que añadir a seenOld
-          continue;
-        }
-        // hijo nuevo de tipo no soportado => recarga por seguridad
-        return { ok:false, reason:'children-added' };
-      }
-    }
+            }} else {{
+            // no podemos crear de forma segura
+            return {{ ok:false, reason:'children-added' }};
+            }}
+        }}
+        const oldChild = oldIndex.get(String(k));
+        if(oldChild){{
+            const r = updateNode(oldChild, newChild);
+            if(!r.ok){{ return r; }}
+            seenOld.add(oldChild);
+        }} else {{
+            // Fallback conservador: si hay viejo en la misma posición y el tipo coincide, lo reutilizamos
+            if(i < oldC.length){{
+            const candidate = oldC[i];
+            if(!typesDiffer(candidate, newChild)){{
+                const r = updateNode(candidate, newChild);
+                if(!r.ok){{ return r; }}
+                seenOld.add(candidate);
+                continue;
+            }}
+            }}
+            // Intentar crear subárbol si es un tipo soportado por el registry (no isla)
+            const subtree = createSubtree(newChild);
+            if(subtree){{
+            // insertar en la posición i dentro del DOM
+            const refChildVNode = (i < oldC.length) ? oldC[i] : null;
+            if(refChildVNode && refChildVNode.id){{
+                const refEl = document.getElementById(refChildVNode.id);
+                if(refEl && refEl.parentNode){{ refEl.parentNode.insertBefore(subtree, refEl); }}
+                else {{ el.appendChild(subtree); }}
+            }} else {{
+                el.appendChild(subtree);
+            }}
+            // marcar como visto (no había old), nada que añadir a seenOld
+            continue;
+            }}
+            // hijo nuevo de tipo no soportado => recarga por seguridad
+            return {{ ok:false, reason:'children-added' }};
+        }}
+        }}
 
-    // Eliminar los viejos no vistos (removidos)
-    for(let i=0;i<oldC.length;i++){
-      const v = oldC[i];
-      if(!seenOld.has(v)){
-        removeSubtree(v);
-      }
-    }
-    return { ok:true };
-  }
+        // Eliminar los viejos no vistos (removidos)
+        for(let i=0;i<oldC.length;i++){{
+        const v = oldC[i];
+        if(!seenOld.has(v)){{
+            removeSubtree(v);
+        }}
+        }}
+        return {{ ok:true }};
+    }}
 
-  function schedule(fn){
-    if(typeof requestAnimationFrame === 'function'){
-      requestAnimationFrame(fn);
-    } else { setTimeout(fn, 16); }
-  }
+    function schedule(fn){{
+        if(typeof requestAnimationFrame === 'function'){{
+        requestAnimationFrame(fn);
+        }} else {{ setTimeout(fn, 16); }}
+    }}
 
-  function update(newSnapshot){
-    const old = currentSnapshot;
-    if(!old){
-      // primera vez: solo (re)hidratar eventos
-      bindEventsFromVNode(newSnapshot);
-      currentSnapshot = newSnapshot;
-      try{ window.__DARS_VDOM__ = newSnapshot; }catch(_){ /* ignore */ }
-      return;
-    }
-    schedule(()=>{
-      const res = updateNode(old, newSnapshot);
-      if(!res.ok){
-        console.warn('[Dars] Structural change detected (', res.reason, '), reloading...');
-        try { location.reload(); } catch(e) { /* ignore */ }
+    function update(newSnapshot){{
+        const old = currentSnapshot;
+        if(!old){{
+        // primera vez: ya no necesitamos bindEventsFromVNode porque los eventos están en JS
+        currentSnapshot = newSnapshot;
+        try{{ window.__DARS_VDOM__ = newSnapshot; }}catch(_){{ /* ignore */ }}
         return;
-      }
-      // Re-vincular mapa de eventos por si cambió
-      bindEventsFromVNode(newSnapshot);
-      currentSnapshot = newSnapshot;
-      try{ window.__DARS_VDOM__ = newSnapshot; }catch(_){ /* ignore */ }
-    });
-  }
+        }}
+        schedule(()=>{{
+        const res = updateNode(old, newSnapshot);
+        if(!res.ok){{
+            console.warn('[Dars] Structural change detected (', res.reason, '), reloading...');
+            try {{ location.reload(); }} catch(e) {{ /* ignore */ }}
+            return;
+        }}
+        currentSnapshot = newSnapshot;
+        try{{ window.__DARS_VDOM__ = newSnapshot; }}catch(_){{ /* ignore */ }}
+        }});
+    }}
 
-  function hydrate(snapshot){
-    bindEventsFromVNode(snapshot);
-    currentSnapshot = snapshot;
-    try{ window.__DARS_VDOM__ = snapshot; }catch(_){ /* ignore */ }
+    function hydrate(snapshot){{
+        // NUEVO: Ya no necesitamos bindEventsFromVNode porque los eventos están inicializados
+        currentSnapshot = snapshot;
+        try{{ window.__DARS_VDOM__ = snapshot; }}catch(_){{ /* ignore */ }}
 
-    // Delegar eventos comunes (extendido)
-    const delegated = [
-      'click','dblclick',
-      'mousedown','mouseup','mouseenter','mouseleave','mousemove',
-      'keydown','keyup','keypress',
-      'change','input','submit',
-      'focus','blur'
-    ];
-    delegated.forEach(ev => delegate(ev, document));
-  }
+        // Delegar eventos comunes (extendido)
+        const delegated = [
+        'click','dblclick',
+        'mousedown','mouseup','mouseenter','mouseleave','mousemove',
+        'keydown','keyup','keypress',
+        'change','input','submit',
+        'focus','blur'
+        ];
+        delegated.forEach(ev => delegate(ev, document));
+    }}
 
-  function startHotReload(){
-    const vurl = (window.__DARS_VERSION_URL || 'version.txt');
-    let timer = null;
-    let warnedVersionMissing = false;
+    function startHotReload(){{
+        const vurl = (window.__DARS_VERSION_URL || 'version.txt');
+        let timer = null;
+        let warnedVersionMissing = false;
 
-    function httpGet(url, onSuccess, onError, responseType){
-      try{
-        const xhr = new XMLHttpRequest();
-        if(responseType){ xhr.responseType = responseType; }
-        xhr.open('GET', url, true);
-        xhr.timeout = 5000;
-        xhr.onreadystatechange = function(){
-          if(xhr.readyState === 4){
-            if(xhr.status >= 200 && xhr.status < 300){
-              onSuccess(xhr.response);
-            } else {
-              onError();
-            }
-          }
-        };
-        xhr.onerror = onError;
-        xhr.ontimeout = onError;
-        xhr.setRequestHeader('Cache-Control', 'no-store');
-        xhr.send();
-      }catch(e){ onError(); }
-    }
+        function httpGet(url, onSuccess, onError, responseType){{
+        try{{
+            const xhr = new XMLHttpRequest();
+            if(responseType){{ xhr.responseType = responseType; }}
+            xhr.open('GET', url, true);
+            xhr.timeout = 5000;
+            xhr.onreadystatechange = function(){{
+            if(xhr.readyState === 4){{
+                if(xhr.status >= 200 && xhr.status < 300){{
+                onSuccess(xhr.response);
+                }} else {{
+                onError();
+                }}
+            }}
+            }};
+            xhr.onerror = onError;
+            xhr.ontimeout = onError;
+            xhr.setRequestHeader('Cache-Control', 'no-store');
+            xhr.send();
+        }}catch(e){{ onError(); }}
+        }}
 
-    function tick(){
-      httpGet(vurl, function(text){
-        let ver = (text || '').toString().trim();
-        if(ver){ warnedVersionMissing = false; }
-        if(!currentVersion){ currentVersion = ver; }
-        if(ver && ver !== currentVersion){
-          currentVersion = ver;
-          // Política solicitada: siempre recargar por completo al detectar nueva versión
-          try { location.reload(); } catch(_) {}
-          return;
-        }
-        timer = setTimeout(tick, 600);
-      }, function(){
-        if(!warnedVersionMissing){ console.log('[Dars] waiting for version.txt'); warnedVersionMissing = true; }
-        timer = setTimeout(tick, 600);
-      }, 'text');
-    }
-    tick();
-    return ()=>{ if(timer) clearTimeout(timer); };
-  }
+        function tick(){{
+        httpGet(vurl, function(text){{
+            let ver = (text || '').toString().trim();
+            if(ver){{ warnedVersionMissing = false; }}
+            if(!currentVersion){{ currentVersion = ver; }}
+            if(ver && ver !== currentVersion){{
+            currentVersion = ver;
+            // Política solicitada: siempre recargar por completo al detectar nueva versión
+            try {{ location.reload(); }} catch(_) {{}}
+            return;
+            }}
+            timer = setTimeout(tick, 600);
+        }}, function(){{
+            if(!warnedVersionMissing){{ console.log('[Dars] waiting for version.txt'); warnedVersionMissing = true; }}
+            timer = setTimeout(tick, 600);
+        }}, 'text');
+        }}
+        tick();
+        return ()=>{{ if(timer) clearTimeout(timer); }};
+    }}
 
-  document.addEventListener('DOMContentLoaded', function(){
-    if(window.__DARS_VDOM__){
-      hydrate(window.__DARS_VDOM__);
-    } else {
-      console.warn('[Dars] No VDOM snapshot found for hydration');
-    }
-    // Activar hot-reload incremental en dev si hay URLs definidas
-    if(window.__DARS_VERSION_URL && window.__DARS_SNAPSHOT_URL){
-      startHotReload();
-    }
-  });
-})();
-"""
+    document.addEventListener('DOMContentLoaded', function(){{
+        // NUEVO: Inicializar eventos antes de la hidratación
+        initializeEvents();
+        
+        if(window.__DARS_VDOM__){{
+        hydrate(window.__DARS_VDOM__);
+        }} else {{
+        console.warn('[Dars] No VDOM snapshot found for hydration');
+        }}
+        // Activar hot-reload incremental en dev si hay URLs definidas
+        if(window.__DARS_VERSION_URL && window.__DARS_SNAPSHOT_URL){{
+        startHotReload();
+        }}
+    }});
+    }})();
+    """
         return runtime
+
+    def _generate_events_js(self, events_map: Dict[str, Dict[str, Any]]) -> str:
+        """Genera código JS para inicializar todos los eventos directamente en el runtime"""
+        lines = []
+        
+        for comp_id, events in events_map.items():
+            for event_name, event_spec in events.items():
+                code = None
+                # Extraer código del evento
+                if isinstance(event_spec, dict):
+                    code = event_spec.get('code') or event_spec.get('value')
+                elif isinstance(event_spec, str):
+                    code = event_spec
+                
+                if code:
+                    # Escapar el código para JS
+                    escaped_code = code.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
+                    
+                    lines.append(f'    // Evento {event_name} para componente {comp_id}')
+                    lines.append(f'    if (!eventMap.has("{comp_id}")) eventMap.set("{comp_id}", {{}});')
+                    lines.append(f'    eventMap.get("{comp_id}")["{event_name}"] = (event) => {{ {escaped_code} }};')
+                    lines.append('')
+        
+        return '\n'.join(lines) if lines else '    // No hay eventos para esta página'
 
     def get_component_id(self, component, prefix="comp"):
         """

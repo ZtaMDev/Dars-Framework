@@ -1,4 +1,3 @@
-# Embedded dars.min.js content (ESM + global)
 DARS_MIN_JS = """/* Dars minimal runtime: state + DOM updates (ESM + global) */
 const __registry = new Map();
 
@@ -135,7 +134,18 @@ function _applyMods(defaultId, mods){
           if (m.hasOwnProperty('state')) payload.state = m.state;
           if (m.hasOwnProperty('goto')) payload.goto = m.goto;
           if (!payload.name && !payload.id && defaultId) payload.id = String(defaultId);
-          setTimeout(()=>{ try{ change(payload); }catch(_){ } }, 0);
+          // Usar el nuevo sistema de cambio de estado que es compatible con el runtime actual
+          setTimeout(()=>{ 
+            try{ 
+              if (window.Dars && typeof window.Dars.change === 'function') {
+                window.Dars.change(payload);
+              } else if (window.__DARS_CHANGE_FN) {
+                window.__DARS_CHANGE_FN(payload);
+              } else {
+                console.warn('[Dars] State change function not available');
+              }
+            }catch(_){ } 
+          }, 0);
         }catch(_){ }
       }
     }catch(_){ }

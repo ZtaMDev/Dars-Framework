@@ -190,6 +190,7 @@ def minify_output_dir(output_dir: str, extra_skip: Iterable[str] = None, progres
     except Exception:
         default_on = True
         vite_on = False
+    
     # Gather candidates first to allow accurate progress reporting
     extra_skip_set: Set[str] = set(extra_skip or [])
     candidates = []
@@ -206,6 +207,42 @@ def minify_output_dir(output_dir: str, extra_skip: Iterable[str] = None, progres
     total = len(candidates)
     processed = 0
     written = 0
+    
+    # NUEVO: Priorizar archivos combinados (app.js) sobre archivos individuales
+    # Cuando viteMinify está activado, solo minificar archivos app.js y ignorar los individuales
+    if vite_on:
+        # Filtrar candidatos: mantener solo app.js y eliminar archivos individuales que están combinados
+        filtered_candidates = []
+        individual_files_to_skip = set()
+        
+        # Identificar archivos app.js existentes
+        app_js_files = [c for c in candidates if 'app.js' in c or 'app_' in c]
+        
+        # Para cada app.js, identificar los archivos individuales que reemplaza
+        for app_js in app_js_files:
+            app_js_name = os.path.basename(app_js)
+            if app_js_name == 'app.js':
+                # En single-page, reemplaza runtime_dars.js, script.js, vdom_tree.js
+                individual_files_to_skip.update(['runtime_dars.js', 'script.js', 'vdom_tree.js'])
+            elif app_js_name.startswith('app_') and app_js_name.endswith('.js'):
+                # En multipágina, reemplaza los archivos correspondientes a esa página
+                slug = app_js_name[4:-3]  # Extraer slug de app_{slug}.js
+                individual_files_to_skip.update([
+                    f'runtime_dars_{slug}.js',
+                    f'script_{slug}.js', 
+                    f'vdom_tree_{slug}.js'
+                ])
+        
+        # Filtrar candidatos: mantener solo app.js y otros archivos que no sean individuales
+        for candidate in candidates:
+            candidate_name = os.path.basename(candidate)
+            if candidate_name in individual_files_to_skip:
+                continue  # Saltar archivos individuales que están combinados
+            filtered_candidates.append(candidate)
+        
+        candidates = filtered_candidates
+        total = len(candidates)
+
     for full in candidates:
         ext = os.path.splitext(full)[1].lower()
         try:
@@ -228,8 +265,7 @@ def minify_output_dir(output_dir: str, extra_skip: Iterable[str] = None, progres
                 new_content = None
         elif ext in SAFE_HTML_EXT:
             # Skip HTML minification completely
-            new_content = minify_html(content)
-
+            new_content = None
 
         if new_content is not None and new_content != content:
             try:

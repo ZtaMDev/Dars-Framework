@@ -1,1 +1,0 @@
-window.__DARS_EVENTS__=window.__DARS_EVENTS__||{};console.debug('[Dars] events.js loaded, components:',Object.keys(window.__DARS_EVENTS__));

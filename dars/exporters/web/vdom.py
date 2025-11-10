@@ -18,8 +18,6 @@ except Exception:  # pragma: no cover - defensive import
 
 
 class VNode:
-    """A minimal serializable Virtual Node for Dars components."""
-
     def __init__(
         self,
         type_name: str,
@@ -28,7 +26,7 @@ class VNode:
         class_name: Optional[str],
         style: Dict[str, Any],
         props: Dict[str, Any],
-        events: Optional[Dict[str, Any]],
+        # REMOVER events de aquí
         children: Optional[List["VNode"]] = None,
         text: Optional[str] = None,
         is_island: bool = False,
@@ -39,7 +37,6 @@ class VNode:
         self.class_name = class_name
         self.style = style or {}
         self.props = props or {}
-        self.events = events or None
         self.children = children or []
         self.text = text
         self.isIsland = is_island
@@ -52,12 +49,10 @@ class VNode:
             "class": self.class_name,
             "style": self.style or {},
             "props": self.props or {},
-            "events": self.events or None,
             "children": [c.to_dict() for c in (self.children or [])],
         }
         if self.text is not None:
             d["text"] = self.text
-        # Siempre incluimos isIsland para que el runtime pueda tomar decisiones
         d["isIsland"] = bool(self.isIsland)
         return d
 
@@ -73,8 +68,9 @@ class VDomBuilder:
     """
 
     def __init__(self, id_provider: Optional[Callable[[Component, str], str]] = None) -> None:
-        # id_provider(component, prefix) -> id string
         self.id_provider = id_provider
+        # Nuevo: recolector de eventos por página
+        self.events_map: Dict[str, Dict[str, Any]] = {}
 
     def build(self, component: Component) -> Dict[str, Any]:
         vnode = self._build_vnode(component, path=["0"])  # raíz con path estable
@@ -206,6 +202,10 @@ class VDomBuilder:
 
         # Events
         events_payload = self._serialize_events(component)
+        
+        comp_id = comp_id or stable_key  # usar stable_key como fallback
+        if comp_id and events_payload:
+            self.events_map[comp_id] = events_payload
 
         # Children
         children_nodes: List[VNode] = []
@@ -243,7 +243,6 @@ class VDomBuilder:
             class_name=getattr(component, 'class_name', None),
             style=getattr(component, 'style', {}) or {},
             props=safe_props,
-            events=events_payload,
             children=children_nodes,
             text=text_value,
             is_island=is_island,

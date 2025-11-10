@@ -30,6 +30,7 @@ class DarsState:
             d["rules"] = self.rules
         return d
 
+    # state.py - Modificar el método state de DarsState
     def state(self, idx: Optional[int] = None, cComp: bool = False, render: Optional[Any] = None, goto: Optional[Any] = None) -> InlineScript:
         """
         Convenience: returns an InlineScript that, when added to a page/app,
@@ -42,7 +43,8 @@ class DarsState:
         target_id = self.id or ""
 
         def _escape_js_str(s: str) -> str:
-            return s.replace("\\", "\\\\").replace("'", "\\'").replace("\n", "\\n").replace("\r", "")
+            # Escapar para JavaScript, incluyendo saltos de línea
+            return s.replace("\\", "\\\\").replace("'", "\\'").replace("\n", "\\n").replace("\r", "\\r")
 
         # Compute HTML if needed
         html_val = None
@@ -80,23 +82,27 @@ class DarsState:
             parts.append(f"html: '{html_str}'")
         payload = ", ".join(parts)
 
+        # Generar código JavaScript en una sola línea para compatibilidad con el nuevo sistema de eventos
         code = (
-            "(async () => {\n"
-            "  try {\n"
-            "    let ch = window.__DARS_CHANGE_FN;\n"
-            "    if (!ch) {\n"
-            "      if (window.Dars && typeof window.Dars.change === 'function') {\n"
-            "        ch = window.Dars.change.bind(window.Dars);\n"
-            "      } else {\n"
-            "        const m = await import('./lib/dars.min.js');\n"
-            "        ch = (m.change || (m.default && m.default.change));\n"
-            "      }\n"
-            "      if (typeof ch === 'function') window.__DARS_CHANGE_FN = ch;\n"
-            "    }\n"
-            f"    if (typeof ch === 'function') ch({{{payload}}});\n"
-            "  } catch (e) { /* noop */ }\n"
-            "})();\n"
+            "(async () => {"
+            "  try {"
+            "    let ch = window.__DARS_CHANGE_FN;"
+            "    if (!ch) {"
+            "      if (window.Dars && typeof window.Dars.change === 'function') {"
+            "        ch = window.Dars.change.bind(window.Dars);"
+            "      } else {"
+            "        const m = await import('./lib/dars.min.js');"
+            "        ch = (m.change || (m.default && m.default.change));"
+            "      }"
+            "      if (typeof ch === 'function') window.__DARS_CHANGE_FN = ch;"
+            "    }"
+            f"    if (typeof ch === 'function') ch({{{payload}}});"
+            "  } catch (e) { /* noop */ }"
+            "})();"
         )
+        
+        # Minificar el código removiendo espacios extra (pero manteniendo la estructura básica)
+        code = ' '.join(code.split())
         return InlineScript(code, module=True)
 
     # --- cState: define rules/mods for a given state index ---
