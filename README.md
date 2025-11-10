@@ -24,7 +24,7 @@ Try dars without installing nothing just visit the [Dars Playground](https://dar
 - Export your app to static web files with a single CLI command.
 - Export to native desktop apps (BETA) using project config `format: "desktop"` and `dars build`.
 - Use multipage, layouts, scripts, and more—see docs for advanced features.
-- For more information visit the [Documentation](https://ztamdev.github.io/Dars-Framework/documentation.html)
+- For more information visit the [Documentation](https://ztamdev.github.io/Dars-Framework/docs.html)
 
 ## Quick Example: Your First App
 ```python
@@ -154,7 +154,7 @@ Tip: use `dars doctor` to review optional tooling that can enhance bundling/mini
 ## More
 
 - Visit dars [official website](https://ztamdev.github.io/Dars-Framework/)
-- Visit the dars official [Documentation](https://ztamdev.github.io/Dars-Framework/documentation.html) now on separate website.
+- Visit the dars official [Documentation](https://ztamdev.github.io/Dars-Framework/docs.html) now on separate website.
 - Try dars without installing nothing just visit the [Dars Playground](https://dars-playground.vercel.app/)
 
 ## Local Execution and Live Preview
@@ -244,7 +244,7 @@ See LandingPage docs for details: state_management.md, events.md, scripts.md.
 ## More
 
 - Visit dars [official website](https://ztamdev.github.io/Dars-Framework/)
-- Visit the dars official [Documentation](https://ztamdev.github.io/Dars-Framework/documentation.html) now on separate website.
+- Visit the dars official [Documentation](https://ztamdev.github.io/Dars-Framework/docs.html) now on separate website.
 - Try dars without installing nothing just visit the [Dars Playground](https://dars-playground.vercel.app/)
 
 ## Local Execution and Live Preview
