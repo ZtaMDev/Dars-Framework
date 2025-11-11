@@ -62,8 +62,6 @@ index = Page(
     Button(
         text="Click Me!",
         on_click= dScript("alert('Hello World')"),
-        on_mouse_enter=dScript("this.style.backgroundColor = '#2980b9';"),
-        on_mouse_leave=dScript("this.style.backgroundColor = '#3498db';"),
         style={
             'background-color': '#3498db',
             'color': 'white',
@@ -85,7 +83,7 @@ index = Page(
         'font-family': 'Arial, sans-serif'
     }
 ) 
-index.attr()
+
 app.add_page("index", index, title="Hello World", index=True)
 
 if __name__ == "__main__":
