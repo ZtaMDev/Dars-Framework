@@ -26,8 +26,6 @@ container = Container(
     Button(
         text="Check",
         on_click= dScript("""alert('Health Check')"""),
-        on_mouse_enter=dScript("""this.style.backgroundColor = '#2980b9';"""),
-        on_mouse_leave=dScript("""this.style.backgroundColor = '#3498db';"""),
         style={
             'background-color': '#3498db',
             'color': 'white',

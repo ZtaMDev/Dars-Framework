@@ -60,16 +60,13 @@ The HTML exporter generates standard web applications that can run in any browse
 dars export my_app.py --format html --output ./dist
 ```
 
-By default, the `dars export` command generates a production bundle (no hot-reload). See Bundling vs Dev Preview below.
-
 #### Generated Structure
 
 ```
 dist/
 ├── index.html      # Main page
 ├── styles.css      # CSS styles
-├── script.js       # JavaScript logic
-└── runtime_dars.js # Dars runtime
+└── script.js       # JavaScript logic
 ```
 
 #### Example Output
@@ -90,7 +87,6 @@ dist/
         <button id="button_789" class="dars-button" style="background-color: #007bff; color: white;">Click</button>
     </div>
     <script src="script.js"></script>
-    <script src="runtime_dars.js"></script>
 </body>
 </html>
 ```
@@ -159,4 +155,86 @@ class MyCustomExporter(Exporter):
         return "generated_code"
 ```
 
+## Desktop Export (BETA)
 
+The desktop exporter allows you to package your Dars app as a native desktop application. This feature is currently in BETA: usable for testing and internal tooling, but not recommended for production deployments yet.
+
+### Status and Scope
+
+- BETA: Many options and integrations are still evolving (advanced packaging, signing, etc.).
+- Cross‑platform targets supported: Windows, Linux, macOS (host restrictions apply for macOS signing, and linux if you don't have docker).
+- Underlying tech: Electron is used to deliver a native desktop container for your web UI.
+- Hot Reload: `dars dev` with desktop apps is fully supported, but for now it closes and reopen the electron dev app when a file change is detected.
+### Quickstart desktop Export
+
+1. Initialize or update your project for desktop:
+
+   ```bash
+   dars init --type desktop
+   # or if you already have a project
+   dars init --update
+   ```
+
+2. Ensure your project config has desktop format:
+
+   ```json
+   {
+     "entry": "main.py",
+     "format": "desktop",
+     "outdir": "dist",
+     "targetPlatform": "auto"
+   }
+   ```
+
+3. Verify optional tooling (Node/Bun, Electron, electron‑builder):
+
+   ```bash
+   dars doctor --all --yes
+   ```
+
+4. Build your desktop app:
+
+   ```bash
+   dars build
+   ```
+
+Artifacts will be placed in `dist/`. The desktop source (used for packaging) is emitted to `dist/source-electron/`.
+
+### Native Functions
+
+You can acces native functions via `dars.desktop` module:
+
+```python
+from dars.desktop import *
+```
+
+With this module you can acces for now 2 main functions:
+
+```python 
+write_text("./app/lib/hello.txt", "Hello Text")
+```
+and
+
+```python
+read_text("./app/lib/hello.txt")
+```
+
+This two functions allows you to read and write text files in your desktop application filesystem, both returns an dScript() with the code to be executed in the desktop app.
+also you can use dScripts to run custom javascript code in the desktop app. and for now 'dars dev' is supported but python main.py with rTimeCompile() is not supported because it have issues with relative paths and also it can be used in events of any component.
+
+### Platform Targeting
+
+- `targetPlatform`: `auto` | `windows` | `linux` | `macos`.
+- On non‑mac hosts, building for macOS is not supported.
+
+### Metadata and Packaging Notes
+
+- App metadata is taken from your `App` instance when available: title, description, author, version.
+- If version is not set, a default `0.1.0` is used and a warning is shown.
+- Package manager and Electron version are pinned by the exporter to make builds predictable.
+
+### Caveats (BETA)
+
+- Not yet recommended for production.
+- Some advanced packaging and signing options may require manual configuration.
+- Expect changes to configuration keys and defaults as the feature matures.

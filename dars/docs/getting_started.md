@@ -1,4 +1,3 @@
-The documentstion of dars is moving to the documentation official website please visit https://ztamdev.github.io/Dars-Framework/documentation.html because this documents will be deprecated in some time...
 # Getting Started with Dars
 
 Welcome to Dars, a modern Python framework for building web applications with reusable UI components.
@@ -6,24 +5,22 @@ Welcome to Dars, a modern Python framework for building web applications with re
 ## Quick Start
 
 1. **Install Dars**  
-   See [INSTALL.md](../../INSTALL.md) for installation instructions.
+   See INSTALL section for installation instructions.
 
-2. **Project Structure**  
-   Learn about the framework internal project layout in [STRUCTURE.md](../../STRUCTURE.md).
+2. **Explore Components**  
+   Discover all available UI components in [components.md](#dars-components-documentation).
 
-3. **Explore Components**  
-   Discover all available UI components in [components.md](components.md).
+3. **Command-Line Usage**  
+   Find CLI commands, options, and workflows in [cli.md](#dars-cli-reference).
 
-4. **Command-Line Usage**  
-   Find CLI commands, options, and workflows in [cli.md](cli.md).
+4. **App Class**
+   Learn how to create an app class in [App Documentation](#app-class-and-pwa-features-in-dars-framework).
 
-5. **App Class**
-   Learn how to create an app class in [App Documentation](app.md).
-
-6. **Component Search and Modification**
+5. **Component Search and Modification**
    All components in Dars now support a powerful search and modification system:
 
-      ```python
+```python
+
    from dars.all import *
 
    app = App(title="Search Demo")
@@ -51,28 +48,21 @@ Welcome to Dars, a modern Python framework for building web applications with re
        .attr(style={"padding": "10px"})
 
    app.add_page(name="main", root=page)
-   ```
+
+```
 
 7.  **Adding Custom File Types**
 
 ```python
+
 app.rTimeCompile().add_file_types = ".js,.css"
+
 ```
 
 * Include any extension your project uses beyond default Python files.
 
 ## Need More Help?
 
-### Project Structure  
-   Learn about the recommended project layout in [STRUCTURE.md](../../STRUCTURE.md).
-
-### Explore Components  
-   Discover all available UI components in [components.md](components.md).
-
-### Command-Line Usage  
-   Find CLI commands, options, and workflows in [cli.md](cli.md).
-
-### Need More Help?
 - For advanced topics, see the full documentation and examples in the referenced files above.
 - If you have questions or need support, check the official repository or community channels.
 

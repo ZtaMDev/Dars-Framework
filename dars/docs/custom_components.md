@@ -1,3 +1,5 @@
+# Custom Components in Dars Framework
+
 This is an example of how to create a custom component in Dars. The `Button` class inherits from `Component` and defines its own initialization and rendering logic. You can use `self.set_event` to attach event handlers to components.
 
 > Note: when you instance a CustomComponent you need to do it like this CustomComponent(id="") <-- with parentesis
@@ -26,5 +28,4 @@ class CustomComponent(Component):
         </div>
         '''
 ```
-
 

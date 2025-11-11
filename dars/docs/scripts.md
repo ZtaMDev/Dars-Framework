@@ -1,10 +1,10 @@
 # Dars - Script System
 
-## Introduction
+## Introduction to Scripts
 
 The script system of Dars allows adding interactive logic and dynamic behaviors to applications. Scripts are written in JavaScript and seamlessly integrate with UI components.
 
-## Fundamentals
+## Fundamentals of Scripts
 
 ### What are Scripts?
 
@@ -85,7 +85,7 @@ app.add_script(custom_action)
 
 ## InlineScript
 
-### Basic Syntax
+### Basic Syntax InlineScript
 
 ```python
 from dars.scripts.script import InlineScript
@@ -292,12 +292,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
 The exporter (`html_css_js.py`) automatically detects and exports all scripts of type `dScript`, `InlineScript`, and `FileScript`. You can safely mix and match them in your app, and all will be included in the generated JS.
 
+New in v1.2.2:
+
+- Script objects embedded in state bootstrap (e.g., inside `Mod.set(..., on_*=...)`) are serialized to a JSON-safe form as `{ "code": "..." }` and reconstituted at runtime.
+- Event attributes (`on_*`) accept a single script or an array of scripts (any mix of InlineScript, FileScript, dScript, or raw JS strings). The runtime runs them sequentially and guarantees a single active dynamic listener per event.
+
 ---
 
 ## FileScript
 
-### Basic Syntax
-
+### Basic Syntax for FileScript
 ```python
 from dars.scripts.script import FileScript
 
@@ -478,7 +482,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 """))
 
-# Global script
+
 app.add_script(InlineScript("console.log('Script global para todas las páginas');"))
 ```
 
@@ -487,7 +491,6 @@ When exporting, each page will have its own JS file combining global scripts and
 ```python
 from dars.scripts.script import FileScript
 
-# Load multiple scripts
 app.add_script(FileScript("./scripts/utils.js"))
 app.add_script(FileScript("./scripts/api.js"))
 app.add_script(FileScript("./scripts/validaciones.js"))
@@ -504,7 +507,6 @@ from dars.components.basic.input import Input
 from dars.components.basic.container import Container
 from dars.scripts.script import InlineScript
 
-# Create components with specific IDs
 formulario = Container(
     id="formulario-contacto",
     children=[
@@ -526,7 +528,6 @@ formulario = Container(
     ]
 )
 
-# Script that interacts with components
 script_formulario = InlineScript("""
 document.addEventListener(\'DOMContentLoaded\', function() {
     const formulario = document.getElementById(\'formulario-contacto\');
@@ -585,7 +586,6 @@ document.addEventListener(\'DOMContentLoaded\', function() {
 });
 """)
 
-# Add to the application
 app = App(title="Form with Script")
 app.set_root(form)
 app.add_script(form_script)
