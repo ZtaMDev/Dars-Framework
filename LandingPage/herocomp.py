@@ -131,27 +131,6 @@ def create_hero():
                 "opacity": "0",
             }
         ),
-        Container(
-            Text(
-                text="Scroll to see more",
-                id="scroll-text",
-                style={
-                    "color": "#a0cfc0",
-                    "font-size": "16px",
-                    "opacity": "0",
-                    "transform": "translateY(20px)",
-                    "transition": "all 1s ease-out",
-                    "animation": "fadeGlow 4s ease-in-out infinite alternate"
-                }
-            ),
-            style={
-                "position": "absolute",
-                "bottom": "40px",
-                "left": "0",
-                "right": "0",
-                "text-align": "center"
-            }
-        ),
         id="hero-section",
         style={
             "height": "100vh",
