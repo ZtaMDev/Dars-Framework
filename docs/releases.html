@@ -85,6 +85,170 @@
    <div class="dars-container" id="container_170" style="margin-left: 280px; min-height: 100vh; background: linear-gradient(135deg, #0f1e1a 0%, #132d24 100%); transition: margin-left 0.3s ease">
     <div class="dars-container" id="markdown-content-container" style="max-width: 800px; margin: 0 auto; padding: 40px 20px">
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_171">
+      <h1 id="release-notes-v133">
+       Release Notes v1.3.3
+      </h1>
+      <blockquote>
+       <p>
+        Minor update featuring new semantic Section component and enhanced state serialization. Continues JavaScript migration improvements from v1.3.2.
+       </p>
+      </blockquote>
+      <h2 id="installation">
+       Installation
+      </h2>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
+</code></pre>
+      </div>
+      <p>
+       or
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.3
+</code></pre>
+      </div>
+      <h2 id="whats-new">
+       What's New
+      </h2>
+      <h3 id="section-component">
+       Section Component
+      </h3>
+      <p>
+       <strong>
+        Semantic HTML Container:
+       </strong>
+       - New
+       <code>
+        Section
+       </code>
+       component that renders as
+       <code>
+        &lt;section&gt;&lt;/section&gt;
+       </code>
+       instead of generic
+       <code>
+        &lt;div&gt;
+       </code>
+       - Maintains all functionality of Container component (children, styles, etc.)
+- Improves HTML readability and semantic structure for debugging
+- Better accessibility and SEO through proper sectioning elements
+      </p>
+      <p>
+       <strong>
+        Usage:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Creates &lt;section&gt; with all container capabilities</span>
+<span class="n">Section</span><span class="p">(</span><span class="n">Button</span><span class="p">(</span><span class="s2">"HI"</span><span class="p">),</span> <span class="n">styles</span><span class="o">=</span><span class="p">{</span><span class="o">...</span><span class="p">})</span>
+</code></pre>
+      </div>
+      <h3 id="enhanced-state-event-serialization">
+       Enhanced State &amp; Event Serialization
+      </h3>
+      <p>
+       <strong>
+        Complete JavaScript Migration:
+       </strong>
+       - States are now fully serialized in JavaScript and no longer exposed in HTML
+- Final migration of both state and event systems to pure JavaScript
+- Eliminates need for state/event data in VDOM structure
+- Improved security and cleaner HTML output
+      </p>
+      <p>
+       <strong>
+        Benefits:
+       </strong>
+       - More secure: State data hidden from direct HTML inspection
+- Cleaner markup: Reduced data attributes in rendered HTML
+- Better performance: Streamlined state management
+- Enhanced minification: Better compatibility with Vite optimization
+      </p>
+      <h3 id="documentation-updates">
+       Documentation Updates
+      </h3>
+      <ul>
+       <li>
+        Updated documentation to reflect new Section component usage
+       </li>
+       <li>
+        Enhanced examples and best practices for semantic HTML
+       </li>
+       <li>
+        Migration guides for state serialization changes
+       </li>
+      </ul>
+      <h2 id="technical-improvements">
+       Technical Improvements
+      </h2>
+      <ul>
+       <li>
+        <strong>
+         Backward Compatible
+        </strong>
+        : No breaking changes to existing components
+       </li>
+       <li>
+        <strong>
+         Progressive Enhancement
+        </strong>
+        : Existing containers continue working as before
+       </li>
+       <li>
+        <strong>
+         Performance
+        </strong>
+        : Maintains all optimizations from v1.3.2
+       </li>
+      </ul>
+      <h2 id="migration-notes">
+       Migration Notes
+      </h2>
+      <h3 id="for-existing-projects">
+       For Existing Projects
+      </h3>
+      <p>
+       <strong>
+        Automatic Upgrade:
+       </strong>
+       - No configuration changes required
+- Existing container components remain unchanged
+- State management automatically uses new serialization
+      </p>
+      <p>
+       <strong>
+        Optional Section Component Adoption:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Old way (still works)</span>
+<span class="n">Container</span><span class="p">(</span><span class="n">children</span><span class="o">=</span><span class="p">[</span><span class="o">...</span><span class="p">])</span>
+
+<span class="c1"># New semantic way</span>
+<span class="n">Section</span><span class="p">(</span><span class="n">children</span><span class="o">=</span><span class="p">[</span><span class="o">...</span><span class="p">])</span>
+</code></pre>
+      </div>
+      <h2 id="desktop-exporter-status">
+       Desktop Exporter Status
+      </h2>
+      <p>
+       <strong>
+        Still in BETA
+       </strong>
+       - No changes from v1.3.2
+      </p>
+      <h2 id="known-issues">
+       Known Issues
+      </h2>
+      <ul>
+       <li>
+        None introduced in this release
+       </li>
+       <li>
+        Continuing to monitor Electron desktop exporter stability
+       </li>
+      </ul>
+      <hr/>
       <h1 id="release-notes-v132">
        Release Notes v1.3.2
       </h1>
@@ -93,7 +257,7 @@
         Major minification improvements with combined JS files and optimized event handling. Electron desktop exporter remains in beta.
        </p>
       </blockquote>
-      <h2 id="installation">
+      <h2 id="installation-2">
        Installation
       </h2>
       <div class="codehilite">
@@ -240,7 +404,7 @@
         : Multi-page application build performance
        </li>
       </ul>
-      <h2 id="desktop-exporter-status">
+      <h2 id="desktop-exporter-status-2">
        Desktop Exporter Status
       </h2>
       <p>
@@ -278,10 +442,10 @@
 - Development mode with hot reload
 - Production packaging still experimental
       </p>
-      <h2 id="migration-notes">
+      <h2 id="migration-notes-2">
        Migration Notes
       </h2>
-      <h3 id="for-existing-projects">
+      <h3 id="for-existing-projects-2">
        For Existing Projects
       </h3>
       <p>
@@ -348,7 +512,7 @@
         : More efficient minification process
        </li>
       </ul>
-      <h2 id="known-issues">
+      <h2 id="known-issues-2">
        Known Issues
       </h2>
       <ul>
@@ -389,7 +553,7 @@
         Native desktop functions and DX improved with dev mode and file system integration.
        </p>
       </blockquote>
-      <h2 id="installation-2">
+      <h2 id="installation-3">
        Installation
       </h2>
       <div class="codehilite">
@@ -474,7 +638,7 @@
         Native desktop export (BETA), improved CLI and doctor integration, and metadata fixes for packaging. This is a BETA release: usable for testing, not recommended for production.
        </p>
       </blockquote>
-      <h2 id="installation-3">
+      <h2 id="installation-4">
        Installation
       </h2>
       <div class="codehilite">
@@ -757,7 +921,7 @@ dars<span class="w"> </span>build
         Optional default minification, precise CLI control, faster builds, and clearer minification status.
        </p>
       </blockquote>
-      <h2 id="installation-4">
+      <h2 id="installation-5">
        Installation
       </h2>
       <div class="codehilite">
@@ -1073,6 +1237,39 @@ dars<span class="w"> </span>build
      <div class="sidebar-category">
       Versions
      </div>
+     <a class="sidebar-link sidebar-level-1" href="#release-notes-v133" style="margin-left: 0px">
+      Release Notes v1.3.3
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#installation" style="margin-left: 20px">
+      Installation
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#whats-new" style="margin-left: 20px">
+      What's New
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#section-component" style="margin-left: 40px">
+      Section Component
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#enhanced-state-event-serialization" style="margin-left: 40px">
+      Enhanced State &amp; Event Serialization
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#documentation-updates" style="margin-left: 40px">
+      Documentation Updates
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#technical-improvements" style="margin-left: 20px">
+      Technical Improvements
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#migration-notes" style="margin-left: 20px">
+      Migration Notes
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#for-existing-projects" style="margin-left: 40px">
+      For Existing Projects
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#desktop-exporter-status" style="margin-left: 20px">
+      Desktop Exporter Status
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#known-issues" style="margin-left: 20px">
+      Known Issues
+     </a>
      <a class="sidebar-link sidebar-level-1" href="#release-notes-v132" style="margin-left: 0px">
       Release Notes v1.3.2
      </a>

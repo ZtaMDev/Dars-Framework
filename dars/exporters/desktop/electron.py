@@ -153,51 +153,51 @@ class ElectronExporter(Exporter):
                     json.dump(pkg, f, indent=2)
 
                 main_js = (
-                    "const { app, BrowserWindow, ipcMain, Menu } = require('electron');\n" \
-                    "const path = require('path');\n" \
-                    "const fs = require('fs').promises;\n" \
-                    "let META = { title: '" + app_title.replace("'", "\\'") + "', packageName: '" + pkg_name + "' };\n" \
-                    "try { META = Object.assign(META, require('./dars.meta.json')); } catch(e){}\n" \
-                    "\n" \
-                    "function createWindow() {\n" \
-                    f"  const win = new BrowserWindow({{\n" \
-                    "    width: 1000, height: 700,\n" \
-                    "    title: META.title,\n" \
-                    "    webPreferences: {\n" \
-                    "      contextIsolation: true,\n" \
-                    "      preload: path.join(__dirname, 'preload.js')\n" \
-                    "    }\n" \
-                    "  });\n" \
-                    "  win.loadFile(path.join(__dirname, 'app', 'index.html'));\n" \
-                    "}\n" \
-                    "\n" \
-                    "// Remove default application menu\n" \
-                    "Menu.setApplicationMenu(null);\n" \
-                    "try { app.setName(META.packageName || META.title || 'dars-app'); } catch(e){}\n" \
-                    "\n" \
-                    "// Basic IPC wiring (Phase 3)\n" \
-                    "ipcMain.handle('dars::FileSystem::read_text', async (_e, filePath, encoding='utf-8') => {\n" \
-                    "  if (!filePath || typeof filePath !== 'string') throw new Error('filePath must be a string');\n" \
-                    "  const content = await fs.readFile(filePath, { encoding });\n" \
-                    "  return content;\n" \
-                    "});\n" \
-                    "ipcMain.handle('dars::FileSystem::write_text', async (_e, filePath, data, encoding='utf-8') => {\n" \
-                    "  if (!filePath || typeof filePath !== 'string') throw new Error('filePath must be a string');\n" \
-                    "  if (typeof data !== 'string') data = String(data ?? '');\n" \
-                    "  await fs.writeFile(filePath, data, { encoding });\n" \
-                    "  return true;\n" \
-                    "});\n" \
-                    "\n" \
-                    "app.whenReady().then(() => {\n" \
-                    "  createWindow();\n" \
-                    "  app.on('activate', function () {\n" \
-                    "    if (BrowserWindow.getAllWindows().length === 0) createWindow();\n" \
-                    "  });\n" \
-                    "});\n" \
-                    "\n" \
-                    "app.on('window-all-closed', function () {\n" \
-                    "  if (process.platform !== 'darwin') app.quit();\n" \
-                    "});\n"
+                        "const { app, BrowserWindow, ipcMain, Menu } = require('electron');\n"
+                        "const path = require('path');\n"
+                        "const fs = require('fs').promises;\n"
+                        "let META = { title: '" + app_title.replace("'", "\\'") + "', packageName: '" + pkg_name + "' };\n"
+                                                                                                                   "try { META = Object.assign(META, require('./dars.meta.json')); } catch(e){}\n"
+                                                                                                                   "\n"
+                                                                                                                   "function createWindow() {\n"
+                                                                                                                   f"  const win = new BrowserWindow({{\n"
+                                                                                                                   "    width: 1000, height: 700,\n"
+                                                                                                                   "    title: META.title,\n"
+                                                                                                                   "    webPreferences: {\n"
+                                                                                                                   "      contextIsolation: true,\n"
+                                                                                                                   "      preload: path.join(__dirname, 'preload.js')\n"
+                                                                                                                   "    }\n"
+                                                                                                                   "  });\n"
+                                                                                                                   "  win.loadFile(path.join(__dirname, 'app', 'index.html'));\n"
+                                                                                                                   "}\n"
+                                                                                                                   "\n"
+                                                                                                                   "// Remove default application menu\n"
+                                                                                                                   "Menu.setApplicationMenu(null);\n"
+                                                                                                                   "try { app.setName(META.packageName || META.title || 'dars-app'); } catch(e){}\n"
+                                                                                                                   "\n"
+                                                                                                                   "// Basic IPC wiring (Phase 3)\n"
+                                                                                                                   "ipcMain.handle('dars::FileSystem::read_text', async (_e, filePath, encoding='utf-8') => {\n"
+                                                                                                                   "  if (!filePath || typeof filePath !== 'string') throw new Error('filePath must be a string');\n"
+                                                                                                                   "  const content = await fs.readFile(filePath, { encoding });\n"
+                                                                                                                   "  return content;\n"
+                                                                                                                   "});\n"
+                                                                                                                   "ipcMain.handle('dars::FileSystem::write_text', async (_e, filePath, data, encoding='utf-8') => {\n"
+                                                                                                                   "  if (!filePath || typeof filePath !== 'string') throw new Error('filePath must be a string');\n"
+                                                                                                                   "  if (typeof data !== 'string') data = String(data ?? '');\n"
+                                                                                                                   "  await fs.writeFile(filePath, data, { encoding });\n"
+                                                                                                                   "  return true;\n"
+                                                                                                                   "});\n"
+                                                                                                                   "\n"
+                                                                                                                   "app.whenReady().then(() => {\n"
+                                                                                                                   "  createWindow();\n"
+                                                                                                                   "  app.on('activate', function () {\n"
+                                                                                                                   "    if (BrowserWindow.getAllWindows().length === 0) createWindow();\n"
+                                                                                                                   "  });\n"
+                                                                                                                   "});\n"
+                                                                                                                   "\n"
+                                                                                                                   "app.on('window-all-closed', function () {\n"
+                                                                                                                   "  if (process.platform !== 'darwin') app.quit();\n"
+                                                                                                                   "});\n"
                 )
                 with open(os.path.join(base_out, 'main.js'), 'w', encoding='utf-8') as f:
                     f.write(main_js)

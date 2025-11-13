@@ -1,8 +1,8 @@
-from dars.core.component import Component
-from dars.core.properties import StyleProps
-from typing import Optional, Union, Dict, Any, List
+from typing import Optional, Dict, Any, List
 
-class Container(Component):
+from dars.core.component import Component
+
+class Section(Component):
     def __init__(
         self,
         *children: Component,

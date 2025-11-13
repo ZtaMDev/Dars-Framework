@@ -2,27 +2,20 @@
 """
 Dars Exporter - Command line tool for exporting Dars applications
 """
-import shutil
-import subprocess
-import venv
-from rich.prompt import Confirm
-from rich.syntax import Syntax
 import argparse
-import os
-import sys
-import time
 import importlib.util
-from pathlib import Path
-from typing import Optional, Dict, Any
+import os
+import shutil
+import sys
+from typing import Optional
 
 from rich.console import Console
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn
 from rich.panel import Panel
-from rich.text import Text
+from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn
+from rich.prompt import Confirm
+from rich.syntax import Syntax
 from rich.table import Table
-from rich.markdown import Markdown
-from rich import print as rprint
-from importlib import resources
+from rich.text import Text
 
 # Importar exportadores
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -32,7 +25,6 @@ from dars.exporters.web.html_css_js import HTMLCSSJSExporter
 from dars.exporters.desktop.electron import ElectronExporter
 from dars.cli.translations import translator
 from dars.config import load_config, resolve_paths, write_default_config, update_config
-from dars.cli.doctor.preflight import check_and_gate
 from dars.cli.doctor.doctor import run_doctor, run_forcedev
 
 console = Console()
@@ -811,20 +803,6 @@ def create_parser(include_hidden: bool = True) -> argparse.ArgumentParser:
 
     return parser
 
-from pathlib import Path
-from typing import Dict
-
-from pathlib import Path
-from typing import Dict
-
-from pathlib import Path
-from typing import Dict
-
-from pathlib import Path
-from typing import Dict
-
-from pathlib import Path
-from typing import Dict
 
 from pathlib import Path
 from typing import Dict
@@ -1662,4 +1640,3 @@ def ensure_dars_lib(project_root: str):
 
 if __name__ == "__main__":
     main()
-

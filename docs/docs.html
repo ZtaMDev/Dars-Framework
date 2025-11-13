@@ -401,6 +401,15 @@
      <a class="sidebar-link sidebar-level-4" href="#container-layouts" style="margin-left: 60px">
       Container Layouts
      </a>
+     <a class="sidebar-link sidebar-level-3" href="#section" style="margin-left: 40px">
+      Section
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#section-syntax" style="margin-left: 60px">
+      Section Syntax
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#section-properties" style="margin-left: 60px">
+      Section Properties
+     </a>
      <a class="sidebar-link sidebar-level-3" href="#markdown" style="margin-left: 40px">
       Markdown
      </a>
@@ -2614,6 +2623,9 @@ Desktop build target. Only effective when
       <hr/>
      </div>
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_118">
+      <p>
+       from dars.components.basic.section import Section
+      </p>
       <h1 id="dars-components-documentation">
        Dars - Components Documentation
       </h1>
@@ -2679,7 +2691,7 @@ Desktop build target. Only effective when
        dScript Basic Usage
       </h3>
       <div class="codehilite">
-       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.scripts.dscript</span><span class="w"> </span><span class="kn">import</span> <span class="n">dScript</span>
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
 <span class="c1"># Button with click handler</span>
 <span class="n">button</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span>
@@ -4376,6 +4388,115 @@ Use the
 <span class="p">)</span>
 </code></pre>
       </div>
+      <h3 id="section">
+       Section
+      </h3>
+      <p>
+       The
+       <code>
+        Section
+       </code>
+       component is a container that can hold other components. It supports multiple ways to add child components.
+And also its like the
+       <a href="#Container">
+        Container
+       </a>
+       component but instead of export a
+       <code>
+        &lt;div&gt;
+       </code>
+       to render it exports and
+       <code>
+        &lt;section&gt;
+       </code>
+       .
+      </p>
+      <h4 id="section-syntax">
+       Section Syntax
+      </h4>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="c1"># Method 1: Pass components as arguments</span>
+<span class="n">container</span> <span class="o">=</span> <span class="n">Section</span><span class="p">(</span>
+    <span class="n">Text</span><span class="p">(</span><span class="s2">"Hello"</span><span class="p">),</span>
+    <span class="n">Button</span><span class="p">(</span><span class="s2">"Click me"</span><span class="p">),</span>
+    <span class="n">style</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">"display"</span><span class="p">:</span> <span class="s2">"flex"</span><span class="p">,</span>
+        <span class="s2">"flex-direction"</span><span class="p">:</span> <span class="s2">"column"</span><span class="p">,</span>
+        <span class="s2">"padding"</span><span class="p">:</span> <span class="s2">"20px"</span><span class="p">,</span>
+        <span class="s2">"background-color"</span><span class="p">:</span> <span class="s2">"#f8f9fa"</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="c1"># Method 2: Use additional_children parameter</span>
+<span class="n">components</span> <span class="o">=</span> <span class="p">[</span><span class="n">Text</span><span class="p">(</span><span class="s2">"Hello"</span><span class="p">),</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Click me"</span><span class="p">)]</span>
+<span class="n">container</span> <span class="o">=</span> <span class="n">Section</span><span class="p">(</span>
+    <span class="n">additional_children</span><span class="o">=</span><span class="n">components</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">"display"</span><span class="p">:</span> <span class="s2">"flex"</span><span class="p">,</span>
+        <span class="s2">"flex-direction"</span><span class="p">:</span> <span class="s2">"column"</span><span class="p">,</span>
+        <span class="s2">"padding"</span><span class="p">:</span> <span class="s2">"20px"</span><span class="p">,</span>
+        <span class="s2">"background-color"</span><span class="p">:</span> <span class="s2">"#f8f9fa"</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="c1"># Method 3: Add children after creation</span>
+<span class="n">container</span> <span class="o">=</span> <span class="n">Section</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="p">{</span>
+    <span class="s2">"display"</span><span class="p">:</span> <span class="s2">"flex"</span><span class="p">,</span>
+    <span class="s2">"flex-direction"</span><span class="p">:</span> <span class="s2">"column"</span><span class="p">,</span>
+    <span class="s2">"padding"</span><span class="p">:</span> <span class="s2">"20px"</span><span class="p">,</span>
+    <span class="s2">"background-color"</span><span class="p">:</span> <span class="s2">"#f8f9fa"</span>
+<span class="p">})</span>
+<span class="n">container</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">Text</span><span class="p">(</span><span class="s2">"Hello"</span><span class="p">))</span>
+<span class="n">container</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">Button</span><span class="p">(</span><span class="s2">"Click me"</span><span class="p">))</span>
+</code></pre>
+      </div>
+      <h4 id="section-properties">
+       Section Properties
+      </h4>
+      <table>
+       <thead>
+        <tr>
+         <th>
+          Property
+         </th>
+         <th>
+          Type
+         </th>
+         <th>
+          Description
+         </th>
+        </tr>
+       </thead>
+       <tbody>
+        <tr>
+         <td>
+          <code>
+           children
+          </code>
+         </td>
+         <td>
+          tuple
+         </td>
+         <td>
+          Components passed as positional arguments
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           additional_children
+          </code>
+         </td>
+         <td>
+          list
+         </td>
+         <td>
+          Optional list of additional components
+         </td>
+        </tr>
+       </tbody>
+      </table>
       <h3 id="markdown">
        Markdown
       </h3>

@@ -1,3 +1,90 @@
+# Release Notes v1.3.3
+
+> Minor update featuring new semantic Section component and enhanced state serialization. Continues JavaScript migration improvements from v1.3.2.
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+or
+
+```bash
+pip install dars-framework==1.3.3
+```
+
+## What's New
+
+### Section Component
+
+**Semantic HTML Container:**
+- New `Section` component that renders as `<section></section>` instead of generic `<div>`
+- Maintains all functionality of Container component (children, styles, etc.)
+- Improves HTML readability and semantic structure for debugging
+- Better accessibility and SEO through proper sectioning elements
+
+**Usage:**
+```python
+# Creates <section> with all container capabilities
+Section(Button("HI"), styles={...})
+```
+
+### Enhanced State & Event Serialization
+
+**Complete JavaScript Migration:**
+- States are now fully serialized in JavaScript and no longer exposed in HTML
+- Final migration of both state and event systems to pure JavaScript
+- Eliminates need for state/event data in VDOM structure
+- Improved security and cleaner HTML output
+
+**Benefits:**
+- More secure: State data hidden from direct HTML inspection
+- Cleaner markup: Reduced data attributes in rendered HTML
+- Better performance: Streamlined state management
+- Enhanced minification: Better compatibility with Vite optimization
+
+### Documentation Updates
+
+- Updated documentation to reflect new Section component usage
+- Enhanced examples and best practices for semantic HTML
+- Migration guides for state serialization changes
+
+## Technical Improvements
+
+- **Backward Compatible**: No breaking changes to existing components
+- **Progressive Enhancement**: Existing containers continue working as before
+- **Performance**: Maintains all optimizations from v1.3.2
+
+## Migration Notes
+
+### For Existing Projects
+
+**Automatic Upgrade:**
+- No configuration changes required
+- Existing container components remain unchanged
+- State management automatically uses new serialization
+
+**Optional Section Component Adoption:**
+```python
+# Old way (still works)
+Container(children=[...])
+
+# New semantic way
+Section(children=[...])
+```
+
+## Desktop Exporter Status
+
+**Still in BETA** - No changes from v1.3.2
+
+## Known Issues
+
+- None introduced in this release
+- Continuing to monitor Electron desktop exporter stability
+
+---
+
 # Release Notes v1.3.2
 
 > Major minification improvements with combined JS files and optimized event handling. Electron desktop exporter remains in beta.

@@ -14,7 +14,7 @@ __pycache__/
 *.pyd
 .DS_Store
 .env
-.venv
+.venv/
 venv/
 ENV/
 build/
@@ -38,3 +38,4 @@ test/
 myapp/
 tst/
 dpm.py
+changelog.md

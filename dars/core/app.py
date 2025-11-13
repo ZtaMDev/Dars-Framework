@@ -4,7 +4,7 @@ from dars.exporters.base import Exporter
 from dars.scripts.script import Script
 from .component import Component
 from .events import EventManager
-
+import os, shutil, sys, platform
 class Page:
     """Represents an individual page in the Dars app (multipage)."""
     def __init__(self, name: str, root: 'Component', title: str = None, meta: dict = None, index: bool = False, scripts: Optional[List[Any]] = None):

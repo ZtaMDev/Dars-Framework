@@ -1,3 +1,5 @@
+from dars.components.basic.section import Section
+
 # Dars - Components Documentation
 
 ---
@@ -30,7 +32,7 @@ For a complete list of available event types and how to use them, refer to the d
 ### dScript Basic Usage
 
 ```python
-from dars.scripts.dscript import dScript
+from dars.all import *
 
 # Button with click handler
 button = Button(
@@ -674,6 +676,58 @@ sidebar = Container(
     }
 )
 ```
+
+### Section
+
+The `Section` component is a container that can hold other components. It supports multiple ways to add child components.
+And also its like the [Container](#Container) component but instead of export a `<div>` to render it exports and `<section>`.
+
+#### Section Syntax
+
+```python
+from dars.all import *
+# Method 1: Pass components as arguments
+container = Section(
+    Text("Hello"),
+    Button("Click me"),
+    style={
+        "display": "flex",
+        "flex-direction": "column",
+        "padding": "20px",
+        "background-color": "#f8f9fa"
+    }
+)
+
+# Method 2: Use additional_children parameter
+components = [Text("Hello"), Button("Click me")]
+container = Section(
+    additional_children=components,
+    style={
+        "display": "flex",
+        "flex-direction": "column",
+        "padding": "20px",
+        "background-color": "#f8f9fa"
+    }
+)
+
+# Method 3: Add children after creation
+container = Section(style={
+    "display": "flex",
+    "flex-direction": "column",
+    "padding": "20px",
+    "background-color": "#f8f9fa"
+})
+container.add_child(Text("Hello"))
+container.add_child(Button("Click me"))
+```
+
+#### Section Properties
+
+| Property | Type | Description |
+|-----------|------|-------------|
+| `children` | tuple | Components passed as positional arguments |
+| `additional_children` | list | Optional list of additional components |
+
 
 ### Markdown
 

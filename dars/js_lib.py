@@ -1,4 +1,4 @@
-DARS_MIN_JS = """/* Dars minimal runtime: state + DOM updates (ESM + global) */
+DARS_MIN_JS = """/* Dars minimal runtime script */
 const __registry = new Map();
 
 function $(id){ return document.getElementById(id) || document.querySelector(`[data-id="${id}"]`) || null; }
@@ -26,6 +26,15 @@ function registerState(name, cfg){
       entry.__defaultSnapshot = { attrs, html: String(el.innerHTML||'') };
     }
   }catch(_){ }
+}
+
+function registerStates(statesConfig) {
+  if (!Array.isArray(statesConfig)) return;
+  for (const state of statesConfig) {
+    if (state && state.name && state.id) {
+      registerState(state.name, state);
+    }
+  }
 }
 
 function getState(name){ return __registry.get(name); }
@@ -209,8 +218,8 @@ function change(opt){
   }catch(e){ }
 }
 
-const Dars = { registerState, getState, change, $ };
+const Dars = { registerState, registerStates, getState, change, $ };
 try { window.Dars = window.Dars || Dars; } catch(_) {}
-export { registerState, getState, change, $ };
+export { registerState, registerStates, getState, change, $ };
 export default Dars;
 """

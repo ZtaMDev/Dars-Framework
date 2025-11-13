@@ -1,3 +1,4 @@
+from dars.components.basic.section import Section
 from dars.exporters.base import Exporter
 from dars.scripts.dscript import dScript
 from dars.core.app import App
@@ -24,6 +25,7 @@ from dars.components.basic.progressbar import ProgressBar
 from dars.components.basic.spinner import Spinner
 from dars.components.basic.tooltip import Tooltip
 from dars.components.basic.markdown import Markdown
+from dars.components.basic.section import Section
 from typing import Dict, Any
 import os
 from bs4 import BeautifulSoup
@@ -875,9 +877,7 @@ self.addEventListener('fetch', event => {
         {body_content}
         {vdom_script_tag}
         {version_vars_html}
-        {bootstrap_json_tag}
         {dars_lib_tag}
-        {bootstrap_init_tag}
         {runtime_script_tag}
     {extra_scripts_html}    {main_script_tag}
     </body>
@@ -1787,48 +1787,22 @@ body {
         events_js_code = ""
         if events_map:
             events_js_code = self._generate_events_js(events_map)
+            
+        states_js_code = self._generate_states_js()
         
-        runtime = f"""// Dars Runtime (Hydration + Delegated Events + Diff/Patch + Hot Reload)
+        runtime = f"""// Dars Runtime
     (function(){{
-    const eventMap = new Map(); // id -> {{ev: fn}}
+    const eventMap = new Map();
     let currentSnapshot = null;
     let currentVersion = null;
 
-    // NUEVO: Inicialización de eventos - directamente en JS
     function initializeEvents() {{
     {events_js_code}
     }}
-
-    // Registro de componentes (skeleton). En siguientes iteraciones añadiremos create/patch por tipo built-in
-    const registry = {{
-        // Implementación mínima segura para crear nodos cuando se agregan hijos
-        'Text': {{
-        create(v){{
-            if(!v || v.isIsland) return null;
-            const el = document.createElement('span');
-            if(v.id) el.id = v.id;
-            if(v.class) el.className = v.class;
-            if(v.style){{ for(const k in v.style){{ try{{ el.style.setProperty(k.replace(/_/g,'-'), String(v.style[k])); }}catch{{}} }} }}
-            if(Object.prototype.hasOwnProperty.call(v,'text')){{ el.textContent = String(v.text||''); }}
-            // props
-            if(v.props){{ for(const k in v.props){{ const val=v.props[k]; try{{ if(val===false||val===null||typeof val==='undefined'){{ el.removeAttribute(k);}} else {{ el.setAttribute(k, String(val)); }} }}catch{{}} }} }}
-            return el;
-        }}
-        }},
-        'Container': {{
-        create(v){{
-            if(!v || v.isIsland) return null;
-            const el = document.createElement('div');
-            if(v.id) el.id = v.id;
-            const base = 'dars-container';
-            el.className = (v.class ? (base + ' ' + v.class) : base);
-            if(v.style){{ for(const k in v.style){{ try{{ el.style.setProperty(k.replace(/_/g,'-'), String(v.style[k])); }}catch{{}} }} }}
-            // props
-            if(v.props){{ for(const k in v.props){{ const val=v.props[k]; try{{ if(val===false||val===null||typeof val==='undefined'){{ el.removeAttribute(k);}} else {{ el.setAttribute(k, String(val)); }} }}catch{{}} }} }}
-            return el;
-        }}
-        }},
-    }};
+    
+    function initializeStates() {{
+    {states_js_code}
+    }}
 
     function walk(v, fn){{
         if(!v) return;
@@ -1861,9 +1835,6 @@ body {
     }}
 
     function bindEventsFromVNode(snapshot){{
-        // NUEVO: Ya no necesitamos construir eventos desde el VDOM
-        // porque están inicializados directamente en JS
-        // Solo necesitamos mantener compatibilidad con eventos dinámicos
         walk(snapshot, (v)=>{{
         if(v && v.id && v.events){{
             // Solo procesar eventos si no están ya en el eventMap
@@ -1904,7 +1875,6 @@ body {
         for(const k in newS){{ const v=newS[k]; try{{ el.style.setProperty(k.replace(/_/g,'-'), String(v)); }}catch{{}} }}
     }}
 
-    // Event delegation helper (restored)
     function delegate(eventName, root){{
         (root||document).addEventListener(eventName, function(e){{
         let node = e.target;
@@ -1914,7 +1884,6 @@ body {
             if(id && eventMap.has(id)){{
             const handlers = eventMap.get(id);
             const h = handlers[eventName];
-            // If there is a dynamic handler attached on this node for the same event, let it handle and skip default
             if(node && node.__darsEv && node.__darsEv[eventName]){{
                 return;
             }}
@@ -1930,7 +1899,6 @@ body {
 
     function typesDiffer(a,b){{ return (a && b) ? a.type !== b.type : a!==b; }}
 
-    // Elimina un subárbol del DOM (y del mapa de eventos) usando los ids del VDOM
     function removeSubtree(v){{
         if(!v) return;
         // eliminar hijos primero (postorden)
@@ -1946,13 +1914,11 @@ body {
         if(!newV || !newV.id){{ return {{ ok:false, reason:'missing-new' }}; }}
         let el = document.getElementById(newV.id);
         if(!el){{
-        // Fallback: si cambió el id entre snapshots pero es el mismo nodo lógico, reasignamos id
         const oldEl = (oldV && oldV.id) ? document.getElementById(oldV.id) : null;
         if(oldEl){{ try {{ oldEl.id = newV.id; el = oldEl; }} catch(_){{}} }}
         }}
         if(!el){{ return {{ ok:false, reason:'missing-el' }}; }}
 
-        // Si cambia el tipo, estructura u orden de hijos, pedimos reload completo (fase 2 simplificada)
         if(typesDiffer(oldV, newV)){{
         return {{ ok:false, reason:'type-changed' }};
         }}
@@ -1975,39 +1941,29 @@ body {
         }}
         }}
 
-        // NUEVO: Ya no procesamos eventos desde el VDOM durante updates
-        // porque están inicializados directamente en JS
-
-        // hijos (reconciliación por id/key). Para islas, tratamos el subárbol como opaco.
         if(isIsland){{ return {{ ok:true }}; }}
 
-        // Permitimos REMOCIONES sin recarga.
         const oldC = (oldV && oldV.children) ? oldV.children : [];
         const newC = (newV.children) ? newV.children : [];
 
-        // Construir índice de hijos viejos por id o key
         const oldIndex = new Map(); // clave -> vnode viejo
         for(let i=0;i<oldC.length;i++){{
         const k = (oldC[i] && (oldC[i].id || oldC[i].key)) || null;
         if(k){{ oldIndex.set(String(k), oldC[i]); }}
         }}
 
-        // Seguimiento de cuáles viejos fueron actualizados
         const seenOld = new Set();
 
-        // Actualizar/validar hijos nuevos
         for(let i=0;i<newC.length;i++){{
         const newChild = newC[i];
         const k = (newChild && (newChild.id || newChild.key)) || null;
         if(!k){{
-            // sin id/key fiable: conservador => usar reconciliación por índice si existe par
             if(i < oldC.length){{
             const r = updateNode(oldC[i], newChild);
             if(!r.ok){{ return r; }}
             seenOld.add(oldC[i]);
             continue;
             }} else {{
-            // no podemos crear de forma segura
             return {{ ok:false, reason:'children-added' }};
             }}
         }}
@@ -2017,7 +1973,6 @@ body {
             if(!r.ok){{ return r; }}
             seenOld.add(oldChild);
         }} else {{
-            // Fallback conservador: si hay viejo en la misma posición y el tipo coincide, lo reutilizamos
             if(i < oldC.length){{
             const candidate = oldC[i];
             if(!typesDiffer(candidate, newChild)){{
@@ -2027,10 +1982,8 @@ body {
                 continue;
             }}
             }}
-            // Intentar crear subárbol si es un tipo soportado por el registry (no isla)
             const subtree = createSubtree(newChild);
             if(subtree){{
-            // insertar en la posición i dentro del DOM
             const refChildVNode = (i < oldC.length) ? oldC[i] : null;
             if(refChildVNode && refChildVNode.id){{
                 const refEl = document.getElementById(refChildVNode.id);
@@ -2039,15 +1992,12 @@ body {
             }} else {{
                 el.appendChild(subtree);
             }}
-            // marcar como visto (no había old), nada que añadir a seenOld
             continue;
             }}
-            // hijo nuevo de tipo no soportado => recarga por seguridad
             return {{ ok:false, reason:'children-added' }};
         }}
         }}
 
-        // Eliminar los viejos no vistos (removidos)
         for(let i=0;i<oldC.length;i++){{
         const v = oldC[i];
         if(!seenOld.has(v)){{
@@ -2066,7 +2016,6 @@ body {
     function update(newSnapshot){{
         const old = currentSnapshot;
         if(!old){{
-        // primera vez: ya no necesitamos bindEventsFromVNode porque los eventos están en JS
         currentSnapshot = newSnapshot;
         try{{ window.__DARS_VDOM__ = newSnapshot; }}catch(_){{ /* ignore */ }}
         return;
@@ -2084,11 +2033,8 @@ body {
     }}
 
     function hydrate(snapshot){{
-        // NUEVO: Ya no necesitamos bindEventsFromVNode porque los eventos están inicializados
         currentSnapshot = snapshot;
         try{{ window.__DARS_VDOM__ = snapshot; }}catch(_){{ /* ignore */ }}
-
-        // Delegar eventos comunes (extendido)
         const delegated = [
         'click','dblclick',
         'mousedown','mouseup','mouseenter','mouseleave','mousemove',
@@ -2133,7 +2079,6 @@ body {
             if(!currentVersion){{ currentVersion = ver; }}
             if(ver && ver !== currentVersion){{
             currentVersion = ver;
-            // Política solicitada: siempre recargar por completo al detectar nueva versión
             try {{ location.reload(); }} catch(_) {{}}
             return;
             }}
@@ -2148,7 +2093,8 @@ body {
     }}
 
     document.addEventListener('DOMContentLoaded', function(){{
-        // NUEVO: Inicializar eventos antes de la hidratación
+        initializeStates();
+        //Inicializar eventos antes de la hidratación
         initializeEvents();
         
         if(window.__DARS_VDOM__){{
@@ -2165,10 +2111,114 @@ body {
     """
         return runtime
 
+    def _generate_states_js(self) -> str:
+        """Genera código JS puro para inicializar todos los estados directamente en el runtime"""
+        try:
+            from dars.core.state import STATE_BOOTSTRAP
+            if not STATE_BOOTSTRAP:
+                return "    // No hay estados para inicializar"
+
+            lines = []
+            lines.append('    // Inicializar estados')
+            lines.append('    try {')
+            lines.append('        const statesConfig = [')
+
+            # Generar cada estado como objeto JS literal
+            for i, state in enumerate(STATE_BOOTSTRAP):
+                state_js = self._state_to_js(state)
+                lines.append(f'            {state_js}' + (',' if i < len(STATE_BOOTSTRAP) - 1 else ''))
+
+            lines.append('        ];')
+            lines.append('        if (window.Dars && typeof window.Dars.registerStates === "function") {')
+            lines.append('            window.Dars.registerStates(statesConfig);')
+            lines.append('        } else if (window.__DARS_STATES_FN) {')
+            lines.append('            window.__DARS_STATES_FN(statesConfig);')
+            lines.append('        } else {')
+            lines.append('            // Fallback: cargar runtime y luego registrar estados')
+            lines.append('            (async () => {')
+            lines.append('                try {')
+            lines.append('                    const m = await import("./lib/dars.min.js");')
+            lines.append('                    const registerStates = m.registerStates || (m.default && m.default.registerStates);')
+            lines.append('                    if (typeof registerStates === "function") {')
+            lines.append('                        registerStates(statesConfig);')
+            lines.append('                        window.__DARS_STATES_FN = registerStates;')
+            lines.append('                    }')
+            lines.append('                } catch (e) {')
+            lines.append('                    console.error("[Dars] Failed to initialize states", e);')
+            lines.append('                }')
+            lines.append('            })();')
+            lines.append('        }')
+            lines.append('    } catch (e) {')
+            lines.append('        console.error("[Dars] State initialization error", e);')
+            lines.append('    }')
+
+            return '\n'.join(lines)
+
+        except Exception as e:
+            return f'    console.error("[Dars] State bootstrap failed: {str(e)}");'
+
+    def _state_to_js(self, state):
+        """Convierte un estado a código JavaScript literal"""
+        if not isinstance(state, dict):
+            return '{}'
+
+        parts = []
+        for key, value in state.items():
+            js_key = f'"{key}"'
+            js_value = self._value_to_js(value)
+            parts.append(f'{js_key}: {js_value}')
+
+        return '{ ' + ', '.join(parts) + ' }'
+
+    def _value_to_js(self, value):
+        """Convierte cualquier valor a su representación JavaScript"""
+        if value is None:
+            return 'null'
+        elif isinstance(value, bool):
+            return 'true' if value else 'false'
+        elif isinstance(value, (int, float)):
+            return str(value)
+        elif isinstance(value, str):
+            # Escapar para JavaScript
+            escaped = (value.replace('\\', '\\\\')
+                       .replace('"', '\\"')
+                       .replace("'", "\\'")
+                       .replace('\n', '\\n')
+                       .replace('\r', '\\r')
+                       .replace('\t', '\\t'))
+            return f'"{escaped}"'
+        elif isinstance(value, list):
+            items = [self._value_to_js(item) for item in value]
+            return '[' + ', '.join(items) + ']'
+        elif isinstance(value, dict):
+            parts = []
+            for k, v in value.items():
+                js_key = f'"{k}"' if isinstance(k, str) else str(k)
+                js_value = self._value_to_js(v)
+                parts.append(f'{js_key}: {js_value}')
+            return '{' + ', '.join(parts) + '}'
+        else:
+            # Para objetos InlineScript y otros tipos especiales
+            try:
+                if hasattr(value, 'get_code'):
+                    code = value.get_code()
+                    # Escapar el código para JS
+                    escaped_code = (code.replace('\\', '\\\\')
+                                    .replace('"', '\\"')
+                                    .replace("'", "\\'")
+                                    .replace('\n', '\\n')
+                                    .replace('\r', '\\r')
+                                    .replace('\t', '\\t'))
+                    return f'"{escaped_code}"'
+            except Exception:
+                pass
+
+            # Fallback: convertir a string
+            return f'"{str(value)}"'
     def _generate_events_js(self, events_map: Dict[str, Dict[str, Any]]) -> str:
         """Genera código JS para inicializar todos los eventos directamente en el runtime"""
         lines = []
-        
+
         for comp_id, events in events_map.items():
             for event_name, event_spec in events.items():
                 code = None
@@ -2177,16 +2227,16 @@ body {
                     code = event_spec.get('code') or event_spec.get('value')
                 elif isinstance(event_spec, str):
                     code = event_spec
-                
+
                 if code:
                     # Escapar el código para JS
                     escaped_code = code.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
-                    
+
                     lines.append(f'    // Evento {event_name} para componente {comp_id}')
                     lines.append(f'    if (!eventMap.has("{comp_id}")) eventMap.set("{comp_id}", {{}});')
                     lines.append(f'    eventMap.get("{comp_id}")["{event_name}"] = (event) => {{ {escaped_code} }};')
                     lines.append('')
-        
+
         return '\n'.join(lines) if lines else '    // No hay eventos para esta página'
 
     def get_component_id(self, component, prefix="comp"):
@@ -2235,11 +2285,11 @@ body {
         from dars.components.layout.flex import FlexLayout
         
         
-        # Lista de componentes built-in de Dars que NO deben usar su propio método render()
+        # Lista de componentes built-in de Dars que NO deben usar su propio metodo render()
         builtin_components = [
             Page, GridLayout, FlexLayout, Text, Button, Input, Container, Image, Link, 
             Textarea, Card, Modal, Navbar, Checkbox, RadioButton, Select, Slider, 
-            DatePicker, Table, Tabs, Accordion, ProgressBar, Spinner, Tooltip, Markdown,
+            DatePicker, Table, Tabs, Accordion, ProgressBar, Spinner, Tooltip, Markdown, Section
         ]
         
         # Verificar si es un componente personalizado (no built-in)
@@ -2271,6 +2321,8 @@ body {
             return self.render_input(component)
         elif isinstance(component, Container):
             return self.render_container(component)
+        elif isinstance(component, Section):
+            return self.render_section(component)
         elif isinstance(component, Image):
             return self.render_image(component)
         elif isinstance(component, Link):
@@ -2474,6 +2526,27 @@ body {
             children_html += self.render_component(child)
 
         return f'<div id="{component_id}" {class_attr} {style_attr}>{children_html}</div>'
+
+    def render_section(self, section: Section):
+        """Renderiza un componente Section"""
+        component_id = self.get_component_id(section, prefix="section")
+        class_attr = f'class="dars-section {section.class_name or ""}"'
+        style_attr = f'style="{self.render_styles(section.style)}"' if section.style else ""
+
+        children_html = ""
+        children = section.children
+        if not isinstance(children, list):
+            children = []
+        flat_children = []
+        for child in children:
+            if isinstance(child, list):
+                flat_children.extend([c for c in child if hasattr(c, 'render')])
+            elif hasattr(child, 'render'):
+                flat_children.append(child)
+        for child in flat_children:
+            children_html += self.render_component(child)
+
+        return f'<section id="{component_id}" {class_attr} {style_attr}>{children_html}</section>'
         
     def render_image(self, image: Image) -> str:
         """Renderiza un componente Image"""
@@ -2842,3 +2915,5 @@ body {
                 events_attr += f' data-event-{event_name}="true"'
         
         return f'<div id="{component_id}" {class_attr} {style_attr}{events_attr}>{children_html}</div>'
+
+
