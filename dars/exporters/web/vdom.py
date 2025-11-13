@@ -25,8 +25,8 @@ class VNode:
         key: Optional[str],
         class_name: Optional[str],
         style: Dict[str, Any],
+        hover_style: Dict[str, Any],
         props: Dict[str, Any],
-        # REMOVER events de aquí
         children: Optional[List["VNode"]] = None,
         text: Optional[str] = None,
         is_island: bool = False,
@@ -36,6 +36,7 @@ class VNode:
         self.key = key
         self.class_name = class_name
         self.style = style or {}
+        self.hover_style = hover_style or {} 
         self.props = props or {}
         self.children = children or []
         self.text = text
@@ -48,6 +49,7 @@ class VNode:
             "key": self.key,
             "class": self.class_name,
             "style": self.style or {},
+            "hover_style": self.hover_style or {},
             "props": self.props or {},
             "children": [c.to_dict() for c in (self.children or [])],
         }
@@ -67,17 +69,17 @@ class VDomBuilder:
       may treat these as opaque islands unless more granular hooks are added.
     """
 
-    def __init__(self, id_provider: Optional[Callable[[Component, str], str]] = None) -> None:
+    def __init__(self, id_provider: Optional[Callable[[Component, str], str]] = None) -> None: # type: ignore
         self.id_provider = id_provider
         # Nuevo: recolector de eventos por página
         self.events_map: Dict[str, Dict[str, Any]] = {}
 
-    def build(self, component: Component) -> Dict[str, Any]:
+    def build(self, component: Component) -> Dict[str, Any]: # type: ignore
         vnode = self._build_vnode(component, path=["0"])  # raíz con path estable
         return vnode.to_dict()
 
     # --- internals ---
-    def _safe_props(self, component: Component) -> Dict[str, Any]:
+    def _safe_props(self, component: Component) -> Dict[str, Any]: # type: ignore
         """Extract props + public attributes into a single serializable mapping.
 
         Rules:
@@ -144,7 +146,7 @@ class VDomBuilder:
 
         return result
 
-    def _serialize_events(self, component: Component) -> Optional[Dict[str, Any]]:
+    def _serialize_events(self, component: Component) -> Optional[Dict[str, Any]]: # type: ignore
         events_payload: Dict[str, Any] = {}
         try:
             events = getattr(component, 'events', {}) or {}
@@ -168,7 +170,7 @@ class VDomBuilder:
             pass
         return events_payload or None
 
-    def _text_value(self, component: Component) -> Optional[str]:
+    def _text_value(self, component: Component) -> Optional[str]: # type: ignore
         # Try extracting a textual value if the component has a primary text prop
         try:
             for cand in ('text', 'content', 'value', 'label'):
@@ -180,7 +182,7 @@ class VDomBuilder:
             pass
         return None
 
-    def _build_vnode(self, component: Component, path: list) -> VNode:
+    def _build_vnode(self, component: Component, path: list) -> VNode: # type: ignore
         try:
             comp_type = component.__class__.__name__
         except Exception:
@@ -242,6 +244,7 @@ class VDomBuilder:
             key=stable_key,
             class_name=getattr(component, 'class_name', None),
             style=getattr(component, 'style', {}) or {},
+            hover_style=getattr(component, 'hover_style', {}) or {},
             props=safe_props,
             children=children_nodes,
             text=text_value,

@@ -18,9 +18,10 @@ class Slider(Component):
         style: Optional[Dict[str, Any]] = None,
         disabled: bool = False,
         on_change: Optional[Callable] = None,
-        on_input: Optional[Callable] = None
+        on_input: Optional[Callable] = None,
+        **props
     ):
-        super().__init__(id=id, class_name=class_name, style=style)
+        super().__init__(id=id, class_name=class_name, style=style, **props)
         self.min_value = min_value
         self.max_value = max_value
         self.value = max(min_value, min(max_value, value))  # Asegurar que esté en rango

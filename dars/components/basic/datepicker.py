@@ -24,9 +24,10 @@ class DatePicker(Component):
         readonly: bool = False,
         on_change: Optional[Callable] = None,
         on_open: Optional[Callable] = None,
-        on_close: Optional[Callable] = None
+        on_close: Optional[Callable] = None,
+        **props
     ):
-        super().__init__(id=id, class_name=class_name, style=style)
+        super().__init__(id=id, class_name=class_name, style=style, **props)
         
         # Asignar atributos básicos primero
         self.placeholder = placeholder

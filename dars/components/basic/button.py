@@ -11,6 +11,7 @@ class Button(Component):
         id: Optional[str] = None, 
         class_name: Optional[str] = None, 
         style: Optional[Dict[str, Any]] = None,
+        hover_style: Optional[Dict[str, Any]] = None,
         disabled: bool = False,
         button_type: str = "button",  # "button", "submit", "reset"
         on_click: Optional[Callable] = None,
@@ -20,9 +21,10 @@ class Button(Component):
         on_mouse_down: Optional[Callable] = None,
         on_mouse_up: Optional[Callable] = None,
         on_key_down: Optional[Callable] = None,
-        on_key_up: Optional[Callable] = None
+        on_key_up: Optional[Callable] = None,
+        **props
     ):
-        super().__init__(id=id, class_name=class_name, style=style)
+        super().__init__(id=id, class_name=class_name, style=style, hover_style=hover_style, **props)
         self.text = text
         self.disabled = disabled
         self.button_type = button_type

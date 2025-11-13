@@ -1,6 +1,7 @@
 from typing import Dict, Any, List, Optional, Callable, Union, Type
 from abc import ABC, abstractmethod
 from dars.core.events import EventTypes
+from dars.exporters.base import Exporter
 
 class ComponentQuery:
     def __init__(self, components: List['Component']):
@@ -81,11 +82,10 @@ class Component(ABC):
         self.id: Optional[str] = props.get('id')
         self.class_name: str = props.get("class_name", self.__class__.__name__)
         self.style: Dict[str, Any] = props.get('style', {})
+        self.hover_style: Dict[str, Any] = props.get('hover_style', {})
         self.events: Dict[str, Callable] = {}
-        # Stable identity hint for children reconciliation in VDOM (optional)
         self.key: Optional[str] = props.get('key')
-
-        # Generic on_* props -> register as events on any component
+        
         if props:
             on_map = {
                 'on_click': EventTypes.CLICK,
@@ -176,8 +176,8 @@ class Component(ABC):
 
     def attr(self, **attrs) -> Union['Component', dict]:
         """If kwargs are provided, sets attributes on the component (chained setter).  
-           If no kwargs are provided, returns a dict with all editable component attributes (getter).  
-           Example:
+        If no kwargs are provided, returns a dict with all editable component attributes (getter).  
+        Example:
                 c.attr(id='new', style={'color': 'red'})
                 c.attr()['id']  # getter
         """
@@ -193,6 +193,9 @@ class Component(ABC):
             for key, value in attrs.items():
                 if key == 'style':
                     self.style.update(value)
+                    continue
+                elif key == 'hover_style':  # NUEVO: soporte para hover_style
+                    self.hover_style.update(value)
                     continue
                 elif key == 'class_name':
                     self.class_name = value
@@ -245,6 +248,7 @@ class Component(ABC):
         d['id'] = self.id
         d['class_name'] = self.class_name
         d['style'] = self.style
+        d['hover_style'] = self.hover_style
         d['events'] = self.events
         return d
 
