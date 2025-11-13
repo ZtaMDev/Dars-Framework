@@ -2266,21 +2266,49 @@ body {
         lines = []
 
         for comp_id, events in events_map.items():
-            for event_name, event_spec in events.items():
-                code = None
-                # Extraer código del evento
-                if isinstance(event_spec, dict):
-                    code = event_spec.get('code') or event_spec.get('value')
-                elif isinstance(event_spec, str):
-                    code = event_spec
+            for event_name, event_handlers in events.items():
+                # Soporte para arrays de handlers
+                handlers_list = event_handlers if isinstance(event_handlers, list) else [event_handlers]
+                
+                valid_handlers = []
+                for handler_spec in handlers_list:
+                    code = None
+                    
+                    # Extraer código del handler de manera más robusta
+                    if hasattr(handler_spec, 'get_code'):
+                        # Para objetos dScript, InlineScript, etc.
+                        try:
+                            code = handler_spec.get_code()
+                        except Exception:
+                            continue
+                    elif isinstance(handler_spec, dict):
+                        # Para diccionarios con código
+                        code = handler_spec.get('code') or handler_spec.get('value')
+                    elif isinstance(handler_spec, str):
+                        # Para strings directos
+                        code = handler_spec
+                    
+                    if code and isinstance(code, str) and code.strip():
+                        valid_handlers.append(code.strip())
 
-                if code:
-                    # Escapar el código para JS
-                    escaped_code = code.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
-
+                if valid_handlers:
                     lines.append(f'    // Evento {event_name} para componente {comp_id}')
                     lines.append(f'    if (!eventMap.has("{comp_id}")) eventMap.set("{comp_id}", {{}});')
-                    lines.append(f'    eventMap.get("{comp_id}")["{event_name}"] = (event) => {{ {escaped_code} }};')
+                    
+                    # NUEVO: Ejecutar cada handler en su propio contexto
+                    if len(valid_handlers) == 1:
+                        # Caso único handler - mantener compatibilidad
+                        lines.append(f'    eventMap.get("{comp_id}")["{event_name}"] = (event) => {{')
+                        lines.append(f'        try {{ {valid_handlers[0]} }} catch(e) {{ console.error("Error en handler:", e); }}')
+                        lines.append(f'    }};')
+                    else:
+                        # Múltiples handlers - ejecutar cada uno individualmente
+                        lines.append(f'    eventMap.get("{comp_id}")["{event_name}"] = (event) => {{')
+                        for i, handler_code in enumerate(valid_handlers):
+                            lines.append(f'        // Handler {i+1}')
+                            lines.append(f'        try {{ {handler_code} }} catch(e) {{ console.error("Error en handler {i+1}:", e); }}')
+                        lines.append(f'    }};')
+                    
                     lines.append('')
 
         return '\n'.join(lines) if lines else '    // No hay eventos para esta página'

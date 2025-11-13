@@ -109,27 +109,49 @@ class Component(ABC):
             }
             for k, v in list(props.items()):
                 if k in on_map and v is not None:
-                    handler = v
-                    # Normalize handler to Script-like if possible
-                    try:
-                        from dars.scripts.script import Script
-                        if not isinstance(handler, Script):
-                            if callable(handler):
-                                from dars.scripts.dscript import dScript
-                                handler = dScript(handler.__code__)
-                    except Exception:
-                        # Best-effort: keep as-is (string or callable)
-                        pass
-                    self.set_event(on_map[k], handler)
+                    if isinstance(v, (list, tuple)):
+                        handlers = []
+                        for handler_item in v:
+                            handler = self._normalize_handler(handler_item)
+                            if handler:
+                                handlers.append(handler)
+                        if handlers:
+                            self.set_event(on_map[k], handlers)
+                    else:
+                        # Comportamiento original para handlers únicos
+                        handler = self._normalize_handler(v)
+                        if handler:
+                            self.set_event(on_map[k], handler)
+    
+    def _normalize_handler(self, handler):
+        """Normaliza un handler individual a formato Script"""
+        try:
+            from dars.scripts.script import Script
+            if not isinstance(handler, Script):
+                if callable(handler):
+                    from dars.scripts.dscript import dScript
+                    handler = dScript(handler.__code__)
+        except Exception:
+            # Best-effort: mantener como está (string o callable)
+            pass
+        return handler
+
+    def set_event(self, event_name: str, handler):
+        """Ahora soporta handler individual o lista de handlers"""
+        if event_name not in self.events:
+            self.events[event_name] = []
+        
+        if isinstance(handler, (list, tuple)):
+            self.events[event_name].extend(handler)
+        else:
+            self.events[event_name].append(handler)
         
     def add_child(self, child: 'Component'):
         if isinstance(child, type) and issubclass(child, Component):
             raise TypeError(f"The class {child.__name__} was passed instead of an instance. You should use {child.__name__}(...).")
         child.parent = self
         self.children.append(child)
-        
-    def set_event(self, event_name: str, handler: Callable):
-        self.events[event_name] = handler
+
         
     def find(self, 
              id: Optional[str] = None,
@@ -227,16 +249,21 @@ class Component(ABC):
                             'on_resize': EventTypes.RESIZE,
                         }.get(key)
                         if event_name:
-                            handler = value
-                            from dars.scripts.script import Script
-                            if not isinstance(handler, Script):
-                                if callable(handler):
-                                    from dars.scripts.dscript import dScript
-                                    handler = dScript(handler.__code__)
-                            self.set_event(event_name, handler)
+                            # Soporte para arrays
+                            if isinstance(value, (list, tuple)):
+                                handlers = []
+                                for handler_item in value:
+                                    handler = self._normalize_handler(handler_item)
+                                    if handler:
+                                        handlers.append(handler)
+                                if handlers:
+                                    self.set_event(event_name, handlers)
+                            else:
+                                handler = self._normalize_handler(value)
+                                if handler:
+                                    self.set_event(event_name, handler)
                             continue
                     except Exception:
-                        # If any error, fall back to setting as a prop
                         pass
                 if hasattr(self, key):
                     setattr(self, key, value)

@@ -150,24 +150,39 @@ class VDomBuilder:
         events_payload: Dict[str, Any] = {}
         try:
             events = getattr(component, 'events', {}) or {}
-            for ev_name, handler in events.items():
-                code = None
-                try:
-                    if hasattr(handler, 'get_code'):
-                        code = handler.get_code()
-                    elif isinstance(handler, dict):
-                        code = handler.get('code') or handler.get('value')
-                    elif isinstance(handler, str):
-                        code = handler
-                    else:
-                        # fallback best-effort
-                        code = str(handler)
-                except Exception:
+            for ev_name, handlers in events.items():
+                # Soporte para arrays de handlers
+                handler_list = handlers if isinstance(handlers, (list, tuple)) else [handlers]
+                
+                serialized_handlers = []
+                for handler in handler_list:
                     code = None
-                if code:
-                    events_payload[ev_name] = {"type": "inline", "code": code}
-        except Exception:
-            pass
+                    try:
+                        # MEJORADO: Manejo más robusto de diferentes tipos de handlers
+                        if hasattr(handler, 'get_code'):
+                            code = handler.get_code()
+                        elif isinstance(handler, dict):
+                            code = handler.get('code') or handler.get('value')
+                        elif isinstance(handler, str):
+                            code = handler
+                        else:
+                            # fallback mejorado
+                            code = str(handler) if handler else None
+                    except Exception as e:
+                        print(f"Warning: Error serializing event handler: {e}")
+                        code = None
+                    
+                    # MEJORADO: Validar que el código no esté vacío
+                    if code and (isinstance(code, str) and code.strip()):
+                        serialized_handlers.append({
+                            "type": "inline", 
+                            "code": code.strip()
+                        })
+                
+                if serialized_handlers:
+                    events_payload[ev_name] = serialized_handlers
+        except Exception as e:
+            print(f"Warning: Error processing events: {e}")
         return events_payload or None
 
     def _text_value(self, component: Component) -> Optional[str]: # type: ignore
