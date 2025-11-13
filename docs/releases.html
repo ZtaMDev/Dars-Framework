@@ -230,12 +230,12 @@
     margin: 0 auto;
     padding: 40px 20px;">
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_171">
-      <h1 id="release-notes-v133">
-       Release Notes v1.3.3
+      <h1 id="release-notes-v134">
+       Release Notes v1.3.4
       </h1>
       <blockquote>
        <p>
-        Minor update featuring new semantic Section component and enhanced state serialization. Continues JavaScript migration improvements from v1.3.2.
+        Enhanced interactivity update featuring hover styles, multi-handler events, and runtime versioning. Improves component styling and event handling flexibility.
        </p>
       </blockquote>
       <h2 id="installation">
@@ -249,10 +249,203 @@
        or
       </p>
       <div class="codehilite">
-       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.3
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.4
 </code></pre>
       </div>
       <h2 id="whats-new">
+       What's New
+      </h2>
+      <h3 id="hover-styles-support">
+       Hover Styles Support
+      </h3>
+      <p>
+       <strong>
+        Enhanced Component Interactivity:
+       </strong>
+       - New
+       <code>
+        hover_style
+       </code>
+       attribute for all components, allowing dynamic styling on mouse hover
+- Styles are automatically generated with higher specificity to ensure proper application
+      </p>
+      <h3 id="multi-handler-event-system">
+       Multi-Handler Event System
+      </h3>
+      <p>
+       <strong>
+        Flexible Event Management:
+       </strong>
+       - Components now support arrays of event handlers for the same event type
+- Multiple
+       <code>
+        dScript
+       </code>
+       , inline JavaScript, or mixed handlers can be assigned to single events
+- Handlers execute in sequence with individual error handling
+- Full backward compatibility with existing single-handler syntax
+      </p>
+      <h3 id="runtime-versioning">
+       Runtime Versioning
+      </h3>
+      <p>
+       <strong>
+        Enhanced Debugging &amp; Tracking:
+       </strong>
+       - JavaScript runtime now includes version information accessible via
+       <code>
+        Dars.version
+       </code>
+       - Release URL exposed through
+       <code>
+        Dars.releaseUrl
+       </code>
+       for quick reference
+- Better debugging and environment identification
+- Framework version tracking in deployed applications
+      </p>
+      <p>
+       <strong>
+        Usage:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1">// Access version information</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="sb">`Using Dars v</span><span class="si">${</span><span class="nx">Dars</span><span class="p">.</span><span class="nx">version</span><span class="si">}</span><span class="sb">`</span><span class="p">);</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="sb">`Release: </span><span class="si">${</span><span class="nx">Dars</span><span class="p">.</span><span class="nx">releaseUrl</span><span class="si">}</span><span class="sb">`</span><span class="p">);</span>
+</code></pre>
+      </div>
+      <h2 id="technical-improvements">
+       Technical Improvements
+      </h2>
+      <h3 id="web-exporter-enhancements">
+       Web Exporter Enhancements
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Improved Style Application
+        </strong>
+        : Fixed CSS generation to ensure all component styles render correctly
+       </li>
+       <li>
+        <strong>
+         Robust Event Serialization
+        </strong>
+        : Enhanced handler extraction and code generation for reliable event execution
+       </li>
+       <li>
+        <strong>
+         Better Error Handling
+        </strong>
+        : Individual error catching for multi-handler events prevents cascade failures
+       </li>
+      </ul>
+      <h3 id="component-system">
+       Component System
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Backward Compatibility
+        </strong>
+        : All existing single-handler events continue working unchanged
+       </li>
+       <li>
+        <strong>
+         Enhanced Flexibility
+        </strong>
+        : Mix and match handler types (dScript, strings, arrays) with consistent behavior
+       </li>
+       <li>
+        <strong>
+         Cleaner Code Generation
+        </strong>
+        : Improved JavaScript output with proper handler separation and error boundaries
+       </li>
+      </ul>
+      <h2 id="migration-notes">
+       Migration Notes
+      </h2>
+      <h3 id="for-existing-projects">
+       For Existing Projects
+      </h3>
+      <p>
+       <strong>
+        Automatic Upgrade:
+       </strong>
+       - No breaking changes - existing code works identically
+- Hover styles can be incrementally added to enhance existing components
+- Multi-handler events are optional - single handlers remain fully supported
+      </p>
+      <h2 id="desktop-exporter-status">
+       Desktop Exporter Status
+      </h2>
+      <p>
+       <strong>
+        Still in BETA
+       </strong>
+       - No changes from v1.3.3
+      </p>
+      <h2 id="performance-compatibility">
+       Performance &amp; Compatibility
+      </h2>
+      <ul>
+       <li>
+        <strong>
+         Zero Overhead
+        </strong>
+        : New features only activate when used
+       </li>
+       <li>
+        <strong>
+         Bundle Size
+        </strong>
+        : Minimal impact on final application size
+       </li>
+       <li>
+        <strong>
+         Browser Support
+        </strong>
+        : Maintains full cross-browser compatibility
+       </li>
+       <li>
+        <strong>
+         Framework Integration
+        </strong>
+        : Seamless with existing Dars ecosystem
+       </li>
+      </ul>
+      <hr/>
+      <p>
+       <strong>
+        Upgrade Recommended
+       </strong>
+       for all projects requiring enhanced interactivity and better development tooling.
+      </p>
+      <h1 id="release-notes-v133">
+       Release Notes v1.3.3
+      </h1>
+      <blockquote>
+       <p>
+        Minor update featuring new semantic Section component and enhanced state serialization. Continues JavaScript migration improvements from v1.3.2.
+       </p>
+      </blockquote>
+      <h2 id="installation-2">
+       Installation
+      </h2>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
+</code></pre>
+      </div>
+      <p>
+       or
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.3
+</code></pre>
+      </div>
+      <h2 id="whats-new-2">
        What's New
       </h2>
       <h3 id="section-component">
@@ -323,7 +516,7 @@
         Migration guides for state serialization changes
        </li>
       </ul>
-      <h2 id="technical-improvements">
+      <h2 id="technical-improvements-2">
        Technical Improvements
       </h2>
       <ul>
@@ -346,10 +539,10 @@
         : Maintains all optimizations from v1.3.2
        </li>
       </ul>
-      <h2 id="migration-notes">
+      <h2 id="migration-notes-2">
        Migration Notes
       </h2>
-      <h3 id="for-existing-projects">
+      <h3 id="for-existing-projects-2">
        For Existing Projects
       </h3>
       <p>
@@ -373,7 +566,7 @@
 <span class="n">Section</span><span class="p">(</span><span class="n">children</span><span class="o">=</span><span class="p">[</span><span class="o">...</span><span class="p">])</span>
 </code></pre>
       </div>
-      <h2 id="desktop-exporter-status">
+      <h2 id="desktop-exporter-status-2">
        Desktop Exporter Status
       </h2>
       <p>
@@ -402,7 +595,7 @@
         Major minification improvements with combined JS files and optimized event handling. Electron desktop exporter remains in beta.
        </p>
       </blockquote>
-      <h2 id="installation-2">
+      <h2 id="installation-3">
        Installation
       </h2>
       <div class="codehilite">
@@ -549,7 +742,7 @@
         : Multi-page application build performance
        </li>
       </ul>
-      <h2 id="desktop-exporter-status-2">
+      <h2 id="desktop-exporter-status-3">
        Desktop Exporter Status
       </h2>
       <p>
@@ -587,10 +780,10 @@
 - Development mode with hot reload
 - Production packaging still experimental
       </p>
-      <h2 id="migration-notes-2">
+      <h2 id="migration-notes-3">
        Migration Notes
       </h2>
-      <h3 id="for-existing-projects-2">
+      <h3 id="for-existing-projects-3">
        For Existing Projects
       </h3>
       <p>
@@ -698,7 +891,7 @@
         Native desktop functions and DX improved with dev mode and file system integration.
        </p>
       </blockquote>
-      <h2 id="installation-3">
+      <h2 id="installation-4">
        Installation
       </h2>
       <div class="codehilite">
@@ -783,7 +976,7 @@
         Native desktop export (BETA), improved CLI and doctor integration, and metadata fixes for packaging. This is a BETA release: usable for testing, not recommended for production.
        </p>
       </blockquote>
-      <h2 id="installation-4">
+      <h2 id="installation-5">
        Installation
       </h2>
       <div class="codehilite">
@@ -1066,7 +1259,7 @@ dars<span class="w"> </span>build
         Optional default minification, precise CLI control, faster builds, and clearer minification status.
        </p>
       </blockquote>
-      <h2 id="installation-5">
+      <h2 id="installation-6">
        Installation
       </h2>
       <div class="codehilite">
@@ -1459,11 +1652,23 @@ dars<span class="w"> </span>build
      <div class="sidebar-category">
       Versions
      </div>
-     <a class="sidebar-link sidebar-level-1" href="#release-notes-v133" style="margin-left: 0px">
-      Release Notes v1.3.3
+     <a class="sidebar-link sidebar-level-1" href="#release-notes-v134" style="margin-left: 0px">
+      Release Notes v1.3.4
      </a>
      <a class="sidebar-link sidebar-level-2" href="#installation" style="margin-left: 20px">
       Installation
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#whats-new" style="margin-left: 20px">
+      What's New
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#hover-styles-support" style="margin-left: 40px">
+      Hover Styles Support
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#multi-handler-event-system" style="margin-left: 40px">
+      Multi-Handler Event System
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#runtime-versioning" style="margin-left: 40px">
+      Runtime Versioning
      </a>
      <a class="sidebar-link sidebar-level-2" href="#whats-new" style="margin-left: 20px">
       What's New

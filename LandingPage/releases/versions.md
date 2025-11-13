@@ -1,3 +1,86 @@
+# Release Notes v1.3.4
+
+> Enhanced interactivity update featuring hover styles, multi-handler events, and runtime versioning. Improves component styling and event handling flexibility.
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+or
+
+```bash
+pip install dars-framework==1.3.4
+```
+
+## What's New
+
+### Hover Styles Support
+
+**Enhanced Component Interactivity:**
+- New `hover_style` attribute for all components, allowing dynamic styling on mouse hover
+- Styles are automatically generated with higher specificity to ensure proper application
+
+### Multi-Handler Event System
+
+**Flexible Event Management:**
+- Components now support arrays of event handlers for the same event type
+- Multiple `dScript`, inline JavaScript, or mixed handlers can be assigned to single events
+- Handlers execute in sequence with individual error handling
+- Full backward compatibility with existing single-handler syntax
+
+### Runtime Versioning
+
+**Enhanced Debugging & Tracking:**
+- JavaScript runtime now includes version information accessible via `Dars.version`
+- Release URL exposed through `Dars.releaseUrl` for quick reference
+- Better debugging and environment identification
+- Framework version tracking in deployed applications
+
+**Usage:**
+```javascript
+// Access version information
+console.log(`Using Dars v${Dars.version}`);
+console.log(`Release: ${Dars.releaseUrl}`);
+```
+
+## Technical Improvements
+
+### Web Exporter Enhancements
+- **Improved Style Application**: Fixed CSS generation to ensure all component styles render correctly
+- **Robust Event Serialization**: Enhanced handler extraction and code generation for reliable event execution
+- **Better Error Handling**: Individual error catching for multi-handler events prevents cascade failures
+
+### Component System
+- **Backward Compatibility**: All existing single-handler events continue working unchanged
+- **Enhanced Flexibility**: Mix and match handler types (dScript, strings, arrays) with consistent behavior
+- **Cleaner Code Generation**: Improved JavaScript output with proper handler separation and error boundaries
+
+## Migration Notes
+
+### For Existing Projects
+
+**Automatic Upgrade:**
+- No breaking changes - existing code works identically
+- Hover styles can be incrementally added to enhance existing components
+- Multi-handler events are optional - single handlers remain fully supported
+
+## Desktop Exporter Status
+
+**Still in BETA** - No changes from v1.3.3
+
+## Performance & Compatibility
+
+- **Zero Overhead**: New features only activate when used
+- **Bundle Size**: Minimal impact on final application size
+- **Browser Support**: Maintains full cross-browser compatibility
+- **Framework Integration**: Seamless with existing Dars ecosystem
+
+---
+
+**Upgrade Recommended** for all projects requiring enhanced interactivity and better development tooling.
+
 # Release Notes v1.3.3
 
 > Minor update featuring new semantic Section component and enhanced state serialization. Continues JavaScript migration improvements from v1.3.2.
