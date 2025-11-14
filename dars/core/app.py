@@ -1433,6 +1433,155 @@ class App:
             if result:
                 return result
         return None
+    
+    def delete(self, id: str) -> 'App':
+        """Remove a component by id from the tree before export (compile-time)."""
+        def _find_parent_and_index(node: Component, target_id: str):
+            for idx, ch in enumerate(getattr(node, 'children', [])[:] ):
+                if getattr(ch, 'id', None) == target_id:
+                    return node, idx
+                res = _find_parent_and_index(ch, target_id)
+                if res:
+                    return res
+            return None
+
+        if self.is_multipage():
+            for name, page in self._pages.items():
+                if not page.root:
+                    continue
+                res = _find_parent_and_index(page.root, id)
+                if res:
+                    parent, idx = res
+                    child = parent.children.pop(idx)
+                    try:
+                        child.parent = None
+                    except Exception:
+                        pass
+                    return self
+            print(f"[Dars] Warning: component id '{id}' not found for deletion.")
+            return self
+        if not self.root:
+            print("[Dars] Warning: no root component defined.")
+            return self
+        res = _find_parent_and_index(self.root, id)
+        if res:
+            parent, idx = res
+            child = parent.children.pop(idx)
+            try:
+                child.parent = None
+            except Exception:
+                pass
+            return self
+        print(f"[Dars] Warning: component id '{id}' not found for deletion.")
+        return self
+
+    def create(self, target, root: Optional["Component"] = None, on_top_of=None, on_bottom_of=None) -> 'App':
+        """Create/insert a component in the tree before export (compile-time)."""
+        if on_top_of is not None and on_bottom_of is not None:
+            raise ValueError("Provide only one of on_top_of or on_bottom_of")
+
+        # Permitir target como callable, instancia o id (str) de un componente existente
+        if isinstance(target, str):
+            # Mover componente existente por id
+            comp = self.find_component_by_id(target)
+            if not comp:
+                print(f"[Dars] Warning: target id '{target}' not found; create() skipped.")
+                return self
+            # Desanclar del padre anterior si existe
+            try:
+                if getattr(comp, 'parent', None) and comp in comp.parent.children:
+                    comp.parent.children.remove(comp)
+                    comp.parent = None
+            except Exception:
+                pass
+        else:
+            comp = target() if callable(target) and not isinstance(target, Component) else target
+        if isinstance(comp, type) and issubclass(comp, Component):
+            raise TypeError("A Component class was provided; pass an instance or a callable returning one.")
+        if not isinstance(comp, Component):
+            raise TypeError("target must be a Component instance or a callable returning one")
+
+        def _resolve_root(root_arg):
+            if root_arg is None:
+                if self.is_multipage():
+                    page = self.get_index_page()
+                    return page.root if page else None
+                return self.root
+            if isinstance(root_arg, Component):
+                return root_arg
+            if isinstance(root_arg, str):
+                # Priorizar id de componente sobre nombre de página
+                found = self.find_component_by_id(root_arg)
+                if found:
+                    return found
+                if root_arg in self._pages:
+                    p = self._pages[root_arg]
+                    return p.root
+            return None
+
+        root_comp = _resolve_root(root)
+        if not root_comp:
+            print("[Dars] Warning: invalid root for create(); operation skipped.")
+            return self
+
+        def _resolve_ref(ref):
+            if ref is None:
+                return None
+            if isinstance(ref, Component):
+                for i, ch in enumerate(root_comp.children):
+                    if ch is ref:
+                        return i
+                return None
+            if isinstance(ref, str):
+                for i, ch in enumerate(root_comp.children):
+                    if getattr(ch, 'id', None) == ref:
+                        return i
+                return None
+            return None
+
+        def _find_parent_and_index_in_subtree(node: Component, ref) -> Optional[tuple]:
+            """Busca en profundidad la referencia y devuelve (parent, index) si la referencia es hijo de 'parent'."""
+            for idx, ch in enumerate(getattr(node, 'children', [])[:] ):
+                if (ref is ch) or (isinstance(ref, str) and getattr(ch, 'id', None) == ref):
+                    return node, idx
+                res = _find_parent_and_index_in_subtree(ch, ref)
+                if res:
+                    return res
+            return None
+
+        insert_idx = None
+        if on_top_of is not None:
+            idx = _resolve_ref(on_top_of)
+            if idx is None:
+                # Intentar localizar en el subárbol y ajustar root si es necesario
+                res = _find_parent_and_index_in_subtree(root_comp, on_top_of)
+                if res:
+                    root_comp, idx = res
+                    insert_idx = idx
+                else:
+                    print("[Dars] Warning: on_top_of reference not found; appending.")
+                    insert_idx = None
+            else:
+                insert_idx = idx
+        elif on_bottom_of is not None:
+            idx = _resolve_ref(on_bottom_of)
+            if idx is None:
+                res = _find_parent_and_index_in_subtree(root_comp, on_bottom_of)
+                if res:
+                    root_comp, idx = res
+                    insert_idx = idx + 1
+                else:
+                    print("[Dars] Warning: on_bottom_of reference not found; appending.")
+                    insert_idx = None
+            else:
+                insert_idx = idx + 1
+
+        comp.parent = root_comp
+        if insert_idx is None or insert_idx >= len(root_comp.children):
+            root_comp.children.append(comp)
+        else:
+            root_comp.children.insert(insert_idx, comp)
+        return self
         
     def get_stats(self) -> Dict[str, Any]:
         """Return application stadistics (single-page and multipage)"""

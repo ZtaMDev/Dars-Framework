@@ -5,8 +5,136 @@ const DARS_VERSION = '{__version__}';
 const DARS_RELEASE_URL = '{__release_url__}';
 
 const __registry = new Map();
+const __vdom = new Map();
 
 function $(id){{ return document.getElementById(id) || document.querySelector(`[data-id="${{id}}"]`) || null; }}
+
+// Alert helper (non-fatal)
+function _alert(msg){{ try{{ alert(String(msg)); }}catch(_ ){{ try{{ console.error(String(msg)); }}catch(_ ){{ }} }} }}
+
+// CSS.escape fallback
+function _cssEscape(s){{
+  try{{ if (globalThis.CSS && typeof CSS.escape==='function') return CSS.escape(String(s)); }}catch(_ ){{ }}
+  try{{ return String(s).replace(/[^a-zA-Z0-9_\-]/g, '\\$&'); }}catch(_ ){{ return String(s); }}
+}}
+
+function _attachEventsForVNode(el, vnode, events, markClass){{
+  try{{
+    if(vnode && vnode.id && events && events[vnode.id]){{
+      const evs = events[vnode.id] || {{}};
+      for(const type in evs){{
+        const handlers = evs[type];
+        const codes = [];
+        const push = (it)=>{{ if(typeof it==='string') codes.push(it); else if(it&&typeof it.code==='string') codes.push(it.code); }};
+        if(Array.isArray(handlers)){{ handlers.forEach(push); }} else {{ push(handlers); }}
+        if(!codes.length) continue;
+        el.__darsEv = el.__darsEv || {{}};
+        if(el.__darsEv[type]){{ try{{ el.removeEventListener(type, el.__darsEv[type], true); }}catch(_ ){{ }} try{{ el.removeEventListener(type, el.__darsEv[type], false); }}catch(_ ){{ }} }}
+        const handler = function(ev){{ try{{ ev.stopImmediatePropagation(); ev.stopPropagation(); ev.preventDefault(); ev.cancelBubble = true; }}catch(_ ){{ }}
+          for(const c of codes){{ try{{ (0,eval)(c); }}catch(_ ){{ }} }}
+        }};
+        try{{ el.addEventListener(type, handler, {{ capture: true }}); }}catch(_ ){{ }}
+        el.__darsEv[type] = handler;
+        try{{ if(markClass) el.classList.add(markClass); }}catch(_ ){{ }}
+      }}
+    }}
+  }}catch(_ ){{ }}
+  // Recorrer hijos VDOM y DOM en paralelo (sólo elementos)
+  try{{
+    const vkids = (vnode && Array.isArray(vnode.children)) ? vnode.children : [];
+    let ei = 0;
+    for(let i=0;i<vkids.length;i++){{
+      const vk = vkids[i];
+      while(ei < el.childNodes.length && el.childNodes[ei].nodeType !== 1) ei++;
+      const childEl = el.childNodes[ei++];
+      if(childEl) _attachEventsForVNode(childEl, vk, events, markClass);
+    }}
+  }}catch(_ ){{ }}
+}}
+
+// ---- Runtime helpers for dynamic create/delete ----
+function _elFromVNode(v){{
+  const map = {{ Text: 'span', Button: 'button', Section: 'section', Div: 'div' }};
+  const tag = (v && typeof v.type === 'string') ? (map[v.type] || 'div') : 'div';
+  const el = document.createElement(tag);
+  try{{ if(v.id) el.id = String(v.id); }}catch(_ ){{ }}
+  try{{ if(v.id) el.classList.add('dars-id-' + String(v.id)); }}catch(_ ){{ }}
+  try{{ if(v.class){{ el.className = String(v.class); }} }}catch(_ ){{ }}
+  try{{ if(v.style && typeof v.style === 'object'){{
+    for(const k in v.style){{ try{{ el.style[k] = v.style[k]; }}catch(_ ){{}}}}
+  }}}}catch(_ ){{ }}
+  try{{ if(typeof v.text === 'string') el.textContent = v.text; }}catch(_ ){{ }}
+  // children
+  try{{ if(Array.isArray(v.children)){{
+    for(const c of v.children){{ const ch = _elFromVNode(c); if(ch) el.appendChild(ch); }}
+  }}}}catch(_ ){{ }}
+  return el;
+}}
+
+function _walkVNode(v, fn){{
+  if(!v) return; try{{ fn(v); }}catch(_ ){{ }}
+  try{{ if(Array.isArray(v.children)) v.children.forEach(ch=>_walkVNode(ch, fn)); }}catch(_ ){{ }}
+}}
+
+function _storeVNode(v){{ _walkVNode(v, n=>{{ try{{ if(n && n.id) __vdom.set(String(n.id), n); }}catch(_ ){{ }} }}); }}
+function _removeVNodeById(id){{ try{{ __vdom.delete(String(id)); }}catch(_ ){{ }} }}
+
+function _attachEventsMap(events){{
+  if(!events||typeof events!=='object') return;
+  for(const cid in events){{
+    try{{
+      const el = $(cid); if(!el) continue;
+      const evs = events[cid] || {{}};
+      for(const type in evs){{
+        const handlers = evs[type];
+        const codes = [];
+        const push = (it)=>{{ if(typeof it==='string') codes.push(it); else if(it&&typeof it.code==='string') codes.push(it.code); }};
+        if(Array.isArray(handlers)){{ handlers.forEach(push); }} else {{ push(handlers); }}
+        if(!codes.length) continue;
+        el.__darsEv = el.__darsEv || {{}};
+        if(el.__darsEv[type]){{ try{{ el.removeEventListener(type, el.__darsEv[type], true); }}catch(_ ){{ }} try{{ el.removeEventListener(type, el.__darsEv[type], false); }}catch(_ ){{ }} }}
+        const handler = function(ev){{ try{{ ev.stopImmediatePropagation(); ev.stopPropagation(); ev.preventDefault(); ev.cancelBubble = true; }}catch(_ ){{ }}
+          for(const c of codes){{ try{{ (0,eval)(c); }}catch(_ ){{ }} }}
+        }};
+        try{{ el.addEventListener(type, handler, {{ capture: true }}); }}catch(_ ){{ }}
+        el.__darsEv[type] = handler;
+      }}
+    }}catch(_ ){{ }}
+  }}
+}}
+
+const runtime = {{
+  deleteComponent(id){{
+    try{{
+      const el = $(id); if(!el) return;
+      const parent = el.parentNode; if(parent) parent.removeChild(el);
+      _removeVNodeById(id);
+    }}catch(e){{ try{{ console.error(e); }}catch(_ ){{ }} }}
+  }},
+  createComponent(root_id, vdom_data, position){{
+    try{{
+      const root = $(root_id); if(!root) return;
+      const el = _elFromVNode(vdom_data||{{}});
+      // insert
+      const pos = String(position||'append');
+      if(pos==='append'){{ root.appendChild(el); }}
+      else if(pos==='prepend'){{ root.insertBefore(el, root.firstChild||null); }}
+      else if(pos.startsWith('before:')){{ const sid = pos.slice(7); const sib = $(sid); if(sib&&sib.parentNode){{ sib.parentNode.insertBefore(el, sib); }} else {{ root.appendChild(el); }} }}
+      else if(pos.startsWith('after:')){{ const sid = pos.slice(6); const sib = $(sid); if(sib&&sib.parentNode){{ sib.parentNode.insertBefore(el, sib.nextSibling); }} else {{ root.appendChild(el); }} }}
+      else {{ root.appendChild(el); }}
+      // store vdom and attach events if provided
+      _storeVNode(vdom_data||{{}});
+      if(vdom_data && vdom_data._events){{
+        // marcar y rehidratar eventos en el subárbol recién creado
+        const mark = 'dars-ev-' + Math.random().toString(36).slice(2);
+        try{{ el.classList.add(mark); }}catch(_ ){{ }}
+        _attachEventsForVNode(el, vdom_data, vdom_data._events, mark);
+      }}
+      // hydrate newly created subtree if available
+      try{{ if(typeof window.DarsHydrate === 'function') window.DarsHydrate(el); }}catch(_ ){{ }}
+    }}catch(e){{ try{{ console.error(e); }}catch(_ ){{ }} }}
+  }}
+}};
 
 function registerState(name, cfg){{
   if(!name || !cfg || !cfg.id) return;
@@ -241,6 +369,7 @@ const Dars = {{
     getState, 
     change, 
     $, 
+    runtime,
     version: DARS_VERSION,
     releaseUrl: DARS_RELEASE_URL
 }};

@@ -217,6 +217,11 @@ class VDomBuilder:
                 # fallback to existing id attribute (may be None)
                 comp_id = getattr(component, 'id', None)
 
+        # Clave estable: si no hay id ni key definidos, usamos el path del árbol
+        stable_key = getattr(component, 'key', None)
+        if not stable_key:
+            stable_key = "/".join(path)
+
         # Props
         safe_props = self._safe_props(component)
 
@@ -250,11 +255,6 @@ class VDomBuilder:
                 is_island = True
         except Exception:
             is_island = False
-
-        # Clave estable: si no hay id ni key definidos, usamos el path del árbol
-        stable_key = getattr(component, 'key', None)
-        if not stable_key and not comp_id:
-            stable_key = "/".join(path)
 
         vnode = VNode(
             type_name=comp_type,

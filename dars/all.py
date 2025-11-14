@@ -46,6 +46,7 @@ from dars.exporters.web.html_css_js import HTMLCSSJSExporter
 from dars.scripts.dscript import dScript
 from dars.scripts.script import *
 from dars.version import __version__
+from dars.backend import createComp, deleteComp
 
 # from dars.core.properties import *
 
@@ -60,4 +61,5 @@ __all__ = [
     '__version__',
     'run_app_tests', 'run_unit_tests', 'main',
     'dState', 'Mod',
+    'createComp', 'deleteComp',
 ]
