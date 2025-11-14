@@ -1,3 +1,80 @@
+# Release Notes v1.3.5
+
+> Enhanced styling and development experience update featuring active styles, improved preview system, and advanced file monitoring. Delivers better visual feedback and faster development workflow.
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+or
+
+```bash
+pip install dars-framework==1.3.5
+```
+
+## What's New
+
+### Active Styles Support
+
+**Complete Component Styling System:**
+- New `active_style` attribute for all components, providing visual feedback during user interaction
+- Completes the styling triad: `style`, `hover_style`, and `active_style`
+- Works seamlessly with existing hover styles introduced in v1.3.4
+
+**Usage:**
+```python
+Button("Click it",
+        id="btn1",
+        on_click=[dScript('console.log(`HI`)'), txtstate.state(1)],
+        style={"color": "green"},
+        hover_style={"color": "red"},      # from v1.3.4
+        active_style={"color": "purple"},  # new in v1.3.5
+)
+```
+
+### Enhanced Preview System
+
+**Optimized Development Server:**
+- Completely redesigned preview system with faster load times
+- Improved hot reload support for instant code changes
+- Better error handling and cleanup processes
+- Enhanced Ctrl+C handling for smooth server shutdown
+
+### Advanced File Watcher
+
+**Comprehensive Project Monitoring:**
+- New file watching system monitors file creation, deletion, and modification
+- Automatic detection of new files in the project directory
+- Supports multiple file extensions (.py, .js, .css, etc.)
+- Real-time updates without manual intervention
+
+## Fixed Issues
+
+### Responsiveness Improvements
+- **Landing Page**: Fixed responsiveness issues on smaller screens
+- **Mobile Compatibility**: Enhanced display and interaction on mobile devices
+
+## Technical Improvements
+
+### Development Experience
+- **Faster Hot Reload**: Reduced reload intervals and improved change detection
+- **Better Error Recovery**: Enhanced error handling during file changes
+- **Clean Shutdown**: Improved server termination and resource cleanup
+
+## Migration Notes
+
+### For Existing Projects
+
+**Seamless Upgrade:**
+- No breaking changes - all existing code remains compatible
+- Active styles can be added incrementally to enhance user interaction
+
+## Desktop Exporter Status
+
+**Still in BETA**
+
 # Release Notes v1.3.4
 
 > Enhanced interactivity update featuring hover styles, multi-handler events, and runtime versioning. Improves component styling and event handling flexibility.

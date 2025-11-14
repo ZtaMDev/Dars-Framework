@@ -230,12 +230,12 @@
     margin: 0 auto;
     padding: 40px 20px;">
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_171">
-      <h1 id="release-notes-v134">
-       Release Notes v1.3.4
+      <h1 id="release-notes-v135">
+       Release Notes v1.3.5
       </h1>
       <blockquote>
        <p>
-        Enhanced interactivity update featuring hover styles, multi-handler events, and runtime versioning. Improves component styling and event handling flexibility.
+        Enhanced styling and development experience update featuring active styles, improved preview system, and advanced file monitoring. Delivers better visual feedback and faster development workflow.
        </p>
       </blockquote>
       <h2 id="installation">
@@ -249,10 +249,167 @@
        or
       </p>
       <div class="codehilite">
-       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.4
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.5
 </code></pre>
       </div>
       <h2 id="whats-new">
+       What's New
+      </h2>
+      <h3 id="active-styles-support">
+       Active Styles Support
+      </h3>
+      <p>
+       <strong>
+        Complete Component Styling System:
+       </strong>
+       - New
+       <code>
+        active_style
+       </code>
+       attribute for all components, providing visual feedback during user interaction
+- Completes the styling triad:
+       <code>
+        style
+       </code>
+       ,
+       <code>
+        hover_style
+       </code>
+       , and
+       <code>
+        active_style
+       </code>
+       - Works seamlessly with existing hover styles introduced in v1.3.4
+      </p>
+      <p>
+       <strong>
+        Usage:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">Button</span><span class="p">(</span><span class="s2">"Click it"</span><span class="p">,</span>
+        <span class="nb">id</span><span class="o">=</span><span class="s2">"btn1"</span><span class="p">,</span>
+        <span class="n">on_click</span><span class="o">=</span><span class="p">[</span><span class="n">dScript</span><span class="p">(</span><span class="s1">'console.log(`HI`)'</span><span class="p">),</span> <span class="n">txtstate</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">1</span><span class="p">)],</span>
+        <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s2">"color"</span><span class="p">:</span> <span class="s2">"green"</span><span class="p">},</span>
+        <span class="n">hover_style</span><span class="o">=</span><span class="p">{</span><span class="s2">"color"</span><span class="p">:</span> <span class="s2">"red"</span><span class="p">},</span>      <span class="c1"># from v1.3.4</span>
+        <span class="n">active_style</span><span class="o">=</span><span class="p">{</span><span class="s2">"color"</span><span class="p">:</span> <span class="s2">"purple"</span><span class="p">},</span>  <span class="c1"># new in v1.3.5</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="enhanced-preview-system">
+       Enhanced Preview System
+      </h3>
+      <p>
+       <strong>
+        Optimized Development Server:
+       </strong>
+       - Completely redesigned preview system with faster load times
+- Improved hot reload support for instant code changes
+- Better error handling and cleanup processes
+- Enhanced Ctrl+C handling for smooth server shutdown
+      </p>
+      <h3 id="advanced-file-watcher">
+       Advanced File Watcher
+      </h3>
+      <p>
+       <strong>
+        Comprehensive Project Monitoring:
+       </strong>
+       - New file watching system monitors file creation, deletion, and modification
+- Automatic detection of new files in the project directory
+- Supports multiple file extensions (.py, .js, .css, etc.)
+- Real-time updates without manual intervention
+      </p>
+      <h2 id="fixed-issues">
+       Fixed Issues
+      </h2>
+      <h3 id="responsiveness-improvements">
+       Responsiveness Improvements
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Landing Page
+        </strong>
+        : Fixed responsiveness issues on smaller screens
+       </li>
+       <li>
+        <strong>
+         Mobile Compatibility
+        </strong>
+        : Enhanced display and interaction on mobile devices
+       </li>
+      </ul>
+      <h2 id="technical-improvements">
+       Technical Improvements
+      </h2>
+      <h3 id="development-experience">
+       Development Experience
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Faster Hot Reload
+        </strong>
+        : Reduced reload intervals and improved change detection
+       </li>
+       <li>
+        <strong>
+         Better Error Recovery
+        </strong>
+        : Enhanced error handling during file changes
+       </li>
+       <li>
+        <strong>
+         Clean Shutdown
+        </strong>
+        : Improved server termination and resource cleanup
+       </li>
+      </ul>
+      <h2 id="migration-notes">
+       Migration Notes
+      </h2>
+      <h3 id="for-existing-projects">
+       For Existing Projects
+      </h3>
+      <p>
+       <strong>
+        Seamless Upgrade:
+       </strong>
+       - No breaking changes - all existing code remains compatible
+- Active styles can be added incrementally to enhance user interaction
+      </p>
+      <h2 id="desktop-exporter-status">
+       Desktop Exporter Status
+      </h2>
+      <p>
+       <strong>
+        Still in BETA
+       </strong>
+      </p>
+      <h1 id="release-notes-v134">
+       Release Notes v1.3.4
+      </h1>
+      <blockquote>
+       <p>
+        Enhanced interactivity update featuring hover styles, multi-handler events, and runtime versioning. Improves component styling and event handling flexibility.
+       </p>
+      </blockquote>
+      <h2 id="installation-2">
+       Installation
+      </h2>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
+</code></pre>
+      </div>
+      <p>
+       or
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.4
+</code></pre>
+      </div>
+      <h2 id="whats-new-2">
        What's New
       </h2>
       <h3 id="hover-styles-support">
@@ -315,7 +472,7 @@
 <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="sb">`Release: </span><span class="si">${</span><span class="nx">Dars</span><span class="p">.</span><span class="nx">releaseUrl</span><span class="si">}</span><span class="sb">`</span><span class="p">);</span>
 </code></pre>
       </div>
-      <h2 id="technical-improvements">
+      <h2 id="technical-improvements-2">
        Technical Improvements
       </h2>
       <h3 id="web-exporter-enhancements">
@@ -364,10 +521,10 @@
         : Improved JavaScript output with proper handler separation and error boundaries
        </li>
       </ul>
-      <h2 id="migration-notes">
+      <h2 id="migration-notes-2">
        Migration Notes
       </h2>
-      <h3 id="for-existing-projects">
+      <h3 id="for-existing-projects-2">
        For Existing Projects
       </h3>
       <p>
@@ -378,7 +535,7 @@
 - Hover styles can be incrementally added to enhance existing components
 - Multi-handler events are optional - single handlers remain fully supported
       </p>
-      <h2 id="desktop-exporter-status">
+      <h2 id="desktop-exporter-status-2">
        Desktop Exporter Status
       </h2>
       <p>
@@ -431,7 +588,7 @@
         Minor update featuring new semantic Section component and enhanced state serialization. Continues JavaScript migration improvements from v1.3.2.
        </p>
       </blockquote>
-      <h2 id="installation-2">
+      <h2 id="installation-3">
        Installation
       </h2>
       <div class="codehilite">
@@ -445,7 +602,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.3
 </code></pre>
       </div>
-      <h2 id="whats-new-2">
+      <h2 id="whats-new-3">
        What's New
       </h2>
       <h3 id="section-component">
@@ -516,7 +673,7 @@
         Migration guides for state serialization changes
        </li>
       </ul>
-      <h2 id="technical-improvements-2">
+      <h2 id="technical-improvements-3">
        Technical Improvements
       </h2>
       <ul>
@@ -539,10 +696,10 @@
         : Maintains all optimizations from v1.3.2
        </li>
       </ul>
-      <h2 id="migration-notes-2">
+      <h2 id="migration-notes-3">
        Migration Notes
       </h2>
-      <h3 id="for-existing-projects-2">
+      <h3 id="for-existing-projects-3">
        For Existing Projects
       </h3>
       <p>
@@ -566,7 +723,7 @@
 <span class="n">Section</span><span class="p">(</span><span class="n">children</span><span class="o">=</span><span class="p">[</span><span class="o">...</span><span class="p">])</span>
 </code></pre>
       </div>
-      <h2 id="desktop-exporter-status-2">
+      <h2 id="desktop-exporter-status-3">
        Desktop Exporter Status
       </h2>
       <p>
@@ -595,7 +752,7 @@
         Major minification improvements with combined JS files and optimized event handling. Electron desktop exporter remains in beta.
        </p>
       </blockquote>
-      <h2 id="installation-3">
+      <h2 id="installation-4">
        Installation
       </h2>
       <div class="codehilite">
@@ -742,7 +899,7 @@
         : Multi-page application build performance
        </li>
       </ul>
-      <h2 id="desktop-exporter-status-3">
+      <h2 id="desktop-exporter-status-4">
        Desktop Exporter Status
       </h2>
       <p>
@@ -780,10 +937,10 @@
 - Development mode with hot reload
 - Production packaging still experimental
       </p>
-      <h2 id="migration-notes-3">
+      <h2 id="migration-notes-4">
        Migration Notes
       </h2>
-      <h3 id="for-existing-projects-3">
+      <h3 id="for-existing-projects-4">
        For Existing Projects
       </h3>
       <p>
@@ -891,7 +1048,7 @@
         Native desktop functions and DX improved with dev mode and file system integration.
        </p>
       </blockquote>
-      <h2 id="installation-4">
+      <h2 id="installation-5">
        Installation
       </h2>
       <div class="codehilite">
@@ -976,7 +1133,7 @@
         Native desktop export (BETA), improved CLI and doctor integration, and metadata fixes for packaging. This is a BETA release: usable for testing, not recommended for production.
        </p>
       </blockquote>
-      <h2 id="installation-5">
+      <h2 id="installation-6">
        Installation
       </h2>
       <div class="codehilite">
@@ -1259,7 +1416,7 @@ dars<span class="w"> </span>build
         Optional default minification, precise CLI control, faster builds, and clearer minification status.
        </p>
       </blockquote>
-      <h2 id="installation-6">
+      <h2 id="installation-7">
        Installation
       </h2>
       <div class="codehilite">
@@ -1652,11 +1809,17 @@ dars<span class="w"> </span>build
      <div class="sidebar-category">
       Versions
      </div>
-     <a class="sidebar-link sidebar-level-1" href="#release-notes-v134" style="margin-left: 0px">
-      Release Notes v1.3.4
+     <a class="sidebar-link sidebar-level-1" href="#release-notes-v135" style="margin-left: 0px">
+      Release Notes v1.3.5
      </a>
      <a class="sidebar-link sidebar-level-2" href="#installation" style="margin-left: 20px">
       Installation
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#whats-new" style="margin-left: 20px">
+      What's New
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#active-styles-support" style="margin-left: 40px">
+      Active Styles Support
      </a>
      <a class="sidebar-link sidebar-level-2" href="#whats-new" style="margin-left: 20px">
       What's New
