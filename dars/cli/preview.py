@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-Dars Preview - Preview system for exported applications
+Dars Preview - Optimized Preview Server for Dars Applications
+Fast, reliable server specifically designed for hot reload development.
 """
 
 import os
@@ -12,437 +13,304 @@ import socketserver
 import threading
 import time
 from pathlib import Path
+from urllib.parse import urlparse
+import signal
 
 from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
-from rich.table import Table
-from rich import print as rprint
-
-from dars.cli.translations import translator
 
 console = Console()
 
+
 class PreviewServer:
-    """Preview server for Dars applications"""
-    
-    class DarsRequestHandler(http.server.SimpleHTTPRequestHandler):
+    """Fast preview server optimized for hot reload development"""
+
+    class FastRequestHandler(http.server.SimpleHTTPRequestHandler):
+        def __init__(self, *args, **kwargs):
+            self.base_directory = kwargs.pop("directory", ".")
+            super().__init__(*args, **kwargs)
+
+        def translate_path(self, path):
+            # Override to serve from our specific directory
+            path = super().translate_path(path)
+            relpath = os.path.relpath(path, os.getcwd())
+            return os.path.join(self.base_directory, relpath)
+
+        def do_GET(self):
+            # Hot reload endpoints - serve immediately with no caching
+            if self.path.endswith("version.txt") or (
+                self.path.startswith("/version_") and self.path.endswith(".txt")
+            ):
+                self.send_response(200)
+                self.send_header("Content-type", "text/plain")
+                self.send_header("Cache-Control", "no-store, no-cache, must-revalidate")
+                self.send_header("Pragma", "no-cache")
+                self.send_header("Expires", "0")
+                self.end_headers()
+
+                version_path = self.translate_path(self.path)
+                if os.path.exists(version_path):
+                    with open(version_path, "r") as f:
+                        self.wfile.write(f.read().encode())
+                else:
+                    self.wfile.write(b"0")
+                return
+
+            # For root path, always serve index.html
+            if self.path == "/" or self.path == "":
+                self.path = "/index.html"
+
+            # Check if file exists, if not serve index.html for SPA routing
+            file_path = self.translate_path(self.path)
+            if not os.path.exists(file_path):
+                index_path = os.path.join(self.base_directory, "index.html")
+                if os.path.exists(index_path):
+                    self.path = "/index.html"
+                else:
+                    self.send_error(404, "File not found")
+                    return
+
+            return super().do_GET()
+
         def end_headers(self):
-            # CORS para desarrollo PWA si es necesario
-            self.send_header('Access-Control-Allow-Origin', '*')
+            # Development headers - no caching
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Cache-Control", "no-store, no-cache, must-revalidate")
+            self.send_header("Pragma", "no-cache")
+            self.send_header("Expires", "0")
             super().end_headers()
+
         def guess_type(self, path):
-            # Ensure correct MIME types for JS modules and JSON
-            if path.endswith('.mjs') or path.endswith('.js'):
-                return 'application/javascript'
-            if path.endswith('.json'):
-                return 'application/json'
+            # Ensure correct MIME types
+            if path.endswith(".mjs") or path.endswith(".js"):
+                return "application/javascript"
+            if path.endswith(".json"):
+                return "application/json"
+            if path.endswith(".css"):
+                return "text/css"
+            if path.endswith(".html"):
+                return "text/html"
             return super().guess_type(path)
-        def log_request(self, code='-', size='-'):
-            """Silencia logs para peticiones frecuentes del hot-reload (version.txt)."""
+
+        def log_message(self, format, *args):
             try:
-                p = getattr(self, 'path', '') or ''
-                # Coincidir /version.txt o /version_<slug>.txt
-                if p.endswith('version.txt') or (p.startswith('/version_') and p.endswith('.txt')):
-                    return  # no loggear
+                # Suppress logs for hot reload requests and normal page loads
+                path = getattr(self, "path", "")
+                if any(
+                    pattern in path
+                    for pattern in ["version.txt", "favicon.ico", ".css", ".js", ".png", ".jpg", ".svg"]
+                ):
+                    return
+                
+                # Handle different log message formats safely
+                if len(args) >= 3:
+                    # Normal request: (client_address, method, request_line)
+                    console.print(f"[dim]HTTP {args[1]} {args[0]} - {args[2]}[/dim]")
+                elif len(args) == 2:
+                    # Error message: (code, message)
+                    console.print(f"[dim]HTTP Error {args[0]}: {args[1]}[/dim]")
+                else:
+                    # Unknown format, log what we have
+                    console.print(f"[dim]HTTP Log: {args}[/dim]")
             except Exception:
+                # Silently ignore any logging errors during shutdown
                 pass
-            return super().log_request(code, size)
-    
-    def __init__(self, directory: str, port: int = 8000):
+
+    def __init__(self, directory: str, port: int = 8000, host: str = "localhost"):
         self.directory = os.path.abspath(directory)
         self.port = port
+        self.host = host
         self.server = None
         self.server_thread = None
-        
+        self._is_ready = False
+        self._shutdown_event = threading.Event()
+        self._server_stopped = False
+
+    def is_ready(self):
+        """Check if index.html exists and server is ready"""
+        index_path = os.path.join(self.directory, "index.html")
+        return os.path.exists(index_path) and self._is_ready
+
+    def wait_until_ready(self, timeout=5.0):
+        """Wait for index.html to be available"""
+        start_time = time.time()
+        while time.time() - start_time < timeout:
+            index_path = os.path.join(self.directory, "index.html")
+            if os.path.exists(index_path):
+                return True
+            time.sleep(0.05)
+        return False
+
     def start(self):
-        """Starts the preview server"""
+        """Starts the preview server - optimized for fast startup"""
         try:
-            # Change to the application directory
-            os.chdir(self.directory)
+            # Ensure directory exists
+            os.makedirs(self.directory, exist_ok=True)
+
+            # Register mimetypes
+            mimetypes.add_type("application/javascript", ".js")
+            mimetypes.add_type("application/javascript", ".mjs")
+            mimetypes.add_type("application/json", ".json")
+
+            # Use ThreadingTCPServer to allow concurrent requests and clean shutdown
+            handler = lambda *args, **kwargs: self.FastRequestHandler(
+                *args, directory=self.directory, **kwargs
+            )
+
+            # Ensure the class allows reuse address before bind
+            socketserver.ThreadingTCPServer.allow_reuse_address = True
+            self.server = socketserver.ThreadingTCPServer((self.host, self.port), handler)
+
+            # Don't block process exit for active request threads
+            self.server.daemon_threads = True
+
+            # Start server in a background thread using serve_forever with a short poll interval
+            self.server_thread = threading.Thread(target=self._serve_forever)
+            self.server_thread.daemon = True  # Changed to True for faster shutdown
+            self.server_thread.start()
+
+            # mark ready quickly
+            time.sleep(0.05)
+            self._is_ready = True
+
+            console.print(f"[green]✓ Preview server started on http://{self.host}:{self.port}[/green]")
+            return True
+
+        except Exception as e:
+            console.print(f"[red]Failed to start preview server: {e}[/red]")
+            return False
+
+    def _serve_forever(self):
+        """Serve forever with proper shutdown handling"""
+        try:
+            self.server.serve_forever(poll_interval=0.5)
+        except Exception:
+            # Ignore errors during shutdown
+            if not self._shutdown_event.is_set():
+                pass
+
+    def stop(self, timeout: float = 2.0):
+        """Stops the preview server quickly and reliably"""
+        if self._server_stopped:
+            return
             
-            # Create the server
-            # Register mimetypes for strict module loading
+        self._shutdown_event.set()
+        self._is_ready = False
+        self._server_stopped = True
+
+        if self.server:
             try:
-                mimetypes.add_type('application/javascript', '.js')
-                mimetypes.add_type('application/javascript', '.mjs')
-                mimetypes.add_type('application/json', '.json')
+                # First shutdown the server to stop accepting new connections
+                self.server.shutdown()
             except Exception:
                 pass
-            handler = self.DarsRequestHandler
-            self.server = socketserver.TCPServer(("", self.port), handler)
-            
-            # Start in a separate thread
-            self.server_thread = threading.Thread(target=self.server.serve_forever)
-            self.server_thread.daemon = True
-            self.server_thread.start()
-            
-            return True
-            
-        except Exception as e:
-            console.print(f"[red]{translator.get('server_start_error')}: {e}[/red]")
-            return False
-            
-    def stop(self):
-        """Stops the preview server"""
-        if self.server:
-            self.server.shutdown()
-            self.server.server_close()
-            
+
+            try:
+                # Then close the server socket
+                self.server.server_close()
+            except Exception:
+                pass
+
+            self.server = None
+
+        # Wait for thread to finish with timeout
+        if self.server_thread and self.server_thread.is_alive():
+            self.server_thread.join(timeout=timeout)
+
+        # If still alive after timeout, it will be killed as daemon thread
+        if self.server_thread and self.server_thread.is_alive():
+            console.print("[yellow]Server thread stopping...[/yellow]")
+
     def get_url(self) -> str:
         """Gets the server URL"""
-        return f"http://localhost:{self.port}"
+        return f"http://{self.host}:{self.port}"
 
-def preview_html_app(directory: str, auto_open: bool = True, port: int = 8000):
-    """Previews an exported HTML application"""
-    
-    import signal
-    
-    # Verify that index.html exists
-    index_path = os.path.join(directory, "index.html")
-    if not os.path.exists(index_path):
-        console.print(f"[red]{translator.get('index_html_missing')} {directory}[/red]")
+
+def preview_app(directory: str, auto_open: bool = True, port: int = 8000, host: str = "localhost"):
+    """Previews a Dars HTML application with fast hot reload support"""
+
+    # Verify that directory exists
+    if not os.path.exists(directory):
+        console.print(f"[red]Directory does not exist: {directory}[/red]")
         return False
-        
+
     # Create and start the server
-    server = PreviewServer(directory, port)
-    
+    server = PreviewServer(directory, port, host=host)
+
     if not server.start():
         return False
-        
+
     url = server.get_url()
-    
+
     # Show information
-    panel_content = f"""
-[green]✓[/green] {translator.get('preview_server_started')}
+    panel = Panel(
+        Text(
+            f"✓ Preview server running successfully\n\n"
+            f"URL: {url}\n"
+            f"Directory: {directory}\n"
+            f"Port: {port}\n\n"
+            f"Press Ctrl+C to stop the server",
+            style="bold green",
+            justify="center",
+        ),
+        title="Dars Preview",
+        border_style="cyan",
+    )
+    console.print(panel)
 
-[bold]URL:[/bold] {url}
-[bold]{translator.get('directory')}:[/bold] {directory}
-[bold]{translator.get('port')}:[/bold] {port}
-
-[yellow]{translator.get('press_ctrl_c')}[/yellow]
-"""
-    
-    console.print(Panel(panel_content, title="Dars Preview", border_style="green"))
-    
     # Open in browser if requested
     if auto_open:
         try:
             webbrowser.open(url)
-            console.print(f"[cyan]{translator.get('opening_in_browser').format(url=url)}[/cyan]")
+            console.print(f"[cyan]Opening in browser: {url}[/cyan]")
         except Exception as e:
-            console.print(f"[yellow]{translator.get('browser_open_error')}: {e}[/yellow]")
-            console.print(f"[cyan]{translator.get('open_manually')}: {url}[/cyan]")
+            console.print(f"[yellow]Could not open browser: {e}[/yellow]")
+            console.print(f"[cyan]Open manually: {url}[/cyan]")
 
-    import threading
-    import signal
-
-    shutdown_event = threading.Event()
+    # Improved shutdown handling
+    def signal_handler(sig, frame):
+        console.print(f"\n[yellow]Stopping preview server...[/yellow]")
+        # Stop server immediately
+        server.stop()
+        console.print(f"[green]✓ Preview server stopped successfully[/green]")
+        # Exit cleanly
+        sys.exit(0)
 
     try:
-        while not shutdown_event.is_set():
-            shutdown_event.wait(timeout=1)  # Espera hasta que se pida cerrar, sin consumir CPU
+        signal.signal(signal.SIGINT, signal_handler)
+    except Exception as e:
+        console.print(f"[yellow]Warning: Could not set signal handler: {e}[/yellow]")
+
+    try:
+        # Keep the main thread alive with polling
+        while server._is_ready and not server._shutdown_event.is_set():
+            time.sleep(0.1)
     except KeyboardInterrupt:
-        shutdown_event.set()
-    finally:
-        console.print(f"\n[yellow]{translator.get('stopping_server')}[/yellow]")
+        signal_handler(None, None)
+    except Exception as e:
+        console.print(f"[red]Unexpected error: {e}[/red]")
         server.stop()
-        console.print(f"[green]{translator.get('server_stopped')}[/green]")
 
     return True
 
-def preview_react_app(directory: str):
-    """Previews an exported React application"""
-    
-    # Verify that package.json exists
-    package_path = os.path.join(directory, "package.json")
-    if not os.path.exists(package_path):
-        console.print(f"[red]{translator.get('package_json_not_found')} {directory}[/red]")
-        return False
-        
-    console.print(Panel(
-        f"""
-{translator.get('preview_react_instructions')}:
 
-1. {translator.get('navigate_to_directory')}:
-   [cyan]cd {directory}[/cyan]
-
-2. {translator.get('install_dependencies')}:
-   [cyan]npm install[/cyan]
-
-3. {translator.get('start_dev_server')}:
-   [cyan]npm start[/cyan]
-
-{translator.get('app_will_open')} http://localhost:3000
-        """,
-        title=translator.get('react_preview'),
-        border_style="blue"
-    ))
-    
-    return True
-
-def preview_react_native_app(directory: str):
-    """Previews an exported React Native application"""
-    
-    # Verify that package.json exists
-    package_path = os.path.join(directory, "package.json")
-    if not os.path.exists(package_path):
-        console.print(f"[red]{translator.get('package_json_not_found')} {directory}[/red]")
-        return False
-        
-    console.print(Panel(
-        f"""
-{translator.get('preview_react_native_instructions')}:
-
-1. {translator.get('navigate_to_directory')}:
-   [cyan]cd {directory}[/cyan]
-
-2. {translator.get('install_dependencies')}:
-   [cyan]npm install[/cyan]
-
-3. {translator.get('for_android')}:
-   [cyan]npm run android[/cyan]
-
-4. {translator.get('for_ios')}:
-   [cyan]npm run ios[/cyan]
-
-5. {translator.get('start_metro')}:
-   [cyan]npm start[/cyan]
-
-[yellow]{translator.get('react_native_note')}[/yellow]
-        """,
-        title=translator.get('react_native_preview'),
-        border_style="green"
-    ))
-    
-    return True
-
-def preview_pyside6_app(directory: str):
-    """Previews an exported PySide6 application"""
-    
-    # Verify that main.py exists
-    main_path = os.path.join(directory, "main.py")
-    if not os.path.exists(main_path):
-        console.print(f"[red]{translator.get('main_py_not_found')} {directory}[/red]")
-        return False
-        
-    console.print(Panel(
-        f"""
-{translator.get('run_pyside6_app')}:
-
-1. {translator.get('navigate_to_directory')}:
-   [cyan]cd {directory}[/cyan]
-
-2. {translator.get('install_dependencies')}:
-   [cyan]pip install -r requirements.txt[/cyan]
-
-3. {translator.get('run_application')}:
-   [cyan]python main.py[/cyan]
-
-[yellow]{translator.get('pyside6_note')}[/yellow]
-        """,
-        title=translator.get('pyside6_preview'),
-        border_style="magenta"
-    ))
-    
-    return True
-
-def preview_csharp_app(directory: str):
-    """Previews an exported C# application"""
-    
-    # Search for .csproj file
-    csproj_files = list(Path(directory).glob("*.csproj"))
-    if not csproj_files:
-        console.print(f"[red]{translator.get('csproj_not_found')} {directory}[/red]")
-        return False
-        
-    csproj_file = csproj_files[0].name
-    
-    console.print(Panel(
-        f"""
-{translator.get('run_csharp_app')}:
-
-1. {translator.get('navigate_to_directory')}:
-   [cyan]cd {directory}[/cyan]
-
-2. {translator.get('restore_dependencies')}:
-   [cyan]dotnet restore[/cyan]
-
-3. {translator.get('build_application')}:
-   [cyan]dotnet build[/cyan]
-
-4. {translator.get('run_application')}:
-   [cyan]dotnet run[/cyan]
-
-[yellow]{translator.get('dotnet_note')}[/yellow]
-        """,
-        title=translator.get('csharp_preview'),
-        border_style="red"
-    ))
-    
-    return True
-
-def preview_kotlin_app(directory: str):
-    """Previews an exported Kotlin application"""
-    
-    # Verify that build.gradle.kts exists
-    gradle_path = os.path.join(directory, "build.gradle.kts")
-    if not os.path.exists(gradle_path):
-        console.print(f"[red]{translator.get('gradle_not_found')} {directory}[/red]")
-        return False
-        
-    console.print(Panel(
-        f"""
-{translator.get('run_kotlin_app')}:
-
-1. {translator.get('navigate_to_directory')}:
-   [cyan]cd {directory}[/cyan]
-
-2. {translator.get('for_desktop')}:
-   [cyan]./gradlew run[/cyan]
-
-3. {translator.get('for_android')}:
-   [cyan]./gradlew installDebug[/cyan]
-
-4. {translator.get('build_all_platforms')}:
-   [cyan]./gradlew build[/cyan]
-
-[yellow]{translator.get('kotlin_note')}[/yellow]
-        """,
-        title=translator.get('kotlin_preview'),
-        border_style="yellow"
-    ))
-    
-    return True
-
-def auto_detect_format(directory: str) -> str:
-    """Automatically detects the format of the exported application"""
-    
-    if os.path.exists(os.path.join(directory, "index.html")):
-        return "html"
-    elif os.path.exists(os.path.join(directory, "package.json")):
-        # Read package.json to distinguish between React and React Native
-        try:
-            import json
-            with open(os.path.join(directory, "package.json"), 'r') as f:
-                package_data = json.load(f)
-                
-            if "react-native" in package_data.get("dependencies", {}):
-                return "react-native"
-            else:
-                return "react"
-        except:
-            return "react"
-    elif os.path.exists(os.path.join(directory, "main.py")):
-        return "pyside6"
-    elif list(Path(directory).glob("*.csproj")):
-        return "csharp"
-    elif os.path.exists(os.path.join(directory, "build.gradle.kts")):
-        return "kotlin"
-    else:
-        return "unknown"
-
-def preview_app(directory: str, format_name: str = None, auto_open: bool = True, port: int = 8000):
-    """Previews an exported application"""
-    
-    if not os.path.exists(directory):
-        console.print(f"[red]{translator.get('directory_not_exists').format(directory=directory)}[/red]")
-        return False
-        
-    # Automatically detect format if not specified
-    if format_name is None:
-        format_name = auto_detect_format(directory)
-        
-    if format_name == "unknown":
-        console.print(f"[red]{translator.get('format_not_detected').format(directory=directory)}[/red]")
-        return False
-        
-    console.print(f"[cyan]{translator.get('detected_format')}: {format_name}[/cyan]")
-    
-    # Call the corresponding previewer
-    preview_functions = {
-        "html": lambda: preview_html_app(directory, auto_open, port),
-        "react": lambda: preview_react_app(directory),
-        "react-native": lambda: preview_react_native_app(directory),
-        "pyside6": lambda: preview_pyside6_app(directory),
-        "csharp": lambda: preview_csharp_app(directory),
-        "kotlin": lambda: preview_kotlin_app(directory)
-    }
-    
-    preview_function = preview_functions.get(format_name)
-    if preview_function:
-        return preview_function()
-    else:
-        console.print(f"[red]{translator.get('format_not_supported').format(format=format_name)}[/red]")
-        return False
-
-if __name__ == "__main__":
+def main():
+    """Main entry point for the preview server"""
     import argparse
-    import sys
-    
-    # First, create a simple parser just to extract the language
-    pre_parser = argparse.ArgumentParser(add_help=False)
-    pre_parser.add_argument("--lang", "-l", choices=["en", "es"], default="en")
-    
-    # Parse known args to get language without triggering errors on other args
-    pre_args, _ = pre_parser.parse_known_args()
-    
-    # Set language before creating the main parser and save preference if specified
-    # If --lang is in sys.argv, it means the user explicitly specified it
-    save_preference = "--lang" in sys.argv or "-l" in sys.argv
-    translator.set_language(pre_args.lang, save=save_preference)
-    
-    # Check for help before parsing arguments to show Rich-styled help
-    if '-h' in sys.argv or '--help' in sys.argv:
-        # Show banner
-        console.print(Panel(
-            Text("Dars Preview", style="bold cyan", justify="center"),
-            subtitle=translator.get('preview_description'),
-            border_style="cyan"
-        ))
-        
-        # Show usage
-        console.print(f"\n[bold cyan]{translator.get('usage')}:[/bold cyan]")
-        console.print("preview.py [-h] [--format FORMAT] [--no-open] [--port PORT] [--lang {en,es}] directory")
-        
-        # Show positional arguments
-        console.print(f"\n[bold cyan]{translator.get('positional_arguments')}:[/bold cyan]")
-        pos_table = Table(show_header=False, box=None, padding=(0, 2, 0, 0), expand=True)
-        pos_table.add_column("Argument", style="bold green", width=20, no_wrap=True)
-        pos_table.add_column("Description", style="dim white", overflow="fold")
-        pos_table.add_row("directory", translator.get('directory_help'))
-        console.print(pos_table)
-        
-        # Show options
-        console.print(f"\n[bold cyan]{translator.get('options')}:[/bold cyan]")
-        opt_table = Table(show_header=False, box=None, padding=(0, 2, 0, 0), expand=True)
-        opt_table.add_column("Option", style="bold green", width=30, no_wrap=True)
-        opt_table.add_column("Description", style="dim white", overflow="fold")
-        opt_table.add_row("-h, --help", "show this help message and exit")
-        opt_table.add_row("--format FORMAT, -f FORMAT", translator.get('format_help'))
-        opt_table.add_row("--no-open", translator.get('no_open_help'))
-        opt_table.add_row("--port PORT, -p PORT", translator.get('port_help'))
-        opt_table.add_row("--lang {en,es}, -l {en,es}", translator.get('lang_help'))
-        console.print(opt_table)
-        
-        sys.exit(0)
-    
-    # Now create the full parser with translated help text
-    parser = argparse.ArgumentParser(description=translator.get('preview_description'))
-    parser.add_argument("directory", help=translator.get('directory_help'))
-    parser.add_argument("--format", "-f", help=translator.get('format_help'))
-    parser.add_argument("--no-open", action="store_true", help=translator.get('no_open_help'))
-    parser.add_argument("--port", "-p", type=int, default=8000, help=translator.get('port_help'))
-    parser.add_argument("--lang", "-l", choices=["en", "es"], default="en", help=translator.get('lang_help'))
-    
+
+    parser = argparse.ArgumentParser(description="Dars Preview Server")
+    parser.add_argument("directory", help="Directory containing the exported application")
+    parser.add_argument("--port", "-p", type=int, default=8000, help="Port to run the server on (default: 8000)")
+    parser.add_argument("--host", type=str, default="localhost", help="Host to bind to (default: localhost)")
+    parser.add_argument("--no-open", action="store_true", help="Do not open browser automatically")
+
     args = parser.parse_args()
-    
-    success = preview_app(
-        args.directory, 
-        args.format, 
-        not args.no_open, 
-        args.port
-    )
-    
+
+    success = preview_app(args.directory, auto_open=not args.no_open, port=args.port, host=args.host)
+
     sys.exit(0 if success else 1)
 
+
+if __name__ == "__main__":
+    main()

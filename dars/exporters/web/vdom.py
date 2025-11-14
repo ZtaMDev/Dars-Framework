@@ -26,6 +26,7 @@ class VNode:
         class_name: Optional[str],
         style: Dict[str, Any],
         hover_style: Dict[str, Any],
+        active_style: Dict[str, Any],
         props: Dict[str, Any],
         children: Optional[List["VNode"]] = None,
         text: Optional[str] = None,
@@ -36,7 +37,8 @@ class VNode:
         self.key = key
         self.class_name = class_name
         self.style = style or {}
-        self.hover_style = hover_style or {} 
+        self.hover_style = hover_style or {}
+        self.active_style = active_style or {} 
         self.props = props or {}
         self.children = children or []
         self.text = text
@@ -50,6 +52,7 @@ class VNode:
             "class": self.class_name,
             "style": self.style or {},
             "hover_style": self.hover_style or {},
+            "active_style": self.active_style or {},
             "props": self.props or {},
             "children": [c.to_dict() for c in (self.children or [])],
         }
@@ -96,7 +99,7 @@ class VDomBuilder:
         EXCLUDE_KEYS = {
             'id', 'class_name', 'style', 'children', 'events', 'scripts', 'key',
             'props',  # avoid nesting component.props inside props
-            'rendered_html',  # avoid transporting heavy derived HTML payloads
+            'rendered_html','active_style', 'hover_style'  # avoid transporting heavy derived HTML payloads
         }
 
         # 1) Base props from component.props
@@ -260,6 +263,7 @@ class VDomBuilder:
             class_name=getattr(component, 'class_name', None),
             style=getattr(component, 'style', {}) or {},
             hover_style=getattr(component, 'hover_style', {}) or {},
+            active_style=getattr(component, 'active_style', {}) or {},
             props=safe_props,
             children=children_nodes,
             text=text_value,

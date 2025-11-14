@@ -1550,7 +1550,6 @@ def main():
         try:
             # Avoid duplicating the same 'Running dev' message that the app itself prints.
             # The child process (app.rTimeCompile) will emit a detailed "Running dev:" message.
-            console.print(f"[cyan]Starting dev process: {entry}[/cyan]")
             process = subprocess.Popen([sys.executable, entry], cwd=os.path.dirname(entry))
             process.wait()
             sys.exit(process.returncode or 0)

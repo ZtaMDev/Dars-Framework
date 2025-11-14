@@ -132,11 +132,11 @@ class App:
 
     def rTimeCompile(self, exporter=None, port=None, add_file_types=".py, .js, .css", watchfiledialog=False):
         """
-        Generates a quick preview of the app on a local server using an exporter
-        (default: HTMLCSSJSExporter) and serving the files from a temporary directory.
-        Does not open the browser automatically. The server stops with Ctrl+C.
-        You can pass the port as a command-line argument: python main.py --port 8080
+        Optimized Real-Time Compile with fast Ctrl+C exit
+        Shows a colored spinner ("Exiting server...") when user presses Ctrl+C.
+        Supports both web and desktop modes with configuration respect.
         """
+
         import threading
         import time
         import sys
@@ -154,37 +154,52 @@ class App:
 
         @contextmanager
         def pushd(path):
-            """Cambia temporalmente el cwd y lo restaura al salir."""
             old = os.getcwd()
             os.chdir(path)
             try:
                 yield
             finally:
                 os.chdir(old)
-
-        # Rich para mensajes bonitos
         try:
-            from rich.console import Console
+            from dars.cli.main import console as global_console
+        except Exception:
+            global_console = None
+
+        # Importar componentes de Rich
+        try:
             from rich.panel import Panel
             from rich.text import Text
-        except ImportError:
-            Console = None
-        console = Console() if 'Console' in locals() else None
+            from rich.live import Live
+            from rich.spinner import Spinner
+            from rich.align import Align
+            from rich.table import Table
+        except Exception:
+            Panel = Text = Live = Spinner = Align = Table = None
 
-        # Leer puerto de sys.argv si no se pasa explícito
+        # Si no existe una consola global, creamos una local segura
+        if global_console:
+            console = global_console
+        else:
+            try:
+                from rich.console import Console as _Console
+                console = _Console()
+            except Exception:
+                console = None
+
+        # ---- PORT ----
         if port is None:
             port = 8000
             for i, arg in enumerate(sys.argv):
                 if arg in ('--port', '-p') and i + 1 < len(sys.argv):
                     try:
                         port = int(sys.argv[i + 1])
-                    except Exception:
+                    except:
                         pass
-            # --- Normalizar add_file_types => lista de extensiones que empiezan con '.' ---
+
+        # ---- NORMALIZE EXTENSIONS ----
         def _normalize_exts(exts):
             if not exts:
                 return ['.py']
-            # aceptar string con comas
             if isinstance(exts, str):
                 parts = [p.strip() for p in exts.split(',') if p.strip()]
             elif isinstance(exts, (list, tuple, set)):
@@ -199,132 +214,372 @@ class App:
                 if not p.startswith('.'):
                     p = '.' + p
                 normalized.append(p.lower())
-            # siempre incluir .py (comportamiento: .py + los adicionales)
+
             if '.py' not in normalized:
                 normalized.insert(0, '.py')
-            # eliminar duplicados preservando orden
-            seen = set()
-            result = []
+
+            seen, result = set(), []
             for e in normalized:
                 if e not in seen:
                     seen.add(e)
                     result.append(e)
             return result
 
-        # Lista final de extensiones a vigilar (ej: ['.py', '.js', '.css'])
         watch_exts = _normalize_exts(add_file_types)
-               
-        # Importar exportador por defecto si no se pasa
+
+        # ---- EXPORTER ----
         if exporter is None:
             try:
                 from dars.exporters.web.html_css_js import HTMLCSSJSExporter
             except ImportError:
-                print("Could not import HTMLCSSJSExporter")
+                if console:
+                    console.print("[red]Could not import HTMLCSSJSExporter[/red]")
+                else:
+                    print("Could not import HTMLCSSJSExporter")
                 return
             exporter = HTMLCSSJSExporter()
 
-        # Importar PreviewServer (para modo web)
+        # ---- PREVIEW SERVER ----
         try:
             from dars.cli.preview import PreviewServer
-        except ImportError:
+        except Exception:
             PreviewServer = None
 
         shutdown_event = threading.Event()
-        watchers = []  # aquí guardaremos todos los watchers
+        cleanup_done_event = threading.Event()
+        watchers = []
+        directory_watchers = []
 
-        # Debounce / lock para evitar reloads concurrentes
         reload_lock = threading.Lock()
         last_reload_at = 0.0
-        MIN_RELOAD_INTERVAL = 0.4  # segundos
+        MIN_RELOAD_INTERVAL = 0.4
+
+        # ---- IMPROVED Ctrl+C HANDLER ----
+        shutting_down = False
+        spinner_thread = None
+        initialization_complete = threading.Event()
+
+        def fast_exit_handler(sig, frame):
+            nonlocal shutting_down, spinner_thread
+            if shutting_down:
+                return
+            shutting_down = True
+            shutdown_event.set()
+
+            if console:
+                def _spinner():
+                    try:
+                        # Wait for initialization to complete if we're still starting up
+                        if not initialization_complete.is_set():
+                            with console.status("[bold yellow] Waiting for initialization to complete...[/bold yellow]", spinner="dots"):
+                                initialization_complete.wait(timeout=5.0)
+                        
+                        with console.status("[bold magenta] Exiting server...[/bold magenta]", spinner="dots"):
+                            cleanup_done_event.wait(timeout=3.0)
+                    except Exception:
+                        pass
+
+                spinner_thread = threading.Thread(target=_spinner, daemon=True)
+                spinner_thread.start()
+            else:
+                print("Exiting...")
 
         try:
-            # Detectar archivo principal de la app (el que ejecutaste con `python archivo.py`)
-            app_file = None
-            for frame in inspect.stack():
-                if frame.function == "<module>":
-                    app_file = frame.filename
-                    break
-            if not app_file:
-                app_file = sys.argv[0]
+            signal.signal(signal.SIGINT, fast_exit_handler)
+        except Exception:
+            pass
 
-            project_root = os.path.dirname(os.path.abspath(app_file))
-            if project_root not in sys.path:
-                sys.path.insert(0, project_root)
+        # ---- DETECT APP FILE AND PROJECT ROOT ----
+        app_file = None
+        for frame in inspect.stack():
+            if frame.function == "<module>":
+                app_file = frame.filename
+                break
+        if not app_file:
+            app_file = sys.argv[0]
 
-            preview_dir = os.path.join(project_root, "dars_preview")
-            cwd_original = os.getcwd()
+        project_root = os.path.dirname(os.path.abspath(app_file))
+        if project_root not in sys.path:
+            sys.path.insert(0, project_root)
 
-            # limpiar preview anterior
-            if os.path.exists(preview_dir):
+        cwd_original = os.getcwd()
+
+        # ---- PREVIEW DIR ----
+        preview_dir = os.path.join(project_root, "dars_preview")
+        try:
+            shutil.rmtree(preview_dir, ignore_errors=True)
+        except:
+            pass
+        os.makedirs(preview_dir, exist_ok=True)
+
+        # ---- LOAD CONFIG AND DETECT MODE ----
+        try:
+            from dars.config import load_config
+            cfg, cfg_found = load_config(project_root)
+        except Exception:
+            cfg, cfg_found = ({}, False)
+
+        if not cfg_found:
+            warn_msg = "[Dars] Warning: dars.config.json not found. Run 'dars init --update' to create it in existing projects."
+            if console:
+                console.print(f"[yellow]{warn_msg}[/yellow]")
+            else:
+                print(warn_msg)
+
+        # Detect desktop mode from config or attribute
+        fmt = str(cfg.get('format', '')).lower() if cfg else ''
+        is_desktop = bool(getattr(self, 'desktop', False) or fmt == 'desktop')
+
+        # ---- ENHANCED FILE WATCHING SYSTEM ----
+        class EnhancedFileWatcher:
+            """Watches a file for changes and triggers a callback when it changes."""
+            def __init__(self, path, on_change, poll_interval=0.5):
+                self.path = path
+                self.on_change = on_change
+                self.poll_interval = poll_interval
+                self._last_mtime = None
+                self._stop_event = threading.Event()
+                self._thread = threading.Thread(target=self._watch, daemon=True)
+
+            def start(self):
                 try:
-                    shutil.rmtree(preview_dir)
-                except Exception as e:
-                    msg = f"Warning: Could not clean previous preview directory: {e}"
-                    console.print(f"[yellow]{msg}[/yellow]") if console else print(msg)
+                    self._last_mtime = os.path.getmtime(self.path)
+                except OSError:
+                    # File might not exist yet, we'll check in the watch loop
+                    self._last_mtime = None
+                self._thread.start()
 
-            os.makedirs(preview_dir, exist_ok=True)
+            def stop(self):
+                self._stop_event.set()
+                self._thread.join(timeout=1.0)
 
-            # Advertir si no hay archivo de configuración
+            def _watch(self):
+                while not self._stop_event.is_set():
+                    try:
+                        if os.path.exists(self.path):
+                            mtime = os.path.getmtime(self.path)
+                            if mtime != self._last_mtime:
+                                self._last_mtime = mtime
+                                self.on_change()
+                        else:
+                            # File was deleted, reset last_mtime so we detect when it's recreated
+                            if self._last_mtime is not None:
+                                self._last_mtime = None
+                    except Exception:
+                        pass
+                    time.sleep(self.poll_interval)
+
+        class DirectoryWatcher:
+            """Watches a directory for file changes and new files."""
+            def __init__(self, directory, extensions, on_change, poll_interval=2.0):
+                self.directory = directory
+                self.extensions = extensions
+                self.on_change = on_change
+                self.poll_interval = poll_interval
+                self._stop_event = threading.Event()
+                self._thread = threading.Thread(target=self._watch, daemon=True)
+                self._known_files = self._get_current_files()
+
+            def start(self):
+                self._thread.start()
+
+            def stop(self):
+                self._stop_event.set()
+                self._thread.join(timeout=1.0)
+
+            def _get_current_files(self):
+                """Get current files matching extensions in directory."""
+                files = set()
+                try:
+                    for ext in self.extensions:
+                        for file_path in Path(self.directory).rglob(f"*{ext}"):
+                            if self._should_watch_file(file_path):
+                                files.add(str(file_path))
+                except Exception:
+                    pass
+                return files
+
+            def _should_watch_file(self, file_path):
+                """Check if file should be watched based on exclusion rules."""
+                skip_dirs = {"__pycache__", ".git", "dars_preview", ".pytest_cache", "venv", "env", "node_modules"}
+                file_str = str(file_path)
+                return not any(skip_dir in file_str for skip_dir in skip_dirs)
+
+            def _watch(self):
+                while not self._stop_event.is_set():
+                    try:
+                        current_files = self._get_current_files()
+                        
+                        # Check for new files
+                        new_files = current_files - self._known_files
+                        if new_files:
+                            if len(new_files) == 1:
+                                file = next(iter(new_files))
+                                self.on_change(f"New file created: {os.path.relpath(file, self.directory)}")
+                            else:
+                                self.on_change(f"New files detected: {len(new_files)} files")
+                            self._known_files = current_files
+                        
+                        # Check for deleted files (optional, but good for tracking)
+                        deleted_files = self._known_files - current_files
+                        if deleted_files:
+                            self._known_files = current_files
+                            
+                    except Exception as e:
+                        # Log error but continue watching
+                        pass
+                        
+                    time.sleep(self.poll_interval)
+
+        def _collect_project_files_by_ext(root, exts):
+            """Collect files with given extensions, excluding certain directories."""
+            files = []
+            skip_dirs = {"__pycache__", ".git", "dars_preview", ".pytest_cache", "venv", "env", "node_modules"}
+            
             try:
-                from dars.config import load_config
-                cfg, cfg_found = load_config(project_root)
-            except Exception:
-                cfg, cfg_found = ({}, False)
-            if not cfg_found:
-                warn_msg = "[Dars] Warning: dars.config.json not found. Run 'dars init --update' to create it in existing projects."
+                for dirpath, dirnames, filenames in os.walk(root):
+                    # Remove skipped directories from dirnames to prevent walking into them
+                    dirnames[:] = [d for d in dirnames if d not in skip_dirs]
+                    
+                    for fname in filenames:
+                        file_path = os.path.join(dirpath, fname)
+                        file_ext = os.path.splitext(fname)[1].lower()
+                        
+                        if file_ext in exts:
+                            files.append(file_path)
+            except Exception as e:
+                # If there's any error walking the directory, at least return the main app file
                 if console:
-                    console.print(f"[yellow]{warn_msg}[/yellow]")
+                    console.print(f"[yellow]Warning: Error scanning directory {root}: {e}[/yellow]")
+            
+            return files
+
+        # Función mejorada para manejar cambios
+        def handle_file_change(change_description=None):
+            nonlocal last_reload_at, files_to_watch
+            now = time.time()
+            if now - last_reload_at < MIN_RELOAD_INTERVAL:
+                return
+            with reload_lock:
+                last_reload_at = time.time()
+                
+                if change_description:
+                    change_msg = change_description
                 else:
-                    print(warn_msg)
+                    change_msg = "File change detected"
+                    
+                if console:
+                    console.print(f"[yellow]{change_msg}. Reloading...[/yellow]")
+                else:
+                    print(f"[Dars] {change_msg}. Reloading...")
 
-            # Detectar formato desktop por config o atributo
-            fmt = str(cfg.get('format', '')).lower() if cfg else ''
-            is_desktop = bool(getattr(self, 'desktop', False) or fmt == 'desktop')
-
-            if is_desktop:
-                # --- Desktop dev: exportar Electron y lanzar Electron ---
                 try:
-                    from dars.exporters.desktop.electron import ElectronExporter
-                    from dars.core import js_bridge as jsb
-                except Exception as e:
-                    (console.print(f"[red]Desktop dev setup failed: {e}[/red]") if console else print(f"[Dars] Desktop dev setup failed: {e}"))
-                    return
+                    # Actualizar la lista de archivos vigilados si es necesario
+                    current_files = _collect_project_files_by_ext(project_root, watch_exts)
+                    if len(current_files) != len(files_to_watch):
+                        files_to_watch.clear()
+                        files_to_watch.extend(current_files)
+                        if console:
+                            console.print(f"[cyan]Updated file watch list: {len(files_to_watch)} files[/cyan]")
+                    
+                    if project_root not in sys.path:
+                        sys.path.insert(0, project_root)
+                    with pushd(project_root):
+                        to_remove = []
+                        root_abs = os.path.abspath(project_root)
+                        for name, mod in list(sys.modules.items()):
+                            mod_file = getattr(mod, '__file__', None)
+                            if not mod_file:
+                                continue
+                            mod_file_abs = os.path.abspath(mod_file)
+                            if mod_file_abs.startswith(root_abs):
+                                to_remove.append(name)
+                        for name in to_remove:
+                            sys.modules.pop(name, None)
+                        sys.modules.pop("dars_app", None)
 
+                        unique_name = f"dars_app_reload_{int(time.time()*1000)}"
+                        spec = importlib.util.spec_from_file_location(unique_name, app_file)
+                        module = importlib.util.module_from_spec(spec)
+                        spec.loader.exec_module(module)
+
+                        new_app = None
+                        for v in vars(module).values():
+                            if getattr(v, "__class__", None) and v.__class__.__name__ == "App":
+                                new_app = v
+                                break
+
+                        if not new_app:
+                            if console:
+                                console.print("[red]No App instance found after reload.[/red]")
+                            return
+
+                        # Escribir version.txt ANTES de exportar
+                        version_file = os.path.join(preview_dir, "version.txt")
+                        new_version = str(int(time.time() * 1000))
+                        with open(version_file, 'w') as f:
+                            f.write(new_version)
+                        
+                        # Exportar la aplicación
+                        if is_desktop:
+                            elec_exporter.export(new_app, preview_dir, bundle=False)
+                        else:
+                            exporter.export(new_app, preview_dir, bundle=False)
+                        
+                        # Verificar que la exportación fue exitosa
+                        index_path = os.path.join(preview_dir, "index.html")
+                        if os.path.exists(index_path):
+                            if console:
+                                console.print("[green]App reloaded and re-exported successfully.[/green]")
+                        else:
+                            if console:
+                                console.print("[red]Export failed: index.html not created[/red]")
+                            
+                except Exception as e:
+                    tb = traceback.format_exc()
+                    if console:
+                        console.print(f"[red]Hot reload failed: {e}\n{tb}[/red]")
+                    else:
+                        print(f"[Dars] Hot reload failed: {e}\n{tb}")
+
+        # ---- DESKTOP MODE ----
+        if is_desktop:
+            try:
+                from dars.exporters.desktop.electron import ElectronExporter
+                from dars.core import js_bridge as jsb
+            except Exception as e:
+                if console:
+                    console.print(f"[red]Desktop dev setup failed: {e}[/red]")
+                else:
+                    print(f"[Dars] Desktop dev setup failed: {e}")
+                return
+
+            # Mark initialization as in progress
+            initialization_complete.clear()
+
+            try:
                 with pushd(project_root):
                     elec_exporter = ElectronExporter()
                     ok = elec_exporter.export(self, preview_dir, bundle=False)
                     if not ok:
-                        (console.print("[red]Electron export failed.[/red]") if console else print("[Dars] Electron export failed."))
+                        if console:
+                            console.print("[red]Electron export failed.[/red]")
+                        else:
+                            print("[Dars] Electron export failed.")
                         return
-                # Intentar lanzar Electron
+
                 if not jsb.electron_available():
-                    (console.print("[yellow]⚠ Electron no encontrado. Ejecuta: dars doctor --all --yes[/yellow]") if console else print("[Dars] Electron not found. Run: dars doctor --all --yes"))
+                    if console:
+                        console.print("[yellow]⚠ Electron not found. Run: dars doctor --all --yes[/yellow]")
+                    else:
+                        print("[Dars] Electron not found. Run: dars doctor --all --yes")
                     return
-                # Show running file info and then launch Electron subprocess (spawn) so we can stream logs
+
                 run_msg = f"Running dev: {app_file}\nLaunching Electron (dev)..."
                 if console:
                     console.print(f"[cyan]{run_msg}[/cyan]")
                 else:
                     print(run_msg)
-
-                # Prepare file watching for hot reload (desktop). We'll re-export and restart Electron on changes.
-                from dars.cli.hot_reload import FileWatcher
-                import threading
-
-                def _collect_project_files_by_ext(root, exts):
-                    files = []
-                    for dirpath, dirnames, filenames in os.walk(root):
-                        # exclude preview_dir, .git and __pycache__
-                        if os.path.abspath(dirpath).startswith(os.path.abspath(preview_dir)):
-                            continue
-                        if '.git' in dirpath or '__pycache__' in dirpath:
-                            continue
-                        for fname in filenames:
-                            for ext in exts:
-                                if fname.lower().endswith(ext):
-                                    files.append(os.path.join(dirpath, fname))
-                                    break
-                    return files
 
                 files_to_watch = _collect_project_files_by_ext(project_root, watch_exts)
                 if not files_to_watch:
@@ -333,34 +588,33 @@ class App:
                 electron_proc = None
                 stream_threads = []
                 control_port = None
-                # Flag to indicate that a restart was requested by the watcher (reload)
                 restart_triggered = False
 
                 def start_electron():
-                    nonlocal electron_proc, stream_threads
-                    nonlocal control_port
+                    nonlocal electron_proc, stream_threads, control_port, restart_triggered
                     try:
-                        # pick an ephemeral control port for graceful shutdown and pass via env
-                        try:
-                            import socket as _socket
-                            s = _socket.socket()
-                            s.bind(('127.0.0.1', 0))
-                            picked = s.getsockname()[1]
-                            s.close()
-                        except Exception:
-                            picked = None
-                        env = os.environ.copy()
-                        if picked:
-                            env['DARS_CONTROL_PORT'] = str(picked)
-                        p, cmd = jsb.electron_dev_spawn(cwd=preview_dir, env=env)
-                        if p and picked:
-                            control_port = picked
+                        import socket as _socket
+                        s = _socket.socket()
+                        s.bind(('127.0.0.1', 0))
+                        picked = s.getsockname()[1]
+                        s.close()
                     except Exception:
-                        p = None
-                        cmd = None
+                        picked = None
+                        
+                    env = os.environ.copy()
+                    if picked:
+                        env['DARS_CONTROL_PORT'] = str(picked)
+                        
+                    p, cmd = jsb.electron_dev_spawn(cwd=preview_dir, env=env)
+                    if p and picked:
+                        control_port = picked
+                        
                     if not p:
                         msg = f"Could not start Electron (cmd: {cmd}). Ensure Electron is installed."
-                        (console.print(f"[red]{msg}[/red]") if console else print(msg))
+                        if console:
+                            console.print(f"[red]{msg}[/red]")
+                        else:
+                            print(msg)
                         return False
 
                     def _stream_output(pipe, is_err=False):
@@ -384,10 +638,11 @@ class App:
 
                     t_out = threading.Thread(target=_stream_output, args=(p.stdout, False), daemon=True)
                     t_err = threading.Thread(target=_stream_output, args=(p.stderr, True), daemon=True)
-                    t_out.start(); t_err.start()
+                    t_out.start()
+                    t_err.start()
                     stream_threads = [t_out, t_err]
                     electron_proc = p
-                    # Report PID for easier debugging
+                    
                     try:
                         if console:
                             console.print(f"[magenta]Electron PID: {p.pid}[/magenta]")
@@ -395,143 +650,64 @@ class App:
                             print(f"[Dars] Electron PID: {p.pid}")
                     except Exception:
                         pass
-                    # Reset restart flag on fresh start
-                    nonlocal restart_triggered
+                    
                     restart_triggered = False
                     return True
 
                 def stop_electron():
                     nonlocal electron_proc
                     if electron_proc:
-                        # First attempt graceful shutdown via control HTTP endpoint if available
+                        # Fast shutdown - use terminate immediately for faster exit
                         try:
                             if control_port:
                                 try:
                                     import urllib.request as _ur
                                     url = f"http://127.0.0.1:{control_port}/__dars_shutdown"
                                     req = _ur.Request(url, method='POST')
-                                    with _ur.urlopen(req, timeout=1) as _res:
-                                        pass
+                                    _ur.urlopen(req, timeout=0.5)  # Reduced timeout
                                 except Exception:
-                                    # ignore network errors and fall back to killing
                                     pass
                         except Exception:
                             pass
 
+                        # Fast kill process
                         try:
                             pid = electron_proc.pid
-                            # Try graceful terminate of the whole process group / tree
                             if os.name == 'nt':
-                                # taskkill /T /F will kill child processes as well
-                                try:
-                                    subprocess.run(["taskkill", "/F", "/T", "/PID", str(pid)], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                                except Exception:
-                                    try:
-                                        electron_proc.terminate()
-                                    except Exception:
-                                        pass
+                                subprocess.run(["taskkill", "/F", "/T", "/PID", str(pid)], 
+                                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=2)
                             else:
                                 try:
                                     os.killpg(os.getpgid(pid), signal.SIGTERM)
-                                except Exception:
+                                    electron_proc.wait(timeout=1)
+                                except:
                                     try:
                                         electron_proc.terminate()
-                                    except Exception:
-                                        pass
-                            try:
-                                electron_proc.wait(timeout=3)
-                            except Exception:
-                                try:
-                                    electron_proc.kill()
-                                except Exception:
-                                    pass
+                                        electron_proc.wait(timeout=1)
+                                    except:
+                                        try:
+                                            electron_proc.kill()
+                                        except:
+                                            pass
                         except Exception:
                             try:
                                 electron_proc.terminate()
-                            except Exception:
+                            except:
                                 pass
                         finally:
                             electron_proc = None
 
                 def reload_and_restart(changed_file=None):
-                    nonlocal last_reload_at
                     nonlocal restart_triggered
-                    now = time.time()
-                    if now - last_reload_at < MIN_RELOAD_INTERVAL:
-                        return
-                    with reload_lock:
-                        last_reload_at = time.time()
-                        if console:
-                            console.print(f"[yellow]Detected change in {changed_file}. Rebuilding and restarting Electron...[/yellow]")
-                        else:
-                            print(f"[Dars] Detected change in {changed_file}. Rebuilding and restarting Electron...")
+                    handle_file_change(f"File changed: {os.path.relpath(changed_file, project_root)}" if changed_file else "Change detected")
+                    restart_triggered = True
+                    stop_electron()
+                    start_electron()
 
-                        try:
-                            if project_root not in sys.path:
-                                sys.path.insert(0, project_root)
-                            with pushd(project_root):
-                                # Clear project modules from sys.modules
-                                to_remove = []
-                                for name, mod in list(sys.modules.items()):
-                                    try:
-                                        mod_file = getattr(mod, '__file__', None)
-                                        if not mod_file:
-                                            continue
-                                        mod_file_abs = os.path.abspath(mod_file)
-                                        if mod_file_abs.startswith(os.path.abspath(project_root)):
-                                            to_remove.append(name)
-                                    except Exception:
-                                        continue
-                                for name in to_remove:
-                                    try:
-                                        del sys.modules[name]
-                                    except Exception:
-                                        pass
-                                sys.modules.pop("dars_app", None)
-
-                                unique_name = f"dars_app_reload_{int(time.time()*1000)}"
-                                spec = importlib.util.spec_from_file_location(unique_name, app_file)
-                                module = importlib.util.module_from_spec(spec)
-                                spec.loader.exec_module(module)
-
-                                # Find App instance
-                                new_app = None
-                                for v in vars(module).values():
-                                    try:
-                                        if isinstance(v, App):
-                                            new_app = v
-                                            break
-                                    except Exception:
-                                        pass
-                                if not new_app:
-                                    for v in vars(module).values():
-                                        try:
-                                            if hasattr(v, '__class__') and v.__class__.__name__ == 'App':
-                                                new_app = v
-                                                break
-                                        except Exception:
-                                            pass
-                                if not new_app:
-                                    (console.print("[red]No App instance found after reload.") if console else print("[Dars] No App instance found after reload."))
-                                    return
-
-                                # Export and restart electron
-                                with pushd(project_root):
-                                    elec_exporter.export(new_app, preview_dir, bundle=False)
-
-                            # mark that restart was triggered by file change
-                            restart_triggered = True
-                            stop_electron()
-                            start_electron()
-                            (console.print("[green]Re-exported and restarted Electron successfully.[/green]") if console else print("[Dars] Re-exported and restarted Electron successfully."))
-                        except Exception as e:
-                            tb = traceback.format_exc()
-                            (console.print(f"[red]Hot reload failed: {e}\n{tb}[/red]") if console else print(f"[Dars] Hot reload failed: {e}\n{tb}"))
-
-                # Create watchers
+                # Crear EnhancedFileWatchers para archivos individuales
                 for f in files_to_watch:
                     try:
-                        w = FileWatcher(f, lambda f=f: reload_and_restart(f))
+                        w = EnhancedFileWatcher(f, lambda f=f: reload_and_restart(f))
                         w.start()
                         watchers.append(w)
                     except Exception as e:
@@ -540,271 +716,313 @@ class App:
                         else:
                             print(f"[Dars] Warning: could not watch {f}: {e}")
 
-                # Start Electron initially
-                if not start_electron():
-                    # Starting electron failed, cleanup watchers
+                # Crear DirectoryWatcher para detectar nuevos archivos
+                try:
+                    dir_watcher = DirectoryWatcher(
+                        project_root, 
+                        watch_exts, 
+                        lambda msg: reload_and_restart(),
+                        poll_interval=2.0  # Check for new files every 2 seconds
+                    )
+                    dir_watcher.start()
+                    directory_watchers.append(dir_watcher)
+                    
+                except Exception as e:
+                    if console:
+                        console.print(f"[yellow]Warning: could not start directory watcher: {e}[/yellow]")
+
+                # Mark initialization as complete
+                initialization_complete.set()
+
+                # Check if shutdown was requested during initialization
+                if shutdown_event.is_set():
+                    if console:
+                        console.print("[yellow]Shutdown requested during initialization. Stopping...[/yellow]")
+                    # Clean up and return
                     for w in watchers:
                         try:
                             w.stop()
                         except Exception:
                             pass
+                    for dw in directory_watchers:
+                        try:
+                            dw.stop()
+                        except Exception:
+                            pass
                     return
 
-                # Wait until process ends or user interrupts; background watchers will restart it as needed
+                if not start_electron():
+                    for w in watchers:
+                        try:
+                            w.stop()
+                        except Exception:
+                            pass
+                    for dw in directory_watchers:
+                        try:
+                            dw.stop()
+                        except Exception:
+                            pass
+                    return
+
                 try:
                     while not shutdown_event.is_set():
-                        # If electron process ended
                         if electron_proc and electron_proc.poll() is not None:
                             code = electron_proc.returncode
-                            # If the restart was triggered by our watcher, perform restart and clear flag
                             if restart_triggered:
-                                (console.print(f"[red]Electron exited with code {code}. Restarting...[/red]") if console else print(f"[Dars] Electron exited with code {code}. Restarting..."))
+                                if console:
+                                    console.print(f"[red]Electron exited with code {code}. Restarting...[/red]")
+                                else:
+                                    print(f"[Dars] Electron exited with code {code}. Restarting...")
                                 restart_triggered = False
                                 stop_electron()
                                 start_electron()
                             else:
-                                # Likely user closed the window: stop watchers and exit the dev loop
-                                (console.print(f"[cyan]Electron closed by user (code {code}). Stopping dev mode...[/cyan]") if console else print(f"[Dars] Electron closed by user (code {code}). Stopping dev mode..."))
+                                if console:
+                                    console.print(f"[cyan]Electron closed by user (code {code}). Stopping dev mode...[/cyan]")
+                                else:
+                                    print(f"[Dars] Electron closed by user (code {code}). Stopping dev mode...")
                                 shutdown_event.set()
                                 break
-                        shutdown_event.wait(timeout=1)
+                        time.sleep(0.1)  # Faster polling
                 except KeyboardInterrupt:
                     shutdown_event.set()
                 finally:
-                    # cleanup
+                    # Fast cleanup for desktop mode
                     stop_electron()
                     for w in watchers:
                         try:
                             w.stop()
                         except Exception:
                             pass
+                    for dw in directory_watchers:
+                        try:
+                            dw.stop()
+                        except Exception:
+                            pass
+                    cleanup_done_event.set()
+                    time.sleep(0.1)  # Minimal delay
                     return
 
-            # --- Web dev por defecto ---
+            except Exception as e:
+                initialization_complete.set()
+                raise
+
+        # ---- WEB MODE ----
+        # Mark initialization as in progress
+        initialization_complete.clear()
+
+        try:
             with pushd(project_root):
                 exporter.export(self, preview_dir, bundle=False)
-
-            if not PreviewServer:
-                (console.print("[red]Preview server module not available.[/red]") if console else print("[Dars] Preview server module not available."))
-                return
-
-            url = f"http://localhost:{port}"
-            app_title = getattr(self, 'title', 'Dars App')
+        except Exception as e:
             if console:
+                console.print(f"[red]Export failed: {e}[/red]")
+            else:
+                print(f"Export failed: {e}")
+            initialization_complete.set()
+            return
+
+        if not PreviewServer:
+            if console:
+                console.print("[red]Preview server module not available.[/red]")
+            else:
+                print("[Dars] Preview server module not available.")
+            initialization_complete.set()
+            return
+
+        url = f"http://localhost:{port}"
+        app_title = getattr(self, 'title', 'Dars App')
+
+        # Mensaje inicial bonito con Panel
+        try:
+            if console and Panel and Text:
                 panel = Panel(
-                    Text(f"✔ App running successfully\n\nName: {app_title}\nPreview available at: {url}\n\nPress Ctrl+C to stop the server.",
+                    Text(
+                        f"✔ App running successfully\n\nName: {app_title}\nPreview available at: {url}\n\nPress Ctrl+C to stop the server.",
                         style="bold green", justify="center"),
                     title="Dars Preview", border_style="cyan")
                 console.print(panel)
             else:
                 print(f"[Dars] App '{app_title}' running. Preview at {url}")
+        except Exception:
+            print(f"[Dars] App '{app_title}' running. Preview at {url}")
 
-            server = PreviewServer(preview_dir, port)
+        server = PreviewServer(preview_dir, port)
+        server_exception = {"exc": None}
+
+        def _server_thread_fn():
             try:
-                if not server.start():
-                    (console.print("[red]Could not start preview server.[/red]")
-                    if console else print("Could not start preview server."))
-                    return
-
-                # --- HOT RELOAD ---
-                from dars.cli.hot_reload import FileWatcher
-
-                def _collect_project_files_by_ext(root, exts):
-                    files = []
-                    for dirpath, dirnames, filenames in os.walk(root):
-                        # excluir preview_dir, .git y __pycache__
-                        if os.path.abspath(dirpath).startswith(os.path.abspath(preview_dir)):
-                            continue
-                        if '.git' in dirpath or '__pycache__' in dirpath:
-                            continue
-                        for fname in filenames:
-                            for ext in exts:
-                                if fname.lower().endswith(ext):
-                                    files.append(os.path.join(dirpath, fname))
-                                    break
-                    return files
-
-
-                def reload_and_export(changed_file=None):
-                    nonlocal last_reload_at
-                    now = time.time()
-                    # debounce rápido
-                    if now - last_reload_at < MIN_RELOAD_INTERVAL:
-                        return
-                    with reload_lock:
-                        last_reload_at = time.time()
-                        if console:
-                            console.print(f"[yellow]Detected change in {changed_file}. Reloading...[/yellow]")
-                        else:
-                            print(f"[Dars] Detected change in {changed_file}. Reloading...")
-
-                        try:
-                            if project_root not in sys.path:
-                                sys.path.insert(0, project_root)
-
-                            with pushd(project_root):
-                                # --- Limpiar del cache todos los módulos que pertenecen al proyecto ---
-                                to_remove = []
-                                for name, mod in list(sys.modules.items()):
-                                    try:
-                                        mod_file = getattr(mod, '__file__', None)
-                                        if not mod_file:
-                                            continue
-                                        # normalizar paths
-                                        mod_file_abs = os.path.abspath(mod_file)
-                                        if mod_file_abs.startswith(os.path.abspath(project_root)):
-                                            to_remove.append(name)
-                                    except Exception:
-                                        continue
-
-                                for name in to_remove:
-                                    try:
-                                        del sys.modules[name]
-                                    except Exception:
-                                        pass
-
-                                # también borrar cualquier nombre temporal 'dars_app' si existiese
-                                sys.modules.pop("dars_app", None)
-
-                                # Importar el archivo principal en un nombre único (para limpieza segura)
-                                unique_name = f"dars_app_reload_{int(time.time()*1000)}"
-                                spec = importlib.util.spec_from_file_location(unique_name, app_file)
-                                module = importlib.util.module_from_spec(spec)
-                                spec.loader.exec_module(module)
-
-                                # Buscar nueva instancia App en el módulo recargado
-                                new_app = None
-                                for v in vars(module).values():
-                                    try:
-                                        if isinstance(v, App):
-                                            new_app = v
-                                            break
-                                    except Exception:
-                                        # si isinstance falla por alguna razón, ignorar
-                                        pass
-
-                                # fallback por nombre de clase (por si App es distinto objeto)
-                                if not new_app:
-                                    for v in vars(module).values():
-                                        try:
-                                            if hasattr(v, '__class__') and v.__class__.__name__ == 'App':
-                                                new_app = v
-                                                break
-                                        except Exception:
-                                            pass
-
-                                if not new_app:
-                                    (console.print("[red]No App instance found after reload.")
-                                    if console else print("[Dars] No App instance found after reload."))
-                                    return
-
-                                # Exportar la nueva instancia
-                                exporter.export(new_app, preview_dir, bundle=False)
-
-                            (console.print("[green]App reloaded and re-exported successfully.[/green]")
-                            if console else print("[Dars] App reloaded and re-exported successfully."))
-
-                        except Exception as e:
-                            tb = traceback.format_exc()
-                            (console.print(f"[red]Hot reload failed: {e}\n{tb}[/red]")
-                            if console else print(f"[Dars] Hot reload failed: {e}\n{tb}"))
-
-                # --- Crear watchers para todos los archivos .py dentro del proyecto (recursivo) ---
-                files_to_watch = _collect_project_files_by_ext(project_root, watch_exts)
-
-
-                # Si no hay archivos detectados (raro), al menos mirar app_file
-                if not files_to_watch:
-                    files_to_watch = [app_file]
-
-                for f in files_to_watch:
-                    try:
-                        # FileWatcher espera una función sin argumentos; usamos lambda que captura f
-                        w = FileWatcher(f, lambda f=f: reload_and_export(f))
-                        w.start()
-                        watchers.append(w)
-                    except Exception as e:
-                        if console:
-                            console.print(f"[yellow]Warning: could not watch {f}: {e}[/yellow]")
-                        else:
-                            print(f"[Dars] Warning: could not watch {f}: {e}")
-                
-                if console:
-                    # Mostrar rutas relativas para que no sea tan largo
-                    rel_paths = [os.path.relpath(f, project_root) for f in files_to_watch]
-                    max_show = 80  # número máximo de líneas a mostrar
-                    if len(rel_paths) > max_show:
-                        shown = rel_paths[:max_show]
-                        shown.append(f"... (+{len(rel_paths)-max_show} más)")
+                started = server.start()
+                if not started:
+                    if console:
+                        console.print("[red]Could not start preview server.[/red]")
                     else:
-                        shown = rel_paths or ["(ninguno)"]
-
-                    from rich.table import Table
-                    table = Table(show_header=False, box=None, padding=0)
-                    table.add_column("Files", style="bold")
-                    for p in shown:
-                        table.add_row(p)
-
-                    panel = Panel(
-                        table,
-                        title=f"Watching {len(files_to_watch)} files · Exts: {', '.join(watch_exts)}",
-                        subtitle=f"Project root: {os.path.basename(project_root)}",
-                        border_style="magenta"
-                    )
-                    if self.watchfiledialog:
-                        console.print(panel)
+                        print("Could not start preview server.")
+                    return
+            except Exception as e:
+                server_exception["exc"] = e
+                if console:
+                    console.print(f"[red]Server thread exception: {e}[/red]")
                 else:
-                    if self.watchfiledialog:
-                        print(f"[Dars] Watching {len(files_to_watch)} files in {project_root}:")
-                        for f in files_to_watch:
-                            print("  -", os.path.relpath(f, project_root))
+                    print(f"Server thread exception: {e}\n{traceback.format_exc()}")
 
-                # Loop principal: espera a Ctrl+C
-                while not shutdown_event.is_set():
-                    shutdown_event.wait(timeout=1)  # Espera sin consumir CPU
+        srv_thread = threading.Thread(target=_server_thread_fn, daemon=True)
+        srv_thread.start()
 
-            except KeyboardInterrupt:
-                shutdown_event.set()
-                for w in watchers:
-                    try:
-                        w.stop()
-                    except Exception:
-                        pass
-                (console.print("\n[cyan]Stopping preview and watcher...[/cyan]")
-                if console else print("\n[Dars] Stopping preview and watcher..."))
-            finally:
-                # Detener watchers y servidor
+        files_to_watch = _collect_project_files_by_ext(project_root, watch_exts)
+        if not files_to_watch:
+            files_to_watch = [app_file]
+
+        # Crear EnhancedFileWatchers para archivos individuales
+        for f in files_to_watch:
+            try:
+                w = EnhancedFileWatcher(f, lambda f=f: handle_file_change(f"File changed: {os.path.relpath(f, project_root)}"))
+                w.start()
+                watchers.append(w)
+            except Exception as e:
+                if console:
+                    console.print(f"[yellow]Warning: could not watch {f}: {e}[/yellow]")
+                else:
+                    print(f"[Dars] Warning: could not watch {f}: {e}")
+
+        # Crear DirectoryWatcher para detectar nuevos archivos
+        try:
+            dir_watcher = DirectoryWatcher(
+                project_root, 
+                watch_exts, 
+                lambda msg: handle_file_change(msg),
+                poll_interval=2.0
+            )
+            dir_watcher.start()
+            directory_watchers.append(dir_watcher)
+        except Exception as e:
+            if console:
+                console.print(f"[yellow]Warning: could not start directory watcher: {e}[/yellow]")
+
+        # Mark initialization as complete
+        initialization_complete.set()
+
+        # Check if shutdown was requested during initialization
+        if shutdown_event.is_set():
+            if console:
+                console.print("[yellow]Shutdown requested during initialization. Stopping...[/yellow]")
+            # Clean up and return
+            for w in watchers:
                 try:
-                    server.stop()
+                    w.stop()
                 except Exception:
                     pass
-                for w in watchers:
+            for dw in directory_watchers:
+                try:
+                    dw.stop()
+                except Exception:
+                    pass
+            try:
+                server.stop()
+            except Exception:
+                pass
+            cleanup_done_event.set()
+            return
+
+        # Show watched files if enabled
+        if self.watchfiledialog and console and Table:
+            rel_paths = [os.path.relpath(f, project_root) for f in files_to_watch]
+            max_show = 80
+            if len(rel_paths) > max_show:
+                shown = rel_paths[:max_show]
+                shown.append(f"... (+{len(rel_paths)-max_show} more)")
+            else:
+                shown = rel_paths or ["(none)"]
+
+            table = Table(show_header=False, box=None, padding=0)
+            table.add_column("Files", style="bold")
+            for p in shown:
+                table.add_row(p)
+
+            panel = Panel(
+                table,
+                title=f"Watching {len(files_to_watch)} files · Exts: {', '.join(watch_exts)}",
+                subtitle=f"Project root: {os.path.basename(project_root)}",
+                border_style="magenta"
+            )
+            console.print(panel)
+        elif self.watchfiledialog:
+            print(f"[Dars] Watching {len(files_to_watch)} files in {project_root}:")
+            for f in files_to_watch:
+                print("  -", os.path.relpath(f, project_root))
+
+        # ---- IMPROVED MAIN LOOP ----
+        try:
+            while not shutdown_event.is_set():
+                if server_exception.get("exc"):
+                    if console:
+                        console.print(f"[red]Server failed during startup: {server_exception['exc']}[/red]")
+                    else:
+                        print("Server failed during startup:", server_exception["exc"])
+                    break
+                time.sleep(0.1)  # Faster polling
+        except Exception as e:
+            if console:
+                console.print(f"[red]Main loop exception: {e}[/red]")
+            else:
+                print("Main loop exception:", e)
+        finally:
+            # FAST CLEANUP - New version style
+            shutdown_event.set()
+            
+            # Stop watchers first (fast)
+            for w in watchers:
+                try:
+                    w.stop()
+                except Exception:
+                    pass
+            
+            # Stop directory watchers
+            for dw in directory_watchers:
+                try:
+                    dw.stop()
+                except Exception:
+                    pass
+
+            # Fast server shutdown
+            try:
+                if server and hasattr(server, "httpd"):
+                    # Fast shutdown without graceful waiting
                     try:
-                        w.stop()
+                        server.httpd.shutdown()
                     except Exception:
                         pass
-                (console.print("[green]Preview stopped.[/green]")
-                if console else print("[Dars] Preview stopped."))
+                    try:
+                        server.httpd.server_close()
+                    except Exception:
+                        pass
+            except Exception:
+                pass
 
-        except PermissionError as e:
-            msg = f"Warning: Could not clean temp directory due to permissions: {e}"
-            console.print(f"[yellow]{msg}[/yellow]") if console else print(msg)
-        except Exception as e:
-            msg = f"Unexpected error in fast preview: {e}\n{traceback.format_exc()}"
-            console.print(f"[red]{msg}[/red]") if console else print(msg)
-        finally:
-            # Restaurar cwd y limpiar preview
+            cleanup_done_event.set()
+            time.sleep(0.15)  # Minimal delay for cleanup
+
+            if console:
+                console.print("[green]✔ Preview stopped.[/green]")
+            else:
+                print("✔ Preview stopped.")
+
+            # Restore original directory
             try:
                 os.chdir(cwd_original)
             except Exception:
                 pass
+
+            # Fast preview directory cleanup
             try:
-                shutil.rmtree(preview_dir)
-                (console.print("[yellow]Preview files deleted.[/yellow]")
-                if console else print("Preview files deleted."))
+                shutil.rmtree(preview_dir, ignore_errors=True)
+                if console:
+                    console.print("[yellow]Preview files deleted.[/yellow]")
+                else:
+                    print("Preview files deleted.")
             except Exception as e:
-                msg = f"Could not delete preview directory: {e}"
-                console.print(f"[red]{msg}[/red]") if console else print(msg)
+                if console:
+                    console.print(f"[yellow]Note: Could not delete preview directory: {e}[/yellow]")
 
     
     def __init__(

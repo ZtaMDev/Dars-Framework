@@ -130,21 +130,46 @@ from dars.core.component import Component
 class Component(ABC):
     def __init__(self, **props):
         self.props = props
-        self.children = []
-        self.parent = None
-        self.id = props.get("id")
-        self.class_name = props.get("class_name")
-        self.style = props.get("style", {})
-        self.events = {}
+        self.children: List[Component] = []
+        self.parent: Optional[Component] = None
+        self.id: Optional[str] = props.get('id')
+        self.class_name: str = props.get("class_name", self.__class__.__name__)
+        self.style: Dict[str, Any] = props.get('style', {})
+        self.hover_style: Dict[str, Any] = props.get('hover_style', {})
+        self.active_style: Dict[str, Any] = props.get('active_style', {})
+        self.events: Dict[str, Callable] = {}
+        self.key: Optional[str] = props.get('key')
 ```
 
-### Common Properties
+### Global Properties
 
 All components support these basic properties:
 
 - **id**: Unique component identifier
 - **class_name**: CSS class for additional styles
 - **style**: Dictionary of CSS styles
+- **hover_style**: Dictionary of CSS styles on hover
+- **active_style**: Dictionary of CSS styles when active
+- **set_event(event_name, handler)**: Attach event handlers
+- **on_click** event handler receives a dScript object or a comp.state() function
+- **on_double_click** event handler receives a dScript object or a comp.state() function
+- **on_mouse_down** event handler receives a dScript object or a comp.state() function
+- **on_mouse_up** event handler receives a dScript object or a comp.state() function
+- **on_mouse_enter** event handler receives a dScript object or a comp.state() function
+- **on_mouse_leave** event handler receives a dScript object or a comp.state() function
+- **on_mouse_move** event handler receives a dScript object or a comp.state() function
+- **on_key_down** event handler receives a dScript object or a comp.state() function
+- **on_key_up** event handler receives a dScript object or a comp.state() function
+- **on_key_press** event handler receives a dScript object or a comp.state() function
+- **on_change** event handler receives a dScript object or a comp.state() function
+- **on_input** event handler receives a dScript object or a comp.state() function
+- **on_submit** event handler receives a dScript object or a comp.state() function
+- **on_focus** event handler receives a dScript object or a comp.state() function
+- **on_blur** event handler receives a dScript object or a comp.state() function
+- **on_load** event handler receives a dScript object or a comp.state() function
+- **on_error** event handler receives a dScript object or a comp.state() function
+- **on_resize** event handler receives a dScript object or a comp.state() function
+
 - **children**: List of child components (for containers)
 
 ### Component-Search-and-Modification

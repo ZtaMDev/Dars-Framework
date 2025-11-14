@@ -83,6 +83,7 @@ class Component(ABC):
         self.class_name: str = props.get("class_name", self.__class__.__name__)
         self.style: Dict[str, Any] = props.get('style', {})
         self.hover_style: Dict[str, Any] = props.get('hover_style', {})
+        self.active_style: Dict[str, Any] = props.get('active_style', {})
         self.events: Dict[str, Callable] = {}
         self.key: Optional[str] = props.get('key')
         
@@ -216,8 +217,11 @@ class Component(ABC):
                 if key == 'style':
                     self.style.update(value)
                     continue
-                elif key == 'hover_style':  # NUEVO: soporte para hover_style
+                elif key == 'hover_style':
                     self.hover_style.update(value)
+                    continue
+                elif key == 'active_style':
+                    self.active_style.update(value)
                     continue
                 elif key == 'class_name':
                     self.class_name = value
@@ -276,6 +280,7 @@ class Component(ABC):
         d['class_name'] = self.class_name
         d['style'] = self.style
         d['hover_style'] = self.hover_style
+        d['active_style'] = self.active_style
         d['events'] = self.events
         return d
 

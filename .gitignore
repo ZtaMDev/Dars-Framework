@@ -38,4 +38,4 @@ test/
 myapp/
 tst/
 dpm.py
-changelog.md
+changes.md

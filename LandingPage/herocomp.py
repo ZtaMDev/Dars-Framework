@@ -108,7 +108,7 @@ def create_hero():
             style={
                 "display": "flex",
                 "align-items": "center",
-                "margin-top": "25px",
+                "margin-top": "20px",
                 "opacity": "0",
                 "align-items":"center",
                 "transform": "translateY(10px)",
@@ -121,7 +121,8 @@ def create_hero():
             id="get-started-btn",
             on_click="openDocs()",
             style={
-                "margin-top": "30px",
+                "margin-top": "25px",
+                "margin-bottom": "20px",
                 "padding": "14px 42px",
                 "font-size": "18px",
                 "font-weight": "600",
@@ -133,8 +134,9 @@ def create_hero():
         ),
         id="hero-section",
         style={
-            "height": "100vh",
+            "min-height": "100vh",
             "display": "flex",
+            "height": "auto",
             "flex-direction": "column",
             "align-items": "center",
             "justify-content": "center",
@@ -142,5 +144,6 @@ def create_hero():
             "background": "linear-gradient(135deg, #0f1e1a 0%, #132d24 100%)",
             "position": "relative",
             "padding-top": "80px",
+            "padding": "80px 20px 40px",
         }
     )

@@ -460,8 +460,8 @@
      <a class="sidebar-link sidebar-level-2" href="#base-component-class" style="margin-left: 20px">
       Base Component Class
      </a>
-     <a class="sidebar-link sidebar-level-3" href="#common-properties" style="margin-left: 40px">
-      Common Properties
+     <a class="sidebar-link sidebar-level-3" href="#global-properties" style="margin-left: 40px">
+      Global Properties
      </a>
      <a class="sidebar-link sidebar-level-3" href="#component-search-and-modification" style="margin-left: 40px">
       Component-Search-and-Modification
@@ -3204,16 +3204,19 @@ Desktop build target. Only effective when
 <span class="k">class</span><span class="w"> </span><span class="nc">Component</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">props</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">props</span> <span class="o">=</span> <span class="n">props</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"id"</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">class_name</span> <span class="o">=</span> <span class="n">props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"class_name"</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">style</span> <span class="o">=</span> <span class="n">props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"style"</span><span class="p">,</span> <span class="p">{})</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">events</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Component</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Component</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'id'</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">class_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"class_name"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">style</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'style'</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hover_style</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'hover_style'</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">active_style</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'active_style'</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'key'</span><span class="p">)</span>
 </code></pre>
       </div>
-      <h3 id="common-properties">
-       Common Properties
+      <h3 id="global-properties">
+       Global Properties
       </h3>
       <p>
        All components support these basic properties:
@@ -3239,9 +3242,139 @@ Desktop build target. Only effective when
        </li>
        <li>
         <strong>
-         children
+         hover_style
         </strong>
-        : List of child components (for containers)
+        : Dictionary of CSS styles on hover
+       </li>
+       <li>
+        <strong>
+         active_style
+        </strong>
+        : Dictionary of CSS styles when active
+       </li>
+       <li>
+        <strong>
+         set_event(event_name, handler)
+        </strong>
+        : Attach event handlers
+       </li>
+       <li>
+        <strong>
+         on_click
+        </strong>
+        event handler receives a dScript object or a comp.state() function
+       </li>
+       <li>
+        <strong>
+         on_double_click
+        </strong>
+        event handler receives a dScript object or a comp.state() function
+       </li>
+       <li>
+        <strong>
+         on_mouse_down
+        </strong>
+        event handler receives a dScript object or a comp.state() function
+       </li>
+       <li>
+        <strong>
+         on_mouse_up
+        </strong>
+        event handler receives a dScript object or a comp.state() function
+       </li>
+       <li>
+        <strong>
+         on_mouse_enter
+        </strong>
+        event handler receives a dScript object or a comp.state() function
+       </li>
+       <li>
+        <strong>
+         on_mouse_leave
+        </strong>
+        event handler receives a dScript object or a comp.state() function
+       </li>
+       <li>
+        <strong>
+         on_mouse_move
+        </strong>
+        event handler receives a dScript object or a comp.state() function
+       </li>
+       <li>
+        <strong>
+         on_key_down
+        </strong>
+        event handler receives a dScript object or a comp.state() function
+       </li>
+       <li>
+        <strong>
+         on_key_up
+        </strong>
+        event handler receives a dScript object or a comp.state() function
+       </li>
+       <li>
+        <strong>
+         on_key_press
+        </strong>
+        event handler receives a dScript object or a comp.state() function
+       </li>
+       <li>
+        <strong>
+         on_change
+        </strong>
+        event handler receives a dScript object or a comp.state() function
+       </li>
+       <li>
+        <strong>
+         on_input
+        </strong>
+        event handler receives a dScript object or a comp.state() function
+       </li>
+       <li>
+        <strong>
+         on_submit
+        </strong>
+        event handler receives a dScript object or a comp.state() function
+       </li>
+       <li>
+        <strong>
+         on_focus
+        </strong>
+        event handler receives a dScript object or a comp.state() function
+       </li>
+       <li>
+        <strong>
+         on_blur
+        </strong>
+        event handler receives a dScript object or a comp.state() function
+       </li>
+       <li>
+        <strong>
+         on_load
+        </strong>
+        event handler receives a dScript object or a comp.state() function
+       </li>
+       <li>
+        <strong>
+         on_error
+        </strong>
+        event handler receives a dScript object or a comp.state() function
+       </li>
+       <li>
+        <p>
+         <strong>
+          on_resize
+         </strong>
+         event handler receives a dScript object or a comp.state() function
+        </p>
+       </li>
+       <li>
+        <p>
+         <strong>
+          children
+         </strong>
+         : List of child components (for containers)
+        </p>
        </li>
       </ul>
       <h3 id="component-search-and-modification">
