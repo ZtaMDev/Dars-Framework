@@ -97,9 +97,10 @@ class PreviewServer:
             try:
                 # Suppress logs for hot reload requests and normal page loads
                 path = getattr(self, "path", "")
-                if any(
+                # Suppress any version*.txt (e.g., version.txt, version_docs.txt, version_<slug>.txt)
+                if ("version" in path and path.endswith('.txt')) or any(
                     pattern in path
-                    for pattern in ["version.txt", "favicon.ico", ".css", ".js", ".png", ".jpg", ".svg"]
+                    for pattern in ["favicon.ico", ".css", ".js", ".png", ".jpg", ".svg"]
                 ):
                     return
                 

@@ -1,3 +1,49 @@
+# Release Notes v1.3.6
+
+> Compile-time and runtime component manipulation. Introduces `app.create()` / `app.delete()` for pre-export tree editing, and `createComp()` / `deleteComp()` for dynamic DOM operations with safe event hydration.
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+or
+
+```bash
+pip install dars-framework==1.3.6
+```
+
+## What's New
+
+### Compile-Time Component Manipulation
+
+- `app.create(target, root=None, on_top_of=None, on_bottom_of=None)`
+  - Inserts components before/after a reference child or at the end of the `root`.
+  - Accepts `target` as an instance, a callable, or a `str` (id to move an existing component).
+  - Multipage support: `root` can be a component id, a component instance, or a page name.
+- `app.delete(id)`
+  - Removes a component by id from the tree before export (no-op if not found).
+
+### Runtime Component Manipulation
+
+- `createComp(target, root, position='append')`
+  - Generates a `dScript` that calls `Dars.runtime.createComponent(root_id, vdom_data, position)`.
+  - Serializes the Python component to VDOM and rehydrates events for the subtree.
+  - Positions: `append`, `prepend`, `before:<id>`, `after:<id>`.
+- `deleteComp(id)`
+  - Generates `dScript` that calls `Dars.runtime.deleteComponent(id)`.
+
+### Event Hydration for Dynamic Content
+
+- Event rehydration for the newly created subtree (supports arrays of handlers).
+- Every dynamic node with an `id` also gets `class="dars-id-<id>"` for reliable selection when multiple instances exist.
+
+### Barrel Import
+
+- `from dars.all import *` now includes `createComp` and `deleteComp` from `dars.backend`.
+
+
 # Release Notes v1.3.5
 
 > Enhanced styling and development experience update featuring active styles, improved preview system, and advanced file monitoring. Delivers better visual feedback and faster development workflow.

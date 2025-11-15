@@ -29,7 +29,71 @@ Dars provides a powerful way to handle user interactions through the `dScript` c
 
 For a complete list of available event types and how to use them, refer to the documentation in [Events](#events-in-dars).
 
-### dScript Basic Usage
+## Runtime Component Manipulation (createComp / deleteComp)
+
+You can create or delete components dynamically at runtime in the browser using `createComp()` and `deleteComp()`. These functions return `dScript` so you can attach them to events.
+
+- `from dars.all import *` exposes `createComp` and `deleteComp`.
+- The created subtree is serialized to VDOM, mounted into the DOM, and its events are rehydrated automatically.
+- Every node that has an `id` also receives a CSS class `dars-id-<id>` to help target multiple instances when needed.
+
+### API
+
+```python
+createComp(target, root, position='append') -> dScript
+deleteComp(id) -> dScript
+```
+
+- **target**: a component instance or a callable returning one.
+- **root**: id (string) of the DOM/container where to insert.
+- **position**: where to place the new element inside `root`.
+  - `append` (default)
+  - `prepend`
+  - `before:<id>` (insert before a reference sibling id)
+  - `after:<id>` (insert after a reference sibling id)
+
+### Examples
+
+```python
+from dars.all import *
+
+container = Container(id="root")
+
+# Add a button that creates a new Text inside #root on click
+add_btn = Button(
+    text="Add",
+    id="add",
+    on_click=createComp(Text("Hi", id="msg"), root="root", position='append')
+)
+
+# Add another button that inserts before a specific sibling
+insert_btn = Button(
+    text="Insert Before",
+    on_click=createComp(Text("Before", id="before"), root="root", position='before:msg')
+)
+
+# Button that deletes an element by id
+delete_btn = Button(
+    text="Delete msg",
+    on_click=deleteComp("msg")
+)
+```
+
+### Event Rehydration
+
+- When a subtree is created with `createComp`, all events defined in its Python components are attached at runtime.
+- This includes nested children and multiple handlers per node.
+
+### Multiple Instances and CSS Class
+
+- Elements get a helper class `dars-id-<id>` in addition to the DOM `id`.
+- This makes it easier to query duplicate instances when they exist.
+
+### Notes
+
+- These APIs are for dynamic changes in the browser. For compile-time changes (before export/preview), use `App.create()` and `App.delete()` described in the App documentation.
+
+## dScript Basic Usage
 
 ```python
 from dars.all import *

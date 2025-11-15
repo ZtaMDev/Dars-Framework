@@ -27,6 +27,60 @@ class App:
     ):
 ```
 
+## Compile-Time Component Manipulation (App.create / App.delete)
+
+Dars lets you modify the component tree before export or preview. Use these methods on `App` to insert or remove components safely at compile time.
+
+### App.create(target, root=None, on_top_of=None, on_bottom_of=None)
+
+- **Purpose**: Insert a component into the tree.
+- **`target`** can be:
+  - A component instance (e.g., `Button("OK", id="ok")`).
+  - A callable that returns an instance (called lazily).
+  - A `str` id of an existing component in the app tree to move it.
+- **`root`**: Where to insert. Accepts:
+  - A component instance.
+  - A component id (`str`).
+  - A page name (`str`) in multipage apps.
+- **`on_top_of` / `on_bottom_of`**: Reference sibling inside `root` to place the new node before/after. Can be an id (`str`) or a component instance found within `root` (deep search). If neither is provided, it appends to `root`.
+- Works with both single-page (`app.root`) and multipage (`app.add_page`) setups.
+- If anything can’t be resolved, it fails gracefully without crashing.
+
+#### Examples
+
+```python
+from dars.all import *
+
+app = App(title="Compile-time create/delete")
+
+# Single-page usage
+root = Container(Text("A" , id="a"), Text("C", id="c"), id="root")
+app.set_root(root)
+
+# Insert new Text before id="c"
+app.create(Text("B", id="b"), root="root", on_top_of="c")
+
+# Move existing component by id to bottom
+app.create("a", root="root", on_bottom_of="c")
+
+# Multipage usage (root by page name)
+home = Page(Container(Text("Home"), id="home_root"))
+app.add_page(name="home", root=home, index=True)
+app.create(Text("Welcome", id="welcome"), root="home", on_bottom_of="home_root")
+```
+
+### App.delete(id)
+
+- **Purpose**: Remove a component from the tree by its `id`.
+- If the id does not exist, it becomes a no-op (safe warning behavior).
+
+```python
+# Remove a component by id before export/preview
+app.delete("b")
+```
+
+These operations run before export and affect the generated HTML/VDOM. For dynamic changes at runtime in the browser, see the runtime APIs in the Components documentation.
+
 ## Global Styles Management
 
 ### Enhanced add_global_style() Method

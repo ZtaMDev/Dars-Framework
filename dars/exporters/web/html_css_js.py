@@ -2131,9 +2131,13 @@ body {
     }}
 
     function startHotReload(){{
+        try{{ if (window.__DARS_HOTRELOAD_DISABLED__) return ()=>{{}}; }}catch(_ ){{ }}
         const vurl = (window.__DARS_VERSION_URL || 'version.txt');
         let timer = null;
         let warnedVersionMissing = false;
+        let failCount = 0;
+        const maxFails = 10;
+        let stopped = false;
 
         function httpGet(url, onSuccess, onError, responseType){{
         try{{
@@ -2158,9 +2162,26 @@ body {
         }}
 
         function tick(){{
+        if(stopped) return;
         httpGet(vurl, function(text){{
             let ver = (text || '').toString().trim();
-            if(ver){{ warnedVersionMissing = false; }}
+            // Treat '0' or empty as missing
+            if(!ver || ver === '0'){{
+            failCount += 1;
+            if(failCount >= maxFails){{
+                console.warn('[Dars] version file not found after', maxFails, 'attempts. Hot reload disabled for this session.');
+                stopped = true;
+                try{{ window.__DARS_HOTRELOAD_DISABLED__ = true; window.__DARS_STOP_HOTRELOAD = null; }}catch(_ ){{ }}
+                if(timer) try{{ clearTimeout(timer); }}catch(_ ){{ }}
+                return;
+            }}
+            if(!warnedVersionMissing){{ console.warn('[Dars] waiting for version file...'); warnedVersionMissing = true; }}
+            timer = setTimeout(tick, 600);
+            return;
+            }}
+            // Reset fail counter on valid version
+            failCount = 0;
+            warnedVersionMissing = false;
             if(!currentVersion){{ currentVersion = ver; }}
             if(ver && ver !== currentVersion){{
             currentVersion = ver;
@@ -2169,31 +2190,40 @@ body {
             }}
             timer = setTimeout(tick, 600);
         }}, function(){{
-            if(!warnedVersionMissing){{ console.log('[Dars] waiting for version.txt'); warnedVersionMissing = true; }}
+            failCount += 1;
+            if(failCount >= maxFails){{
+            console.warn('[Dars] version file not reachable after', maxFails, 'attempts. Hot reload disabled for this session.');
+            stopped = true;
+            try{{ window.__DARS_HOTRELOAD_DISABLED__ = true; window.__DARS_STOP_HOTRELOAD = null; }}catch(_ ){{ }}
+            if(timer) try{{ clearTimeout(timer); }}catch(_ ){{ }}
+            return;
+            }}
+            if(!warnedVersionMissing){{ console.warn('[Dars] waiting for version file...'); warnedVersionMissing = true; }}
             timer = setTimeout(tick, 600);
         }}, 'text');
         }}
         tick();
-        return ()=>{{ if(timer) clearTimeout(timer); }};
+        return ()=>{{ try{{ stopped = true; if(timer) clearTimeout(timer); window.__DARS_STOP_HOTRELOAD = null; }}catch(_ ){{ }} }};
     }}
 
-    document.addEventListener('DOMContentLoaded', function(){{
-        initializeStates();
-        //Inicializar eventos antes de la hidratación
-        initializeEvents();
+document.addEventListener('DOMContentLoaded', function(){{
+initializeStates();
+//Inicializar eventos antes de la hidratación
+initializeEvents();
         
-        if(window.__DARS_VDOM__){{
-        hydrate(window.__DARS_VDOM__);
-        }} else {{
-        console.warn('[Dars] No VDOM snapshot found for hydration');
-        }}
-        // Activar hot-reload incremental en dev si hay URLs definidas
-        if(window.__DARS_VERSION_URL && window.__DARS_SNAPSHOT_URL){{
-        startHotReload();
-        }}
-    }});
-    }})();
-    """
+if(window.__DARS_VDOM__){{
+hydrate(window.__DARS_VDOM__);
+}} else {{
+console.warn('[Dars] No VDOM snapshot found for hydration');
+}}
+// Activar hot-reload incremental en dev si hay URLs definidas (evitar múltiples pollers)
+if(window.__DARS_VERSION_URL && window.__DARS_SNAPSHOT_URL){{
+try{{ if (typeof window.__DARS_STOP_HOTRELOAD === 'function') {{ window.__DARS_STOP_HOTRELOAD(); }} }}catch(_ ){{ }}
+try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_ ){{ }}
+}}
+}});
+}})();
+"""
         return runtime
 
     def _generate_states_js(self) -> str:

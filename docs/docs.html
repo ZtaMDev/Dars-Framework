@@ -351,6 +351,18 @@
      <a class="sidebar-link sidebar-level-2" href="#basic-structure" style="margin-left: 20px">
       Basic Structure
      </a>
+     <a class="sidebar-link sidebar-level-2" href="#compile-time-component-manipulation-appcreate-appdelete" style="margin-left: 20px">
+      Compile-Time Component Manipulation (App.create / App.delete)
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#appcreatetarget-rootnone-ontopofnone-onbottomofnone" style="margin-left: 40px">
+      App.create(target, root=None, on_top_of=None, on_bottom_of=None)
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#examples" style="margin-left: 60px">
+      Examples
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#appdeleteid" style="margin-left: 40px">
+      App.delete(id)
+     </a>
      <a class="sidebar-link sidebar-level-2" href="#global-styles-management" style="margin-left: 20px">
       Global Styles Management
      </a>
@@ -445,7 +457,25 @@
      <a class="sidebar-link sidebar-level-2" href="#event-handling-with-dscript" style="margin-left: 20px">
       Event Handling with dScript
      </a>
-     <a class="sidebar-link sidebar-level-3" href="#dscript-basic-usage" style="margin-left: 40px">
+     <a class="sidebar-link sidebar-level-2" href="#runtime-component-manipulation-createcomp-deletecomp" style="margin-left: 20px">
+      Runtime Component Manipulation (createComp / deleteComp)
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#api" style="margin-left: 40px">
+      API
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#examples" style="margin-left: 40px">
+      Examples
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#event-rehydration" style="margin-left: 40px">
+      Event Rehydration
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#multiple-instances-and-css-class" style="margin-left: 40px">
+      Multiple Instances and CSS Class
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#notes" style="margin-left: 40px">
+      Notes
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#dscript-basic-usage" style="margin-left: 20px">
       dScript Basic Usage
      </a>
      <a class="sidebar-link sidebar-level-3" href="#available-events" style="margin-left: 40px">
@@ -2099,6 +2129,173 @@ Desktop build target. Only effective when
     <span class="p">):</span>
 </code></pre>
       </div>
+      <h2 id="compile-time-component-manipulation-appcreate-appdelete">
+       Compile-Time Component Manipulation (App.create / App.delete)
+      </h2>
+      <p>
+       Dars lets you modify the component tree before export or preview. Use these methods on
+       <code>
+        App
+       </code>
+       to insert or remove components safely at compile time.
+      </p>
+      <h3 id="appcreatetarget-rootnone-on_top_ofnone-on_bottom_ofnone">
+       App.create(target, root=None, on_top_of=None, on_bottom_of=None)
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Purpose
+        </strong>
+        : Insert a component into the tree.
+       </li>
+       <li>
+        <strong>
+         <code>
+          target
+         </code>
+        </strong>
+        can be:
+        <ul>
+         <li>
+          A component instance (e.g.,
+          <code>
+           Button("OK", id="ok")
+          </code>
+          ).
+         </li>
+         <li>
+          A callable that returns an instance (called lazily).
+         </li>
+         <li>
+          A
+          <code>
+           str
+          </code>
+          id of an existing component in the app tree to move it.
+         </li>
+        </ul>
+       </li>
+       <li>
+        <strong>
+         <code>
+          root
+         </code>
+        </strong>
+        : Where to insert. Accepts:
+        <ul>
+         <li>
+          A component instance.
+         </li>
+         <li>
+          A component id (
+          <code>
+           str
+          </code>
+          ).
+         </li>
+         <li>
+          A page name (
+          <code>
+           str
+          </code>
+          ) in multipage apps.
+         </li>
+        </ul>
+       </li>
+       <li>
+        <strong>
+         <code>
+          on_top_of
+         </code>
+         /
+         <code>
+          on_bottom_of
+         </code>
+        </strong>
+        : Reference sibling inside
+        <code>
+         root
+        </code>
+        to place the new node before/after. Can be an id (
+        <code>
+         str
+        </code>
+        ) or a component instance found within
+        <code>
+         root
+        </code>
+        (deep search). If neither is provided, it appends to
+        <code>
+         root
+        </code>
+        .
+       </li>
+       <li>
+        Works with both single-page (
+        <code>
+         app.root
+        </code>
+        ) and multipage (
+        <code>
+         app.add_page
+        </code>
+        ) setups.
+       </li>
+       <li>
+        If anything can’t be resolved, it fails gracefully without crashing.
+       </li>
+      </ul>
+      <h4 id="examples">
+       Examples
+      </h4>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"Compile-time create/delete"</span><span class="p">)</span>
+
+<span class="c1"># Single-page usage</span>
+<span class="n">root</span> <span class="o">=</span> <span class="n">Container</span><span class="p">(</span><span class="n">Text</span><span class="p">(</span><span class="s2">"A"</span> <span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"a"</span><span class="p">),</span> <span class="n">Text</span><span class="p">(</span><span class="s2">"C"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"c"</span><span class="p">),</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"root"</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">set_root</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+
+<span class="c1"># Insert new Text before id="c"</span>
+<span class="n">app</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">Text</span><span class="p">(</span><span class="s2">"B"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"b"</span><span class="p">),</span> <span class="n">root</span><span class="o">=</span><span class="s2">"root"</span><span class="p">,</span> <span class="n">on_top_of</span><span class="o">=</span><span class="s2">"c"</span><span class="p">)</span>
+
+<span class="c1"># Move existing component by id to bottom</span>
+<span class="n">app</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s2">"a"</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="s2">"root"</span><span class="p">,</span> <span class="n">on_bottom_of</span><span class="o">=</span><span class="s2">"c"</span><span class="p">)</span>
+
+<span class="c1"># Multipage usage (root by page name)</span>
+<span class="n">home</span> <span class="o">=</span> <span class="n">Page</span><span class="p">(</span><span class="n">Container</span><span class="p">(</span><span class="n">Text</span><span class="p">(</span><span class="s2">"Home"</span><span class="p">),</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"home_root"</span><span class="p">))</span>
+<span class="n">app</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"home"</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">home</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">Text</span><span class="p">(</span><span class="s2">"Welcome"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"welcome"</span><span class="p">),</span> <span class="n">root</span><span class="o">=</span><span class="s2">"home"</span><span class="p">,</span> <span class="n">on_bottom_of</span><span class="o">=</span><span class="s2">"home_root"</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="appdeleteid">
+       App.delete(id)
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Purpose
+        </strong>
+        : Remove a component from the tree by its
+        <code>
+         id
+        </code>
+        .
+       </li>
+       <li>
+        If the id does not exist, it becomes a no-op (safe warning behavior).
+       </li>
+      </ul>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Remove a component by id before export/preview</span>
+<span class="n">app</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">"b"</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       These operations run before export and affect the generated HTML/VDOM. For dynamic changes at runtime in the browser, see the runtime APIs in the Components documentation.
+      </p>
       <h2 id="global-styles-management">
        Global Styles Management
       </h2>
@@ -2832,9 +3029,192 @@ Desktop build target. Only effective when
        </a>
        .
       </p>
-      <h3 id="dscript-basic-usage">
-       dScript Basic Usage
+      <h2 id="runtime-component-manipulation-createcomp-deletecomp">
+       Runtime Component Manipulation (createComp / deleteComp)
+      </h2>
+      <p>
+       You can create or delete components dynamically at runtime in the browser using
+       <code>
+        createComp()
+       </code>
+       and
+       <code>
+        deleteComp()
+       </code>
+       . These functions return
+       <code>
+        dScript
+       </code>
+       so you can attach them to events.
+      </p>
+      <ul>
+       <li>
+        <code>
+         from dars.all import *
+        </code>
+        exposes
+        <code>
+         createComp
+        </code>
+        and
+        <code>
+         deleteComp
+        </code>
+        .
+       </li>
+       <li>
+        The created subtree is serialized to VDOM, mounted into the DOM, and its events are rehydrated automatically.
+       </li>
+       <li>
+        Every node that has an
+        <code>
+         id
+        </code>
+        also receives a CSS class
+        <code>
+         dars-id-&lt;id&gt;
+        </code>
+        to help target multiple instances when needed.
+       </li>
+      </ul>
+      <h3 id="api">
+       API
       </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">createComp</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">'append'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">dScript</span>
+<span class="n">deleteComp</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">dScript</span>
+</code></pre>
+      </div>
+      <ul>
+       <li>
+        <strong>
+         target
+        </strong>
+        : a component instance or a callable returning one.
+       </li>
+       <li>
+        <strong>
+         root
+        </strong>
+        : id (string) of the DOM/container where to insert.
+       </li>
+       <li>
+        <strong>
+         position
+        </strong>
+        : where to place the new element inside
+        <code>
+         root
+        </code>
+        .
+        <ul>
+         <li>
+          <code>
+           append
+          </code>
+          (default)
+         </li>
+         <li>
+          <code>
+           prepend
+          </code>
+         </li>
+         <li>
+          <code>
+           before:&lt;id&gt;
+          </code>
+          (insert before a reference sibling id)
+         </li>
+         <li>
+          <code>
+           after:&lt;id&gt;
+          </code>
+          (insert after a reference sibling id)
+         </li>
+        </ul>
+       </li>
+      </ul>
+      <h3 id="examples">
+       Examples
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">container</span> <span class="o">=</span> <span class="n">Container</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"root"</span><span class="p">)</span>
+
+<span class="c1"># Add a button that creates a new Text inside #root on click</span>
+<span class="n">add_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span>
+    <span class="n">text</span><span class="o">=</span><span class="s2">"Add"</span><span class="p">,</span>
+    <span class="nb">id</span><span class="o">=</span><span class="s2">"add"</span><span class="p">,</span>
+    <span class="n">on_click</span><span class="o">=</span><span class="n">createComp</span><span class="p">(</span><span class="n">Text</span><span class="p">(</span><span class="s2">"Hi"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"msg"</span><span class="p">),</span> <span class="n">root</span><span class="o">=</span><span class="s2">"root"</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">'append'</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># Add another button that inserts before a specific sibling</span>
+<span class="n">insert_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span>
+    <span class="n">text</span><span class="o">=</span><span class="s2">"Insert Before"</span><span class="p">,</span>
+    <span class="n">on_click</span><span class="o">=</span><span class="n">createComp</span><span class="p">(</span><span class="n">Text</span><span class="p">(</span><span class="s2">"Before"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"before"</span><span class="p">),</span> <span class="n">root</span><span class="o">=</span><span class="s2">"root"</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">'before:msg'</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># Button that deletes an element by id</span>
+<span class="n">delete_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span>
+    <span class="n">text</span><span class="o">=</span><span class="s2">"Delete msg"</span><span class="p">,</span>
+    <span class="n">on_click</span><span class="o">=</span><span class="n">deleteComp</span><span class="p">(</span><span class="s2">"msg"</span><span class="p">)</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="event-rehydration">
+       Event Rehydration
+      </h3>
+      <ul>
+       <li>
+        When a subtree is created with
+        <code>
+         createComp
+        </code>
+        , all events defined in its Python components are attached at runtime.
+       </li>
+       <li>
+        This includes nested children and multiple handlers per node.
+       </li>
+      </ul>
+      <h3 id="multiple-instances-and-css-class">
+       Multiple Instances and CSS Class
+      </h3>
+      <ul>
+       <li>
+        Elements get a helper class
+        <code>
+         dars-id-&lt;id&gt;
+        </code>
+        in addition to the DOM
+        <code>
+         id
+        </code>
+        .
+       </li>
+       <li>
+        This makes it easier to query duplicate instances when they exist.
+       </li>
+      </ul>
+      <h3 id="notes">
+       Notes
+      </h3>
+      <ul>
+       <li>
+        These APIs are for dynamic changes in the browser. For compile-time changes (before export/preview), use
+        <code>
+         App.create()
+        </code>
+        and
+        <code>
+         App.delete()
+        </code>
+        described in the App documentation.
+       </li>
+      </ul>
+      <h2 id="dscript-basic-usage">
+       dScript Basic Usage
+      </h2>
       <div class="codehilite">
        <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 

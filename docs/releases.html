@@ -230,12 +230,28 @@
     margin: 0 auto;
     padding: 40px 20px;">
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_171">
-      <h1 id="release-notes-v135">
-       Release Notes v1.3.5
+      <h1 id="release-notes-v136">
+       Release Notes v1.3.6
       </h1>
       <blockquote>
        <p>
-        Enhanced styling and development experience update featuring active styles, improved preview system, and advanced file monitoring. Delivers better visual feedback and faster development workflow.
+        Compile-time and runtime component manipulation. Introduces
+        <code>
+         app.create()
+        </code>
+        /
+        <code>
+         app.delete()
+        </code>
+        for pre-export tree editing, and
+        <code>
+         createComp()
+        </code>
+        /
+        <code>
+         deleteComp()
+        </code>
+        for dynamic DOM operations with safe event hydration.
        </p>
       </blockquote>
       <h2 id="installation">
@@ -249,10 +265,187 @@
        or
       </p>
       <div class="codehilite">
-       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.5
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.6
 </code></pre>
       </div>
       <h2 id="whats-new">
+       What's New
+      </h2>
+      <h3 id="compile-time-component-manipulation">
+       Compile-Time Component Manipulation
+      </h3>
+      <ul>
+       <li>
+        <code>
+         app.create(target, root=None, on_top_of=None, on_bottom_of=None)
+        </code>
+        <ul>
+         <li>
+          Inserts components before/after a reference child or at the end of the
+          <code>
+           root
+          </code>
+          .
+         </li>
+         <li>
+          Accepts
+          <code>
+           target
+          </code>
+          as an instance, a callable, or a
+          <code>
+           str
+          </code>
+          (id to move an existing component).
+         </li>
+         <li>
+          Multipage support:
+          <code>
+           root
+          </code>
+          can be a component id, a component instance, or a page name.
+         </li>
+        </ul>
+       </li>
+       <li>
+        <code>
+         app.delete(id)
+        </code>
+        <ul>
+         <li>
+          Removes a component by id from the tree before export (no-op if not found).
+         </li>
+        </ul>
+       </li>
+      </ul>
+      <h3 id="runtime-component-manipulation">
+       Runtime Component Manipulation
+      </h3>
+      <ul>
+       <li>
+        <code>
+         createComp(target, root, position='append')
+        </code>
+        <ul>
+         <li>
+          Generates a
+          <code>
+           dScript
+          </code>
+          that calls
+          <code>
+           Dars.runtime.createComponent(root_id, vdom_data, position)
+          </code>
+          .
+         </li>
+         <li>
+          Serializes the Python component to VDOM and rehydrates events for the subtree.
+         </li>
+         <li>
+          Positions:
+          <code>
+           append
+          </code>
+          ,
+          <code>
+           prepend
+          </code>
+          ,
+          <code>
+           before:&lt;id&gt;
+          </code>
+          ,
+          <code>
+           after:&lt;id&gt;
+          </code>
+          .
+         </li>
+        </ul>
+       </li>
+       <li>
+        <code>
+         deleteComp(id)
+        </code>
+        <ul>
+         <li>
+          Generates
+          <code>
+           dScript
+          </code>
+          that calls
+          <code>
+           Dars.runtime.deleteComponent(id)
+          </code>
+          .
+         </li>
+        </ul>
+       </li>
+      </ul>
+      <h3 id="event-hydration-for-dynamic-content">
+       Event Hydration for Dynamic Content
+      </h3>
+      <ul>
+       <li>
+        Event rehydration for the newly created subtree (supports arrays of handlers).
+       </li>
+       <li>
+        Every dynamic node with an
+        <code>
+         id
+        </code>
+        also gets
+        <code>
+         class="dars-id-&lt;id&gt;"
+        </code>
+        for reliable selection when multiple instances exist.
+       </li>
+      </ul>
+      <h3 id="barrel-import">
+       Barrel Import
+      </h3>
+      <ul>
+       <li>
+        <code>
+         from dars.all import *
+        </code>
+        now includes
+        <code>
+         createComp
+        </code>
+        and
+        <code>
+         deleteComp
+        </code>
+        from
+        <code>
+         dars.backend
+        </code>
+        .
+       </li>
+      </ul>
+      <h1 id="release-notes-v135">
+       Release Notes v1.3.5
+      </h1>
+      <blockquote>
+       <p>
+        Enhanced styling and development experience update featuring active styles, improved preview system, and advanced file monitoring. Delivers better visual feedback and faster development workflow.
+       </p>
+      </blockquote>
+      <h2 id="installation-2">
+       Installation
+      </h2>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
+</code></pre>
+      </div>
+      <p>
+       or
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.5
+</code></pre>
+      </div>
+      <h2 id="whats-new-2">
        What's New
       </h2>
       <h3 id="active-styles-support">
@@ -395,7 +588,7 @@
         Enhanced interactivity update featuring hover styles, multi-handler events, and runtime versioning. Improves component styling and event handling flexibility.
        </p>
       </blockquote>
-      <h2 id="installation-2">
+      <h2 id="installation-3">
        Installation
       </h2>
       <div class="codehilite">
@@ -409,7 +602,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.4
 </code></pre>
       </div>
-      <h2 id="whats-new-2">
+      <h2 id="whats-new-3">
        What's New
       </h2>
       <h3 id="hover-styles-support">
@@ -588,7 +781,7 @@
         Minor update featuring new semantic Section component and enhanced state serialization. Continues JavaScript migration improvements from v1.3.2.
        </p>
       </blockquote>
-      <h2 id="installation-3">
+      <h2 id="installation-4">
        Installation
       </h2>
       <div class="codehilite">
@@ -602,7 +795,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.3
 </code></pre>
       </div>
-      <h2 id="whats-new-3">
+      <h2 id="whats-new-4">
        What's New
       </h2>
       <h3 id="section-component">
@@ -752,7 +945,7 @@
         Major minification improvements with combined JS files and optimized event handling. Electron desktop exporter remains in beta.
        </p>
       </blockquote>
-      <h2 id="installation-4">
+      <h2 id="installation-5">
        Installation
       </h2>
       <div class="codehilite">
@@ -1048,7 +1241,7 @@
         Native desktop functions and DX improved with dev mode and file system integration.
        </p>
       </blockquote>
-      <h2 id="installation-5">
+      <h2 id="installation-6">
        Installation
       </h2>
       <div class="codehilite">
@@ -1133,7 +1326,7 @@
         Native desktop export (BETA), improved CLI and doctor integration, and metadata fixes for packaging. This is a BETA release: usable for testing, not recommended for production.
        </p>
       </blockquote>
-      <h2 id="installation-6">
+      <h2 id="installation-7">
        Installation
       </h2>
       <div class="codehilite">
@@ -1416,7 +1609,7 @@ dars<span class="w"> </span>build
         Optional default minification, precise CLI control, faster builds, and clearer minification status.
        </p>
       </blockquote>
-      <h2 id="installation-7">
+      <h2 id="installation-8">
        Installation
       </h2>
       <div class="codehilite">
@@ -1809,6 +2002,27 @@ dars<span class="w"> </span>build
      <div class="sidebar-category">
       Versions
      </div>
+     <a class="sidebar-link sidebar-level-1" href="#release-notes-v136" style="margin-left: 0px">
+      Release Notes v1.3.6
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#installation" style="margin-left: 20px">
+      Installation
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#whats-new" style="margin-left: 20px">
+      What's New
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#compile-time-component-manipulation" style="margin-left: 40px">
+      Compile-Time Component Manipulation
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#runtime-component-manipulation" style="margin-left: 40px">
+      Runtime Component Manipulation
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#event-hydration-for-dynamic-content" style="margin-left: 40px">
+      Event Hydration for Dynamic Content
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#barrel-import" style="margin-left: 40px">
+      Barrel Import
+     </a>
      <a class="sidebar-link sidebar-level-1" href="#release-notes-v135" style="margin-left: 0px">
       Release Notes v1.3.5
      </a>
