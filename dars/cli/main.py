@@ -489,6 +489,178 @@ class DarsExporter:
                     console.print(f"[green]✔ {translator.get('extra_file_copied').format(file=extra_file)}[/green]")
 
             console.print(f"[green]✔ {translator.get('template_copied').format(template=template)}[/green]")
+        elif str(proj_type).lower() == 'desktop':
+            # Use the default desktop template from dars/templates/desktop/template/
+            try:
+                current_file = Path(__file__).resolve()
+                template_dir = current_file.parent.parent / "templates" / "desktop" / "template"
+                
+                if not template_dir.exists():
+                    console.print(f"[yellow]⚠ Desktop template directory not found, using default scaffold[/yellow]")
+                    # Fall back to default hello world
+                    HELLO_WORLD_CODE = """
+from dars.all import *
+
+app = App(title="Hello World", theme="dark", desktop=True)
+# Crear componentes
+index = Page(
+    Text(
+        text="Hello World",
+        style={
+            'font-size': '48px',
+            'color': '#2c3e50',
+            'margin-bottom': '20px',
+            'font-weight': 'bold',
+            'text-align': 'center'
+        }
+    ),
+    Text(
+        text="Hello World",
+        style={
+            'font-size': '20px',
+            'color': '#7f8c8d',
+            'margin-bottom': '40px',
+            'text-align': 'center'
+        }
+    ),
+
+    Button(
+        text="Click Me!",
+        on_click= dScript("alert('Hello World')"),
+        on_mouse_enter=dScript("this.style.backgroundColor = '#2980b9';"),
+        on_mouse_leave=dScript("this.style.backgroundColor = '#3498db';"),
+        style={
+            'background-color': '#3498db',
+            'color': 'white',
+            'padding': '15px 30px',
+            'border': 'none',
+            'border-radius': '8px',
+            'font-size': '18px',
+            'cursor': 'pointer',
+            'transition': 'background-color 0.3s'
+        }
+    ),
+    style={
+        'display': 'flex',
+        'flex-direction': 'column',
+        'align-items': 'center',
+        'justify-content': 'center',
+        'min-height': '100vh',
+        'background-color': '#f0f2f5',
+        'font-family': 'Arial, sans-serif'
+    }
+) 
+
+app.add_page("index", index, title="Hello World", index=True)
+
+if __name__ == "__main__":
+    app.rTimeCompile()
+"""
+                    main_py = Path(name) / "main.py"
+                    main_py.write_text(HELLO_WORLD_CODE.strip(), encoding="utf-8")
+                    console.print(f"[green]✔ {translator.get('main_py_created')}[/green]")
+                else:
+                    # Copy all files from template directory, excluding __pycache__ and dars_preview
+                    excluded_dirs = {'__pycache__', 'dars_preview'}
+                    excluded_files = {'.pyc', '.pyo'}
+                    
+                    def should_copy(item_path: Path) -> bool:
+                        """Check if a file/directory should be copied"""
+                        # Skip excluded directories
+                        if item_path.name in excluded_dirs:
+                            return False
+                        # Skip excluded file extensions
+                        if item_path.suffix in excluded_files:
+                            return False
+                        return True
+                    
+                    def copy_template_recursive(src: Path, dst: Path):
+                        """Recursively copy template files"""
+                        if not should_copy(src):
+                            return
+                        
+                        if src.is_dir():
+                            dst.mkdir(parents=True, exist_ok=True)
+                            for item in src.iterdir():
+                                copy_template_recursive(item, dst / item.name)
+                        else:
+                            dst.parent.mkdir(parents=True, exist_ok=True)
+                            shutil.copy2(src, dst)
+                            # Show relative path from template dir
+                            rel_path = src.relative_to(template_dir)
+                            console.print(f"[green]✔ {rel_path} copied[/green]")
+                    
+                    # Copy all files from template
+                    for item in template_dir.iterdir():
+                        if should_copy(item):
+                            dest_item = Path(name) / item.name
+                            copy_template_recursive(item, dest_item)
+                    
+                    console.print("[green]✔ Desktop template copied[/green]")
+            except Exception as e:
+                console.print(f"[yellow]⚠ Could not copy desktop template: {e}, using default scaffold[/yellow]")
+                # Fall back to default hello world
+                HELLO_WORLD_CODE = """
+from dars.all import *
+
+app = App(title="Hello World", theme="dark", desktop=True)
+# Crear componentes
+index = Page(
+    Text(
+        text="Hello World",
+        style={
+            'font-size': '48px',
+            'color': '#2c3e50',
+            'margin-bottom': '20px',
+            'font-weight': 'bold',
+            'text-align': 'center'
+        }
+    ),
+    Text(
+        text="Hello World",
+        style={
+            'font-size': '20px',
+            'color': '#7f8c8d',
+            'margin-bottom': '40px',
+            'text-align': 'center'
+        }
+    ),
+
+    Button(
+        text="Click Me!",
+        on_click= dScript("alert('Hello World')"),
+        on_mouse_enter=dScript("this.style.backgroundColor = '#2980b9';"),
+        on_mouse_leave=dScript("this.style.backgroundColor = '#3498db';"),
+        style={
+            'background-color': '#3498db',
+            'color': 'white',
+            'padding': '15px 30px',
+            'border': 'none',
+            'border-radius': '8px',
+            'font-size': '18px',
+            'cursor': 'pointer',
+            'transition': 'background-color 0.3s'
+        }
+    ),
+    style={
+        'display': 'flex',
+        'flex-direction': 'column',
+        'align-items': 'center',
+        'justify-content': 'center',
+        'min-height': '100vh',
+        'background-color': '#f0f2f5',
+        'font-family': 'Arial, sans-serif'
+    }
+) 
+
+app.add_page("index", index, title="Hello World", index=True)
+
+if __name__ == "__main__":
+    app.rTimeCompile()
+"""
+                main_py = Path(name) / "main.py"
+                main_py.write_text(HELLO_WORLD_CODE.strip(), encoding="utf-8")
+                console.print(f"[green]✔ {translator.get('main_py_created')}[/green]")
         else:
             # Default hello world code (sin template)
             HELLO_WORLD_CODE = """
@@ -574,109 +746,126 @@ if __name__ == "__main__":
             # Non-fatal; keep init working even if config write fails
             pass
 
-        # Desktop backend scaffold
-        if str(proj_type).lower() == 'desktop':
+        # Desktop backend scaffold (only if template was not used, as template already includes backend)
+        if str(proj_type).lower() == 'desktop' and template is None:
             try:
                 backend_dir = Path(name) / 'backend'
-                backend_dir.mkdir(parents=True, exist_ok=True)
-                # package.json (CJS)
-                backend_pkg = '{\n' + \
-                    '  "name": "dars-electron-backend",\n' + \
-                    '  "private": true,\n' + \
-                    '  "main": "main.js",\n' + \
-                    '  "scripts": {"start": "electron ."},\n' + \
-                    '  "devDependencies": {"electron": "latest"}\n' + \
-                '}\n'
-                (backend_dir / 'package.json').write_text(backend_pkg, encoding='utf-8')
-                # main.js
-                backend_main = "const { app, BrowserWindow, Menu, ipcMain } = require('electron');\n" + \
-                    "const path = require('path');\n" + \
-                    "const fs = require('fs').promises;\n" + \
-                    "const http = require('http');\n\n" + \
-                    "function createWindow() {\n" + \
-                    "  const win = new BrowserWindow({\n" + \
-                    "    width: 1000, height: 700,\n" + \
-                    "    webPreferences: {\n" + \
-                    "      contextIsolation: true,\n" + \
-                    "      preload: path.join(__dirname, 'preload.js')\n" + \
-                    "    }\n" + \
-                    "  });\n" + \
-                    "  Menu.setApplicationMenu(null);\n" + \
-                    "  win.loadFile(path.join(__dirname, 'app', 'index.html'));\n" + \
-                    "}\n\n" + \
-                    "app.whenReady().then(() => {\n" + \
-                    "  createWindow();\n" + \
-                    "  app.on('activate', function () {\n" + \
-                    "    if (BrowserWindow.getAllWindows().length === 0) createWindow();\n" + \
-                    "  });\n" + \
-                    "});\n\n" + \
-                                        "// Utility to resolve paths: absolute paths are used as-is; relative paths resolve against process.cwd()\n" + \
-                                        "function resolvePath(p) {\n" + \
-                                        "  if (!p || typeof p !== 'string') throw new Error('filePath must be a string');\n" + \
-                                        "  if (path.isAbsolute(p)) return p;\n" + \
-                                        "  return path.resolve(process.cwd(), p);\n" + \
-                                        "}\n\n" + \
-                                        "function closeAllAndExit() {\n" + \
-                                        "  try {\n" + \
-                                        "    const wins = BrowserWindow.getAllWindows();\n" + \
-                                        "    wins.forEach(w => { try { w.close(); } catch(e) {} });\n" + \
-                                        "  } catch (e) {}\n" + \
-                                        "  setTimeout(() => { try { app.quit(); } catch(e) {} }, 300);\n" + \
-                                        "}\n\n" + \
-                                        "// Allow renderer to request graceful shutdown\n" + \
-                                        "ipcMain.handle('dars::dev::shutdown', async () => {\n" + \
-                                        "  closeAllAndExit();\n" + \
-                                        "  return true;\n" + \
-                                        "});\n\n" + \
-                                        "// HTTP control server for external processes (e.g., Python dev launcher)\n" + \
-                                        "const controlPort = process.env.DARS_CONTROL_PORT;\n" + \
-                                        "if (controlPort) {\n" + \
-                                        "  try {\n" + \
-                                        "    const server = http.createServer((req, res) => {\n" + \
-                                        "      if (req.method === 'POST' && req.url === '/__dars_shutdown') {\n" + \
-                                        "        closeAllAndExit();\n" + \
-                                        "        res.writeHead(200); res.end('ok');\n" + \
-                                        "        return;\n" + \
-                                        "      }\n" + \
-                                        "      res.writeHead(404); res.end('not-found');\n" + \
-                                        "    });\n" + \
-                                        "    server.listen(Number(controlPort), '127.0.0.1');\n" + \
-                                        "  } catch (e) { /* ignore */ }\n" + \
-                                        "}\n\n" + \
-                                        "// IPC handlers for Dars desktop API\n" + \
-                                        "ipcMain.handle('dars::FileSystem::read_text', async (_e, filePath, encoding = 'utf-8') => {\n" + \
-                                        "  const resolved = resolvePath(filePath);\n" + \
-                                        "  const content = await fs.readFile(resolved, { encoding });\n" + \
-                                        "  return content;\n" + \
-                                        "});\n\n" + \
-                                        "ipcMain.handle('dars::FileSystem::write_text', async (_e, filePath, data, encoding = 'utf-8') => {\n" + \
-                                        "  const resolved = resolvePath(filePath);\n" + \
-                                        "  if (typeof data !== 'string') data = String(data ?? '');\n" + \
-                                        "  await fs.writeFile(resolved, data, { encoding });\n" + \
-                                        "  return true;\n" + \
-                                        "});\n\n" + \
-                                        "app.on('window-all-closed', function () {\n" + \
-                                        "  if (process.platform !== 'darwin') app.quit();\n" + \
-                                        "});\n"
-                (backend_dir / 'main.js').write_text(backend_main, encoding='utf-8')
-                # preload.js
-                backend_preload = "const { contextBridge, ipcRenderer } = require('electron');\n" + \
-                    "contextBridge.exposeInMainWorld('DarsIPC', {\n" + \
-                    "  invoke: (channel, ...args) => ipcRenderer.invoke(channel, ...args)\n" + \
-                    "});\n" + \
-                    "// Also expose a minimal DarsDesktopAPI for renderer convenience\n" + \
-                    "contextBridge.exposeInMainWorld('DarsDesktopAPI', {\n" + \
-                    "  FileSystem: {\n" + \
-                    "    read_text: (...args) => ipcRenderer.invoke('dars::FileSystem::read_text', ...args),\n" + \
-                    "    write_text: (...args) => ipcRenderer.invoke('dars::FileSystem::write_text', ...args)\n" + \
-                    "  }\n" + \
-                    "});\n" + \
-                    "// Dev helpers: request graceful shutdown from Python dev launcher\n" + \
-                    "contextBridge.exposeInMainWorld('DarsDev', {\n" + \
-                    "  shutdown: () => ipcRenderer.invoke('dars::dev::shutdown')\n" + \
-                    "});\n"
-                (backend_dir / 'preload.js').write_text(backend_preload, encoding='utf-8')
-                console.print("[green]✔ backend/ scaffold created[/green]")
+                # Check if backend already exists (from template)
+                if not backend_dir.exists():
+                    backend_dir.mkdir(parents=True, exist_ok=True)
+                    # package.json (CJS)
+                    backend_pkg = '{\n' + \
+                        '  "name": "dars-electron-backend",\n' + \
+                        '  "private": true,\n' + \
+                        '  "main": "main.js",\n' + \
+                        '  "scripts": {"start": "electron ."},\n' + \
+                        '  "devDependencies": {"electron": "latest"}\n' + \
+                    '}\n'
+                    (backend_dir / 'package.json').write_text(backend_pkg, encoding='utf-8')
+                    # main.js
+                    backend_main = "const { app, BrowserWindow, Menu, ipcMain } = require('electron');\n" + \
+                        "const path = require('path');\n" + \
+                        "const fs = require('fs').promises;\n" + \
+                        "const http = require('http');\n\n" + \
+                        "function createWindow() {\n" + \
+                        "  const win = new BrowserWindow({\n" + \
+                        "    width: 1000, height: 700,\n" + \
+                        "    webPreferences: {\n" + \
+                        "      contextIsolation: true,\n" + \
+                        "      preload: path.join(__dirname, 'preload.js')\n" + \
+                        "    }\n" + \
+                        "  });\n" + \
+                        "  Menu.setApplicationMenu(null);\n" + \
+                        "  win.loadFile(path.join(__dirname, 'app', 'index.html'));\n" + \
+                        "}\n\n" + \
+                        "app.whenReady().then(() => {\n" + \
+                        "  createWindow();\n" + \
+                        "  app.on('activate', function () {\n" + \
+                        "    if (BrowserWindow.getAllWindows().length === 0) createWindow();\n" + \
+                        "  });\n" + \
+                        "});\n\n" + \
+                                            "// Utility to resolve paths: absolute paths are used as-is; relative paths resolve against process.cwd()\n" + \
+                                            "function resolvePath(p) {\n" + \
+                                            "  if (!p || typeof p !== 'string') throw new Error('filePath must be a string');\n" + \
+                                            "  if (path.isAbsolute(p)) return p;\n" + \
+                                            "  return path.resolve(process.cwd(), p);\n" + \
+                                            "}\n\n" + \
+                                            "function closeAllAndExit() {\n" + \
+                                            "  try {\n" + \
+                                            "    const wins = BrowserWindow.getAllWindows();\n" + \
+                                            "    wins.forEach(w => { try { w.close(); } catch(e) {} });\n" + \
+                                            "  } catch (e) {}\n" + \
+                                            "  setTimeout(() => { try { app.quit(); } catch(e) {} }, 300);\n" + \
+                                            "}\n\n" + \
+                                            "// Allow renderer to request graceful shutdown\n" + \
+                                            "ipcMain.handle('dars::dev::shutdown', async () => {\n" + \
+                                            "  closeAllAndExit();\n" + \
+                                            "  return true;\n" + \
+                                            "});\n\n" + \
+                                            "// HTTP control server for external processes (e.g., Python dev launcher)\n" + \
+                                            "const controlPort = process.env.DARS_CONTROL_PORT;\n" + \
+                                            "if (controlPort) {\n" + \
+                                            "  try {\n" + \
+                                            "    const server = http.createServer((req, res) => {\n" + \
+                                            "      if (req.method === 'POST' && req.url === '/__dars_shutdown') {\n" + \
+                                            "        closeAllAndExit();\n" + \
+                                            "        res.writeHead(200); res.end('ok');\n" + \
+                                            "        return;\n" + \
+                                            "      }\n" + \
+                                            "      res.writeHead(404); res.end('not-found');\n" + \
+                                            "    });\n" + \
+                                            "    server.listen(Number(controlPort), '127.0.0.1');\n" + \
+                                            "  } catch (e) { /* ignore */ }\n" + \
+                                            "}\n\n" + \
+                                            "// IPC handlers for Dars desktop API\n" + \
+                                            "ipcMain.handle('dars::FileSystem::read_text', async (_e, filePath, encoding = 'utf-8') => {\n" + \
+                                            "  const resolved = resolvePath(filePath);\n" + \
+                                            "  const content = await fs.readFile(resolved, { encoding });\n" + \
+                                            "  return content;\n" + \
+                                            "});\n\n" + \
+                                            "ipcMain.handle('dars::FileSystem::write_text', async (_e, filePath, data, encoding = 'utf-8') => {\n" + \
+                                            "  const resolved = resolvePath(filePath);\n" + \
+                                            "  if (typeof data !== 'string') data = String(data ?? '');\n" + \
+                                            "  await fs.writeFile(resolved, data, { encoding });\n" + \
+                                            "  return true;\n" + \
+                                            "});\n\n" + \
+                                            "app.on('window-all-closed', function () {\n" + \
+                                            "  if (process.platform !== 'darwin') app.quit();\n" + \
+                                            "});\n"
+                    (backend_dir / 'main.js').write_text(backend_main, encoding='utf-8')
+                    # preload.js
+                    backend_preload = "const { contextBridge, ipcRenderer } = require('electron');\n" + \
+                        "contextBridge.exposeInMainWorld('DarsIPC', {\n" + \
+                        "  invoke: (channel, ...args) => ipcRenderer.invoke(channel, ...args)\n" + \
+                        "});\n" + \
+                        "// Also expose a minimal DarsDesktopAPI for renderer convenience\n" + \
+                        "contextBridge.exposeInMainWorld('DarsDesktopAPI', {\n" + \
+                        "  FileSystem: {\n" + \
+                        "    read_text: (...args) => ipcRenderer.invoke('dars::FileSystem::read_text', ...args),\n" + \
+                        "    write_text: (...args) => ipcRenderer.invoke('dars::FileSystem::write_text', ...args)\n" + \
+                        "  }\n" + \
+                        "});\n" + \
+                        "// Dev helpers: request graceful shutdown from Python dev launcher\n" + \
+                        "contextBridge.exposeInMainWorld('DarsDev', {\n" + \
+                        "  shutdown: () => ipcRenderer.invoke('dars::dev::shutdown')\n" + \
+                        "});\n"
+                    (backend_dir / 'preload.js').write_text(backend_preload, encoding='utf-8')
+                    console.print("[green]✔ backend/ scaffold created[/green]")
+                
+                # Copy default icon to icons/ directory (only if not already exists from template)
+                try:
+                    icons_dir = Path(name) / 'icons'
+                    icons_dir.mkdir(parents=True, exist_ok=True)
+                    # Get path to default icon in templates/desktop
+                    current_file = Path(__file__).resolve()
+                    default_icon_src = current_file.parent.parent / "templates" / "desktop" / "icon.png"
+                    if default_icon_src.exists():
+                        default_icon_dest = icons_dir / "icon.png"
+                        if not default_icon_dest.exists():
+                            shutil.copy2(default_icon_src, default_icon_dest)
+                            console.print("[green]✔ icons/icon.png created[/green]")
+                except Exception as e:
+                    console.print(f"[yellow]Warning: could not copy default icon: {e}[/yellow]")
             except Exception as e:
                 console.print(f"[yellow]Warning: could not create backend scaffold: {e}[/yellow]")
 
@@ -1218,6 +1407,21 @@ def main():
                             "});\n",
                             encoding='utf-8')
                     console.print("[green]✔ backend/ scaffold ensured[/green]")
+                    
+                    # Ensure default icon exists in icons/ directory
+                    try:
+                        icons_dir = Path(project_root) / 'icons'
+                        icons_dir.mkdir(parents=True, exist_ok=True)
+                        # Get path to default icon in templates/desktop
+                        current_file = Path(__file__).resolve()
+                        default_icon_src = current_file.parent.parent / "templates" / "desktop" / "icon.png"
+                        if default_icon_src.exists():
+                            default_icon_dest = icons_dir / "icon.png"
+                            if not default_icon_dest.exists():
+                                shutil.copy2(default_icon_src, default_icon_dest)
+                                console.print("[green]✔ icons/icon.png created[/green]")
+                    except Exception as e:
+                        console.print(f"[yellow]Warning: could not copy default icon: {e}[/yellow]")
             except Exception:
                 pass
         elif not args.name:
@@ -1380,21 +1584,109 @@ def main():
                         _jsrun(["bun", "install", "--production"], cwd=src_dir)
                 except Exception:
                     pass
-                # Build args
-                build_args = []
+                # Build args - use --dir to generate unpacked directory (not installer)
+                # Target is also configured in package.json, but --dir flag ensures it
+                build_args = ["--dir"]
                 if target == 'windows':
-                    build_args = ["--win"]
+                    build_args.append("--win")
                 elif target == 'linux':
-                    build_args = ["--linux"]
+                    build_args.append("--linux")
                 elif target == 'macos':
-                    build_args = ["--mac"]
+                    build_args.append("--mac")
 
-                console.print(f"[cyan][Dars] Packaging Electron app for {target}...[/cyan]")
-                code, _out, err = jsb.electron_build(cwd=src_dir, extra_args=build_args)
-                if code != 0:
-                    console.print(f"[red]✖ electron-builder failed.\nSTDOUT:\n{_out}\nSTDERR:\n{err}[/red]")
-                    sys.exit(1)
-                console.print("[green]✔ Electron package created in dist/[/green]")
+                # Show progress with Rich Progress bar
+                from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn
+                import time
+                import threading
+                
+                progress_messages = []
+                last_message = ""
+                current_progress = 10
+                build_complete = False
+                
+                def progress_callback(line: str):
+                    nonlocal last_message, current_progress
+                    # Filter and format electron-builder output
+                    line_lower = line.lower()
+                    if any(keyword in line_lower for keyword in ['packaging', 'building', 'compiling', 'copying', 'writing', 'done', 'error', 'warning']):
+                        # Clean up the message
+                        clean_msg = line.strip()
+                        if clean_msg and clean_msg != last_message:
+                            progress_messages.append(clean_msg)
+                            last_message = clean_msg
+                            # Increment progress based on keywords
+                            if 'packaging' in line_lower:
+                                current_progress = min(current_progress + 15, 90)
+                            elif 'building' in line_lower or 'compiling' in line_lower:
+                                current_progress = min(current_progress + 10, 90)
+                            elif 'copying' in line_lower or 'writing' in line_lower:
+                                current_progress = min(current_progress + 5, 90)
+                            elif 'done' in line_lower:
+                                current_progress = 95
+                
+                def update_progress_bar(progress, task):
+                    """Gradually update progress bar while building"""
+                    nonlocal current_progress, build_complete
+                    while not build_complete:
+                        if current_progress < 90:
+                            # Gradually increase progress over time (simulated)
+                            current_progress = min(current_progress + 1, 90)
+                        progress.update(task, completed=current_progress)
+                        time.sleep(0.5)  # Update every 0.5 seconds
+                
+                with Progress(
+                    SpinnerColumn(),
+                    TextColumn("[progress.description]{task.description}"),
+                    BarColumn(),
+                    TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+                    TimeElapsedColumn(),
+                    console=console
+                ) as progress:
+                    task = progress.add_task(f"[cyan]Packaging Electron app for {target}...", total=100)
+                    
+                    # Start with some progress
+                    progress.update(task, advance=10)
+                    
+                    # Start progress updater thread
+                    progress_thread = threading.Thread(target=update_progress_bar, args=(progress, task), daemon=True)
+                    progress_thread.start()
+                    
+                    # Run electron-builder with progress callback
+                    start_time = time.time()
+                    code, _out, err = jsb.electron_build(cwd=src_dir, extra_args=build_args, progress_callback=progress_callback)
+                    elapsed = time.time() - start_time
+                    
+                    # Mark build as complete
+                    build_complete = True
+                    progress_thread.join(timeout=1.0)
+                    
+                    if code != 0:
+                        progress.update(task, completed=100)
+                        console.print(f"[red]✖ electron-builder failed after {elapsed:.1f}s[/red]")
+                        if _out:
+                            # Show last few error messages
+                            error_lines = [line for line in _out.split('\n') if any(kw in line.lower() for kw in ['error', 'failed', 'exception'])]
+                            if error_lines:
+                                console.print("[red]Error details:[/red]")
+                                for err_line in error_lines[-5:]:  # Last 5 error lines
+                                    console.print(f"  [red]{err_line}[/red]")
+                        if err:
+                            console.print(f"[red]STDERR: {err}[/red]")
+                        sys.exit(1)
+                    
+                    # Complete the progress bar
+                    progress.update(task, completed=100, description=f"[green]✓ Packaging completed in {elapsed:.1f}s[/green]")
+                    
+                    # Show summary of what was built
+                    if progress_messages:
+                        # Filter for important messages
+                        important = [msg for msg in progress_messages if any(kw in msg.lower() for kw in ['packaging', 'building', 'done', 'created'])]
+                        if important:
+                            console.print(f"\n[dim]Build output:[/dim]")
+                            for msg in important[-3:]:  # Last 3 important messages
+                                console.print(f"  [dim]{msg}[/dim]")
+                
+                console.print(f"[green]✔ Electron package created in dist/ (took {elapsed:.1f}s)[/green]")
             except Exception as e:
                 console.print(f"[red]Desktop build failed: {e}[/red]")
                 sys.exit(1)

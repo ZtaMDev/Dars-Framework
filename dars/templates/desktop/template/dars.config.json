@@ -1,0 +1,19 @@
+{
+  "entry": "main.py",
+  "format": "desktop",
+  "outdir": "dist",
+  "publicDir": "public",
+  "include": [],
+  "exclude": [
+    "**/__pycache__",
+    ".git",
+    ".venv",
+    "node_modules"
+  ],
+  "bundle": true,
+  "defaultMinify": false,
+  "viteMinify": false,
+  "markdownHighlight": true,
+  "markdownHighlightTheme": "auto",
+  "targetPlatform": "auto"
+}

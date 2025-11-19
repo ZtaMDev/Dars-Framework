@@ -801,6 +801,24 @@ class App:
                             pass
                     cleanup_done_event.set()
                     time.sleep(0.1)  # Minimal delay
+                    
+                    # Clean up preview directory
+                    try:
+                        shutil.rmtree(preview_dir, ignore_errors=True)
+                        if console:
+                            console.print("[yellow]Preview files deleted.[/yellow]")
+                        else:
+                            print("Preview files deleted.")
+                    except Exception as e:
+                        if console:
+                            console.print(f"[yellow]Note: Could not delete preview directory: {e}[/yellow]")
+                    
+                    # Restore original directory
+                    try:
+                        os.chdir(cwd_original)
+                    except Exception:
+                        pass
+                    
                     return
 
             except Exception as e:

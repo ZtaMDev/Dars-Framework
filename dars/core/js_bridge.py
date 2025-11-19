@@ -149,18 +149,59 @@ def electron_dev_spawn(cwd: Optional[str] = None, env: Optional[dict] = None):
         return None, cmd
 
 
-def electron_build(cwd: Optional[str] = None, extra_args: Optional[List[str]] = None) -> Tuple[int, str, str]:
-    """Run electron-builder build in cwd."""
-    args = extra_args or ["--dir"]
+def electron_build(cwd: Optional[str] = None, extra_args: Optional[List[str]] = None, progress_callback=None) -> Tuple[int, str, str]:
+    """Run electron-builder build in cwd.
+    
+    Args:
+        cwd: Working directory
+        extra_args: Additional arguments for electron-builder (default: empty, uses package.json config)
+        progress_callback: Optional callback function(message: str) to receive progress updates
+    """
+    args = extra_args or []
+    cmd = None
+    
     # Prefer npx; fallback to bun x if npx not available in PATH
     npx = which("npx.cmd") or which("npx")
     if npx:
-        return _run([npx, "--yes", "electron-builder", *args], cwd=cwd)
-    if has_bun():
-        return _run(["bun", "x", "electron-builder", *args], cwd=cwd)
-    # Last resort: try plain electron-builder if present
-    eb = which("electron-builder") or "electron-builder"
-    return _run([eb, *args], cwd=cwd)
+        cmd = [npx, "--yes", "electron-builder", *args]
+    elif has_bun():
+        cmd = ["bun", "x", "electron-builder", *args]
+    else:
+        # Last resort: try plain electron-builder if present
+        eb = which("electron-builder") or "electron-builder"
+        cmd = [eb, *args]
+    
+    if progress_callback:
+        # Run with live output for progress updates
+        try:
+            import subprocess
+            p = subprocess.Popen(
+                cmd,
+                cwd=cwd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                bufsize=1,
+                universal_newlines=True
+            )
+            
+            stdout_lines = []
+            for line in iter(p.stdout.readline, ''):
+                if not line:
+                    break
+                line = line.rstrip()
+                stdout_lines.append(line)
+                # Call progress callback with the line
+                if progress_callback:
+                    progress_callback(line)
+            
+            p.wait()
+            return p.returncode, '\n'.join(stdout_lines), ''
+        except Exception as e:
+            return 1, '', str(e)
+    else:
+        # Fallback to original behavior
+        return _run(cmd, cwd=cwd)
 
 
 def node_run(code: str) -> Tuple[int, str, str]:

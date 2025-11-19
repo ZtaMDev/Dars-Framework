@@ -59,7 +59,57 @@ class ElectronExporter(Exporter):
                 # Non-fatal: continue even if injection fails
                 pass
 
-            # 4) Backend: use user-provided backend/ if present; else generate defaults
+            # 4) Handle desktop icon from app.icon property
+            app_icon = getattr(app, 'icon', '') or ''
+            icon_path = None
+            if app_icon:
+                # Resolve icon path (relative to project root or absolute)
+                project_root = os.getcwd()
+                if os.path.isabs(app_icon):
+                    icon_path = app_icon
+                else:
+                    icon_path = os.path.join(project_root, app_icon)
+                # Check if icon exists
+                if not os.path.isfile(icon_path):
+                    # Try in icons/ directory
+                    alt_path = os.path.join(project_root, 'icons', os.path.basename(app_icon))
+                    if os.path.isfile(alt_path):
+                        icon_path = alt_path
+                    else:
+                        # Try default icon.png in icons/
+                        default_icon = os.path.join(project_root, 'icons', 'icon.png')
+                        if os.path.isfile(default_icon):
+                            icon_path = default_icon
+                        else:
+                            icon_path = None
+            else:
+                # Try default icon.png in icons/
+                default_icon = os.path.join(os.getcwd(), 'icons', 'icon.png')
+                if os.path.isfile(default_icon):
+                    icon_path = default_icon
+            
+            # Copy icon to build directory if found
+            build_icon_dir = os.path.join(base_out, 'build', 'icons')
+            build_icon_path = None
+            root_icon_path = None
+            if icon_path and os.path.isfile(icon_path):
+                try:
+                    os.makedirs(build_icon_dir, exist_ok=True)
+                    # Copy icon with appropriate name for electron-builder
+                    icon_ext = os.path.splitext(icon_path)[1].lower()
+                    if icon_ext in ['.png', '.ico', '.icns']:
+                        # electron-builder expects icon.png, icon.ico, or icon.icns
+                        build_icon_name = f'icon{icon_ext}'
+                        build_icon_path = os.path.join(build_icon_dir, build_icon_name)
+                        shutil.copy2(icon_path, build_icon_path)
+                        # Also copy to root of base_out for electron-builder to find
+                        root_icon_path = os.path.join(base_out, build_icon_name)
+                        shutil.copy2(icon_path, root_icon_path)
+                except Exception:
+                    build_icon_path = None
+                    root_icon_path = None
+
+            # 5) Backend: use user-provided backend/ if present; else generate defaults
             backend_dir = os.path.join(os.getcwd(), 'backend')
             # Compute metadata from App
             app_title = getattr(app, 'title', 'Dars App') or 'Dars App'
@@ -87,7 +137,28 @@ class ElectronExporter(Exporter):
                     for fname in ('package.json', 'main.js', 'preload.js'):
                         src = os.path.join(backend_dir, fname)
                         if os.path.isfile(src):
-                            shutil.copy2(src, os.path.join(base_out, fname))
+                            dest = os.path.join(base_out, fname)
+                            shutil.copy2(src, dest)
+                            # If it's main.js and we have an icon, inject icon configuration
+                            if fname == 'main.js' and root_icon_path and os.path.isfile(root_icon_path):
+                                try:
+                                    with open(dest, 'r', encoding='utf-8') as f:
+                                        main_content = f.read()
+                                    # Check if icon is already configured
+                                    if 'icon:' not in main_content:
+                                        icon_rel = os.path.basename(root_icon_path)
+                                        # Try to inject icon in BrowserWindow options
+                                        # Look for BrowserWindow({ pattern
+                                        import re
+                                        pattern = r'(new BrowserWindow\s*\(\s*\{)'
+                                        replacement = f'\\1\n    icon: path.join(__dirname, {repr(icon_rel)}),'
+                                        new_content = re.sub(pattern, replacement, main_content, count=1)
+                                        if new_content != main_content:
+                                            with open(dest, 'w', encoding='utf-8') as f:
+                                                f.write(new_content)
+                                except Exception:
+                                    # If injection fails, continue with original file
+                                    pass
                     # Override package.json name and ensure build fields
                     try:
                         import json
@@ -123,6 +194,64 @@ class ElectronExporter(Exporter):
                             b['directories'] = dirs
                             b.setdefault('appId', f"com.dars.{pkg_name}")
                             b.setdefault('productName', app_title)
+                            
+                            # Configure icon if available (use root_icon_path for electron-builder)
+                            if root_icon_path and os.path.isfile(root_icon_path):
+                                icon_ext = os.path.splitext(root_icon_path)[1].lower()
+                                # Use relative path from base_out for electron-builder
+                                icon_rel_path = os.path.basename(root_icon_path)
+                                if icon_ext == '.png':
+                                    b['icon'] = icon_rel_path
+                                elif icon_ext == '.ico':
+                                    b['icon'] = icon_rel_path
+                                    # Also set win.icon
+                                    if 'win' not in b:
+                                        b['win'] = {}
+                                    b['win']['icon'] = icon_rel_path
+                                elif icon_ext == '.icns':
+                                    b['icon'] = icon_rel_path
+                                    # Also set mac.icon
+                                    if 'mac' not in b:
+                                        b['mac'] = {}
+                                    b['mac']['icon'] = icon_rel_path
+                            
+                            # Configure to generate direct executables (not installers)
+                            # Windows: generate dir (unpacked) instead of installer
+                            if 'win' not in b:
+                                b['win'] = {}
+                            # Use "dir" as string target for unpacked directory
+                            b['win']['target'] = "dir"
+                            
+                            # Linux: generate dir (unpacked directory)
+                            if 'linux' not in b:
+                                b['linux'] = {}
+                            b['linux']['target'] = "dir"
+                            
+                            # macOS: generate dir (unpacked directory)
+                            if 'mac' not in b:
+                                b['mac'] = {}
+                            b['mac']['target'] = "dir"
+                            
+                            # Ensure files are included correctly
+                            # Don't override if user already has files configured
+                            if 'files' not in b:
+                                b['files'] = [
+                                    "app/**/*",
+                                    "main.js",
+                                    "preload.js",
+                                    "package.json",
+                                    "dars.meta.json",
+                                    "!**/node_modules/**",
+                                    "!**/.git/**"
+                                ]
+                            # Ensure extraFiles includes icon if available
+                            if root_icon_path and os.path.isfile(root_icon_path):
+                                if 'extraFiles' not in b:
+                                    b['extraFiles'] = []
+                                icon_name = os.path.basename(root_icon_path)
+                                if icon_name not in [f.get('from', '') for f in b.get('extraFiles', [])]:
+                                    b['extraFiles'].append({"from": icon_name, "to": "."})
+                            
                             data['build'] = b
                             with open(pkg_path, 'w', encoding='utf-8') as pf:
                                 json.dump(data, pf, indent=2)
@@ -143,15 +272,54 @@ class ElectronExporter(Exporter):
                     "description": app_desc,
                     "author": app_author,
                     "version": default_version,
-                    "build": {"directories": {"output": "../"}, "electronVersion": "39.1.1", "appId": "com.dars.TBD", "productName": "TBD"}
+                    "build": {
+                        "directories": {"output": "../"},
+                        "electronVersion": "39.1.1",
+                        "appId": "com.dars.TBD",
+                        "productName": "TBD",
+                        "files": [
+                            "app/**/*",
+                            "main.js",
+                            "preload.js",
+                            "package.json",
+                            "dars.meta.json",
+                            "!**/node_modules/**",
+                            "!**/.git/**"
+                        ],
+                        "win": {"target": "dir"},
+                        "linux": {"target": "dir"},
+                        "mac": {"target": "dir"}
+                    }
                 }
                 import json
                 pkg['name'] = pkg_name
                 pkg['build']['appId'] = f"com.dars.{pkg_name}"
                 pkg['build']['productName'] = app_title
+                
+                # Configure icon if available (use root_icon_path for electron-builder)
+                if root_icon_path and os.path.isfile(root_icon_path):
+                    icon_ext = os.path.splitext(root_icon_path)[1].lower()
+                    # Use relative path from base_out for electron-builder
+                    icon_rel_path = os.path.basename(root_icon_path)
+                    if icon_ext == '.png':
+                        pkg['build']['icon'] = icon_rel_path
+                    elif icon_ext == '.ico':
+                        pkg['build']['icon'] = icon_rel_path
+                        pkg['build']['win']['icon'] = icon_rel_path
+                    elif icon_ext == '.icns':
+                        pkg['build']['icon'] = icon_rel_path
+                        pkg['build']['mac']['icon'] = icon_rel_path
+                
                 with open(os.path.join(base_out, 'package.json'), 'w', encoding='utf-8') as f:
                     json.dump(pkg, f, indent=2)
 
+                # Prepare icon path for main.js
+                icon_js_code = ""
+                if root_icon_path and os.path.isfile(root_icon_path):
+                    # Use relative path from base_out for main.js
+                    icon_rel = os.path.basename(root_icon_path)
+                    icon_js_code = f"    icon: path.join(__dirname, {repr(icon_rel)}),\n"
+                
                 main_js = (
                         "const { app, BrowserWindow, ipcMain, Menu } = require('electron');\n"
                         "const path = require('path');\n"
@@ -163,6 +331,7 @@ class ElectronExporter(Exporter):
                                                                                                                    f"  const win = new BrowserWindow({{\n"
                                                                                                                    "    width: 1000, height: 700,\n"
                                                                                                                    "    title: META.title,\n"
+                                                                                                                   + icon_js_code +
                                                                                                                    "    webPreferences: {\n"
                                                                                                                    "      contextIsolation: true,\n"
                                                                                                                    "      preload: path.join(__dirname, 'preload.js')\n"
