@@ -67,8 +67,34 @@ ipcMain.handle('dars::FileSystem::read_text', async (_e, filePath, encoding = 'u
 ipcMain.handle('dars::FileSystem::write_text', async (_e, filePath, data, encoding = 'utf-8') => {
   const resolved = resolvePath(filePath);
   if (typeof data !== 'string') data = String(data ?? '');
+  await fs.mkdir(path.dirname(resolved), { recursive: true });
   await fs.writeFile(resolved, data, { encoding });
   return true;
+});
+
+// Binary file operations
+ipcMain.handle('dars::FileSystem::read_file', async (_e, filePath) => {
+  const resolved = resolvePath(filePath);
+  try {
+    const data = await fs.readFile(resolved);
+    // Convert to array for JSON serialization
+    return { data: Array.from(data) };
+  } catch (error) {
+    console.error('Error reading file:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('dars::FileSystem::write_file', async (_e, filePath, data) => {
+  const resolved = resolvePath(filePath);
+  try {
+    await fs.mkdir(path.dirname(resolved), { recursive: true });
+    await fs.writeFile(resolved, Buffer.from(data));
+    return true;
+  } catch (error) {
+    console.error('Error writing file:', error);
+    throw error;
+  }
 });
 
 app.on('window-all-closed', function () {

@@ -784,73 +784,73 @@ if __name__ == "__main__":
                         "    if (BrowserWindow.getAllWindows().length === 0) createWindow();\n" + \
                         "  });\n" + \
                         "});\n\n" + \
-                                            "// Utility to resolve paths: absolute paths are used as-is; relative paths resolve against process.cwd()\n" + \
-                                            "function resolvePath(p) {\n" + \
-                                            "  if (!p || typeof p !== 'string') throw new Error('filePath must be a string');\n" + \
-                                            "  if (path.isAbsolute(p)) return p;\n" + \
-                                            "  return path.resolve(process.cwd(), p);\n" + \
-                                            "}\n\n" + \
-                                            "function closeAllAndExit() {\n" + \
-                                            "  try {\n" + \
-                                            "    const wins = BrowserWindow.getAllWindows();\n" + \
-                                            "    wins.forEach(w => { try { w.close(); } catch(e) {} });\n" + \
-                                            "  } catch (e) {}\n" + \
-                                            "  setTimeout(() => { try { app.quit(); } catch(e) {} }, 300);\n" + \
-                                            "}\n\n" + \
-                                            "// Allow renderer to request graceful shutdown\n" + \
-                                            "ipcMain.handle('dars::dev::shutdown', async () => {\n" + \
-                                            "  closeAllAndExit();\n" + \
-                                            "  return true;\n" + \
-                                            "});\n\n" + \
-                                            "// HTTP control server for external processes (e.g., Python dev launcher)\n" + \
-                                            "const controlPort = process.env.DARS_CONTROL_PORT;\n" + \
-                                            "if (controlPort) {\n" + \
-                                            "  try {\n" + \
-                                            "    const server = http.createServer((req, res) => {\n" + \
-                                            "      if (req.method === 'POST' && req.url === '/__dars_shutdown') {\n" + \
-                                            "        closeAllAndExit();\n" + \
-                                            "        res.writeHead(200); res.end('ok');\n" + \
-                                            "        return;\n" + \
-                                            "      }\n" + \
-                                            "      res.writeHead(404); res.end('not-found');\n" + \
-                                            "    });\n" + \
-                                            "    server.listen(Number(controlPort), '127.0.0.1');\n" + \
-                                            "  } catch (e) { /* ignore */ }\n" + \
-                                            "}\n\n" + \
-                                            "// IPC handlers for Dars desktop API\n" + \
-                                            "ipcMain.handle('dars::FileSystem::read_text', async (_e, filePath, encoding = 'utf-8') => {\n" + \
-                                            "  const resolved = resolvePath(filePath);\n" + \
-                                            "  const content = await fs.readFile(resolved, { encoding });\n" + \
-                                            "  return content;\n" + \
-                                            "});\n\n" + \
-                                            "ipcMain.handle('dars::FileSystem::write_text', async (_e, filePath, data, encoding = 'utf-8') => {\n" + \
-                                            "  const resolved = resolvePath(filePath);\n" + \
-                                            "  if (typeof data !== 'string') data = String(data ?? '');\n" + \
-                                            "  await fs.writeFile(resolved, data, { encoding });\n" + \
-                                            "  return true;\n" + \
-                                            "});\n\n" + \
-                                            "app.on('window-all-closed', function () {\n" + \
-                                            "  if (process.platform !== 'darwin') app.quit();\n" + \
-                                            "});\n"
-                    (backend_dir / 'main.js').write_text(backend_main, encoding='utf-8')
-                    # preload.js
-                    backend_preload = "const { contextBridge, ipcRenderer } = require('electron');\n" + \
-                        "contextBridge.exposeInMainWorld('DarsIPC', {\n" + \
-                        "  invoke: (channel, ...args) => ipcRenderer.invoke(channel, ...args)\n" + \
-                        "});\n" + \
-                        "// Also expose a minimal DarsDesktopAPI for renderer convenience\n" + \
-                        "contextBridge.exposeInMainWorld('DarsDesktopAPI', {\n" + \
-                        "  FileSystem: {\n" + \
-                        "    read_text: (...args) => ipcRenderer.invoke('dars::FileSystem::read_text', ...args),\n" + \
-                        "    write_text: (...args) => ipcRenderer.invoke('dars::FileSystem::write_text', ...args)\n" + \
-                        "  }\n" + \
-                        "});\n" + \
-                        "// Dev helpers: request graceful shutdown from Python dev launcher\n" + \
-                        "contextBridge.exposeInMainWorld('DarsDev', {\n" + \
-                        "  shutdown: () => ipcRenderer.invoke('dars::dev::shutdown')\n" + \
-                        "});\n"
-                    (backend_dir / 'preload.js').write_text(backend_preload, encoding='utf-8')
-                    console.print("[green]✔ backend/ scaffold created[/green]")
+                                        "// Utility to resolve paths: absolute paths are used as-is; relative paths resolve against process.cwd()\n" + \
+                                        "function resolvePath(p) {\n" + \
+                                        "  if (!p || typeof p !== 'string') throw new Error('filePath must be a string');\n" + \
+                                        "  if (path.isAbsolute(p)) return p;\n" + \
+                                        "  return path.resolve(process.cwd(), p);\n" + \
+                                        "}\n\n" + \
+                                        "function closeAllAndExit() {\n" + \
+                                        "  try {\n" + \
+                                        "    const wins = BrowserWindow.getAllWindows();\n" + \
+                                        "    wins.forEach(w => { try { w.close(); } catch(e) {} });\n" + \
+                                        "  } catch (e) {}\n" + \
+                                        "  setTimeout(() => { try { app.quit(); } catch(e) {} }, 300);\n" + \
+                                        "}\n\n" + \
+                                        "// Allow renderer to request graceful shutdown\n" + \
+                                        "ipcMain.handle('dars::dev::shutdown', async () => {\n" + \
+                                        "  closeAllAndExit();\n" + \
+                                        "  return true;\n" + \
+                                        "});\n\n" + \
+                                        "// HTTP control server for external processes (e.g., Python dev launcher)\n" + \
+                                        "const controlPort = process.env.DARS_CONTROL_PORT;\n" + \
+                                        "if (controlPort) {\n" + \
+                                        "  try {\n" + \
+                                        "    const server = http.createServer((req, res) => {\n" + \
+                                        "      if (req.method === 'POST' && req.url === '/__dars_shutdown') {\n" + \
+                                        "        closeAllAndExit();\n" + \
+                                        "        res.writeHead(200); res.end('ok');\n" + \
+                                        "        return;\n" + \
+                                        "      }\n" + \
+                                        "      res.writeHead(404); res.end('not-found');\n" + \
+                                        "    });\n" + \
+                                        "    server.listen(Number(controlPort), '127.0.0.1');\n" + \
+                                        "  } catch (e) { /* ignore */ }\n" + \
+                                        "}\n\n" + \
+                                        "// IPC handlers for Dars desktop API\n" + \
+                                        "ipcMain.handle('dars::FileSystem::read_text', async (_e, filePath, encoding = 'utf-8') => {\n" + \
+                                        "  const resolved = resolvePath(filePath);\n" + \
+                                        "  const content = await fs.readFile(resolved, { encoding });\n" + \
+                                        "  return content;\n" + \
+                                        "});\n\n" + \
+                                        "ipcMain.handle('dars::FileSystem::write_text', async (_e, filePath, data, encoding = 'utf-8') => {\n" + \
+                                        "  const resolved = resolvePath(filePath);\n" + \
+                                        "  if (typeof data !== 'string') data = String(data ?? '');\n" + \
+                                        "  await fs.writeFile(resolved, data, { encoding });\n" + \
+                                        "  return true;\n" + \
+                                        "});\n\n" + \
+                                        "app.on('window-all-closed', function () {\n" + \
+                                        "  if (process.platform !== 'darwin') app.quit();\n" + \
+                                        "});\n"
+                (backend_dir / 'main.js').write_text(backend_main, encoding='utf-8')
+                # preload.js
+                backend_preload = "const { contextBridge, ipcRenderer } = require('electron');\n" + \
+                    "contextBridge.exposeInMainWorld('DarsIPC', {\n" + \
+                    "  invoke: (channel, ...args) => ipcRenderer.invoke(channel, ...args)\n" + \
+                    "});\n" + \
+                    "// Also expose a minimal DarsDesktopAPI for renderer convenience\n" + \
+                    "contextBridge.exposeInMainWorld('DarsDesktopAPI', {\n" + \
+                    "  FileSystem: {\n" + \
+                    "    read_text: (...args) => ipcRenderer.invoke('dars::FileSystem::read_text', ...args),\n" + \
+                    "    write_text: (...args) => ipcRenderer.invoke('dars::FileSystem::write_text', ...args)\n" + \
+                    "  }\n" + \
+                    "});\n" + \
+                    "// Dev helpers: request graceful shutdown from Python dev launcher\n" + \
+                    "contextBridge.exposeInMainWorld('DarsDev', {\n" + \
+                    "  shutdown: () => ipcRenderer.invoke('dars::dev::shutdown')\n" + \
+                    "});\n"
+                (backend_dir / 'preload.js').write_text(backend_preload, encoding='utf-8')
+                console.print("[green]✔ backend/ scaffold created[/green]")
                 
                 # Copy default icon to icons/ directory (only if not already exists from template)
                 try:
@@ -1383,6 +1383,28 @@ def main():
                     "  await fs.writeFile(resolved, data, { encoding });\n" +
                     "  return true;\n" +
                     "});\n\n" +
+                    "ipcMain.handle('dars::FileSystem::read_file', async (_e, filePath) => {\n" +
+                    "  const resolved = resolvePath(filePath);\n" +
+                    "  try {\n" +
+                    "    const data = await fs.readFile(resolved);\n" +
+                    "    // Convert to array for JSON serialization\n" +
+                    "    return { data: Array.from(data) };\n" +
+                    "  } catch (error) {\n" +
+                    "    console.error('Error reading file:', error);\n" +
+                    "    throw error;\n" +
+                    "  }\n" +
+                    "});\n\n" +
+                    "ipcMain.handle('dars::FileSystem::write_file', async (_e, filePath, data) => {\n" +
+                    "  const resolved = resolvePath(filePath);\n" +
+                    "  try {\n" +
+                    "    await fs.mkdir(path.dirname(resolved), { recursive: true });\n" +
+                    "    await fs.writeFile(resolved, Buffer.from(data));\n" +
+                    "    return true;\n" +
+                    "  } catch (error) {\n" +
+                    "    console.error('Error writing file:', error);\n" +
+                    "    throw error;\n" +
+                    "  }\n" +
+                    "});\n\n" +
                     "app.on('window-all-closed', function () {\n" +
                     "  if (process.platform !== 'darwin') app.quit();\n" +
                     "});\n", encoding='utf-8')
@@ -1398,7 +1420,9 @@ def main():
                             "contextBridge.exposeInMainWorld('DarsDesktopAPI', {\n" +
                             "  FileSystem: {\n" +
                             "    read_text: (...args) => ipcRenderer.invoke('dars::FileSystem::read_text', ...args),\n" +
-                            "    write_text: (...args) => ipcRenderer.invoke('dars::FileSystem::write_text', ...args)\n" +
+                            "    write_text: (...args) => ipcRenderer.invoke('dars::FileSystem::write_text', ...args),\n" +
+                            "    read_file: (...args) => ipcRenderer.invoke('dars::FileSystem::read_file', ...args),\n" +
+                            "    write_file: (...args) => ipcRenderer.invoke('dars::FileSystem::write_file', ...args)\n" +
                             "  }\n" +
                             "});\n" +
                             "// Dev helpers: request graceful shutdown from Python dev launcher\n" +
@@ -1660,7 +1684,7 @@ def main():
                     build_complete = True
                     progress_thread.join(timeout=1.0)
                     
-                    if code != 0:
+                if code != 0:
                         progress.update(task, completed=100)
                         console.print(f"[red]✖ electron-builder failed after {elapsed:.1f}s[/red]")
                         if _out:
@@ -1675,16 +1699,16 @@ def main():
                         sys.exit(1)
                     
                     # Complete the progress bar
-                    progress.update(task, completed=100, description=f"[green]✓ Packaging completed in {elapsed:.1f}s[/green]")
+                progress.update(task, completed=100, description=f"[green]✓ Packaging completed in {elapsed:.1f}s[/green]")
                     
                     # Show summary of what was built
-                    if progress_messages:
+                if progress_messages:
                         # Filter for important messages
-                        important = [msg for msg in progress_messages if any(kw in msg.lower() for kw in ['packaging', 'building', 'done', 'created'])]
-                        if important:
-                            console.print(f"\n[dim]Build output:[/dim]")
-                            for msg in important[-3:]:  # Last 3 important messages
-                                console.print(f"  [dim]{msg}[/dim]")
+                    important = [msg for msg in progress_messages if any(kw in msg.lower() for kw in ['packaging', 'building', 'done', 'created'])]
+                    if important:
+                        console.print(f"\n[dim]Build output:[/dim]")
+                        for msg in important[-3:]:  # Last 3 important messages
+                            console.print(f"  [dim]{msg}[/dim]")
                 
                 console.print(f"[green]✔ Electron package created in dist/ (took {elapsed:.1f}s)[/green]")
             except Exception as e:

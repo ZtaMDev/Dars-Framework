@@ -319,7 +319,7 @@ class ElectronExporter(Exporter):
                     # Use relative path from base_out for main.js
                     icon_rel = os.path.basename(root_icon_path)
                     icon_js_code = f"    icon: path.join(__dirname, {repr(icon_rel)}),\n"
-                
+
                 main_js = (
                         "const { app, BrowserWindow, ipcMain, Menu } = require('electron');\n"
                         "const path = require('path');\n"

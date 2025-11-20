@@ -170,7 +170,6 @@ def electron_build(cwd: Optional[str] = None, extra_args: Optional[List[str]] = 
         # Last resort: try plain electron-builder if present
         eb = which("electron-builder") or "electron-builder"
         cmd = [eb, *args]
-    
     if progress_callback:
         # Run with live output for progress updates
         try:

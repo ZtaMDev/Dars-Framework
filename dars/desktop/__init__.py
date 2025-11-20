@@ -19,11 +19,12 @@ from . import api as _api
 from dars.scripts.dscript import dScript
 import json
 
+from typing import Union, Optional
 # Internal list of dScripts automatically created by desktop helpers.
 # Exporter will attempt to include these when building pages for desktop targets.
 _auto_scripts = []  # type: list[dScript]
 
-__all__ = ["read_text", "write_text"]
+__all__ = ["read_text", "write_text", "read_file", "write_file"]
 
 
 def read_text(file_path: str, encoding: str = 'utf-8', then: Optional[str] = None, autoinclude: bool = False, import_stub: bool = True) -> dScript:
@@ -46,6 +47,93 @@ def write_text(file_path: str, data: str, encoding: str = 'utf-8', then: Optiona
     return _call_as_dscript('FileSystem', 'write_text', file_path, data, encoding, then=then, autoinclude=autoinclude, import_stub=import_stub)
 
 
+def read_file(file_path: str, then: Optional[str] = None,
+              autoinclude: bool = False, import_stub: bool = True,
+              as_data_url: bool = False) -> dScript:
+
+    var_name = f"_dars_fs_{abs(hash(file_path))}"
+
+    if then is None:
+        then = f"console.log('Read {file_path}, bytes:', value.byteLength);"
+
+    # DESKTOP JS
+    desktop_js = f"""
+(async () => {{
+    try {{
+        const raw = await DarsDesktopAPI.FileSystem.read_file({json.dumps(file_path)});
+        const {var_name} = new Uint8Array(raw.data);
+        const value = {var_name};
+        {then}
+        return value;
+    }} catch (e) {{
+        console.error("Desktop read_file error:", e);
+        throw e;
+    }}
+}})()
+""".strip()
+
+    # STATIC JS
+    converter = "readAsDataURL" if as_data_url else "readAsArrayBuffer"
+
+    static_js = f"""
+(async () => {{
+    try {{
+        const response = await fetch({json.dumps(file_path)});
+        if (!response.ok) throw new Error("HTTP " + response.status);
+        const blob = await response.blob();
+
+        const reader = new FileReader();
+
+        return new Promise((resolve, reject) => {{
+            reader.onload = e => {{
+                const {var_name} = e.target.result;
+                const value = {var_name};
+                {then}
+                resolve(value);
+            }};
+            reader.onerror = reject;
+            reader.{converter}(blob);
+        }});
+    }} catch (e) {{
+        console.error("Static read_file error:", e);
+        throw e;
+    }}
+}})()
+""".strip()
+
+    final_js = f"""
+(() => {{
+    if (typeof DarsDesktopAPI !== "undefined" && DarsDesktopAPI.FileSystem) {{
+        return {desktop_js};
+    }}
+    return {static_js};
+}})()
+""".strip()
+
+    return dScript(code=final_js)
+
+
+def write_file(file_path: str, data: Union[bytes, str, dScript], 
+              then: Optional[str] = None, autoinclude: bool = False, 
+              import_stub: bool = True) -> dScript:
+    """Write data to a file.
+    
+    In desktop: Writes directly to the filesystem
+    In browser: Triggers a download
+    
+    Args:
+        file_path: Path where to save the file
+        data: Data to write (bytes, string, or dScript that evaluates to data)
+        then: JavaScript code to execute after writing
+        autoinclude: If True, automatically include this script in the page
+        import_stub: If True, include the desktop API stub
+    """
+    if isinstance(data, (bytes, bytearray)):
+        data = list(data)
+    return _call_as_dscript('FileSystem', 'write_file', file_path, data,
+                          then=then, autoinclude=autoinclude, import_stub=import_stub)
+
+
 # Note: no Python-exec filesystem helpers are exposed by default. The
 # desktop API helpers are JS-first factories (read_text/write_text) which
 # return dScript objects to be executed in the renderer. The API schema
@@ -61,78 +149,31 @@ def _serialize_arg(arg):
         return json.dumps(str(arg))
 
 
-def _call_as_dscript(namespace: str, method: str, *args, then: Optional[str] = None, autoinclude: bool = False, import_stub: bool = True) -> dScript:
-    """Create a dScript that calls the desktop bridge and optionally runs `then` JS with the result.
+def _call_as_dscript(namespace: str, method: str, *args,
+                     then: Optional[str] = None,
+                     autoinclude: bool = False,
+                     import_stub: bool = True) -> dScript:
 
-    The created dScript is appended to _auto_scripts so exporters can include it automatically.
-    """
-    js_args = ", ".join(_serialize_arg(a) for a in args)
-    # Use DarsDesktopAPI directly; the renderer stub file (`dars_desktop_stub.js`) exposes
-    # a top-level `DarsDesktopAPI` binding. Avoid using `window.` so module imports
-    # or bundlers that export the stub will work as expected.
-    call = f"DarsDesktopAPI.{namespace}.{method}({js_args})"
-    if then:
-        body = f"{call}.then(function(result){{ {then} }}).catch(function(e){{ console.error(e); }});"
-    else:
-        # Default: log the result to console to make the call visible in desktop builds
-        body = f"{call}.then(function(result){{ console.log(result); }}).catch(function(e){{ console.error(e); }});"
+    js_args = ", ".join([_serialize_arg(arg) for arg in args])
+    api_call = f"DarsDesktopAPI.{namespace}.{method}({js_args})"
 
-    if import_stub:
-        # Use a dynamic import with fallback to a global DarsIPC bridge if the
-        # stub file is missing (dev preview). This avoids silent failures when
-        # './lib/dars_desktop_stub.js' isn't present.
-        code = (
-            "(async () => {\n"
-            "  try {\n"
-            "    const m = await import('./lib/dars_desktop_stub.js');\n"
-            "    return m.DarsDesktopAPI.%s;\n"
-            "  } catch (e) {\n"
-            "    try {\n"
-            "      if (typeof globalThis !== 'undefined' && globalThis.DarsIPC && typeof globalThis.DarsIPC.invoke === 'function') {\n"
-            "        return globalThis.DarsIPC.invoke('dars::%s::%s', %s);\n"
-            "      }\n"
-            "    } catch(_) {}\n"
-            "    throw e;\n"
-            "  }\n"
-            "})().then(r => r).catch(e => { console.error(e); });\n"
-        )
-        # The placeholders below will be formatted with namespace/method/args
-        # but we need to inject the real body call rather than just returning m.DarsDesktopAPI.
-        # To keep consistent behavior (then/catch wrappers), build an IIFE that calls the method.
-        ns = namespace
-        meth = method
-        # Escape the js_args as provided (already JSON-encoded literals)
-        args_literal = js_args
-        dynamic_code = (
-            "(async () => {\n"
-            "  try {\n"
-            "    const m = await import('./lib/dars_desktop_stub.js');\n"
-            f"    return m.DarsDesktopAPI.{ns}.{meth}({args_literal});\n"
-            "  } catch (e) {\n"
-            "    try {\n"
-            "      if (typeof globalThis !== 'undefined' && globalThis.DarsIPC && typeof globalThis.DarsIPC.invoke === 'function') {\n"
-            f"        return globalThis.DarsIPC.invoke('dars::{ns}::{meth}', {args_literal});\n"
-            "      }\n"
-            "    } catch(_) {}\n"
-            "    throw e;\n"
-            "  }\n"
-            "})()"
-        )
-        # Attach then/catch handlers similar to previous `body` variable
-        if then:
-            code = f"{dynamic_code}.then(function(result){{ {then} }}).catch(function(e){{ console.error(e); }});"
-        else:
-            code = f"{dynamic_code}.then(function(result){{ console.log(result); }}).catch(function(e){{ console.error(e); }});"
-        ds = dScript(code=code, module=True)
-    else:
-        code = body
-        ds = dScript(code=code)
-    # Only append to automatic list if explicitly requested. This avoids
-    # duplicating the same dScript when callers do `app.add_script(write_text(...))`.
+    js = f"""
+(async () => {{
+    try {{
+        const result = await {api_call};
+        {then or ""}
+        return result;
+    }} catch (e) {{
+        console.error("Desktop API error:", e);
+        throw e;
+    }}
+}})()
+""".strip()
+
+    ds = dScript(code=js)
     if autoinclude:
-        try:
-            _auto_scripts.append(ds)
-        except Exception:
-            pass
+        _auto_scripts.append(ds)
+
     return ds
+
 

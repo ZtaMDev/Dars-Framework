@@ -1,4 +1,4 @@
-# Minimal Desktop API registry for Electron bridge (Phase 2)
+# Minimal Desktop API registry for Electron bridge
 # This module defines a simple API schema that the JS generator can use
 # to emit a preload script and a JS stub exposed on window.DarsDesktopAPI.
 
@@ -25,12 +25,11 @@ def get_schema() -> Dict[str, Dict[str, str]]:
     return schema
 
 
-# Example placeholder API (no-op implementations for Phase 2)
-# Users will replace with real functions in Phase 3.
-
 def _not_implemented(*_args, **_kwargs):
     raise NotImplementedError("Desktop API method not implemented")
 
-# Pre-register a simple namespace to demonstrate generator output
+# Register FileSystem API methods
 register("FileSystem", "read_text", _not_implemented)
 register("FileSystem", "write_text", _not_implemented)
+register("FileSystem", "read_file", _not_implemented)
+register("FileSystem", "write_file", _not_implemented)
