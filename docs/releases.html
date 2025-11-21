@@ -230,6 +230,464 @@
     margin: 0 auto;
     padding: 40px 20px;">
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_171">
+      <h1 id="release-notes-v138">
+       Release Notes v1.3.8
+      </h1>
+      <blockquote>
+       <p>
+        Dynamic state updates, improved event handling, and enhanced Electron dev experience. Introduces
+        <code>
+         this()
+        </code>
+        for event-time component updates,
+        <code>
+         RawJS
+        </code>
+        for JavaScript injection, and
+        <code>
+         dScript.then()
+        </code>
+        for async chaining.
+       </p>
+      </blockquote>
+      <h2 id="installation">
+       Installation
+      </h2>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
+</code></pre>
+      </div>
+      <p>
+       or
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.8
+</code></pre>
+      </div>
+      <h2 id="whats-new">
+       What's New
+      </h2>
+      <h3 id="dynamic-state-updates-with-this">
+       Dynamic State Updates with
+       <code>
+        this()
+       </code>
+      </h3>
+      <p>
+       <strong>
+        Effortless Component Updates:
+       </strong>
+       - New
+       <code>
+        this()
+       </code>
+       helper for direct, event-time component updates without pre-registering states
+- Update any component property:
+       <code>
+        text
+       </code>
+       ,
+       <code>
+        html
+       </code>
+       ,
+       <code>
+        style
+       </code>
+       ,
+       <code>
+        attrs
+       </code>
+       ,
+       <code>
+        classes
+       </code>
+       - Works in both desktop and web exports
+- Perfect for async operations and file I/O
+      </p>
+      <p>
+       <strong>
+        Usage:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.core.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">this</span>
+
+<span class="c1"># Button that updates itself</span>
+<span class="n">btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Click me"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span>
+    <span class="n">text</span><span class="o">=</span><span class="s2">"Clicked!"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s2">"color"</span><span class="p">:</span> <span class="s2">"red"</span><span class="p">}</span>
+<span class="p">))</span>
+
+<span class="c1"># Counter with Mod helpers</span>
+<span class="n">counter</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="s2">"0"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"count"</span><span class="p">)</span>
+<span class="n">inc_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"+1"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">Mod</span><span class="o">.</span><span class="n">inc</span><span class="p">(</span><span class="s2">"count"</span><span class="p">)))</span>
+</code></pre>
+      </div>
+      <h3 id="raw-javascript-injection-with-rawjs">
+       Raw JavaScript Injection with
+       <code>
+        RawJS
+       </code>
+      </h3>
+      <p>
+       <strong>
+        Dynamic Value Passing:
+       </strong>
+       - New
+       <code>
+        RawJS
+       </code>
+       class for injecting raw JavaScript variables into state updates
+- Essential for passing values from async operations
+- Use
+       <code>
+        dScript.ARG
+       </code>
+       as a placeholder for chained script results
+      </p>
+      <p>
+       <strong>
+        Usage:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.scripts.dscript</span><span class="w"> </span><span class="kn">import</span> <span class="n">RawJS</span><span class="p">,</span> <span class="n">dScript</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dars.desktop</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_text</span>
+
+<span class="c1"># File content becomes button text</span>
+<span class="n">read_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Load"</span><span class="p">,</span>
+    <span class="n">on_click</span><span class="o">=</span><span class="n">read_text</span><span class="p">(</span><span class="s2">"data.txt"</span><span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span>
+        <span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">RawJS</span><span class="p">(</span><span class="n">dScript</span><span class="o">.</span><span class="n">ARG</span><span class="p">))</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="script-chaining-with-dscriptthen">
+       Script Chaining with
+       <code>
+        dScript.then()
+       </code>
+      </h3>
+      <p>
+       <strong>
+        Sequential Async Operations:
+       </strong>
+       - New
+       <code>
+        .then()
+       </code>
+       method for chaining
+       <code>
+        dScript
+       </code>
+       objects
+- Pass results between scripts using
+       <code>
+        dScript.ARG
+       </code>
+       (resolves to
+       <code>
+        value
+       </code>
+       )
+- Built-in error handling and logging for debugging
+- Enables complex workflows like read → process → update → write
+      </p>
+      <p>
+       <strong>
+        Usage:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Chain file operations</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Process"</span><span class="p">,</span>
+    <span class="n">on_click</span><span class="o">=</span><span class="n">read_text</span><span class="p">(</span><span class="s2">"input.txt"</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="n">dScript</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s2">"return value.toUpperCase()"</span><span class="p">))</span>
+        <span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="n">write_text</span><span class="p">(</span><span class="s2">"output.txt"</span><span class="p">,</span> <span class="n">RawJS</span><span class="p">(</span><span class="s2">"value"</span><span class="p">)))</span>
+        <span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">"Done!"</span><span class="p">))</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="event-handler-assignment-fix">
+       Event Handler Assignment Fix
+      </h3>
+      <p>
+       <strong>
+        Fixed Critical Bug:
+       </strong>
+       - Event handlers can now be assigned via attribute assignment:
+       <code>
+        btn.on_click = handler
+       </code>
+       - Previously only constructor assignment worked:
+       <code>
+        Button(on_click=handler)
+       </code>
+       - Added
+       <code>
+        __setattr__
+       </code>
+       override to properly register events in all cases
+- Maintains backward compatibility with existing code
+      </p>
+      <h3 id="enhanced-electron-dev-mode">
+       Enhanced Electron Dev Mode
+      </h3>
+      <p>
+       <strong>
+        Improved Development Experience:
+       </strong>
+       - Filtered harmless Chrome DevTools warnings (Autofill.enable, etc.)
+- Fixed double Electron window bug on file save/reload
+- Added debounce logic to prevent concurrent restarts
+- Cleaner console output with better error formatting
+- Chrome DevTools auto-open in dev mode for easier debugging
+      </p>
+      <p>
+       <strong>
+        Better Logging:
+       </strong>
+       - Error-only stderr filtering (no more noise)
+- Color-coded messages for different log levels
+- Stack traces properly displayed for JavaScript errors
+      </p>
+      <h2 id="technical-improvements">
+       Technical Improvements
+      </h2>
+      <h3 id="state-system-enhancements">
+       State System Enhancements
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Dynamic Updates
+        </strong>
+        : New
+        <code>
+         change({dynamic: true, ...})
+        </code>
+        path in
+        <code>
+         dars/js_lib.py
+        </code>
+       </li>
+       <li>
+        <strong>
+         RawJS Support
+        </strong>
+        : State methods now detect and preserve
+        <code>
+         RawJS
+        </code>
+        values
+       </li>
+       <li>
+        <strong>
+         this() Proxy
+        </strong>
+        : Clean API for self-referential component updates
+       </li>
+      </ul>
+      <h3 id="script-system-improvements">
+       Script System Improvements
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Chaining Infrastructure
+        </strong>
+        : Robust async IIFE wrapping for sequential execution
+       </li>
+       <li>
+        <strong>
+         Value Passing
+        </strong>
+        : Standardized
+        <code>
+         value
+        </code>
+        variable for inter-script communication
+       </li>
+       <li>
+        <strong>
+         Debug Logging
+        </strong>
+        : Verbose console output for troubleshooting chains
+       </li>
+      </ul>
+      <h3 id="component-system-fixes">
+       Component System Fixes
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Event Collection
+        </strong>
+        :
+        <code>
+         VDomBuilder
+        </code>
+        now correctly serializes all event handlers
+       </li>
+       <li>
+        <strong>
+         Attribute Interception
+        </strong>
+        :
+        <code>
+         __setattr__
+        </code>
+        catches
+        <code>
+         on_*
+        </code>
+        assignments
+       </li>
+       <li>
+        <strong>
+         Backward Compatible
+        </strong>
+        : All existing event patterns continue working
+       </li>
+      </ul>
+      <h3 id="dev-mode-stability">
+       Dev Mode Stability
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Debounce
+        </strong>
+        : 300ms consolidation window for file change events
+       </li>
+       <li>
+        <strong>
+         State Management
+        </strong>
+        : Proper
+        <code>
+         restart_triggered
+        </code>
+        flag handling
+       </li>
+       <li>
+        <strong>
+         Process Cleanup
+        </strong>
+        : Reliable Electron termination before restart
+       </li>
+      </ul>
+      <h2 id="documentation-updates">
+       Documentation Updates
+      </h2>
+      <p>
+       <strong>
+        Comprehensive Coverage:
+       </strong>
+       - New
+       <code>
+        this()
+       </code>
+       section in README with quick examples
+- Expanded
+       <code>
+        state_management.md
+       </code>
+       with complete file operations guide
+- Enhanced
+       <code>
+        exporters.md
+       </code>
+       with desktop API examples and chaining patterns
+- Updated
+       <code>
+        scripts.md
+       </code>
+       with
+       <code>
+        .then()
+       </code>
+       method documentation
+      </p>
+      <h2 id="migration-notes">
+       Migration Notes
+      </h2>
+      <h3 id="for-existing-projects">
+       For Existing Projects
+      </h3>
+      <p>
+       <strong>
+        Seamless Upgrade:
+       </strong>
+       - No breaking changes - all existing code remains compatible
+- New features are opt-in and additive
+- Event handlers work with both constructor and attribute assignment
+      </p>
+      <h2 id="desktop-exporter-status">
+       Desktop Exporter Status
+      </h2>
+      <p>
+       <strong>
+        Still in BETA:
+       </strong>
+       - File operations (
+       <code>
+        read_text
+       </code>
+       ,
+       <code>
+        write_text
+       </code>
+       ,
+       <code>
+        read_file
+       </code>
+       ,
+       <code>
+        write_file
+       </code>
+       ) are stable
+- Dev mode with hot reload is fully functional
+- Production packaging continues in experimental status
+- Native API surface expanding with each release
+      </p>
+      <h2 id="performance-compatibility">
+       Performance &amp; Compatibility
+      </h2>
+      <ul>
+       <li>
+        <strong>
+         Zero Overhead
+        </strong>
+        : Dynamic updates only activate when used
+       </li>
+       <li>
+        <strong>
+         Bundle Size
+        </strong>
+        : Minimal impact from new features
+       </li>
+       <li>
+        <strong>
+         Browser Support
+        </strong>
+        : Maintains full cross-browser compatibility
+       </li>
+       <li>
+        <strong>
+         Desktop Integration
+        </strong>
+        : Enhanced with improved error handling
+       </li>
+      </ul>
+      <hr/>
+      <p>
+       <strong>
+        Upgrade Highly Recommended
+       </strong>
+       for all desktop projects and applications requiring dynamic, event-driven UI updates.
+      </p>
       <h1 id="release-notes-v136">
        Release Notes v1.3.6
       </h1>
@@ -254,7 +712,7 @@
         for dynamic DOM operations with safe event hydration.
        </p>
       </blockquote>
-      <h2 id="installation">
+      <h2 id="installation-2">
        Installation
       </h2>
       <div class="codehilite">
@@ -268,7 +726,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.6
 </code></pre>
       </div>
-      <h2 id="whats-new">
+      <h2 id="whats-new-2">
        What's New
       </h2>
       <h3 id="compile-time-component-manipulation">
@@ -431,7 +889,7 @@
         Enhanced styling and development experience update featuring active styles, improved preview system, and advanced file monitoring. Delivers better visual feedback and faster development workflow.
        </p>
       </blockquote>
-      <h2 id="installation-2">
+      <h2 id="installation-3">
        Installation
       </h2>
       <div class="codehilite">
@@ -445,7 +903,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.5
 </code></pre>
       </div>
-      <h2 id="whats-new-2">
+      <h2 id="whats-new-3">
        What's New
       </h2>
       <h3 id="active-styles-support">
@@ -533,7 +991,7 @@
         : Enhanced display and interaction on mobile devices
        </li>
       </ul>
-      <h2 id="technical-improvements">
+      <h2 id="technical-improvements-2">
        Technical Improvements
       </h2>
       <h3 id="development-experience">
@@ -559,10 +1017,10 @@
         : Improved server termination and resource cleanup
        </li>
       </ul>
-      <h2 id="migration-notes">
+      <h2 id="migration-notes-2">
        Migration Notes
       </h2>
-      <h3 id="for-existing-projects">
+      <h3 id="for-existing-projects-2">
        For Existing Projects
       </h3>
       <p>
@@ -572,7 +1030,7 @@
        - No breaking changes - all existing code remains compatible
 - Active styles can be added incrementally to enhance user interaction
       </p>
-      <h2 id="desktop-exporter-status">
+      <h2 id="desktop-exporter-status-2">
        Desktop Exporter Status
       </h2>
       <p>
@@ -588,7 +1046,7 @@
         Enhanced interactivity update featuring hover styles, multi-handler events, and runtime versioning. Improves component styling and event handling flexibility.
        </p>
       </blockquote>
-      <h2 id="installation-3">
+      <h2 id="installation-4">
        Installation
       </h2>
       <div class="codehilite">
@@ -602,7 +1060,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.4
 </code></pre>
       </div>
-      <h2 id="whats-new-3">
+      <h2 id="whats-new-4">
        What's New
       </h2>
       <h3 id="hover-styles-support">
@@ -665,7 +1123,7 @@
 <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="sb">`Release: </span><span class="si">${</span><span class="nx">Dars</span><span class="p">.</span><span class="nx">releaseUrl</span><span class="si">}</span><span class="sb">`</span><span class="p">);</span>
 </code></pre>
       </div>
-      <h2 id="technical-improvements-2">
+      <h2 id="technical-improvements-3">
        Technical Improvements
       </h2>
       <h3 id="web-exporter-enhancements">
@@ -714,10 +1172,10 @@
         : Improved JavaScript output with proper handler separation and error boundaries
        </li>
       </ul>
-      <h2 id="migration-notes-2">
+      <h2 id="migration-notes-3">
        Migration Notes
       </h2>
-      <h3 id="for-existing-projects-2">
+      <h3 id="for-existing-projects-3">
        For Existing Projects
       </h3>
       <p>
@@ -728,7 +1186,7 @@
 - Hover styles can be incrementally added to enhance existing components
 - Multi-handler events are optional - single handlers remain fully supported
       </p>
-      <h2 id="desktop-exporter-status-2">
+      <h2 id="desktop-exporter-status-3">
        Desktop Exporter Status
       </h2>
       <p>
@@ -737,7 +1195,7 @@
        </strong>
        - No changes from v1.3.3
       </p>
-      <h2 id="performance-compatibility">
+      <h2 id="performance-compatibility-2">
        Performance &amp; Compatibility
       </h2>
       <ul>
@@ -781,7 +1239,7 @@
         Minor update featuring new semantic Section component and enhanced state serialization. Continues JavaScript migration improvements from v1.3.2.
        </p>
       </blockquote>
-      <h2 id="installation-4">
+      <h2 id="installation-5">
        Installation
       </h2>
       <div class="codehilite">
@@ -795,7 +1253,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.3
 </code></pre>
       </div>
-      <h2 id="whats-new-4">
+      <h2 id="whats-new-5">
        What's New
       </h2>
       <h3 id="section-component">
@@ -852,7 +1310,7 @@
 - Better performance: Streamlined state management
 - Enhanced minification: Better compatibility with Vite optimization
       </p>
-      <h3 id="documentation-updates">
+      <h3 id="documentation-updates-2">
        Documentation Updates
       </h3>
       <ul>
@@ -866,7 +1324,7 @@
         Migration guides for state serialization changes
        </li>
       </ul>
-      <h2 id="technical-improvements-3">
+      <h2 id="technical-improvements-4">
        Technical Improvements
       </h2>
       <ul>
@@ -889,10 +1347,10 @@
         : Maintains all optimizations from v1.3.2
        </li>
       </ul>
-      <h2 id="migration-notes-3">
+      <h2 id="migration-notes-4">
        Migration Notes
       </h2>
-      <h3 id="for-existing-projects-3">
+      <h3 id="for-existing-projects-4">
        For Existing Projects
       </h3>
       <p>
@@ -916,7 +1374,7 @@
 <span class="n">Section</span><span class="p">(</span><span class="n">children</span><span class="o">=</span><span class="p">[</span><span class="o">...</span><span class="p">])</span>
 </code></pre>
       </div>
-      <h2 id="desktop-exporter-status-3">
+      <h2 id="desktop-exporter-status-4">
        Desktop Exporter Status
       </h2>
       <p>
@@ -945,7 +1403,7 @@
         Major minification improvements with combined JS files and optimized event handling. Electron desktop exporter remains in beta.
        </p>
       </blockquote>
-      <h2 id="installation-5">
+      <h2 id="installation-6">
        Installation
       </h2>
       <div class="codehilite">
@@ -1092,7 +1550,7 @@
         : Multi-page application build performance
        </li>
       </ul>
-      <h2 id="desktop-exporter-status-4">
+      <h2 id="desktop-exporter-status-5">
        Desktop Exporter Status
       </h2>
       <p>
@@ -1130,10 +1588,10 @@
 - Development mode with hot reload
 - Production packaging still experimental
       </p>
-      <h2 id="migration-notes-4">
+      <h2 id="migration-notes-5">
        Migration Notes
       </h2>
-      <h3 id="for-existing-projects-4">
+      <h3 id="for-existing-projects-5">
        For Existing Projects
       </h3>
       <p>
@@ -1241,7 +1699,7 @@
         Native desktop functions and DX improved with dev mode and file system integration.
        </p>
       </blockquote>
-      <h2 id="installation-6">
+      <h2 id="installation-7">
        Installation
       </h2>
       <div class="codehilite">
@@ -1326,7 +1784,7 @@
         Native desktop export (BETA), improved CLI and doctor integration, and metadata fixes for packaging. This is a BETA release: usable for testing, not recommended for production.
        </p>
       </blockquote>
-      <h2 id="installation-7">
+      <h2 id="installation-8">
        Installation
       </h2>
       <div class="codehilite">
@@ -1609,7 +2067,7 @@ dars<span class="w"> </span>build
         Optional default minification, precise CLI control, faster builds, and clearer minification status.
        </p>
       </blockquote>
-      <h2 id="installation-8">
+      <h2 id="installation-9">
        Installation
       </h2>
       <div class="codehilite">
@@ -2002,6 +2460,60 @@ dars<span class="w"> </span>build
      <div class="sidebar-category">
       Versions
      </div>
+     <a class="sidebar-link sidebar-level-1" href="#release-notes-v138" style="margin-left: 0px">
+      Release Notes v1.3.8
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#installation" style="margin-left: 20px">
+      Installation
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#whats-new" style="margin-left: 20px">
+      What's New
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#dynamic-state-updates-with-this" style="margin-left: 40px">
+      Dynamic State Updates with `this()`
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#raw-javascript-injection-with-rawjs" style="margin-left: 40px">
+      Raw JavaScript Injection with `RawJS`
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#script-chaining-with-dscriptthen" style="margin-left: 40px">
+      Script Chaining with `dScript.then()`
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#event-handler-assignment-fix" style="margin-left: 40px">
+      Event Handler Assignment Fix
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#enhanced-electron-dev-mode" style="margin-left: 40px">
+      Enhanced Electron Dev Mode
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#technical-improvements" style="margin-left: 20px">
+      Technical Improvements
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#state-system-enhancements" style="margin-left: 40px">
+      State System Enhancements
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#script-system-improvements" style="margin-left: 40px">
+      Script System Improvements
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#component-system-fixes" style="margin-left: 40px">
+      Component System Fixes
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#dev-mode-stability" style="margin-left: 40px">
+      Dev Mode Stability
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#documentation-updates" style="margin-left: 20px">
+      Documentation Updates
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#migration-notes" style="margin-left: 20px">
+      Migration Notes
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#for-existing-projects" style="margin-left: 40px">
+      For Existing Projects
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#desktop-exporter-status" style="margin-left: 20px">
+      Desktop Exporter Status
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#performance-compatibility" style="margin-left: 20px">
+      Performance &amp; Compatibility
+     </a>
      <a class="sidebar-link sidebar-level-1" href="#release-notes-v136" style="margin-left: 0px">
       Release Notes v1.3.6
      </a>

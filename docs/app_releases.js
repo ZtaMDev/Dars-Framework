@@ -1,4 +1,165 @@
-window.__DARS_VDOM__={type:"T1",id:"page_151",key:"0",children:[{type:"T2",id:"container_152",key:"0/0",children:[{type:"T3",id:"dars-navbar",key:"0/0/0",children:[{type:"T2",id:"navbar-left",key:"0/0/0/0",children:[{type:"T4",id:"image_153",key:"0/0/0/0/0"},{type:"T5",id:"text_154",key:"0/0/0/0/1",text:"Dars Framework"}]},{type:"T2",id:"container_155",key:"0/0/0/1",children:[{type:"T2",id:"navbar-right",key:"0/0/0/1/0",children:[{type:"T6",id:"link_156",key:"0/0/0/1/0/0",text:"Home"},{type:"T6",id:"link_157",key:"0/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_158",key:"0/0/0/1/0/2",text:"Releases"},{type:"T6",id:"link_159",key:"0/0/0/1/0/3",text:"PlayGround"},{type:"T6",id:"link_160",key:"0/0/0/1/0/4",text:"GitHub"}]},{type:"T2",id:"hamburger-menu",key:"0/0/0/1/1",children:[{type:"T2",id:"hamburger-btn",key:"0/0/0/1/1/0",children:[{type:"T2",id:"container_161",key:"0/0/0/1/1/0/0",children:[{type:"T2",id:"container_162",key:"0/0/0/1/1/0/0/0"},{type:"T2",id:"container_163",key:"0/0/0/1/1/0/0/1"},{type:"T2",id:"container_164",key:"0/0/0/1/1/0/0/2"}]}]},{type:"T2",id:"mobile-menu",key:"0/0/0/1/1/1",children:[{type:"T6",id:"link_165",key:"0/0/0/1/1/1/0",text:"Home"},{type:"T6",id:"link_166",key:"0/0/0/1/1/1/1",text:"Documentation"},{type:"T6",id:"link_167",key:"0/0/0/1/1/1/2",text:"Releases"},{type:"T6",id:"link_168",key:"0/0/0/1/1/1/3",text:"PlayGround"},{type:"T6",id:"link_169",key:"0/0/0/1/1/1/4",text:"GitHub"}]}]}]}]}]},{type:"T2",id:"container_170",key:"0/1",children:[{type:"T2",id:"markdown-content-container",key:"0/1/0",children:[{type:"T9",id:"markdown_171",key:"0/1/0/0",text:`# Release Notes v1.3.6
+window.__DARS_VDOM__={type:"T1",id:"page_151",key:"0",children:[{type:"T2",id:"container_152",key:"0/0",children:[{type:"T3",id:"dars-navbar",key:"0/0/0",children:[{type:"T2",id:"navbar-left",key:"0/0/0/0",children:[{type:"T4",id:"image_153",key:"0/0/0/0/0"},{type:"T5",id:"text_154",key:"0/0/0/0/1",text:"Dars Framework"}]},{type:"T2",id:"container_155",key:"0/0/0/1",children:[{type:"T2",id:"navbar-right",key:"0/0/0/1/0",children:[{type:"T6",id:"link_156",key:"0/0/0/1/0/0",text:"Home"},{type:"T6",id:"link_157",key:"0/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_158",key:"0/0/0/1/0/2",text:"Releases"},{type:"T6",id:"link_159",key:"0/0/0/1/0/3",text:"PlayGround"},{type:"T6",id:"link_160",key:"0/0/0/1/0/4",text:"GitHub"}]},{type:"T2",id:"hamburger-menu",key:"0/0/0/1/1",children:[{type:"T2",id:"hamburger-btn",key:"0/0/0/1/1/0",children:[{type:"T2",id:"container_161",key:"0/0/0/1/1/0/0",children:[{type:"T2",id:"container_162",key:"0/0/0/1/1/0/0/0"},{type:"T2",id:"container_163",key:"0/0/0/1/1/0/0/1"},{type:"T2",id:"container_164",key:"0/0/0/1/1/0/0/2"}]}]},{type:"T2",id:"mobile-menu",key:"0/0/0/1/1/1",children:[{type:"T6",id:"link_165",key:"0/0/0/1/1/1/0",text:"Home"},{type:"T6",id:"link_166",key:"0/0/0/1/1/1/1",text:"Documentation"},{type:"T6",id:"link_167",key:"0/0/0/1/1/1/2",text:"Releases"},{type:"T6",id:"link_168",key:"0/0/0/1/1/1/3",text:"PlayGround"},{type:"T6",id:"link_169",key:"0/0/0/1/1/1/4",text:"GitHub"}]}]}]}]}]},{type:"T2",id:"container_170",key:"0/1",children:[{type:"T2",id:"markdown-content-container",key:"0/1/0",children:[{type:"T9",id:"markdown_171",key:"0/1/0/0",text:`# Release Notes v1.3.8
+
+> Dynamic state updates, improved event handling, and enhanced Electron dev experience. Introduces \`this()\` for event-time component updates, \`RawJS\` for JavaScript injection, and \`dScript.then()\` for async chaining.
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+or
+
+\`\`\`bash
+pip install dars-framework==1.3.8
+\`\`\`
+
+## What's New
+
+### Dynamic State Updates with \`this()\`
+
+**Effortless Component Updates:**
+- New \`this()\` helper for direct, event-time component updates without pre-registering states
+- Update any component property: \`text\`, \`html\`, \`style\`, \`attrs\`, \`classes\`
+- Works in both desktop and web exports
+- Perfect for async operations and file I/O
+
+**Usage:**
+\`\`\`python
+from dars.core.state import this
+
+# Button that updates itself
+btn = Button("Click me", on_click=this().state(
+    text="Clicked!",
+    style={"color": "red"}
+))
+
+# Counter with Mod helpers
+counter = Text("0", id="count")
+inc_btn = Button("+1", on_click=this().state(text=Mod.inc("count")))
+\`\`\`
+
+### Raw JavaScript Injection with \`RawJS\`
+
+**Dynamic Value Passing:**
+- New \`RawJS\` class for injecting raw JavaScript variables into state updates
+- Essential for passing values from async operations
+- Use \`dScript.ARG\` as a placeholder for chained script results
+
+**Usage:**
+\`\`\`python
+from dars.scripts.dscript import RawJS, dScript
+from dars.desktop import read_text
+
+# File content becomes button text
+read_btn = Button("Load",
+    on_click=read_text("data.txt").then(
+        this().state(text=RawJS(dScript.ARG))
+    )
+)
+\`\`\`
+
+### Script Chaining with \`dScript.then()\`
+
+**Sequential Async Operations:**
+- New \`.then()\` method for chaining \`dScript\` objects
+- Pass results between scripts using \`dScript.ARG\` (resolves to \`value\`)
+- Built-in error handling and logging for debugging
+- Enables complex workflows like read \u2192 process \u2192 update \u2192 write
+
+**Usage:**
+\`\`\`python
+# Chain file operations
+Button("Process",
+    on_click=read_text("input.txt")
+        .then(dScript(code="return value.toUpperCase()"))
+        .then(write_text("output.txt", RawJS("value")))
+        .then(this().state(text="Done!"))
+)
+\`\`\`
+
+### Event Handler Assignment Fix
+
+**Fixed Critical Bug:**
+- Event handlers can now be assigned via attribute assignment: \`btn.on_click = handler\`
+- Previously only constructor assignment worked: \`Button(on_click=handler)\`
+- Added \`__setattr__\` override to properly register events in all cases
+- Maintains backward compatibility with existing code
+
+### Enhanced Electron Dev Mode
+
+**Improved Development Experience:**
+- Filtered harmless Chrome DevTools warnings (Autofill.enable, etc.)
+- Fixed double Electron window bug on file save/reload
+- Added debounce logic to prevent concurrent restarts
+- Cleaner console output with better error formatting
+- Chrome DevTools auto-open in dev mode for easier debugging
+
+**Better Logging:**
+- Error-only stderr filtering (no more noise)
+- Color-coded messages for different log levels
+- Stack traces properly displayed for JavaScript errors
+
+## Technical Improvements
+
+### State System Enhancements
+- **Dynamic Updates**: New \`change({dynamic: true, ...})\` path in \`dars/js_lib.py\`
+- **RawJS Support**: State methods now detect and preserve \`RawJS\` values
+- **this() Proxy**: Clean API for self-referential component updates
+
+### Script System Improvements
+- **Chaining Infrastructure**: Robust async IIFE wrapping for sequential execution
+- **Value Passing**: Standardized \`value\` variable for inter-script communication
+- **Debug Logging**: Verbose console output for troubleshooting chains
+
+### Component System Fixes
+- **Event Collection**: \`VDomBuilder\` now correctly serializes all event handlers
+- **Attribute Interception**: \`__setattr__\` catches \`on_*\` assignments
+- **Backward Compatible**: All existing event patterns continue working
+
+### Dev Mode Stability
+- **Debounce**: 300ms consolidation window for file change events
+- **State Management**: Proper \`restart_triggered\` flag handling
+- **Process Cleanup**: Reliable Electron termination before restart
+
+## Documentation Updates
+
+**Comprehensive Coverage:**
+- New \`this()\` section in README with quick examples
+- Expanded \`state_management.md\` with complete file operations guide
+- Enhanced \`exporters.md\` with desktop API examples and chaining patterns
+- Updated \`scripts.md\` with \`.then()\` method documentation
+
+## Migration Notes
+
+### For Existing Projects
+
+**Seamless Upgrade:**
+- No breaking changes - all existing code remains compatible
+- New features are opt-in and additive
+- Event handlers work with both constructor and attribute assignment
+
+## Desktop Exporter Status
+
+**Still in BETA:**
+- File operations (\`read_text\`, \`write_text\`, \`read_file\`, \`write_file\`) are stable
+- Dev mode with hot reload is fully functional
+- Production packaging continues in experimental status
+- Native API surface expanding with each release
+
+## Performance & Compatibility
+
+- **Zero Overhead**: Dynamic updates only activate when used
+- **Bundle Size**: Minimal impact from new features
+- **Browser Support**: Maintains full cross-browser compatibility
+- **Desktop Integration**: Enhanced with improved error handling
+
+---
+
+**Upgrade Highly Recommended** for all desktop projects and applications requiring dynamic, event-driven UI updates.
+
+
+# Release Notes v1.3.6
 
 > Compile-time and runtime component manipulation. Introduces \`app.create()\` / \`app.delete()\` for pre-export tree editing, and \`createComp()\` / \`deleteComp()\` for dynamic DOM operations with safe event hydration.
 
@@ -606,4 +767,4 @@ Upgrade Recommendation: Recommended for all users; especially helpful for projec
 
 # Older release notes can be found
 
-In the github repository [Here](https://github.com/ZtaMDev/Dars-Framework/releases).`}]},{type:"T2",id:"footer-section",key:"0/1/1",children:[{type:"T2",id:"container_172",key:"0/1/1/0",children:[{type:"T2",id:"container_173",key:"0/1/1/0/0",children:[{type:"T2",id:"container_174",key:"0/1/1/0/0/0",children:[{type:"T4",id:"image_175",key:"0/1/1/0/0/0/0"},{type:"T2",id:"container_176",key:"0/1/1/0/0/0/1",children:[{type:"T5",id:"text_177",key:"0/1/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_178",key:"0/1/1/0/0/1",children:[{type:"T2",id:"container_179",key:"0/1/1/0/0/1/0",children:[{type:"T5",id:"text_180",key:"0/1/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_181",key:"0/1/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_182",key:"0/1/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_183",key:"0/1/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_184",key:"0/1/1/0/0/1/1",children:[{type:"T5",id:"text_185",key:"0/1/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_186",key:"0/1/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_187",key:"0/1/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_188",key:"0/1/1/0/0/1/2",children:[{type:"T5",id:"text_189",key:"0/1/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_190",key:"0/1/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_191",key:"0/1/1/0/0/2",children:[{type:"T2",id:"container_192",key:"0/1/1/0/0/2/0",children:[{type:"T5",id:"text_193",key:"0/1/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_194",key:"0/1/1/0/0/2/1",children:[{type:"T5",id:"text_195",key:"0/1/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_196",key:"0/1/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_197",key:"0/1/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_198",key:"0/1/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]},{type:"T10",id:"documentation-sidebar",key:"0/2"}]},function(){const l=new Map;let r=null,c=null;function p(){}function b(){}function y(e,n){if(!e)return;n(e);const t=e.children||[];for(let i=0;i<t.length;i++)y(t[i],n)}function _(e){try{if(typeof atob=="function")return atob(e);if(typeof Buffer<"u")return Buffer.from(e,"base64").toString("utf8")}catch{}return""}function T(e){try{if(!e)return null;if(e&&e.type==="inline"&&e.code)return new Function("event",e.code);const n=e&&(e.b||e.code_b64)||null;if(n){const t=_(n);if(t)return new Function("event",t)}}catch{}return null}function R(e){y(e,n=>{if(n&&n.id&&n.events&&!l.has(n.id)){const t={};for(const i in n.events){const a=n.events[i],u=T(a);u&&(t[i]=u)}Object.keys(t).length?l.set(n.id,t):l.delete(n.id)}})}function B(e,n){if(!(!e||!n))for(const[t,i]of Object.entries(n))try{i===!1||i===null||typeof i>"u"?e.removeAttribute(t):e.setAttribute(t,String(i))}catch{}}function E(e,n={},t={}){for(const i in n)if(!(i in t))try{e.removeAttribute(i)}catch{}for(const i in t){const a=t[i];try{a===!1||a===null||typeof a>"u"?e.removeAttribute(i):e.setAttribute(i,String(a))}catch{}}}function D(e,n={},t={}){for(const i in n)if(!(i in t))try{e.style.removeProperty(i.replace(/_/g,"-"))}catch{}for(const i in t){const a=t[i];try{e.style.setProperty(i.replace(/_/g,"-"),String(a))}catch{}}}function C(e,n){(n||document).addEventListener(e,function(t){let i=t.target;const a=n||document;for(;i&&i!==a;){const u=i.id;if(u&&l.has(u)){const m=l.get(u)[e];if(i&&i.__darsEv&&i.__darsEv[e])return;if(typeof m=="function"){try{m.call(i,t)}catch(o){console.error("[Dars] handler error",o)}return}}i=i.parentNode}},!0)}function x(e,n){return e&&n?e.type!==n.type:e!==n}function S(e){if(!e)return;const n=e.children||[];for(let t=0;t<n.length;t++)S(n[t]);if(e.id&&l.delete(e.id),e.id){const t=document.getElementById(e.id);if(t&&t.parentNode)try{t.parentNode.removeChild(t)}catch{}}}function w(e,n){if(!n||!n.id)return{ok:!1,reason:"missing-new"};let t=document.getElementById(n.id);if(!t){const o=e&&e.id?document.getElementById(e.id):null;if(o)try{o.id=n.id,t=o}catch{}}if(!t)return{ok:!1,reason:"missing-el"};if(x(e,n))return{ok:!1,reason:"type-changed"};const i=!!n.isIsland;if(!i&&n.class&&(t.className=n.class),i||E(t,e&&e.props||{},n.props||{}),i||D(t,e&&e.style||{},n.style||{}),!i&&Object.prototype.hasOwnProperty.call(n,"text")&&t.textContent!==String(n.text||"")&&(t.textContent=String(n.text||"")),i)return{ok:!0};const a=e&&e.children?e.children:[],u=n.children?n.children:[],k=new Map;for(let o=0;o<a.length;o++){const s=a[o]&&(a[o].id||a[o].key)||null;s&&k.set(String(s),a[o])}const m=new Set;for(let o=0;o<u.length;o++){const s=u[o],f=s&&(s.id||s.key)||null;if(!f)if(o<a.length){const d=w(a[o],s);if(!d.ok)return d;m.add(a[o]);continue}else return{ok:!1,reason:"children-added"};const v=k.get(String(f));if(v){const d=w(v,s);if(!d.ok)return d;m.add(v)}else{if(o<a.length){const h=a[o];if(!x(h,s)){const g=w(h,s);if(!g.ok)return g;m.add(h);continue}}const d=createSubtree(s);if(d){const h=o<a.length?a[o]:null;if(h&&h.id){const g=document.getElementById(h.id);g&&g.parentNode?g.parentNode.insertBefore(d,g):t.appendChild(d)}else t.appendChild(d);continue}return{ok:!1,reason:"children-added"}}}for(let o=0;o<a.length;o++){const s=a[o];m.has(s)||S(s)}return{ok:!0}}function M(e){typeof requestAnimationFrame=="function"?requestAnimationFrame(e):setTimeout(e,16)}function L(e){const n=r;if(!n){r=e;try{window.__DARS_VDOM__=e}catch{}return}M(()=>{const t=w(n,e);if(!t.ok){console.warn("[Dars] Structural change detected (",t.reason,"), reloading...");try{location.reload()}catch{}return}r=e;try{window.__DARS_VDOM__=e}catch{}})}function A(e){r=e;try{window.__DARS_VDOM__=e}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(t=>C(t,document))}function I(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const e=window.__DARS_VERSION_URL||"version.txt";let n=null,t=!1,i=0;const a=10;let u=!1;function k(o,s,f,v){try{const d=new XMLHttpRequest;v&&(d.responseType=v),d.open("GET",o,!0),d.timeout=5e3,d.onreadystatechange=function(){d.readyState===4&&(d.status>=200&&d.status<300?s(d.response):f())},d.onerror=f,d.ontimeout=f,d.setRequestHeader("Cache-Control","no-store"),d.send()}catch{f()}}function m(){u||k(e,function(o){let s=(o||"").toString().trim();if(!s||s==="0"){if(i+=1,i>=a){console.warn("[Dars] version file not found after",a,"attempts. Hot reload disabled for this session."),u=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(n)try{clearTimeout(n)}catch{}return}t||(console.warn("[Dars] waiting for version file..."),t=!0),n=setTimeout(m,600);return}if(i=0,t=!1,c||(c=s),s&&s!==c){c=s;try{location.reload()}catch{}return}n=setTimeout(m,600)},function(){if(i+=1,i>=a){console.warn("[Dars] version file not reachable after",a,"attempts. Hot reload disabled for this session."),u=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(n)try{clearTimeout(n)}catch{}return}t||(console.warn("[Dars] waiting for version file..."),t=!0),n=setTimeout(m,600)},"text")}return m(),()=>{try{u=!0,n&&clearTimeout(n),window.__DARS_STOP_HOTRELOAD=null}catch{}}}document.addEventListener("DOMContentLoaded",function(){if(window.__DARS_VDOM__?A(window.__DARS_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=I()}catch{}}})}(),window.addEventListener("scroll",()=>{const l=document.getElementById("dars-navbar");window.scrollY>20?l.classList.add("scrolled"):l.classList.remove("scrolled");const r=document.getElementById("features-section");if(r&&!r.classList.contains("visible")){const c=r.getBoundingClientRect().top,p=window.innerHeight/1.5;c<p&&(r.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((y,_)=>{setTimeout(()=>{y.style.opacity="1",y.style.transform="translateY(0)"},_*100)}))}}),document.addEventListener("DOMContentLoaded",()=>{const l=document.getElementById("hero-logo"),r=document.getElementById("hero-title"),c=document.getElementById("hero-description"),p=document.getElementById("pip-command"),b=document.getElementById("get-started-btn"),y=document.getElementById("scroll-text");l&&setTimeout(()=>l.classList.add("show"),5),r&&setTimeout(()=>r.classList.add("show"),350),c&&setTimeout(()=>c.classList.add("show"),650),p&&setTimeout(()=>p.classList.add("show"),950),b&&setTimeout(()=>b.classList.add("show"),1250),y&&setTimeout(()=>y.classList.add("show"),1500)});function N(){window.open("https://ztamdev.github.io/Dars-Framework/docs.html","_self")}function O(){navigator.clipboard.writeText("pip install dars framework").then(()=>{const r=document.querySelector("#copy-btn"),c=r.textContent;r.textContent="Copied!",r.style.background="linear-gradient(135deg, #38c49f 0%, #2a6b5b 100%) !important",setTimeout(()=>{r.textContent=c,r.style.background="linear-gradient(135deg, #1d4a3f 0%, #2a6b5b 100%) !important"},2e3)})}document.addEventListener("DOMContentLoaded",function(){const l=document.getElementById("hamburger-btn"),r=document.getElementById("mobile-menu"),c=document.body;l&&r&&(l.addEventListener("click",function(p){p.stopPropagation(),r.style.display==="flex"?(r.style.display="none",l.classList.remove("menu-open"),c.classList.remove("menu-open")):(r.style.display="flex",l.classList.add("menu-open"),c.classList.add("menu-open"))}),r.querySelectorAll("a").forEach(p=>{p.addEventListener("click",function(){r.style.display="none",l.classList.remove("menu-open"),c.classList.remove("menu-open")})}),document.addEventListener("click",function(p){!l.contains(p.target)&&!r.contains(p.target)&&(r.style.display="none",l.classList.remove("menu-open"),c.classList.remove("menu-open"))}),document.addEventListener("keydown",function(p){p.key==="Escape"&&r.style.display==="flex"&&(r.style.display="none",l.classList.remove("menu-open"),c.classList.remove("menu-open"))}))});
+In the github repository [Here](https://github.com/ZtaMDev/Dars-Framework/releases).`}]},{type:"T2",id:"footer-section",key:"0/1/1",children:[{type:"T2",id:"container_172",key:"0/1/1/0",children:[{type:"T2",id:"container_173",key:"0/1/1/0/0",children:[{type:"T2",id:"container_174",key:"0/1/1/0/0/0",children:[{type:"T4",id:"image_175",key:"0/1/1/0/0/0/0"},{type:"T2",id:"container_176",key:"0/1/1/0/0/0/1",children:[{type:"T5",id:"text_177",key:"0/1/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_178",key:"0/1/1/0/0/1",children:[{type:"T2",id:"container_179",key:"0/1/1/0/0/1/0",children:[{type:"T5",id:"text_180",key:"0/1/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_181",key:"0/1/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_182",key:"0/1/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_183",key:"0/1/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_184",key:"0/1/1/0/0/1/1",children:[{type:"T5",id:"text_185",key:"0/1/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_186",key:"0/1/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_187",key:"0/1/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_188",key:"0/1/1/0/0/1/2",children:[{type:"T5",id:"text_189",key:"0/1/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_190",key:"0/1/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_191",key:"0/1/1/0/0/2",children:[{type:"T2",id:"container_192",key:"0/1/1/0/0/2/0",children:[{type:"T5",id:"text_193",key:"0/1/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_194",key:"0/1/1/0/0/2/1",children:[{type:"T5",id:"text_195",key:"0/1/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_196",key:"0/1/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_197",key:"0/1/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_198",key:"0/1/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]},{type:"T10",id:"documentation-sidebar",key:"0/2"}]},function(){const l=new Map;let r=null,c=null;function p(){}function b(){}function h(e,n){if(!e)return;n(e);const t=e.children||[];for(let i=0;i<t.length;i++)h(t[i],n)}function _(e){try{if(typeof atob=="function")return atob(e);if(typeof Buffer<"u")return Buffer.from(e,"base64").toString("utf8")}catch{}return""}function E(e){try{if(!e)return null;if(e&&e.type==="inline"&&e.code)return new Function("event",e.code);const n=e&&(e.b||e.code_b64)||null;if(n){const t=_(n);if(t)return new Function("event",t)}}catch{}return null}function R(e){h(e,n=>{if(n&&n.id&&n.events&&!l.has(n.id)){const t={};for(const i in n.events){const a=n.events[i],u=E(a);u&&(t[i]=u)}Object.keys(t).length?l.set(n.id,t):l.delete(n.id)}})}function B(e,n){if(!(!e||!n))for(const[t,i]of Object.entries(n))try{i===!1||i===null||typeof i>"u"?e.removeAttribute(t):e.setAttribute(t,String(i))}catch{}}function T(e,n={},t={}){for(const i in n)if(!(i in t))try{e.removeAttribute(i)}catch{}for(const i in t){const a=t[i];try{a===!1||a===null||typeof a>"u"?e.removeAttribute(i):e.setAttribute(i,String(a))}catch{}}}function D(e,n={},t={}){for(const i in n)if(!(i in t))try{e.style.removeProperty(i.replace(/_/g,"-"))}catch{}for(const i in t){const a=t[i];try{e.style.setProperty(i.replace(/_/g,"-"),String(a))}catch{}}}function C(e,n){(n||document).addEventListener(e,function(t){let i=t.target;const a=n||document;for(;i&&i!==a;){const u=i.id;if(u&&l.has(u)){const m=l.get(u)[e];if(i&&i.__darsEv&&i.__darsEv[e])return;if(typeof m=="function"){try{m.call(i,t)}catch(o){console.error("[Dars] handler error",o)}return}}i=i.parentNode}},!0)}function x(e,n){return e&&n?e.type!==n.type:e!==n}function S(e){if(!e)return;const n=e.children||[];for(let t=0;t<n.length;t++)S(n[t]);if(e.id&&l.delete(e.id),e.id){const t=document.getElementById(e.id);if(t&&t.parentNode)try{t.parentNode.removeChild(t)}catch{}}}function w(e,n){if(!n||!n.id)return{ok:!1,reason:"missing-new"};let t=document.getElementById(n.id);if(!t){const o=e&&e.id?document.getElementById(e.id):null;if(o)try{o.id=n.id,t=o}catch{}}if(!t)return{ok:!1,reason:"missing-el"};if(x(e,n))return{ok:!1,reason:"type-changed"};const i=!!n.isIsland;if(!i&&n.class&&(t.className=n.class),i||T(t,e&&e.props||{},n.props||{}),i||D(t,e&&e.style||{},n.style||{}),!i&&Object.prototype.hasOwnProperty.call(n,"text")&&t.textContent!==String(n.text||"")&&(t.textContent=String(n.text||"")),i)return{ok:!0};const a=e&&e.children?e.children:[],u=n.children?n.children:[],k=new Map;for(let o=0;o<a.length;o++){const s=a[o]&&(a[o].id||a[o].key)||null;s&&k.set(String(s),a[o])}const m=new Set;for(let o=0;o<u.length;o++){const s=u[o],f=s&&(s.id||s.key)||null;if(!f)if(o<a.length){const d=w(a[o],s);if(!d.ok)return d;m.add(a[o]);continue}else return{ok:!1,reason:"children-added"};const v=k.get(String(f));if(v){const d=w(v,s);if(!d.ok)return d;m.add(v)}else{if(o<a.length){const g=a[o];if(!x(g,s)){const y=w(g,s);if(!y.ok)return y;m.add(g);continue}}const d=createSubtree(s);if(d){const g=o<a.length?a[o]:null;if(g&&g.id){const y=document.getElementById(g.id);y&&y.parentNode?y.parentNode.insertBefore(d,y):t.appendChild(d)}else t.appendChild(d);continue}return{ok:!1,reason:"children-added"}}}for(let o=0;o<a.length;o++){const s=a[o];m.has(s)||S(s)}return{ok:!0}}function M(e){typeof requestAnimationFrame=="function"?requestAnimationFrame(e):setTimeout(e,16)}function N(e){const n=r;if(!n){r=e;try{window.__DARS_VDOM__=e}catch{}return}M(()=>{const t=w(n,e);if(!t.ok){console.warn("[Dars] Structural change detected (",t.reason,"), reloading...");try{location.reload()}catch{}return}r=e;try{window.__DARS_VDOM__=e}catch{}})}function A(e){r=e;try{window.__DARS_VDOM__=e}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(t=>C(t,document))}function I(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const e=window.__DARS_VERSION_URL||"version.txt";let n=null,t=!1,i=0;const a=10;let u=!1;function k(o,s,f,v){try{const d=new XMLHttpRequest;v&&(d.responseType=v),d.open("GET",o,!0),d.timeout=5e3,d.onreadystatechange=function(){d.readyState===4&&(d.status>=200&&d.status<300?s(d.response):f())},d.onerror=f,d.ontimeout=f,d.setRequestHeader("Cache-Control","no-store"),d.send()}catch{f()}}function m(){u||k(e,function(o){let s=(o||"").toString().trim();if(!s||s==="0"){if(i+=1,i>=a){console.warn("[Dars] version file not found after",a,"attempts. Hot reload disabled for this session."),u=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(n)try{clearTimeout(n)}catch{}return}t||(console.warn("[Dars] waiting for version file..."),t=!0),n=setTimeout(m,600);return}if(i=0,t=!1,c||(c=s),s&&s!==c){c=s;try{location.reload()}catch{}return}n=setTimeout(m,600)},function(){if(i+=1,i>=a){console.warn("[Dars] version file not reachable after",a,"attempts. Hot reload disabled for this session."),u=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(n)try{clearTimeout(n)}catch{}return}t||(console.warn("[Dars] waiting for version file..."),t=!0),n=setTimeout(m,600)},"text")}return m(),()=>{try{u=!0,n&&clearTimeout(n),window.__DARS_STOP_HOTRELOAD=null}catch{}}}document.addEventListener("DOMContentLoaded",function(){if(window.__DARS_VDOM__?A(window.__DARS_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=I()}catch{}}})}(),window.addEventListener("scroll",()=>{const l=document.getElementById("dars-navbar");window.scrollY>20?l.classList.add("scrolled"):l.classList.remove("scrolled");const r=document.getElementById("features-section");if(r&&!r.classList.contains("visible")){const c=r.getBoundingClientRect().top,p=window.innerHeight/1.5;c<p&&(r.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((h,_)=>{setTimeout(()=>{h.style.opacity="1",h.style.transform="translateY(0)"},_*100)}))}}),document.addEventListener("DOMContentLoaded",()=>{const l=document.getElementById("hero-logo"),r=document.getElementById("hero-title"),c=document.getElementById("hero-description"),p=document.getElementById("pip-command"),b=document.getElementById("get-started-btn"),h=document.getElementById("scroll-text");l&&setTimeout(()=>l.classList.add("show"),5),r&&setTimeout(()=>r.classList.add("show"),350),c&&setTimeout(()=>c.classList.add("show"),650),p&&setTimeout(()=>p.classList.add("show"),950),b&&setTimeout(()=>b.classList.add("show"),1250),h&&setTimeout(()=>h.classList.add("show"),1500)});function P(){window.open("https://ztamdev.github.io/Dars-Framework/docs.html","_self")}function L(){navigator.clipboard.writeText("pip install dars framework").then(()=>{const r=document.querySelector("#copy-btn"),c=r.textContent;r.textContent="Copied!",r.style.background="linear-gradient(135deg, #38c49f 0%, #2a6b5b 100%) !important",setTimeout(()=>{r.textContent=c,r.style.background="linear-gradient(135deg, #1d4a3f 0%, #2a6b5b 100%) !important"},2e3)})}document.addEventListener("DOMContentLoaded",function(){const l=document.getElementById("hamburger-btn"),r=document.getElementById("mobile-menu"),c=document.body;l&&r&&(l.addEventListener("click",function(p){p.stopPropagation(),r.style.display==="flex"?(r.style.display="none",l.classList.remove("menu-open"),c.classList.remove("menu-open")):(r.style.display="flex",l.classList.add("menu-open"),c.classList.add("menu-open"))}),r.querySelectorAll("a").forEach(p=>{p.addEventListener("click",function(){r.style.display="none",l.classList.remove("menu-open"),c.classList.remove("menu-open")})}),document.addEventListener("click",function(p){!l.contains(p.target)&&!r.contains(p.target)&&(r.style.display="none",l.classList.remove("menu-open"),c.classList.remove("menu-open"))}),document.addEventListener("keydown",function(p){p.key==="Escape"&&r.style.display==="flex"&&(r.style.display="none",l.classList.remove("menu-open"),c.classList.remove("menu-open"))}))});
