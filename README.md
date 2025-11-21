@@ -130,6 +130,29 @@ A complete example demonstrating `dState`, `cState`, `Mod`, and deferred updates
 * Consistent, event-time mutation flow for reliable behavior
 * Secure minification for production bundles (strong JS/CSS minifier integrated into the build pipeline)
 
+### Dynamic State Updates with `this()`
+
+The `this()` helper enables direct, event-time component updates without pre-defining states:
+
+```python
+from dars.all import *
+
+counter = Text("0", id="count")
+btn = Button("Increment", on_click=this().state(text=Mod.inc("count")))
+
+# Use RawJS for dynamic values (e.g., from async operations)
+from dars.desktop import read_text
+
+display = Text("", id="display")
+read_btn = Button("Load", on_click=read_text("data.txt").then(
+    this().state(text=RawJS(dScript.ARG))  # Update with file content
+))
+```
+
+* Works anywhere: desktop and web exports
+* Perfect for async operations and chained scripts
+* Combines with `dScript.then()` for sequencing
+
 ---
 
 ## CLI Usage

@@ -1,4 +1,5 @@
 const { contextBridge, ipcRenderer } = require('electron');
+
 contextBridge.exposeInMainWorld('DarsIPC', {
   invoke: (channel, ...args) => ipcRenderer.invoke(channel, ...args)
 });

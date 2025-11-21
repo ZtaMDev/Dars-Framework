@@ -24,3 +24,69 @@ class dScript(Script):
                 raise FileNotFoundError(f"The script file was not found: {self.file_path}")
         else:
             raise ValueError("No code or file path defined for this dScript.")
+
+    def then(self, script: 'dScript') -> 'dScript':
+        """
+        Chain another script to execute after this one resolves.
+        Wraps the current script in an async IIFE if needed and appends .then().
+        """
+        current_code = self.get_code().strip()
+        next_code = script.get_code().strip()
+        
+        # If next_code is an async IIFE (starts with (async), unwrap it to be a function body
+        # or just pass it as a callback.
+        # Simplest approach: assume current_code returns a Promise.
+        # We wrap current_code in `Promise.resolve(...)` to be safe?
+        # No, read_text returns a dScript that is an async IIFE returning a value.
+        
+        # We need to construct a new JS that chains them.
+        # (async () => { await (current_code); await (next_code); })() ?
+        # But we want to pass the result of current to next?
+        # The user asked for: read_text(...).then(this.state(...))
+        # read_text returns a value. this.state(...) usually ignores arguments or expects specific ones.
+        # But maybe we want to inject the result into the state change?
+        
+        # If the user does: read_text(..., then=this.state(text=dScript.ARG))
+        # But here we are doing .then() on the dScript object.
+        
+        # Let's implement a generic chaining.
+        # We can't easily parse JS to know if it returns a promise.
+        # But our `read_text` implementation returns an async IIFE.
+        
+        combined_code = f"""
+(async () => {{
+    console.log("Starting chained script execution");
+    try {{
+        console.log("Awaiting first script...");
+        const result = await {current_code};
+        // Make result available as 'value' or argument to next script
+        const value = result; 
+        console.log("Dars chained script value:", value);
+        await (async (value) => {{ 
+            {next_code} 
+        }})(result);
+        return result;
+    }} catch (e) {{
+        console.error("Chained script error:", e);
+        throw e;
+    }}
+}})()
+""".strip()
+        return dScript(code=combined_code)
+
+    # Helper for placeholder argument
+    ARG = "value"
+
+class RawJS:
+    """
+    Wrapper to indicate that a string should be treated as raw JavaScript code
+    instead of a string literal when serialized.
+    """
+    def __init__(self, code: str):
+        self.code = code
+    
+    def __str__(self):
+        return self.code
+    
+    def __repr__(self):
+        return self.code

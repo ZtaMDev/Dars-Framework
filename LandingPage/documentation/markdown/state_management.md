@@ -103,3 +103,115 @@ swap_btn = Button(
 - Prefer `mods` for small changes; use `cComp=True` only when you need full HTML replacement.
 
 ---
+
+## Dynamic State Updates & `this()`
+
+Dars introduces dynamic state updates, allowing you to modify component properties directly without pre-registering state indices.
+
+### `this()` helper
+
+The `this()` helper allows a component to refer to itself in an event handler and apply updates dynamically.
+
+```python
+from dars.core.state import this
+
+btn = Button("Click me", on_click=this().state(text="Clicked!", style={"color": "red"}))
+```
+
+Supported dynamic properties:
+- `text`: Update text content.
+- `html`: Update inner HTML.
+- `style`: Dictionary of CSS styles.
+- `attrs`: Dictionary of attributes.
+- `classes`: Dictionary with `add`, `remove`, or `toggle` (single string or list of strings).
+
+```python
+this().state(
+    text="Updated",
+    style={"backgroundColor": "#f0f0f0"},
+    classes={"add": ["active"], "remove": ["inactive"]}
+)
+```
+
+### Using Raw JavaScript Values (`RawJS`)
+
+You can pass raw JavaScript variables to dynamic updates using `RawJS`. This is particularly useful when:
+- Chaining scripts where a previous script returns a value
+- Working with async operations like file reading
+- Using `dScript.ARG` to reference values from previous scripts
+
+```python
+from dars.scripts.dscript import RawJS, dScript
+
+# Using dScript.ARG placeholder for chained values
+this().state(text=RawJS(dScript.ARG))
+
+# Using custom JavaScript expressions
+this().state(text=RawJS("someVar + ' processed'"))
+```
+
+### Complete Example: File Reading with Dynamic Updates
+
+```python
+from dars.all import *
+from dars.desktop import read_text, write_text
+
+# Display component that will show file content
+display = Text("No file loaded", id="display")
+
+# Button that reads file and updates display with content
+read_btn = Button("Load File", 
+    on_click=read_text("data.txt").then(
+        this().state(text=RawJS(dScript.ARG))
+    )
+)
+
+# Button that writes file and updates its own text
+write_btn = Button("Save File",
+    on_click=write_text("output.txt", "Hello Dars!").then(
+        this().state(text="Saved!", style={"color": "green"})
+    )
+)
+
+# Counter with increment using Mod
+counter = Text("0", id="count")
+inc_btn = Button("+1", on_click=this().state(text=Mod.inc("count")))
+
+app = App(title="Dynamic Updates Demo", desktop=True)
+app.set_root(Container(display, read_btn, write_btn, counter, inc_btn))
+```
+
+### Targeting Other Components
+
+While `this()` refers to the clicked component, you can target other components by using a manual update helper:
+
+```python
+def update_component(target_id, **kwargs):
+    """Update a specific component by ID"""
+    import json
+    from dars.scripts.dscript import RawJS
+    
+    parts = [f"id: '{target_id}'", "dynamic: true"]
+    for k, v in kwargs.items():
+        if isinstance(v, RawJS):
+            parts.append(f"{k}: {v.code}")
+        else:
+            parts.append(f"{k}: {json.dumps(v)}")
+    payload = ", ".join(parts)
+    return dScript(code=f"if(window.Dars && window.Dars.change) window.Dars.change({{{payload}}});")
+
+# Read file and update a different component
+btn = Button("Load to Display",
+    on_click=read_text("data.txt").then(
+        update_component("display", text=RawJS(dScript.ARG))
+    )
+)
+```
+
+### Key Benefits
+
+- **No State Pre-registration**: Update components directly without defining states
+- **Works Everywhere**: Both desktop and web exports support dynamic updates
+- **Async-Friendly**: Perfect for chaining with file operations, network requests, etc.
+- **Type-Safe**: Use `RawJS` for JavaScript values, regular Python values for literals
+- **Composable**: Combine with `dScript.then()` for complex workflows

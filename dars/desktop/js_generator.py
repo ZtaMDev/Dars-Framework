@@ -29,6 +29,7 @@ def _gen_preload_api_impl(schema: Dict[str, Dict[str, str]]) -> str:
             lines.append(
                 f"api['{ns}']['{m}'] = (...args) => ipcRenderer.invoke('{channel}', ...args);"
             )
+    # No console override needed as we use DevTools in dev mode
     lines.append("")
     lines.append("contextBridge.exposeInMainWorld('DarsDesktopAPI', api);")
     return "\n".join(lines)

@@ -200,27 +200,72 @@ The desktop exporter allows you to package your Dars app as a native desktop app
 
 Artifacts will be placed in `dist/`. The desktop source (used for packaging) is emitted to `dist/source-electron/`.
 
-### Native Functions
+### Native Functions & Dynamic Updates
 
-You can acces native functions via `dars.desktop` module:
-
-```python
-from dars.desktop import *
-```
-
-With this module you can acces for now 2 main functions:
-
-```python 
-write_text("./app/lib/hello.txt", "Hello Text")
-```
-and
+You can access native filesystem functions via the `dars.desktop` module:
 
 ```python
-read_text("./app/lib/hello.txt")
+from dars.desktop import read_text, write_text, read_file, write_file
+from dars.core.state import this
+from dars.scripts.dscript import RawJS, dScript
 ```
 
-This two functions allows you to read and write text files in your desktop application filesystem, both returns an dScript() with the code to be executed in the desktop app.
-also you can use dScripts to run custom javascript code in the desktop app. and for now 'dars dev' is supported but python main.py with rTimeCompile() is not supported because it have issues with relative paths and also it can be used in events of any component.
+#### File System Operations
+
+The desktop module provides async file operations that return `dScript` objects, perfect for chaining with `this().state()`:
+
+**Reading Text Files**
+```python
+# Simple read - button updates itself with file content
+read_btn = Button("Load Config",
+    on_click=read_text("config.txt").then(
+        this().state(text=RawJS(dScript.ARG))
+    )
+)
+
+# Update another component
+display = Text("", id="display")
+load_btn = Button("Load Data",
+    on_click=read_text("data.txt").then(
+        update_component("display", text=RawJS(dScript.ARG))
+    )
+)
+```
+
+**Writing Text Files**
+```python
+# Write and update button text on success
+save_btn = Button("Save",
+    on_click=write_text("output.txt", "Hello Dars!").then(
+        this().state(text="Saved!", style={"color": "green"})
+    )
+)
+```
+
+**Binary File Operations**
+```python
+# Read binary files (images, etc.)
+img_data = read_file("image.png")
+
+# Write binary data
+write_file("output.bin", data_bytes)
+```
+
+#### Chaining Multiple Operations
+
+Use `dScript.then()` for sequential operations:
+
+```python
+# Read → Process → Update → Write
+Button("Process File",
+    on_click=read_text("input.txt")
+        .then(dScript(code="const processed = value.toUpperCase(); return processed;"))
+        .then(write_text("output.txt", RawJS("processed")))
+        .then(this().state(text="Complete!"))
+)
+```
+
+All file paths are relative to the app's directory. See [State Management](state_management.md#dynamic-state-updates--this) and [Scripts](scripts.md#chaining-scripts-then) for more details on `this()` and chaining.
 
 ### Platform Targeting
 

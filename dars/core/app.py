@@ -528,12 +528,18 @@ class App:
                         
                         # Verificar que la exportación fue exitosa
                         index_path = os.path.join(preview_dir, "index.html")
+                        if is_desktop:
+                            # In desktop mode, index.html is inside 'app' folder
+                            index_path = os.path.join(preview_dir, "app", "index.html")
+                        
                         if os.path.exists(index_path):
                             if console:
                                 console.print("[green]App reloaded and re-exported successfully.[/green]")
                         else:
                             if console:
-                                console.print("[red]Export failed: index.html not created[/red]")
+                                console.print(f"[red]Export failed: {os.path.basename(index_path)} not created[/red]")
+                        
+                        return True # Indicate success
                             
                 except Exception as e:
                     tb = traceback.format_exc()
@@ -541,6 +547,7 @@ class App:
                         console.print(f"[red]Hot reload failed: {e}\n{tb}[/red]")
                     else:
                         print(f"[Dars] Hot reload failed: {e}\n{tb}")
+                    return False # Indicate failure
 
         # ---- DESKTOP MODE ----
         if is_desktop:
@@ -602,6 +609,7 @@ class App:
                         picked = None
                         
                     env = os.environ.copy()
+                    env['DARS_DEV'] = '1'
                     if picked:
                         env['DARS_CONTROL_PORT'] = str(picked)
                         
@@ -623,14 +631,23 @@ class App:
                                 if not line:
                                     break
                                 text = line.rstrip('\n')
-                                if is_err and ("Uncaught" in text or "Error" in text or "TypeError" in text or "ReferenceError" in text):
+                                
+                                # Filter out harmless DevTools warnings
+                                if "Autofill.enable" in text or "Autofill.setAddresses" in text:
+                                    continue
+                                if "wasn't found" in text and ("Autofill" in text or "protocol_client" in text):
+                                    continue
+                                
+                                # Only show actual errors, not all stderr
+                                if is_err and (("Error" in text and ("occurred in handler" in text or "ENOENT" in text or "TypeError" in text or "ReferenceError" in text)) or "Uncaught" in text):
                                     if console:
-                                        console.print(f"[red][Electron STDERR][/red] {text}")
+                                        console.print(f"[red][Electron Error][/red] {text}")
                                     else:
-                                        print(f"[Electron STDERR] {text}")
-                                else:
+                                        print(f"[Electron Error] {text}")
+                                elif not is_err and text.strip():  # Only show non-empty stdout
+                                    # Skip empty lines and unnecessary output
                                     if console:
-                                        console.print(f"[Electron] {text}")
+                                        console.print(f"[dim][Electron][/dim] {text}")
                                     else:
                                         print(f"[Electron] {text}")
                         except Exception:
@@ -699,10 +716,20 @@ class App:
 
                 def reload_and_restart(changed_file=None):
                     nonlocal restart_triggered
-                    handle_file_change(f"File changed: {os.path.relpath(changed_file, project_root)}" if changed_file else "Change detected")
-                    restart_triggered = True
-                    stop_electron()
-                    start_electron()
+                    # Prevent concurrent restarts
+                    if restart_triggered:
+                        return
+                    
+                    reloaded = handle_file_change(f"File changed: {os.path.relpath(changed_file, project_root)}" if changed_file else "Change detected")
+                    if reloaded:
+                        restart_triggered = True
+                        time.sleep(0.3)  # Small delay to consolidate multiple file change events
+                        stop_electron()
+                        time.sleep(0.2)  # Ensure process fully stopped
+                        if not shutdown_event.is_set():  # Only restart if not shutting down
+                            start_electron()
+                            restart_triggered = False
+
 
                 # Crear EnhancedFileWatchers para archivos individuales
                 for f in files_to_watch:
@@ -768,14 +795,14 @@ class App:
                     while not shutdown_event.is_set():
                         if electron_proc and electron_proc.poll() is not None:
                             code = electron_proc.returncode
+                            # Only restart if it wasn't a deliberate restart from file change
                             if restart_triggered:
+                                # Already being handled by reload_and_restart
                                 if console:
-                                    console.print(f"[red]Electron exited with code {code}. Restarting...[/red]")
-                                else:
-                                    print(f"[Dars] Electron exited with code {code}. Restarting...")
-                                restart_triggered = False
-                                stop_electron()
-                                start_electron()
+                                    console.print(f"[dim][Electron restarting after file change...][/dim]")
+                                # Wait for the restart to complete
+                                time.sleep(1)
+                                continue
                             else:
                                 if console:
                                     console.print(f"[cyan]Electron closed by user (code {code}). Stopping dev mode...[/cyan]")
@@ -783,7 +810,8 @@ class App:
                                     print(f"[Dars] Electron closed by user (code {code}). Stopping dev mode...")
                                 shutdown_event.set()
                                 break
-                        time.sleep(0.1)  # Faster polling
+                        time.sleep(0.5)
+  # Faster polling
                 except KeyboardInterrupt:
                     shutdown_event.set()
                 finally:

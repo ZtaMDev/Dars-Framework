@@ -124,6 +124,58 @@ class Component(ABC):
                         if handler:
                             self.set_event(on_map[k], handler)
     
+    def __setattr__(self, name: str, value: Any) -> None:
+        """Intercept attribute assignments to handle on_* event properties."""
+        # Allow normal attribute setting for non-event properties
+        if not name.startswith('on_'):
+            object.__setattr__(self, name, value)
+            return
+        
+        # Handle on_* event property assignments
+        event_map = {
+            'on_click': EventTypes.CLICK,
+            'on_double_click': EventTypes.DOUBLE_CLICK,
+            'on_mouse_down': EventTypes.MOUSE_DOWN,
+            'on_mouse_up': EventTypes.MOUSE_UP,
+            'on_mouse_enter': EventTypes.MOUSE_ENTER,
+            'on_mouse_leave': EventTypes.MOUSE_LEAVE,
+            'on_mouse_move': EventTypes.MOUSE_MOVE,
+            'on_key_down': EventTypes.KEY_DOWN,
+            'on_key_up': EventTypes.KEY_UP,
+            'on_key_press': EventTypes.KEY_PRESS,
+            'on_change': EventTypes.CHANGE,
+            'on_input': EventTypes.INPUT,
+            'on_submit': EventTypes.SUBMIT,
+            'on_focus': EventTypes.FOCUS,
+            'on_blur': EventTypes.BLUR,
+            'on_load': EventTypes.LOAD,
+            'on_error': EventTypes.ERROR,
+            'on_resize': EventTypes.RESIZE,
+        }
+        
+        event_name = event_map.get(name)
+        if event_name and value is not None:
+            # Clear existing handlers for this event
+            if event_name in self.events:
+                self.events[event_name] = []
+            
+            # Add new handler(s)
+            if isinstance(value, (list, tuple)):
+                handlers = []
+                for handler_item in value:
+                    handler = self._normalize_handler(handler_item)
+                    if handler:
+                        handlers.append(handler)
+                if handlers:
+                    self.set_event(event_name, handlers)
+            else:
+                handler = self._normalize_handler(value)
+                if handler:
+                    self.set_event(event_name, handler)
+        
+        # Still set the attribute for backward compatibility
+        object.__setattr__(self, name, value)
+    
     def _normalize_handler(self, handler):
         """Normaliza un handler individual a formato Script"""
         try:

@@ -440,6 +440,24 @@
      <a class="sidebar-link sidebar-level-2" href="#best-practices" style="margin-left: 20px">
       Best practices
      </a>
+     <a class="sidebar-link sidebar-level-2" href="#dynamic-state-updates-this" style="margin-left: 20px">
+      Dynamic State Updates &amp; `this()`
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#this-helper" style="margin-left: 40px">
+      `this()` helper
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#using-raw-javascript-values-rawjs" style="margin-left: 40px">
+      Using Raw JavaScript Values (`RawJS`)
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#complete-example-file-reading-with-dynamic-updates" style="margin-left: 40px">
+      Complete Example: File Reading with Dynamic Updates
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#targeting-other-components" style="margin-left: 40px">
+      Targeting Other Components
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#key-benefits" style="margin-left: 40px">
+      Key Benefits
+     </a>
      <div class="sidebar-divider">
      </div>
      <div class="sidebar-category">
@@ -955,8 +973,14 @@
      <a class="sidebar-link sidebar-level-3" href="#quickstart-desktop-export" style="margin-left: 40px">
       Quickstart desktop Export
      </a>
-     <a class="sidebar-link sidebar-level-3" href="#native-functions" style="margin-left: 40px">
-      Native Functions
+     <a class="sidebar-link sidebar-level-3" href="#native-functions-dynamic-updates" style="margin-left: 40px">
+      Native Functions &amp; Dynamic Updates
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#file-system-operations" style="margin-left: 60px">
+      File System Operations
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#chaining-multiple-operations" style="margin-left: 60px">
+      Chaining Multiple Operations
      </a>
      <a class="sidebar-link sidebar-level-3" href="#platform-targeting" style="margin-left: 40px">
       Platform Targeting
@@ -1001,6 +1025,9 @@
      </a>
      <a class="sidebar-link sidebar-level-3" href="#example-editable-js-preset-from-python" style="margin-left: 40px">
       Example: Editable JS preset from Python
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#chaining-scripts-then" style="margin-left: 40px">
+      Chaining Scripts (`.then()`)
      </a>
      <a class="sidebar-link sidebar-level-2" href="#inlinescript" style="margin-left: 20px">
       InlineScript
@@ -2963,11 +2990,223 @@ Desktop build target. Only effective when
        </li>
       </ul>
       <hr/>
+      <h2 id="dynamic-state-updates-this">
+       Dynamic State Updates &amp;
+       <code>
+        this()
+       </code>
+      </h2>
+      <p>
+       Dars introduces dynamic state updates, allowing you to modify component properties directly without pre-registering state indices.
+      </p>
+      <h3 id="this-helper">
+       <code>
+        this()
+       </code>
+       helper
+      </h3>
+      <p>
+       The
+       <code>
+        this()
+       </code>
+       helper allows a component to refer to itself in an event handler and apply updates dynamically.
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.core.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">this</span>
+
+<span class="n">btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Click me"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">"Clicked!"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s2">"color"</span><span class="p">:</span> <span class="s2">"red"</span><span class="p">}))</span>
+</code></pre>
+      </div>
+      <p>
+       Supported dynamic properties:
+-
+       <code>
+        text
+       </code>
+       : Update text content.
+-
+       <code>
+        html
+       </code>
+       : Update inner HTML.
+-
+       <code>
+        style
+       </code>
+       : Dictionary of CSS styles.
+-
+       <code>
+        attrs
+       </code>
+       : Dictionary of attributes.
+-
+       <code>
+        classes
+       </code>
+       : Dictionary with
+       <code>
+        add
+       </code>
+       ,
+       <code>
+        remove
+       </code>
+       , or
+       <code>
+        toggle
+       </code>
+       (single string or list of strings).
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span>
+    <span class="n">text</span><span class="o">=</span><span class="s2">"Updated"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s2">"backgroundColor"</span><span class="p">:</span> <span class="s2">"#f0f0f0"</span><span class="p">},</span>
+    <span class="n">classes</span><span class="o">=</span><span class="p">{</span><span class="s2">"add"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"active"</span><span class="p">],</span> <span class="s2">"remove"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"inactive"</span><span class="p">]}</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="using-raw-javascript-values-rawjs">
+       Using Raw JavaScript Values (
+       <code>
+        RawJS
+       </code>
+       )
+      </h3>
+      <p>
+       You can pass raw JavaScript variables to dynamic updates using
+       <code>
+        RawJS
+       </code>
+       . This is particularly useful when:
+- Chaining scripts where a previous script returns a value
+- Working with async operations like file reading
+- Using
+       <code>
+        dScript.ARG
+       </code>
+       to reference values from previous scripts
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.scripts.dscript</span><span class="w"> </span><span class="kn">import</span> <span class="n">RawJS</span><span class="p">,</span> <span class="n">dScript</span>
+
+<span class="c1"># Using dScript.ARG placeholder for chained values</span>
+<span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">RawJS</span><span class="p">(</span><span class="n">dScript</span><span class="o">.</span><span class="n">ARG</span><span class="p">))</span>
+
+<span class="c1"># Using custom JavaScript expressions</span>
+<span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">RawJS</span><span class="p">(</span><span class="s2">"someVar + ' processed'"</span><span class="p">))</span>
+</code></pre>
+      </div>
+      <h3 id="complete-example-file-reading-with-dynamic-updates">
+       Complete Example: File Reading with Dynamic Updates
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dars.desktop</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_text</span><span class="p">,</span> <span class="n">write_text</span>
+
+<span class="c1"># Display component that will show file content</span>
+<span class="n">display</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="s2">"No file loaded"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"display"</span><span class="p">)</span>
+
+<span class="c1"># Button that reads file and updates display with content</span>
+<span class="n">read_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Load File"</span><span class="p">,</span> 
+    <span class="n">on_click</span><span class="o">=</span><span class="n">read_text</span><span class="p">(</span><span class="s2">"data.txt"</span><span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span>
+        <span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">RawJS</span><span class="p">(</span><span class="n">dScript</span><span class="o">.</span><span class="n">ARG</span><span class="p">))</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># Button that writes file and updates its own text</span>
+<span class="n">write_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Save File"</span><span class="p">,</span>
+    <span class="n">on_click</span><span class="o">=</span><span class="n">write_text</span><span class="p">(</span><span class="s2">"output.txt"</span><span class="p">,</span> <span class="s2">"Hello Dars!"</span><span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span>
+        <span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">"Saved!"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s2">"color"</span><span class="p">:</span> <span class="s2">"green"</span><span class="p">})</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># Counter with increment using Mod</span>
+<span class="n">counter</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="s2">"0"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"count"</span><span class="p">)</span>
+<span class="n">inc_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"+1"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">Mod</span><span class="o">.</span><span class="n">inc</span><span class="p">(</span><span class="s2">"count"</span><span class="p">)))</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"Dynamic Updates Demo"</span><span class="p">,</span> <span class="n">desktop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">set_root</span><span class="p">(</span><span class="n">Container</span><span class="p">(</span><span class="n">display</span><span class="p">,</span> <span class="n">read_btn</span><span class="p">,</span> <span class="n">write_btn</span><span class="p">,</span> <span class="n">counter</span><span class="p">,</span> <span class="n">inc_btn</span><span class="p">))</span>
+</code></pre>
+      </div>
+      <h3 id="targeting-other-components">
+       Targeting Other Components
+      </h3>
+      <p>
+       While
+       <code>
+        this()
+       </code>
+       refers to the clicked component, you can target other components by using a manual update helper:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">update_component</span><span class="p">(</span><span class="n">target_id</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Update a specific component by ID"""</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">dars.scripts.dscript</span><span class="w"> </span><span class="kn">import</span> <span class="n">RawJS</span>
+
+    <span class="n">parts</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"id: '</span><span class="si">{</span><span class="n">target_id</span><span class="si">}</span><span class="s2">'"</span><span class="p">,</span> <span class="s2">"dynamic: true"</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">RawJS</span><span class="p">):</span>
+            <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">v</span><span class="o">.</span><span class="n">code</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">payload</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dScript</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="sa">f</span><span class="s2">"if(window.Dars &amp;&amp; window.Dars.change) window.Dars.change(</span><span class="se">{{</span><span class="si">{</span><span class="n">payload</span><span class="si">}</span><span class="se">}}</span><span class="s2">);"</span><span class="p">)</span>
+
+<span class="c1"># Read file and update a different component</span>
+<span class="n">btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Load to Display"</span><span class="p">,</span>
+    <span class="n">on_click</span><span class="o">=</span><span class="n">read_text</span><span class="p">(</span><span class="s2">"data.txt"</span><span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span>
+        <span class="n">update_component</span><span class="p">(</span><span class="s2">"display"</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">RawJS</span><span class="p">(</span><span class="n">dScript</span><span class="o">.</span><span class="n">ARG</span><span class="p">))</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="key-benefits">
+       Key Benefits
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         No State Pre-registration
+        </strong>
+        : Update components directly without defining states
+       </li>
+       <li>
+        <strong>
+         Works Everywhere
+        </strong>
+        : Both desktop and web exports support dynamic updates
+       </li>
+       <li>
+        <strong>
+         Async-Friendly
+        </strong>
+        : Perfect for chaining with file operations, network requests, etc.
+       </li>
+       <li>
+        <strong>
+         Type-Safe
+        </strong>
+        : Use
+        <code>
+         RawJS
+        </code>
+        for JavaScript values, regular Python values for literals
+       </li>
+       <li>
+        <strong>
+         Composable
+        </strong>
+        : Combine with
+        <code>
+         dScript.then()
+        </code>
+        for complex workflows
+       </li>
+      </ul>
      </div>
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_118">
-      <p>
-       from dars.components.basic.section import Section
-      </p>
       <h1 id="dars-components-documentation">
        Dars - Components Documentation
       </h1>
@@ -8780,37 +9019,119 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
        </code>
        .
       </p>
-      <h3 id="native-functions">
-       Native Functions
+      <h3 id="native-functions-dynamic-updates">
+       Native Functions &amp; Dynamic Updates
       </h3>
       <p>
-       You can acces native functions via
+       You can access native filesystem functions via the
        <code>
         dars.desktop
        </code>
        module:
       </p>
       <div class="codehilite">
-       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.desktop</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.desktop</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_text</span><span class="p">,</span> <span class="n">write_text</span><span class="p">,</span> <span class="n">read_file</span><span class="p">,</span> <span class="n">write_file</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dars.core.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">this</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dars.scripts.dscript</span><span class="w"> </span><span class="kn">import</span> <span class="n">RawJS</span><span class="p">,</span> <span class="n">dScript</span>
 </code></pre>
       </div>
+      <h4 id="file-system-operations">
+       File System Operations
+      </h4>
       <p>
-       With this module you can acces for now 2 main functions:
+       The desktop module provides async file operations that return
+       <code>
+        dScript
+       </code>
+       objects, perfect for chaining with
+       <code>
+        this().state()
+       </code>
+       :
+      </p>
+      <p>
+       <strong>
+        Reading Text Files
+       </strong>
       </p>
       <div class="codehilite">
-       <pre><span></span><code><span class="n">write_text</span><span class="p">(</span><span class="s2">"./app/lib/hello.txt"</span><span class="p">,</span> <span class="s2">"Hello Text"</span><span class="p">)</span>
+       <pre><span></span><code><span class="c1"># Simple read - button updates itself with file content</span>
+<span class="n">read_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Load Config"</span><span class="p">,</span>
+    <span class="n">on_click</span><span class="o">=</span><span class="n">read_text</span><span class="p">(</span><span class="s2">"config.txt"</span><span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span>
+        <span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">RawJS</span><span class="p">(</span><span class="n">dScript</span><span class="o">.</span><span class="n">ARG</span><span class="p">))</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># Update another component</span>
+<span class="n">display</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"display"</span><span class="p">)</span>
+<span class="n">load_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Load Data"</span><span class="p">,</span>
+    <span class="n">on_click</span><span class="o">=</span><span class="n">read_text</span><span class="p">(</span><span class="s2">"data.txt"</span><span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span>
+        <span class="n">update_component</span><span class="p">(</span><span class="s2">"display"</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">RawJS</span><span class="p">(</span><span class="n">dScript</span><span class="o">.</span><span class="n">ARG</span><span class="p">))</span>
+    <span class="p">)</span>
+<span class="p">)</span>
 </code></pre>
       </div>
       <p>
+       <strong>
+        Writing Text Files
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Write and update button text on success</span>
+<span class="n">save_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Save"</span><span class="p">,</span>
+    <span class="n">on_click</span><span class="o">=</span><span class="n">write_text</span><span class="p">(</span><span class="s2">"output.txt"</span><span class="p">,</span> <span class="s2">"Hello Dars!"</span><span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span>
+        <span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">"Saved!"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s2">"color"</span><span class="p">:</span> <span class="s2">"green"</span><span class="p">})</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Binary File Operations
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Read binary files (images, etc.)</span>
+<span class="n">img_data</span> <span class="o">=</span> <span class="n">read_file</span><span class="p">(</span><span class="s2">"image.png"</span><span class="p">)</span>
+
+<span class="c1"># Write binary data</span>
+<span class="n">write_file</span><span class="p">(</span><span class="s2">"output.bin"</span><span class="p">,</span> <span class="n">data_bytes</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <h4 id="chaining-multiple-operations">
+       Chaining Multiple Operations
+      </h4>
+      <p>
+       Use
+       <code>
+        dScript.then()
+       </code>
+       for sequential operations:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Read → Process → Update → Write</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Process File"</span><span class="p">,</span>
+    <span class="n">on_click</span><span class="o">=</span><span class="n">read_text</span><span class="p">(</span><span class="s2">"input.txt"</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="n">dScript</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s2">"const processed = value.toUpperCase(); return processed;"</span><span class="p">))</span>
+        <span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="n">write_text</span><span class="p">(</span><span class="s2">"output.txt"</span><span class="p">,</span> <span class="n">RawJS</span><span class="p">(</span><span class="s2">"processed"</span><span class="p">)))</span>
+        <span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">"Complete!"</span><span class="p">))</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       All file paths are relative to the app's directory. See
+       <a href="state_management.md#dynamic-state-updates--this">
+        State Management
+       </a>
        and
-      </p>
-      <div class="codehilite">
-       <pre><span></span><code><span class="n">read_text</span><span class="p">(</span><span class="s2">"./app/lib/hello.txt"</span><span class="p">)</span>
-</code></pre>
-      </div>
-      <p>
-       This two functions allows you to read and write text files in your desktop application filesystem, both returns an dScript() with the code to be executed in the desktop app.
-also you can use dScripts to run custom javascript code in the desktop app. and for now 'dars dev' is supported but python main.py with rTimeCompile() is not supported because it have issues with relative paths and also it can be used in events of any component.
+       <a href="scripts.md#chaining-scripts-then">
+        Scripts
+       </a>
+       for more details on
+       <code>
+        this()
+       </code>
+       and chaining.
       </p>
       <h3 id="platform-targeting">
        Platform Targeting
@@ -9022,6 +9343,56 @@ also you can use dScripts to run custom javascript code in the desktop app. and 
 <span class="n">app</span><span class="o">.</span><span class="n">add_script</span><span class="p">(</span><span class="n">custom_action</span><span class="p">)</span>
 </code></pre>
       </div>
+      <h3 id="chaining-scripts-then">
+       Chaining Scripts (
+       <code>
+        .then()
+       </code>
+       )
+      </h3>
+      <p>
+       You can chain multiple
+       <code>
+        dScript
+       </code>
+       objects using the
+       <code>
+        .then()
+       </code>
+       method. This is particularly useful when working with asynchronous operations like file reading in Electron.
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.desktop</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_text</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dars.core.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">this</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dars.scripts.dscript</span><span class="w"> </span><span class="kn">import</span> <span class="n">RawJS</span><span class="p">,</span> <span class="n">dScript</span>
+
+<span class="c1"># Read a file and update a component with its content</span>
+<span class="c1"># The result of the previous script is available as dScript.ARG (which resolves to 'value')</span>
+<span class="n">read_op</span> <span class="o">=</span> <span class="n">read_text</span><span class="p">(</span><span class="s2">"data.txt"</span><span class="p">)</span>
+<span class="n">update_op</span> <span class="o">=</span> <span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">RawJS</span><span class="p">(</span><span class="n">dScript</span><span class="o">.</span><span class="n">ARG</span><span class="p">))</span>
+
+<span class="n">chained_script</span> <span class="o">=</span> <span class="n">read_op</span><span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="n">update_op</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       The
+       <code>
+        RawJS
+       </code>
+       wrapper ensures that
+       <code>
+        dScript.ARG
+       </code>
+       is treated as a variable name (
+       <code>
+        value
+       </code>
+       ) rather than a string literal
+       <code>
+        "value"
+       </code>
+       .
+      </p>
       <h2 id="inlinescript">
        InlineScript
       </h2>

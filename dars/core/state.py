@@ -1,5 +1,7 @@
 from typing import Any, Dict, List, Optional
 from dars.scripts.script import InlineScript
+from dars.scripts.dscript import RawJS
+import json
 
 # Global registry collected at authoring time (Python)
 STATE_BOOTSTRAP: List[Dict[str, Any]] = []
@@ -31,7 +33,7 @@ class DarsState:
         return d
 
     # state.py - Modificar el método state de DarsState
-    def state(self, idx: Optional[int] = None, cComp: bool = False, render: Optional[Any] = None, goto: Optional[Any] = None) -> InlineScript:
+    def state(self, idx: Optional[int] = None, cComp: bool = False, render: Optional[Any] = None, goto: Optional[Any] = None, **kwargs) -> InlineScript:
         """
         Convenience: returns an InlineScript that, when added to a page/app,
         triggers a state change via the JS runtime. Intended for quick prototyping.
@@ -39,6 +41,7 @@ class DarsState:
         - idx: target state index/value
         - cComp: if True, performs a full HTML replace (custom component flow)
         - render: HTML string to inject when cComp=True
+        - kwargs: dynamic state updates (text, style, etc.)
         """
         target_id = self.id or ""
 
@@ -80,6 +83,22 @@ class DarsState:
             html_str = _escape_js_str(html_val or "")
             parts.append("useCustomRender: true")
             parts.append(f"html: '{html_str}'")
+            
+        # Dynamic updates
+        if kwargs:
+            parts.append("dynamic: true")
+            for k, v in kwargs.items():
+                if isinstance(v, RawJS):
+                    parts.append(f"{k}: {v.code}")
+                elif k == 'style' and isinstance(v, dict):
+                    parts.append(f"style: {json.dumps(v)}")
+                elif k == 'attrs' and isinstance(v, dict):
+                    parts.append(f"attrs: {json.dumps(v)}")
+                elif k == 'classes' and isinstance(v, dict):
+                    parts.append(f"classes: {json.dumps(v)}")
+                else:
+                    parts.append(f"{k}: {json.dumps(v)}")
+
         payload = ", ".join(parts)
 
         # Generar código JavaScript en una sola línea para compatibilidad con el nuevo sistema de eventos
@@ -313,3 +332,54 @@ def dState(name: str, component: Any = None, id: Optional[str] = None, states: O
     except Exception:
         pass
     return st
+
+
+class ThisProxy:
+    """
+    Helper class to generate dynamic state changes for 'this' component.
+    """
+    def state(self, **kwargs) -> InlineScript:
+        """
+        Generate JS to update 'this' component's state dynamically.
+        """
+        parts = ["dynamic: true", "id: (this && this.id) ? this.id : (event && event.target && event.target.id) ? event.target.id : null"]
+        
+        for k, v in kwargs.items():
+            if isinstance(v, RawJS):
+                parts.append(f"{k}: {v.code}")
+            elif k == 'style' and isinstance(v, dict):
+                parts.append(f"style: {json.dumps(v)}")
+            elif k == 'attrs' and isinstance(v, dict):
+                parts.append(f"attrs: {json.dumps(v)}")
+            elif k == 'classes' and isinstance(v, dict):
+                parts.append(f"classes: {json.dumps(v)}")
+            else:
+                parts.append(f"{k}: {json.dumps(v)}")
+                
+        payload = ", ".join(parts)
+        
+        code = (
+            "(async () => {"
+            "  try {"
+            "    let ch = window.__DARS_CHANGE_FN;"
+            "    if (!ch) {"
+            "      if (window.Dars && typeof window.Dars.change === 'function') {"
+            "        ch = window.Dars.change.bind(window.Dars);"
+            "      } else {"
+            "        const m = await import('./lib/dars.min.js');"
+            "        ch = (m.change || (m.default && m.default.change));"
+            "      }"
+            "      if (typeof ch === 'function') window.__DARS_CHANGE_FN = ch;"
+            "    }"
+            f"    if (typeof ch === 'function') ch({{{payload}}});"
+            "  } catch (e) { /* noop */ }"
+            "})();"
+        )
+        return InlineScript(' '.join(code.split()), module=True)
+
+def this() -> ThisProxy:
+    """
+    Returns a proxy object that refers to the current component in an event handler.
+    Usage: this().state(text="New Text")
+    """
+    return ThisProxy()

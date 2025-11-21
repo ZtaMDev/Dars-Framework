@@ -1,5 +1,3 @@
-from dars.components.basic.section import Section
-
 # Dars - Components Documentation
 
 ---

@@ -13,6 +13,11 @@ function createWindow() {
   });
   Menu.setApplicationMenu(null);
   win.loadFile(path.join(__dirname, 'app', 'index.html'));
+
+  // Open DevTools in development mode
+  if (process.env.DARS_DEV === '1') {
+    win.webContents.openDevTools();
+  }
 }
 
 app.whenReady().then(() => {
@@ -32,9 +37,9 @@ function resolvePath(p) {
 function closeAllAndExit() {
   try {
     const wins = BrowserWindow.getAllWindows();
-    wins.forEach(w => { try { w.close(); } catch(e) {} });
-  } catch (e) {}
-  setTimeout(() => { try { app.quit(); } catch(e) {} }, 300);
+    wins.forEach(w => { try { w.close(); } catch (e) { } });
+  } catch (e) { }
+  setTimeout(() => { try { app.quit(); } catch (e) { } }, 300);
 }
 
 ipcMain.handle('dars::dev::shutdown', async () => {

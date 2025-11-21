@@ -255,7 +255,7 @@ function _applyMods(defaultId, mods){{
                   try{{ 
                     // NUEVO: ejecutar todos los códigos en secuencia
                     for(const c of codes){{ 
-                      try{{ (0,eval)(c); }}catch(_){{ }} 
+                      try{{ (new Function('event', c)).call(el, ev); }}catch(_){{ }} 
                     }} 
                   }} finally{{
                     try{{ setTimeout(()=>{{ try{{ el[propName] = prevOn; }}catch(_){{ }} }}, 0); }}catch(_){{ }}
@@ -330,6 +330,55 @@ function change(opt){{
     el.innerHTML = opt.html;
     if(typeof window.DarsHydrate === 'function'){{ try{{ window.DarsHydrate(el); }}catch(e){{}} }}
     return;
+  }}
+
+  // Dynamic state support: if opt contains direct modifications (text, style, etc.)
+  // apply them directly without looking up a registered state.
+  if (opt.dynamic) {{
+      const el = $(opt.id);
+      if (!el) return;
+      
+      // Apply text change
+      if (opt.hasOwnProperty('text')) {{
+          el.textContent = String(opt.text);
+      }}
+      
+      // Apply HTML change
+      if (opt.hasOwnProperty('html')) {{
+          el.innerHTML = String(opt.html);
+      }}
+      
+      // Apply style changes
+      if (opt.style && typeof opt.style === 'object') {{
+          for (const k in opt.style) {{
+              try {{ el.style[k] = opt.style[k]; }} catch (_) {{}}
+          }}
+      }}
+      
+      // Apply attribute changes
+      if (opt.attrs && typeof opt.attrs === 'object') {{
+          for (const k in opt.attrs) {{
+              try {{ el.setAttribute(k, String(opt.attrs[k])); }} catch (_) {{}}
+          }}
+      }}
+      
+      // Apply class changes
+      if (opt.classes && typeof opt.classes === 'object') {{
+          if (opt.classes.add) {{
+              const toAdd = Array.isArray(opt.classes.add) ? opt.classes.add : [opt.classes.add];
+              toAdd.forEach(c => el.classList.add(c));
+          }}
+          if (opt.classes.remove) {{
+              const toRemove = Array.isArray(opt.classes.remove) ? opt.classes.remove : [opt.classes.remove];
+              toRemove.forEach(c => el.classList.remove(c));
+          }}
+          if (opt.classes.toggle) {{
+              const toToggle = Array.isArray(opt.classes.toggle) ? opt.classes.toggle : [opt.classes.toggle];
+              toToggle.forEach(c => el.classList.toggle(c));
+          }}
+      }}
+      
+      return;
   }}
 
   const name = opt.name || null;

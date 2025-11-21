@@ -829,12 +829,33 @@ if __name__ == "__main__":
                                         "  await fs.writeFile(resolved, data, { encoding });\n" + \
                                         "  return true;\n" + \
                                         "});\n\n" + \
+                                        "ipcMain.on('dars::console', (event, type, ...args) => {\n" + \
+                                        "  console.log(`[Renderer ${type.toUpperCase()}]`, ...args);\n" + \
+                                        "});\n\n" + \
                                         "app.on('window-all-closed', function () {\n" + \
                                         "  if (process.platform !== 'darwin') app.quit();\n" + \
                                         "});\n"
                 (backend_dir / 'main.js').write_text(backend_main, encoding='utf-8')
                 # preload.js
                 backend_preload = "const { contextBridge, ipcRenderer } = require('electron');\n" + \
+                    "\n" + \
+                    "// Override console to send logs to main process\n" + \
+                    "const methods = ['log', 'warn', 'error', 'info', 'debug'];\n" + \
+                    "methods.forEach(method => {\n" + \
+                    "    const original = console[method];\n" + \
+                    "    console[method] = (...args) => {\n" + \
+                    "        original(...args);\n" + \
+                    "        try {\n" + \
+                    "            ipcRenderer.send('dars::console', method, ...args.map(a => {\n" + \
+                    "                try {\n" + \
+                    "                    return typeof a === 'object' ? JSON.stringify(a) : String(a);\n" + \
+                    "                } catch(e) {\n" + \
+                    "                    return String(a);\n" + \
+                    "                }\n" + \
+                    "            }));\n" + \
+                    "        } catch(e) {}\n" + \
+                    "    };\n" + \
+                    "});\n\n" + \
                     "contextBridge.exposeInMainWorld('DarsIPC', {\n" + \
                     "  invoke: (channel, ...args) => ipcRenderer.invoke(channel, ...args)\n" + \
                     "});\n" + \
@@ -1333,6 +1354,10 @@ def main():
                     "  });\n" +
                     "  Menu.setApplicationMenu(null);\n" +
                     "  win.loadFile(path.join(__dirname, 'app', 'index.html'));\n" +
+                    "  // Open DevTools in development mode\n" +
+                    "  if (process.env.DARS_DEV === '1') {\n" +
+                    "    win.webContents.openDevTools();\n" +
+                    "  }\n" +
                     "}\n\n" +
                     "app.whenReady().then(() => {\n" +
                     "  createWindow();\n" +
@@ -1380,6 +1405,7 @@ def main():
                     "ipcMain.handle('dars::FileSystem::write_text', async (_e, filePath, data, encoding = 'utf-8') => {\n" +
                     "  const resolved = resolvePath(filePath);\n" +
                     "  if (typeof data !== 'string') data = String(data ?? '');\n" +
+                    "  await fs.mkdir(path.dirname(resolved), { recursive: true });\n" +
                     "  await fs.writeFile(resolved, data, { encoding });\n" +
                     "  return true;\n" +
                     "});\n\n" +
