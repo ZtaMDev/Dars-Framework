@@ -9,7 +9,7 @@
       "email": "ztadevs@gmail.com"
     }
   ],
-  "license": "MIT",
+  "license": "MPL2.0",
   "dependencies": {
     "rich": "==14.2.0",
     "bs4": "==0.0.2",
@@ -28,7 +28,7 @@
     "dars": "dars.cli.main:main"
   },
   "pyproject": {
-    "project.license": "MIT",
+    "project.license": "MPL2.0",
     "project.readme": "README.md",
     "tool": {
       "setuptools": {
