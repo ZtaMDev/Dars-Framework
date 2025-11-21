@@ -1968,10 +1968,25 @@ body {
             const id = node.id;
             if(id && eventMap.has(id)){{
             const handlers = eventMap.get(id);
-            const h = handlers[eventName];
+            
+            // Check __darsEv first (these are from js_lib.py event attachment)
             if(node && node.__darsEv && node.__darsEv[eventName]){{
                 return;
             }}
+            
+            // Try exact match first
+            let h = handlers[eventName];
+            
+            // For keyboard events, also check for key-filtered version
+            if(!h && (eventName === 'keydown' || eventName === 'keyup' || eventName === 'keypress')){{
+                // Check if there's a filtered handler for this specific key
+                const key = e.key || e.code;
+                if(key){{
+                const filteredEvent = eventName + '.' + key;
+                h = handlers[filteredEvent];
+                }}
+            }}
+            
             if(typeof h === 'function'){{
                 try {{ h.call(node, e); }} catch(err){{ console.error('[Dars] handler error', err); }}
                 return;

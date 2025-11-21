@@ -43,7 +43,7 @@ from dars.core.state import dState, Mod, this
 from dars.dars_tests.run_tests import run_app_tests, run_unit_tests, main
 # Exporters (optional, for direct use)
 from dars.exporters.web.html_css_js import HTMLCSSJSExporter
-from dars.scripts.dscript import dScript, RawJS
+from dars.scripts.dscript import dScript, RawJS, Arg
 from dars.scripts.script import *
 from dars.version import __version__
 from dars.backend import createComp, deleteComp
@@ -61,5 +61,5 @@ __all__ = [
     '__version__',
     'run_app_tests', 'run_unit_tests', 'main',
     'dState', 'Mod',
-    'createComp', 'deleteComp', 'RawJS', 'this',
+    'createComp', 'deleteComp', 'RawJS', 'this', 'Arg',
 ]

@@ -979,6 +979,24 @@
      <a class="sidebar-link sidebar-level-4" href="#file-system-operations" style="margin-left: 60px">
       File System Operations
      </a>
+     <a class="sidebar-link sidebar-level-1" href="#list-all-files-in-a-directory" style="margin-left: 0px">
+      List all files in a directory
+     </a>
+     <a class="sidebar-link sidebar-level-1" href="#list-with-glob-pattern-filtering" style="margin-left: 0px">
+      List with glob pattern filtering
+     </a>
+     <a class="sidebar-link sidebar-level-1" href="#dynamic-path-from-input" style="margin-left: 0px">
+      Dynamic path from input
+     </a>
+     <a class="sidebar-link sidebar-level-1" href="#include-file-sizes-optional" style="margin-left: 0px">
+      Include file sizes (optional)
+     </a>
+     <a class="sidebar-link sidebar-level-1" href="#read-binary-files-images-etc" style="margin-left: 0px">
+      Read binary files (images, etc.)
+     </a>
+     <a class="sidebar-link sidebar-level-1" href="#write-binary-data" style="margin-left: 0px">
+      Write binary data
+     </a>
      <a class="sidebar-link sidebar-level-4" href="#chaining-multiple-operations" style="margin-left: 60px">
       Chaining Multiple Operations
      </a>
@@ -9030,7 +9048,7 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
        module:
       </p>
       <div class="codehilite">
-       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.desktop</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_text</span><span class="p">,</span> <span class="n">write_text</span><span class="p">,</span> <span class="n">read_file</span><span class="p">,</span> <span class="n">write_file</span>
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.desktop</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_text</span><span class="p">,</span> <span class="n">write_text</span><span class="p">,</span> <span class="n">read_file</span><span class="p">,</span> <span class="n">write_file</span><span class="p">,</span> <span class="n">list_directory</span><span class="p">,</span> <span class="n">get_value</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dars.core.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">this</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dars.scripts.dscript</span><span class="w"> </span><span class="kn">import</span> <span class="n">RawJS</span><span class="p">,</span> <span class="n">dScript</span>
 </code></pre>
@@ -9083,6 +9101,45 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
         <span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">"Saved!"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s2">"color"</span><span class="p">:</span> <span class="s2">"green"</span><span class="p">})</span>
     <span class="p">)</span>
 <span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Listing Directories
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.desktop</span><span class="w"> </span><span class="kn">import</span> <span class="n">list_directory</span><span class="p">,</span> <span class="n">get_value</span>
+
+<span class="c1"># List all files in a directory</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Browse"</span><span class="p">,</span>
+    <span class="n">on_click</span><span class="o">=</span><span class="n">list_directory</span><span class="p">(</span><span class="s2">"."</span><span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span>
+        <span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"file-list"</span><span class="p">,</span> <span class="n">html</span><span class="o">=</span><span class="n">RawJS</span><span class="p">(</span><span class="s2">"""</span>
+<span class="s2">            value.map(f =&gt; {</span>
+<span class="s2">                const icon = f.isDirectory ? '📁' : '📄';</span>
+<span class="s2">                return `&lt;div&gt;$</span><span class="si">{icon}</span><span class="s2"> $</span><span class="si">{f.name}</span><span class="s2">&lt;/div&gt;`;</span>
+<span class="s2">            }).join('')</span>
+<span class="s2">        """</span><span class="p">))</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># List with glob pattern filtering</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Python Files"</span><span class="p">,</span>
+    <span class="n">on_click</span><span class="o">=</span><span class="n">list_directory</span><span class="p">(</span><span class="s2">"."</span><span class="p">,</span> <span class="s2">"*.py"</span><span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span>
+        <span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"count"</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">RawJS</span><span class="p">(</span><span class="s2">"`Found $</span><span class="si">{value.length}</span><span class="s2"> files`"</span><span class="p">))</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># Dynamic path from input</span>
+<span class="n">Input</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"path"</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s2">"."</span><span class="p">)</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"List Directory"</span><span class="p">,</span>
+    <span class="n">on_click</span><span class="o">=</span><span class="n">list_directory</span><span class="p">(</span><span class="n">get_value</span><span class="p">(</span><span class="s2">"path"</span><span class="p">))</span><span class="o">.</span><span class="n">then</span><span class="p">(</span>
+        <span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"output"</span><span class="p">,</span> <span class="n">html</span><span class="o">=</span><span class="n">RawJS</span><span class="p">(</span><span class="s2">"value.map(f =&gt; f.name).join('&lt;br&gt;')"</span><span class="p">))</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># Include file sizes (optional)</span>
+<span class="n">list_directory</span><span class="p">(</span><span class="s2">"."</span><span class="p">,</span> <span class="s2">"*"</span><span class="p">,</span> <span class="n">include_size</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </code></pre>
       </div>
       <p>

@@ -24,7 +24,33 @@ from typing import Union, Optional
 # Exporter will attempt to include these when building pages for desktop targets.
 _auto_scripts = []  # type: list[dScript]
 
-__all__ = ["read_text", "write_text", "read_file", "write_file"]
+__all__ = ["read_text", "write_text", "read_file", "write_file", "get_value", "list_directory"]
+
+
+def get_value(element_id: str):
+    """Get the value of an input element as a RawJS variable.
+    
+    This allows using dynamic values from inputs, textareas, etc. in file operations.
+    
+    Args:
+        element_id: The ID of the element to get the value from
+        
+    Returns:
+        RawJS object containing JavaScript to access the element's value
+        
+    Example:
+        ```python
+        path_input = Input(id="file_path")
+        save_btn = Button("Save",
+            on_click=write_text(
+                get_value("file_path"),  # Dynamic path from input
+                get_value("editor")      # Dynamic content
+            )
+        )
+        ```
+    """
+    from dars.scripts.dscript import RawJS
+    return RawJS(f"document.getElementById('{element_id}').value")
 
 
 def read_text(file_path: str, encoding: str = 'utf-8', then: Optional[str] = None, autoinclude: bool = False, import_stub: bool = True) -> dScript:
@@ -134,6 +160,58 @@ def write_file(file_path: str, data: Union[bytes, str, dScript],
                           then=then, autoinclude=autoinclude, import_stub=import_stub)
 
 
+def list_directory(directory_path: str, pattern: str = "*", include_size: bool = False,
+                   then: Optional[str] = None, autoinclude: bool = False,
+                   import_stub: bool = True) -> dScript:
+    """List files and folders in a directory.
+    
+    Returns an array of objects with: {name, isDirectory, size (optional)}
+    
+    Args:
+        directory_path: Path to the directory to list (supports get_value() for dynamic paths)
+        pattern: Glob pattern to filter results (default: "*" for all)
+        include_size: Whether to include file sizes in bytes (default: False)
+        then: JavaScript code to execute with the result (use 'value' to access result)
+        autoinclude: If True, automatically include this script in the page
+        import_stub: If True, include the desktop API stub
+        
+    Returns:
+        dScript that when executed returns an array of file/folder objects
+        
+    Example with this() state update:
+        ```python
+        from dars.desktop import list_directory, get_value
+        from dars.core.state import this
+        
+        # Simple list - just names
+        Button("List", 
+            on_click=list_directory(get_value("path")).then(
+                this().state(id="output", text=RawJS("value.map(f => f.name).join('\\\\n')"))
+            )
+        )
+        
+        # Filter by pattern
+        Button("List Python Files",
+            on_click=list_directory(".", "*.py").then(
+                this().state(id="count", text=RawJS("`Found ${value.length} files`"))
+            )
+        )
+        ```
+        
+    Example with Arg helper (Pythonic):
+        ```python
+        from dars.scripts.dscript import Arg
+        
+        # Using Arg for cleaner syntax (coming soon - currently use 'value' directly)
+        list_directory(".").then(
+            this().state(id="files", text=Arg.map("f => f.name").join("\\\\n"))
+        )
+        ```
+    """
+    return _call_as_dscript('FileSystem', 'list_directory', directory_path, pattern, include_size,
+                          then=then, autoinclude=autoinclude, import_stub=import_stub)
+
+
 # Note: no Python-exec filesystem helpers are exposed by default. The
 # desktop API helpers are JS-first factories (read_text/write_text) which
 # return dScript objects to be executed in the renderer. The API schema
@@ -142,6 +220,16 @@ def write_file(file_path: str, data: Union[bytes, str, dScript],
 
 # ---- dScript factory helpers ----
 def _serialize_arg(arg):
+    """Serialize Python arguments to JavaScript code.
+    
+    Handles RawJS objects for dynamic values (e.g., from get_value()).
+    """
+    from dars.scripts.dscript import RawJS
+    
+    # If it's a RawJS object, use the raw code directly
+    if isinstance(arg, RawJS):
+        return arg.code
+    
     # Try to serialize basic types to JS literal safely
     try:
         return json.dumps(arg)

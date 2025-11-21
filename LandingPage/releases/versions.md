@@ -1,3 +1,209 @@
+# Release Notes v1.3.9
+
+> Desktop File System API, Pythonic Arg helper, keyboard event filtering, and comprehensive template synchronization. Major enhancements to desktop capabilities with improved developer experience.
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+or
+
+```bash
+pip install dars-framework==1.3.9
+```
+
+## What's New
+
+### Desktop File System API - `list_directory`
+
+**Comprehensive Directory Listing:**
+- New `list_directory()` function for browsing files and folders
+- Optional glob pattern filtering (e.g., `"*.py"` for Python files only)
+- Optional `include_size` parameter (default: False) to show/hide file sizes
+- Full integration with `get_value()` for dynamic paths from inputs
+- Seamless chaining with `dScript.then()` for UI updates
+- Returns array of `{name, isDirectory, size?}` objects
+
+**Usage:**
+```python
+from dars.desktop import list_directory, get_value
+from dars.core.state import this
+
+# Simple directory listing
+Button("List", 
+    on_click=list_directory(get_value("path")).then(
+        this().state(id="output", html=RawJS("value.map(f => f.name).join('<br>')"))
+    )
+)
+
+# Filter by pattern
+Button("Python Files",
+    on_click=list_directory(".", "*.py").then(
+        this().state(id="count", text=RawJS("`Found ${value.length} files`"))
+    )
+)
+
+# Include file sizes
+list_directory(".", "*", include_size=True)
+```
+
+### Pythonic `Arg` Helper
+
+**Cleaner dScript.ARG Access:**
+- New `Arg` singleton for Pythonic access to `dScript.ARG`
+- More readable than `RawJS("dScript.ARG")`
+- Provides helper methods like `.map()`, `.join()`, `.length`, etc.
+- Auto-generates proper JavaScript code
+- Exported in `dars.all` for easy access
+
+**Usage:**
+```python
+from dars.scripts.dscript import Arg
+
+# Old way (still works)
+this().state(text=RawJS("dScript.ARG.map(f => f.name).join('\\n')"))
+
+# New Pythonic way
+this().state(text=Arg.map("f => f.name").join("\\n"))
+
+# Properties
+Arg.length  # -> "dScript.ARG.length"
+Arg.value   # -> "dScript.ARG.value"
+
+# Methods
+Arg.map("f => f.name")  # -> "dScript.ARG.map(f => f.name)"
+Arg.filter("x => x > 0")  # -> "dScript.ARG.filter(x => x > 0)"
+```
+
+### Enhanced Keyboard Event Filtering
+
+**Specific Key Event Handlers:**
+- New keyboard event constants for specific keys (e.g., `KEY_DOWN_ENTER`, `KEY_DOWN_ESCAPE`)
+- Event type parsing with `.` delimiter for key filtering (e.g., `"keydown.Enter"`)
+- Proper event delegation with key matching
+- Works across all event attachment mechanisms
+- Backward compatible with existing keyboard events
+
+**New Event Constants:**
+```python
+from dars.core.events import EventTypes
+
+# Specific Enter key events
+on_keydown_enter    # Triggered only when Enter is pressed
+on_keyup_enter      # Triggered only when Enter is released
+
+# Specific Escape key events  
+on_keydown_escape   # Triggered only when Escape is pressed
+on_keyup_escape     # Triggered only when Escape is released
+
+# Usage
+Input(
+    id="search",
+    on_keydown_enter=search_action,  # Only fires on Enter
+    on_keydown_escape=clear_action   # Only fires on Escape
+)
+```
+
+### Configurable DevTools
+
+**Electron DevTools Control:**
+- New `devtools` parameter in `App` class (default: `True`)
+- Respects `DARS_DEV` and `DARS_DEVTOOLS` environment variables
+- DevTools only open when both conditions met: dev mode + devtools enabled
+- Better control over development environment
+- Applies to all Electron generation methods
+
+**Usage:**
+```python
+# Disable DevTools even in dev mode
+app = App(
+    title="My App",
+    desktop=True,
+    devtools=False  # Won't open DevTools
+)
+
+# Default behavior (DevTools enabled)
+app = App(
+    title="My App",
+    desktop=True
+)
+```
+
+### Dynamic Form Element Updates
+
+**Fixed `change` Function:**
+- Corrected dynamic text updates for form elements
+- Uses `.value` for `Input`, `Textarea`, `Select`
+- Uses `.textContent` for other elements (Text, Button, etc.)
+- Ensures UI updates properly reflect state changes
+- Fixed issue where form input values weren't updating
+
+### Improved Event Delegation
+
+**Keyboard Event Fix:**
+- Fixed event delegation for key-filtered keyboard events
+- Properly checks both base event name and filtered event name in eventMap
+- Ensures `keydown.Enter` and similar events work correctly
+- Maintains backward compatibility with non-filtered events
+
+## Bug Fixes
+
+- Fixed `change` function to use `.value` for form elements instead of `.textContent`
+- Fixed event delegation to properly handle key-filtered keyboard events like `keydown.Enter`
+- Fixed ElectronExporter default templates to include latest IPC handlers
+- Fixed CLI template generation to include all current File System API functions
+
+## Improved
+
+- Enhanced developer experience with configurable DevTools
+- Cleaner syntax with `Arg` helper for dScript.ARG access
+- More powerful keyboard event handling with key-specific filtering
+
+## Migration Guide
+
+### From v1.3.8 to v1.3.9
+
+No breaking changes. You can upgrade safely:
+
+```bash
+pip install --upgrade dars-framework
+```
+
+**Optional: Use new features**
+
+1. **Use `list_directory` for file browsing:**
+```python
+from dars.desktop import list_directory, get_value
+
+Button("Browse", 
+    on_click=list_directory(get_value("dir")).then(...)
+)
+```
+
+2. **Use `Arg` helper for cleaner code:**
+```python
+from dars.scripts.dscript import Arg
+
+# Instead of RawJS("dScript.ARG.map(...)") 
+text=Arg.map("x => x.name").join("\\n")
+```
+
+3. **Use specific keyboard events:**
+```python
+Input(
+    on_keydown_enter=submit_action,
+    on_keydown_escape=cancel_action
+)
+```
+
+## Documentation
+
+- Updated Desktop exporter documentation with File System API examples
+- Added `Arg` helper documentation in scripts section
+- Enhanced keyboard events documentation with key-specific examples
+
 # Release Notes v1.3.8
 
 > Dynamic state updates, improved event handling, and enhanced Electron dev experience. Introduces `this()` for event-time component updates, `RawJS` for JavaScript injection, and `dScript.then()` for async chaining.

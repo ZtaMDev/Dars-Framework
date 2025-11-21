@@ -85,6 +85,46 @@ class EventTypes:
     KEY_UP = "keyup"
     KEY_PRESS = "keypress"
     
+    # Eventos de teclado específicos (key-filtered)
+    # Enter
+    KEY_DOWN_ENTER = "keydown.Enter"
+    KEY_UP_ENTER = "keyup.Enter"
+    KEY_PRESS_ENTER = "keypress.Enter"
+    
+    # Escape
+    KEY_DOWN_ESCAPE = "keydown.Escape"
+    KEY_UP_ESCAPE = "keyup.Escape"
+    
+    # Tab
+    KEY_DOWN_TAB = "keydown.Tab"
+    KEY_UP_TAB = "keyup.Tab"
+    
+    # Space
+    KEY_DOWN_SPACE = "keydown.Space"
+    KEY_UP_SPACE = "keyup.Space"
+    
+    # Arrows
+    KEY_DOWN_ARROW_UP = "keydown.ArrowUp"
+    KEY_DOWN_ARROW_DOWN = "keydown.ArrowDown"
+    KEY_DOWN_ARROW_LEFT = "keydown.ArrowLeft"
+    KEY_DOWN_ARROW_RIGHT = "keydown.ArrowRight"
+    KEY_UP_ARROW_UP = "keyup.ArrowUp"
+    KEY_UP_ARROW_DOWN = "keyup.ArrowDown"
+    KEY_UP_ARROW_LEFT = "keyup.ArrowLeft"
+    KEY_UP_ARROW_RIGHT = "keyup.ArrowRight"
+    
+    # Backspace and Delete
+    KEY_DOWN_BACKSPACE = "keydown.Backspace"
+    KEY_DOWN_DELETE = "keydown.Delete"
+    
+    # Control keys
+    KEY_DOWN_CTRL = "keydown.Control"
+    KEY_UP_CTRL = "keyup.Control"
+    KEY_DOWN_ALT = "keydown.Alt"
+    KEY_UP_ALT = "keyup.Alt"
+    KEY_DOWN_SHIFT = "keydown.Shift"
+    KEY_UP_SHIFT = "keyup.Shift"
+    
     # Eventos de formulario
     CHANGE = "change"
     INPUT = "input"

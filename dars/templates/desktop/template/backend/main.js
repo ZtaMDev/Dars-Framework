@@ -13,9 +13,8 @@ function createWindow() {
   });
   Menu.setApplicationMenu(null);
   win.loadFile(path.join(__dirname, 'app', 'index.html'));
-
-  // Open DevTools in development mode
-  if (process.env.DARS_DEV === '1') {
+  // Open DevTools in development mode if enabled
+  if (process.env.DARS_DEV === '1' && process.env.DARS_DEVTOOLS !== '0') {
     win.webContents.openDevTools();
   }
 }
@@ -77,7 +76,6 @@ ipcMain.handle('dars::FileSystem::write_text', async (_e, filePath, data, encodi
   return true;
 });
 
-// Binary file operations
 ipcMain.handle('dars::FileSystem::read_file', async (_e, filePath) => {
   const resolved = resolvePath(filePath);
   try {
@@ -98,6 +96,34 @@ ipcMain.handle('dars::FileSystem::write_file', async (_e, filePath, data) => {
     return true;
   } catch (error) {
     console.error('Error writing file:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('dars::FileSystem::list_directory', async (_e, dirPath, pattern = '*', includeSize = false) => {
+  const resolved = resolvePath(dirPath);
+  try {
+    const entries = await fs.readdir(resolved, { withFileTypes: true });
+    const result = [];
+    for (const entry of entries) {
+      // Simple pattern matching (supports * wildcard)
+      if (pattern !== '*') {
+        const regex = new RegExp('^' + pattern.replace(/\*/g, '.*') + '$');
+        if (!regex.test(entry.name)) continue;
+      }
+      const obj = {
+        name: entry.name,
+        isDirectory: entry.isDirectory()
+      };
+      if (includeSize) {
+        const stats = await fs.stat(path.join(resolved, entry.name));
+        obj.size = stats.size;
+      }
+      result.push(obj);
+    }
+    return result;
+  } catch (error) {
+    console.error('Error listing directory:', error);
     throw error;
   }
 });

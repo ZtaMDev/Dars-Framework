@@ -610,6 +610,7 @@ class App:
                         
                     env = os.environ.copy()
                     env['DARS_DEV'] = '1'
+                    env['DARS_DEVTOOLS'] = '1' if getattr(self, 'devtools', True) else '0'
                     if picked:
                         env['DARS_CONTROL_PORT'] = str(picked)
                         
@@ -1087,6 +1088,8 @@ class App:
         background_color: str = "#ffffff",
         service_worker_path: str = "",
         service_worker_enabled: bool = False,
+        desktop: bool = False,
+        devtools: bool = True,  # Auto-open DevTools in desktop dev mode
         **config
     ):
         # Propiedades básicas de la aplicación
@@ -1097,7 +1100,7 @@ class App:
         self.version = version
         self.keywords = keywords or []
         self.language = language
-        
+        self.desktop = desktop
         # Iconos y favicon
         self.favicon = favicon
         self.icon = icon  # Para PWA y meta tags
@@ -1110,6 +1113,9 @@ class App:
         self.background_color = background_color
         self.service_worker_path = service_worker_path
         self.service_worker_enabled = service_worker_enabled
+        
+        # Desktop configuration
+        self.devtools = devtools  # Control DevTools auto-open in dev mode
         
         # Propiedades Open Graph (para redes sociales)
 

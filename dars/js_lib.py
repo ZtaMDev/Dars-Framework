@@ -28,12 +28,22 @@ function _attachEventsForVNode(el, vnode, events, markClass){{
         const push = (it)=>{{ if(typeof it==='string') codes.push(it); else if(it&&typeof it.code==='string') codes.push(it.code); }};
         if(Array.isArray(handlers)){{ handlers.forEach(push); }} else {{ push(handlers); }}
         if(!codes.length) continue;
+        
+        // Parse event type for key filtering (e.g., "keydown.Enter")
+        const [baseEvent, targetKey] = type.includes('.') ? type.split('.', 2) : [type, null];
+        
         el.__darsEv = el.__darsEv || {{}};
-        if(el.__darsEv[type]){{ try{{ el.removeEventListener(type, el.__darsEv[type], true); }}catch(_ ){{ }} try{{ el.removeEventListener(type, el.__darsEv[type], false); }}catch(_ ){{ }} }}
-        const handler = function(ev){{ try{{ ev.stopImmediatePropagation(); ev.stopPropagation(); ev.preventDefault(); ev.cancelBubble = true; }}catch(_ ){{ }}
+        if(el.__darsEv[type]){{ try{{ el.removeEventListener(baseEvent, el.__darsEv[type], true); }}catch(_ ){{ }} try{{ el.removeEventListener(baseEvent, el.__darsEv[type], false); }}catch(_ ){{ }} }}
+        const handler = function(ev){{ 
+          // Key filtering for keyboard events
+          if(targetKey){{
+            if(!ev || !ev.key) return; // Not a keyboard event
+            if(ev.key !== targetKey && ev.code !== targetKey) return; // Wrong key
+          }}
+          try{{ ev.stopImmediatePropagation(); ev.stopPropagation(); ev.preventDefault(); ev.cancelBubble = true; }}catch(_ ){{ }}
           for(const c of codes){{ try{{ (0,eval)(c); }}catch(_ ){{ }} }}
         }};
-        try{{ el.addEventListener(type, handler, {{ capture: true }}); }}catch(_ ){{ }}
+        try{{ el.addEventListener(baseEvent, handler, {{ capture: true }}); }}catch(_ ){{ }}
         el.__darsEv[type] = handler;
         try{{ if(markClass) el.classList.add(markClass); }}catch(_ ){{ }}
       }}
@@ -91,12 +101,22 @@ function _attachEventsMap(events){{
         const push = (it)=>{{ if(typeof it==='string') codes.push(it); else if(it&&typeof it.code==='string') codes.push(it.code); }};
         if(Array.isArray(handlers)){{ handlers.forEach(push); }} else {{ push(handlers); }}
         if(!codes.length) continue;
+        
+        // Parse event type for key filtering (e.g., "keydown.Enter")
+        const [baseEvent, targetKey] = type.includes('.') ? type.split('.', 2) : [type, null];
+        
         el.__darsEv = el.__darsEv || {{}};
-        if(el.__darsEv[type]){{ try{{ el.removeEventListener(type, el.__darsEv[type], true); }}catch(_ ){{ }} try{{ el.removeEventListener(type, el.__darsEv[type], false); }}catch(_ ){{ }} }}
-        const handler = function(ev){{ try{{ ev.stopImmediatePropagation(); ev.stopPropagation(); ev.preventDefault(); ev.cancelBubble = true; }}catch(_ ){{ }}
+        if(el.__darsEv[type]){{ try{{ el.removeEventListener(baseEvent, el.__darsEv[type], true); }}catch(_ ){{ }} try{{ el.removeEventListener(baseEvent, el.__darsEv[type], false); }}catch(_ ){{ }} }}
+        const handler = function(ev){{ 
+          // Key filtering for keyboard events
+          if(targetKey){{
+            if(!ev || !ev.key) return; // Not a keyboard event
+            if(ev.key !== targetKey && ev.code !== targetKey) return; // Wrong key
+          }}
+          try{{ ev.stopImmediatePropagation(); ev.stopPropagation(); ev.preventDefault(); ev.cancelBubble = true; }}catch(_ ){{ }}
           for(const c of codes){{ try{{ (0,eval)(c); }}catch(_ ){{ }} }}
         }};
-        try{{ el.addEventListener(type, handler, {{ capture: true }}); }}catch(_ ){{ }}
+        try{{ el.addEventListener(baseEvent, handler, {{ capture: true }}); }}catch(_ ){{ }}
         el.__darsEv[type] = handler;
       }}
     }}catch(_ ){{ }}
@@ -239,17 +259,25 @@ function _applyMods(defaultId, mods){{
               }}
               
               if(codes.length){{
+                // Parse event type for key filtering (e.g., "keydown.Enter")
+                const [baseEvent, targetKey] = type.includes('.') ? type.split('.', 2) : [type, null];
+                
                 el.__darsEv = el.__darsEv || {{}};
                 if(el.__darsEv[type]){{
-                  try{{ el.removeEventListener(type, el.__darsEv[type], true); }}catch(_){{ }}
-                  try{{ el.removeEventListener(type, el.__darsEv[type], false); }}catch(_){{ }}
+                  try{{ el.removeEventListener(baseEvent, el.__darsEv[type], true); }}catch(_){{ }}
+                  try{{ el.removeEventListener(baseEvent, el.__darsEv[type], false); }}catch(_){{ }}
                 }}
                 const handler = function(ev){{
+                  // Key filtering for keyboard events
+                  if(targetKey){{
+                    if(!ev || !ev.key) return; // Not a keyboard event
+                    if(ev.key !== targetKey && ev.code !== targetKey) return; // Wrong key
+                  }}
                   try{{ ev.stopImmediatePropagation(); }}catch(_){{ }}
                   try{{ ev.stopPropagation(); }}catch(_){{ }}
                   try{{ ev.preventDefault(); }}catch(_){{ }}
                   try{{ ev.cancelBubble = true; }}catch(_){{ }}
-                  let propName = 'on'+type;
+                  let propName = 'on'+baseEvent;
                   let prevOn = null;
                   try{{ prevOn = el[propName]; el[propName] = null; }}catch(_){{ }}
                   try{{ 
@@ -338,9 +366,14 @@ function change(opt){{
       const el = $(opt.id);
       if (!el) return;
       
-      // Apply text change
+      // Apply text change (use .value for form elements, .textContent for others)
       if (opt.hasOwnProperty('text')) {{
-          el.textContent = String(opt.text);
+          const isFormElement = el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT';
+          if (isFormElement) {{
+              el.value = String(opt.text);
+          }} else {{
+              el.textContent = String(opt.text);
+          }}
       }}
       
       // Apply HTML change

@@ -230,6 +230,459 @@
     margin: 0 auto;
     padding: 40px 20px;">
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_171">
+      <h1 id="release-notes-v139">
+       Release Notes v1.3.9
+      </h1>
+      <blockquote>
+       <p>
+        Desktop File System API, Pythonic Arg helper, keyboard event filtering, and comprehensive template synchronization. Major enhancements to desktop capabilities with improved developer experience.
+       </p>
+      </blockquote>
+      <h2 id="installation">
+       Installation
+      </h2>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
+</code></pre>
+      </div>
+      <p>
+       or
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.9
+</code></pre>
+      </div>
+      <h2 id="whats-new">
+       What's New
+      </h2>
+      <h3 id="desktop-file-system-api-list_directory">
+       Desktop File System API -
+       <code>
+        list_directory
+       </code>
+      </h3>
+      <p>
+       <strong>
+        Comprehensive Directory Listing:
+       </strong>
+       - New
+       <code>
+        list_directory()
+       </code>
+       function for browsing files and folders
+- Optional glob pattern filtering (e.g.,
+       <code>
+        "*.py"
+       </code>
+       for Python files only)
+- Optional
+       <code>
+        include_size
+       </code>
+       parameter (default: False) to show/hide file sizes
+- Full integration with
+       <code>
+        get_value()
+       </code>
+       for dynamic paths from inputs
+- Seamless chaining with
+       <code>
+        dScript.then()
+       </code>
+       for UI updates
+- Returns array of
+       <code>
+        {name, isDirectory, size?}
+       </code>
+       objects
+      </p>
+      <p>
+       <strong>
+        Usage:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.desktop</span><span class="w"> </span><span class="kn">import</span> <span class="n">list_directory</span><span class="p">,</span> <span class="n">get_value</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dars.core.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">this</span>
+
+<span class="c1"># Simple directory listing</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"List"</span><span class="p">,</span> 
+    <span class="n">on_click</span><span class="o">=</span><span class="n">list_directory</span><span class="p">(</span><span class="n">get_value</span><span class="p">(</span><span class="s2">"path"</span><span class="p">))</span><span class="o">.</span><span class="n">then</span><span class="p">(</span>
+        <span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"output"</span><span class="p">,</span> <span class="n">html</span><span class="o">=</span><span class="n">RawJS</span><span class="p">(</span><span class="s2">"value.map(f =&gt; f.name).join('&lt;br&gt;')"</span><span class="p">))</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># Filter by pattern</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Python Files"</span><span class="p">,</span>
+    <span class="n">on_click</span><span class="o">=</span><span class="n">list_directory</span><span class="p">(</span><span class="s2">"."</span><span class="p">,</span> <span class="s2">"*.py"</span><span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span>
+        <span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"count"</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">RawJS</span><span class="p">(</span><span class="s2">"`Found $</span><span class="si">{value.length}</span><span class="s2"> files`"</span><span class="p">))</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># Include file sizes</span>
+<span class="n">list_directory</span><span class="p">(</span><span class="s2">"."</span><span class="p">,</span> <span class="s2">"*"</span><span class="p">,</span> <span class="n">include_size</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="pythonic-arg-helper">
+       Pythonic
+       <code>
+        Arg
+       </code>
+       Helper
+      </h3>
+      <p>
+       <strong>
+        Cleaner dScript.ARG Access:
+       </strong>
+       - New
+       <code>
+        Arg
+       </code>
+       singleton for Pythonic access to
+       <code>
+        dScript.ARG
+       </code>
+       - More readable than
+       <code>
+        RawJS("dScript.ARG")
+       </code>
+       - Provides helper methods like
+       <code>
+        .map()
+       </code>
+       ,
+       <code>
+        .join()
+       </code>
+       ,
+       <code>
+        .length
+       </code>
+       , etc.
+- Auto-generates proper JavaScript code
+- Exported in
+       <code>
+        dars.all
+       </code>
+       for easy access
+      </p>
+      <p>
+       <strong>
+        Usage:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.scripts.dscript</span><span class="w"> </span><span class="kn">import</span> <span class="n">Arg</span>
+
+<span class="c1"># Old way (still works)</span>
+<span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">RawJS</span><span class="p">(</span><span class="s2">"dScript.ARG.map(f =&gt; f.name).join('</span><span class="se">\\</span><span class="s2">n')"</span><span class="p">))</span>
+
+<span class="c1"># New Pythonic way</span>
+<span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">Arg</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="s2">"f =&gt; f.name"</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">"</span><span class="se">\\</span><span class="s2">n"</span><span class="p">))</span>
+
+<span class="c1"># Properties</span>
+<span class="n">Arg</span><span class="o">.</span><span class="n">length</span>  <span class="c1"># -&gt; "dScript.ARG.length"</span>
+<span class="n">Arg</span><span class="o">.</span><span class="n">value</span>   <span class="c1"># -&gt; "dScript.ARG.value"</span>
+
+<span class="c1"># Methods</span>
+<span class="n">Arg</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="s2">"f =&gt; f.name"</span><span class="p">)</span>  <span class="c1"># -&gt; "dScript.ARG.map(f =&gt; f.name)"</span>
+<span class="n">Arg</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s2">"x =&gt; x &gt; 0"</span><span class="p">)</span>  <span class="c1"># -&gt; "dScript.ARG.filter(x =&gt; x &gt; 0)"</span>
+</code></pre>
+      </div>
+      <h3 id="enhanced-keyboard-event-filtering">
+       Enhanced Keyboard Event Filtering
+      </h3>
+      <p>
+       <strong>
+        Specific Key Event Handlers:
+       </strong>
+       - New keyboard event constants for specific keys (e.g.,
+       <code>
+        KEY_DOWN_ENTER
+       </code>
+       ,
+       <code>
+        KEY_DOWN_ESCAPE
+       </code>
+       )
+- Event type parsing with
+       <code>
+        .
+       </code>
+       delimiter for key filtering (e.g.,
+       <code>
+        "keydown.Enter"
+       </code>
+       )
+- Proper event delegation with key matching
+- Works across all event attachment mechanisms
+- Backward compatible with existing keyboard events
+      </p>
+      <p>
+       <strong>
+        New Event Constants:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.core.events</span><span class="w"> </span><span class="kn">import</span> <span class="n">EventTypes</span>
+
+<span class="c1"># Specific Enter key events</span>
+<span class="n">on_keydown_enter</span>    <span class="c1"># Triggered only when Enter is pressed</span>
+<span class="n">on_keyup_enter</span>      <span class="c1"># Triggered only when Enter is released</span>
+
+<span class="c1"># Specific Escape key events  </span>
+<span class="n">on_keydown_escape</span>   <span class="c1"># Triggered only when Escape is pressed</span>
+<span class="n">on_keyup_escape</span>     <span class="c1"># Triggered only when Escape is released</span>
+
+<span class="c1"># Usage</span>
+<span class="n">Input</span><span class="p">(</span>
+    <span class="nb">id</span><span class="o">=</span><span class="s2">"search"</span><span class="p">,</span>
+    <span class="n">on_keydown_enter</span><span class="o">=</span><span class="n">search_action</span><span class="p">,</span>  <span class="c1"># Only fires on Enter</span>
+    <span class="n">on_keydown_escape</span><span class="o">=</span><span class="n">clear_action</span>   <span class="c1"># Only fires on Escape</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="configurable-devtools">
+       Configurable DevTools
+      </h3>
+      <p>
+       <strong>
+        Electron DevTools Control:
+       </strong>
+       - New
+       <code>
+        devtools
+       </code>
+       parameter in
+       <code>
+        App
+       </code>
+       class (default:
+       <code>
+        True
+       </code>
+       )
+- Respects
+       <code>
+        DARS_DEV
+       </code>
+       and
+       <code>
+        DARS_DEVTOOLS
+       </code>
+       environment variables
+- DevTools only open when both conditions met: dev mode + devtools enabled
+- Better control over development environment
+- Applies to all Electron generation methods
+      </p>
+      <p>
+       <strong>
+        Usage:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Disable DevTools even in dev mode</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">"My App"</span><span class="p">,</span>
+    <span class="n">desktop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">devtools</span><span class="o">=</span><span class="kc">False</span>  <span class="c1"># Won't open DevTools</span>
+<span class="p">)</span>
+
+<span class="c1"># Default behavior (DevTools enabled)</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">"My App"</span><span class="p">,</span>
+    <span class="n">desktop</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="dynamic-form-element-updates">
+       Dynamic Form Element Updates
+      </h3>
+      <p>
+       <strong>
+        Fixed
+        <code>
+         change
+        </code>
+        Function:
+       </strong>
+       - Corrected dynamic text updates for form elements
+- Uses
+       <code>
+        .value
+       </code>
+       for
+       <code>
+        Input
+       </code>
+       ,
+       <code>
+        Textarea
+       </code>
+       ,
+       <code>
+        Select
+       </code>
+       - Uses
+       <code>
+        .textContent
+       </code>
+       for other elements (Text, Button, etc.)
+- Ensures UI updates properly reflect state changes
+- Fixed issue where form input values weren't updating
+      </p>
+      <h3 id="improved-event-delegation">
+       Improved Event Delegation
+      </h3>
+      <p>
+       <strong>
+        Keyboard Event Fix:
+       </strong>
+       - Fixed event delegation for key-filtered keyboard events
+- Properly checks both base event name and filtered event name in eventMap
+- Ensures
+       <code>
+        keydown.Enter
+       </code>
+       and similar events work correctly
+- Maintains backward compatibility with non-filtered events
+      </p>
+      <h2 id="bug-fixes">
+       Bug Fixes
+      </h2>
+      <ul>
+       <li>
+        Fixed
+        <code>
+         change
+        </code>
+        function to use
+        <code>
+         .value
+        </code>
+        for form elements instead of
+        <code>
+         .textContent
+        </code>
+       </li>
+       <li>
+        Fixed event delegation to properly handle key-filtered keyboard events like
+        <code>
+         keydown.Enter
+        </code>
+       </li>
+       <li>
+        Fixed ElectronExporter default templates to include latest IPC handlers
+       </li>
+       <li>
+        Fixed CLI template generation to include all current File System API functions
+       </li>
+      </ul>
+      <h2 id="improved">
+       Improved
+      </h2>
+      <ul>
+       <li>
+        Enhanced developer experience with configurable DevTools
+       </li>
+       <li>
+        Cleaner syntax with
+        <code>
+         Arg
+        </code>
+        helper for dScript.ARG access
+       </li>
+       <li>
+        More powerful keyboard event handling with key-specific filtering
+       </li>
+      </ul>
+      <h2 id="migration-guide">
+       Migration Guide
+      </h2>
+      <h3 id="from-v138-to-v139">
+       From v1.3.8 to v1.3.9
+      </h3>
+      <p>
+       No breaking changes. You can upgrade safely:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Optional: Use new features
+       </strong>
+      </p>
+      <ol>
+       <li>
+        <strong>
+         Use
+         <code>
+          list_directory
+         </code>
+         for file browsing:
+        </strong>
+       </li>
+      </ol>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.desktop</span><span class="w"> </span><span class="kn">import</span> <span class="n">list_directory</span><span class="p">,</span> <span class="n">get_value</span>
+
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Browse"</span><span class="p">,</span> 
+    <span class="n">on_click</span><span class="o">=</span><span class="n">list_directory</span><span class="p">(</span><span class="n">get_value</span><span class="p">(</span><span class="s2">"dir"</span><span class="p">))</span><span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <ol start="2">
+       <li>
+        <strong>
+         Use
+         <code>
+          Arg
+         </code>
+         helper for cleaner code:
+        </strong>
+       </li>
+      </ol>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.scripts.dscript</span><span class="w"> </span><span class="kn">import</span> <span class="n">Arg</span>
+
+<span class="c1"># Instead of RawJS("dScript.ARG.map(...)") </span>
+<span class="n">text</span><span class="o">=</span><span class="n">Arg</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="s2">"x =&gt; x.name"</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">"</span><span class="se">\\</span><span class="s2">n"</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <ol start="3">
+       <li>
+        <strong>
+         Use specific keyboard events:
+        </strong>
+       </li>
+      </ol>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">Input</span><span class="p">(</span>
+    <span class="n">on_keydown_enter</span><span class="o">=</span><span class="n">submit_action</span><span class="p">,</span>
+    <span class="n">on_keydown_escape</span><span class="o">=</span><span class="n">cancel_action</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h2 id="documentation">
+       Documentation
+      </h2>
+      <ul>
+       <li>
+        Updated Desktop exporter documentation with File System API examples
+       </li>
+       <li>
+        Added
+        <code>
+         Arg
+        </code>
+        helper documentation in scripts section
+       </li>
+       <li>
+        Enhanced keyboard events documentation with key-specific examples
+       </li>
+      </ul>
       <h1 id="release-notes-v138">
        Release Notes v1.3.8
       </h1>
@@ -250,7 +703,7 @@
         for async chaining.
        </p>
       </blockquote>
-      <h2 id="installation">
+      <h2 id="installation-2">
        Installation
       </h2>
       <div class="codehilite">
@@ -264,7 +717,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.8
 </code></pre>
       </div>
-      <h2 id="whats-new">
+      <h2 id="whats-new-2">
        What's New
       </h2>
       <h3 id="dynamic-state-updates-with-this">
@@ -712,7 +1165,7 @@
         for dynamic DOM operations with safe event hydration.
        </p>
       </blockquote>
-      <h2 id="installation-2">
+      <h2 id="installation-3">
        Installation
       </h2>
       <div class="codehilite">
@@ -726,7 +1179,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.6
 </code></pre>
       </div>
-      <h2 id="whats-new-2">
+      <h2 id="whats-new-3">
        What's New
       </h2>
       <h3 id="compile-time-component-manipulation">
@@ -889,7 +1342,7 @@
         Enhanced styling and development experience update featuring active styles, improved preview system, and advanced file monitoring. Delivers better visual feedback and faster development workflow.
        </p>
       </blockquote>
-      <h2 id="installation-3">
+      <h2 id="installation-4">
        Installation
       </h2>
       <div class="codehilite">
@@ -903,7 +1356,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.5
 </code></pre>
       </div>
-      <h2 id="whats-new-3">
+      <h2 id="whats-new-4">
        What's New
       </h2>
       <h3 id="active-styles-support">
@@ -1046,7 +1499,7 @@
         Enhanced interactivity update featuring hover styles, multi-handler events, and runtime versioning. Improves component styling and event handling flexibility.
        </p>
       </blockquote>
-      <h2 id="installation-4">
+      <h2 id="installation-5">
        Installation
       </h2>
       <div class="codehilite">
@@ -1060,7 +1513,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.4
 </code></pre>
       </div>
-      <h2 id="whats-new-4">
+      <h2 id="whats-new-5">
        What's New
       </h2>
       <h3 id="hover-styles-support">
@@ -1239,7 +1692,7 @@
         Minor update featuring new semantic Section component and enhanced state serialization. Continues JavaScript migration improvements from v1.3.2.
        </p>
       </blockquote>
-      <h2 id="installation-5">
+      <h2 id="installation-6">
        Installation
       </h2>
       <div class="codehilite">
@@ -1253,7 +1706,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.3
 </code></pre>
       </div>
-      <h2 id="whats-new-5">
+      <h2 id="whats-new-6">
        What's New
       </h2>
       <h3 id="section-component">
@@ -1403,7 +1856,7 @@
         Major minification improvements with combined JS files and optimized event handling. Electron desktop exporter remains in beta.
        </p>
       </blockquote>
-      <h2 id="installation-6">
+      <h2 id="installation-7">
        Installation
       </h2>
       <div class="codehilite">
@@ -1527,7 +1980,7 @@
         : Fallback minification when Vite is unavailable
        </li>
       </ul>
-      <h2 id="bug-fixes">
+      <h2 id="bug-fixes-2">
        Bug Fixes
       </h2>
       <ul>
@@ -1699,7 +2152,7 @@
         Native desktop functions and DX improved with dev mode and file system integration.
        </p>
       </blockquote>
-      <h2 id="installation-7">
+      <h2 id="installation-8">
        Installation
       </h2>
       <div class="codehilite">
@@ -1750,7 +2203,7 @@
       <p>
        Also you can use dScripts to run custom javascript code in the desktop app. and for now 'dars dev' is supported but python main.py with rTimeCompile() is not supported because it have issues with relative paths.
       </p>
-      <h2 id="bug-fixes-2">
+      <h2 id="bug-fixes-3">
        Bug Fixes
       </h2>
       <ul>
@@ -1784,7 +2237,7 @@
         Native desktop export (BETA), improved CLI and doctor integration, and metadata fixes for packaging. This is a BETA release: usable for testing, not recommended for production.
        </p>
       </blockquote>
-      <h2 id="installation-8">
+      <h2 id="installation-9">
        Installation
       </h2>
       <div class="codehilite">
@@ -1970,7 +2423,7 @@ dars<span class="w"> </span>build
 <span class="p">}</span>
 </code></pre>
       </div>
-      <h2 id="bug-fixes-3">
+      <h2 id="bug-fixes-4">
        Bug Fixes
       </h2>
       <ul>
@@ -2067,7 +2520,7 @@ dars<span class="w"> </span>build
         Optional default minification, precise CLI control, faster builds, and clearer minification status.
        </p>
       </blockquote>
-      <h2 id="installation-9">
+      <h2 id="installation-10">
        Installation
       </h2>
       <div class="codehilite">
@@ -2224,7 +2677,7 @@ dars<span class="w"> </span>build
         </ul>
        </li>
       </ul>
-      <h2 id="bug-fixes-4">
+      <h2 id="bug-fixes-5">
        Bug Fixes
       </h2>
       <ul>
@@ -2460,6 +2913,57 @@ dars<span class="w"> </span>build
      <div class="sidebar-category">
       Versions
      </div>
+     <a class="sidebar-link sidebar-level-1" href="#release-notes-v139" style="margin-left: 0px">
+      Release Notes v1.3.9
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#installation" style="margin-left: 20px">
+      Installation
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#whats-new" style="margin-left: 20px">
+      What's New
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#desktop-file-system-api-listdirectory" style="margin-left: 40px">
+      Desktop File System API - `list_directory`
+     </a>
+     <a class="sidebar-link sidebar-level-1" href="#simple-directory-listing" style="margin-left: 0px">
+      Simple directory listing
+     </a>
+     <a class="sidebar-link sidebar-level-1" href="#filter-by-pattern" style="margin-left: 0px">
+      Filter by pattern
+     </a>
+     <a class="sidebar-link sidebar-level-1" href="#include-file-sizes" style="margin-left: 0px">
+      Include file sizes
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#pythonic-arg-helper" style="margin-left: 40px">
+      Pythonic `Arg` Helper
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#enhanced-keyboard-event-filtering" style="margin-left: 40px">
+      Enhanced Keyboard Event Filtering
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#configurable-devtools" style="margin-left: 40px">
+      Configurable DevTools
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#dynamic-form-element-updates" style="margin-left: 40px">
+      Dynamic Form Element Updates
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#improved-event-delegation" style="margin-left: 40px">
+      Improved Event Delegation
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#bug-fixes" style="margin-left: 20px">
+      Bug Fixes
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#improved" style="margin-left: 20px">
+      Improved
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#migration-guide" style="margin-left: 20px">
+      Migration Guide
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#from-v138-to-v139" style="margin-left: 40px">
+      From v1.3.8 to v1.3.9
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#documentation" style="margin-left: 20px">
+      Documentation
+     </a>
      <a class="sidebar-link sidebar-level-1" href="#release-notes-v138" style="margin-left: 0px">
       Release Notes v1.3.8
      </a>

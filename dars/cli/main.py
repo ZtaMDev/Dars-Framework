@@ -1354,8 +1354,8 @@ def main():
                     "  });\n" +
                     "  Menu.setApplicationMenu(null);\n" +
                     "  win.loadFile(path.join(__dirname, 'app', 'index.html'));\n" +
-                    "  // Open DevTools in development mode\n" +
-                    "  if (process.env.DARS_DEV === '1') {\n" +
+                    "  // Open DevTools in development mode if enabled\n" +
+                    "  if (process.env.DARS_DEV === '1' && process.env.DARS_DEVTOOLS !== '0') {\n" +
                     "    win.webContents.openDevTools();\n" +
                     "  }\n" +
                     "}\n\n" +
@@ -1431,6 +1431,33 @@ def main():
                     "    throw error;\n" +
                     "  }\n" +
                     "});\n\n" +
+                    "ipcMain.handle('dars::FileSystem::list_directory', async (_e, dirPath, pattern = '*', includeSize = false) => {\n" +
+                    "  const resolved = resolvePath(dirPath);\n" +
+                    "  try {\n" +
+                    "    const entries = await fs.readdir(resolved, { withFileTypes: true });\n" +
+                    "    const result = [];\n" +
+                    "    for (const entry of entries) {\n" +
+                    "      // Simple pattern matching (supports * wildcard)\n" +
+                    "      if (pattern !== '*') {\n" +
+                    "        const regex = new RegExp('^' + pattern.replace(/\\*/g, '.*') + '$');\n" +
+                    "        if (!regex.test(entry.name)) continue;\n" +
+                    "      }\n" +
+                    "      const obj = {\n" +
+                    "        name: entry.name,\n" +
+                    "        isDirectory: entry.isDirectory()\n" +
+                    "      };\n" +
+                    "      if (includeSize) {\n" +
+                    "        const stats = await fs.stat(path.join(resolved, entry.name));\n" +
+                    "        obj.size = stats.size;\n" +
+                    "      }\n" +
+                    "      result.push(obj);\n" +
+                    "    }\n" +
+                    "    return result;\n" +
+                    "  } catch (error) {\n" +
+                    "    console.error('Error listing directory:', error);\n" +
+                    "    throw error;\n" +
+                    "  }\n" +
+                    "});\n\n" +
                     "app.on('window-all-closed', function () {\n" +
                     "  if (process.platform !== 'darwin') app.quit();\n" +
                     "});\n", encoding='utf-8')
@@ -1448,7 +1475,8 @@ def main():
                             "    read_text: (...args) => ipcRenderer.invoke('dars::FileSystem::read_text', ...args),\n" +
                             "    write_text: (...args) => ipcRenderer.invoke('dars::FileSystem::write_text', ...args),\n" +
                             "    read_file: (...args) => ipcRenderer.invoke('dars::FileSystem::read_file', ...args),\n" +
-                            "    write_file: (...args) => ipcRenderer.invoke('dars::FileSystem::write_file', ...args)\n" +
+                            "    write_file: (...args) => ipcRenderer.invoke('dars::FileSystem::write_file', ...args),\n" +
+                            "    list_directory: (...args) => ipcRenderer.invoke('dars::FileSystem::list_directory', ...args)\n" +
                             "  }\n" +
                             "});\n" +
                             "// Dev helpers: request graceful shutdown from Python dev launcher\n" +

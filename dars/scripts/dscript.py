@@ -90,3 +90,28 @@ class RawJS:
     
     def __repr__(self):
         return self.code
+
+# Pythonic helper for dScript.ARG access
+class _ArgHelper:
+    """Pythonic wrapper for dScript.ARG to avoid raw JS strings.
+    
+    Usage:
+        Arg.text -> RawJS("dScript.ARG.text")
+        Arg.value -> RawJS("dScript.ARG.value")
+        Arg -> RawJS("dScript.ARG")
+    """
+    def __getattr__(self, name: str):
+        from .rawjs import RawJS
+        return RawJS(f"dScript.ARG.{name}")
+    
+    def __str__(self):
+        return "dScript.ARG"
+    
+    def __repr__(self):
+        return "Arg (dScript.ARG accessor)"
+
+# Singleton instance
+Arg = _ArgHelper()
+
+# Special constant for referencing dScript.ARG in .then() chains
+ARG = "dScript.ARG"

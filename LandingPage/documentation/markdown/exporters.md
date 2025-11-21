@@ -205,7 +205,7 @@ Artifacts will be placed in `dist/`. The desktop source (used for packaging) is 
 You can access native filesystem functions via the `dars.desktop` module:
 
 ```python
-from dars.desktop import read_text, write_text, read_file, write_file
+from dars.desktop import read_text, write_text, read_file, write_file, list_directory, get_value
 from dars.core.state import this
 from dars.scripts.dscript import RawJS, dScript
 ```
@@ -240,6 +240,41 @@ save_btn = Button("Save",
         this().state(text="Saved!", style={"color": "green"})
     )
 )
+```
+
+**Listing Directories**
+```python
+from dars.desktop import list_directory, get_value
+
+# List all files in a directory
+Button("Browse",
+    on_click=list_directory(".").then(
+        this().state(id="file-list", html=RawJS("""
+            value.map(f => {
+                const icon = f.isDirectory ? '📁' : '📄';
+                return `<div>${icon} ${f.name}</div>`;
+            }).join('')
+        """))
+    )
+)
+
+# List with glob pattern filtering
+Button("Python Files",
+    on_click=list_directory(".", "*.py").then(
+        this().state(id="count", text=RawJS("`Found ${value.length} files`"))
+    )
+)
+
+# Dynamic path from input
+Input(id="path", value=".")
+Button("List Directory",
+    on_click=list_directory(get_value("path")).then(
+        this().state(id="output", html=RawJS("value.map(f => f.name).join('<br>')"))
+    )
+)
+
+# Include file sizes (optional)
+list_directory(".", "*", include_size=True)
 ```
 
 **Binary File Operations**
