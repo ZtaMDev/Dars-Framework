@@ -38,7 +38,7 @@ Try dars without installing nothing just visit the [Dars Playground](https://dar
 from dars.all import *
 
 app = App(title="Hello World", theme="dark")
-# Crear componentes
+
 index = Page(
      Text(
         text="Hello World",
@@ -62,7 +62,7 @@ index = Page(
 
     Button(
         text="Click Me!",
-        on_click= dScript("alert('Hello World')"),
+        on_click= alert('Hello from DARS!'),
         style={
             'background-color': '#3498db',
             'color': 'white',
@@ -89,7 +89,6 @@ app.add_page("index", index, title="Hello World", index=True)
 
 if __name__ == "__main__":
     app.rTimeCompile()
-
 ```
 
 ---
