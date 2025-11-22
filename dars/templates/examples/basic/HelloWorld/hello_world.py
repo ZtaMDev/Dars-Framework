@@ -25,9 +25,11 @@ index = Page(
 
     Button(
         text="Click Me!",
-        on_click= dScript("alert('Hello World')"),
-        on_mouse_enter=dScript("this.style.backgroundColor = '#2980b9';"),
-        on_mouse_leave=dScript("this.style.backgroundColor = '#3498db';"),
+        # Modern state updates using this()
+        on_click=[this().state(text="Clicked!", style={'background-color': '#27ae60'}), dScript("alert('Hello World!')")],
+        # Hover effects using this()
+        on_mouse_enter=this().state(style={'background-color': '#2980b9'}),
+        on_mouse_leave=this().state(style={'background-color': '#3498db'}),
         style={
             'background-color': '#3498db',
             'color': 'white',

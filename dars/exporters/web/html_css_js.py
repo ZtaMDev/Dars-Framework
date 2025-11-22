@@ -1865,6 +1865,19 @@ body {
             vdom_dict = {'type': 'Root', 'id': None, 'children': []}
         return json.dumps(vdom_dict, ensure_ascii=False)
 
+    def _collect_component_types(self, component: Component, types_set: set):
+        """Recursively collect all component types used in the tree"""
+        if not component:
+            return
+        
+        # Add current component type
+        types_set.add(component.__class__.__name__)
+        
+        # Recurse children
+        if hasattr(component, 'children') and component.children:
+            for child in component.children:
+                self._collect_component_types(child, types_set)
+
     def generate_javascript(self, app: App, page_root: Component, events_map: Dict[str, Dict[str, Any]] = None) -> str:
         """Genera un runtime modular con eventos integrados directamente en JS"""
         
@@ -1875,6 +1888,79 @@ body {
             
         states_js_code = self._generate_states_js()
         
+        # Collect used component types for conditional logic injection
+        used_types = set()
+        self._collect_component_types(page_root, used_types)
+        
+        # Conditional Default Logic
+        default_logic_js = ""
+        
+        # Tabs Logic
+        if 'Tabs' in used_types:
+            default_logic_js += """
+    // Tabs
+    document.addEventListener('click', function(e) {
+        if (e.target && e.target.matches && e.target.matches('.dars-tab')) {
+            const tabsContainer = e.target.closest('.dars-tabs');
+            if (!tabsContainer) return;
+            const tabIndex = e.target.getAttribute('data-tab');
+            tabsContainer.querySelectorAll('.dars-tab').forEach(t => t.classList.remove('dars-tab-active'));
+            e.target.classList.add('dars-tab-active');
+            tabsContainer.querySelectorAll('.dars-tab-panel').forEach((p, i) => {
+                if (i == tabIndex) p.classList.add('dars-tab-panel-active');
+                else p.classList.remove('dars-tab-panel-active');
+            });
+        }
+    });
+"""
+
+        # Accordion Logic
+        if 'Accordion' in used_types:
+            default_logic_js += """
+    // Accordion
+    document.addEventListener('click', function(e) {
+        if (e.target && e.target.matches && e.target.matches('.dars-accordion-title')) {
+            const section = e.target.closest('.dars-accordion-section');
+            if (section) {
+                section.classList.toggle('dars-accordion-open');
+            }
+        }
+    });
+"""
+
+        # Modal Logic (Close on overlay click)
+        if 'Modal' in used_types:
+            default_logic_js += """
+    // Modal (Close on overlay click)
+    document.addEventListener('click', function(e) {
+        if (e.target && e.target.matches && e.target.matches('.dars-modal')) {
+            // Only close if clicking the overlay itself, not the content
+            // Check if the modal is currently visible (flex/block)
+            const style = window.getComputedStyle(e.target);
+            if (style.display !== 'none') {
+                e.target.style.display = 'none';
+            }
+        }
+    });
+"""
+
+        # Slider Logic (Update displayed value)
+        if 'Slider' in used_types:
+            default_logic_js += """
+    // Slider (Update displayed value)
+    document.addEventListener('input', function(e) {
+        if (e.target && e.target.type === 'range') {
+            const wrapper = e.target.closest('.dars-slider-wrapper');
+            if (wrapper) {
+                const valueDisplay = wrapper.querySelector('.dars-slider-value');
+                if (valueDisplay) {
+                    valueDisplay.textContent = e.target.value;
+                }
+            }
+        }
+    });
+"""
+        
         runtime = f"""// Dars Runtime
     (function(){{
     const eventMap = new Map();
@@ -1883,6 +1969,9 @@ body {
 
     function initializeEvents() {{
     {events_js_code}
+    
+    // --- Default Logic for Advanced Components ---
+    {default_logic_js}
     }}
     
     function initializeStates() {{
@@ -2382,12 +2471,12 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_ ){{ }}
                     # NUEVO: Ejecutar cada handler en su propio contexto
                     if len(valid_handlers) == 1:
                         # Caso único handler - mantener compatibilidad
-                        lines.append(f'    eventMap.get("{comp_id}")["{event_name}"] = (event) => {{')
+                        lines.append(f'    eventMap.get("{comp_id}")["{event_name}"] = function(event) {{')
                         lines.append(f'        try {{ {valid_handlers[0]} }} catch(e) {{ console.error("Error en handler:", e); }}')
                         lines.append(f'    }};')
                     else:
                         # Múltiples handlers - ejecutar cada uno individualmente
-                        lines.append(f'    eventMap.get("{comp_id}")["{event_name}"] = (event) => {{')
+                        lines.append(f'    eventMap.get("{comp_id}")["{event_name}"] = function(event) {{')
                         for i, handler_code in enumerate(valid_handlers):
                             lines.append(f'        // Handler {i+1}')
                             lines.append(f'        try {{ {handler_code} }} catch(e) {{ console.error("Error en handler {i+1}:", e); }}')

@@ -20,7 +20,7 @@ from dars.components.basic.markdown import Markdown
 from dars.components.basic.page import Page
 from dars.components.basic.progressbar import ProgressBar
 from dars.components.basic.radiobutton import RadioButton
-from dars.components.basic.select import Select
+from dars.components.basic.select import Select, SelectOption
 from dars.components.basic.slider import Slider
 from dars.components.basic.spinner import Spinner
 from dars.components.basic.text import Text
@@ -44,6 +44,7 @@ from dars.dars_tests.run_tests import run_app_tests, run_unit_tests, main
 # Exporters (optional, for direct use)
 from dars.exporters.web.html_css_js import HTMLCSSJSExporter
 from dars.scripts.dscript import dScript, RawJS, Arg
+from dars.scripts.utils_ds import showModal, hideModal
 from dars.scripts.script import *
 from dars.version import __version__
 from dars.backend import createComp, deleteComp
@@ -61,5 +62,5 @@ __all__ = [
     '__version__',
     'run_app_tests', 'run_unit_tests', 'main',
     'dState', 'Mod',
-    'createComp', 'deleteComp', 'RawJS', 'this', 'Arg',
+    'createComp', 'deleteComp', 'RawJS', 'this', 'Arg', 'SelectOption', 'showModal', 'hideModal',
 ]

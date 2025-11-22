@@ -1,3 +1,23 @@
+# Release Notes v1.4.0
+
+> Simple Template update.
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+or
+
+```bash
+pip install dars-framework==1.4.0
+```
+
+## Notes:
+
+All advanced and basic templates are now updated using the new features.
+
 # Release Notes v1.3.9
 
 > Desktop File System API, Pythonic Arg helper, keyboard event filtering, and comprehensive template synchronization. Major enhancements to desktop capabilities with improved developer experience.

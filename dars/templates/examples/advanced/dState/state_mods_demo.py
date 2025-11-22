@@ -11,7 +11,7 @@ counter_text = Text("0", id="Counter", style={
 status_text = Text("State: 0", id="Status", style={'margin-bottom': '16px'})
 
 # Define a state bound to the counter_text element
-counter = dState("counter", component=counter_text, states=[0,1,2,3])
+counter = dState("counter", component=counter_text, states=[0,1,2,3,4])
 
 # cState rules (compact Mod specs)
 # - When entering state 1: increment text by +1
@@ -29,10 +29,12 @@ counter.cState(3, mods=[
     Mod.toggle_class(counter_text, name='highlight', on=None),
     Mod.append_text(counter_text, value='!'),
     # Prepare status to show state 0 upon auto-cycle (state 0 is immutable, no rules)
+    Mod.set(status_text, text='State: 3'),
+])
+counter.cState(4, mods=[
+    Mod.call(counter, state=0),
     Mod.set(status_text, text='State: 0'),
 ])
-# Auto-cycle back to 0 after applying state 3 mods
-counter.cState(3).goto(0)
 
 # Controls
 inc_btn = Button("Next (+1)", id="NextBtn", on_click=counter.state(goto='+1'))

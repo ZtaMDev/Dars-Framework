@@ -36,6 +36,9 @@ class Modal(Component):
             modal_style += f'; {self.render_styles(self.style)}'
         attrs.append(f'style="{modal_style}"')
         
+        if self.id:
+            attrs.append(f'id="{self.id}"')
+        
         return f'''<div {" ".join(attrs)}>
             <div class="dars-modal-content" style="background: white; padding: 20px; border-radius: 8px; max-width: 500px; width: 90%;">
                 {title_html}

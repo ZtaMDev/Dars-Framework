@@ -28,6 +28,9 @@ class Card(Component):
         else: attrs.append('class="dars-card"')
         if self.style: attrs.append(f'style="{self.render_styles(self.style)}"')
         
+        if self.id:
+            attrs.append(f'id="{self.id}"')
+        
         return f'<div {" ".join(attrs)}>{title_html}{children_html}</div>'
 
 

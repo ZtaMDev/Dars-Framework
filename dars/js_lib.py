@@ -338,10 +338,13 @@ function _resolveGoto(cur, goto, statesLen){{
   if(goto == null) return cur;
   if(typeof goto === 'number') return goto;
   if(typeof goto === 'string'){{
-    if(/^[-+]\\\\d+$/.test(goto)){{
+    if(/^[-+]\\d+$/.test(goto)){{
       const delta = parseInt(goto, 10);
       const next = cur + delta;
-      if(statesLen && statesLen > 0){{ return Math.max(0, Math.min(statesLen-1, next)); }}
+      if(statesLen && statesLen > 0){{ 
+        // Implement wrapping (modulo arithmetic)
+        return (next % statesLen + statesLen) % statesLen;
+      }}
       return next;
     }}
     const n = parseInt(goto, 10);
@@ -423,7 +426,11 @@ function change(opt){{
     const len = Array.isArray(st.states) ? st.states.length : 0;
     if(goto !== null){{ targetState = _resolveGoto(cur, goto, len); }}
     if(targetState === null){{ targetState = cur; }}
+    
+    // Prevent infinite loops if targetState is same as current and no goto logic involved
+    // But here we might want to re-apply rules if forced.
     st.current = targetState;
+    
     const rules = st.rules && st.rules[String(targetState)];
     if(targetState === 0){{
       _restoreDefault(st.id, st.__defaultSnapshot);
@@ -432,7 +439,12 @@ function change(opt){{
       if(Array.isArray(rules.mods)){{ _applyMods(st.id, rules.mods); }}
       if(rules.hasOwnProperty('goto')){{
         const nxt = _resolveGoto(st.current, rules.goto, len);
-        if(nxt !== st.current){{ st.current = nxt; }}
+        if(nxt !== st.current){{ 
+            // Recursive transition via setTimeout to allow render cycle to complete
+            setTimeout(() => {{
+                change({{ id: opt.id, name: name, state: nxt }});
+            }}, 0);
+        }}
       }}
     }}
   }}

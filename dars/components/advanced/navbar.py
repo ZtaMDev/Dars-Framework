@@ -40,5 +40,8 @@ class Navbar(Component):
             navbar_style += f'; {self.render_styles(self.style)}'
         attrs.append(f'style="{navbar_style}"')
         
+        if self.id:
+            attrs.append(f'id="{self.id}"')
+        
         return f'<nav {" ".join(attrs)}>{brand_html}<div class="dars-navbar-nav">{children_html}</div></nav>'
 

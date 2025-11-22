@@ -1,5 +1,3 @@
-from dars.core.app import App
-from dars.components.basic import Container, Text, Button
 import os
 from dars.all import *
 
@@ -26,7 +24,11 @@ app = App(
 
 app.root = Container(
     Text(text="¡Bienvenido a la PWA con iconos personalizados!"),
-    Button(text="Haz clic aquí", on_click=dScript("alert('¡Botón de ejemplo!')")),
+    Button(
+        text="Haz clic aquí", 
+        on_click=this().state(text="¡Gracias!", style={'background-color': '#2ecc71', 'color': 'white'}),
+        style={'padding': '10px 20px', 'border-radius': '5px', 'border': '1px solid #ccc'}
+    ),
 )
 
 if __name__ == '__main__':

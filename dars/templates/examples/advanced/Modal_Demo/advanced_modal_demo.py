@@ -1,43 +1,34 @@
 from dars.all import *
-from dars.scripts.script import *
+from dars.core.state import this
+from dars.scripts.dscript import dScript
+
 # Crear la aplicación
 app = App(title="Mi App con Navbar Funcional")
-app.add_script(InlineScript('''
-document.addEventListener('DOMContentLoaded', function() {
-        var modal = document.getElementById('modal-demo');
-        var btnAbrir = document.getElementById('btn-abrir-modal');
-        var btnCerrar = document.getElementById('btn-cerrar-modal');
-        if (modal && btnAbrir && btnCerrar) {
-            btnAbrir.addEventListener('click', function() {
-                if (modal.getAttribute('data-enabled') === 'true') {
-                    modal.style.display = 'flex';
-                    modal.classList.remove('dars-modal-hidden');
-                    modal.removeAttribute('hidden');
-                }
-            });
-            btnCerrar.addEventListener('click', function() {
-                modal.style.display = 'none';
-                modal.classList.add('dars-modal-hidden');
-                modal.setAttribute('hidden', '');
-            });
-            // Ocultar modal por defecto al cargar
-            modal.style.display = 'none';
-            modal.classList.add('dars-modal-hidden');
-            modal.setAttribute('hidden', '');
-        }
-});
-    '''))
+
 # Función para crear el navbar (reutilizable en todas las páginas)
 def crear_navbar():
-    home_link = Link(text="Inicio", href="/", style={"color": "white", "text-decoration": "none", "margin-right": "20px", "padding": "10px 15px", "border-radius": "5px"})
-    about_link = Link(text="Acerca de", href="/about.html", style={"color": "white", "text-decoration": "none", "margin-right": "20px", "padding": "10px 15px", "border-radius": "5px"})
-    contact_link = Link(text="Contacto", href="/contact.html", style={"color": "white", "text-decoration": "none", "margin-right": "20px", "padding": "10px 15px", "border-radius": "5px"})
+    nav_style = {
+        "color": "white", 
+        "text-decoration": "none", 
+        "margin-right": "20px", 
+        "padding": "10px 15px", 
+        "border-radius": "5px",
+        "transition": "all 0.3s ease"
+    }
+    nav_hover = {
+        "background-color": "rgba(255,255,255,0.2)",
+        "transform": "translateY(-2px)"
+    }
+    
+    home_link = Link(text="Inicio", href="/", style=nav_style, hover_style=nav_hover)
+    about_link = Link(text="Acerca de", href="/about.html", style=nav_style, hover_style=nav_hover)
+    contact_link = Link(text="Contacto", href="/contact.html", style=nav_style, hover_style=nav_hover)
     
     return Navbar(
         home_link, 
         about_link, 
         contact_link,
-        brand="🚀 DarsApp",
+        brand="DarsApp",
         style={
             "background": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
             "padding": "15px 30px",
@@ -48,7 +39,7 @@ def crear_navbar():
 # PÁGINA DE INICIO
 home_content = Container(
     Text(
-        text="¡Bienvenido a DarsApp!",
+        text="Bienvenido a DarsApp",
         style={
             "font-size": "3rem",
             "color": "#2c3e50",
@@ -70,18 +61,27 @@ home_content = Container(
     # --- COMPONENTES AVANZADOS DEMO ---
     Card([
         Text(text="Este es un Card avanzado con hijos", style={"margin-bottom": "10px"}),
-        Link(text="Ir a Contacto", href="/contact.html", style={"color": "#667eea"})
+        Link(text="Ir a Contacto", href="/contact.html", style={"color": "#667eea", "text-decoration": "none"}, hover_style={"text-decoration": "underline"})
     ], title="Demo Card", style={"margin": "30px auto", "max-width": "400px"}),
 
     # --- Modal con botón para cerrar ---
     Modal([
-        Text(text="¡Este es el contenido de un Modal avanzado!", style={"text-align": "center"}),
-        Button(text="Cerrar Modal", id="btn-cerrar-modal", style={"margin": "20px auto 0 auto", "display": "block"})
+        Text(text="Este es el contenido de un Modal avanzado", style={"text-align": "center"}),
+        Button(
+            text="Cerrar Modal", 
+            id="btn-cerrar-modal", 
+            style={"margin": "20px auto 0 auto", "display": "block", "background": "#e74c3c", "color": "white", "border": "none", "padding": "10px 20px", "border-radius": "5px", "cursor": "pointer"},
+            hover_style={"background": "#c0392b"},
+            on_click=hideModal(id="modal-demo")
+        )
     ], title="Demo Modal", is_open=False, id="modal-demo", style={"margin": "30px auto"}),
+    
     Button(
         text="Mostrar Modal",
         id="btn-abrir-modal",
-        style={"margin": "20px 0", "padding": "10px 20px", "background": "#667eea", "color": "white", "border": "none", "border-radius": "5px"}
+        style={"margin": "20px 0", "padding": "10px 20px", "background": "#667eea", "color": "white", "border": "none", "border-radius": "5px", "cursor": "pointer"},
+        hover_style={"background": "#5a6fd6", "transform": "translateY(-2px)"},
+        on_click=showModal(id="modal-demo")
     ),
 
     Tabs(
@@ -117,6 +117,12 @@ home_content = Container(
         ],
         style={"margin": "30px auto", "max-width": "400px"}
     ),
+    
+    style={
+        "display": "flex",
+        "flex-direction": "column",
+        "align-items": "center"
+    }
 )
 
 home_page = Page(
@@ -196,7 +202,7 @@ contact_content = Container(
         }
     ),
     Text(
-        text="📧 Información de Contacto",
+        text="Información de Contacto",
         style={
             "font-size": "1.8rem",
             "color": "#34495e",
@@ -256,15 +262,6 @@ app.add_global_style(selector="body", styles={
     "font-family": "Arial, sans-serif"
 })
 
-app.add_global_style(selector="a", styles={
-    "transition": "all 0.3s ease"
-})
-
-app.add_global_style(selector="a:hover", styles={
-    "background-color": "rgba(255,255,255,0.2) !important",
-    "transform": "translateY(-2px)"
-})
-
 # Agregar todas las páginas a la aplicación
 app.add_page(name="index", root=home_page, index=True)
 app.add_page(name="about", root=about_page)
@@ -272,4 +269,3 @@ app.add_page(name="contact", root=contact_page)
 
 if __name__ == "__main__":
     app.rTimeCompile()  # Preview en vivo
-
