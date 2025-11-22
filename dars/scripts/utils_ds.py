@@ -2,16 +2,15 @@
 from dars.scripts.dscript import dScript
 
 
+# ============= Modal Utilities =============
+
 def showModal(id: str) -> dScript:
     """
     Returns a dScript that shows a Dars Modal component.
     
     Args:
         id: The ID of the modal component to show
-        
-    Returns:
-        dScript object that removes hidden attributes and displays the modal
-        
+             
     Example:
         Button("Open Modal", on_click=showModal(id="my-modal"))
     """
@@ -26,11 +25,453 @@ def hideModal(id: str) -> dScript:
     Args:
         id: The ID of the modal component to hide
         
-    Returns:
-        dScript object that adds hidden attributes and hides the modal
-        
     Example:
         Button("Close Modal", on_click=hideModal(id="my-modal"))
     """
     code = f"const m = document.getElementById('{id}'); m.setAttribute('hidden', ''); m.classList.add('dars-modal-hidden'); m.style.display = 'none';"
     return dScript(code)
+
+
+# ============= Navigation Utilities =============
+
+def goTo(href: str) -> dScript:
+    """
+    Navigate to a URL in the current tab.
+    
+    Args:
+        href: The URL to navigate to
+        
+    Example:
+        Button("Go Home", on_click=goTo(href="/"))
+    """
+    code = f"window.location.href = '{href}';"
+    return dScript(code)
+
+
+def goToNew(href: str) -> dScript:
+    """
+    Open a URL in a new tab.
+    
+    Args:
+        href: The URL to open in a new tab
+        
+    Example:
+        Button("Open in New Tab", on_click=goToNew(href="https://example.com"))
+    """
+    code = f"window.open('{href}', '_blank');"
+    return dScript(code)
+
+
+def reload() -> dScript:
+    """
+    Reload the current page.
+    
+    Example:
+        Button("Refresh", on_click=reload())
+    """
+    return dScript("window.location.reload();")
+
+
+def goBack() -> dScript:
+    """
+    Navigate back in browser history.
+    
+    Example:
+        Button("Back", on_click=goBack())
+    """
+    return dScript("window.history.back();")
+
+
+def goForward() -> dScript:
+    """
+    Navigate forward in browser history.
+    
+    Example:
+        Button("Forward", on_click=goForward())
+    """
+    return dScript("window.history.forward();")
+
+
+# ============= Alert & Console Utilities =============
+
+def alert(message: str) -> dScript:
+    """
+    Show a browser alert dialog.
+    
+    Args:
+        message: The message to display
+        
+    Example:
+        Button("Alert", on_click=alert(message="Hello World!"))
+    """
+    # Escape single quotes in message
+    escaped_message = message.replace("'", "\\'")
+    return dScript(f"alert('{escaped_message}');")
+
+
+def confirm(message: str, on_ok: str = "", on_cancel: str = "") -> dScript:
+    """
+    Show a browser confirm dialog with optional callbacks.
+    
+    Args:
+        message: The message to display
+        on_ok: JavaScript code to execute if user clicks OK
+        on_cancel: JavaScript code to execute if user clicks Cancel
+        
+    Example:
+        Button("Delete", on_click=confirm(
+            message="Are you sure?",
+            on_ok="console.log('Deleted')",
+            on_cancel="console.log('Cancelled')"
+        ))
+    """
+    escaped_message = message.replace("'", "\\'")
+    if on_ok or on_cancel:
+        code = f"if (confirm('{escaped_message}')) {{ {on_ok} }} else {{ {on_cancel} }}"
+    else:
+        code = f"confirm('{escaped_message}');"
+    return dScript(code)
+
+
+def log(message: str) -> dScript:
+    """
+    Log a message to the browser console.
+    
+    Args:
+        message: The message to log
+        
+    Example:
+        Button("Log", on_click=log(message="Button clicked"))
+    """
+    escaped_message = message.replace("'", "\\'")
+    return dScript(f"console.log('{escaped_message}');")
+
+
+# ============= DOM Manipulation Utilities =============
+
+def show(id: str) -> dScript:
+    """
+    Show an element by setting display to block.
+    
+    Args:
+        id: The ID of the element to show
+        
+    Example:
+        Button("Show", on_click=show(id="my-element"))
+    """
+    return dScript(f"document.getElementById('{id}').style.display = 'block';")
+
+
+def hide(id: str) -> dScript:
+    """
+    Hide an element by setting display to none.
+    
+    Args:
+        id: The ID of the element to hide
+        
+    Example:
+        Button("Hide", on_click=hide(id="my-element"))
+    """
+    return dScript(f"document.getElementById('{id}').style.display = 'none';")
+
+
+def toggle(id: str) -> dScript:
+    """
+    Toggle an element's visibility.
+    
+    Args:
+        id: The ID of the element to toggle
+        
+    Example:
+        Button("Toggle", on_click=toggle(id="my-element"))
+    """
+    code = f"const el = document.getElementById('{id}'); el.style.display = el.style.display === 'none' ? 'block' : 'none';"
+    return dScript(code)
+
+
+def setText(id: str, text: str) -> dScript:
+    """
+    Set the text content of an element.
+    
+    Args:
+        id: The ID of the element
+        text: The new text content
+        
+    Example:
+        Button("Update", on_click=setText(id="status", text="Done!"))
+    """
+    escaped_text = text.replace("'", "\\'")
+    return dScript(f"document.getElementById('{id}').textContent = '{escaped_text}';")
+
+
+def addClass(id: str, class_name: str) -> dScript:
+    """
+    Add a CSS class to an element.
+    
+    Args:
+        id: The ID of the element
+        class_name: The class name to add
+        
+    Example:
+        Button("Highlight", on_click=addClass(id="text", class_name="highlight"))
+    """
+    return dScript(f"document.getElementById('{id}').classList.add('{class_name}');")
+
+
+def removeClass(id: str, class_name: str) -> dScript:
+    """
+    Remove a CSS class from an element.
+    
+    Args:
+        id: The ID of the element
+        class_name: The class name to remove
+        
+    Example:
+        Button("Remove", on_click=removeClass(id="text", class_name="highlight"))
+    """
+    return dScript(f"document.getElementById('{id}').classList.remove('{class_name}');")
+
+
+def toggleClass(id: str, class_name: str) -> dScript:
+    """
+    Toggle a CSS class on an element.
+    
+    Args:
+        id: The ID of the element
+        class_name: The class name to toggle
+        
+    Example:
+        Button("Toggle", on_click=toggleClass(id="text", class_name="active"))
+    """
+    return dScript(f"document.getElementById('{id}').classList.toggle('{class_name}');")
+
+
+# ============= Scroll Utilities =============
+
+def scrollTo(x: int = 0, y: int = 0) -> dScript:
+    """
+    Scroll the window to a specific position.
+    
+    Args:
+        x: Horizontal scroll position in pixels
+        y: Vertical scroll position in pixels
+        
+    Example:
+        Button("Top", on_click=scrollTo(x=0, y=0))
+    """
+    return dScript(f"window.scrollTo({x}, {y});")
+
+
+def scrollToTop() -> dScript:
+    """
+    Scroll to the top of the page smoothly.
+    
+    Example:
+        Button("To Top", on_click=scrollToTop())
+    """
+    return dScript("window.scrollTo({ top: 0, behavior: 'smooth' });")
+
+
+def scrollToBottom() -> dScript:
+    """
+    Scroll to the bottom of the page smoothly.
+    
+    Example:
+        Button("To Bottom", on_click=scrollToBottom())
+    """
+    return dScript("window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });")
+
+
+def scrollToElement(id: str) -> dScript:
+    """
+    Scroll to a specific element smoothly.
+    
+    Args:
+        id: The ID of the element to scroll to
+        
+    Example:
+        Button("Go to Section", on_click=scrollToElement(id="section-2"))
+    """
+    return dScript(f"document.getElementById('{id}').scrollIntoView({{ behavior: 'smooth' }});")
+
+
+# ============= Form Utilities =============
+
+def submitForm(form_id: str) -> dScript:
+    """
+    Submit a form programmatically.
+    
+    Args:
+        form_id: The ID of the form to submit
+        
+    Example:
+        Button("Submit", on_click=submitForm(form_id="my-form"))
+    """
+    return dScript(f"document.getElementById('{form_id}').submit();")
+
+
+def resetForm(form_id: str) -> dScript:
+    """
+    Reset a form to its initial values.
+    
+    Args:
+        form_id: The ID of the form to reset
+        
+    Example:
+        Button("Reset", on_click=resetForm(form_id="my-form"))
+    """
+    return dScript(f"document.getElementById('{form_id}').reset();")
+
+
+def getValue(input_id: str, target_id: str) -> dScript:
+    """
+    Get the value from an input and set it to another element.
+    
+    Args:
+        input_id: The ID of the input element
+        target_id: The ID of the element to update
+        
+    Example:
+        Button("Copy", on_click=getValue(input_id="input1", target_id="output"))
+    """
+    code = f"document.getElementById('{target_id}').textContent = document.getElementById('{input_id}').value;"
+    return dScript(code)
+
+
+def clearInput(input_id: str) -> dScript:
+    """
+    Clear an input field.
+    
+    Args:
+        input_id: The ID of the input to clear
+        
+    Example:
+        Button("Clear", on_click=clearInput(input_id="search"))
+    """
+    return dScript(f"document.getElementById('{input_id}').value = '';")
+
+
+# ============= Storage Utilities =============
+
+def saveToLocal(key: str, value: str) -> dScript:
+    """
+    Save a value to localStorage.
+    
+    Args:
+        key: The storage key
+        value: The value to store
+        
+    Example:
+        Button("Save", on_click=saveToLocal(key="username", value="john"))
+    """
+    escaped_value = value.replace("'", "\\'")
+    return dScript(f"localStorage.setItem('{key}', '{escaped_value}');")
+
+
+def loadFromLocal(key: str, target_id: str) -> dScript:
+    """
+    Load a value from localStorage and display it.
+    
+    Args:
+        key: The storage key
+        target_id: The ID of the element to update with the value
+        
+    Example:
+        Button("Load", on_click=loadFromLocal(key="username", target_id="display"))
+    """
+    code = f"const val = localStorage.getItem('{key}'); if (val) document.getElementById('{target_id}').textContent = val;"
+    return dScript(code)
+
+
+def removeFromLocal(key: str) -> dScript:
+    """
+    Remove a value from localStorage.
+    
+    Args:
+        key: The storage key to remove
+        
+    Example:
+        Button("Clear Storage", on_click=removeFromLocal(key="username"))
+    """
+    return dScript(f"localStorage.removeItem('{key}');")
+
+
+def clearLocalStorage() -> dScript:
+    """
+    Clear all localStorage data.
+    
+    Example:
+        Button("Clear All", on_click=clearLocalStorage())
+    """
+    return dScript("localStorage.clear();")
+
+
+# ============= Clipboard Utilities =============
+
+def copyToClipboard(text: str) -> dScript:
+    """
+    Copy text to clipboard.
+    
+    Args:
+        text: The text to copy
+        
+    Example:
+        Button("Copy", on_click=copyToClipboard(text="Hello World"))
+    """
+    escaped_text = text.replace("'", "\\'")
+    return dScript(f"navigator.clipboard.writeText('{escaped_text}').catch(err => console.error('Copy failed:', err));")
+
+
+def copyElementText(id: str) -> dScript:
+    """
+    Copy the text content of an element to clipboard.
+    
+    Args:
+        id: The ID of the element whose text to copy
+        
+    Example:
+        Button("Copy Code", on_click=copyElementText(id="code-block"))
+    """
+    code = f"const text = document.getElementById('{id}').textContent; navigator.clipboard.writeText(text).catch(err => console.error('Copy failed:', err));"
+    return dScript(code)
+
+
+# ============= Focus Utilities =============
+
+def focus(id: str) -> dScript:
+    """
+    Set focus on an element.
+    
+    Args:
+        id: The ID of the element to focus
+        
+    Example:
+        Button("Focus Input", on_click=focus(id="search-input"))
+    """
+    return dScript(f"document.getElementById('{id}').focus();")
+
+
+def blur(id: str) -> dScript:
+    """
+    Remove focus from an element.
+    
+    Args:
+        id: The ID of the element to blur
+        
+    Example:
+        Button("Blur", on_click=blur(id="input"))
+    """
+    return dScript(f"document.getElementById('{id}').blur();")
+
+def setTimeout(delay: int, code: dScript) -> dScript:
+    """
+    Set a timeout to execute a script after a delay.
+    
+    Args:
+        code: The script to execute
+        delay: The delay in milliseconds
+        
+    Example:
+        Button("Delayed Action", on_click=setTimeout(code=alert('Delayed!'), delay=2000))
+    """
+    return dScript(f"setTimeout(() => {{ {code.code} }}, {delay});")

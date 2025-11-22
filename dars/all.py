@@ -44,11 +44,11 @@ from dars.dars_tests.run_tests import run_app_tests, run_unit_tests, main
 # Exporters (optional, for direct use)
 from dars.exporters.web.html_css_js import HTMLCSSJSExporter
 from dars.scripts.dscript import dScript, RawJS, Arg
-from dars.scripts.utils_ds import showModal, hideModal
+from dars.scripts.utils_ds import showModal, hideModal, goTo, goToNew, reload, goBack, goForward, alert, confirm, log, show, hide, toggle, addClass, removeClass, toggleClass, scrollTo, scrollToTop, scrollToBottom, scrollToElement, submitForm, resetForm, getValue, clearInput, saveToLocal, loadFromLocal, removeFromLocal, clearLocalStorage, copyToClipboard, copyElementText, focus, blur, setText, setTimeout
 from dars.scripts.script import *
 from dars.version import __version__
 from dars.backend import createComp, deleteComp
-
+from dars.backend import updateComp
 # from dars.core.properties import *
 
 __all__ = [
@@ -62,5 +62,25 @@ __all__ = [
     '__version__',
     'run_app_tests', 'run_unit_tests', 'main',
     'dState', 'Mod',
-    'createComp', 'deleteComp', 'RawJS', 'this', 'Arg', 'SelectOption', 'showModal', 'hideModal',
+    'createComp', 'deleteComp', 'updateComp', 'RawJS', 'this', 'Arg', 'SelectOption', 
+    # Modal utilities
+    'showModal', 'hideModal',
+    # Navigation utilities
+    'goTo', 'goToNew', 'reload', 'goBack', 'goForward',
+    # Alert & console utilities
+    'alert', 'confirm', 'log',
+    # DOM manipulation utilities
+    'show', 'hide', 'toggle', 'addClass', 'removeClass', 'toggleClass', 'setText',
+    # Scroll utilities
+    'scrollTo', 'scrollToTop', 'scrollToBottom', 'scrollToElement',
+    # Form utilities
+    'submitForm', 'resetForm', 'getValue', 'clearInput',
+    # Storage utilities
+    'saveToLocal', 'loadFromLocal', 'removeFromLocal', 'clearLocalStorage',
+    # Clipboard utilities
+    'copyToClipboard', 'copyElementText',
+    # Focus utilities
+    'focus', 'blur',
+    # Timer utilities
+    'setTimeout',
 ]

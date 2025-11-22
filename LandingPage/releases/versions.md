@@ -1,3 +1,39 @@
+# Release Notes v1.4.2
+
+> New utility dScript functions added to `utils_ds` for enhanced client-side interactions.
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+or
+
+```bash
+pip install dars-framework==1.4.2
+```
+
+## What's New
+
+### Utility Functions (`utils_ds`)
+
+- `setTimeout(delay: int, code: dScript)`: Execute a dScript after a delay (ms).
+- `setText(id: str, text: str)`: Set the text content of an element.
+- `showModal(id: str)`, `hideModal(id: str)`: Modal visibility helpers.
+- `goTo(href: str)`, `goToNew(href: str)`, `reload()`, `goBack()`, `goForward()`: Navigation utilities.
+- `alert(message: str)`, `confirm(message: str, on_ok: str = "", on_cancel: str = "")`, `log(message: str)`: Alert & console utilities.
+- `show(id: str)`, `hide(id: str)`, `toggle(id: str)`, `addClass(id: str, class_name: str)`, `removeClass(id: str, class_name: str)`, `toggleClass(id: str, class_name: str)`: DOM manipulation utilities.
+- `scrollTo(x: int = 0, y: int = 0)`, `scrollToTop()`, `scrollToBottom()`, `scrollToElement(id: str)`: Scroll utilities.
+- `submitForm(form_id: str)`, `resetForm(form_id: str)`, `getValue(input_id: str, target_id: str)`, `clearInput(input_id: str)`: Form utilities.
+- `saveToLocal(key: str, value: str)`, `loadFromLocal(key: str, target_id: str)`, `removeFromLocal(key: str)`, `clearLocalStorage()`: Storage utilities.
+- `copyToClipboard(text: str)`, `copyElementText(id: str)`: Clipboard utilities.
+- `focus(id: str)`, `blur(id: str)`: Focus utilities.
+
+These functions are documented in `https://ztamdev.github.io/Dars-Framework/docs.html#dars-script-system` and for states in `https://ztamdev.github.io/Dars-Framework/docs.html#state-management-in-dars-dstate-cstate-goto-mods`.
+
+---
+
 # Release Notes v1.4.1
 
 > SEO and Apple device optimizations. Enhanced metadata generation with automatic MIME type detection for favicons and comprehensive iOS/Safari support.

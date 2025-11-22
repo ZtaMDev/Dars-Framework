@@ -55,6 +55,7 @@ def create_hero():
         Container(
             Container(
                 Text(
+                    id="pip-command-text",
                     text="pip install dars framework",
                     style={
                         "font-family": "monospace",
@@ -72,7 +73,20 @@ def create_hero():
                 ),
                 Button(
                     text="Copy",
-                    on_click="copyPipCommand()",
+                    on_click=[
+                        copyElementText("pip-command-text"),
+                        this().state(text="Copied!", style={
+                            "background": "linear-gradient(135deg, #38c49f 0%, #2a6b5b 100%) !important"
+                            }
+                        ),
+                        setTimeout(1000, this().state(
+                            text="Copy", 
+                            style={
+                                "background": "linear-gradient(135deg, #1d4a3f 0%, #2a6b5b 100%) !important"
+                                }
+                            )
+                        )
+                    ],
                     style={
                         "background": "rgba(20, 30, 27, 0.9)",
                         "border": "1px solid rgba(100,255,200,0.3)",
@@ -119,7 +133,7 @@ def create_hero():
         Button(
             text="Get Started",
             id="get-started-btn",
-            on_click="openDocs()",
+            on_click=goToNew("https://ztamdev.github.io/Dars-Framework/docs.html"),
             style={
                 "margin-top": "25px",
                 "margin-bottom": "20px",

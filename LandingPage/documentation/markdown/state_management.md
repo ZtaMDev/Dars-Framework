@@ -97,7 +97,7 @@ swap_btn = Button(
 - `change({...})` resolves `goto`, updates `current`, applies `rules[<state>].mods` and optional `rules[<state>].goto` (single hop), then dispatches a `CustomEvent('dars:state', ...)`.
 
 ## Best practices
-
+-
 - Keep the label text purely numeric if you plan to use `inc/dec` on `text`.
 - Use `goto` in rules to avoid infinite accumulation when staying at the same state.
 - Prefer `mods` for small changes; use `cComp=True` only when you need full HTML replacement.
@@ -181,29 +181,25 @@ app = App(title="Dynamic Updates Demo", desktop=True)
 app.set_root(Container(display, read_btn, write_btn, counter, inc_btn))
 ```
 
-### Targeting Other Components
+### Targeting Other Components with `updateComp`
 
-While `this()` refers to the clicked component, you can target other components by using a manual update helper:
+While `this()` refers to the clicked component, you can target other components by using the `updateComp` helper from `dars.backend` (exported in `dars.all`).
 
 ```python
-def update_component(target_id, **kwargs):
-    """Update a specific component by ID"""
-    import json
-    from dars.scripts.dscript import RawJS
-    
-    parts = [f"id: '{target_id}'", "dynamic: true"]
-    for k, v in kwargs.items():
-        if isinstance(v, RawJS):
-            parts.append(f"{k}: {v.code}")
-        else:
-            parts.append(f"{k}: {json.dumps(v)}")
-    payload = ", ".join(parts)
-    return dScript(code=f"if(window.Dars && window.Dars.change) window.Dars.change({{{payload}}});")
+from dars.all import updateComp
 
 # Read file and update a different component
 btn = Button("Load to Display",
     on_click=read_text("data.txt").then(
-        update_component("display", text=RawJS(dScript.ARG))
+        updateComp("display", text=RawJS(dScript.ARG))
+    )
+)
+
+# Update multiple properties of another component
+btn2 = Button("Style It",
+    on_click=updateComp("display", 
+        style={"color": "blue", "fontWeight": "bold"},
+        text="Styled!"
     )
 )
 ```

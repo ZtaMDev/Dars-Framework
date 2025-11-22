@@ -28,7 +28,7 @@ counter.cState(2, mods=[
 counter.cState(3, mods=[
     Mod.toggle_class(counter_text, name='highlight', on=None),
     Mod.append_text(counter_text, value='!'),
-    # Prepare status to show state 0 upon auto-cycle (state 0 is immutable, no rules)
+    # Prepare status to show state 0 upon auto-cycle
     Mod.set(status_text, text='State: 3'),
 ])
 counter.cState(4, mods=[

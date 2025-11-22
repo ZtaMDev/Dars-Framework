@@ -86,3 +86,58 @@ def createComp(target: Union[Component, Any], root: Union[str, Component], posit
         "})(); }catch(e){ console.error(e); }"
     )
     return dScript(code=code)
+
+
+def updateComp(target: Union[str, Component], **kwargs) -> dScript:
+    """
+    Update a component's state/properties by ID or reference.
+    
+    Args:
+        target: Component instance or string ID
+        **kwargs: Properties to update (text, style, class_name, etc.)
+    """
+    # Resolve ID
+    if hasattr(target, 'id') and target.id:
+        target_id = target.id
+    else:
+        target_id = str(target)
+        
+    # Build payload similar to this().state()
+    parts = [f"id: '{target_id}'", "dynamic: true"]
+    
+    for k, v in kwargs.items():
+        if isinstance(v, dScript): # Use dScript instead of RawJS if imported differently, but RawJS is safer check if available
+            parts.append(f"{k}: {v.code}")
+        elif hasattr(v, 'code'): # Generic check for script objects
+             parts.append(f"{k}: {v.code}")
+        elif k == 'style' and isinstance(v, dict):
+            parts.append(f"style: {json.dumps(v)}")
+        elif k == 'attrs' and isinstance(v, dict):
+            parts.append(f"attrs: {json.dumps(v)}")
+        elif k == 'classes' and isinstance(v, dict):
+            parts.append(f"classes: {json.dumps(v)}")
+        else:
+            parts.append(f"{k}: {json.dumps(v)}")
+            
+    payload = ", ".join(parts)
+    
+    # Generate JS code
+    code = (
+        "(async () => {"
+        "  try {"
+        "    let ch = window.__DARS_CHANGE_FN;"
+        "    if (!ch) {"
+        "      if (window.Dars && typeof window.Dars.change === 'function') {"
+        "        ch = window.Dars.change.bind(window.Dars);"
+        "      } else {"
+        "        const m = await import('./lib/dars.min.js');"
+        "        ch = (m.change || (m.default && m.default.change));"
+        "      }"
+        "      if (typeof ch === 'function') window.__DARS_CHANGE_FN = ch;"
+        "    }"
+        f"    if (typeof ch === 'function') ch({{{payload}}});"
+        "  } catch (e) { /* noop */ }"
+        "})();"
+    )
+    
+    return dScript(code=' '.join(code.split()))

@@ -609,5 +609,112 @@ document.addEventListener(\'DOMContentLoaded\', function() {
 app = App(title="Form with Script")
 app.set_root(form)
 app.add_script(form_script)
+```
 
+## Utility Scripts (`utils_ds`)
 
+Dars provides a collection of utility functions in `dars.scripts.utils_ds` (exported in `dars.all`) that return pre-configured `dScript` objects for common tasks. These allow you to implement interactivity without writing raw JavaScript.
+
+### Navigation
+
+- `goTo(href)`: Navigate to a URL in the current tab.
+- `goToNew(href)`: Open a URL in a new tab.
+- `reload()`: Reload the current page.
+- `goBack()`: Navigate back in browser history.
+- `goForward()`: Navigate forward in browser history.
+
+```python
+Button("Home", on_click=goTo("/"))
+Button("Docs", on_click=goToNew("https://docs.dars.dev"))
+```
+
+### DOM Manipulation
+
+- `show(id)`: Show an element (display: block).
+- `hide(id)`: Hide an element (display: none).
+- `toggle(id)`: Toggle visibility.
+- `setText(id, text)`: Set text content.
+- `addClass(id, class_name)`: Add a CSS class.
+- `removeClass(id, class_name)`: Remove a CSS class.
+- `toggleClass(id, class_name)`: Toggle a CSS class.
+
+```python
+Button("Show Details", on_click=show("details-panel"))
+Button("Toggle Theme", on_click=toggleClass("app-root", "dark-mode"))
+```
+
+### Timeouts
+
+- `setTimeout(delay, code)`: Set a timeout to execute a script after a delay.
+
+```python
+Button("Delayed Action", on_click=setTimeout(code=alert('Delayed!'), delay=2000))
+```
+
+### Modals
+
+- `showModal(id)`: Show a Dars Modal component (handles hidden attribute and class).
+- `hideModal(id)`: Hide a Dars Modal component.
+
+```python
+Button("Open Modal", on_click=showModal("my-modal"))
+```
+
+### Forms
+
+- `submitForm(form_id)`: Submit a form.
+- `resetForm(form_id)`: Reset a form.
+- `getValue(input_id, target_id)`: Copy value from input to another element's text.
+- `clearInput(input_id)`: Clear an input field.
+
+```python
+Button("Submit", on_click=submitForm("contact-form"))
+Button("Clear", on_click=clearInput("search-box"))
+```
+
+### Storage (localStorage)
+
+- `saveToLocal(key, value)`: Save string value.
+- `loadFromLocal(key, target_id)`: Load value and set as text of target element.
+- `removeFromLocal(key)`: Remove item.
+- `clearLocalStorage()`: Clear all storage.
+
+```python
+Button("Save Prefs", on_click=saveToLocal("theme", "dark"))
+```
+
+### Clipboard
+
+- `copyToClipboard(text)`: Copy text string.
+- `copyElementText(id)`: Copy text content of an element.
+
+```python
+Button("Copy Code", on_click=copyElementText("code-block"))
+```
+
+### Scroll
+
+- `scrollTo(x, y)`: Scroll to position.
+- `scrollToTop()`: Smooth scroll to top.
+- `scrollToBottom()`: Smooth scroll to bottom.
+- `scrollToElement(id)`: Smooth scroll to specific element.
+
+```python
+Button("Back to Top", on_click=scrollToTop())
+```
+
+### Alerts & Focus
+
+- `alert(message)`: Show browser alert.
+- `confirm(message, on_ok, on_cancel)`: Show confirm dialog.
+- `log(message)`: Log to console.
+- `focus(id)`: Focus an element.
+- `blur(id)`: Blur an element.
+
+```python
+Button("Delete", on_click=confirm(
+    "Are you sure?", 
+    on_ok="console.log('Deleted')", 
+    on_cancel="console.log('Cancelled')"
+))
+```

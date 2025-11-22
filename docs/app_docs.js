@@ -1,4 +1,4 @@
-window.__DARS_VDOM__={type:"T1",id:"page_92",key:"0",children:[{type:"T2",id:"container_93",key:"0/0",children:[{type:"T3",id:"dars-navbar",key:"0/0/0",children:[{type:"T2",id:"navbar-left",key:"0/0/0/0",children:[{type:"T4",id:"image_94",key:"0/0/0/0/0"},{type:"T5",id:"text_95",key:"0/0/0/0/1",text:"Dars Framework"}]},{type:"T2",id:"container_96",key:"0/0/0/1",children:[{type:"T2",id:"navbar-right",key:"0/0/0/1/0",children:[{type:"T6",id:"link_97",key:"0/0/0/1/0/0",text:"Home"},{type:"T6",id:"link_98",key:"0/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_99",key:"0/0/0/1/0/2",text:"Releases"},{type:"T6",id:"link_100",key:"0/0/0/1/0/3",text:"PlayGround"},{type:"T6",id:"link_101",key:"0/0/0/1/0/4",text:"GitHub"}]},{type:"T2",id:"hamburger-menu",key:"0/0/0/1/1",children:[{type:"T2",id:"hamburger-btn",key:"0/0/0/1/1/0",children:[{type:"T2",id:"container_102",key:"0/0/0/1/1/0/0",children:[{type:"T2",id:"container_103",key:"0/0/0/1/1/0/0/0"},{type:"T2",id:"container_104",key:"0/0/0/1/1/0/0/1"},{type:"T2",id:"container_105",key:"0/0/0/1/1/0/0/2"}]}]},{type:"T2",id:"mobile-menu",key:"0/0/0/1/1/1",children:[{type:"T6",id:"link_106",key:"0/0/0/1/1/1/0",text:"Home"},{type:"T6",id:"link_107",key:"0/0/0/1/1/1/1",text:"Documentation"},{type:"T6",id:"link_108",key:"0/0/0/1/1/1/2",text:"Releases"},{type:"T6",id:"link_109",key:"0/0/0/1/1/1/3",text:"PlayGround"},{type:"T6",id:"link_110",key:"0/0/0/1/1/1/4",text:"GitHub"}]}]}]}]}]},{type:"T8",id:"documentation-sidebar",key:"0/1"},{type:"T2",id:"container_111",key:"0/2",children:[{type:"T2",id:"markdown-content-container",key:"0/2/0",children:[{type:"T9",id:"markdown_112",key:"0/2/0/0",text:`# Dars Framework Documentation
+window.__DARS_VDOM__={type:"T1",id:"page_91",key:"0",children:[{type:"T2",id:"container_92",key:"0/0",children:[{type:"T3",id:"dars-navbar",key:"0/0/0",children:[{type:"T2",id:"navbar-left",key:"0/0/0/0",children:[{type:"T4",id:"image_93",key:"0/0/0/0/0"},{type:"T5",id:"text_94",key:"0/0/0/0/1",text:"Dars Framework"}]},{type:"T2",id:"container_95",key:"0/0/0/1",children:[{type:"T2",id:"navbar-right",key:"0/0/0/1/0",children:[{type:"T6",id:"link_96",key:"0/0/0/1/0/0",text:"Home"},{type:"T6",id:"link_97",key:"0/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_98",key:"0/0/0/1/0/2",text:"Releases"},{type:"T6",id:"link_99",key:"0/0/0/1/0/3",text:"PlayGround"},{type:"T6",id:"link_100",key:"0/0/0/1/0/4",text:"GitHub"}]},{type:"T2",id:"hamburger-menu",key:"0/0/0/1/1",children:[{type:"T2",id:"hamburger-btn",key:"0/0/0/1/1/0",children:[{type:"T2",id:"container_101",key:"0/0/0/1/1/0/0",children:[{type:"T2",id:"container_102",key:"0/0/0/1/1/0/0/0"},{type:"T2",id:"container_103",key:"0/0/0/1/1/0/0/1"},{type:"T2",id:"container_104",key:"0/0/0/1/1/0/0/2"}]}]},{type:"T2",id:"mobile-menu",key:"0/0/0/1/1/1",children:[{type:"T6",id:"link_105",key:"0/0/0/1/1/1/0",text:"Home"},{type:"T6",id:"link_106",key:"0/0/0/1/1/1/1",text:"Documentation"},{type:"T6",id:"link_107",key:"0/0/0/1/1/1/2",text:"Releases"},{type:"T6",id:"link_108",key:"0/0/0/1/1/1/3",text:"PlayGround"},{type:"T6",id:"link_109",key:"0/0/0/1/1/1/4",text:"GitHub"}]}]}]}]}]},{type:"T8",id:"documentation-sidebar",key:"0/1"},{type:"T2",id:"container_110",key:"0/2",children:[{type:"T2",id:"markdown-content-container",key:"0/2/0",children:[{type:"T9",id:"markdown_111",key:"0/2/0/0",text:`# Dars Framework Documentation
 
 Welcome to the official Dars Framework documentation. Here you will find detailed guides and references to help you build modern web applications with Python.
 
@@ -15,7 +15,7 @@ Welcome to the official Dars Framework documentation. Here you will find detaile
 - [Scripts System](#dars-script-system)
 - [CLI Usage and Commands](#dars-cli-reference)
 
-`},{type:"T9",id:"markdown_113",key:"0/2/0/1",text:`# Installation Guide - Dars Framework
+`},{type:"T9",id:"markdown_112",key:"0/2/0/1",text:`# Installation Guide - Dars Framework
 
 ## System Requirements
 
@@ -178,7 +178,7 @@ dars build
 Notes:
 - Desktop support is under active development; configuration keys and defaults may change.
 - Some platform targets (like macOS) require building on that OS for signing.
-`},{type:"T9",id:"markdown_114",key:"0/2/0/2",text:`# Getting Started with Dars
+`},{type:"T9",id:"markdown_113",key:"0/2/0/2",text:`# Getting Started with Dars
 
 Welcome to Dars, a modern Python framework for building web applications with reusable UI components.
 
@@ -247,7 +247,7 @@ app.rTimeCompile().add_file_types = ".js,.css"
 - If you have questions or need support, check the official repository or community channels.
 
 Start building with Dars...
-`},{type:"T9",id:"markdown_115",key:"0/2/0/3",text:'# Dars Project Configuration\n\nThe file (dars.config.json) configures how Dars exports and builds your project. It is created by `dars init <name>` for new projects and can be merged/updated in existing projects with `dars init --update`.\n\n## Example\n\n```json\n{\n  "entry": "main.py",\n  "format": "html",\n  "outdir": "dist",\n  "publicDir": null,\n  "include": [],\n  "exclude": ["**/__pycache__", ".git", ".venv", "node_modules"],\n  "bundle": false,\n  "defaultMinify": true,\n  "viteMinify": true,\n  "markdownHighlight": true\n}\n```\n\n## Fields\n\n- entry\n  Python entry file for your app. Used by `dars build` and by `dars export config`.\n\n- format\n  Export format. Supported: `html` and `desktop` (BETA). When set to `desktop`, the build command will produce native desktop artifacts.\n\n- outdir\n  Directory where the exported files are written.\n\n- publicDir\n  Directory whose contents are copied as-is into the output (e.g. `public/` or `assets/`). If `null`, Dars will try to autodetect common locations.\n\n- include / exclude\n  Simple filters (by substring) applied when copying from `publicDir`.\n\n- bundle\n  Reserved for future use. Current exporters already produce a bundled output.\n\n- defaultMinify\n  Toggle the built-in Python minifier (safe and conservative). Controls HTML minification and provides JS/CSS fallback when advanced tools are unavailable.\n  - `true` (default): run the default Python-side minifier.\n  - `false`: skip the default minifier. You can still use Vite/esbuild via `viteMinify`.\n\n- viteMinify\n  Toggle the advanced JS minifier.\n  - `true` (default): prefer the advanced minifier; fall back to the secondary minifier; if neither is available, a conservative built-in fallback is used.\n  - `false`: skip the advanced minifier and use the secondary minifier directly; fall back to the conservative built-in if not available.\n\n- markdownHighlight\n  Auto-inject a client-side syntax highlighter for fenced code blocks in Markdown.\n  - `true` (default): injects Prism.js assets once per page and highlights `pre code` blocks.\n  - `false`: no assets injected; you can include your own highlighter or none at all.\n\n## Desktop-specific (BETA)\n\n- targetPlatform\n  Desktop build target. Only effective when `format` is `desktop`.\n  - Values: `auto` (default), `windows`, `linux`, `macos`.\n  - Note: macOS targets must be built on macOS for signing.\n\n> Desktop export is BETA: suitable for testing, not recommended for production yet. Configuration keys and defaults may change.\n\n## Behavior and defaults\n\n- `dars init --update` merges your existing config with Dars defaults and writes the result back, adding any new keys (like `defaultMinify`, `viteMinify`) without removing your current settings.\n- During `dars export` and `dars build`, Dars reads this file and configures the minification pipeline accordingly.\n- If advanced minifiers are not available, builds still complete with a conservative fallback. On `dars build`, a small notice may appear indicating that a less powerful minifier was used.\n- You can force-skip the default Python minifier per run with `--no-minify` (does not affect `viteMinify`).\n\n## Tips\n\n- To add or refresh the config in an existing project:\n  ```bash\n  dars init --update\n  ```\n- To review optional tooling that can enhance bundling/minification, run:\n  ```bash\n  dars doctor\n  ```\n- If you want to force using only the secondary minifier, set `"viteMinify": false`.\n - To disable the default minifier by config, set `"defaultMinify": false`; to disable it per-run use `--no-minify`.\n'},{type:"T9",id:"markdown_116",key:"0/2/0/4",text:`# App Class and PWA Features in Dars Framework
+`},{type:"T9",id:"markdown_114",key:"0/2/0/3",text:'# Dars Project Configuration\n\nThe file (dars.config.json) configures how Dars exports and builds your project. It is created by `dars init <name>` for new projects and can be merged/updated in existing projects with `dars init --update`.\n\n## Example\n\n```json\n{\n  "entry": "main.py",\n  "format": "html",\n  "outdir": "dist",\n  "publicDir": null,\n  "include": [],\n  "exclude": ["**/__pycache__", ".git", ".venv", "node_modules"],\n  "bundle": false,\n  "defaultMinify": true,\n  "viteMinify": true,\n  "markdownHighlight": true\n}\n```\n\n## Fields\n\n- entry\n  Python entry file for your app. Used by `dars build` and by `dars export config`.\n\n- format\n  Export format. Supported: `html` and `desktop` (BETA). When set to `desktop`, the build command will produce native desktop artifacts.\n\n- outdir\n  Directory where the exported files are written.\n\n- publicDir\n  Directory whose contents are copied as-is into the output (e.g. `public/` or `assets/`). If `null`, Dars will try to autodetect common locations.\n\n- include / exclude\n  Simple filters (by substring) applied when copying from `publicDir`.\n\n- bundle\n  Reserved for future use. Current exporters already produce a bundled output.\n\n- defaultMinify\n  Toggle the built-in Python minifier (safe and conservative). Controls HTML minification and provides JS/CSS fallback when advanced tools are unavailable.\n  - `true` (default): run the default Python-side minifier.\n  - `false`: skip the default minifier. You can still use Vite/esbuild via `viteMinify`.\n\n- viteMinify\n  Toggle the advanced JS minifier.\n  - `true` (default): prefer the advanced minifier; fall back to the secondary minifier; if neither is available, a conservative built-in fallback is used.\n  - `false`: skip the advanced minifier and use the secondary minifier directly; fall back to the conservative built-in if not available.\n\n- markdownHighlight\n  Auto-inject a client-side syntax highlighter for fenced code blocks in Markdown.\n  - `true` (default): injects Prism.js assets once per page and highlights `pre code` blocks.\n  - `false`: no assets injected; you can include your own highlighter or none at all.\n\n## Desktop-specific (BETA)\n\n- targetPlatform\n  Desktop build target. Only effective when `format` is `desktop`.\n  - Values: `auto` (default), `windows`, `linux`, `macos`.\n  - Note: macOS targets must be built on macOS for signing.\n\n> Desktop export is BETA: suitable for testing, not recommended for production yet. Configuration keys and defaults may change.\n\n## Behavior and defaults\n\n- `dars init --update` merges your existing config with Dars defaults and writes the result back, adding any new keys (like `defaultMinify`, `viteMinify`) without removing your current settings.\n- During `dars export` and `dars build`, Dars reads this file and configures the minification pipeline accordingly.\n- If advanced minifiers are not available, builds still complete with a conservative fallback. On `dars build`, a small notice may appear indicating that a less powerful minifier was used.\n- You can force-skip the default Python minifier per run with `--no-minify` (does not affect `viteMinify`).\n\n## Tips\n\n- To add or refresh the config in an existing project:\n  ```bash\n  dars init --update\n  ```\n- To review optional tooling that can enhance bundling/minification, run:\n  ```bash\n  dars doctor\n  ```\n- If you want to force using only the secondary minifier, set `"viteMinify": false`.\n - To disable the default minifier by config, set `"defaultMinify": false`; to disable it per-run use `--no-minify`.\n'},{type:"T9",id:"markdown_115",key:"0/2/0/4",text:`# App Class and PWA Features in Dars Framework
 
 ## Overview
 
@@ -590,7 +590,7 @@ Dars Framework's PWA implementation is compatible with:
 - Chrome/Chromium (full support)
 - Firefox (basic support)
 - Safari (limited support on iOS)
-- Edge (full support)`},{type:"T9",id:"markdown_117",key:"0/2/0/5",text:`# State management in Dars (dState, cState, goto, mods)
+- Edge (full support)`},{type:"T9",id:"markdown_116",key:"0/2/0/5",text:`# State management in Dars (dState, cState, goto, mods)
 
 This document describes the new state system available in Dars 1.1.9.
 
@@ -689,7 +689,7 @@ swap_btn = Button(
 - \`change({...})\` resolves \`goto\`, updates \`current\`, applies \`rules[<state>].mods\` and optional \`rules[<state>].goto\` (single hop), then dispatches a \`CustomEvent('dars:state', ...)\`.
 
 ## Best practices
-
+-
 - Keep the label text purely numeric if you plan to use \`inc/dec\` on \`text\`.
 - Use \`goto\` in rules to avoid infinite accumulation when staying at the same state.
 - Prefer \`mods\` for small changes; use \`cComp=True\` only when you need full HTML replacement.
@@ -773,29 +773,25 @@ app = App(title="Dynamic Updates Demo", desktop=True)
 app.set_root(Container(display, read_btn, write_btn, counter, inc_btn))
 \`\`\`
 
-### Targeting Other Components
+### Targeting Other Components with \`updateComp\`
 
-While \`this()\` refers to the clicked component, you can target other components by using a manual update helper:
+While \`this()\` refers to the clicked component, you can target other components by using the \`updateComp\` helper from \`dars.backend\` (exported in \`dars.all\`).
 
 \`\`\`python
-def update_component(target_id, **kwargs):
-    """Update a specific component by ID"""
-    import json
-    from dars.scripts.dscript import RawJS
-    
-    parts = [f"id: '{target_id}'", "dynamic: true"]
-    for k, v in kwargs.items():
-        if isinstance(v, RawJS):
-            parts.append(f"{k}: {v.code}")
-        else:
-            parts.append(f"{k}: {json.dumps(v)}")
-    payload = ", ".join(parts)
-    return dScript(code=f"if(window.Dars && window.Dars.change) window.Dars.change({{{payload}}});")
+from dars.all import updateComp
 
 # Read file and update a different component
 btn = Button("Load to Display",
     on_click=read_text("data.txt").then(
-        update_component("display", text=RawJS(dScript.ARG))
+        updateComp("display", text=RawJS(dScript.ARG))
+    )
+)
+
+# Update multiple properties of another component
+btn2 = Button("Style It",
+    on_click=updateComp("display", 
+        style={"color": "blue", "fontWeight": "bold"},
+        text="Styled!"
     )
 )
 \`\`\`
@@ -806,7 +802,7 @@ btn = Button("Load to Display",
 - **Works Everywhere**: Both desktop and web exports support dynamic updates
 - **Async-Friendly**: Perfect for chaining with file operations, network requests, etc.
 - **Type-Safe**: Use \`RawJS\` for JavaScript values, regular Python values for literals
-- **Composable**: Combine with \`dScript.then()\` for complex workflows`},{type:"T9",id:"markdown_118",key:"0/2/0/6",text:`# Dars - Components Documentation
+- **Composable**: Combine with \`dScript.then()\` for complex workflows`},{type:"T9",id:"markdown_117",key:"0/2/0/6",text:`# Dars - Components Documentation
 
 ---
 
@@ -2648,7 +2644,7 @@ save_button = Button("Guardar", style=PRIMARY_BUTTON_STYLES)
 
 Components provide a solid foundation for creating modern and responsive user interfaces that can be exported to multiple platforms while maintaining consistency and functionality.
 
-`},{type:"T9",id:"markdown_119",key:"0/2/0/7",text:`# Custom Components in Dars Framework
+`},{type:"T9",id:"markdown_118",key:"0/2/0/7",text:`# Custom Components in Dars Framework
 
 This is an example of how to create a custom component in Dars. The \`Button\` class inherits from \`Component\` and defines its own initialization and rendering logic. You can use \`self.set_event\` to attach event handlers to components.
 
@@ -2679,7 +2675,7 @@ class CustomComponent(Component):
         '''
 \`\`\`
 
-`},{type:"T9",id:"markdown_120",key:"0/2/0/8",text:`# Events in Dars
+`},{type:"T9",id:"markdown_119",key:"0/2/0/8",text:`# Events in Dars
 
 This is the documentation for the events in Dars.
 
@@ -2748,7 +2744,7 @@ Runtime behavior:
 - Dynamic handlers run in capture phase and stop propagation for the same event.
 - Returning to the default state (index 0) removes any dynamic listeners from that element and restores its initial DOM.
 
-`},{type:"T9",id:"markdown_121",key:"0/2/0/9",text:`# Dars - Exporter Documentation
+`},{type:"T9",id:"markdown_120",key:"0/2/0/9",text:`# Dars - Exporter Documentation
 
 ## Introduction
 
@@ -3068,7 +3064,7 @@ All file paths are relative to the app's directory. See [State Management](state
 - Not yet recommended for production.
 - Some advanced packaging and signing options may require manual configuration.
 - Expect changes to configuration keys and defaults as the feature matures.
-`},{type:"T9",id:"markdown_122",key:"0/2/0/10",text:`# Dars - Script System
+`},{type:"T9",id:"markdown_121",key:"0/2/0/10",text:`# Dars - Script System
 
 ## Introduction to Scripts
 
@@ -3679,9 +3675,116 @@ document.addEventListener(\\'DOMContentLoaded\\', function() {
 app = App(title="Form with Script")
 app.set_root(form)
 app.add_script(form_script)
+\`\`\`
 
+## Utility Scripts (\`utils_ds\`)
 
-`},{type:"T9",id:"markdown_123",key:"0/2/0/11",text:`# Dars CLI Reference
+Dars provides a collection of utility functions in \`dars.scripts.utils_ds\` (exported in \`dars.all\`) that return pre-configured \`dScript\` objects for common tasks. These allow you to implement interactivity without writing raw JavaScript.
+
+### Navigation
+
+- \`goTo(href)\`: Navigate to a URL in the current tab.
+- \`goToNew(href)\`: Open a URL in a new tab.
+- \`reload()\`: Reload the current page.
+- \`goBack()\`: Navigate back in browser history.
+- \`goForward()\`: Navigate forward in browser history.
+
+\`\`\`python
+Button("Home", on_click=goTo("/"))
+Button("Docs", on_click=goToNew("https://docs.dars.dev"))
+\`\`\`
+
+### DOM Manipulation
+
+- \`show(id)\`: Show an element (display: block).
+- \`hide(id)\`: Hide an element (display: none).
+- \`toggle(id)\`: Toggle visibility.
+- \`setText(id, text)\`: Set text content.
+- \`addClass(id, class_name)\`: Add a CSS class.
+- \`removeClass(id, class_name)\`: Remove a CSS class.
+- \`toggleClass(id, class_name)\`: Toggle a CSS class.
+
+\`\`\`python
+Button("Show Details", on_click=show("details-panel"))
+Button("Toggle Theme", on_click=toggleClass("app-root", "dark-mode"))
+\`\`\`
+
+### Timeouts
+
+- \`setTimeout(delay, code)\`: Set a timeout to execute a script after a delay.
+
+\`\`\`python
+Button("Delayed Action", on_click=setTimeout(code=alert('Delayed!'), delay=2000))
+\`\`\`
+
+### Modals
+
+- \`showModal(id)\`: Show a Dars Modal component (handles hidden attribute and class).
+- \`hideModal(id)\`: Hide a Dars Modal component.
+
+\`\`\`python
+Button("Open Modal", on_click=showModal("my-modal"))
+\`\`\`
+
+### Forms
+
+- \`submitForm(form_id)\`: Submit a form.
+- \`resetForm(form_id)\`: Reset a form.
+- \`getValue(input_id, target_id)\`: Copy value from input to another element's text.
+- \`clearInput(input_id)\`: Clear an input field.
+
+\`\`\`python
+Button("Submit", on_click=submitForm("contact-form"))
+Button("Clear", on_click=clearInput("search-box"))
+\`\`\`
+
+### Storage (localStorage)
+
+- \`saveToLocal(key, value)\`: Save string value.
+- \`loadFromLocal(key, target_id)\`: Load value and set as text of target element.
+- \`removeFromLocal(key)\`: Remove item.
+- \`clearLocalStorage()\`: Clear all storage.
+
+\`\`\`python
+Button("Save Prefs", on_click=saveToLocal("theme", "dark"))
+\`\`\`
+
+### Clipboard
+
+- \`copyToClipboard(text)\`: Copy text string.
+- \`copyElementText(id)\`: Copy text content of an element.
+
+\`\`\`python
+Button("Copy Code", on_click=copyElementText("code-block"))
+\`\`\`
+
+### Scroll
+
+- \`scrollTo(x, y)\`: Scroll to position.
+- \`scrollToTop()\`: Smooth scroll to top.
+- \`scrollToBottom()\`: Smooth scroll to bottom.
+- \`scrollToElement(id)\`: Smooth scroll to specific element.
+
+\`\`\`python
+Button("Back to Top", on_click=scrollToTop())
+\`\`\`
+
+### Alerts & Focus
+
+- \`alert(message)\`: Show browser alert.
+- \`confirm(message, on_ok, on_cancel)\`: Show confirm dialog.
+- \`log(message)\`: Log to console.
+- \`focus(id)\`: Focus an element.
+- \`blur(id)\`: Blur an element.
+
+\`\`\`python
+Button("Delete", on_click=confirm(
+    "Are you sure?", 
+    on_ok="console.log('Deleted')", 
+    on_cancel="console.log('Cancelled')"
+))
+\`\`\`
+`},{type:"T9",id:"markdown_122",key:"0/2/0/11",text:`# Dars CLI Reference
 
 The Dars Command Line Interface (CLI) lets you manage your projects, export apps, and preview results quickly from the terminal.
 
@@ -3786,4 +3889,4 @@ dars init  -L
 - Applying minification (vite): Vite/esbuild minification is active (JS/CSS) and default is disabled.
 - Applying minification (default + vite): both are active.
 
-For more, see the [Getting Started](#getting-started-with-dars) guide and the main documentation index.`}]},{type:"T2",id:"footer-section",key:"0/2/1",children:[{type:"T2",id:"container_124",key:"0/2/1/0",children:[{type:"T2",id:"container_125",key:"0/2/1/0/0",children:[{type:"T2",id:"container_126",key:"0/2/1/0/0/0",children:[{type:"T4",id:"image_127",key:"0/2/1/0/0/0/0"},{type:"T2",id:"container_128",key:"0/2/1/0/0/0/1",children:[{type:"T5",id:"text_129",key:"0/2/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_130",key:"0/2/1/0/0/1",children:[{type:"T2",id:"container_131",key:"0/2/1/0/0/1/0",children:[{type:"T5",id:"text_132",key:"0/2/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_133",key:"0/2/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_134",key:"0/2/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_135",key:"0/2/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_136",key:"0/2/1/0/0/1/1",children:[{type:"T5",id:"text_137",key:"0/2/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_138",key:"0/2/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_139",key:"0/2/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_140",key:"0/2/1/0/0/1/2",children:[{type:"T5",id:"text_141",key:"0/2/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_142",key:"0/2/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_143",key:"0/2/1/0/0/2",children:[{type:"T2",id:"container_144",key:"0/2/1/0/0/2/0",children:[{type:"T5",id:"text_145",key:"0/2/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_146",key:"0/2/1/0/0/2/1",children:[{type:"T5",id:"text_147",key:"0/2/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_148",key:"0/2/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_149",key:"0/2/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_150",key:"0/2/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]}]},function(){const c=new Map;let r=null,d=null;function p(){}function _(){}function h(n,e){if(!n)return;e(n);const t=n.children||[];for(let o=0;o<t.length;o++)h(t[o],e)}function v(n){try{if(typeof atob=="function")return atob(n);if(typeof Buffer<"u")return Buffer.from(n,"base64").toString("utf8")}catch{}return""}function T(n){try{if(!n)return null;if(n&&n.type==="inline"&&n.code)return new Function("event",n.code);const e=n&&(n.b||n.code_b64)||null;if(e){const t=v(e);if(t)return new Function("event",t)}}catch{}return null}function L(n){h(n,e=>{if(e&&e.id&&e.events&&!c.has(e.id)){const t={};for(const o in e.events){const a=e.events[o],m=T(a);m&&(t[o]=m)}Object.keys(t).length?c.set(e.id,t):c.delete(e.id)}})}function I(n,e){if(!(!n||!e))for(const[t,o]of Object.entries(e))try{o===!1||o===null||typeof o>"u"?n.removeAttribute(t):n.setAttribute(t,String(o))}catch{}}function C(n,e={},t={}){for(const o in e)if(!(o in t))try{n.removeAttribute(o)}catch{}for(const o in t){const a=t[o];try{a===!1||a===null||typeof a>"u"?n.removeAttribute(o):n.setAttribute(o,String(a))}catch{}}}function E(n,e={},t={}){for(const o in e)if(!(o in t))try{n.style.removeProperty(o.replace(/_/g,"-"))}catch{}for(const o in t){const a=t[o];try{n.style.setProperty(o.replace(/_/g,"-"),String(a))}catch{}}}function A(n,e){(e||document).addEventListener(n,function(t){let o=t.target;const a=e||document;for(;o&&o!==a;){const m=o.id;if(m&&c.has(m)){const y=c.get(m);if(o&&o.__darsEv&&o.__darsEv[n])return;let u=y[n];if(!u&&(n==="keydown"||n==="keyup"||n==="keypress")){const i=t.key||t.code;if(i){const s=n+"."+i;u=y[s]}}if(typeof u=="function"){try{u.call(o,t)}catch(i){console.error("[Dars] handler error",i)}return}}o=o.parentNode}},!0)}function k(n,e){return n&&e?n.type!==e.type:n!==e}function S(n){if(!n)return;const e=n.children||[];for(let t=0;t<e.length;t++)S(e[t]);if(n.id&&c.delete(n.id),n.id){const t=document.getElementById(n.id);if(t&&t.parentNode)try{t.parentNode.removeChild(t)}catch{}}}function w(n,e){if(!e||!e.id)return{ok:!1,reason:"missing-new"};let t=document.getElementById(e.id);if(!t){const i=n&&n.id?document.getElementById(n.id):null;if(i)try{i.id=e.id,t=i}catch{}}if(!t)return{ok:!1,reason:"missing-el"};if(k(n,e))return{ok:!1,reason:"type-changed"};const o=!!e.isIsland;if(!o&&e.class&&(t.className=e.class),o||C(t,n&&n.props||{},e.props||{}),o||E(t,n&&n.style||{},e.style||{}),!o&&Object.prototype.hasOwnProperty.call(e,"text")&&t.textContent!==String(e.text||"")&&(t.textContent=String(e.text||"")),o)return{ok:!0};const a=n&&n.children?n.children:[],m=e.children?e.children:[],y=new Map;for(let i=0;i<a.length;i++){const s=a[i]&&(a[i].id||a[i].key)||null;s&&y.set(String(s),a[i])}const u=new Set;for(let i=0;i<m.length;i++){const s=m[i],f=s&&(s.id||s.key)||null;if(!f)if(i<a.length){const l=w(a[i],s);if(!l.ok)return l;u.add(a[i]);continue}else return{ok:!1,reason:"children-added"};const x=y.get(String(f));if(x){const l=w(x,s);if(!l.ok)return l;u.add(x)}else{if(i<a.length){const g=a[i];if(!k(g,s)){const b=w(g,s);if(!b.ok)return b;u.add(g);continue}}const l=createSubtree(s);if(l){const g=i<a.length?a[i]:null;if(g&&g.id){const b=document.getElementById(g.id);b&&b.parentNode?b.parentNode.insertBefore(l,b):t.appendChild(l)}else t.appendChild(l);continue}return{ok:!1,reason:"children-added"}}}for(let i=0;i<a.length;i++){const s=a[i];u.has(s)||S(s)}return{ok:!0}}function D(n){typeof requestAnimationFrame=="function"?requestAnimationFrame(n):setTimeout(n,16)}function M(n){const e=r;if(!e){r=n;try{window.__DARS_VDOM__=n}catch{}return}D(()=>{const t=w(e,n);if(!t.ok){console.warn("[Dars] Structural change detected (",t.reason,"), reloading...");try{location.reload()}catch{}return}r=n;try{window.__DARS_VDOM__=n}catch{}})}function B(n){r=n;try{window.__DARS_VDOM__=n}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(t=>A(t,document))}function P(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const n=window.__DARS_VERSION_URL||"version.txt";let e=null,t=!1,o=0;const a=10;let m=!1;function y(i,s,f,x){try{const l=new XMLHttpRequest;x&&(l.responseType=x),l.open("GET",i,!0),l.timeout=5e3,l.onreadystatechange=function(){l.readyState===4&&(l.status>=200&&l.status<300?s(l.response):f())},l.onerror=f,l.ontimeout=f,l.setRequestHeader("Cache-Control","no-store"),l.send()}catch{f()}}function u(){m||y(n,function(i){let s=(i||"").toString().trim();if(!s||s==="0"){if(o+=1,o>=a){console.warn("[Dars] version file not found after",a,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(e)try{clearTimeout(e)}catch{}return}t||(console.warn("[Dars] waiting for version file..."),t=!0),e=setTimeout(u,600);return}if(o=0,t=!1,d||(d=s),s&&s!==d){d=s;try{location.reload()}catch{}return}e=setTimeout(u,600)},function(){if(o+=1,o>=a){console.warn("[Dars] version file not reachable after",a,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(e)try{clearTimeout(e)}catch{}return}t||(console.warn("[Dars] waiting for version file..."),t=!0),e=setTimeout(u,600)},"text")}return u(),()=>{try{m=!0,e&&clearTimeout(e),window.__DARS_STOP_HOTRELOAD=null}catch{}}}document.addEventListener("DOMContentLoaded",function(){if(window.__DARS_VDOM__?B(window.__DARS_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=P()}catch{}}})}(),window.addEventListener("scroll",()=>{const c=document.getElementById("dars-navbar");window.scrollY>20?c.classList.add("scrolled"):c.classList.remove("scrolled");const r=document.getElementById("features-section");if(r&&!r.classList.contains("visible")){const d=r.getBoundingClientRect().top,p=window.innerHeight/1.5;d<p&&(r.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((h,v)=>{setTimeout(()=>{h.style.opacity="1",h.style.transform="translateY(0)"},v*100)}))}}),document.addEventListener("DOMContentLoaded",()=>{const c=document.getElementById("hero-logo"),r=document.getElementById("hero-title"),d=document.getElementById("hero-description"),p=document.getElementById("pip-command"),_=document.getElementById("get-started-btn"),h=document.getElementById("scroll-text");c&&setTimeout(()=>c.classList.add("show"),5),r&&setTimeout(()=>r.classList.add("show"),350),d&&setTimeout(()=>d.classList.add("show"),650),p&&setTimeout(()=>p.classList.add("show"),950),_&&setTimeout(()=>_.classList.add("show"),1250),h&&setTimeout(()=>h.classList.add("show"),1500)});function F(){window.open("https://ztamdev.github.io/Dars-Framework/docs.html","_self")}function O(){navigator.clipboard.writeText("pip install dars framework").then(()=>{const r=document.querySelector("#copy-btn"),d=r.textContent;r.textContent="Copied!",r.style.background="linear-gradient(135deg, #38c49f 0%, #2a6b5b 100%) !important",setTimeout(()=>{r.textContent=d,r.style.background="linear-gradient(135deg, #1d4a3f 0%, #2a6b5b 100%) !important"},2e3)})}document.addEventListener("DOMContentLoaded",function(){const c=document.getElementById("hamburger-btn"),r=document.getElementById("mobile-menu"),d=document.body;c&&r&&(c.addEventListener("click",function(p){p.stopPropagation(),r.style.display==="flex"?(r.style.display="none",c.classList.remove("menu-open"),d.classList.remove("menu-open")):(r.style.display="flex",c.classList.add("menu-open"),d.classList.add("menu-open"))}),r.querySelectorAll("a").forEach(p=>{p.addEventListener("click",function(){r.style.display="none",c.classList.remove("menu-open"),d.classList.remove("menu-open")})}),document.addEventListener("click",function(p){!c.contains(p.target)&&!r.contains(p.target)&&(r.style.display="none",c.classList.remove("menu-open"),d.classList.remove("menu-open"))}),document.addEventListener("keydown",function(p){p.key==="Escape"&&r.style.display==="flex"&&(r.style.display="none",c.classList.remove("menu-open"),d.classList.remove("menu-open"))}))});
+For more, see the [Getting Started](#getting-started-with-dars) guide and the main documentation index.`}]},{type:"T2",id:"footer-section",key:"0/2/1",children:[{type:"T2",id:"container_123",key:"0/2/1/0",children:[{type:"T2",id:"container_124",key:"0/2/1/0/0",children:[{type:"T2",id:"container_125",key:"0/2/1/0/0/0",children:[{type:"T4",id:"image_126",key:"0/2/1/0/0/0/0"},{type:"T2",id:"container_127",key:"0/2/1/0/0/0/1",children:[{type:"T5",id:"text_128",key:"0/2/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_129",key:"0/2/1/0/0/1",children:[{type:"T2",id:"container_130",key:"0/2/1/0/0/1/0",children:[{type:"T5",id:"text_131",key:"0/2/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_132",key:"0/2/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_133",key:"0/2/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_134",key:"0/2/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_135",key:"0/2/1/0/0/1/1",children:[{type:"T5",id:"text_136",key:"0/2/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_137",key:"0/2/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_138",key:"0/2/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_139",key:"0/2/1/0/0/1/2",children:[{type:"T5",id:"text_140",key:"0/2/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_141",key:"0/2/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_142",key:"0/2/1/0/0/2",children:[{type:"T2",id:"container_143",key:"0/2/1/0/0/2/0",children:[{type:"T5",id:"text_144",key:"0/2/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_145",key:"0/2/1/0/0/2/1",children:[{type:"T5",id:"text_146",key:"0/2/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_147",key:"0/2/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_148",key:"0/2/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_149",key:"0/2/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]}]},function(){const c=new Map;let l=null,d=null;function p(){}function _(){}function f(n,e){if(!n)return;e(n);const t=n.children||[];for(let o=0;o<t.length;o++)f(t[o],e)}function v(n){try{if(typeof atob=="function")return atob(n);if(typeof Buffer<"u")return Buffer.from(n,"base64").toString("utf8")}catch{}return""}function T(n){try{if(!n)return null;if(n&&n.type==="inline"&&n.code)return new Function("event",n.code);const e=n&&(n.b||n.code_b64)||null;if(e){const t=v(e);if(t)return new Function("event",t)}}catch{}return null}function L(n){f(n,e=>{if(e&&e.id&&e.events&&!c.has(e.id)){const t={};for(const o in e.events){const i=e.events[o],m=T(i);m&&(t[o]=m)}Object.keys(t).length?c.set(e.id,t):c.delete(e.id)}})}function M(n,e){if(!(!n||!e))for(const[t,o]of Object.entries(e))try{o===!1||o===null||typeof o>"u"?n.removeAttribute(t):n.setAttribute(t,String(o))}catch{}}function C(n,e={},t={}){for(const o in e)if(!(o in t))try{n.removeAttribute(o)}catch{}for(const o in t){const i=t[o];try{i===!1||i===null||typeof i>"u"?n.removeAttribute(o):n.setAttribute(o,String(i))}catch{}}}function E(n,e={},t={}){for(const o in e)if(!(o in t))try{n.style.removeProperty(o.replace(/_/g,"-"))}catch{}for(const o in t){const i=t[o];try{n.style.setProperty(o.replace(/_/g,"-"),String(i))}catch{}}}function A(n,e){(e||document).addEventListener(n,function(t){let o=t.target;const i=e||document;for(;o&&o!==i;){const m=o.id;if(m&&c.has(m)){const y=c.get(m);if(o&&o.__darsEv&&o.__darsEv[n])return;let u=y[n];if(!u&&(n==="keydown"||n==="keyup"||n==="keypress")){const a=t.key||t.code;if(a){const r=n+"."+a;u=y[r]}}if(typeof u=="function"){try{u.call(o,t)}catch(a){console.error("[Dars] handler error",a)}return}}o=o.parentNode}},!0)}function k(n,e){return n&&e?n.type!==e.type:n!==e}function S(n){if(!n)return;const e=n.children||[];for(let t=0;t<e.length;t++)S(e[t]);if(n.id&&c.delete(n.id),n.id){const t=document.getElementById(n.id);if(t&&t.parentNode)try{t.parentNode.removeChild(t)}catch{}}}function w(n,e){if(!e||!e.id)return{ok:!1,reason:"missing-new"};let t=document.getElementById(e.id);if(!t){const a=n&&n.id?document.getElementById(n.id):null;if(a)try{a.id=e.id,t=a}catch{}}if(!t)return{ok:!1,reason:"missing-el"};if(k(n,e))return{ok:!1,reason:"type-changed"};const o=!!e.isIsland;if(!o&&e.class&&(t.className=e.class),o||C(t,n&&n.props||{},e.props||{}),o||E(t,n&&n.style||{},e.style||{}),!o&&Object.prototype.hasOwnProperty.call(e,"text")&&t.textContent!==String(e.text||"")&&(t.textContent=String(e.text||"")),o)return{ok:!0};const i=n&&n.children?n.children:[],m=e.children?e.children:[],y=new Map;for(let a=0;a<i.length;a++){const r=i[a]&&(i[a].id||i[a].key)||null;r&&y.set(String(r),i[a])}const u=new Set;for(let a=0;a<m.length;a++){const r=m[a],h=r&&(r.id||r.key)||null;if(!h)if(a<i.length){const s=w(i[a],r);if(!s.ok)return s;u.add(i[a]);continue}else return{ok:!1,reason:"children-added"};const x=y.get(String(h));if(x){const s=w(x,r);if(!s.ok)return s;u.add(x)}else{if(a<i.length){const g=i[a];if(!k(g,r)){const b=w(g,r);if(!b.ok)return b;u.add(g);continue}}const s=createSubtree(r);if(s){const g=a<i.length?i[a]:null;if(g&&g.id){const b=document.getElementById(g.id);b&&b.parentNode?b.parentNode.insertBefore(s,b):t.appendChild(s)}else t.appendChild(s);continue}return{ok:!1,reason:"children-added"}}}for(let a=0;a<i.length;a++){const r=i[a];u.has(r)||S(r)}return{ok:!0}}function D(n){typeof requestAnimationFrame=="function"?requestAnimationFrame(n):setTimeout(n,16)}function I(n){const e=l;if(!e){l=n;try{window.__DARS_VDOM__=n}catch{}return}D(()=>{const t=w(e,n);if(!t.ok){console.warn("[Dars] Structural change detected (",t.reason,"), reloading...");try{location.reload()}catch{}return}l=n;try{window.__DARS_VDOM__=n}catch{}})}function B(n){l=n;try{window.__DARS_VDOM__=n}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(t=>A(t,document))}function P(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const n=window.__DARS_VERSION_URL||"version.txt";let e=null,t=!1,o=0;const i=10;let m=!1;function y(a,r,h,x){try{const s=new XMLHttpRequest;x&&(s.responseType=x),s.open("GET",a,!0),s.timeout=5e3,s.onreadystatechange=function(){s.readyState===4&&(s.status>=200&&s.status<300?r(s.response):h())},s.onerror=h,s.ontimeout=h,s.setRequestHeader("Cache-Control","no-store"),s.send()}catch{h()}}function u(){m||y(n,function(a){let r=(a||"").toString().trim();if(!r||r==="0"){if(o+=1,o>=i){console.warn("[Dars] version file not found after",i,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(e)try{clearTimeout(e)}catch{}return}t||(console.warn("[Dars] waiting for version file..."),t=!0),e=setTimeout(u,600);return}if(o=0,t=!1,d||(d=r),r&&r!==d){d=r;try{location.reload()}catch{}return}e=setTimeout(u,600)},function(){if(o+=1,o>=i){console.warn("[Dars] version file not reachable after",i,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(e)try{clearTimeout(e)}catch{}return}t||(console.warn("[Dars] waiting for version file..."),t=!0),e=setTimeout(u,600)},"text")}return u(),()=>{try{m=!0,e&&clearTimeout(e),window.__DARS_STOP_HOTRELOAD=null}catch{}}}document.addEventListener("DOMContentLoaded",function(){if(window.__DARS_VDOM__?B(window.__DARS_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=P()}catch{}}})}(),window.addEventListener("scroll",()=>{const c=document.getElementById("dars-navbar");window.scrollY>20?c.classList.add("scrolled"):c.classList.remove("scrolled");const l=document.getElementById("features-section");if(l&&!l.classList.contains("visible")){const d=l.getBoundingClientRect().top,p=window.innerHeight/1.5;d<p&&(l.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((f,v)=>{setTimeout(()=>{f.style.opacity="1",f.style.transform="translateY(0)"},v*100)}))}}),document.addEventListener("DOMContentLoaded",()=>{const c=document.getElementById("hero-logo"),l=document.getElementById("hero-title"),d=document.getElementById("hero-description"),p=document.getElementById("pip-command"),_=document.getElementById("get-started-btn"),f=document.getElementById("scroll-text");c&&setTimeout(()=>c.classList.add("show"),5),l&&setTimeout(()=>l.classList.add("show"),350),d&&setTimeout(()=>d.classList.add("show"),650),p&&setTimeout(()=>p.classList.add("show"),950),_&&setTimeout(()=>_.classList.add("show"),1250),f&&setTimeout(()=>f.classList.add("show"),1500)}),document.addEventListener("DOMContentLoaded",function(){const c=document.getElementById("hamburger-btn"),l=document.getElementById("mobile-menu"),d=document.body;c&&l&&(c.addEventListener("click",function(p){p.stopPropagation(),l.style.display==="flex"?(l.style.display="none",c.classList.remove("menu-open"),d.classList.remove("menu-open")):(l.style.display="flex",c.classList.add("menu-open"),d.classList.add("menu-open"))}),l.querySelectorAll("a").forEach(p=>{p.addEventListener("click",function(){l.style.display="none",c.classList.remove("menu-open"),d.classList.remove("menu-open")})}),document.addEventListener("click",function(p){!c.contains(p.target)&&!l.contains(p.target)&&(l.style.display="none",c.classList.remove("menu-open"),d.classList.remove("menu-open"))}),document.addEventListener("keydown",function(p){p.key==="Escape"&&l.style.display==="flex"&&(l.style.display="none",c.classList.remove("menu-open"),d.classList.remove("menu-open"))}))});

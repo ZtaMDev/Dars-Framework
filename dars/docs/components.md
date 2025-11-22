@@ -27,10 +27,74 @@ Dars provides a powerful way to handle user interactions through the `dScript` c
 
 For a complete list of available event types and how to use them, refer to the documentation in [Events](#events-in-dars).
 
-### dScript Basic Usage
+## Runtime Component Manipulation (createComp / deleteComp)
+
+You can create or delete components dynamically at runtime in the browser using `createComp()` and `deleteComp()`. These functions return `dScript` so you can attach them to events.
+
+- `from dars.all import *` exposes `createComp` and `deleteComp`.
+- The created subtree is serialized to VDOM, mounted into the DOM, and its events are rehydrated automatically.
+- Every node that has an `id` also receives a CSS class `dars-id-<id>` to help target multiple instances when needed.
+
+### API
 
 ```python
-from dars.scripts.dscript import dScript
+createComp(target, root, position='append') -> dScript
+deleteComp(id) -> dScript
+```
+
+- **target**: a component instance or a callable returning one.
+- **root**: id (string) of the DOM/container where to insert.
+- **position**: where to place the new element inside `root`.
+  - `append` (default)
+  - `prepend`
+  - `before:<id>` (insert before a reference sibling id)
+  - `after:<id>` (insert after a reference sibling id)
+
+### Examples
+
+```python
+from dars.all import *
+
+container = Container(id="root")
+
+# Add a button that creates a new Text inside #root on click
+add_btn = Button(
+    text="Add",
+    id="add",
+    on_click=createComp(Text("Hi", id="msg"), root="root", position='append')
+)
+
+# Add another button that inserts before a specific sibling
+insert_btn = Button(
+    text="Insert Before",
+    on_click=createComp(Text("Before", id="before"), root="root", position='before:msg')
+)
+
+# Button that deletes an element by id
+delete_btn = Button(
+    text="Delete msg",
+    on_click=deleteComp("msg")
+)
+```
+
+### Event Rehydration
+
+- When a subtree is created with `createComp`, all events defined in its Python components are attached at runtime.
+- This includes nested children and multiple handlers per node.
+
+### Multiple Instances and CSS Class
+
+- Elements get a helper class `dars-id-<id>` in addition to the DOM `id`.
+- This makes it easier to query duplicate instances when they exist.
+
+### Notes
+
+- These APIs are for dynamic changes in the browser. For compile-time changes (before export/preview), use `App.create()` and `App.delete()` described in the App documentation.
+
+## dScript Basic Usage
+
+```python
+from dars.all import *
 
 # Button with click handler
 button = Button(
@@ -128,21 +192,46 @@ from dars.core.component import Component
 class Component(ABC):
     def __init__(self, **props):
         self.props = props
-        self.children = []
-        self.parent = None
-        self.id = props.get("id")
-        self.class_name = props.get("class_name")
-        self.style = props.get("style", {})
-        self.events = {}
+        self.children: List[Component] = []
+        self.parent: Optional[Component] = None
+        self.id: Optional[str] = props.get('id')
+        self.class_name: str = props.get("class_name", self.__class__.__name__)
+        self.style: Dict[str, Any] = props.get('style', {})
+        self.hover_style: Dict[str, Any] = props.get('hover_style', {})
+        self.active_style: Dict[str, Any] = props.get('active_style', {})
+        self.events: Dict[str, Callable] = {}
+        self.key: Optional[str] = props.get('key')
 ```
 
-### Common Properties
+### Global Properties
 
 All components support these basic properties:
 
 - **id**: Unique component identifier
 - **class_name**: CSS class for additional styles
 - **style**: Dictionary of CSS styles
+- **hover_style**: Dictionary of CSS styles on hover
+- **active_style**: Dictionary of CSS styles when active
+- **set_event(event_name, handler)**: Attach event handlers
+- **on_click** event handler receives a dScript object or a comp.state() function
+- **on_double_click** event handler receives a dScript object or a comp.state() function
+- **on_mouse_down** event handler receives a dScript object or a comp.state() function
+- **on_mouse_up** event handler receives a dScript object or a comp.state() function
+- **on_mouse_enter** event handler receives a dScript object or a comp.state() function
+- **on_mouse_leave** event handler receives a dScript object or a comp.state() function
+- **on_mouse_move** event handler receives a dScript object or a comp.state() function
+- **on_key_down** event handler receives a dScript object or a comp.state() function
+- **on_key_up** event handler receives a dScript object or a comp.state() function
+- **on_key_press** event handler receives a dScript object or a comp.state() function
+- **on_change** event handler receives a dScript object or a comp.state() function
+- **on_input** event handler receives a dScript object or a comp.state() function
+- **on_submit** event handler receives a dScript object or a comp.state() function
+- **on_focus** event handler receives a dScript object or a comp.state() function
+- **on_blur** event handler receives a dScript object or a comp.state() function
+- **on_load** event handler receives a dScript object or a comp.state() function
+- **on_error** event handler receives a dScript object or a comp.state() function
+- **on_resize** event handler receives a dScript object or a comp.state() function
+
 - **children**: List of child components (for containers)
 
 ### Component-Search-and-Modification
@@ -674,6 +763,58 @@ sidebar = Container(
     }
 )
 ```
+
+### Section
+
+The `Section` component is a container that can hold other components. It supports multiple ways to add child components.
+And also its like the [Container](#Container) component but instead of export a `<div>` to render it exports and `<section>`.
+
+#### Section Syntax
+
+```python
+from dars.all import *
+# Method 1: Pass components as arguments
+container = Section(
+    Text("Hello"),
+    Button("Click me"),
+    style={
+        "display": "flex",
+        "flex-direction": "column",
+        "padding": "20px",
+        "background-color": "#f8f9fa"
+    }
+)
+
+# Method 2: Use additional_children parameter
+components = [Text("Hello"), Button("Click me")]
+container = Section(
+    additional_children=components,
+    style={
+        "display": "flex",
+        "flex-direction": "column",
+        "padding": "20px",
+        "background-color": "#f8f9fa"
+    }
+)
+
+# Method 3: Add children after creation
+container = Section(style={
+    "display": "flex",
+    "flex-direction": "column",
+    "padding": "20px",
+    "background-color": "#f8f9fa"
+})
+container.add_child(Text("Hello"))
+container.add_child(Button("Click me"))
+```
+
+#### Section Properties
+
+| Property | Type | Description |
+|-----------|------|-------------|
+| `children` | tuple | Components passed as positional arguments |
+| `additional_children` | list | Optional list of additional components |
+
 
 ### Markdown
 

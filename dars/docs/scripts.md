@@ -83,6 +83,26 @@ document.addEventListener('DOMContentLoaded', function() {
 app.add_script(custom_action)
 ```
 
+### Chaining Scripts (`.then()`)
+
+You can chain multiple `dScript` objects using the `.then()` method. This is particularly useful when working with asynchronous operations like file reading in Electron.
+
+```python
+from dars.desktop import read_text
+from dars.core.state import this
+from dars.scripts.dscript import RawJS, dScript
+
+# Read a file and update a component with its content
+# The result of the previous script is available as dScript.ARG (which resolves to 'value')
+read_op = read_text("data.txt")
+update_op = this().state(text=RawJS(dScript.ARG))
+
+chained_script = read_op.then(update_op)
+```
+
+The `RawJS` wrapper ensures that `dScript.ARG` is treated as a variable name (`value`) rather than a string literal `"value"`.
+
+
 ## InlineScript
 
 ### Basic Syntax InlineScript
