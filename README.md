@@ -136,16 +136,7 @@ The `this()` helper enables direct, event-time component updates without pre-def
 ```python
 from dars.all import *
 
-counter = Text("0", id="count")
-btn = Button("Increment", on_click=this().state(text=Mod.inc("count")))
-
-# Use RawJS for dynamic values (e.g., from async operations)
-from dars.desktop import read_text
-
-display = Text("", id="display")
-read_btn = Button("Load", on_click=read_text("data.txt").then(
-    this().state(text=RawJS(dScript.ARG))  # Update with file content
-))
+btn = Button("Click Me!", on_click=this().state(text="You Clicked!",))
 ```
 
 * Works anywhere: desktop and web exports
