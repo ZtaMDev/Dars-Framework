@@ -3,7 +3,7 @@ from dars.all import *
 app = App(title="Hello World", theme="dark")
 # Crear componentes
 index = Page(
-    Text(
+     Text(
         text="Hello World",
         style={
             'font-size': '48px',
@@ -25,11 +25,7 @@ index = Page(
 
     Button(
         text="Click Me!",
-        # Modern state updates using this()
-        on_click=[this().state(text="Clicked!", style={'background-color': '#27ae60'}), dScript("alert('Hello World!')")],
-        # Hover effects using this()
-        on_mouse_enter=this().state(style={'background-color': '#2980b9'}),
-        on_mouse_leave=this().state(style={'background-color': '#3498db'}),
+        on_click= alert('Hello from DARS!'),
         style={
             'background-color': '#3498db',
             'color': 'white',
@@ -51,7 +47,7 @@ index = Page(
         'font-family': 'Arial, sans-serif'
     }
 ) 
-index.attr()
+
 app.add_page("index", index, title="Hello World", index=True)
 
 if __name__ == "__main__":
