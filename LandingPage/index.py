@@ -15,6 +15,9 @@ app = App(
     description="Dars framework landing page for the UI multiplatform python framework",
     theme_color="#0d1513",
     background_color="#0d1513",
+    apple_mobile_web_app_capable=True,
+    apple_mobile_web_app_status_bar_style="black-translucent",
+    apple_mobile_web_app_title="Dars Framework",
     keywords=["framework","python","python framework", "dars","dars framework", "ui components", "declarative UI"]
 )
 
@@ -25,6 +28,7 @@ index = Page(
     create_howitworks(),
     create_footer()
 )
+app.set_theme("dark")
 app.add_global_style(file_path="index.css")
 app.add_script(dScript(file_path="script.js"))
 app.add_page("index", index, title="Dars Framework", index=True)

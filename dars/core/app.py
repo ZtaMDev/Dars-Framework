@@ -1083,6 +1083,9 @@ class App:
         favicon: str = "",
         icon: str = "",
         apple_touch_icon: str = "",
+        apple_mobile_web_app_capable: bool = False,
+        apple_mobile_web_app_status_bar_style: str = "default",  # "default", "black", "black-translucent"
+        apple_mobile_web_app_title: str = "",
         manifest: str = "",
         theme_color: str = "#000000",
         background_color: str = "#ffffff",
@@ -1105,6 +1108,10 @@ class App:
         self.favicon = favicon
         self.icon = icon  # Para PWA y meta tags
         self.apple_touch_icon = apple_touch_icon
+        # Apple mobile web app properties
+        self.apple_mobile_web_app_capable = apple_mobile_web_app_capable
+        self.apple_mobile_web_app_status_bar_style = apple_mobile_web_app_status_bar_style
+        self.apple_mobile_web_app_title = apple_mobile_web_app_title or title
         self.manifest = manifest  # Para PWA manifest.json
         
         # Colores para PWA y tema

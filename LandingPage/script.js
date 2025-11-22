@@ -13,7 +13,7 @@ window.addEventListener("scroll", () => {
 
     if (sectionPosition < screenPosition) {
       featuresSection.classList.add("visible");
-      
+
       const featureCards = document.querySelectorAll('[id^="feature-card-"]');
       featureCards.forEach((card, index) => {
         setTimeout(() => {
@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const logo = document.getElementById("hero-logo");
   const title = document.getElementById("hero-title");
   const desc = document.getElementById("hero-description");
-  const pipCommand = document.getElementById("pip-command"); // NUEVO
+  const pipCommand = document.getElementById("pip-command");
   const btn = document.getElementById("get-started-btn");
   const scrollText = document.getElementById("scroll-text");
 
@@ -42,14 +42,14 @@ document.addEventListener("DOMContentLoaded", () => {
   if (desc) {
     setTimeout(() => desc.classList.add("show"), 650);
   }
-  if (pipCommand) { // NUEVO
+  if (pipCommand) {
     setTimeout(() => pipCommand.classList.add("show"), 950);
   }
   if (btn) {
-    setTimeout(() => btn.classList.add("show"), 1250); // Aumentado de 950 a 1250
+    setTimeout(() => btn.classList.add("show"), 1250);
   }
   if (scrollText) {
-    setTimeout(() => scrollText.classList.add("show"), 1500); // Aumentado de 1200 a 1500
+    setTimeout(() => scrollText.classList.add("show"), 1500);
   }
 });
 
@@ -58,70 +58,68 @@ function openDocs() {
 }
 
 function copyPipCommand() {
-    const command = 'pip install dars framework';
-    navigator.clipboard.writeText(command).then(() => {
-        const btn = document.querySelector('#copy-btn');
-        const originalText = btn.textContent;
-        btn.textContent = 'Copied!';
-        btn.style.background = "linear-gradient(135deg, #38c49f 0%, #2a6b5b 100%) !important";
-        
-        setTimeout(() => {
-            btn.textContent = originalText;
-            btn.style.background = "linear-gradient(135deg, #1d4a3f 0%, #2a6b5b 100%) !important";
-        }, 2000);
-    });
+  const command = 'pip install dars framework';
+  navigator.clipboard.writeText(command).then(() => {
+    const btn = document.querySelector('#copy-btn');
+    const originalText = btn.textContent;
+    btn.textContent = 'Copied!';
+    btn.style.background = "linear-gradient(135deg, #38c49f 0%, #2a6b5b 100%) !important";
+
+    setTimeout(() => {
+      btn.textContent = originalText;
+      btn.style.background = "linear-gradient(135deg, #1d4a3f 0%, #2a6b5b 100%) !important";
+    }, 2000);
+  });
 }
 
-// En tu script.js, reemplaza la función del hamburguesa con esta versión mejorada:
+document.addEventListener('DOMContentLoaded', function () {
+  const hamburgerBtn = document.getElementById('hamburger-btn');
+  const mobileMenu = document.getElementById('mobile-menu');
+  const body = document.body;
 
-document.addEventListener('DOMContentLoaded', function() {
-    const hamburgerBtn = document.getElementById('hamburger-btn');
-    const mobileMenu = document.getElementById('mobile-menu');
-    const body = document.body;
-    
-    if (hamburgerBtn && mobileMenu) {
-        hamburgerBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const isOpen = mobileMenu.style.display === 'flex';
-            
-            if (isOpen) {
-                // Cerrar menú
-                mobileMenu.style.display = 'none';
-                hamburgerBtn.classList.remove('menu-open');
-                body.classList.remove('menu-open');
-            } else {
-                // Abrir menú
-                mobileMenu.style.display = 'flex';
-                hamburgerBtn.classList.add('menu-open');
-                body.classList.add('menu-open');
-            }
-        });
-        
-        // Cerrar menú al hacer clic en un enlace
-        mobileMenu.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', function() {
-                mobileMenu.style.display = 'none';
-                hamburgerBtn.classList.remove('menu-open');
-                body.classList.remove('menu-open');
-            });
-        });
-        
-        // Cerrar menú al hacer clic fuera
-        document.addEventListener('click', function(event) {
-            if (!hamburgerBtn.contains(event.target) && !mobileMenu.contains(event.target)) {
-                mobileMenu.style.display = 'none';
-                hamburgerBtn.classList.remove('menu-open');
-                body.classList.remove('menu-open');
-            }
-        });
-        
-        // Cerrar menú con tecla Escape
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape' && mobileMenu.style.display === 'flex') {
-                mobileMenu.style.display = 'none';
-                hamburgerBtn.classList.remove('menu-open');
-                body.classList.remove('menu-open');
-            }
-        });
-    }
+  if (hamburgerBtn && mobileMenu) {
+    hamburgerBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      const isOpen = mobileMenu.style.display === 'flex';
+
+      if (isOpen) {
+        // Cerrar menú
+        mobileMenu.style.display = 'none';
+        hamburgerBtn.classList.remove('menu-open');
+        body.classList.remove('menu-open');
+      } else {
+        // Abrir menú
+        mobileMenu.style.display = 'flex';
+        hamburgerBtn.classList.add('menu-open');
+        body.classList.add('menu-open');
+      }
+    });
+
+    // Cerrar menú al hacer clic en un enlace
+    mobileMenu.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', function () {
+        mobileMenu.style.display = 'none';
+        hamburgerBtn.classList.remove('menu-open');
+        body.classList.remove('menu-open');
+      });
+    });
+
+    // Cerrar menú al hacer clic fuera
+    document.addEventListener('click', function (event) {
+      if (!hamburgerBtn.contains(event.target) && !mobileMenu.contains(event.target)) {
+        mobileMenu.style.display = 'none';
+        hamburgerBtn.classList.remove('menu-open');
+        body.classList.remove('menu-open');
+      }
+    });
+
+    // Cerrar menú con tecla Escape
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && mobileMenu.style.display === 'flex') {
+        mobileMenu.style.display = 'none';
+        hamburgerBtn.classList.remove('menu-open');
+        body.classList.remove('menu-open');
+      }
+    });
+  }
 });

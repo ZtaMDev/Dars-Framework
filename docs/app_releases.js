@@ -1,4 +1,150 @@
-window.__DARS_VDOM__={type:"T1",id:"page_151",key:"0",children:[{type:"T2",id:"container_152",key:"0/0",children:[{type:"T3",id:"dars-navbar",key:"0/0/0",children:[{type:"T2",id:"navbar-left",key:"0/0/0/0",children:[{type:"T4",id:"image_153",key:"0/0/0/0/0"},{type:"T5",id:"text_154",key:"0/0/0/0/1",text:"Dars Framework"}]},{type:"T2",id:"container_155",key:"0/0/0/1",children:[{type:"T2",id:"navbar-right",key:"0/0/0/1/0",children:[{type:"T6",id:"link_156",key:"0/0/0/1/0/0",text:"Home"},{type:"T6",id:"link_157",key:"0/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_158",key:"0/0/0/1/0/2",text:"Releases"},{type:"T6",id:"link_159",key:"0/0/0/1/0/3",text:"PlayGround"},{type:"T6",id:"link_160",key:"0/0/0/1/0/4",text:"GitHub"}]},{type:"T2",id:"hamburger-menu",key:"0/0/0/1/1",children:[{type:"T2",id:"hamburger-btn",key:"0/0/0/1/1/0",children:[{type:"T2",id:"container_161",key:"0/0/0/1/1/0/0",children:[{type:"T2",id:"container_162",key:"0/0/0/1/1/0/0/0"},{type:"T2",id:"container_163",key:"0/0/0/1/1/0/0/1"},{type:"T2",id:"container_164",key:"0/0/0/1/1/0/0/2"}]}]},{type:"T2",id:"mobile-menu",key:"0/0/0/1/1/1",children:[{type:"T6",id:"link_165",key:"0/0/0/1/1/1/0",text:"Home"},{type:"T6",id:"link_166",key:"0/0/0/1/1/1/1",text:"Documentation"},{type:"T6",id:"link_167",key:"0/0/0/1/1/1/2",text:"Releases"},{type:"T6",id:"link_168",key:"0/0/0/1/1/1/3",text:"PlayGround"},{type:"T6",id:"link_169",key:"0/0/0/1/1/1/4",text:"GitHub"}]}]}]}]}]},{type:"T2",id:"container_170",key:"0/1",children:[{type:"T2",id:"markdown-content-container",key:"0/1/0",children:[{type:"T9",id:"markdown_171",key:"0/1/0/0",text:`# Release Notes v1.4.0
+window.__DARS_VDOM__={type:"T1",id:"page_151",key:"0",children:[{type:"T2",id:"container_152",key:"0/0",children:[{type:"T3",id:"dars-navbar",key:"0/0/0",children:[{type:"T2",id:"navbar-left",key:"0/0/0/0",children:[{type:"T4",id:"image_153",key:"0/0/0/0/0"},{type:"T5",id:"text_154",key:"0/0/0/0/1",text:"Dars Framework"}]},{type:"T2",id:"container_155",key:"0/0/0/1",children:[{type:"T2",id:"navbar-right",key:"0/0/0/1/0",children:[{type:"T6",id:"link_156",key:"0/0/0/1/0/0",text:"Home"},{type:"T6",id:"link_157",key:"0/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_158",key:"0/0/0/1/0/2",text:"Releases"},{type:"T6",id:"link_159",key:"0/0/0/1/0/3",text:"PlayGround"},{type:"T6",id:"link_160",key:"0/0/0/1/0/4",text:"GitHub"}]},{type:"T2",id:"hamburger-menu",key:"0/0/0/1/1",children:[{type:"T2",id:"hamburger-btn",key:"0/0/0/1/1/0",children:[{type:"T2",id:"container_161",key:"0/0/0/1/1/0/0",children:[{type:"T2",id:"container_162",key:"0/0/0/1/1/0/0/0"},{type:"T2",id:"container_163",key:"0/0/0/1/1/0/0/1"},{type:"T2",id:"container_164",key:"0/0/0/1/1/0/0/2"}]}]},{type:"T2",id:"mobile-menu",key:"0/0/0/1/1/1",children:[{type:"T6",id:"link_165",key:"0/0/0/1/1/1/0",text:"Home"},{type:"T6",id:"link_166",key:"0/0/0/1/1/1/1",text:"Documentation"},{type:"T6",id:"link_167",key:"0/0/0/1/1/1/2",text:"Releases"},{type:"T6",id:"link_168",key:"0/0/0/1/1/1/3",text:"PlayGround"},{type:"T6",id:"link_169",key:"0/0/0/1/1/1/4",text:"GitHub"}]}]}]}]}]},{type:"T2",id:"container_170",key:"0/1",children:[{type:"T2",id:"markdown-content-container",key:"0/1/0",children:[{type:"T9",id:"markdown_171",key:"0/1/0/0",text:`# Release Notes v1.4.1
+
+> SEO and Apple device optimizations. Enhanced metadata generation with automatic MIME type detection for favicons and comprehensive iOS/Safari support.
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+or
+
+\`\`\`bash
+pip install dars-framework==1.4.1
+\`\`\`
+
+## What's New
+
+### Automatic Favicon MIME Type Detection
+
+**Smart Icon Type Recognition:**
+- Favicon links now automatically detect and use the correct MIME type based on file extension
+- Supports PNG, ICO, SVG, JPG/JPEG, WebP, and GIF formats
+- No manual type specification needed
+- Eliminates incorrect \`image/x-icon\` type for PNG files
+
+**Before (v1.4.0):**
+\`\`\`html
+<link rel="icon" href="logo.png" type="image/x-icon">  <!-- Incorrect! -->
+\`\`\`
+
+**After (v1.4.1):**
+\`\`\`html
+<link rel="icon" href="logo.png" type="image/png">  <!-- Correct! -->
+\`\`\`
+
+### Enhanced Apple Device Support
+
+**New App Properties:**
+- \`apple_mobile_web_app_capable\` - Enable fullscreen mode when added to home screen
+- \`apple_mobile_web_app_status_bar_style\` - Control status bar appearance:
+  - \`"default"\` - Standard iOS status bar
+  - \`"black"\` - Black status bar
+  - \`"black-translucent"\` - **Transparent status bar** (solves Safari iOS 16+ solid color issue)
+- \`apple_mobile_web_app_title\` - Custom title for home screen icon
+
+**Usage:**
+\`\`\`python
+app = App(
+    title="My App",
+    favicon="logo.png",
+    apple_touch_icon="logo.png",
+    apple_mobile_web_app_capable=True,
+    apple_mobile_web_app_status_bar_style="black-translucent",  # Enables transparency!
+    apple_mobile_web_app_title="MyApp"
+)
+\`\`\`
+
+### Safari 15+ Theme Color Enhancements
+
+**Adaptive Theme Colors:**
+- Theme color now includes media query variants for light/dark mode
+- Proper integration with iOS system appearance settings
+- **Fixes Safari iOS 16+ transparency issues** where solid colors blocked background visibility
+
+**Generated Meta Tags:**
+\`\`\`html
+<meta name="theme-color" content="#0d1513">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#0d1513">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0d1513">
+\`\`\`
+
+### Improved Apple Touch Icon
+
+**Multiple Size Specifications:**
+- Apple touch icon now includes size attribute for better iOS home screen quality
+- Generates both standard and 180x180 sized icon links
+
+**Generated Links:**
+\`\`\`html
+<link rel="apple-touch-icon" href="logo.png">
+<link rel="apple-touch-icon" sizes="180x180" href="logo.png">
+\`\`\`
+
+### Modern Mobile Web App Meta Tag
+
+**Standards Compliance:**
+- Added \`mobile-web-app-capable\` meta tag alongside \`apple-mobile-web-app-capable\`
+- Eliminates deprecation warnings in modern browsers
+- Maintains backward compatibility with older iOS versions
+
+**Generated Meta Tags:**
+\`\`\`html
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+\`\`\`
+
+## Technical Improvements
+
+### Exporter Enhancements (\`dars/exporters/web/html_css_js.py\`)
+
+- **New \`_detect_icon_mime_type()\` Helper**: Automatically detects MIME types from file extensions
+- **Enhanced \`_generate_meta_tags()\`**: Adds Apple-specific meta tags and theme-color variants
+- **Updated \`_generate_links()\`**: Applies automatic MIME detection and sizes attribute
+
+### App Class Updates (\`dars/core/app.py\`)
+
+- Added 3 new initialization parameters for Apple mobile web app support
+- Properties auto-initialize with sensible defaults (\`apple_mobile_web_app_title\` defaults to app title)
+- All new properties are **optional** and **backward compatible**
+
+## Migration Notes
+
+### For Existing Projects
+
+**Automatic Upgrade:**
+- No configuration changes required
+- Favicons automatically get correct MIME types
+- Theme colors automatically include light/dark variants
+- All new features are opt-in
+
+**Optional iOS Enhancement:**
+\`\`\`python
+# Add to your App initialization
+app = App(
+    # ... existing params ...
+    apple_mobile_web_app_capable=True,
+    apple_mobile_web_app_status_bar_style="black-translucent",
+    apple_mobile_web_app_title="MyApp"
+)
+\`\`\`
+
+## SEO & Performance Impact
+
+- **Improved SEO**: Correct MIME types and proper meta tags
+- **Better Mobile Indexing**: Enhanced metadata for mobile search results
+- **iOS User Retention**: Superior home screen experience encourages app-like usage
+
+## Desktop Exporter Status
+
+**Still in BETA** - No changes from v1.4.0
+
+---
+
+**Upgrade Highly Recommended** for all projects, especially those targeting iOS/Safari users or requiring proper favicon MIME types.
+
+# Release Notes v1.4.0
 
 > Simple Template update.
 
@@ -994,4 +1140,4 @@ Upgrade Recommendation: Recommended for all users; especially helpful for projec
 # Older release notes can be found
 
 In the github repository [Here](https://github.com/ZtaMDev/Dars-Framework/releases).
-`}]},{type:"T2",id:"footer-section",key:"0/1/1",children:[{type:"T2",id:"container_172",key:"0/1/1/0",children:[{type:"T2",id:"container_173",key:"0/1/1/0/0",children:[{type:"T2",id:"container_174",key:"0/1/1/0/0/0",children:[{type:"T4",id:"image_175",key:"0/1/1/0/0/0/0"},{type:"T2",id:"container_176",key:"0/1/1/0/0/0/1",children:[{type:"T5",id:"text_177",key:"0/1/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_178",key:"0/1/1/0/0/1",children:[{type:"T2",id:"container_179",key:"0/1/1/0/0/1/0",children:[{type:"T5",id:"text_180",key:"0/1/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_181",key:"0/1/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_182",key:"0/1/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_183",key:"0/1/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_184",key:"0/1/1/0/0/1/1",children:[{type:"T5",id:"text_185",key:"0/1/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_186",key:"0/1/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_187",key:"0/1/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_188",key:"0/1/1/0/0/1/2",children:[{type:"T5",id:"text_189",key:"0/1/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_190",key:"0/1/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_191",key:"0/1/1/0/0/2",children:[{type:"T2",id:"container_192",key:"0/1/1/0/0/2/0",children:[{type:"T5",id:"text_193",key:"0/1/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_194",key:"0/1/1/0/0/2/1",children:[{type:"T5",id:"text_195",key:"0/1/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_196",key:"0/1/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_197",key:"0/1/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_198",key:"0/1/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]},{type:"T10",id:"documentation-sidebar",key:"0/2"}]},function(){const d=new Map;let r=null,c=null;function p(){}function k(){}function h(e,n){if(!e)return;n(e);const t=e.children||[];for(let i=0;i<t.length;i++)h(t[i],n)}function _(e){try{if(typeof atob=="function")return atob(e);if(typeof Buffer<"u")return Buffer.from(e,"base64").toString("utf8")}catch{}return""}function E(e){try{if(!e)return null;if(e&&e.type==="inline"&&e.code)return new Function("event",e.code);const n=e&&(e.b||e.code_b64)||null;if(n){const t=_(n);if(t)return new Function("event",t)}}catch{}return null}function M(e){h(e,n=>{if(n&&n.id&&n.events&&!d.has(n.id)){const t={};for(const i in n.events){const a=n.events[i],u=E(a);u&&(t[i]=u)}Object.keys(t).length?d.set(n.id,t):d.delete(n.id)}})}function B(e,n){if(!(!e||!n))for(const[t,i]of Object.entries(n))try{i===!1||i===null||typeof i>"u"?e.removeAttribute(t):e.setAttribute(t,String(i))}catch{}}function T(e,n={},t={}){for(const i in n)if(!(i in t))try{e.removeAttribute(i)}catch{}for(const i in t){const a=t[i];try{a===!1||a===null||typeof a>"u"?e.removeAttribute(i):e.setAttribute(i,String(a))}catch{}}}function D(e,n={},t={}){for(const i in n)if(!(i in t))try{e.style.removeProperty(i.replace(/_/g,"-"))}catch{}for(const i in t){const a=t[i];try{e.style.setProperty(i.replace(/_/g,"-"),String(a))}catch{}}}function A(e,n){(n||document).addEventListener(e,function(t){let i=t.target;const a=n||document;for(;i&&i!==a;){const u=i.id;if(u&&d.has(u)){const y=d.get(u);if(i&&i.__darsEv&&i.__darsEv[e])return;let m=y[e];if(!m&&(e==="keydown"||e==="keyup"||e==="keypress")){const o=t.key||t.code;if(o){const s=e+"."+o;m=y[s]}}if(typeof m=="function"){try{m.call(i,t)}catch(o){console.error("[Dars] handler error",o)}return}}i=i.parentNode}},!0)}function x(e,n){return e&&n?e.type!==n.type:e!==n}function S(e){if(!e)return;const n=e.children||[];for(let t=0;t<n.length;t++)S(n[t]);if(e.id&&d.delete(e.id),e.id){const t=document.getElementById(e.id);if(t&&t.parentNode)try{t.parentNode.removeChild(t)}catch{}}}function w(e,n){if(!n||!n.id)return{ok:!1,reason:"missing-new"};let t=document.getElementById(n.id);if(!t){const o=e&&e.id?document.getElementById(e.id):null;if(o)try{o.id=n.id,t=o}catch{}}if(!t)return{ok:!1,reason:"missing-el"};if(x(e,n))return{ok:!1,reason:"type-changed"};const i=!!n.isIsland;if(!i&&n.class&&(t.className=n.class),i||T(t,e&&e.props||{},n.props||{}),i||D(t,e&&e.style||{},n.style||{}),!i&&Object.prototype.hasOwnProperty.call(n,"text")&&t.textContent!==String(n.text||"")&&(t.textContent=String(n.text||"")),i)return{ok:!0};const a=e&&e.children?e.children:[],u=n.children?n.children:[],y=new Map;for(let o=0;o<a.length;o++){const s=a[o]&&(a[o].id||a[o].key)||null;s&&y.set(String(s),a[o])}const m=new Set;for(let o=0;o<u.length;o++){const s=u[o],f=s&&(s.id||s.key)||null;if(!f)if(o<a.length){const l=w(a[o],s);if(!l.ok)return l;m.add(a[o]);continue}else return{ok:!1,reason:"children-added"};const b=y.get(String(f));if(b){const l=w(b,s);if(!l.ok)return l;m.add(b)}else{if(o<a.length){const g=a[o];if(!x(g,s)){const v=w(g,s);if(!v.ok)return v;m.add(g);continue}}const l=createSubtree(s);if(l){const g=o<a.length?a[o]:null;if(g&&g.id){const v=document.getElementById(g.id);v&&v.parentNode?v.parentNode.insertBefore(l,v):t.appendChild(l)}else t.appendChild(l);continue}return{ok:!1,reason:"children-added"}}}for(let o=0;o<a.length;o++){const s=a[o];m.has(s)||S(s)}return{ok:!0}}function C(e){typeof requestAnimationFrame=="function"?requestAnimationFrame(e):setTimeout(e,16)}function P(e){const n=r;if(!n){r=e;try{window.__DARS_VDOM__=e}catch{}return}C(()=>{const t=w(n,e);if(!t.ok){console.warn("[Dars] Structural change detected (",t.reason,"), reloading...");try{location.reload()}catch{}return}r=e;try{window.__DARS_VDOM__=e}catch{}})}function R(e){r=e;try{window.__DARS_VDOM__=e}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(t=>A(t,document))}function I(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const e=window.__DARS_VERSION_URL||"version.txt";let n=null,t=!1,i=0;const a=10;let u=!1;function y(o,s,f,b){try{const l=new XMLHttpRequest;b&&(l.responseType=b),l.open("GET",o,!0),l.timeout=5e3,l.onreadystatechange=function(){l.readyState===4&&(l.status>=200&&l.status<300?s(l.response):f())},l.onerror=f,l.ontimeout=f,l.setRequestHeader("Cache-Control","no-store"),l.send()}catch{f()}}function m(){u||y(e,function(o){let s=(o||"").toString().trim();if(!s||s==="0"){if(i+=1,i>=a){console.warn("[Dars] version file not found after",a,"attempts. Hot reload disabled for this session."),u=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(n)try{clearTimeout(n)}catch{}return}t||(console.warn("[Dars] waiting for version file..."),t=!0),n=setTimeout(m,600);return}if(i=0,t=!1,c||(c=s),s&&s!==c){c=s;try{location.reload()}catch{}return}n=setTimeout(m,600)},function(){if(i+=1,i>=a){console.warn("[Dars] version file not reachable after",a,"attempts. Hot reload disabled for this session."),u=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(n)try{clearTimeout(n)}catch{}return}t||(console.warn("[Dars] waiting for version file..."),t=!0),n=setTimeout(m,600)},"text")}return m(),()=>{try{u=!0,n&&clearTimeout(n),window.__DARS_STOP_HOTRELOAD=null}catch{}}}document.addEventListener("DOMContentLoaded",function(){if(window.__DARS_VDOM__?R(window.__DARS_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=I()}catch{}}})}(),window.addEventListener("scroll",()=>{const d=document.getElementById("dars-navbar");window.scrollY>20?d.classList.add("scrolled"):d.classList.remove("scrolled");const r=document.getElementById("features-section");if(r&&!r.classList.contains("visible")){const c=r.getBoundingClientRect().top,p=window.innerHeight/1.5;c<p&&(r.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((h,_)=>{setTimeout(()=>{h.style.opacity="1",h.style.transform="translateY(0)"},_*100)}))}}),document.addEventListener("DOMContentLoaded",()=>{const d=document.getElementById("hero-logo"),r=document.getElementById("hero-title"),c=document.getElementById("hero-description"),p=document.getElementById("pip-command"),k=document.getElementById("get-started-btn"),h=document.getElementById("scroll-text");d&&setTimeout(()=>d.classList.add("show"),5),r&&setTimeout(()=>r.classList.add("show"),350),c&&setTimeout(()=>c.classList.add("show"),650),p&&setTimeout(()=>p.classList.add("show"),950),k&&setTimeout(()=>k.classList.add("show"),1250),h&&setTimeout(()=>h.classList.add("show"),1500)});function N(){window.open("https://ztamdev.github.io/Dars-Framework/docs.html","_self")}function F(){navigator.clipboard.writeText("pip install dars framework").then(()=>{const r=document.querySelector("#copy-btn"),c=r.textContent;r.textContent="Copied!",r.style.background="linear-gradient(135deg, #38c49f 0%, #2a6b5b 100%) !important",setTimeout(()=>{r.textContent=c,r.style.background="linear-gradient(135deg, #1d4a3f 0%, #2a6b5b 100%) !important"},2e3)})}document.addEventListener("DOMContentLoaded",function(){const d=document.getElementById("hamburger-btn"),r=document.getElementById("mobile-menu"),c=document.body;d&&r&&(d.addEventListener("click",function(p){p.stopPropagation(),r.style.display==="flex"?(r.style.display="none",d.classList.remove("menu-open"),c.classList.remove("menu-open")):(r.style.display="flex",d.classList.add("menu-open"),c.classList.add("menu-open"))}),r.querySelectorAll("a").forEach(p=>{p.addEventListener("click",function(){r.style.display="none",d.classList.remove("menu-open"),c.classList.remove("menu-open")})}),document.addEventListener("click",function(p){!d.contains(p.target)&&!r.contains(p.target)&&(r.style.display="none",d.classList.remove("menu-open"),c.classList.remove("menu-open"))}),document.addEventListener("keydown",function(p){p.key==="Escape"&&r.style.display==="flex"&&(r.style.display="none",d.classList.remove("menu-open"),c.classList.remove("menu-open"))}))});
+`}]},{type:"T2",id:"footer-section",key:"0/1/1",children:[{type:"T2",id:"container_172",key:"0/1/1/0",children:[{type:"T2",id:"container_173",key:"0/1/1/0/0",children:[{type:"T2",id:"container_174",key:"0/1/1/0/0/0",children:[{type:"T4",id:"image_175",key:"0/1/1/0/0/0/0"},{type:"T2",id:"container_176",key:"0/1/1/0/0/0/1",children:[{type:"T5",id:"text_177",key:"0/1/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_178",key:"0/1/1/0/0/1",children:[{type:"T2",id:"container_179",key:"0/1/1/0/0/1/0",children:[{type:"T5",id:"text_180",key:"0/1/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_181",key:"0/1/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_182",key:"0/1/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_183",key:"0/1/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_184",key:"0/1/1/0/0/1/1",children:[{type:"T5",id:"text_185",key:"0/1/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_186",key:"0/1/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_187",key:"0/1/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_188",key:"0/1/1/0/0/1/2",children:[{type:"T5",id:"text_189",key:"0/1/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_190",key:"0/1/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_191",key:"0/1/1/0/0/2",children:[{type:"T2",id:"container_192",key:"0/1/1/0/0/2/0",children:[{type:"T5",id:"text_193",key:"0/1/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_194",key:"0/1/1/0/0/2/1",children:[{type:"T5",id:"text_195",key:"0/1/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_196",key:"0/1/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_197",key:"0/1/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_198",key:"0/1/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]},{type:"T10",id:"documentation-sidebar",key:"0/2"}]},function(){const d=new Map;let r=null,c=null;function p(){}function w(){}function h(e,n){if(!e)return;n(e);const t=e.children||[];for(let i=0;i<t.length;i++)h(t[i],n)}function _(e){try{if(typeof atob=="function")return atob(e);if(typeof Buffer<"u")return Buffer.from(e,"base64").toString("utf8")}catch{}return""}function E(e){try{if(!e)return null;if(e&&e.type==="inline"&&e.code)return new Function("event",e.code);const n=e&&(e.b||e.code_b64)||null;if(n){const t=_(n);if(t)return new Function("event",t)}}catch{}return null}function R(e){h(e,n=>{if(n&&n.id&&n.events&&!d.has(n.id)){const t={};for(const i in n.events){const a=n.events[i],u=E(a);u&&(t[i]=u)}Object.keys(t).length?d.set(n.id,t):d.delete(n.id)}})}function P(e,n){if(!(!e||!n))for(const[t,i]of Object.entries(n))try{i===!1||i===null||typeof i>"u"?e.removeAttribute(t):e.setAttribute(t,String(i))}catch{}}function T(e,n={},t={}){for(const i in n)if(!(i in t))try{e.removeAttribute(i)}catch{}for(const i in t){const a=t[i];try{a===!1||a===null||typeof a>"u"?e.removeAttribute(i):e.setAttribute(i,String(a))}catch{}}}function A(e,n={},t={}){for(const i in n)if(!(i in t))try{e.style.removeProperty(i.replace(/_/g,"-"))}catch{}for(const i in t){const a=t[i];try{e.style.setProperty(i.replace(/_/g,"-"),String(a))}catch{}}}function D(e,n){(n||document).addEventListener(e,function(t){let i=t.target;const a=n||document;for(;i&&i!==a;){const u=i.id;if(u&&d.has(u)){const y=d.get(u);if(i&&i.__darsEv&&i.__darsEv[e])return;let m=y[e];if(!m&&(e==="keydown"||e==="keyup"||e==="keypress")){const o=t.key||t.code;if(o){const s=e+"."+o;m=y[s]}}if(typeof m=="function"){try{m.call(i,t)}catch(o){console.error("[Dars] handler error",o)}return}}i=i.parentNode}},!0)}function S(e,n){return e&&n?e.type!==n.type:e!==n}function x(e){if(!e)return;const n=e.children||[];for(let t=0;t<n.length;t++)x(n[t]);if(e.id&&d.delete(e.id),e.id){const t=document.getElementById(e.id);if(t&&t.parentNode)try{t.parentNode.removeChild(t)}catch{}}}function k(e,n){if(!n||!n.id)return{ok:!1,reason:"missing-new"};let t=document.getElementById(n.id);if(!t){const o=e&&e.id?document.getElementById(e.id):null;if(o)try{o.id=n.id,t=o}catch{}}if(!t)return{ok:!1,reason:"missing-el"};if(S(e,n))return{ok:!1,reason:"type-changed"};const i=!!n.isIsland;if(!i&&n.class&&(t.className=n.class),i||T(t,e&&e.props||{},n.props||{}),i||A(t,e&&e.style||{},n.style||{}),!i&&Object.prototype.hasOwnProperty.call(n,"text")&&t.textContent!==String(n.text||"")&&(t.textContent=String(n.text||"")),i)return{ok:!0};const a=e&&e.children?e.children:[],u=n.children?n.children:[],y=new Map;for(let o=0;o<a.length;o++){const s=a[o]&&(a[o].id||a[o].key)||null;s&&y.set(String(s),a[o])}const m=new Set;for(let o=0;o<u.length;o++){const s=u[o],f=s&&(s.id||s.key)||null;if(!f)if(o<a.length){const l=k(a[o],s);if(!l.ok)return l;m.add(a[o]);continue}else return{ok:!1,reason:"children-added"};const v=y.get(String(f));if(v){const l=k(v,s);if(!l.ok)return l;m.add(v)}else{if(o<a.length){const g=a[o];if(!S(g,s)){const b=k(g,s);if(!b.ok)return b;m.add(g);continue}}const l=createSubtree(s);if(l){const g=o<a.length?a[o]:null;if(g&&g.id){const b=document.getElementById(g.id);b&&b.parentNode?b.parentNode.insertBefore(l,b):t.appendChild(l)}else t.appendChild(l);continue}return{ok:!1,reason:"children-added"}}}for(let o=0;o<a.length;o++){const s=a[o];m.has(s)||x(s)}return{ok:!0}}function M(e){typeof requestAnimationFrame=="function"?requestAnimationFrame(e):setTimeout(e,16)}function B(e){const n=r;if(!n){r=e;try{window.__DARS_VDOM__=e}catch{}return}M(()=>{const t=k(n,e);if(!t.ok){console.warn("[Dars] Structural change detected (",t.reason,"), reloading...");try{location.reload()}catch{}return}r=e;try{window.__DARS_VDOM__=e}catch{}})}function C(e){r=e;try{window.__DARS_VDOM__=e}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(t=>D(t,document))}function I(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const e=window.__DARS_VERSION_URL||"version.txt";let n=null,t=!1,i=0;const a=10;let u=!1;function y(o,s,f,v){try{const l=new XMLHttpRequest;v&&(l.responseType=v),l.open("GET",o,!0),l.timeout=5e3,l.onreadystatechange=function(){l.readyState===4&&(l.status>=200&&l.status<300?s(l.response):f())},l.onerror=f,l.ontimeout=f,l.setRequestHeader("Cache-Control","no-store"),l.send()}catch{f()}}function m(){u||y(e,function(o){let s=(o||"").toString().trim();if(!s||s==="0"){if(i+=1,i>=a){console.warn("[Dars] version file not found after",a,"attempts. Hot reload disabled for this session."),u=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(n)try{clearTimeout(n)}catch{}return}t||(console.warn("[Dars] waiting for version file..."),t=!0),n=setTimeout(m,600);return}if(i=0,t=!1,c||(c=s),s&&s!==c){c=s;try{location.reload()}catch{}return}n=setTimeout(m,600)},function(){if(i+=1,i>=a){console.warn("[Dars] version file not reachable after",a,"attempts. Hot reload disabled for this session."),u=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(n)try{clearTimeout(n)}catch{}return}t||(console.warn("[Dars] waiting for version file..."),t=!0),n=setTimeout(m,600)},"text")}return m(),()=>{try{u=!0,n&&clearTimeout(n),window.__DARS_STOP_HOTRELOAD=null}catch{}}}document.addEventListener("DOMContentLoaded",function(){if(window.__DARS_VDOM__?C(window.__DARS_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=I()}catch{}}})}(),window.addEventListener("scroll",()=>{const d=document.getElementById("dars-navbar");window.scrollY>20?d.classList.add("scrolled"):d.classList.remove("scrolled");const r=document.getElementById("features-section");if(r&&!r.classList.contains("visible")){const c=r.getBoundingClientRect().top,p=window.innerHeight/1.5;c<p&&(r.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((h,_)=>{setTimeout(()=>{h.style.opacity="1",h.style.transform="translateY(0)"},_*100)}))}}),document.addEventListener("DOMContentLoaded",()=>{const d=document.getElementById("hero-logo"),r=document.getElementById("hero-title"),c=document.getElementById("hero-description"),p=document.getElementById("pip-command"),w=document.getElementById("get-started-btn"),h=document.getElementById("scroll-text");d&&setTimeout(()=>d.classList.add("show"),5),r&&setTimeout(()=>r.classList.add("show"),350),c&&setTimeout(()=>c.classList.add("show"),650),p&&setTimeout(()=>p.classList.add("show"),950),w&&setTimeout(()=>w.classList.add("show"),1250),h&&setTimeout(()=>h.classList.add("show"),1500)});function N(){window.open("https://ztamdev.github.io/Dars-Framework/docs.html","_self")}function O(){navigator.clipboard.writeText("pip install dars framework").then(()=>{const r=document.querySelector("#copy-btn"),c=r.textContent;r.textContent="Copied!",r.style.background="linear-gradient(135deg, #38c49f 0%, #2a6b5b 100%) !important",setTimeout(()=>{r.textContent=c,r.style.background="linear-gradient(135deg, #1d4a3f 0%, #2a6b5b 100%) !important"},2e3)})}document.addEventListener("DOMContentLoaded",function(){const d=document.getElementById("hamburger-btn"),r=document.getElementById("mobile-menu"),c=document.body;d&&r&&(d.addEventListener("click",function(p){p.stopPropagation(),r.style.display==="flex"?(r.style.display="none",d.classList.remove("menu-open"),c.classList.remove("menu-open")):(r.style.display="flex",d.classList.add("menu-open"),c.classList.add("menu-open"))}),r.querySelectorAll("a").forEach(p=>{p.addEventListener("click",function(){r.style.display="none",d.classList.remove("menu-open"),c.classList.remove("menu-open")})}),document.addEventListener("click",function(p){!d.contains(p.target)&&!r.contains(p.target)&&(r.style.display="none",d.classList.remove("menu-open"),c.classList.remove("menu-open"))}),document.addEventListener("keydown",function(p){p.key==="Escape"&&r.style.display==="flex"&&(r.style.display="none",d.classList.remove("menu-open"),c.classList.remove("menu-open"))}))});

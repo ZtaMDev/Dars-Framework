@@ -1061,19 +1061,69 @@ self.addEventListener('fetch', event => {
             if content:
                 meta_html.append(f'    <meta name="{name}" content="{content}">')
         
+        # Apple Mobile Web App meta tags
+        if hasattr(app, 'apple_mobile_web_app_capable') and app.apple_mobile_web_app_capable:
+            # Modern standard meta tag (prevents deprecation warning)
+            meta_html.append('    <meta name="mobile-web-app-capable" content="yes">')
+            # Apple-specific meta tag (for older iOS compatibility)
+            meta_html.append('    <meta name="apple-mobile-web-app-capable" content="yes">')
+        
+        if hasattr(app, 'apple_mobile_web_app_status_bar_style') and app.apple_mobile_web_app_status_bar_style:
+            style = app.apple_mobile_web_app_status_bar_style
+            # Validate style value
+            if style in ['default', 'black', 'black-translucent']:
+                meta_html.append(f'    <meta name="apple-mobile-web-app-status-bar-style" content="{style}">')
+        
+        if hasattr(app, 'apple_mobile_web_app_title') and app.apple_mobile_web_app_title:
+            meta_html.append(f'    <meta name="apple-mobile-web-app-title" content="{app.apple_mobile_web_app_title}">')
+        
+        # Enhanced theme-color for Safari 15+ (with media queries for light/dark mode)
+        if hasattr(app, 'theme_color') and app.theme_color:
+            # Standard theme-color
+            meta_html.append(f'    <meta name="theme-color" content="{app.theme_color}">')
+            # Safari 15+ with prefers-color-scheme support
+            meta_html.append(f'    <meta name="theme-color" media="(prefers-color-scheme: light)" content="{app.theme_color}">')
+            meta_html.append(f'    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="{app.theme_color}">')
+        
         # Añadir canonical URL si está configurado
         if app.canonical_url:
             meta_html.append(f'    <link rel="canonical" href="{app.canonical_url}">')
         
         return '\n'.join(meta_html)
     
+    def _detect_icon_mime_type(self, icon_path: str) -> str:
+        """Detect MIME type for icon based on file extension"""
+        import os
+        ext = os.path.splitext(icon_path)[1].lower()
+        mime_types = {
+            '.png': 'image/png',
+            '.ico': 'image/x-icon',
+            '.svg': 'image/svg+xml',
+            '.jpg': 'image/jpeg',
+            '.jpeg': 'image/jpeg',
+            '.webp': 'image/webp',
+            '.gif': 'image/gif'
+        }
+        return mime_types.get(ext, 'image/x-icon')  # Default fallback
+    
     def _generate_links(self, app: App) -> str:
         """Genera los enlaces en el head del HTML"""
         links = []
         
-        # Favicon
-        if hasattr(app, 'favicon'):
-            links.append(f'<link rel="icon" href="{app.favicon}" type="image/x-icon">')
+        # Favicon - with automatic MIME type detection
+        if hasattr(app, 'favicon') and app.favicon:
+            mime_type = self._detect_icon_mime_type(app.favicon)
+            links.append(f'<link rel="icon" href="{app.favicon}" type="{mime_type}">')
+        
+        # Icon (for PWA) - with automatic MIME type detection
+        if hasattr(app, 'icon') and app.icon:
+            mime_type = self._detect_icon_mime_type(app.icon)
+            links.append(f'<link rel="icon" href="{app.icon}" type="{mime_type}">')
+        
+        # Apple Touch Icon - with multiple sizes for better iOS support
+        if hasattr(app, 'apple_touch_icon') and app.apple_touch_icon:
+            links.append(f'<link rel="apple-touch-icon" href="{app.apple_touch_icon}">')
+            links.append(f'<link rel="apple-touch-icon" sizes="180x180" href="{app.apple_touch_icon}">')
         
         # Manifest
         if getattr(app, 'pwa_enabled', False):

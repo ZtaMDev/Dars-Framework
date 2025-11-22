@@ -1,3 +1,149 @@
+# Release Notes v1.4.1
+
+> SEO and Apple device optimizations. Enhanced metadata generation with automatic MIME type detection for favicons and comprehensive iOS/Safari support.
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+or
+
+```bash
+pip install dars-framework==1.4.1
+```
+
+## What's New
+
+### Automatic Favicon MIME Type Detection
+
+**Smart Icon Type Recognition:**
+- Favicon links now automatically detect and use the correct MIME type based on file extension
+- Supports PNG, ICO, SVG, JPG/JPEG, WebP, and GIF formats
+- No manual type specification needed
+- Eliminates incorrect `image/x-icon` type for PNG files
+
+**Before (v1.4.0):**
+```html
+<link rel="icon" href="logo.png" type="image/x-icon">  <!-- Incorrect! -->
+```
+
+**After (v1.4.1):**
+```html
+<link rel="icon" href="logo.png" type="image/png">  <!-- Correct! -->
+```
+
+### Enhanced Apple Device Support
+
+**New App Properties:**
+- `apple_mobile_web_app_capable` - Enable fullscreen mode when added to home screen
+- `apple_mobile_web_app_status_bar_style` - Control status bar appearance:
+  - `"default"` - Standard iOS status bar
+  - `"black"` - Black status bar
+  - `"black-translucent"` - **Transparent status bar** (solves Safari iOS 16+ solid color issue)
+- `apple_mobile_web_app_title` - Custom title for home screen icon
+
+**Usage:**
+```python
+app = App(
+    title="My App",
+    favicon="logo.png",
+    apple_touch_icon="logo.png",
+    apple_mobile_web_app_capable=True,
+    apple_mobile_web_app_status_bar_style="black-translucent",  # Enables transparency!
+    apple_mobile_web_app_title="MyApp"
+)
+```
+
+### Safari 15+ Theme Color Enhancements
+
+**Adaptive Theme Colors:**
+- Theme color now includes media query variants for light/dark mode
+- Proper integration with iOS system appearance settings
+- **Fixes Safari iOS 16+ transparency issues** where solid colors blocked background visibility
+
+**Generated Meta Tags:**
+```html
+<meta name="theme-color" content="#0d1513">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#0d1513">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0d1513">
+```
+
+### Improved Apple Touch Icon
+
+**Multiple Size Specifications:**
+- Apple touch icon now includes size attribute for better iOS home screen quality
+- Generates both standard and 180x180 sized icon links
+
+**Generated Links:**
+```html
+<link rel="apple-touch-icon" href="logo.png">
+<link rel="apple-touch-icon" sizes="180x180" href="logo.png">
+```
+
+### Modern Mobile Web App Meta Tag
+
+**Standards Compliance:**
+- Added `mobile-web-app-capable` meta tag alongside `apple-mobile-web-app-capable`
+- Eliminates deprecation warnings in modern browsers
+- Maintains backward compatibility with older iOS versions
+
+**Generated Meta Tags:**
+```html
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+```
+
+## Technical Improvements
+
+### Exporter Enhancements (`dars/exporters/web/html_css_js.py`)
+
+- **New `_detect_icon_mime_type()` Helper**: Automatically detects MIME types from file extensions
+- **Enhanced `_generate_meta_tags()`**: Adds Apple-specific meta tags and theme-color variants
+- **Updated `_generate_links()`**: Applies automatic MIME detection and sizes attribute
+
+### App Class Updates (`dars/core/app.py`)
+
+- Added 3 new initialization parameters for Apple mobile web app support
+- Properties auto-initialize with sensible defaults (`apple_mobile_web_app_title` defaults to app title)
+- All new properties are **optional** and **backward compatible**
+
+## Migration Notes
+
+### For Existing Projects
+
+**Automatic Upgrade:**
+- No configuration changes required
+- Favicons automatically get correct MIME types
+- Theme colors automatically include light/dark variants
+- All new features are opt-in
+
+**Optional iOS Enhancement:**
+```python
+# Add to your App initialization
+app = App(
+    # ... existing params ...
+    apple_mobile_web_app_capable=True,
+    apple_mobile_web_app_status_bar_style="black-translucent",
+    apple_mobile_web_app_title="MyApp"
+)
+```
+
+## SEO & Performance Impact
+
+- **Improved SEO**: Correct MIME types and proper meta tags
+- **Better Mobile Indexing**: Enhanced metadata for mobile search results
+- **iOS User Retention**: Superior home screen experience encourages app-like usage
+
+## Desktop Exporter Status
+
+**Still in BETA** - No changes from v1.4.0
+
+---
+
+**Upgrade Highly Recommended** for all projects, especially those targeting iOS/Safari users or requiring proper favicon MIME types.
+
 # Release Notes v1.4.0
 
 > Simple Template update.

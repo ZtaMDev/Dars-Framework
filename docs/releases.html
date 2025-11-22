@@ -8,10 +8,19 @@
   <meta content="index, follow" name="robots"/>
   <meta content="width=device-width, initial-scale=1.0, user-scalable=yes" name="viewport"/>
   <meta content="#0d1513" name="theme-color"/>
+  <meta content="yes" name="mobile-web-app-capable"/>
+  <meta content="yes" name="apple-mobile-web-app-capable"/>
+  <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
+  <meta content="Dars Framework" name="apple-mobile-web-app-title"/>
+  <meta content="#0d1513" name="theme-color"/>
+  <meta content="#0d1513" media="(prefers-color-scheme: light)" name="theme-color"/>
+  <meta content="#0d1513" media="(prefers-color-scheme: dark)" name="theme-color"/>
   <title>
    Dars Versions
   </title>
-  <link href="Dars-logo.png" rel="icon" type="image/x-icon"/>
+  <link href="Dars-logo.png" rel="icon" type="image/png"/>
+  <link href="Dars-logo.png" rel="apple-touch-icon"/>
+  <link href="Dars-logo.png" rel="apple-touch-icon" sizes="180x180"/>
   <meta content="Dars Framework" property="og:title"/>
   <meta content="Dars framework landing page for the UI multiplatform python framework" property="og:description"/>
   <meta content="website" property="og:type"/>
@@ -230,6 +239,335 @@
     margin: 0 auto;
     padding: 40px 20px;">
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_171">
+      <h1 id="release-notes-v141">
+       Release Notes v1.4.1
+      </h1>
+      <blockquote>
+       <p>
+        SEO and Apple device optimizations. Enhanced metadata generation with automatic MIME type detection for favicons and comprehensive iOS/Safari support.
+       </p>
+      </blockquote>
+      <h2 id="installation">
+       Installation
+      </h2>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
+</code></pre>
+      </div>
+      <p>
+       or
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.1
+</code></pre>
+      </div>
+      <h2 id="whats-new">
+       What's New
+      </h2>
+      <h3 id="automatic-favicon-mime-type-detection">
+       Automatic Favicon MIME Type Detection
+      </h3>
+      <p>
+       <strong>
+        Smart Icon Type Recognition:
+       </strong>
+       - Favicon links now automatically detect and use the correct MIME type based on file extension
+- Supports PNG, ICO, SVG, JPG/JPEG, WebP, and GIF formats
+- No manual type specification needed
+- Eliminates incorrect
+       <code>
+        image/x-icon
+       </code>
+       type for PNG files
+      </p>
+      <p>
+       <strong>
+        Before (v1.4.0):
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">"icon"</span> <span class="na">href</span><span class="o">=</span><span class="s">"logo.png"</span> <span class="na">type</span><span class="o">=</span><span class="s">"image/x-icon"</span><span class="p">&gt;</span>  <span class="cm">&lt;!-- Incorrect! --&gt;</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        After (v1.4.1):
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">"icon"</span> <span class="na">href</span><span class="o">=</span><span class="s">"logo.png"</span> <span class="na">type</span><span class="o">=</span><span class="s">"image/png"</span><span class="p">&gt;</span>  <span class="cm">&lt;!-- Correct! --&gt;</span>
+</code></pre>
+      </div>
+      <h3 id="enhanced-apple-device-support">
+       Enhanced Apple Device Support
+      </h3>
+      <p>
+       <strong>
+        New App Properties:
+       </strong>
+       -
+       <code>
+        apple_mobile_web_app_capable
+       </code>
+       - Enable fullscreen mode when added to home screen
+-
+       <code>
+        apple_mobile_web_app_status_bar_style
+       </code>
+       - Control status bar appearance:
+  -
+       <code>
+        "default"
+       </code>
+       - Standard iOS status bar
+  -
+       <code>
+        "black"
+       </code>
+       - Black status bar
+  -
+       <code>
+        "black-translucent"
+       </code>
+       -
+       <strong>
+        Transparent status bar
+       </strong>
+       (solves Safari iOS 16+ solid color issue)
+-
+       <code>
+        apple_mobile_web_app_title
+       </code>
+       - Custom title for home screen icon
+      </p>
+      <p>
+       <strong>
+        Usage:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">"My App"</span><span class="p">,</span>
+    <span class="n">favicon</span><span class="o">=</span><span class="s2">"logo.png"</span><span class="p">,</span>
+    <span class="n">apple_touch_icon</span><span class="o">=</span><span class="s2">"logo.png"</span><span class="p">,</span>
+    <span class="n">apple_mobile_web_app_capable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">apple_mobile_web_app_status_bar_style</span><span class="o">=</span><span class="s2">"black-translucent"</span><span class="p">,</span>  <span class="c1"># Enables transparency!</span>
+    <span class="n">apple_mobile_web_app_title</span><span class="o">=</span><span class="s2">"MyApp"</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="safari-15-theme-color-enhancements">
+       Safari 15+ Theme Color Enhancements
+      </h3>
+      <p>
+       <strong>
+        Adaptive Theme Colors:
+       </strong>
+       - Theme color now includes media query variants for light/dark mode
+- Proper integration with iOS system appearance settings
+-
+       <strong>
+        Fixes Safari iOS 16+ transparency issues
+       </strong>
+       where solid colors blocked background visibility
+      </p>
+      <p>
+       <strong>
+        Generated Meta Tags:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="p">&lt;</span><span class="nt">meta</span> <span class="na">name</span><span class="o">=</span><span class="s">"theme-color"</span> <span class="na">content</span><span class="o">=</span><span class="s">"#0d1513"</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">meta</span> <span class="na">name</span><span class="o">=</span><span class="s">"theme-color"</span> <span class="na">media</span><span class="o">=</span><span class="s">"(prefers-color-scheme: light)"</span> <span class="na">content</span><span class="o">=</span><span class="s">"#0d1513"</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">meta</span> <span class="na">name</span><span class="o">=</span><span class="s">"theme-color"</span> <span class="na">media</span><span class="o">=</span><span class="s">"(prefers-color-scheme: dark)"</span> <span class="na">content</span><span class="o">=</span><span class="s">"#0d1513"</span><span class="p">&gt;</span>
+</code></pre>
+      </div>
+      <h3 id="improved-apple-touch-icon">
+       Improved Apple Touch Icon
+      </h3>
+      <p>
+       <strong>
+        Multiple Size Specifications:
+       </strong>
+       - Apple touch icon now includes size attribute for better iOS home screen quality
+- Generates both standard and 180x180 sized icon links
+      </p>
+      <p>
+       <strong>
+        Generated Links:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">"apple-touch-icon"</span> <span class="na">href</span><span class="o">=</span><span class="s">"logo.png"</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">"apple-touch-icon"</span> <span class="na">sizes</span><span class="o">=</span><span class="s">"180x180"</span> <span class="na">href</span><span class="o">=</span><span class="s">"logo.png"</span><span class="p">&gt;</span>
+</code></pre>
+      </div>
+      <h3 id="modern-mobile-web-app-meta-tag">
+       Modern Mobile Web App Meta Tag
+      </h3>
+      <p>
+       <strong>
+        Standards Compliance:
+       </strong>
+       - Added
+       <code>
+        mobile-web-app-capable
+       </code>
+       meta tag alongside
+       <code>
+        apple-mobile-web-app-capable
+       </code>
+       - Eliminates deprecation warnings in modern browsers
+- Maintains backward compatibility with older iOS versions
+      </p>
+      <p>
+       <strong>
+        Generated Meta Tags:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="p">&lt;</span><span class="nt">meta</span> <span class="na">name</span><span class="o">=</span><span class="s">"mobile-web-app-capable"</span> <span class="na">content</span><span class="o">=</span><span class="s">"yes"</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">meta</span> <span class="na">name</span><span class="o">=</span><span class="s">"apple-mobile-web-app-capable"</span> <span class="na">content</span><span class="o">=</span><span class="s">"yes"</span><span class="p">&gt;</span>
+</code></pre>
+      </div>
+      <h2 id="technical-improvements">
+       Technical Improvements
+      </h2>
+      <h3 id="exporter-enhancements-darsexporterswebhtml_css_jspy">
+       Exporter Enhancements (
+       <code>
+        dars/exporters/web/html_css_js.py
+       </code>
+       )
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         New
+         <code>
+          _detect_icon_mime_type()
+         </code>
+         Helper
+        </strong>
+        : Automatically detects MIME types from file extensions
+       </li>
+       <li>
+        <strong>
+         Enhanced
+         <code>
+          _generate_meta_tags()
+         </code>
+        </strong>
+        : Adds Apple-specific meta tags and theme-color variants
+       </li>
+       <li>
+        <strong>
+         Updated
+         <code>
+          _generate_links()
+         </code>
+        </strong>
+        : Applies automatic MIME detection and sizes attribute
+       </li>
+      </ul>
+      <h3 id="app-class-updates-darscoreapppy">
+       App Class Updates (
+       <code>
+        dars/core/app.py
+       </code>
+       )
+      </h3>
+      <ul>
+       <li>
+        Added 3 new initialization parameters for Apple mobile web app support
+       </li>
+       <li>
+        Properties auto-initialize with sensible defaults (
+        <code>
+         apple_mobile_web_app_title
+        </code>
+        defaults to app title)
+       </li>
+       <li>
+        All new properties are
+        <strong>
+         optional
+        </strong>
+        and
+        <strong>
+         backward compatible
+        </strong>
+       </li>
+      </ul>
+      <h2 id="migration-notes">
+       Migration Notes
+      </h2>
+      <h3 id="for-existing-projects">
+       For Existing Projects
+      </h3>
+      <p>
+       <strong>
+        Automatic Upgrade:
+       </strong>
+       - No configuration changes required
+- Favicons automatically get correct MIME types
+- Theme colors automatically include light/dark variants
+- All new features are opt-in
+      </p>
+      <p>
+       <strong>
+        Optional iOS Enhancement:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Add to your App initialization</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span>
+    <span class="c1"># ... existing params ...</span>
+    <span class="n">apple_mobile_web_app_capable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">apple_mobile_web_app_status_bar_style</span><span class="o">=</span><span class="s2">"black-translucent"</span><span class="p">,</span>
+    <span class="n">apple_mobile_web_app_title</span><span class="o">=</span><span class="s2">"MyApp"</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h2 id="seo-performance-impact">
+       SEO &amp; Performance Impact
+      </h2>
+      <ul>
+       <li>
+        <strong>
+         Improved SEO
+        </strong>
+        : Correct MIME types and proper meta tags
+       </li>
+       <li>
+        <strong>
+         Better Mobile Indexing
+        </strong>
+        : Enhanced metadata for mobile search results
+       </li>
+       <li>
+        <strong>
+         iOS User Retention
+        </strong>
+        : Superior home screen experience encourages app-like usage
+       </li>
+      </ul>
+      <h2 id="desktop-exporter-status">
+       Desktop Exporter Status
+      </h2>
+      <p>
+       <strong>
+        Still in BETA
+       </strong>
+       - No changes from v1.4.0
+      </p>
+      <hr/>
+      <p>
+       <strong>
+        Upgrade Highly Recommended
+       </strong>
+       for all projects, especially those targeting iOS/Safari users or requiring proper favicon MIME types.
+      </p>
       <h1 id="release-notes-v140">
        Release Notes v1.4.0
       </h1>
@@ -238,7 +576,7 @@
         Simple Template update.
        </p>
       </blockquote>
-      <h2 id="installation">
+      <h2 id="installation-2">
        Installation
       </h2>
       <div class="codehilite">
@@ -266,7 +604,7 @@
         Desktop File System API, Pythonic Arg helper, keyboard event filtering, and comprehensive template synchronization. Major enhancements to desktop capabilities with improved developer experience.
        </p>
       </blockquote>
-      <h2 id="installation-2">
+      <h2 id="installation-3">
        Installation
       </h2>
       <div class="codehilite">
@@ -280,7 +618,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.9
 </code></pre>
       </div>
-      <h2 id="whats-new">
+      <h2 id="whats-new-2">
        What's New
       </h2>
       <h3 id="desktop-file-system-api-list_directory">
@@ -731,7 +1069,7 @@
         for async chaining.
        </p>
       </blockquote>
-      <h2 id="installation-3">
+      <h2 id="installation-4">
        Installation
       </h2>
       <div class="codehilite">
@@ -745,7 +1083,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.8
 </code></pre>
       </div>
-      <h2 id="whats-new-2">
+      <h2 id="whats-new-3">
        What's New
       </h2>
       <h3 id="dynamic-state-updates-with-this">
@@ -933,7 +1271,7 @@
 - Color-coded messages for different log levels
 - Stack traces properly displayed for JavaScript errors
       </p>
-      <h2 id="technical-improvements">
+      <h2 id="technical-improvements-2">
        Technical Improvements
       </h2>
       <h3 id="state-system-enhancements">
@@ -1091,10 +1429,10 @@
        </code>
        method documentation
       </p>
-      <h2 id="migration-notes">
+      <h2 id="migration-notes-2">
        Migration Notes
       </h2>
-      <h3 id="for-existing-projects">
+      <h3 id="for-existing-projects-2">
        For Existing Projects
       </h3>
       <p>
@@ -1105,7 +1443,7 @@
 - New features are opt-in and additive
 - Event handlers work with both constructor and attribute assignment
       </p>
-      <h2 id="desktop-exporter-status">
+      <h2 id="desktop-exporter-status-2">
        Desktop Exporter Status
       </h2>
       <p>
@@ -1193,7 +1531,7 @@
         for dynamic DOM operations with safe event hydration.
        </p>
       </blockquote>
-      <h2 id="installation-4">
+      <h2 id="installation-5">
        Installation
       </h2>
       <div class="codehilite">
@@ -1207,7 +1545,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.6
 </code></pre>
       </div>
-      <h2 id="whats-new-3">
+      <h2 id="whats-new-4">
        What's New
       </h2>
       <h3 id="compile-time-component-manipulation">
@@ -1370,7 +1708,7 @@
         Enhanced styling and development experience update featuring active styles, improved preview system, and advanced file monitoring. Delivers better visual feedback and faster development workflow.
        </p>
       </blockquote>
-      <h2 id="installation-5">
+      <h2 id="installation-6">
        Installation
       </h2>
       <div class="codehilite">
@@ -1384,7 +1722,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.5
 </code></pre>
       </div>
-      <h2 id="whats-new-4">
+      <h2 id="whats-new-5">
        What's New
       </h2>
       <h3 id="active-styles-support">
@@ -1472,7 +1810,7 @@
         : Enhanced display and interaction on mobile devices
        </li>
       </ul>
-      <h2 id="technical-improvements-2">
+      <h2 id="technical-improvements-3">
        Technical Improvements
       </h2>
       <h3 id="development-experience">
@@ -1498,10 +1836,10 @@
         : Improved server termination and resource cleanup
        </li>
       </ul>
-      <h2 id="migration-notes-2">
+      <h2 id="migration-notes-3">
        Migration Notes
       </h2>
-      <h3 id="for-existing-projects-2">
+      <h3 id="for-existing-projects-3">
        For Existing Projects
       </h3>
       <p>
@@ -1511,7 +1849,7 @@
        - No breaking changes - all existing code remains compatible
 - Active styles can be added incrementally to enhance user interaction
       </p>
-      <h2 id="desktop-exporter-status-2">
+      <h2 id="desktop-exporter-status-3">
        Desktop Exporter Status
       </h2>
       <p>
@@ -1527,7 +1865,7 @@
         Enhanced interactivity update featuring hover styles, multi-handler events, and runtime versioning. Improves component styling and event handling flexibility.
        </p>
       </blockquote>
-      <h2 id="installation-6">
+      <h2 id="installation-7">
        Installation
       </h2>
       <div class="codehilite">
@@ -1541,7 +1879,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.4
 </code></pre>
       </div>
-      <h2 id="whats-new-5">
+      <h2 id="whats-new-6">
        What's New
       </h2>
       <h3 id="hover-styles-support">
@@ -1604,7 +1942,7 @@
 <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="sb">`Release: </span><span class="si">${</span><span class="nx">Dars</span><span class="p">.</span><span class="nx">releaseUrl</span><span class="si">}</span><span class="sb">`</span><span class="p">);</span>
 </code></pre>
       </div>
-      <h2 id="technical-improvements-3">
+      <h2 id="technical-improvements-4">
        Technical Improvements
       </h2>
       <h3 id="web-exporter-enhancements">
@@ -1653,10 +1991,10 @@
         : Improved JavaScript output with proper handler separation and error boundaries
        </li>
       </ul>
-      <h2 id="migration-notes-3">
+      <h2 id="migration-notes-4">
        Migration Notes
       </h2>
-      <h3 id="for-existing-projects-3">
+      <h3 id="for-existing-projects-4">
        For Existing Projects
       </h3>
       <p>
@@ -1667,7 +2005,7 @@
 - Hover styles can be incrementally added to enhance existing components
 - Multi-handler events are optional - single handlers remain fully supported
       </p>
-      <h2 id="desktop-exporter-status-3">
+      <h2 id="desktop-exporter-status-4">
        Desktop Exporter Status
       </h2>
       <p>
@@ -1720,7 +2058,7 @@
         Minor update featuring new semantic Section component and enhanced state serialization. Continues JavaScript migration improvements from v1.3.2.
        </p>
       </blockquote>
-      <h2 id="installation-7">
+      <h2 id="installation-8">
        Installation
       </h2>
       <div class="codehilite">
@@ -1734,7 +2072,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.3
 </code></pre>
       </div>
-      <h2 id="whats-new-6">
+      <h2 id="whats-new-7">
        What's New
       </h2>
       <h3 id="section-component">
@@ -1805,7 +2143,7 @@
         Migration guides for state serialization changes
        </li>
       </ul>
-      <h2 id="technical-improvements-4">
+      <h2 id="technical-improvements-5">
        Technical Improvements
       </h2>
       <ul>
@@ -1828,10 +2166,10 @@
         : Maintains all optimizations from v1.3.2
        </li>
       </ul>
-      <h2 id="migration-notes-4">
+      <h2 id="migration-notes-5">
        Migration Notes
       </h2>
-      <h3 id="for-existing-projects-4">
+      <h3 id="for-existing-projects-5">
        For Existing Projects
       </h3>
       <p>
@@ -1855,7 +2193,7 @@
 <span class="n">Section</span><span class="p">(</span><span class="n">children</span><span class="o">=</span><span class="p">[</span><span class="o">...</span><span class="p">])</span>
 </code></pre>
       </div>
-      <h2 id="desktop-exporter-status-4">
+      <h2 id="desktop-exporter-status-5">
        Desktop Exporter Status
       </h2>
       <p>
@@ -1884,7 +2222,7 @@
         Major minification improvements with combined JS files and optimized event handling. Electron desktop exporter remains in beta.
        </p>
       </blockquote>
-      <h2 id="installation-8">
+      <h2 id="installation-9">
        Installation
       </h2>
       <div class="codehilite">
@@ -2031,7 +2369,7 @@
         : Multi-page application build performance
        </li>
       </ul>
-      <h2 id="desktop-exporter-status-5">
+      <h2 id="desktop-exporter-status-6">
        Desktop Exporter Status
       </h2>
       <p>
@@ -2069,10 +2407,10 @@
 - Development mode with hot reload
 - Production packaging still experimental
       </p>
-      <h2 id="migration-notes-5">
+      <h2 id="migration-notes-6">
        Migration Notes
       </h2>
-      <h3 id="for-existing-projects-5">
+      <h3 id="for-existing-projects-6">
        For Existing Projects
       </h3>
       <p>
@@ -2180,7 +2518,7 @@
         Native desktop functions and DX improved with dev mode and file system integration.
        </p>
       </blockquote>
-      <h2 id="installation-9">
+      <h2 id="installation-10">
        Installation
       </h2>
       <div class="codehilite">
@@ -2265,7 +2603,7 @@
         Native desktop export (BETA), improved CLI and doctor integration, and metadata fixes for packaging. This is a BETA release: usable for testing, not recommended for production.
        </p>
       </blockquote>
-      <h2 id="installation-10">
+      <h2 id="installation-11">
        Installation
       </h2>
       <div class="codehilite">
@@ -2548,7 +2886,7 @@ dars<span class="w"> </span>build
         Optional default minification, precise CLI control, faster builds, and clearer minification status.
        </p>
       </blockquote>
-      <h2 id="installation-11">
+      <h2 id="installation-12">
        Installation
       </h2>
       <div class="codehilite">
@@ -2941,6 +3279,51 @@ dars<span class="w"> </span>build
      <div class="sidebar-category">
       Versions
      </div>
+     <a class="sidebar-link sidebar-level-1" href="#release-notes-v141" style="margin-left: 0px">
+      Release Notes v1.4.1
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#installation" style="margin-left: 20px">
+      Installation
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#whats-new" style="margin-left: 20px">
+      What's New
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#automatic-favicon-mime-type-detection" style="margin-left: 40px">
+      Automatic Favicon MIME Type Detection
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#enhanced-apple-device-support" style="margin-left: 40px">
+      Enhanced Apple Device Support
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#safari-15-theme-color-enhancements" style="margin-left: 40px">
+      Safari 15+ Theme Color Enhancements
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#improved-apple-touch-icon" style="margin-left: 40px">
+      Improved Apple Touch Icon
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#modern-mobile-web-app-meta-tag" style="margin-left: 40px">
+      Modern Mobile Web App Meta Tag
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#technical-improvements" style="margin-left: 20px">
+      Technical Improvements
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#exporter-enhancements-darsexporterswebhtmlcssjspy" style="margin-left: 40px">
+      Exporter Enhancements (`dars/exporters/web/html_css_js.py`)
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#app-class-updates-darscoreapppy" style="margin-left: 40px">
+      App Class Updates (`dars/core/app.py`)
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#migration-notes" style="margin-left: 20px">
+      Migration Notes
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#for-existing-projects" style="margin-left: 40px">
+      For Existing Projects
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#seo-performance-impact" style="margin-left: 20px">
+      SEO &amp; Performance Impact
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#desktop-exporter-status" style="margin-left: 20px">
+      Desktop Exporter Status
+     </a>
      <a class="sidebar-link sidebar-level-1" href="#release-notes-v140" style="margin-left: 0px">
       Release Notes v1.4.0
      </a>
