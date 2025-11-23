@@ -1,4 +1,29 @@
-# Release Notes v1.4.3
+# Release Notes v1.4.4
+
+> Critical bug fix release. Removes non-functional features, fixes style merge, and improves state restoration.
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+or
+
+```bash
+pip install dars-framework==1.4.4
+```
+
+## What's Fixed
+
+- **Style Merge Fix (CRITICAL)** - `Mod.set()` now correctly merges style properties
+- **Removed `this().goto()`** - Non-functional feature removed; use `state.state()` instead
+- **Fixed Syntax Warning** - Corrected invalid escape sequence in `js_lib.py`
+- **Improved State 0 Restoration** - Event handlers now re-attach when returning to default state
+
+---
+
+# Release Notes v1.4.3 (DEPRECATED)
 
 > State management enhancements with compile-time validation, component self-navigation, and critical style merge fix. Improves developer experience and fixes property replacement bug.
 

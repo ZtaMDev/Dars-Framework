@@ -102,9 +102,9 @@ chained_script = read_op.then(update_op)
 
 The `RawJS` wrapper ensures that `dScript.ARG` is treated as a variable name (`value`) rather than a string literal `"value"`.
 
-### Self-Navigation with `this().goto()`
+### State Navigation with `state.state()`
 
-The `this().goto(idx)` method allows a component to navigate to a specific state index in its own `dState`. This enables self-contained state management without external references.
+The `state.state(idx)` method allows you to navigate a component to a specific state index. This is the recommended way to trigger state transitions.
 
 **Requirements**:
 - The component must have a `dState` defined with the target index in its `states` array
@@ -113,7 +113,7 @@ The `this().goto(idx)` method allows a component to navigate to a specific state
 **Example: Toggle Button**
 ```python
 from dars.all import *
-from dars.core.state import dState, this
+from dars.core.state import dState
 
 # Create a button that toggles between two states
 toggle_btn = Button("Off", id="ToggleBtn")
@@ -126,12 +126,12 @@ toggle_state.cState(1, mods=[
     Mod.set(toggle_btn, 
         text="On",
         style={'background-color': 'green', 'color': 'white'},
-        on_click=this().goto(0)  # Return to state 0 when clicked
+        on_click=toggle_state.state(0)  # Return to state 0 when clicked
     )
 ])
 
 # Initial click navigates to state 1
-toggle_btn.on_click = this().goto(1)
+toggle_btn.on_click = toggle_state.state(1)
 ```
 
 **Example: Cycle Through States**
@@ -142,16 +142,16 @@ cycle_state = dState("cycler", component=cycle_btn, states=[0, 1, 2, 3])
 
 # Each state navigates to the next
 cycle_state.cState(1, mods=[
-    Mod.set(cycle_btn, text="State 1", on_click=this().goto(2))
+    Mod.set(cycle_btn, text="State 1", on_click=cycle_state.state(2))
 ])
 cycle_state.cState(2, mods=[
-    Mod.set(cycle_btn, text="State 2", on_click=this().goto(3))
+    Mod.set(cycle_btn, text="State 2", on_click=cycle_state.state(3))
 ])
 cycle_state.cState(3, mods=[
-    Mod.set(cycle_btn, text="State 3", on_click=this().goto(0))
+    Mod.set(cycle_btn, text="State 3", on_click=cycle_state.state(0))
 ])
 
-cycle_btn.on_click = this().goto(1)  # Start the cycle
+cycle_btn.on_click = cycle_state.state(1)  # Start the cycle
 ```
 
 ## InlineScript

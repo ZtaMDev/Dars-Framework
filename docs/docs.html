@@ -467,6 +467,27 @@
      <a class="sidebar-link sidebar-level-3" href="#key-benefits" style="margin-left: 40px">
       Key Benefits
      </a>
+     <a class="sidebar-link sidebar-level-2" href="#state-navigation-patterns" style="margin-left: 20px">
+      State Navigation Patterns
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#1-using-statestateidx-recommended" style="margin-left: 40px">
+      1. Using `state.state(idx)` - Recommended
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#2-multi-state-cycles" style="margin-left: 40px">
+      2. Multi-State Cycles
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#difference-from-thisstate" style="margin-left: 40px">
+      Difference from `this().state()`
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#error-handling" style="margin-left: 40px">
+      Error Handling
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#complete-interactive-example" style="margin-left: 40px">
+      Complete Interactive Example
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#best-practices" style="margin-left: 40px">
+      Best Practices
+     </a>
      <div class="sidebar-divider">
      </div>
      <div class="sidebar-category">
@@ -1038,8 +1059,8 @@
      <a class="sidebar-link sidebar-level-3" href="#chaining-scripts-then" style="margin-left: 40px">
       Chaining Scripts (`.then()`)
      </a>
-     <a class="sidebar-link sidebar-level-3" href="#self-navigation-with-thisgoto" style="margin-left: 40px">
-      Self-Navigation with `this().goto()`
+     <a class="sidebar-link sidebar-level-3" href="#state-navigation-with-statestate" style="margin-left: 40px">
+      State Navigation with `state.state()`
      </a>
      <a class="sidebar-link sidebar-level-2" href="#inlinescript" style="margin-left: 20px">
       InlineScript
@@ -3236,6 +3257,265 @@ Desktop build target. Only effective when
         for complex workflows
        </li>
       </ul>
+      <h2 id="state-navigation-patterns">
+       State Navigation Patterns
+      </h2>
+      <p>
+       There are two main ways to trigger state changes in Dars:
+      </p>
+      <h3 id="1-using-statestateidx-recommended">
+       1. Using
+       <code>
+        state.state(idx)
+       </code>
+       - Recommended
+      </h3>
+      <p>
+       The
+       <code>
+        state.state(idx)
+       </code>
+       method is the standard way to navigate to a specific state when you have a reference to the dState object:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dars.core.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">dState</span>
+
+<span class="c1"># Create a toggle button</span>
+<span class="n">btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Off"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"ToggleBtn"</span><span class="p">)</span>
+
+<span class="c1"># Define state with 2 options</span>
+<span class="n">toggle</span> <span class="o">=</span> <span class="n">dState</span><span class="p">(</span><span class="s2">"toggle"</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="n">btn</span><span class="p">,</span> <span class="n">states</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+<span class="c1"># Configure "On" state</span>
+<span class="n">toggle</span><span class="o">.</span><span class="n">cState</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="p">[</span>
+    <span class="n">Mod</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">btn</span><span class="p">,</span> 
+        <span class="n">text</span><span class="o">=</span><span class="s2">"On"</span><span class="p">,</span>
+        <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s1">'background-color'</span><span class="p">:</span> <span class="s1">'green'</span><span class="p">},</span>
+        <span class="n">on_click</span><span class="o">=</span><span class="n">toggle</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># Use state.state() to go back</span>
+    <span class="p">)</span>
+<span class="p">])</span>
+
+<span class="c1"># Initial click goes to state 1</span>
+<span class="n">btn</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">toggle</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Advantages:
+       </strong>
+       - Clean and straightforward syntax
+- Compile-time safety (if state object doesn't exist, Python will error)
+- No runtime lookups needed
+- Works in all contexts
+      </p>
+      <h3 id="2-multi-state-cycles">
+       2. Multi-State Cycles
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Create a button that cycles through 4 states</span>
+<span class="n">cycle_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"State 0"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"StatusBtn"</span><span class="p">)</span>
+<span class="n">status</span> <span class="o">=</span> <span class="n">dState</span><span class="p">(</span><span class="s2">"status"</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="n">cycle_btn</span><span class="p">,</span> <span class="n">states</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+
+<span class="c1"># Define each state to navigate to the next</span>
+<span class="n">status</span><span class="o">.</span><span class="n">cState</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="p">[</span>
+    <span class="n">Mod</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cycle_btn</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">"State 1 - Loading..."</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+<span class="p">])</span>
+<span class="n">status</span><span class="o">.</span><span class="n">cState</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="p">[</span>
+    <span class="n">Mod</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cycle_btn</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">"State 2 - Processing..."</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+<span class="p">])</span>
+<span class="n">status</span><span class="o">.</span><span class="n">cState</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="p">[</span>
+    <span class="n">Mod</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cycle_btn</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">"State 3 - Complete!"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+<span class="p">])</span>
+
+<span class="c1"># Start the cycle</span>
+<span class="n">cycle_btn</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">status</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="difference-from-thisstate">
+       Difference from
+       <code>
+        this().state()
+       </code>
+      </h3>
+      <ul>
+       <li>
+        <p>
+         <strong>
+          <code>
+           this().state(**kwargs)
+          </code>
+         </strong>
+         : Dynamic property updates without state tracking
+        </p>
+        <ul>
+         <li>
+          Updates component properties directly (text, style, etc.)
+         </li>
+         <li>
+          No dState required
+         </li>
+         <li>
+          Changes are immediate and don't follow state rules
+         </li>
+         <li>
+          Use for simple, one-off updates
+         </li>
+        </ul>
+       </li>
+       <li>
+        <p>
+         <strong>
+          <code>
+           state.state(idx)
+          </code>
+         </strong>
+         : Navigate to a registered dState index
+        </p>
+        <ul>
+         <li>
+          Requires a dState to be defined for the component
+         </li>
+         <li>
+          Triggers all
+          <code>
+           cState
+          </code>
+          rules and mods for that index
+         </li>
+         <li>
+          Maintains state history and allows returning to previous states
+         </li>
+         <li>
+          Follows the complete state lifecycle (enter/exit behaviors)
+         </li>
+         <li>
+          Use for structured state machines
+         </li>
+        </ul>
+       </li>
+      </ul>
+      <h3 id="error-handling">
+       Error Handling
+      </h3>
+      <p>
+       Runtime validation throws descriptive errors:
+      </p>
+      <p>
+       <strong>
+        Example: Missing dState
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Click me"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"MyBtn"</span><span class="p">)</span>
+<span class="n">btn</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">some_state</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># Error if some_state doesn't exist</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Example: Invalid Index
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">my_state</span> <span class="o">=</span> <span class="n">dState</span><span class="p">(</span><span class="s2">"st"</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="n">btn</span><span class="p">,</span> <span class="n">states</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">btn</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">my_state</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>  <span class="c1"># Runtime error: index 5 doesn't exist</span>
+<span class="c1"># Error: [Dars.goto] Index 5 out of bounds for state 'st' (valid: 0-1)</span>
+</code></pre>
+      </div>
+      <h3 id="complete-interactive-example">
+       Complete Interactive Example
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dars.core.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">dState</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"Status Indicator"</span><span class="p">)</span>
+
+<span class="c1"># Create button and status text</span>
+<span class="n">status_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Idle"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"StatusBtn"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="p">{</span>
+    <span class="s1">'padding'</span><span class="p">:</span> <span class="s1">'12px 24px'</span><span class="p">,</span>
+    <span class="s1">'background'</span><span class="p">:</span> <span class="s1">'#gray'</span>
+<span class="p">})</span>
+<span class="n">status_text</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="s2">"Ready"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"StatusText"</span><span class="p">)</span>
+
+<span class="c1"># Define 4-state workflow</span>
+<span class="n">workflow</span> <span class="o">=</span> <span class="n">dState</span><span class="p">(</span><span class="s2">"workflow"</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="n">status_btn</span><span class="p">,</span> <span class="n">states</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+
+<span class="c1"># State 1: Loading</span>
+<span class="n">workflow</span><span class="o">.</span><span class="n">cState</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="p">[</span>
+    <span class="n">Mod</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">status_btn</span><span class="p">,</span> 
+        <span class="n">text</span><span class="o">=</span><span class="s2">"Loading..."</span><span class="p">,</span>
+        <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s1">'background'</span><span class="p">:</span> <span class="s1">'#blue'</span><span class="p">},</span>
+        <span class="n">on_click</span><span class="o">=</span><span class="n">workflow</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="p">),</span>
+    <span class="n">Mod</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">status_text</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">"Fetching data..."</span><span class="p">)</span>
+<span class="p">])</span>
+
+<span class="c1"># State 2: Processing</span>
+<span class="n">workflow</span><span class="o">.</span><span class="n">cState</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="p">[</span>
+    <span class="n">Mod</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">status_btn</span><span class="p">,</span>
+        <span class="n">text</span><span class="o">=</span><span class="s2">"Processing..."</span><span class="p">,</span>
+        <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s1">'background'</span><span class="p">:</span> <span class="s1">'#orange'</span><span class="p">},</span>
+        <span class="n">on_click</span><span class="o">=</span><span class="n">workflow</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="p">),</span>
+    <span class="n">Mod</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">status_text</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">"Analyzing results..."</span><span class="p">)</span>
+<span class="p">])</span>
+
+<span class="c1"># State 3: Complete</span>
+<span class="n">workflow</span><span class="o">.</span><span class="n">cState</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="p">[</span>
+    <span class="n">Mod</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">status_btn</span><span class="p">,</span>
+        <span class="n">text</span><span class="o">=</span><span class="s2">"Complete!"</span><span class="p">,</span>
+        <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s1">'background'</span><span class="p">:</span> <span class="s1">'#green'</span><span class="p">},</span>
+        <span class="n">on_click</span><span class="o">=</span><span class="n">workflow</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># Back to idle</span>
+    <span class="p">),</span>
+    <span class="n">Mod</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">status_text</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">"All done!"</span><span class="p">)</span>
+<span class="p">])</span>
+
+<span class="c1"># Start workflow on click</span>
+<span class="n">status_btn</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">index</span> <span class="o">=</span> <span class="n">Page</span><span class="p">(</span><span class="n">Container</span><span class="p">(</span><span class="n">status_btn</span><span class="p">,</span> <span class="n">status_text</span><span class="p">))</span>
+<span class="n">app</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="s2">"index"</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="best-practices">
+       Best Practices
+      </h3>
+      <ol>
+       <li>
+        <strong>
+         Always use
+         <code>
+          state.state()
+         </code>
+        </strong>
+        when you have a reference to the dState object
+       </li>
+       <li>
+        <strong>
+         Avoid state 0 mutations
+        </strong>
+        : State 0 is immutable and restores default values
+       </li>
+       <li>
+        <strong>
+         Use states 1+ for toggles
+        </strong>
+        : For a toggle, use states [0, 1, 2] and toggle between 1 and 2
+       </li>
+       <li>
+        <strong>
+         Name states meaningfully
+        </strong>
+        : Use descriptive dState names like "workflow", "toggle", "menu"
+       </li>
+       <li>
+        <strong>
+         Keep state machines simple
+        </strong>
+        : Avoid deeply nested or overly complex state transitions
+       </li>
+      </ol>
      </div>
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_117">
       <h1 id="dars-components-documentation">
@@ -9461,22 +9741,18 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
        </code>
        .
       </p>
-      <h3 id="self-navigation-with-thisgoto">
-       Self-Navigation with
+      <h3 id="state-navigation-with-statestate">
+       State Navigation with
        <code>
-        this().goto()
+        state.state()
        </code>
       </h3>
       <p>
        The
        <code>
-        this().goto(idx)
+        state.state(idx)
        </code>
-       method allows a component to navigate to a specific state index in its own
-       <code>
-        dState
-       </code>
-       . This enables self-contained state management without external references.
+       method allows you to navigate a component to a specific state index. This is the recommended way to trigger state transitions.
       </p>
       <p>
        <strong>
@@ -9501,7 +9777,7 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
       </p>
       <div class="codehilite">
        <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dars.core.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">dState</span><span class="p">,</span> <span class="n">this</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dars.core.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">dState</span>
 
 <span class="c1"># Create a button that toggles between two states</span>
 <span class="n">toggle_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Off"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"ToggleBtn"</span><span class="p">)</span>
@@ -9514,12 +9790,12 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
     <span class="n">Mod</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">toggle_btn</span><span class="p">,</span> 
         <span class="n">text</span><span class="o">=</span><span class="s2">"On"</span><span class="p">,</span>
         <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s1">'background-color'</span><span class="p">:</span> <span class="s1">'green'</span><span class="p">,</span> <span class="s1">'color'</span><span class="p">:</span> <span class="s1">'white'</span><span class="p">},</span>
-        <span class="n">on_click</span><span class="o">=</span><span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">goto</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># Return to state 0 when clicked</span>
+        <span class="n">on_click</span><span class="o">=</span><span class="n">toggle_state</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># Return to state 0 when clicked</span>
     <span class="p">)</span>
 <span class="p">])</span>
 
 <span class="c1"># Initial click navigates to state 1</span>
-<span class="n">toggle_btn</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">goto</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">toggle_btn</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">toggle_state</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </code></pre>
       </div>
       <p>
@@ -9534,16 +9810,16 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
 
 <span class="c1"># Each state navigates to the next</span>
 <span class="n">cycle_state</span><span class="o">.</span><span class="n">cState</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="p">[</span>
-    <span class="n">Mod</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cycle_btn</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">"State 1"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">goto</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">Mod</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cycle_btn</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">"State 1"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">cycle_state</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
 <span class="p">])</span>
 <span class="n">cycle_state</span><span class="o">.</span><span class="n">cState</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="p">[</span>
-    <span class="n">Mod</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cycle_btn</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">"State 2"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">goto</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+    <span class="n">Mod</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cycle_btn</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">"State 2"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">cycle_state</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
 <span class="p">])</span>
 <span class="n">cycle_state</span><span class="o">.</span><span class="n">cState</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="p">[</span>
-    <span class="n">Mod</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cycle_btn</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">"State 3"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">goto</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">Mod</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cycle_btn</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">"State 3"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">cycle_state</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
 <span class="p">])</span>
 
-<span class="n">cycle_btn</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">goto</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># Start the cycle</span>
+<span class="n">cycle_btn</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">cycle_state</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># Start the cycle</span>
 </code></pre>
       </div>
       <h2 id="inlinescript">

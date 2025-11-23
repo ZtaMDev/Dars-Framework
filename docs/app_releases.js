@@ -1,4 +1,29 @@
-window.__DARS_VDOM__={type:"T1",id:"page_150",key:"0",children:[{type:"T2",id:"container_151",key:"0/0",children:[{type:"T3",id:"dars-navbar",key:"0/0/0",children:[{type:"T2",id:"navbar-left",key:"0/0/0/0",children:[{type:"T4",id:"image_152",key:"0/0/0/0/0"},{type:"T5",id:"text_153",key:"0/0/0/0/1",text:"Dars Framework"}]},{type:"T2",id:"container_154",key:"0/0/0/1",children:[{type:"T2",id:"navbar-right",key:"0/0/0/1/0",children:[{type:"T6",id:"link_155",key:"0/0/0/1/0/0",text:"Home"},{type:"T6",id:"link_156",key:"0/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_157",key:"0/0/0/1/0/2",text:"Releases"},{type:"T6",id:"link_158",key:"0/0/0/1/0/3",text:"PlayGround"},{type:"T6",id:"link_159",key:"0/0/0/1/0/4",text:"GitHub"}]},{type:"T2",id:"hamburger-menu",key:"0/0/0/1/1",children:[{type:"T2",id:"hamburger-btn",key:"0/0/0/1/1/0",children:[{type:"T2",id:"container_160",key:"0/0/0/1/1/0/0",children:[{type:"T2",id:"container_161",key:"0/0/0/1/1/0/0/0"},{type:"T2",id:"container_162",key:"0/0/0/1/1/0/0/1"},{type:"T2",id:"container_163",key:"0/0/0/1/1/0/0/2"}]}]},{type:"T2",id:"mobile-menu",key:"0/0/0/1/1/1",children:[{type:"T6",id:"link_164",key:"0/0/0/1/1/1/0",text:"Home"},{type:"T6",id:"link_165",key:"0/0/0/1/1/1/1",text:"Documentation"},{type:"T6",id:"link_166",key:"0/0/0/1/1/1/2",text:"Releases"},{type:"T6",id:"link_167",key:"0/0/0/1/1/1/3",text:"PlayGround"},{type:"T6",id:"link_168",key:"0/0/0/1/1/1/4",text:"GitHub"}]}]}]}]}]},{type:"T2",id:"container_169",key:"0/1",children:[{type:"T2",id:"markdown-content-container",key:"0/1/0",children:[{type:"T9",id:"markdown_170",key:"0/1/0/0",text:`# Release Notes v1.4.3
+window.__DARS_VDOM__={type:"T1",id:"page_150",key:"0",children:[{type:"T2",id:"container_151",key:"0/0",children:[{type:"T3",id:"dars-navbar",key:"0/0/0",children:[{type:"T2",id:"navbar-left",key:"0/0/0/0",children:[{type:"T4",id:"image_152",key:"0/0/0/0/0"},{type:"T5",id:"text_153",key:"0/0/0/0/1",text:"Dars Framework"}]},{type:"T2",id:"container_154",key:"0/0/0/1",children:[{type:"T2",id:"navbar-right",key:"0/0/0/1/0",children:[{type:"T6",id:"link_155",key:"0/0/0/1/0/0",text:"Home"},{type:"T6",id:"link_156",key:"0/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_157",key:"0/0/0/1/0/2",text:"Releases"},{type:"T6",id:"link_158",key:"0/0/0/1/0/3",text:"PlayGround"},{type:"T6",id:"link_159",key:"0/0/0/1/0/4",text:"GitHub"}]},{type:"T2",id:"hamburger-menu",key:"0/0/0/1/1",children:[{type:"T2",id:"hamburger-btn",key:"0/0/0/1/1/0",children:[{type:"T2",id:"container_160",key:"0/0/0/1/1/0/0",children:[{type:"T2",id:"container_161",key:"0/0/0/1/1/0/0/0"},{type:"T2",id:"container_162",key:"0/0/0/1/1/0/0/1"},{type:"T2",id:"container_163",key:"0/0/0/1/1/0/0/2"}]}]},{type:"T2",id:"mobile-menu",key:"0/0/0/1/1/1",children:[{type:"T6",id:"link_164",key:"0/0/0/1/1/1/0",text:"Home"},{type:"T6",id:"link_165",key:"0/0/0/1/1/1/1",text:"Documentation"},{type:"T6",id:"link_166",key:"0/0/0/1/1/1/2",text:"Releases"},{type:"T6",id:"link_167",key:"0/0/0/1/1/1/3",text:"PlayGround"},{type:"T6",id:"link_168",key:"0/0/0/1/1/1/4",text:"GitHub"}]}]}]}]}]},{type:"T2",id:"container_169",key:"0/1",children:[{type:"T2",id:"markdown-content-container",key:"0/1/0",children:[{type:"T9",id:"markdown_170",key:"0/1/0/0",text:`# Release Notes v1.4.4
+
+> Critical bug fix release. Removes non-functional features, fixes style merge, and improves state restoration.
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+or
+
+\`\`\`bash
+pip install dars-framework==1.4.4
+\`\`\`
+
+## What's Fixed
+
+- **Style Merge Fix (CRITICAL)** - \`Mod.set()\` now correctly merges style properties
+- **Removed \`this().goto()\`** - Non-functional feature removed; use \`state.state()\` instead
+- **Fixed Syntax Warning** - Corrected invalid escape sequence in \`js_lib.py\`
+- **Improved State 0 Restoration** - Event handlers now re-attach when returning to default state
+
+---
+
+# Release Notes v1.4.3 (DEPRECATED)
 
 > State management enhancements with compile-time validation, component self-navigation, and critical style merge fix. Improves developer experience and fixes property replacement bug.
 

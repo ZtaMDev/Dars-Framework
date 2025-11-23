@@ -166,7 +166,8 @@ function registerState(name, cfg){{
     rules: (cfg.rules && typeof cfg.rules === 'object') ? cfg.rules : {{}},
     defaultIndex: (typeof cfg.defaultIndex === 'number') ? cfg.defaultIndex : 0,
     defaultValue: (cfg.hasOwnProperty('defaultValue') ? cfg.defaultValue : null),
-    __defaultSnapshot: null
+    __defaultSnapshot: null,
+    __vnode: null  // Store vnode reference for event re-hydration
   }};
   __registry.set(name, entry);
   try{{
@@ -177,6 +178,8 @@ function registerState(name, cfg){{
         for(const a of el.getAttributeNames()) attrs[a] = el.getAttribute(a);
       }}catch(_){{ }}
       entry.__defaultSnapshot = {{ attrs, html: String(el.innerHTML||'') }};
+      // Try to get vnode from __vdom for event re-hydration
+      try{{ entry.__vnode = __vdom.get(entry.id); }}catch(_){{ }}
     }}
   }}catch(_){{ }}
 }}
@@ -192,7 +195,7 @@ function registerStates(statesConfig) {{
 
 function getState(name){{ return __registry.get(name); }}
 
-function _restoreDefault(id, snap){{
+function _restoreDefault(id, snap, vnode, eventsMap){{
   try{{
     const el = $(id);
     if(!el || !snap) return;
@@ -207,12 +210,20 @@ function _restoreDefault(id, snap){{
         el.__darsEv = {{}};
       }}
     }}catch(_){{ }}
+    // Restore attributes
     try{{
       const current = el.getAttributeNames ? el.getAttributeNames() : [];
       for(const n of current){{ if(n !== 'id') el.removeAttribute(n); }}
       for(const k in snap.attrs){{ if(k !== 'id') el.setAttribute(k, snap.attrs[k]); }}
     }}catch(_){{ }}
+    // Restore innerHTML
     try{{ el.innerHTML = snap.html || ''; }}catch(_){{ }}
+    // Re-attach original event handlers from vnode if available
+    try{{
+      if(vnode && eventsMap){{
+        _attachEventsForVNode(el, vnode, eventsMap);
+      }}
+    }}catch(_){{ }}
   }}catch(_){{ }}
 }}
 
@@ -440,7 +451,7 @@ function change(opt){{
     
     const rules = st.rules && st.rules[String(targetState)];
     if(targetState === 0){{
-      _restoreDefault(st.id, st.__defaultSnapshot);
+      _restoreDefault(st.id, st.__defaultSnapshot, st.__vnode, (typeof window !== 'undefined' ? window.EventMap : null));
       if(rules){{ try{{ console.error('[Dars] Default state (index 0) is immutable. Rules for state 0 are ignored.'); }}catch(_){{ }} }}
     }} else if(rules){{
       if(Array.isArray(rules.mods)){{ _applyMods(st.id, rules.mods); }}

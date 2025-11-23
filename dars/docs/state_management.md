@@ -217,16 +217,17 @@ btn = Button("Load to Display",
 - **Composable**: Combine with `dScript.then()` for complex workflows
 
 ---
+## State Navigation Patterns
 
-## Self-Navigation with `this().goto()`
+There are two main ways to trigger state changes in Dars:
 
-The `this().goto(idx)` method enables a component to navigate its own `dState` to a specific index. This creates self-contained interactive components that manage their own state transitions.
+### 1. Using `state.state(idx)` - Recommended
 
-### Basic Usage
+The `state.state(idx)` method is the standard way to navigate to a specific state when you have a reference to the dState object:
 
 ```python
 from dars.all import *
-from dars.core.state import dState, this
+from dars.core.state import dState
 
 # Create a toggle button
 btn = Button("Off", id="ToggleBtn")
@@ -239,28 +240,21 @@ toggle.cState(1, mods=[
     Mod.set(btn, 
         text="On",
         style={'background-color': 'green'},
-        on_click=this().goto(0)  # Go back to state 0
+        on_click=toggle.state(0)  # Use state.state() to go back
     )
 ])
 
 # Initial click goes to state 1
-btn.on_click = this().goto(1)
+btn.on_click = toggle.state(1)
 ```
 
-### Difference from `this().state()`
+**Advantages:**
+- Clean and straightforward syntax
+- Compile-time safety (if state object doesn't exist, Python will error)
+- No runtime lookups needed
+- Works in all contexts
 
-- **`this().state(**kwargs)`**: Dynamic property updates without state tracking
-  - Updates component properties directly (text, style, etc.)
-  - No dState required
-  - Changes are immediate and don't follow state rules
-
-- **`this().goto(idx)`**: Navigate to a registered dState index
-  - Requires a dState to be defined for the component
-  - Triggers all `cState` rules and mods for that index
-  - Maintains state history and allows returning to previous states
-  - Follows the complete state lifecycle (enter/exit behaviors)
-
-### Multi-State Navigation
+### 2. Multi-State Cycles
 
 ```python
 # Create a button that cycles through 4 states
@@ -269,102 +263,110 @@ status = dState("status", component=cycle_btn, states=[0, 1, 2, 3])
 
 # Define each state to navigate to the next
 status.cState(1, mods=[
-    Mod.set(cycle_btn, text="State 1 - Loading...", on_click=this().goto(2))
+    Mod.set(cycle_btn, text="State 1 - Loading...", on_click=status.state(2))
 ])
 status.cState(2, mods=[
-    Mod.set(cycle_btn, text="State 2 - Processing...", on_click=this().goto(3))
+    Mod.set(cycle_btn, text="State 2 - Processing...", on_click=status.state(3))
 ])
 status.cState(3, mods=[
-    Mod.set(cycle_btn, text="State 3 - Complete!", on_click=this().goto(0))
+    Mod.set(cycle_btn, text="State 3 - Complete!", on_click=status.state(0))
 ])
 
 # Start the cycle
-cycle_btn.on_click = this().goto(1)
+cycle_btn.on_click = status.state(1)
 ```
 
-### Requirements
+### Difference from `this().state()`
 
-1. **dState must be defined**: The component must have a `dState` registered with it
-2. **Valid index**: The index must exist in the `dState.states` array (0 to length-1)
-3. **Component ID**: The component must have an `id` attribute
+- **`this().state(**kwargs)`**: Dynamic property updates without state tracking
+  - Updates component properties directly (text, style, etc.)
+  - No dState required
+  - Changes are immediate and don't follow state rules
+  - Use for simple, one-off updates
+
+- **`state.state(idx)`**: Navigate to a registered dState index
+  - Requires a dState to be defined for the component
+  - Triggers all `cState` rules and mods for that index
+  - Maintains state history and allows returning to previous states
+  - Follows the complete state lifecycle (enter/exit behaviors)
+  - Use for structured state machines
 
 ### Error Handling
 
-`this().goto()` performs runtime validation and throws descriptive errors:
+Runtime validation throws descriptive errors:
 
-**Error: No dState found**
-```python
-# This will error - button has no dState
-btn = Button("Click me", id="MyBtn", on_click=this().goto(1))
-# Console: [Dars.goto] No dState found for component MyBtn. Define a dState for this component first.
-```
-
-**Error: Index out of bounds**
+**Example: Missing dState**
 ```python
 btn = Button("Click me", id="MyBtn")
-state = dState("btn_state", component=btn, states=[0, 1])  # Only 2 states
-btn.on_click = this().goto(5)  # Index 5 doesn't exist!
-# Console: [Dars.goto] Index 5 out of bounds for state 'btn_state' (valid: 0-1)
+btn.on_click = some_state.state(1)  # Error if some_state doesn't exist
 ```
 
-All errors are logged to the browser console and thrown as JavaScript errors. Open the browser console (F12) to see detailed error messages.
+**Example: Invalid Index**
+```python
+my_state = dState("st", component=btn, states=[0, 1])
+btn.on_click = my_state.state(5)  # Runtime error: index 5 doesn't exist
+# Error: [Dars.goto] Index 5 out of bounds for state 'st' (valid: 0-1)
+```
 
-### Complete Example: Interactive Status Indicator
+### Complete Interactive Example
 
 ```python
 from dars.all import *
+from dars.core.state import dState
 
-app = App(title="Status Demo")
+app = App(title="Status Indicator")
 
-# Status indicator that changes based on user interaction
+# Create button and status text
 status_btn = Button("Idle", id="StatusBtn", style={
-    'padding': '16px 32px',
-    'font-size': '18px',
-    'border-radius': '8px'
+    'padding': '12px 24px',
+    'background': '#gray'
 })
+status_text = Text("Ready", id="StatusText")
 
-# Define 4 states: Idle, Active, Warning, Error
-status_state = dState("status", component=status_btn, states=[0, 1, 2, 3])
+# Define 4-state workflow
+workflow = dState("workflow", component=status_btn, states=[0, 1, 2, 3])
 
-# Active state (green)
-status_state.cState(1, mods=[
-    Mod.set(status_btn,
-        text="✓ Active",
-        style={'background-color': '#4CAF50', 'color': 'white'},
-        on_click=this().goto(2)
-    )
+# State 1: Loading
+workflow.cState(1, mods=[
+    Mod.set(status_btn, 
+        text="Loading...",
+        style={'background': '#blue'},
+        on_click=workflow.state(2)
+    ),
+    Mod.set(status_text, text="Fetching data...")
 ])
 
-# Warning state (orange)
-status_state.cState(2, mods=[
+# State 2: Processing
+workflow.cState(2, mods=[
     Mod.set(status_btn,
-        text="⚠ Warning",
-        style={'background-color': '#FF9800', 'color': 'white'},
-        on_click=this().goto(3)
-    )
+        text="Processing...",
+        style={'background': '#orange'},
+        on_click=workflow.state(3)
+    ),
+    Mod.set(status_text, text="Analyzing results...")
 ])
 
-# Error state (red)
-status_state.cState(3, mods=[
+# State 3: Complete
+workflow.cState(3, mods=[
     Mod.set(status_btn,
-        text="✗ Error",
-        style={'background-color': '#F44336', 'color': 'white'},
-        on_click=this().goto(0)
-    )
+        text="Complete!",
+        style={'background': '#green'},
+        on_click=workflow.state(0)  # Back to idle
+    ),
+    Mod.set(status_text, text="All done!")
 ])
 
-# Initial click starts the sequence
-status_btn.on_click = this().goto(1)
+# Start workflow on click
+status_btn.on_click = workflow.state(1)
 
-page = Page(Container(status_btn))
-app.add_page("index", page, index=True)
-app.rTimeCompile()
+index = Page(Container(status_btn, status_text))
+app.add_page("index", index, index=True)
 ```
 
 ### Best Practices
 
-1. **Use for Sequential States**: `goto()` is ideal for multi-step processes, wizards, or state machines
-2. **Combine with Mods**: Use `Mod.set()` in `cState` to update visual appearance and behavior for each state
-3. **Debug with Console**: Always check browser console for `goto()` errors during development
-4. **Document States**: Comment your state definitions to explain what each index represents
-5. **Validate Indices**: Ensure all `goto()` calls use valid indices from your states array
+1. **Always use `state.state()`** when you have a reference to the dState object
+2. **Avoid state 0 mutations**: State 0 is immutable and restores default values
+3. **Use states 1+ for toggles**: For a toggle, use states [0, 1, 2] and toggle between 1 and 2
+4. **Name states meaningfully**: Use descriptive dState names like "workflow", "toggle", "menu"
+5. **Keep state machines simple**: Avoid deeply nested or overly complex state transitions
