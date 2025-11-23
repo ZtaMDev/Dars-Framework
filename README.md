@@ -23,7 +23,7 @@ pip install dars-framework
 
 > Some Javascript and css stack required for advanced personalization.
 
-Try dars without installing nothing just visit the [Dars Playground](https://dars-playground.vercel.app/)
+Try dars without installing nothing(single page mode) just visit the [Dars Playground](https://dars-playground.vercel.app/)
 
 ## How It Works
 - Build your UI using Python classes and components (like Text, Button, Container, Page, etc).
@@ -141,13 +141,12 @@ btn = Button("Click Me!", on_click=this().state(text="You Clicked!"))
 
 * Works anywhere: desktop and web exports
 * Perfect for async operations and chained scripts
-* Combines with `dScript.then()` for sequencing
 
 ---
 
 ## SPA Routing System
 
-Dars 1.4.5 introduces a powerful client-side routing system for Single Page Applications:
+Dars 1.4.6 introduces a powerful client-side routing system for Single Page Applications:
 
 ### Basic Routing
 
@@ -196,7 +195,7 @@ profile_page = Page(Text("Profile Content"))
 
 # NOTE if you don't assign index=True to one of the pages when using more than 1 page with SPA route system
 # you get a 404 error because the router doesn't knwow the index page and cannot assign it as index.
-# this is probaly going to be corrected in next updates
+# this is probably going to be fixed in next updates
 app.add_page("dashboard", dashboard(), index=True)
 app.add_page("settings", settings_page, route="/dashboard/settings", parent="dashboard")
 app.add_page("profile", profile_page, route="/dashboard/profile", parent="dashboard")
