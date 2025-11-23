@@ -2,9 +2,13 @@ from typing import Any, Dict, List, Optional
 from dars.scripts.script import InlineScript
 from dars.scripts.dscript import RawJS
 import json
+import warnings
 
 # Global registry collected at authoring time (Python)
 STATE_BOOTSTRAP: List[Dict[str, Any]] = []
+
+# Global registry for compile-time validation: {component_id: (state_name, states_list)}
+_COMPONENT_TO_STATE_MAP: Dict[str, tuple] = {}
 
 class DarsState:
     def __init__(self, name: str, id: Optional[str], states: Optional[List[Any]], is_custom: bool = False):
@@ -329,6 +333,10 @@ def dState(name: str, component: Any = None, id: Optional[str] = None, states: O
         d = st.to_dict()
         STATE_BOOTSTRAP.append(d)
         st._bootstrap_ref = d
+        
+        # Register in compile-time validation map
+        if target_id:
+            _COMPONENT_TO_STATE_MAP[target_id] = (name, states or [])
     except Exception:
         pass
     return st
@@ -377,9 +385,124 @@ class ThisProxy:
         )
         return InlineScript(' '.join(code.split()), module=True)
 
+    def goto(self, idx: int, _component_id: Optional[str] = None) -> InlineScript:
+        """
+        Navigate to a specific state index for this component.
+        Requires a dState to be defined for the component.
+        
+        Args:
+            idx: The state index to navigate to (must exist in the component's dState)
+            _component_id: Internal - component ID for compile-time validation
+            
+        Raises:
+            ValueError: At compile-time if validation fails
+            JavaScript Error: At runtime if no dState is registered for the component
+            JavaScript Error: At runtime if the index is out of bounds
+        
+        Note: Compile-time validation is advisory only. Full validation happens at runtime.
+        """
+        # Check if component ID was set via this_for() or passed directly
+        cid = _component_id or getattr(self, '_cid', None)
+        
+        # Compile-time validation (when component ID is known)
+        if cid and cid in _COMPONENT_TO_STATE_MAP:
+            state_name, states_list = _COMPONENT_TO_STATE_MAP[cid]
+            # Validate index is within bounds
+            if not isinstance(states_list, list) or len(states_list) == 0:
+                raise ValueError(
+                    f"[Dars Compile Error] Component '{cid}' has dState '{state_name}' "
+                    f"but no states list defined. Define states parameter in dState()."
+                )
+            if idx < 0 or idx >= len(states_list):
+                raise ValueError(
+                    f"[Dars Compile Error] this().goto({idx}) - Index {idx} out of bounds for component '{cid}'. "
+                    f"State '{state_name}' has {len(states_list)} states (valid indices: 0-{len(states_list)-1})."
+                )
+        elif cid and cid not in _COMPONENT_TO_STATE_MAP:
+            # Component ID is known but no dState registered
+            raise ValueError(
+                f"[Dars Compile Error] this().goto({idx}) used on component '{cid}' "
+                f"but no dState is defined for this component. "
+                f"You must create a dState for this component before using goto().\n"
+                f"Example: my_state = dState('state_name', component=your_component, states=[0, 1, 2])"
+            )
+        
+        # Generate JavaScript code (runtime validation)
+        code = (
+            "(async () => {"
+            "  try {"
+            "    const compId = (this && this.id) ? this.id : "
+            "                    (event && event.target && event.target.id) ? event.target.id : null;"
+            "    if (!compId) throw new Error('[Dars.goto] Cannot resolve component ID');"
+            "    "
+            "    let ch = window.__DARS_CHANGE_FN;"
+            "    if (!ch) {"
+            "      if (window.Dars && typeof window.Dars.change === 'function') {"
+            "        ch = window.Dars.change.bind(window.Dars);"
+            "      } else {"
+            "        const m = await import('./lib/dars.min.js');"
+            "        ch = (m.change || (m.default && m.default.change));"
+            "      }"
+            "      if (typeof ch === 'function') window.__DARS_CHANGE_FN = ch;"
+            "    }"
+            "    "
+            "    const registry = (window.Dars && window.Dars._stateRegistry) || {};"
+            "    let stateName = null;"
+            "    for (const [name, stateObj] of Object.entries(registry)) {"
+            "      if (stateObj.id === compId) {"
+            "        stateName = name;"
+            "        break;"
+            "      }"
+            "    }"
+            "    "
+            "    if (!stateName) {"
+            "      throw new Error(`[Dars.goto] No dState found for component ${compId}. Define a dState for this component first.`);"
+            "    }"
+            "    "
+            "    const stateObj = registry[stateName];"
+            f"    const targetIdx = {idx};"
+            "    "
+            "    if (!stateObj.states || !Array.isArray(stateObj.states)) {"
+            "      throw new Error(`[Dars.goto] State '${stateName}' has no states array`);"
+            "    }"
+            "    if (targetIdx < 0 || targetIdx >= stateObj.states.length) {"
+            "      throw new Error(`[Dars.goto] Index " + str(idx) + " out of bounds for state '${stateName}' (valid: 0-${stateObj.states.length - 1})`);"
+            "    }"
+            "    "
+            "    if (typeof ch === 'function') {"
+            f"      ch({{id: compId, name: stateName, state: {idx}}});"
+            "    }"
+            "  } catch (e) {"
+            "    console.error('[Dars.goto]', e);"
+            "    throw e;"
+            "  }"
+            "})();"
+        )
+        return InlineScript(' '.join(code.split()), module=True)
+
 def this() -> ThisProxy:
     """
     Returns a proxy object that refers to the current component in an event handler.
     Usage: this().state(text="New Text")
+    Note: For compile-time validation with goto(), prefer using direct assignment like:
+    component.on_click = this().goto(idx) after defining dState for that component
     """
     return ThisProxy()
+
+def this_for(component_id: str) -> ThisProxy:
+    """
+    Returns a ThisProxy bound to a specific component ID for compile-time validation.
+    
+    This is primarily used internally by the framework when components assign event handlers.
+    For manual use, prefer direct assignment after dState definition.
+    
+    Args:
+        component_id: The ID of the component this refers to
+        
+    Returns:
+        ThisProxy instance that will validate goto() calls at compile-time
+    """
+    proxy = ThisProxy()
+    # Store the component ID for validation in goto()
+    proxy._cid = component_id  # type: ignore
+    return proxy

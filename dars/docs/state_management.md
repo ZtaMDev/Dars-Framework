@@ -215,3 +215,156 @@ btn = Button("Load to Display",
 - **Async-Friendly**: Perfect for chaining with file operations, network requests, etc.
 - **Type-Safe**: Use `RawJS` for JavaScript values, regular Python values for literals
 - **Composable**: Combine with `dScript.then()` for complex workflows
+
+---
+
+## Self-Navigation with `this().goto()`
+
+The `this().goto(idx)` method enables a component to navigate its own `dState` to a specific index. This creates self-contained interactive components that manage their own state transitions.
+
+### Basic Usage
+
+```python
+from dars.all import *
+from dars.core.state import dState, this
+
+# Create a toggle button
+btn = Button("Off", id="ToggleBtn")
+
+# Define state with 2 options
+toggle = dState("toggle", component=btn, states=[0, 1])
+
+# Configure "On" state
+toggle.cState(1, mods=[
+    Mod.set(btn, 
+        text="On",
+        style={'background-color': 'green'},
+        on_click=this().goto(0)  # Go back to state 0
+    )
+])
+
+# Initial click goes to state 1
+btn.on_click = this().goto(1)
+```
+
+### Difference from `this().state()`
+
+- **`this().state(**kwargs)`**: Dynamic property updates without state tracking
+  - Updates component properties directly (text, style, etc.)
+  - No dState required
+  - Changes are immediate and don't follow state rules
+
+- **`this().goto(idx)`**: Navigate to a registered dState index
+  - Requires a dState to be defined for the component
+  - Triggers all `cState` rules and mods for that index
+  - Maintains state history and allows returning to previous states
+  - Follows the complete state lifecycle (enter/exit behaviors)
+
+### Multi-State Navigation
+
+```python
+# Create a button that cycles through 4 states
+cycle_btn = Button("State 0", id="StatusBtn")
+status = dState("status", component=cycle_btn, states=[0, 1, 2, 3])
+
+# Define each state to navigate to the next
+status.cState(1, mods=[
+    Mod.set(cycle_btn, text="State 1 - Loading...", on_click=this().goto(2))
+])
+status.cState(2, mods=[
+    Mod.set(cycle_btn, text="State 2 - Processing...", on_click=this().goto(3))
+])
+status.cState(3, mods=[
+    Mod.set(cycle_btn, text="State 3 - Complete!", on_click=this().goto(0))
+])
+
+# Start the cycle
+cycle_btn.on_click = this().goto(1)
+```
+
+### Requirements
+
+1. **dState must be defined**: The component must have a `dState` registered with it
+2. **Valid index**: The index must exist in the `dState.states` array (0 to length-1)
+3. **Component ID**: The component must have an `id` attribute
+
+### Error Handling
+
+`this().goto()` performs runtime validation and throws descriptive errors:
+
+**Error: No dState found**
+```python
+# This will error - button has no dState
+btn = Button("Click me", id="MyBtn", on_click=this().goto(1))
+# Console: [Dars.goto] No dState found for component MyBtn. Define a dState for this component first.
+```
+
+**Error: Index out of bounds**
+```python
+btn = Button("Click me", id="MyBtn")
+state = dState("btn_state", component=btn, states=[0, 1])  # Only 2 states
+btn.on_click = this().goto(5)  # Index 5 doesn't exist!
+# Console: [Dars.goto] Index 5 out of bounds for state 'btn_state' (valid: 0-1)
+```
+
+All errors are logged to the browser console and thrown as JavaScript errors. Open the browser console (F12) to see detailed error messages.
+
+### Complete Example: Interactive Status Indicator
+
+```python
+from dars.all import *
+
+app = App(title="Status Demo")
+
+# Status indicator that changes based on user interaction
+status_btn = Button("Idle", id="StatusBtn", style={
+    'padding': '16px 32px',
+    'font-size': '18px',
+    'border-radius': '8px'
+})
+
+# Define 4 states: Idle, Active, Warning, Error
+status_state = dState("status", component=status_btn, states=[0, 1, 2, 3])
+
+# Active state (green)
+status_state.cState(1, mods=[
+    Mod.set(status_btn,
+        text="✓ Active",
+        style={'background-color': '#4CAF50', 'color': 'white'},
+        on_click=this().goto(2)
+    )
+])
+
+# Warning state (orange)
+status_state.cState(2, mods=[
+    Mod.set(status_btn,
+        text="⚠ Warning",
+        style={'background-color': '#FF9800', 'color': 'white'},
+        on_click=this().goto(3)
+    )
+])
+
+# Error state (red)
+status_state.cState(3, mods=[
+    Mod.set(status_btn,
+        text="✗ Error",
+        style={'background-color': '#F44336', 'color': 'white'},
+        on_click=this().goto(0)
+    )
+])
+
+# Initial click starts the sequence
+status_btn.on_click = this().goto(1)
+
+page = Page(Container(status_btn))
+app.add_page("index", page, index=True)
+app.rTimeCompile()
+```
+
+### Best Practices
+
+1. **Use for Sequential States**: `goto()` is ideal for multi-step processes, wizards, or state machines
+2. **Combine with Mods**: Use `Mod.set()` in `cState` to update visual appearance and behavior for each state
+3. **Debug with Console**: Always check browser console for `goto()` errors during development
+4. **Document States**: Comment your state definitions to explain what each index represents
+5. **Validate Indices**: Ensure all `goto()` calls use valid indices from your states array

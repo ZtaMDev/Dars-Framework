@@ -289,10 +289,17 @@ function _applyMods(defaultId, mods){{
                     try{{ setTimeout(()=>{{ try{{ el[propName] = prevOn; }}catch(_){{ }} }}, 0); }}catch(_){{ }}
                   }}
                 }};
-                try{{ el.addEventListener(type, handler, {{ capture: true }}); }}catch(_){{ }}
+                try{{ el.addEventListener(baseEvent, handler, {{ capture: true }}); }}catch(_){{ }}
                 el.__darsEv[type] = handler;
                 continue;
               }}
+            }}
+            // Special handling for style to merge instead of replace
+            if(k === 'style' \u0026\u0026 typeof attrs[k] === 'object'){{
+              for(const styleKey in attrs[k]){{
+                try{{ el.style[styleKey] = attrs[k][styleKey]; }}catch(_){{ }}
+              }}
+              continue;
             }}
             el.setAttribute(k, String(attrs[k]));
           }}catch(_){{ }}

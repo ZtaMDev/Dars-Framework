@@ -1,3 +1,28 @@
+# Release Notes v1.4.3
+
+> State management enhancements with compile-time validation, component self-navigation, and critical style merge fix. Improves developer experience and fixes property replacement bug.
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+or
+
+```bash
+pip install dars-framework==1.4.3
+```
+
+## What's New
+
+- **`this().goto(idx)`** - Component self-navigation for state transitions
+- **`this_for(id)`** - Compile-time validation helper for state navigation
+- **Style Merge Fix** - Critical fix: `Mod.set()` now merges style properties instead of replacing them
+- **Enhanced Documentation** - Guides for state management patterns
+
+---
+
 # Release Notes v1.4.2
 
 > New utility dScript functions added to `utils_ds` for enhanced client-side interactions.

@@ -2980,7 +2980,7 @@ load_btn = Button("Load Data",
 
 **Writing Text Files**
 \`\`\`python
-# Write and update button text on success
+
 save_btn = Button("Save",
     on_click=write_text("output.txt", "Hello Dars!").then(
         this().state(text="Saved!", style={"color": "green"})
@@ -2992,7 +2992,7 @@ save_btn = Button("Save",
 \`\`\`python
 from dars.desktop import list_directory, get_value
 
-# List all files in a directory
+
 Button("Browse",
     on_click=list_directory(".").then(
         this().state(id="file-list", html=RawJS("""
@@ -3004,14 +3004,14 @@ Button("Browse",
     )
 )
 
-# List with glob pattern filtering
+
 Button("Python Files",
     on_click=list_directory(".", "*.py").then(
         this().state(id="count", text=RawJS("\`Found \${value.length} files\`"))
     )
 )
 
-# Dynamic path from input
+
 Input(id="path", value=".")
 Button("List Directory",
     on_click=list_directory(get_value("path")).then(
@@ -3019,16 +3019,16 @@ Button("List Directory",
     )
 )
 
-# Include file sizes (optional)
+
 list_directory(".", "*", include_size=True)
 \`\`\`
 
 **Binary File Operations**
 \`\`\`python
-# Read binary files (images, etc.)
+
 img_data = read_file("image.png")
 
-# Write binary data
+
 write_file("output.bin", data_bytes)
 \`\`\`
 
@@ -3168,6 +3168,57 @@ chained_script = read_op.then(update_op)
 
 The \`RawJS\` wrapper ensures that \`dScript.ARG\` is treated as a variable name (\`value\`) rather than a string literal \`"value"\`.
 
+### Self-Navigation with \`this().goto()\`
+
+The \`this().goto(idx)\` method allows a component to navigate to a specific state index in its own \`dState\`. This enables self-contained state management without external references.
+
+**Requirements**:
+- The component must have a \`dState\` defined with the target index in its \`states\` array
+- The index must be valid (0 to states.length - 1)
+
+**Example: Toggle Button**
+\`\`\`python
+from dars.all import *
+from dars.core.state import dState, this
+
+# Create a button that toggles between two states
+toggle_btn = Button("Off", id="ToggleBtn")
+
+# Define states for the button
+toggle_state = dState("toggle", component=toggle_btn, states=[0, 1])
+
+# Configure state 1 appearance and behavior
+toggle_state.cState(1, mods=[
+    Mod.set(toggle_btn, 
+        text="On",
+        style={'background-color': 'green', 'color': 'white'},
+        on_click=this().goto(0)  # Return to state 0 when clicked
+    )
+])
+
+# Initial click navigates to state 1
+toggle_btn.on_click = this().goto(1)
+\`\`\`
+
+**Example: Cycle Through States**
+\`\`\`python
+# Create a button that cycles through multiple states
+cycle_btn = Button("State 0", id="CycleBtn")
+cycle_state = dState("cycler", component=cycle_btn, states=[0, 1, 2, 3])
+
+# Each state navigates to the next
+cycle_state.cState(1, mods=[
+    Mod.set(cycle_btn, text="State 1", on_click=this().goto(2))
+])
+cycle_state.cState(2, mods=[
+    Mod.set(cycle_btn, text="State 2", on_click=this().goto(3))
+])
+cycle_state.cState(3, mods=[
+    Mod.set(cycle_btn, text="State 3", on_click=this().goto(0))
+])
+
+cycle_btn.on_click = this().goto(1)  # Start the cycle
+\`\`\`
 
 ## InlineScript
 
@@ -3187,198 +3238,9 @@ document.addEventListener('DOMContentLoaded', function() {
 """)
 \`\`\`
 
-### Practical Examples
-
-#### Button Event Handling
-
-\`\`\`python
-script_botones = InlineScript("""
-// Function to handle button clicks
-function manejarClickBoton(evento) {
-    const boton = evento.target;
-    const texto = boton.textContent;
-    
-    console.log(\`Button pressed: \${texto}\`);
-    
-    // Change text temporarily
-    const textoOriginal = boton.textContent;
-    boton.textContent = '\xA1Presionado!';
-    boton.disabled = true;
-    
-    setTimeout(() => {
-        boton.textContent = textoOriginal;
-        boton.disabled = false;
-    }, 1000);
-}
-
-// Add events to all buttons
-document.addEventListener('DOMContentLoaded', function() {
-    const botones = document.querySelectorAll('button');
-    botones.forEach(boton => {
-        boton.addEventListener('click', manejarClickBoton);
-    });
-});
-""")
-\`\`\`
-
-#### Form Validation
-
-\`\`\`python
-script_validacion = InlineScript("""
-// Form validation
-function validarFormulario() {
-    const inputs = document.querySelectorAll('input[required]');
-    let esValido = true;
-    
-    inputs.forEach(input => {
-        if (!input.value.trim()) {
-            mostrarError(input, 'This field is required');
-            esValido = false;
-        } else {
-            limpiarError(input);
-        }
-        
-        // Specific type validation
-        if (input.type === 'email' && input.value) {
-            const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
-            if (!emailRegex.test(input.value)) {
-                mostrarError(input, 'Email is invalid');
-                esValido = false;
-            }
-        }
-    });
-    
-    return esValido;
-}
-
-function mostrarError(input, mensaje) {
-    //  Remove previous error
-    limpiarError(input);
-    
-    // Create error element
-    const error = document.createElement('div');
-    error.className = 'error-mensaje';
-    error.textContent = mensaje;
-    error.style.color = '#dc3545';
-    error.style.fontSize = '12px';
-    error.style.marginTop = '5px';
-    
-    // Add after the input
-    input.parentNode.insertBefore(error, input.nextSibling);
-    
-    // Change input style
-    input.style.borderColor = '#dc3545';
-}
-
-function limpiarError(input) {
-    const error = input.parentNode.querySelector('.error-mensaje');
-    if (error) {
-        error.remove();
-    }
-    input.style.borderColor = '';
-}
-
-// Configure real-time validation
-document.addEventListener('DOMContentLoaded', function() {
-    const inputs = document.querySelectorAll('input');
-    inputs.forEach(input => {
-        input.addEventListener('blur', function() {
-            if (this.hasAttribute('required') && !this.value.trim()) {
-                mostrarError(this, 'This field is required');
-            } else {
-                limpiarError(this);
-            }
-        });
-        
-        input.addEventListener('input', function() {
-            limpiarError(this);
-        });
-    });
-});
-""")
-\`\`\`
-
-#### Visual Effects and Animations
-
-\`\`\`python
-script_animaciones = InlineScript("""
-// Fade in effect for elements
-function fadeIn(elemento, duracion = 500) {
-    elemento.style.opacity = '0';
-    elemento.style.display = 'block';
-    
-    const inicio = performance.now();
-    
-    function animar(tiempo) {
-        const progreso = (tiempo - inicio) / duracion;
-        
-        if (progreso < 1) {
-            elemento.style.opacity = progreso;
-            requestAnimationFrame(animar);
-        } else {
-            elemento.style.opacity = '1';
-        }
-    }
-    
-    requestAnimationFrame(animar);
-}
-
-// Typing effect for text
-function efectoTyping(elemento, texto, velocidad = 50) {
-    elemento.textContent = '';
-    let i = 0;
-    
-    function escribir() {
-        if (i < texto.length) {
-            elemento.textContent += texto.charAt(i);
-            i++;
-            setTimeout(escribir, velocidad);
-        }
-    }
-    
-    escribir();
-}
-
-// Parallax simple
-function iniciarParallax() {
-    window.addEventListener('scroll', function() {
-        const scrolled = window.pageYOffset;
-        const elementos = document.querySelectorAll('.parallax');
-        
-        elementos.forEach(elemento => {
-            const velocidad = elemento.dataset.velocidad || 0.5;
-            const yPos = -(scrolled * velocidad);
-            elemento.style.transform = \`translateY(\${yPos}px)\`;
-        });
-    });
-}
-
-// Inicializar efectos
-document.addEventListener('DOMContentLoaded', function() {
-    // Fade in para todos los elementos con clase 'fade-in'
-    const elementosFadeIn = document.querySelectorAll('.fade-in');
-    elementosFadeIn.forEach((elemento, index) => {
-        setTimeout(() => fadeIn(elemento), index * 200);
-    });
-    
-    // Efecto typing para t\xEDtulos
-    const titulos = document.querySelectorAll('.typing-effect');
-    titulos.forEach(titulo => {
-        const texto = titulo.textContent;
-        efectoTyping(titulo, texto);
-    });
-    
-    // Inicializar parallax
-    iniciarParallax();
-});
-""")
-\`\`\`
-
 ### Integration with Exporter
 
 The exporter (\`html_css_js.py\`) automatically detects and exports all scripts of type \`dScript\`, \`InlineScript\`, and \`FileScript\`. You can safely mix and match them in your app, and all will be included in the generated JS.
-
-New in v1.2.2:
 
 - Script objects embedded in state bootstrap (e.g., inside \`Mod.set(..., on_*=...)\`) are serialized to a JSON-safe form as \`{ "code": "..." }\` and reconstituted at runtime.
 - Event attributes (\`on_*\`) accept a single script or an array of scripts (any mix of InlineScript, FileScript, dScript, or raw JS strings). The runtime runs them sequentially and guarantees a single active dynamic listener per event.
@@ -3393,288 +3255,6 @@ from dars.scripts.script import FileScript
 
 # Load script from file
 script = FileScript("./scripts/mi_script.js")
-\`\`\`
-
-### File Organization
-
-\`\`\`
-mi_proyecto/
-\u251C\u2500\u2500 app.py
-\u251C\u2500\u2500 scripts/
-\u2502   \u251C\u2500\u2500 utils.js
-\u2502   \u251C\u2500\u2500 validaciones.js
-\u2502   \u2514\u2500\u2500 animaciones.js
-\u2514\u2500\u2500\u2500\u2500\u2500\u2500 api.js
-
-\`\`\`
-
-#### Example: utils.js
-
-\`\`\`javascript
-// scripts/utils.js
-
-// General utilities
-const Utils = {
-    // Date formatting
-    formatearFecha: function(fecha) {
-        return new Intl.DateTimeFormat('es-ES', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        }).format(fecha);
-    },
-    
-    // Debounce for event optimization
-    debounce: function(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    },
-    
-    // Email validation
-    esEmailValido: function(email) {
-        const regex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
-        return regex.test(email);
-    },
-    
-    // Generate unique ID
-    generarId: function() {
-        return '_'+ Math.random().toString(36).substr(2, 9);
-    },
-    
-    // Local storage
-    guardarEnLocal: function(clave, valor) {
-        try {
-            localStorage.setItem(clave, JSON.stringify(valor));
-            return true;
-        } catch (e) {
-            console.error('Error al guardar en localStorage:', e);
-            return false;
-        }
-    },
-    
-    obtenerDeLocal: function(clave) {
-        try {
-            const item = localStorage.getItem(clave);
-            return item ? JSON.parse(item) : null;
-        } catch (e) {
-            console.error('Error al leer de localStorage:', e);
-            return null;
-        }
-    }
-};
-
-// Make available globally
-window.Utils = Utils;
-\`\`\`
-
-#### Example: api.js
-
-\`\`\`javascript
-// scripts/api.js
-
-// API client
-class ApiClient {
-    constructor(baseUrl) {
-        this.baseUrl = baseUrl;
-        this.headers = {
-            'Content-Type': 'application/json'
-        };
-    }
-    
-    async request(endpoint, options = {}) {
-        const url = \`\${this.baseUrl}\${endpoint}\`;
-        const config = {
-            headers: this.headers,
-            ...options
-        };
-        
-        try {
-            const response = await fetch(url, config);
-            
-            if (!response.ok) {
-                throw new Error(\`HTTP error! status: \${response.status}\`);
-            }
-            
-            return await response.json();
-        } catch (error) {
-            console.error('Error en la petici\xF3n:', error);
-            throw error;
-        }
-    }
-    
-    async get(endpoint) {
-        return this.request(endpoint, { method: 'GET' });
-    }
-    
-    async post(endpoint, data) {
-        return this.request(endpoint, {
-            method: 'POST',
-            body: JSON.stringify(data)
-        });
-    }
-    
-    async put(endpoint, data) {
-        return this.request(endpoint, {
-            method: 'PUT',
-            body: JSON.stringify(data)
-        });
-    }
-    
-    async delete(endpoint) {
-        return this.request(endpoint, { method: 'DELETE' });
-    }
-}
-
-// Global instance
-window.api = new ApiClient('https://api.ejemplo.com');
-\`\`\`
-
-### Usage in the Application
-
-#### Global and Page-specific Scripts (multipage)
-
-In multipage applications, you can add global scripts to the App and page-specific scripts to each Page:
-
-\`\`\`python
-from dars.scripts.script import InlineScript
-from dars.components.basic import Page, Button, Text
-
-home = Page(
-    Text("Inicio"),
-    Button("Ir a About", id="btn-about")
-)
-home.add_script(InlineScript("""
-document.addEventListener('DOMContentLoaded', function() {
-    var btn = document.getElementById('btn-about');
-    if (btn) btn.onclick = () => window.location.href = 'about.html';
-});
-"""))
-
-about = Page(
-    Text("Sobre Nosotros"),
-    Button("Volver", id="btn-home")
-)
-about.add_script(InlineScript("""
-document.addEventListener('DOMContentLoaded', function() {
-    var btn = document.getElementById('btn-home');
-    if (btn) btn.onclick = () => window.location.href = 'index.html';
-});
-"""))
-
-
-app.add_script(InlineScript("console.log('Script global para todas las p\xE1ginas');"))
-\`\`\`
-
-When exporting, each page will have its own JS file combining global scripts and page-specific scripts.
-
-\`\`\`python
-from dars.scripts.script import FileScript
-
-app.add_script(FileScript("./scripts/utils.js"))
-app.add_script(FileScript("./scripts/api.js"))
-app.add_script(FileScript("./scripts/validaciones.js"))
-\`\`\`
-
-## Component Integration
-
-### Connecting Scripts to Components
-
-\`\`\`python
-from dars.core.app import App
-from dars.components.basic.button import Button
-from dars.components.basic.input import Input
-from dars.components.basic.container import Container
-from dars.scripts.script import InlineScript
-
-formulario = Container(
-    id="formulario-contacto",
-    children=[
-        Input(
-            id="campo-nombre",
-            placeholder="Nombre",
-            required=True
-        ),
-        Input(
-            id="campo-email",
-            placeholder="Email",
-            input_type="email",
-            required=True
-        ),
-        Button(
-            id="boton-enviar",
-            text="Enviar"
-        )
-    ]
-)
-
-script_formulario = InlineScript("""
-document.addEventListener(\\'DOMContentLoaded\\', function() {
-    const formulario = document.getElementById(\\'formulario-contacto\\');
-    const campoNombre = document.getElementById(\\'campo-nombre\\');
-    const campoEmail = document.getElementById(\\'campo-email\\');
-    const botonEnviar = document.getElementById(\\'boton-enviar\\');
-    
-    // Real-time validation
-    campoNombre.addEventListener(\\'input\\', function() {
-        validarNombre(this.value);
-    });
-    
-    campoEmail.addEventListener(\\'input\\', function() {
-        validarEmail(this.value);
-    });
-    
-    // Handle form submission
-    botonEnviar.addEventListener(\\'click\\', function(e) {
-        e.preventDefault();
-        enviarFormulario();
-    });
-    
-    function validarNombre(nombre) {
-        const esValido = nombre.length >= 2;
-        campoNombre.style.borderColor = esValido ? \\'#28a745\\' : \\'#dc3545\\';
-        return esValido;
-    }
-    
-    function validarEmail(email) {
-        const regex = /^[^\\\\s@]+@[^\\\\s@]+\\\\.[^\\\\s@]+$/;
-        const esValido = regex.test(email);
-        campoEmail.style.borderColor = esValido ? \\'#28a745\\' : \\'#dc3545\\';
-        return esValido;
-    }
-    
-    function enviarFormulario() {
-        const nombre = campoNombre.value;
-        const email = campoEmail.value;
-        
-        if (validarNombre(nombre) && validarEmail(email)) {
-            // Simular env\xEDo
-            botonEnviar.textContent = \\'Enviando...\\';
-            botonEnviar.disabled = true;
-            
-            setTimeout(() => {
-                alert(\\'Formulario enviado correctamente\\');
-                campoNombre.value = \\'\\';
-                campoEmail.value = \\'\\';
-                botonEnviar.textContent = \\'Enviar\\';
-                botonEnviar.disabled = false;
-            }, 2000);
-        } else {
-            alert(\\'Por favor, corrige los errores en el formulario\\');
-        }
-    }
-});
-""")
-
-app = App(title="Form with Script")
-app.set_root(form)
-app.add_script(form_script)
 \`\`\`
 
 ## Utility Scripts (\`utils_ds\`)
@@ -3889,4 +3469,4 @@ dars init  -L
 - Applying minification (vite): Vite/esbuild minification is active (JS/CSS) and default is disabled.
 - Applying minification (default + vite): both are active.
 
-For more, see the [Getting Started](#getting-started-with-dars) guide and the main documentation index.`}]},{type:"T2",id:"footer-section",key:"0/2/1",children:[{type:"T2",id:"container_123",key:"0/2/1/0",children:[{type:"T2",id:"container_124",key:"0/2/1/0/0",children:[{type:"T2",id:"container_125",key:"0/2/1/0/0/0",children:[{type:"T4",id:"image_126",key:"0/2/1/0/0/0/0"},{type:"T2",id:"container_127",key:"0/2/1/0/0/0/1",children:[{type:"T5",id:"text_128",key:"0/2/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_129",key:"0/2/1/0/0/1",children:[{type:"T2",id:"container_130",key:"0/2/1/0/0/1/0",children:[{type:"T5",id:"text_131",key:"0/2/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_132",key:"0/2/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_133",key:"0/2/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_134",key:"0/2/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_135",key:"0/2/1/0/0/1/1",children:[{type:"T5",id:"text_136",key:"0/2/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_137",key:"0/2/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_138",key:"0/2/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_139",key:"0/2/1/0/0/1/2",children:[{type:"T5",id:"text_140",key:"0/2/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_141",key:"0/2/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_142",key:"0/2/1/0/0/2",children:[{type:"T2",id:"container_143",key:"0/2/1/0/0/2/0",children:[{type:"T5",id:"text_144",key:"0/2/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_145",key:"0/2/1/0/0/2/1",children:[{type:"T5",id:"text_146",key:"0/2/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_147",key:"0/2/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_148",key:"0/2/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_149",key:"0/2/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]}]},function(){const c=new Map;let l=null,d=null;function p(){}function _(){}function f(n,e){if(!n)return;e(n);const t=n.children||[];for(let o=0;o<t.length;o++)f(t[o],e)}function v(n){try{if(typeof atob=="function")return atob(n);if(typeof Buffer<"u")return Buffer.from(n,"base64").toString("utf8")}catch{}return""}function T(n){try{if(!n)return null;if(n&&n.type==="inline"&&n.code)return new Function("event",n.code);const e=n&&(n.b||n.code_b64)||null;if(e){const t=v(e);if(t)return new Function("event",t)}}catch{}return null}function L(n){f(n,e=>{if(e&&e.id&&e.events&&!c.has(e.id)){const t={};for(const o in e.events){const i=e.events[o],m=T(i);m&&(t[o]=m)}Object.keys(t).length?c.set(e.id,t):c.delete(e.id)}})}function M(n,e){if(!(!n||!e))for(const[t,o]of Object.entries(e))try{o===!1||o===null||typeof o>"u"?n.removeAttribute(t):n.setAttribute(t,String(o))}catch{}}function C(n,e={},t={}){for(const o in e)if(!(o in t))try{n.removeAttribute(o)}catch{}for(const o in t){const i=t[o];try{i===!1||i===null||typeof i>"u"?n.removeAttribute(o):n.setAttribute(o,String(i))}catch{}}}function E(n,e={},t={}){for(const o in e)if(!(o in t))try{n.style.removeProperty(o.replace(/_/g,"-"))}catch{}for(const o in t){const i=t[o];try{n.style.setProperty(o.replace(/_/g,"-"),String(i))}catch{}}}function A(n,e){(e||document).addEventListener(n,function(t){let o=t.target;const i=e||document;for(;o&&o!==i;){const m=o.id;if(m&&c.has(m)){const y=c.get(m);if(o&&o.__darsEv&&o.__darsEv[n])return;let u=y[n];if(!u&&(n==="keydown"||n==="keyup"||n==="keypress")){const a=t.key||t.code;if(a){const r=n+"."+a;u=y[r]}}if(typeof u=="function"){try{u.call(o,t)}catch(a){console.error("[Dars] handler error",a)}return}}o=o.parentNode}},!0)}function k(n,e){return n&&e?n.type!==e.type:n!==e}function S(n){if(!n)return;const e=n.children||[];for(let t=0;t<e.length;t++)S(e[t]);if(n.id&&c.delete(n.id),n.id){const t=document.getElementById(n.id);if(t&&t.parentNode)try{t.parentNode.removeChild(t)}catch{}}}function w(n,e){if(!e||!e.id)return{ok:!1,reason:"missing-new"};let t=document.getElementById(e.id);if(!t){const a=n&&n.id?document.getElementById(n.id):null;if(a)try{a.id=e.id,t=a}catch{}}if(!t)return{ok:!1,reason:"missing-el"};if(k(n,e))return{ok:!1,reason:"type-changed"};const o=!!e.isIsland;if(!o&&e.class&&(t.className=e.class),o||C(t,n&&n.props||{},e.props||{}),o||E(t,n&&n.style||{},e.style||{}),!o&&Object.prototype.hasOwnProperty.call(e,"text")&&t.textContent!==String(e.text||"")&&(t.textContent=String(e.text||"")),o)return{ok:!0};const i=n&&n.children?n.children:[],m=e.children?e.children:[],y=new Map;for(let a=0;a<i.length;a++){const r=i[a]&&(i[a].id||i[a].key)||null;r&&y.set(String(r),i[a])}const u=new Set;for(let a=0;a<m.length;a++){const r=m[a],h=r&&(r.id||r.key)||null;if(!h)if(a<i.length){const s=w(i[a],r);if(!s.ok)return s;u.add(i[a]);continue}else return{ok:!1,reason:"children-added"};const x=y.get(String(h));if(x){const s=w(x,r);if(!s.ok)return s;u.add(x)}else{if(a<i.length){const g=i[a];if(!k(g,r)){const b=w(g,r);if(!b.ok)return b;u.add(g);continue}}const s=createSubtree(r);if(s){const g=a<i.length?i[a]:null;if(g&&g.id){const b=document.getElementById(g.id);b&&b.parentNode?b.parentNode.insertBefore(s,b):t.appendChild(s)}else t.appendChild(s);continue}return{ok:!1,reason:"children-added"}}}for(let a=0;a<i.length;a++){const r=i[a];u.has(r)||S(r)}return{ok:!0}}function D(n){typeof requestAnimationFrame=="function"?requestAnimationFrame(n):setTimeout(n,16)}function I(n){const e=l;if(!e){l=n;try{window.__DARS_VDOM__=n}catch{}return}D(()=>{const t=w(e,n);if(!t.ok){console.warn("[Dars] Structural change detected (",t.reason,"), reloading...");try{location.reload()}catch{}return}l=n;try{window.__DARS_VDOM__=n}catch{}})}function B(n){l=n;try{window.__DARS_VDOM__=n}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(t=>A(t,document))}function P(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const n=window.__DARS_VERSION_URL||"version.txt";let e=null,t=!1,o=0;const i=10;let m=!1;function y(a,r,h,x){try{const s=new XMLHttpRequest;x&&(s.responseType=x),s.open("GET",a,!0),s.timeout=5e3,s.onreadystatechange=function(){s.readyState===4&&(s.status>=200&&s.status<300?r(s.response):h())},s.onerror=h,s.ontimeout=h,s.setRequestHeader("Cache-Control","no-store"),s.send()}catch{h()}}function u(){m||y(n,function(a){let r=(a||"").toString().trim();if(!r||r==="0"){if(o+=1,o>=i){console.warn("[Dars] version file not found after",i,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(e)try{clearTimeout(e)}catch{}return}t||(console.warn("[Dars] waiting for version file..."),t=!0),e=setTimeout(u,600);return}if(o=0,t=!1,d||(d=r),r&&r!==d){d=r;try{location.reload()}catch{}return}e=setTimeout(u,600)},function(){if(o+=1,o>=i){console.warn("[Dars] version file not reachable after",i,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(e)try{clearTimeout(e)}catch{}return}t||(console.warn("[Dars] waiting for version file..."),t=!0),e=setTimeout(u,600)},"text")}return u(),()=>{try{m=!0,e&&clearTimeout(e),window.__DARS_STOP_HOTRELOAD=null}catch{}}}document.addEventListener("DOMContentLoaded",function(){if(window.__DARS_VDOM__?B(window.__DARS_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=P()}catch{}}})}(),window.addEventListener("scroll",()=>{const c=document.getElementById("dars-navbar");window.scrollY>20?c.classList.add("scrolled"):c.classList.remove("scrolled");const l=document.getElementById("features-section");if(l&&!l.classList.contains("visible")){const d=l.getBoundingClientRect().top,p=window.innerHeight/1.5;d<p&&(l.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((f,v)=>{setTimeout(()=>{f.style.opacity="1",f.style.transform="translateY(0)"},v*100)}))}}),document.addEventListener("DOMContentLoaded",()=>{const c=document.getElementById("hero-logo"),l=document.getElementById("hero-title"),d=document.getElementById("hero-description"),p=document.getElementById("pip-command"),_=document.getElementById("get-started-btn"),f=document.getElementById("scroll-text");c&&setTimeout(()=>c.classList.add("show"),5),l&&setTimeout(()=>l.classList.add("show"),350),d&&setTimeout(()=>d.classList.add("show"),650),p&&setTimeout(()=>p.classList.add("show"),950),_&&setTimeout(()=>_.classList.add("show"),1250),f&&setTimeout(()=>f.classList.add("show"),1500)}),document.addEventListener("DOMContentLoaded",function(){const c=document.getElementById("hamburger-btn"),l=document.getElementById("mobile-menu"),d=document.body;c&&l&&(c.addEventListener("click",function(p){p.stopPropagation(),l.style.display==="flex"?(l.style.display="none",c.classList.remove("menu-open"),d.classList.remove("menu-open")):(l.style.display="flex",c.classList.add("menu-open"),d.classList.add("menu-open"))}),l.querySelectorAll("a").forEach(p=>{p.addEventListener("click",function(){l.style.display="none",c.classList.remove("menu-open"),d.classList.remove("menu-open")})}),document.addEventListener("click",function(p){!c.contains(p.target)&&!l.contains(p.target)&&(l.style.display="none",c.classList.remove("menu-open"),d.classList.remove("menu-open"))}),document.addEventListener("keydown",function(p){p.key==="Escape"&&l.style.display==="flex"&&(l.style.display="none",c.classList.remove("menu-open"),d.classList.remove("menu-open"))}))});
+For more, see the [Getting Started](#getting-started-with-dars) guide and the main documentation index.`}]},{type:"T2",id:"footer-section",key:"0/2/1",children:[{type:"T2",id:"container_123",key:"0/2/1/0",children:[{type:"T2",id:"container_124",key:"0/2/1/0/0",children:[{type:"T2",id:"container_125",key:"0/2/1/0/0/0",children:[{type:"T4",id:"image_126",key:"0/2/1/0/0/0/0"},{type:"T2",id:"container_127",key:"0/2/1/0/0/0/1",children:[{type:"T5",id:"text_128",key:"0/2/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_129",key:"0/2/1/0/0/1",children:[{type:"T2",id:"container_130",key:"0/2/1/0/0/1/0",children:[{type:"T5",id:"text_131",key:"0/2/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_132",key:"0/2/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_133",key:"0/2/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_134",key:"0/2/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_135",key:"0/2/1/0/0/1/1",children:[{type:"T5",id:"text_136",key:"0/2/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_137",key:"0/2/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_138",key:"0/2/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_139",key:"0/2/1/0/0/1/2",children:[{type:"T5",id:"text_140",key:"0/2/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_141",key:"0/2/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_142",key:"0/2/1/0/0/2",children:[{type:"T2",id:"container_143",key:"0/2/1/0/0/2/0",children:[{type:"T5",id:"text_144",key:"0/2/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_145",key:"0/2/1/0/0/2/1",children:[{type:"T5",id:"text_146",key:"0/2/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_147",key:"0/2/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_148",key:"0/2/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_149",key:"0/2/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]}]},function(){const d=new Map;let l=null,c=null;function p(){}function x(){}function f(n,e){if(!n)return;e(n);const t=n.children||[];for(let o=0;o<t.length;o++)f(t[o],e)}function k(n){try{if(typeof atob=="function")return atob(n);if(typeof Buffer<"u")return Buffer.from(n,"base64").toString("utf8")}catch{}return""}function T(n){try{if(!n)return null;if(n&&n.type==="inline"&&n.code)return new Function("event",n.code);const e=n&&(n.b||n.code_b64)||null;if(e){const t=k(e);if(t)return new Function("event",t)}}catch{}return null}function M(n){f(n,e=>{if(e&&e.id&&e.events&&!d.has(e.id)){const t={};for(const o in e.events){const i=e.events[o],m=T(i);m&&(t[o]=m)}Object.keys(t).length?d.set(e.id,t):d.delete(e.id)}})}function L(n,e){if(!(!n||!e))for(const[t,o]of Object.entries(e))try{o===!1||o===null||typeof o>"u"?n.removeAttribute(t):n.setAttribute(t,String(o))}catch{}}function C(n,e={},t={}){for(const o in e)if(!(o in t))try{n.removeAttribute(o)}catch{}for(const o in t){const i=t[o];try{i===!1||i===null||typeof i>"u"?n.removeAttribute(o):n.setAttribute(o,String(i))}catch{}}}function A(n,e={},t={}){for(const o in e)if(!(o in t))try{n.style.removeProperty(o.replace(/_/g,"-"))}catch{}for(const o in t){const i=t[o];try{n.style.setProperty(o.replace(/_/g,"-"),String(i))}catch{}}}function D(n,e){(e||document).addEventListener(n,function(t){let o=t.target;const i=e||document;for(;o&&o!==i;){const m=o.id;if(m&&d.has(m)){const y=d.get(m);if(o&&o.__darsEv&&o.__darsEv[n])return;let u=y[n];if(!u&&(n==="keydown"||n==="keyup"||n==="keypress")){const a=t.key||t.code;if(a){const r=n+"."+a;u=y[r]}}if(typeof u=="function"){try{u.call(o,t)}catch(a){console.error("[Dars] handler error",a)}return}}o=o.parentNode}},!0)}function v(n,e){return n&&e?n.type!==e.type:n!==e}function S(n){if(!n)return;const e=n.children||[];for(let t=0;t<e.length;t++)S(e[t]);if(n.id&&d.delete(n.id),n.id){const t=document.getElementById(n.id);if(t&&t.parentNode)try{t.parentNode.removeChild(t)}catch{}}}function w(n,e){if(!e||!e.id)return{ok:!1,reason:"missing-new"};let t=document.getElementById(e.id);if(!t){const a=n&&n.id?document.getElementById(n.id):null;if(a)try{a.id=e.id,t=a}catch{}}if(!t)return{ok:!1,reason:"missing-el"};if(v(n,e))return{ok:!1,reason:"type-changed"};const o=!!e.isIsland;if(!o&&e.class&&(t.className=e.class),o||C(t,n&&n.props||{},e.props||{}),o||A(t,n&&n.style||{},e.style||{}),!o&&Object.prototype.hasOwnProperty.call(e,"text")&&t.textContent!==String(e.text||"")&&(t.textContent=String(e.text||"")),o)return{ok:!0};const i=n&&n.children?n.children:[],m=e.children?e.children:[],y=new Map;for(let a=0;a<i.length;a++){const r=i[a]&&(i[a].id||i[a].key)||null;r&&y.set(String(r),i[a])}const u=new Set;for(let a=0;a<m.length;a++){const r=m[a],h=r&&(r.id||r.key)||null;if(!h)if(a<i.length){const s=w(i[a],r);if(!s.ok)return s;u.add(i[a]);continue}else return{ok:!1,reason:"children-added"};const _=y.get(String(h));if(_){const s=w(_,r);if(!s.ok)return s;u.add(_)}else{if(a<i.length){const g=i[a];if(!v(g,r)){const b=w(g,r);if(!b.ok)return b;u.add(g);continue}}const s=createSubtree(r);if(s){const g=a<i.length?i[a]:null;if(g&&g.id){const b=document.getElementById(g.id);b&&b.parentNode?b.parentNode.insertBefore(s,b):t.appendChild(s)}else t.appendChild(s);continue}return{ok:!1,reason:"children-added"}}}for(let a=0;a<i.length;a++){const r=i[a];u.has(r)||S(r)}return{ok:!0}}function B(n){typeof requestAnimationFrame=="function"?requestAnimationFrame(n):setTimeout(n,16)}function I(n){const e=l;if(!e){l=n;try{window.__DARS_VDOM__=n}catch{}return}B(()=>{const t=w(e,n);if(!t.ok){console.warn("[Dars] Structural change detected (",t.reason,"), reloading...");try{location.reload()}catch{}return}l=n;try{window.__DARS_VDOM__=n}catch{}})}function E(n){l=n;try{window.__DARS_VDOM__=n}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(t=>D(t,document))}function P(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const n=window.__DARS_VERSION_URL||"version.txt";let e=null,t=!1,o=0;const i=10;let m=!1;function y(a,r,h,_){try{const s=new XMLHttpRequest;_&&(s.responseType=_),s.open("GET",a,!0),s.timeout=5e3,s.onreadystatechange=function(){s.readyState===4&&(s.status>=200&&s.status<300?r(s.response):h())},s.onerror=h,s.ontimeout=h,s.setRequestHeader("Cache-Control","no-store"),s.send()}catch{h()}}function u(){m||y(n,function(a){let r=(a||"").toString().trim();if(!r||r==="0"){if(o+=1,o>=i){console.warn("[Dars] version file not found after",i,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(e)try{clearTimeout(e)}catch{}return}t||(console.warn("[Dars] waiting for version file..."),t=!0),e=setTimeout(u,600);return}if(o=0,t=!1,c||(c=r),r&&r!==c){c=r;try{location.reload()}catch{}return}e=setTimeout(u,600)},function(){if(o+=1,o>=i){console.warn("[Dars] version file not reachable after",i,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(e)try{clearTimeout(e)}catch{}return}t||(console.warn("[Dars] waiting for version file..."),t=!0),e=setTimeout(u,600)},"text")}return u(),()=>{try{m=!0,e&&clearTimeout(e),window.__DARS_STOP_HOTRELOAD=null}catch{}}}document.addEventListener("DOMContentLoaded",function(){if(window.__DARS_VDOM__?E(window.__DARS_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=P()}catch{}}})}(),window.addEventListener("scroll",()=>{const d=document.getElementById("dars-navbar");window.scrollY>20?d.classList.add("scrolled"):d.classList.remove("scrolled");const l=document.getElementById("features-section");if(l&&!l.classList.contains("visible")){const c=l.getBoundingClientRect().top,p=window.innerHeight/1.5;c<p&&(l.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((f,k)=>{setTimeout(()=>{f.style.opacity="1",f.style.transform="translateY(0)"},k*100)}))}}),document.addEventListener("DOMContentLoaded",()=>{const d=document.getElementById("hero-logo"),l=document.getElementById("hero-title"),c=document.getElementById("hero-description"),p=document.getElementById("pip-command"),x=document.getElementById("get-started-btn"),f=document.getElementById("scroll-text");d&&setTimeout(()=>d.classList.add("show"),5),l&&setTimeout(()=>l.classList.add("show"),350),c&&setTimeout(()=>c.classList.add("show"),650),p&&setTimeout(()=>p.classList.add("show"),950),x&&setTimeout(()=>x.classList.add("show"),1250),f&&setTimeout(()=>f.classList.add("show"),1500)}),document.addEventListener("DOMContentLoaded",function(){const d=document.getElementById("hamburger-btn"),l=document.getElementById("mobile-menu"),c=document.body;d&&l&&(d.addEventListener("click",function(p){p.stopPropagation(),l.style.display==="flex"?(l.style.display="none",d.classList.remove("menu-open"),c.classList.remove("menu-open")):(l.style.display="flex",d.classList.add("menu-open"),c.classList.add("menu-open"))}),l.querySelectorAll("a").forEach(p=>{p.addEventListener("click",function(){l.style.display="none",d.classList.remove("menu-open"),c.classList.remove("menu-open")})}),document.addEventListener("click",function(p){!d.contains(p.target)&&!l.contains(p.target)&&(l.style.display="none",d.classList.remove("menu-open"),c.classList.remove("menu-open"))}),document.addEventListener("keydown",function(p){p.key==="Escape"&&l.style.display==="flex"&&(l.style.display="none",d.classList.remove("menu-open"),c.classList.remove("menu-open"))}))});

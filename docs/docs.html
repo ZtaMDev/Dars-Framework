@@ -988,24 +988,6 @@
      <a class="sidebar-link sidebar-level-4" href="#file-system-operations" style="margin-left: 60px">
       File System Operations
      </a>
-     <a class="sidebar-link sidebar-level-1" href="#list-all-files-in-a-directory" style="margin-left: 0px">
-      List all files in a directory
-     </a>
-     <a class="sidebar-link sidebar-level-1" href="#list-with-glob-pattern-filtering" style="margin-left: 0px">
-      List with glob pattern filtering
-     </a>
-     <a class="sidebar-link sidebar-level-1" href="#dynamic-path-from-input" style="margin-left: 0px">
-      Dynamic path from input
-     </a>
-     <a class="sidebar-link sidebar-level-1" href="#include-file-sizes-optional" style="margin-left: 0px">
-      Include file sizes (optional)
-     </a>
-     <a class="sidebar-link sidebar-level-1" href="#read-binary-files-images-etc" style="margin-left: 0px">
-      Read binary files (images, etc.)
-     </a>
-     <a class="sidebar-link sidebar-level-1" href="#write-binary-data" style="margin-left: 0px">
-      Write binary data
-     </a>
      <a class="sidebar-link sidebar-level-4" href="#chaining-multiple-operations" style="margin-left: 60px">
       Chaining Multiple Operations
      </a>
@@ -1056,17 +1038,14 @@
      <a class="sidebar-link sidebar-level-3" href="#chaining-scripts-then" style="margin-left: 40px">
       Chaining Scripts (`.then()`)
      </a>
+     <a class="sidebar-link sidebar-level-3" href="#self-navigation-with-thisgoto" style="margin-left: 40px">
+      Self-Navigation with `this().goto()`
+     </a>
      <a class="sidebar-link sidebar-level-2" href="#inlinescript" style="margin-left: 20px">
       InlineScript
      </a>
      <a class="sidebar-link sidebar-level-3" href="#basic-syntax-inlinescript" style="margin-left: 40px">
       Basic Syntax InlineScript
-     </a>
-     <a class="sidebar-link sidebar-level-3" href="#practical-examples" style="margin-left: 40px">
-      Practical Examples
-     </a>
-     <a class="sidebar-link sidebar-level-4" href="#button-event-handling" style="margin-left: 60px">
-      Button Event Handling
      </a>
      <a class="sidebar-link sidebar-level-3" href="#integration-with-exporter" style="margin-left: 40px">
       Integration with Exporter
@@ -1076,15 +1055,6 @@
      </a>
      <a class="sidebar-link sidebar-level-3" href="#basic-syntax-for-filescript" style="margin-left: 40px">
       Basic Syntax for FileScript
-     </a>
-     <a class="sidebar-link sidebar-level-3" href="#file-organization" style="margin-left: 40px">
-      File Organization
-     </a>
-     <a class="sidebar-link sidebar-level-4" href="#example-utilsjs" style="margin-left: 60px">
-      Example: utils.js
-     </a>
-     <a class="sidebar-link sidebar-level-4" href="#example-apijs" style="margin-left: 60px">
-      Example: api.js
      </a>
      <a class="sidebar-link sidebar-level-2" href="#utility-scripts-utilsds" style="margin-left: 20px">
       Utility Scripts (`utils_ds`)
@@ -9138,8 +9108,7 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
        </strong>
       </p>
       <div class="codehilite">
-       <pre><span></span><code><span class="c1"># Write and update button text on success</span>
-<span class="n">save_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Save"</span><span class="p">,</span>
+       <pre><span></span><code><span class="n">save_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Save"</span><span class="p">,</span>
     <span class="n">on_click</span><span class="o">=</span><span class="n">write_text</span><span class="p">(</span><span class="s2">"output.txt"</span><span class="p">,</span> <span class="s2">"Hello Dars!"</span><span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span>
         <span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">"Saved!"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s2">"color"</span><span class="p">:</span> <span class="s2">"green"</span><span class="p">})</span>
     <span class="p">)</span>
@@ -9154,7 +9123,7 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
       <div class="codehilite">
        <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.desktop</span><span class="w"> </span><span class="kn">import</span> <span class="n">list_directory</span><span class="p">,</span> <span class="n">get_value</span>
 
-<span class="c1"># List all files in a directory</span>
+
 <span class="n">Button</span><span class="p">(</span><span class="s2">"Browse"</span><span class="p">,</span>
     <span class="n">on_click</span><span class="o">=</span><span class="n">list_directory</span><span class="p">(</span><span class="s2">"."</span><span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span>
         <span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"file-list"</span><span class="p">,</span> <span class="n">html</span><span class="o">=</span><span class="n">RawJS</span><span class="p">(</span><span class="s2">"""</span>
@@ -9166,14 +9135,14 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
     <span class="p">)</span>
 <span class="p">)</span>
 
-<span class="c1"># List with glob pattern filtering</span>
+
 <span class="n">Button</span><span class="p">(</span><span class="s2">"Python Files"</span><span class="p">,</span>
     <span class="n">on_click</span><span class="o">=</span><span class="n">list_directory</span><span class="p">(</span><span class="s2">"."</span><span class="p">,</span> <span class="s2">"*.py"</span><span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span>
         <span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"count"</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">RawJS</span><span class="p">(</span><span class="s2">"`Found $</span><span class="si">{value.length}</span><span class="s2"> files`"</span><span class="p">))</span>
     <span class="p">)</span>
 <span class="p">)</span>
 
-<span class="c1"># Dynamic path from input</span>
+
 <span class="n">Input</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"path"</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s2">"."</span><span class="p">)</span>
 <span class="n">Button</span><span class="p">(</span><span class="s2">"List Directory"</span><span class="p">,</span>
     <span class="n">on_click</span><span class="o">=</span><span class="n">list_directory</span><span class="p">(</span><span class="n">get_value</span><span class="p">(</span><span class="s2">"path"</span><span class="p">))</span><span class="o">.</span><span class="n">then</span><span class="p">(</span>
@@ -9181,7 +9150,7 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
     <span class="p">)</span>
 <span class="p">)</span>
 
-<span class="c1"># Include file sizes (optional)</span>
+
 <span class="n">list_directory</span><span class="p">(</span><span class="s2">"."</span><span class="p">,</span> <span class="s2">"*"</span><span class="p">,</span> <span class="n">include_size</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </code></pre>
       </div>
@@ -9191,10 +9160,9 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
        </strong>
       </p>
       <div class="codehilite">
-       <pre><span></span><code><span class="c1"># Read binary files (images, etc.)</span>
-<span class="n">img_data</span> <span class="o">=</span> <span class="n">read_file</span><span class="p">(</span><span class="s2">"image.png"</span><span class="p">)</span>
+       <pre><span></span><code><span class="n">img_data</span> <span class="o">=</span> <span class="n">read_file</span><span class="p">(</span><span class="s2">"image.png"</span><span class="p">)</span>
 
-<span class="c1"># Write binary data</span>
+
 <span class="n">write_file</span><span class="p">(</span><span class="s2">"output.bin"</span><span class="p">,</span> <span class="n">data_bytes</span><span class="p">)</span>
 </code></pre>
       </div>
@@ -9493,6 +9461,91 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
        </code>
        .
       </p>
+      <h3 id="self-navigation-with-thisgoto">
+       Self-Navigation with
+       <code>
+        this().goto()
+       </code>
+      </h3>
+      <p>
+       The
+       <code>
+        this().goto(idx)
+       </code>
+       method allows a component to navigate to a specific state index in its own
+       <code>
+        dState
+       </code>
+       . This enables self-contained state management without external references.
+      </p>
+      <p>
+       <strong>
+        Requirements
+       </strong>
+       :
+- The component must have a
+       <code>
+        dState
+       </code>
+       defined with the target index in its
+       <code>
+        states
+       </code>
+       array
+- The index must be valid (0 to states.length - 1)
+      </p>
+      <p>
+       <strong>
+        Example: Toggle Button
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dars.core.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">dState</span><span class="p">,</span> <span class="n">this</span>
+
+<span class="c1"># Create a button that toggles between two states</span>
+<span class="n">toggle_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Off"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"ToggleBtn"</span><span class="p">)</span>
+
+<span class="c1"># Define states for the button</span>
+<span class="n">toggle_state</span> <span class="o">=</span> <span class="n">dState</span><span class="p">(</span><span class="s2">"toggle"</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="n">toggle_btn</span><span class="p">,</span> <span class="n">states</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+<span class="c1"># Configure state 1 appearance and behavior</span>
+<span class="n">toggle_state</span><span class="o">.</span><span class="n">cState</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="p">[</span>
+    <span class="n">Mod</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">toggle_btn</span><span class="p">,</span> 
+        <span class="n">text</span><span class="o">=</span><span class="s2">"On"</span><span class="p">,</span>
+        <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s1">'background-color'</span><span class="p">:</span> <span class="s1">'green'</span><span class="p">,</span> <span class="s1">'color'</span><span class="p">:</span> <span class="s1">'white'</span><span class="p">},</span>
+        <span class="n">on_click</span><span class="o">=</span><span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">goto</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># Return to state 0 when clicked</span>
+    <span class="p">)</span>
+<span class="p">])</span>
+
+<span class="c1"># Initial click navigates to state 1</span>
+<span class="n">toggle_btn</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">goto</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Example: Cycle Through States
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Create a button that cycles through multiple states</span>
+<span class="n">cycle_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"State 0"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"CycleBtn"</span><span class="p">)</span>
+<span class="n">cycle_state</span> <span class="o">=</span> <span class="n">dState</span><span class="p">(</span><span class="s2">"cycler"</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="n">cycle_btn</span><span class="p">,</span> <span class="n">states</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+
+<span class="c1"># Each state navigates to the next</span>
+<span class="n">cycle_state</span><span class="o">.</span><span class="n">cState</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="p">[</span>
+    <span class="n">Mod</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cycle_btn</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">"State 1"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">goto</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+<span class="p">])</span>
+<span class="n">cycle_state</span><span class="o">.</span><span class="n">cState</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="p">[</span>
+    <span class="n">Mod</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cycle_btn</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">"State 2"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">goto</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+<span class="p">])</span>
+<span class="n">cycle_state</span><span class="o">.</span><span class="n">cState</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="p">[</span>
+    <span class="n">Mod</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cycle_btn</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">"State 3"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">goto</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+<span class="p">])</span>
+
+<span class="n">cycle_btn</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">goto</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># Start the cycle</span>
+</code></pre>
+      </div>
       <h2 id="inlinescript">
        InlineScript
       </h2>
@@ -9509,197 +9562,6 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
 
 <span class="s2">document.addEventListener('DOMContentLoaded', function() {</span>
 <span class="s2">    console.log('Aplicación cargada');</span>
-<span class="s2">});</span>
-<span class="s2">"""</span><span class="p">)</span>
-</code></pre>
-      </div>
-      <h3 id="practical-examples">
-       Practical Examples
-      </h3>
-      <h4 id="button-event-handling">
-       Button Event Handling
-      </h4>
-      <div class="codehilite">
-       <pre><span></span><code><span class="n">script_botones</span> <span class="o">=</span> <span class="n">InlineScript</span><span class="p">(</span><span class="s2">"""</span>
-<span class="s2">// Function to handle button clicks</span>
-<span class="s2">function manejarClickBoton(evento) {</span>
-<span class="s2">    const boton = evento.target;</span>
-<span class="s2">    const texto = boton.textContent;</span>
-
-<span class="s2">    console.log(`Button pressed: $</span><span class="si">{texto}</span><span class="s2">`);</span>
-
-<span class="s2">    // Change text temporarily</span>
-<span class="s2">    const textoOriginal = boton.textContent;</span>
-<span class="s2">    boton.textContent = '¡Presionado!';</span>
-<span class="s2">    boton.disabled = true;</span>
-
-<span class="s2">    setTimeout(() =&gt; {</span>
-<span class="s2">        boton.textContent = textoOriginal;</span>
-<span class="s2">        boton.disabled = false;</span>
-<span class="s2">    }, 1000);</span>
-<span class="s2">}</span>
-
-<span class="s2">// Add events to all buttons</span>
-<span class="s2">document.addEventListener('DOMContentLoaded', function() {</span>
-<span class="s2">    const botones = document.querySelectorAll('button');</span>
-<span class="s2">    botones.forEach(boton =&gt; {</span>
-<span class="s2">        boton.addEventListener('click', manejarClickBoton);</span>
-<span class="s2">    });</span>
-<span class="s2">});</span>
-<span class="s2">"""</span><span class="p">)</span>
-</code></pre>
-      </div>
-      <h4 id="form-validation">
-       Form Validation
-      </h4>
-      <div class="codehilite">
-       <pre><span></span><code><span class="n">script_validacion</span> <span class="o">=</span> <span class="n">InlineScript</span><span class="p">(</span><span class="s2">"""</span>
-<span class="s2">// Form validation</span>
-<span class="s2">function validarFormulario() {</span>
-<span class="s2">    const inputs = document.querySelectorAll('input[required]');</span>
-<span class="s2">    let esValido = true;</span>
-
-<span class="s2">    inputs.forEach(input =&gt; {</span>
-<span class="s2">        if (!input.value.trim()) {</span>
-<span class="s2">            mostrarError(input, 'This field is required');</span>
-<span class="s2">            esValido = false;</span>
-<span class="s2">        } else {</span>
-<span class="s2">            limpiarError(input);</span>
-<span class="s2">        }</span>
-
-<span class="s2">        // Specific type validation</span>
-<span class="s2">        if (input.type === 'email' &amp;&amp; input.value) {</span>
-<span class="s2">            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;</span>
-<span class="s2">            if (!emailRegex.test(input.value)) {</span>
-<span class="s2">                mostrarError(input, 'Email is invalid');</span>
-<span class="s2">                esValido = false;</span>
-<span class="s2">            }</span>
-<span class="s2">        }</span>
-<span class="s2">    });</span>
-
-<span class="s2">    return esValido;</span>
-<span class="s2">}</span>
-
-<span class="s2">function mostrarError(input, mensaje) {</span>
-<span class="s2">    //  Remove previous error</span>
-<span class="s2">    limpiarError(input);</span>
-
-<span class="s2">    // Create error element</span>
-<span class="s2">    const error = document.createElement('div');</span>
-<span class="s2">    error.className = 'error-mensaje';</span>
-<span class="s2">    error.textContent = mensaje;</span>
-<span class="s2">    error.style.color = '#dc3545';</span>
-<span class="s2">    error.style.fontSize = '12px';</span>
-<span class="s2">    error.style.marginTop = '5px';</span>
-
-<span class="s2">    // Add after the input</span>
-<span class="s2">    input.parentNode.insertBefore(error, input.nextSibling);</span>
-
-<span class="s2">    // Change input style</span>
-<span class="s2">    input.style.borderColor = '#dc3545';</span>
-<span class="s2">}</span>
-
-<span class="s2">function limpiarError(input) {</span>
-<span class="s2">    const error = input.parentNode.querySelector('.error-mensaje');</span>
-<span class="s2">    if (error) {</span>
-<span class="s2">        error.remove();</span>
-<span class="s2">    }</span>
-<span class="s2">    input.style.borderColor = '';</span>
-<span class="s2">}</span>
-
-<span class="s2">// Configure real-time validation</span>
-<span class="s2">document.addEventListener('DOMContentLoaded', function() {</span>
-<span class="s2">    const inputs = document.querySelectorAll('input');</span>
-<span class="s2">    inputs.forEach(input =&gt; {</span>
-<span class="s2">        input.addEventListener('blur', function() {</span>
-<span class="s2">            if (this.hasAttribute('required') &amp;&amp; !this.value.trim()) {</span>
-<span class="s2">                mostrarError(this, 'This field is required');</span>
-<span class="s2">            } else {</span>
-<span class="s2">                limpiarError(this);</span>
-<span class="s2">            }</span>
-<span class="s2">        });</span>
-
-<span class="s2">        input.addEventListener('input', function() {</span>
-<span class="s2">            limpiarError(this);</span>
-<span class="s2">        });</span>
-<span class="s2">    });</span>
-<span class="s2">});</span>
-<span class="s2">"""</span><span class="p">)</span>
-</code></pre>
-      </div>
-      <h4 id="visual-effects-and-animations">
-       Visual Effects and Animations
-      </h4>
-      <div class="codehilite">
-       <pre><span></span><code><span class="n">script_animaciones</span> <span class="o">=</span> <span class="n">InlineScript</span><span class="p">(</span><span class="s2">"""</span>
-<span class="s2">// Fade in effect for elements</span>
-<span class="s2">function fadeIn(elemento, duracion = 500) {</span>
-<span class="s2">    elemento.style.opacity = '0';</span>
-<span class="s2">    elemento.style.display = 'block';</span>
-
-<span class="s2">    const inicio = performance.now();</span>
-
-<span class="s2">    function animar(tiempo) {</span>
-<span class="s2">        const progreso = (tiempo - inicio) / duracion;</span>
-
-<span class="s2">        if (progreso &lt; 1) {</span>
-<span class="s2">            elemento.style.opacity = progreso;</span>
-<span class="s2">            requestAnimationFrame(animar);</span>
-<span class="s2">        } else {</span>
-<span class="s2">            elemento.style.opacity = '1';</span>
-<span class="s2">        }</span>
-<span class="s2">    }</span>
-
-<span class="s2">    requestAnimationFrame(animar);</span>
-<span class="s2">}</span>
-
-<span class="s2">// Typing effect for text</span>
-<span class="s2">function efectoTyping(elemento, texto, velocidad = 50) {</span>
-<span class="s2">    elemento.textContent = '';</span>
-<span class="s2">    let i = 0;</span>
-
-<span class="s2">    function escribir() {</span>
-<span class="s2">        if (i &lt; texto.length) {</span>
-<span class="s2">            elemento.textContent += texto.charAt(i);</span>
-<span class="s2">            i++;</span>
-<span class="s2">            setTimeout(escribir, velocidad);</span>
-<span class="s2">        }</span>
-<span class="s2">    }</span>
-
-<span class="s2">    escribir();</span>
-<span class="s2">}</span>
-
-<span class="s2">// Parallax simple</span>
-<span class="s2">function iniciarParallax() {</span>
-<span class="s2">    window.addEventListener('scroll', function() {</span>
-<span class="s2">        const scrolled = window.pageYOffset;</span>
-<span class="s2">        const elementos = document.querySelectorAll('.parallax');</span>
-
-<span class="s2">        elementos.forEach(elemento =&gt; {</span>
-<span class="s2">            const velocidad = elemento.dataset.velocidad || 0.5;</span>
-<span class="s2">            const yPos = -(scrolled * velocidad);</span>
-<span class="s2">            elemento.style.transform = `translateY($</span><span class="si">{yPos}</span><span class="s2">px)`;</span>
-<span class="s2">        });</span>
-<span class="s2">    });</span>
-<span class="s2">}</span>
-
-<span class="s2">// Inicializar efectos</span>
-<span class="s2">document.addEventListener('DOMContentLoaded', function() {</span>
-<span class="s2">    // Fade in para todos los elementos con clase 'fade-in'</span>
-<span class="s2">    const elementosFadeIn = document.querySelectorAll('.fade-in');</span>
-<span class="s2">    elementosFadeIn.forEach((elemento, index) =&gt; {</span>
-<span class="s2">        setTimeout(() =&gt; fadeIn(elemento), index * 200);</span>
-<span class="s2">    });</span>
-
-<span class="s2">    // Efecto typing para títulos</span>
-<span class="s2">    const titulos = document.querySelectorAll('.typing-effect');</span>
-<span class="s2">    titulos.forEach(titulo =&gt; {</span>
-<span class="s2">        const texto = titulo.textContent;</span>
-<span class="s2">        efectoTyping(titulo, texto);</span>
-<span class="s2">    });</span>
-
-<span class="s2">    // Inicializar parallax</span>
-<span class="s2">    iniciarParallax();</span>
 <span class="s2">});</span>
 <span class="s2">"""</span><span class="p">)</span>
 </code></pre>
@@ -9725,9 +9587,6 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
         FileScript
        </code>
        . You can safely mix and match them in your app, and all will be included in the generated JS.
-      </p>
-      <p>
-       New in v1.2.2:
       </p>
       <ul>
        <li>
@@ -9761,296 +9620,6 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
 
 <span class="c1"># Load script from file</span>
 <span class="n">script</span> <span class="o">=</span> <span class="n">FileScript</span><span class="p">(</span><span class="s2">"./scripts/mi_script.js"</span><span class="p">)</span>
-</code></pre>
-      </div>
-      <h3 id="file-organization">
-       File Organization
-      </h3>
-      <pre>
-<code class="language-none">mi_proyecto/
-├── app.py
-├── scripts/
-│   ├── utils.js
-│   ├── validaciones.js
-│   └── animaciones.js
-└────── api.js
-
-</code></pre>
-      <h4 id="example-utilsjs">
-       Example: utils.js
-      </h4>
-      <div class="codehilite">
-       <pre><span></span><code><span class="c1">// scripts/utils.js</span>
-
-<span class="c1">// General utilities</span>
-<span class="kd">const</span><span class="w"> </span><span class="nx">Utils</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="c1">// Date formatting</span>
-<span class="w">    </span><span class="nx">formatearFecha</span><span class="o">:</span><span class="w"> </span><span class="kd">function</span><span class="p">(</span><span class="nx">fecha</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Intl</span><span class="p">.</span><span class="nx">DateTimeFormat</span><span class="p">(</span><span class="s1">'es-ES'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="nx">year</span><span class="o">:</span><span class="w"> </span><span class="s1">'numeric'</span><span class="p">,</span>
-<span class="w">            </span><span class="nx">month</span><span class="o">:</span><span class="w"> </span><span class="s1">'long'</span><span class="p">,</span>
-<span class="w">            </span><span class="nx">day</span><span class="o">:</span><span class="w"> </span><span class="s1">'numeric'</span>
-<span class="w">        </span><span class="p">}).</span><span class="nx">format</span><span class="p">(</span><span class="nx">fecha</span><span class="p">);</span>
-<span class="w">    </span><span class="p">},</span>
-
-<span class="w">    </span><span class="c1">// Debounce for event optimization</span>
-<span class="w">    </span><span class="nx">debounce</span><span class="o">:</span><span class="w"> </span><span class="kd">function</span><span class="p">(</span><span class="nx">func</span><span class="p">,</span><span class="w"> </span><span class="nx">wait</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nx">timeout</span><span class="p">;</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">executedFunction</span><span class="p">(...</span><span class="nx">args</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="kd">const</span><span class="w"> </span><span class="nx">later</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                </span><span class="nx">clearTimeout</span><span class="p">(</span><span class="nx">timeout</span><span class="p">);</span>
-<span class="w">                </span><span class="nx">func</span><span class="p">(...</span><span class="nx">args</span><span class="p">);</span>
-<span class="w">            </span><span class="p">};</span>
-<span class="w">            </span><span class="nx">clearTimeout</span><span class="p">(</span><span class="nx">timeout</span><span class="p">);</span>
-<span class="w">            </span><span class="nx">timeout</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">setTimeout</span><span class="p">(</span><span class="nx">later</span><span class="p">,</span><span class="w"> </span><span class="nx">wait</span><span class="p">);</span>
-<span class="w">        </span><span class="p">};</span>
-<span class="w">    </span><span class="p">},</span>
-
-<span class="w">    </span><span class="c1">// Email validation</span>
-<span class="w">    </span><span class="nx">esEmailValido</span><span class="o">:</span><span class="w"> </span><span class="kd">function</span><span class="p">(</span><span class="nx">email</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="kd">const</span><span class="w"> </span><span class="nx">regex</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sr">/^[^\s@]+@[^\s@]+\.[^\s@]+$/</span><span class="p">;</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">regex</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">email</span><span class="p">);</span>
-<span class="w">    </span><span class="p">},</span>
-
-<span class="w">    </span><span class="c1">// Generate unique ID</span>
-<span class="w">    </span><span class="nx">generarId</span><span class="o">:</span><span class="w"> </span><span class="kd">function</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="s1">'_'</span><span class="o">+</span><span class="w"> </span><span class="nb">Math</span><span class="p">.</span><span class="nx">random</span><span class="p">().</span><span class="nx">toString</span><span class="p">(</span><span class="mf">36</span><span class="p">).</span><span class="nx">substr</span><span class="p">(</span><span class="mf">2</span><span class="p">,</span><span class="w"> </span><span class="mf">9</span><span class="p">);</span>
-<span class="w">    </span><span class="p">},</span>
-
-<span class="w">    </span><span class="c1">// Local storage</span>
-<span class="w">    </span><span class="nx">guardarEnLocal</span><span class="o">:</span><span class="w"> </span><span class="kd">function</span><span class="p">(</span><span class="nx">clave</span><span class="p">,</span><span class="w"> </span><span class="nx">valor</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="nx">localStorage</span><span class="p">.</span><span class="nx">setItem</span><span class="p">(</span><span class="nx">clave</span><span class="p">,</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">valor</span><span class="p">));</span>
-<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
-<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="nx">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="s1">'Error al guardar en localStorage:'</span><span class="p">,</span><span class="w"> </span><span class="nx">e</span><span class="p">);</span>
-<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span>
-<span class="w">        </span><span class="p">}</span>
-<span class="w">    </span><span class="p">},</span>
-
-<span class="w">    </span><span class="nx">obtenerDeLocal</span><span class="o">:</span><span class="w"> </span><span class="kd">function</span><span class="p">(</span><span class="nx">clave</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="kd">const</span><span class="w"> </span><span class="nx">item</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">localStorage</span><span class="p">.</span><span class="nx">getItem</span><span class="p">(</span><span class="nx">clave</span><span class="p">);</span>
-<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nx">item</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">item</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
-<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="nx">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="s1">'Error al leer de localStorage:'</span><span class="p">,</span><span class="w"> </span><span class="nx">e</span><span class="p">);</span>
-<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
-<span class="w">        </span><span class="p">}</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="p">};</span>
-
-<span class="c1">// Make available globally</span>
-<span class="nb">window</span><span class="p">.</span><span class="nx">Utils</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Utils</span><span class="p">;</span>
-</code></pre>
-      </div>
-      <h4 id="example-apijs">
-       Example: api.js
-      </h4>
-      <div class="codehilite">
-       <pre><span></span><code><span class="c1">// scripts/api.js</span>
-
-<span class="c1">// API client</span>
-<span class="kd">class</span><span class="w"> </span><span class="nx">ApiClient</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="kr">constructor</span><span class="p">(</span><span class="nx">baseUrl</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="nx">baseUrl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">baseUrl</span><span class="p">;</span>
-<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="nx">headers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="s1">'Content-Type'</span><span class="o">:</span><span class="w"> </span><span class="s1">'application/json'</span>
-<span class="w">        </span><span class="p">};</span>
-<span class="w">    </span><span class="p">}</span>
-
-<span class="w">    </span><span class="k">async</span><span class="w"> </span><span class="nx">request</span><span class="p">(</span><span class="nx">endpoint</span><span class="p">,</span><span class="w"> </span><span class="nx">options</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{})</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="kd">const</span><span class="w"> </span><span class="nx">url</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sb">`</span><span class="si">${</span><span class="k">this</span><span class="p">.</span><span class="nx">baseUrl</span><span class="si">}${</span><span class="nx">endpoint</span><span class="si">}</span><span class="sb">`</span><span class="p">;</span>
-<span class="w">        </span><span class="kd">const</span><span class="w"> </span><span class="nx">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="nx">headers</span><span class="o">:</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">headers</span><span class="p">,</span>
-<span class="w">            </span><span class="p">...</span><span class="nx">options</span>
-<span class="w">        </span><span class="p">};</span>
-
-<span class="w">        </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="kd">const</span><span class="w"> </span><span class="nx">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="nx">url</span><span class="p">,</span><span class="w"> </span><span class="nx">config</span><span class="p">);</span>
-
-<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">response</span><span class="p">.</span><span class="nx">ok</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                </span><span class="k">throw</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="ne">Error</span><span class="p">(</span><span class="sb">`HTTP error! status: </span><span class="si">${</span><span class="nx">response</span><span class="p">.</span><span class="nx">status</span><span class="si">}</span><span class="sb">`</span><span class="p">);</span>
-<span class="w">            </span><span class="p">}</span>
-
-<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">json</span><span class="p">();</span>
-<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="nx">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="s1">'Error en la petición:'</span><span class="p">,</span><span class="w"> </span><span class="nx">error</span><span class="p">);</span>
-<span class="w">            </span><span class="k">throw</span><span class="w"> </span><span class="nx">error</span><span class="p">;</span>
-<span class="w">        </span><span class="p">}</span>
-<span class="w">    </span><span class="p">}</span>
-
-<span class="w">    </span><span class="k">async</span><span class="w"> </span><span class="nx">get</span><span class="p">(</span><span class="nx">endpoint</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">request</span><span class="p">(</span><span class="nx">endpoint</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">method</span><span class="o">:</span><span class="w"> </span><span class="s1">'GET'</span><span class="w"> </span><span class="p">});</span>
-<span class="w">    </span><span class="p">}</span>
-
-<span class="w">    </span><span class="k">async</span><span class="w"> </span><span class="nx">post</span><span class="p">(</span><span class="nx">endpoint</span><span class="p">,</span><span class="w"> </span><span class="nx">data</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">request</span><span class="p">(</span><span class="nx">endpoint</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="nx">method</span><span class="o">:</span><span class="w"> </span><span class="s1">'POST'</span><span class="p">,</span>
-<span class="w">            </span><span class="nx">body</span><span class="o">:</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
-<span class="w">        </span><span class="p">});</span>
-<span class="w">    </span><span class="p">}</span>
-
-<span class="w">    </span><span class="k">async</span><span class="w"> </span><span class="nx">put</span><span class="p">(</span><span class="nx">endpoint</span><span class="p">,</span><span class="w"> </span><span class="nx">data</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">request</span><span class="p">(</span><span class="nx">endpoint</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="nx">method</span><span class="o">:</span><span class="w"> </span><span class="s1">'PUT'</span><span class="p">,</span>
-<span class="w">            </span><span class="nx">body</span><span class="o">:</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
-<span class="w">        </span><span class="p">});</span>
-<span class="w">    </span><span class="p">}</span>
-
-<span class="w">    </span><span class="k">async</span><span class="w"> </span><span class="ow">delete</span><span class="p">(</span><span class="nx">endpoint</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">request</span><span class="p">(</span><span class="nx">endpoint</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">method</span><span class="o">:</span><span class="w"> </span><span class="s1">'DELETE'</span><span class="w"> </span><span class="p">});</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="p">}</span>
-
-<span class="c1">// Global instance</span>
-<span class="nb">window</span><span class="p">.</span><span class="nx">api</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">ApiClient</span><span class="p">(</span><span class="s1">'https://api.ejemplo.com'</span><span class="p">);</span>
-</code></pre>
-      </div>
-      <h3 id="usage-in-the-application">
-       Usage in the Application
-      </h3>
-      <h4 id="global-and-page-specific-scripts-multipage">
-       Global and Page-specific Scripts (multipage)
-      </h4>
-      <p>
-       In multipage applications, you can add global scripts to the App and page-specific scripts to each Page:
-      </p>
-      <div class="codehilite">
-       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.scripts.script</span><span class="w"> </span><span class="kn">import</span> <span class="n">InlineScript</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dars.components.basic</span><span class="w"> </span><span class="kn">import</span> <span class="n">Page</span><span class="p">,</span> <span class="n">Button</span><span class="p">,</span> <span class="n">Text</span>
-
-<span class="n">home</span> <span class="o">=</span> <span class="n">Page</span><span class="p">(</span>
-    <span class="n">Text</span><span class="p">(</span><span class="s2">"Inicio"</span><span class="p">),</span>
-    <span class="n">Button</span><span class="p">(</span><span class="s2">"Ir a About"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"btn-about"</span><span class="p">)</span>
-<span class="p">)</span>
-<span class="n">home</span><span class="o">.</span><span class="n">add_script</span><span class="p">(</span><span class="n">InlineScript</span><span class="p">(</span><span class="s2">"""</span>
-<span class="s2">document.addEventListener('DOMContentLoaded', function() {</span>
-<span class="s2">    var btn = document.getElementById('btn-about');</span>
-<span class="s2">    if (btn) btn.onclick = () =&gt; window.location.href = 'about.html';</span>
-<span class="s2">});</span>
-<span class="s2">"""</span><span class="p">))</span>
-
-<span class="n">about</span> <span class="o">=</span> <span class="n">Page</span><span class="p">(</span>
-    <span class="n">Text</span><span class="p">(</span><span class="s2">"Sobre Nosotros"</span><span class="p">),</span>
-    <span class="n">Button</span><span class="p">(</span><span class="s2">"Volver"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"btn-home"</span><span class="p">)</span>
-<span class="p">)</span>
-<span class="n">about</span><span class="o">.</span><span class="n">add_script</span><span class="p">(</span><span class="n">InlineScript</span><span class="p">(</span><span class="s2">"""</span>
-<span class="s2">document.addEventListener('DOMContentLoaded', function() {</span>
-<span class="s2">    var btn = document.getElementById('btn-home');</span>
-<span class="s2">    if (btn) btn.onclick = () =&gt; window.location.href = 'index.html';</span>
-<span class="s2">});</span>
-<span class="s2">"""</span><span class="p">))</span>
-
-
-<span class="n">app</span><span class="o">.</span><span class="n">add_script</span><span class="p">(</span><span class="n">InlineScript</span><span class="p">(</span><span class="s2">"console.log('Script global para todas las páginas');"</span><span class="p">))</span>
-</code></pre>
-      </div>
-      <p>
-       When exporting, each page will have its own JS file combining global scripts and page-specific scripts.
-      </p>
-      <div class="codehilite">
-       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.scripts.script</span><span class="w"> </span><span class="kn">import</span> <span class="n">FileScript</span>
-
-<span class="n">app</span><span class="o">.</span><span class="n">add_script</span><span class="p">(</span><span class="n">FileScript</span><span class="p">(</span><span class="s2">"./scripts/utils.js"</span><span class="p">))</span>
-<span class="n">app</span><span class="o">.</span><span class="n">add_script</span><span class="p">(</span><span class="n">FileScript</span><span class="p">(</span><span class="s2">"./scripts/api.js"</span><span class="p">))</span>
-<span class="n">app</span><span class="o">.</span><span class="n">add_script</span><span class="p">(</span><span class="n">FileScript</span><span class="p">(</span><span class="s2">"./scripts/validaciones.js"</span><span class="p">))</span>
-</code></pre>
-      </div>
-      <h2 id="component-integration">
-       Component Integration
-      </h2>
-      <h3 id="connecting-scripts-to-components">
-       Connecting Scripts to Components
-      </h3>
-      <div class="codehilite">
-       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.core.app</span><span class="w"> </span><span class="kn">import</span> <span class="n">App</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dars.components.basic.button</span><span class="w"> </span><span class="kn">import</span> <span class="n">Button</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dars.components.basic.input</span><span class="w"> </span><span class="kn">import</span> <span class="n">Input</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dars.components.basic.container</span><span class="w"> </span><span class="kn">import</span> <span class="n">Container</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dars.scripts.script</span><span class="w"> </span><span class="kn">import</span> <span class="n">InlineScript</span>
-
-<span class="n">formulario</span> <span class="o">=</span> <span class="n">Container</span><span class="p">(</span>
-    <span class="nb">id</span><span class="o">=</span><span class="s2">"formulario-contacto"</span><span class="p">,</span>
-    <span class="n">children</span><span class="o">=</span><span class="p">[</span>
-        <span class="n">Input</span><span class="p">(</span>
-            <span class="nb">id</span><span class="o">=</span><span class="s2">"campo-nombre"</span><span class="p">,</span>
-            <span class="n">placeholder</span><span class="o">=</span><span class="s2">"Nombre"</span><span class="p">,</span>
-            <span class="n">required</span><span class="o">=</span><span class="kc">True</span>
-        <span class="p">),</span>
-        <span class="n">Input</span><span class="p">(</span>
-            <span class="nb">id</span><span class="o">=</span><span class="s2">"campo-email"</span><span class="p">,</span>
-            <span class="n">placeholder</span><span class="o">=</span><span class="s2">"Email"</span><span class="p">,</span>
-            <span class="n">input_type</span><span class="o">=</span><span class="s2">"email"</span><span class="p">,</span>
-            <span class="n">required</span><span class="o">=</span><span class="kc">True</span>
-        <span class="p">),</span>
-        <span class="n">Button</span><span class="p">(</span>
-            <span class="nb">id</span><span class="o">=</span><span class="s2">"boton-enviar"</span><span class="p">,</span>
-            <span class="n">text</span><span class="o">=</span><span class="s2">"Enviar"</span>
-        <span class="p">)</span>
-    <span class="p">]</span>
-<span class="p">)</span>
-
-<span class="n">script_formulario</span> <span class="o">=</span> <span class="n">InlineScript</span><span class="p">(</span><span class="s2">"""</span>
-<span class="s2">document.addEventListener(</span><span class="se">\'</span><span class="s2">DOMContentLoaded</span><span class="se">\'</span><span class="s2">, function() {</span>
-<span class="s2">    const formulario = document.getElementById(</span><span class="se">\'</span><span class="s2">formulario-contacto</span><span class="se">\'</span><span class="s2">);</span>
-<span class="s2">    const campoNombre = document.getElementById(</span><span class="se">\'</span><span class="s2">campo-nombre</span><span class="se">\'</span><span class="s2">);</span>
-<span class="s2">    const campoEmail = document.getElementById(</span><span class="se">\'</span><span class="s2">campo-email</span><span class="se">\'</span><span class="s2">);</span>
-<span class="s2">    const botonEnviar = document.getElementById(</span><span class="se">\'</span><span class="s2">boton-enviar</span><span class="se">\'</span><span class="s2">);</span>
-
-<span class="s2">    // Real-time validation</span>
-<span class="s2">    campoNombre.addEventListener(</span><span class="se">\'</span><span class="s2">input</span><span class="se">\'</span><span class="s2">, function() {</span>
-<span class="s2">        validarNombre(this.value);</span>
-<span class="s2">    });</span>
-
-<span class="s2">    campoEmail.addEventListener(</span><span class="se">\'</span><span class="s2">input</span><span class="se">\'</span><span class="s2">, function() {</span>
-<span class="s2">        validarEmail(this.value);</span>
-<span class="s2">    });</span>
-
-<span class="s2">    // Handle form submission</span>
-<span class="s2">    botonEnviar.addEventListener(</span><span class="se">\'</span><span class="s2">click</span><span class="se">\'</span><span class="s2">, function(e) {</span>
-<span class="s2">        e.preventDefault();</span>
-<span class="s2">        enviarFormulario();</span>
-<span class="s2">    });</span>
-
-<span class="s2">    function validarNombre(nombre) {</span>
-<span class="s2">        const esValido = nombre.length &gt;= 2;</span>
-<span class="s2">        campoNombre.style.borderColor = esValido ? </span><span class="se">\'</span><span class="s2">#28a745</span><span class="se">\'</span><span class="s2"> : </span><span class="se">\'</span><span class="s2">#dc3545</span><span class="se">\'</span><span class="s2">;</span>
-<span class="s2">        return esValido;</span>
-<span class="s2">    }</span>
-
-<span class="s2">    function validarEmail(email) {</span>
-<span class="s2">        const regex = /^[^</span><span class="se">\\</span><span class="s2">s@]+@[^</span><span class="se">\\</span><span class="s2">s@]+</span><span class="se">\\</span><span class="s2">.[^</span><span class="se">\\</span><span class="s2">s@]+$/;</span>
-<span class="s2">        const esValido = regex.test(email);</span>
-<span class="s2">        campoEmail.style.borderColor = esValido ? </span><span class="se">\'</span><span class="s2">#28a745</span><span class="se">\'</span><span class="s2"> : </span><span class="se">\'</span><span class="s2">#dc3545</span><span class="se">\'</span><span class="s2">;</span>
-<span class="s2">        return esValido;</span>
-<span class="s2">    }</span>
-
-<span class="s2">    function enviarFormulario() {</span>
-<span class="s2">        const nombre = campoNombre.value;</span>
-<span class="s2">        const email = campoEmail.value;</span>
-
-<span class="s2">        if (validarNombre(nombre) &amp;&amp; validarEmail(email)) {</span>
-<span class="s2">            // Simular envío</span>
-<span class="s2">            botonEnviar.textContent = </span><span class="se">\'</span><span class="s2">Enviando...</span><span class="se">\'</span><span class="s2">;</span>
-<span class="s2">            botonEnviar.disabled = true;</span>
-
-<span class="s2">            setTimeout(() =&gt; {</span>
-<span class="s2">                alert(</span><span class="se">\'</span><span class="s2">Formulario enviado correctamente</span><span class="se">\'</span><span class="s2">);</span>
-<span class="s2">                campoNombre.value = </span><span class="se">\'\'</span><span class="s2">;</span>
-<span class="s2">                campoEmail.value = </span><span class="se">\'\'</span><span class="s2">;</span>
-<span class="s2">                botonEnviar.textContent = </span><span class="se">\'</span><span class="s2">Enviar</span><span class="se">\'</span><span class="s2">;</span>
-<span class="s2">                botonEnviar.disabled = false;</span>
-<span class="s2">            }, 2000);</span>
-<span class="s2">        } else {</span>
-<span class="s2">            alert(</span><span class="se">\'</span><span class="s2">Por favor, corrige los errores en el formulario</span><span class="se">\'</span><span class="s2">);</span>
-<span class="s2">        }</span>
-<span class="s2">    }</span>
-<span class="s2">});</span>
-<span class="s2">"""</span><span class="p">)</span>
-
-<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"Form with Script"</span><span class="p">)</span>
-<span class="n">app</span><span class="o">.</span><span class="n">set_root</span><span class="p">(</span><span class="n">form</span><span class="p">)</span>
-<span class="n">app</span><span class="o">.</span><span class="n">add_script</span><span class="p">(</span><span class="n">form_script</span><span class="p">)</span>
 </code></pre>
       </div>
       <h2 id="utility-scripts-utils_ds">

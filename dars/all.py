@@ -39,7 +39,7 @@ from dars.core.events import EventManager
 from dars.core.events import EventTypes
 # CLI (optional, for advanced usage)
 # from dars.cli.main import main as dars_cli_main
-from dars.core.state import dState, Mod, this
+from dars.core.state import dState, Mod, this, this_for
 from dars.dars_tests.run_tests import run_app_tests, run_unit_tests, main
 # Exporters (optional, for direct use)
 from dars.exporters.web.html_css_js import HTMLCSSJSExporter
@@ -61,7 +61,7 @@ __all__ = [
     'EventTypes', 'EventHandler', 'EventEmitter', 'EventManager', 'Markdown',
     '__version__',
     'run_app_tests', 'run_unit_tests', 'main',
-    'dState', 'Mod',
+    'dState', 'Mod', 'this_for',
     'createComp', 'deleteComp', 'updateComp', 'RawJS', 'this', 'Arg', 'SelectOption', 
     # Modal utilities
     'showModal', 'hideModal',
