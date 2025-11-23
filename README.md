@@ -147,7 +147,7 @@ btn = Button("Click Me!", on_click=this().state(text="You Clicked!"))
 
 ## SPA Routing System
 
-Dars 1.4.5 introduces a powerful client-side routing system for Single Page Applications:
+Dars 1.4.6 introduces a powerful client-side routing system for Single Page Applications:
 
 ### Basic Routing
 
