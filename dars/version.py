@@ -1,2 +1,2 @@
-__version__ = "1.4.4"
-__release_url__ = "https://github.com/ZtaMDev/Dars-Framework/releases/tag/1.4.4"
+__version__ = "1.4.5"
+__release_url__ = "https://github.com/ZtaMDev/Dars-Framework/releases/tag/1.4.5"

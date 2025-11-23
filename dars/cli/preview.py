@@ -38,9 +38,12 @@ class PreviewServer:
             return os.path.join(self.base_directory, relpath)
 
         def do_GET(self):
+            # Handle query parameters
+            path_no_query = self.path.split('?')[0]
+
             # Hot reload endpoints - serve immediately with no caching
-            if self.path.endswith("version.txt") or (
-                self.path.startswith("/version_") and self.path.endswith(".txt")
+            if path_no_query.endswith("version.txt") or (
+                path_no_query.startswith("/version_") and path_no_query.endswith(".txt")
             ):
                 self.send_response(200)
                 self.send_header("Content-type", "text/plain")
@@ -49,7 +52,7 @@ class PreviewServer:
                 self.send_header("Expires", "0")
                 self.end_headers()
 
-                version_path = self.translate_path(self.path)
+                version_path = self.translate_path(path_no_query)
                 if os.path.exists(version_path):
                     with open(version_path, "r") as f:
                         self.wfile.write(f.read().encode())
@@ -58,7 +61,7 @@ class PreviewServer:
                 return
 
             # For root path, always serve index.html
-            if self.path == "/" or self.path == "":
+            if path_no_query == "/" or path_no_query == "":
                 self.path = "/index.html"
 
             # Check if file exists, if not serve index.html for SPA routing
@@ -97,8 +100,17 @@ class PreviewServer:
             try:
                 # Suppress logs for hot reload requests and normal page loads
                 path = getattr(self, "path", "")
-                # Suppress any version*.txt (e.g., version.txt, version_docs.txt, version_<slug>.txt)
-                if ("version" in path and path.endswith('.txt')) or any(
+                
+                # Fallback to requestline if path is empty
+                if not path and hasattr(self, 'requestline'):
+                    parts = self.requestline.split()
+                    if len(parts) > 1:
+                        path = parts[1]
+                
+                # Handle query parameters by splitting at '?'
+                clean_path = path.split('?')[0]
+                
+                if ("version" in clean_path and clean_path.endswith('.txt')) or any(
                     pattern in path
                     for pattern in ["favicon.ico", ".css", ".js", ".png", ".jpg", ".svg"]
                 ):

@@ -136,7 +136,7 @@ The `this()` helper enables direct, event-time component updates without pre-def
 ```python
 from dars.all import *
 
-btn = Button("Click Me!", on_click=this().state(text="You Clicked!",))
+btn = Button("Click Me!", on_click=this().state(text="You Clicked!"))
 ```
 
 * Works anywhere: desktop and web exports
@@ -145,7 +145,83 @@ btn = Button("Click Me!", on_click=this().state(text="You Clicked!",))
 
 ---
 
+## SPA Routing System
+
+Dars 1.4.5 introduces a powerful client-side routing system for Single Page Applications:
+
+### Basic Routing
+
+Use the `@route` decorator or `route` parameter to create SPA routes:
+
+```python
+from dars.all import *
+
+app = App(title="My SPA")
+
+# Using decorator
+@route("/")
+def home():
+    return Page(Text("Home Page"))
+
+# Using parameter
+about_page = Page(Text("About Us"))
+app.add_page("about", about_page, route="/about")
+
+app.add_page("home", home())
+```
+
+### Nested Routes with Outlet
+
+Create complex layouts with parent-child routes using the `Outlet` component:
+
+```python
+# Parent layout with navigation
+@route("/dashboard")
+def dashboard():
+    return Page(
+        Text("Dashboard", style={"fontSize": "24px"}),
+        Container(id="nav",
+            Link("Settings", href="/dashboard/settings"),
+            Link("Profile", href="/dashboard/profile")
+        ),
+        Outlet(),  # Child routes render here
+        style={"padding": "20px"}
+    )
+
+# Child routes
+settings_page = Page(Text("Settings Content"))
+profile_page = Page(Text("Profile Content"))
+
+app.add_page("dashboard", dashboard())
+app.add_page("settings", settings_page, route="/dashboard/settings", parent="dashboard")
+app.add_page("profile", profile_page, route="/dashboard/profile", parent="dashboard")
+```
+
+### 404 Error Handling
+
+Dars automatically handles 404 errors with a default page, or you can customize it:
+
+```python
+# Custom 404 page
+custom_404 = Page(
+    Text("Oops! Page not found", style={"fontSize": "32px", "color": "red"}),
+    Link("Go Home", href="/")
+)
+
+app.set_404_page(custom_404)
+```
+
+### Hot Reload for SPAs
+
+The development preview server includes intelligent hot reload:
+- Detects changes and reloads automatically
+- Stops polling after 10 errors to prevent browser lag
+- Clean console output without spam
+
+---
+
 ## CLI Usage
+
 | Command                                 | What it does                               |
 |-----------------------------------------|--------------------------------------------|
 | `dars export my_app.py --format html`   | Export app to HTML/CSS/JS in `./my_app_web` |
@@ -169,7 +245,7 @@ Tip: use `dars doctor` to review optional tooling that can enhance bundling/mini
 - Build with `dars build` to produce desktop artifacts under `dist/`.
 - This feature is in BETA: usable for testing, not yet recommended for production.
 
-## More
+---
 
 - Visit dars [official website](https://ztamdev.github.io/Dars-Framework/)
 - Visit the dars official [Documentation](https://ztamdev.github.io/Dars-Framework/docs.html) now on separate website.
@@ -257,41 +333,4 @@ dars export config --format html
 
 ---
 
-See LandingPage docs for details: state_management.md, events.md, scripts.md.
-
-## More
-
-- Visit dars [official website](https://ztamdev.github.io/Dars-Framework/)
-- Visit the dars official [Documentation](https://ztamdev.github.io/Dars-Framework/docs.html) now on separate website.
-- Try dars without installing nothing just visit the [Dars Playground](https://dars-playground.vercel.app/)
-
-## Local Execution and Live Preview
-
-To test your app locally before exporting, use the hot-reload preview from any Python file that defines your app:
-
-```python
-if __name__ == "__main__":
-    app.rTimeCompile()
-```
-
-Then run your file directly:
-
-```bash
-python my_app.py
-```
-
-This will start a local server at http://localhost:8000 so you can view your app in the browser—no manual export needed. You can change the port with:
-
-```bash
-python my_app.py --port 8088
-```
-
----
-
-You can also use the CLI preview command on an exported app:
-
-```bash
-dars preview ./my_exported_app
-```
-
-This will start a local server at http://localhost:8000 to view your exported app in the browser.
+See LandingPage docs for details: state_management.md, events.md, scripts.md, routing.md.

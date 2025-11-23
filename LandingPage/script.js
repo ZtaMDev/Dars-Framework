@@ -25,33 +25,31 @@ window.addEventListener("scroll", () => {
   }
 });
 
-document.addEventListener("DOMContentLoaded", () => {
-  const logo = document.getElementById("hero-logo");
-  const title = document.getElementById("hero-title");
-  const desc = document.getElementById("hero-description");
-  const pipCommand = document.getElementById("pip-command");
-  const btn = document.getElementById("get-started-btn");
-  const scrollText = document.getElementById("scroll-text");
+const logo = document.getElementById("hero-logo");
+const title = document.getElementById("hero-title");
+const desc = document.getElementById("hero-description");
+const pipCommand = document.getElementById("pip-command");
+const btn = document.getElementById("get-started-btn");
+const scrollText = document.getElementById("scroll-text");
 
-  if (logo) {
-    setTimeout(() => logo.classList.add("show"), 5);
-  }
-  if (title) {
-    setTimeout(() => title.classList.add("show"), 350);
-  }
-  if (desc) {
-    setTimeout(() => desc.classList.add("show"), 650);
-  }
-  if (pipCommand) {
-    setTimeout(() => pipCommand.classList.add("show"), 950);
-  }
-  if (btn) {
-    setTimeout(() => btn.classList.add("show"), 1250);
-  }
-  if (scrollText) {
-    setTimeout(() => scrollText.classList.add("show"), 1500);
-  }
-});
+if (logo) {
+  setTimeout(() => logo.classList.add("show"), 5);
+}
+if (title) {
+  setTimeout(() => title.classList.add("show"), 350);
+}
+if (desc) {
+  setTimeout(() => desc.classList.add("show"), 650);
+}
+if (pipCommand) {
+  setTimeout(() => pipCommand.classList.add("show"), 950);
+}
+if (btn) {
+  setTimeout(() => btn.classList.add("show"), 1250);
+}
+if (scrollText) {
+  setTimeout(() => scrollText.classList.add("show"), 1500);
+}
 
 document.addEventListener('DOMContentLoaded', function () {
   const hamburgerBtn = document.getElementById('hamburger-btn');

@@ -234,7 +234,7 @@ load_btn = Button("Load Data",
 
 **Writing Text Files**
 ```python
-# Write and update button text on success
+
 save_btn = Button("Save",
     on_click=write_text("output.txt", "Hello Dars!").then(
         this().state(text="Saved!", style={"color": "green"})
@@ -246,7 +246,7 @@ save_btn = Button("Save",
 ```python
 from dars.desktop import list_directory, get_value
 
-# List all files in a directory
+
 Button("Browse",
     on_click=list_directory(".").then(
         this().state(id="file-list", html=RawJS("""
@@ -258,14 +258,14 @@ Button("Browse",
     )
 )
 
-# List with glob pattern filtering
+
 Button("Python Files",
     on_click=list_directory(".", "*.py").then(
         this().state(id="count", text=RawJS("`Found ${value.length} files`"))
     )
 )
 
-# Dynamic path from input
+
 Input(id="path", value=".")
 Button("List Directory",
     on_click=list_directory(get_value("path")).then(
@@ -273,16 +273,16 @@ Button("List Directory",
     )
 )
 
-# Include file sizes (optional)
+
 list_directory(".", "*", include_size=True)
 ```
 
 **Binary File Operations**
 ```python
-# Read binary files (images, etc.)
+
 img_data = read_file("image.png")
 
-# Write binary data
+
 write_file("output.bin", data_bytes)
 ```
 

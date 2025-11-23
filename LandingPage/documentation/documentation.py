@@ -25,6 +25,7 @@ docs = Page(
                 class_name="markdown_docs",
                 dark_theme=True
             ),
+            Markdown(file_path="./documentation/markdown/routing.md", class_name="markdown_docs", dark_theme=True),
             Markdown(file_path="./documentation/markdown/state_management.md", class_name="markdown_docs", dark_theme=True),
             Markdown(file_path="./documentation/markdown/components.md", class_name="markdown_docs", dark_theme=True),
             Markdown(file_path="./documentation/markdown/custom_components.md", class_name="markdown_docs", dark_theme=True),

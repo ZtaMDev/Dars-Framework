@@ -29,6 +29,7 @@ from dars.components.basic.tooltip import Tooltip
 from dars.components.layout.anchor import AnchorPoint
 from dars.components.layout.flex import FlexLayout
 from dars.components.basic.section import Section
+from dars.components.advanced.outlet import Outlet
 # Layout
 from dars.components.layout.grid import GridLayout, LayoutBase
 # Core
@@ -37,6 +38,7 @@ from dars.core.component import Component
 from dars.core.events import EventHandler, EventEmitter, EventManager
 from dars.core.events import EventManager
 from dars.core.events import EventTypes
+from dars.core.routing import route, SPARoute, RouteNode  # SPA Routing
 # CLI (optional, for advanced usage)
 # from dars.cli.main import main as dars_cli_main
 from dars.core.state import dState, Mod, this, this_for
@@ -55,7 +57,7 @@ __all__ = [
     'App', 'Component', 'EventManager',
     'Button', 'Checkbox', 'Container', 'DatePicker', 'Image', 'Input', 'Link', 'Page', 'ProgressBar',
     'RadioButton', 'Select', 'Slider', 'Spinner', 'Text', 'Textarea', 'Tooltip',
-    'Accordion', 'Card', 'Modal', 'Navbar', 'Table', 'Tabs', 'Section',
+    'Accordion', 'Card', 'Modal', 'Navbar', 'Table', 'Tabs', 'Section', 'Outlet',
     'GridLayout', 'FlexLayout', 'LayoutBase', 'AnchorPoint',
     'InlineScript', 'FileScript', 'dScript', 'HTMLCSSJSExporter',
     'EventTypes', 'EventHandler', 'EventEmitter', 'EventManager', 'Markdown',
@@ -63,6 +65,8 @@ __all__ = [
     'run_app_tests', 'run_unit_tests', 'main',
     'dState', 'Mod', 'this_for',
     'createComp', 'deleteComp', 'updateComp', 'RawJS', 'this', 'Arg', 'SelectOption', 
+    # SPA Routing
+    'route', 'SPARoute', 'RouteNode',
     # Modal utilities
     'showModal', 'hideModal',
     # Navigation utilities

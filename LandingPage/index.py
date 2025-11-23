@@ -20,20 +20,20 @@ app = App(
     apple_mobile_web_app_title="Dars Framework",
     keywords=["framework","python","python framework", "dars","dars framework", "ui components", "declarative UI"]
 )
-
-index = Page(
-    create_navbar(),
-    create_hero(),
-    create_features(),
-    create_howitworks(),
-    create_footer()
-)
+@route("/")
+def index():
+    return Page(
+        create_navbar(),
+        create_hero(),
+        create_features(),
+        create_howitworks(),
+        create_footer()
+    )
 app.set_theme("dark")
 app.add_global_style(file_path="index.css")
 app.add_script(dScript(file_path="script.js"))
-app.add_page("index", index, title="Dars Framework", index=True)
+app.add_page("index", index(), title="Dars Framework", index=True)
 app.add_page("docs", docs, title="Dars Docs")
 app.add_page("releases", releases, title="Dars Versions")
- 
 if __name__ == "__main__":
     app.rTimeCompile(add_file_types=".py, .js, .css, .md, .svg")

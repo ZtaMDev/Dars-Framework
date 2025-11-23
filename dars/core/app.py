@@ -1158,8 +1158,15 @@ class App:
         
         # Propiedades del framework
         self.root: Optional[Component] = None  # Single-page mode
-        self._pages: Dict[str, Page] = {}      # Multipage mode
+        self._pages: Dict[str, Page] = {}      # Traditional multipage mode
         self._index_page: str = None           # Nombre de la página principal (si existe)
+        
+        # SPA Routing properties
+        self._spa_routes: Dict[str, 'SPARoute'] = {}  # SPA routes by name
+        self._spa_route_tree: Optional['RouteNode'] = None  # Tree structure for nested routes
+        self._spa_index_route: str = None      # Main SPA route
+        self._spa_404_page: Optional[Page] = None  # Custom 404 page
+        
         self.scripts: List['Script'] = []
         self.global_styles: Dict[str, Any] = {}
         self.global_style_files: List[str] = []
@@ -1180,19 +1187,138 @@ class App:
         """Sets the root component of the application (backward-compatible single-page mode)."""
         self.root = component
 
-    def add_page(self, name: str, root: 'Component', title: str = None, meta: dict = None, index: bool = False):
-        """
-        Adds a multipage page to the app.  
-        `name` is the slug/key, `root` the root component.  
-        If `index=True`, this page will be the main one (exported as index.html).  
-        If multiple pages have `index=True`, the last registered one will be the main page.  
-        """
-        if name in self._pages:
-            raise ValueError(f"Page already exists with this name: '{name}'")
-        self._pages[name] = Page(name, root, title, meta, index=index)
-        if index:
-            self._index_page = name
 
+    def add_page(
+        self, 
+        name: str, 
+        root: 'Component', 
+        title: str = None, 
+        meta: dict = None, 
+        index: bool = False,
+        route: str = None,
+        preload: List[str] = None,
+        parent: str = None
+    ):
+        """
+        Adds a page to the app. Can be traditional multipage or SPA route.
+        
+        Args:
+            name: Page identifier/slug
+            root: Root component for the page
+            title: Page title
+            meta: Metadata dict
+            index: If True, this is the main/index page
+            route: SPA route path (e.g., "/home", "/user/:id"). If provided, page becomes SPA route
+            preload: List of route paths to preload (only valid with route parameter)
+            parent: Parent route name for nested routes (only valid with route parameter)
+        
+        Raises:
+            ValueError: If route is defined both via decorator and parameter
+            ValueError: If preload is used without route
+            ValueError: If parent is used without route
+            ValueError: If page name already exists
+        
+        Examples:
+            # Traditional multipage
+            app.add_page("about", about_page)
+            
+            # SPA route
+            app.add_page("home", home_page, route="/")
+            
+            # SPA route with parameters
+            app.add_page("user", user_page, route="/user/:id")
+            
+            # Nested SPA route
+            app.add_page("docs", docs_layout, route="/docs")
+            app.add_page("docs_start", getting_started, route="/docs/getting-started", parent="docs")
+        """
+        from dars.core.routing import get_route, SPARoute, RouteNode
+        
+        # Check for route from decorator
+        decorator_route = get_route(root)
+        
+        # Validate route definition (can't define in both places)
+        if decorator_route and route:
+            raise ValueError(
+                f"Route for page '{name}' is defined in both @route decorator "
+                f"('{decorator_route}') and route parameter ('{route}'). "
+                "Please use only one method."
+            )
+        
+        # Determine final route
+        final_route = route or decorator_route
+        
+        # Validate preload usage
+        if preload and not final_route:
+            raise ValueError(
+                f"preload parameter cannot be used without route definition for page '{name}'"
+            )
+        
+        # Validate parent usage
+        if parent and not final_route:
+            raise ValueError(
+                f"parent parameter cannot be used without route definition for page '{name}'"
+            )
+        
+        # Check if page already exists
+        if name in self._pages or name in self._spa_routes:
+            raise ValueError(f"Page already exists with this name: '{name}'")
+        
+        # Create SPA route or traditional page
+        if final_route:
+            # Validate parent exists if specified
+            if parent and parent not in self._spa_routes:
+                raise ValueError(
+                    f"Parent route '{parent}' does not exist for page '{name}'. "
+                    f"Add parent route before child routes."
+                )
+            
+            # Initialize route tree if needed
+            if self._spa_route_tree is None:
+                self._spa_route_tree = RouteNode()
+            
+            # Create SPA route
+            spa_route = SPARoute(
+                name=name,
+                root=root,
+                route=final_route,
+                title=title,
+                meta=meta,
+                preload=preload,
+                index=index,
+                parent=parent
+            )
+            self._spa_routes[name] = spa_route
+            
+            # Build route tree
+            route_node = RouteNode(spa_route)
+            if parent:
+                # Add as child of parent
+                parent_node = self._find_route_node(self._spa_route_tree, parent)
+                if parent_node:
+                    parent_node.add_child(route_node)
+            else:
+                # Add as top-level route
+                self._spa_route_tree.add_child(route_node)
+            
+            if index:
+                self._spa_index_route = name
+        else:
+            # Traditional multipage
+            self._pages[name] = Page(name, root, title, meta, index=index)
+            if index:
+                self._index_page = name
+
+
+    def _find_route_node(self, node: 'RouteNode', route_name: str) -> Optional['RouteNode']:
+        """Helper to find a RouteNode by its route name in the SPA route tree."""
+        if node.route and node.route.name == route_name:
+            return node
+        for child in node.children:
+            found = self._find_route_node(child, route_name)
+            if found:
+                return found
+        return None
 
     def get_page(self, name: str) -> 'Page':
         """Obtain one registered page by name."""
@@ -1200,15 +1326,24 @@ class App:
 
     def get_index_page(self) -> 'Page':
         """
-        Returns the index page, or the first one if none has index=True.
+        Returns the index page from multipage, or None if none has index=True.
+        Does NOT return first page as fallback if SPA has an index route.
         """
-        # Prioridad: explícita, luego la primera
+        # Check if index is explicitly defined in multipage
         if hasattr(self, '_index_page') and self._index_page and self._index_page in self._pages:
             return self._pages[self._index_page]
+        
+        # Look for a page with index=True
         for page in self._pages.values():
             if getattr(page, 'index', False):
                 return page
-        # Si ninguna marcada, devolver la primera
+        
+        # Only return first page as fallback if there are NO SPA routes
+        # If SPA routes exist, return None to avoid conflicts
+        if hasattr(self, '_spa_routes') and self._spa_routes:
+            return None
+        
+        # Fallback: return first page only if no SPA exists
         if self._pages:
             return list(self._pages.values())[0]
         return None
@@ -1222,6 +1357,29 @@ class App:
     def is_multipage(self) -> bool:
         """Indicate if the app is in multipage mode."""
         return bool(self._pages)
+    
+    def has_spa_routes(self) -> bool:
+        """Indicate if the app has any SPA routes."""
+        return bool(self._spa_routes)
+    
+    def get_spa_index(self) -> Optional['SPARoute']:
+        """Get the index SPA route if exists."""
+        if self._spa_index_route and self._spa_index_route in self._spa_routes:
+            return self._spa_routes[self._spa_index_route]
+        return None
+    
+    def set_404_page(self, page: 'Page'):
+        """
+        Set custom 404 page for SPA routing.
+        
+        Args:
+            page: Page instance to display when route not found
+        
+        Example:
+            not_found_page = Page(Container(Text("404 - Page Not Found")))
+            app.set_404_page(not_found_page)
+        """
+        self._spa_404_page = page
         
     def add_script(self, script: 'Script'):
         """Adds a script to the app"""

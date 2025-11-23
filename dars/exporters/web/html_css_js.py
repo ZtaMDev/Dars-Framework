@@ -142,6 +142,10 @@ class HTMLCSSJSExporter(Exporter):
             # Verificar si debemos combinar archivos JS
             should_combine_js = bundle and vite_minify
 
+            # SPA Routing: exportar SPA routes si existen (no retornar, permitir multipage también)
+            if hasattr(app, "has_spa_routes") and app.has_spa_routes():
+                self._export_spa(app, output_path, bundle, should_combine_js, project_root)
+            
             # Multipágina: exportar un HTML, CSS y JS por cada página registrada
             if hasattr(app, "is_multipage") and app.is_multipage():
                 import copy
@@ -149,8 +153,21 @@ class HTMLCSSJSExporter(Exporter):
                 if hasattr(app, 'get_index_page'):
                     index_page = app.get_index_page()
                 
+                # Check if SPA already has an index route
+                spa_has_index = False
+                if hasattr(app, "has_spa_routes") and app.has_spa_routes():
+                    spa_has_index = app.get_spa_index() is not None
+                
                 # Exportar cada página
                 for slug, page in app.pages.items():
+                    # Si es la página index y ya tenemos SPA index, saltar exportación multipage para esta página
+                    if index_page is not None and page is index_page and spa_has_index:
+                        continue
+                    
+                    # Si la página tiene parent (es ruta SPA hija), saltar exportación multipage
+                    if hasattr(page, 'parent') and page.parent:
+                        continue
+                        
                     page_app = copy.copy(app)
                     page_app.root = page.root
                     if page.title:
@@ -224,7 +241,8 @@ class HTMLCSSJSExporter(Exporter):
                         self.write_file(os.path.join(output_path, app_js_filename), combined_all_js)
                         
                         # Generar HTML con solo el archivo combinado
-                        if index_page is not None and page is index_page:
+                        # Solo usar index.html si es multipage index Y no hay SPA index
+                        if index_page is not None and page is index_page and not spa_has_index:
                             html_content = self.generate_html(page_app, css_file="styles.css",
                                                             script_file=app_js_filename,
                                                             runtime_file="",  # Vacío porque está combinado
@@ -255,7 +273,8 @@ class HTMLCSSJSExporter(Exporter):
                         script_filename = f"script_{slug}.js" if slug != "index" else "script.js"
                         self.write_file(os.path.join(output_path, script_filename), combined_js)
                         
-                        if index_page is not None and page is index_page:
+                        # Solo usar index.html si es multipage index Y no hay SPA index
+                        if index_page is not None and page is index_page and not spa_has_index:
                             html_content = self.generate_html(page_app, css_file="styles.css",
                                                             script_file=script_filename,
                                                             runtime_file=runtime_filename,
@@ -302,8 +321,8 @@ class HTMLCSSJSExporter(Exporter):
                         except Exception:
                             version_val = "1"
                         self.write_file(os.path.join(output_path, version_name), version_val)
-            else:
-                # Single-page clásico
+            elif not (hasattr(app, "has_spa_routes") and app.has_spa_routes()):
+                # Single-page clásico (solo si NO hay SPA routes)
                 # Generar VDOM y obtener eventos
                 page_events_map = {}
                 try:
@@ -801,7 +820,7 @@ self.addEventListener('fetch', event => {
                         "    arr = JSON.parse(json||'[]');\n"
                         "  } catch(_) { arr = []; }\n"
                         "  try {\n"
-                        "    const m = await import('./lib/dars.min.js');\n"
+                        "    const m = await import('/lib/dars.min.js');\n"
                         "    const reg = m.registerState || (m.default && m.default.registerState);\n"
                         "    if (typeof reg === 'function') { arr.forEach(s => reg(s.name, s)); }\n"
                         "  } catch (e) {\n"
@@ -822,7 +841,7 @@ self.addEventListener('fetch', event => {
                         "  if (!el) { window.__DARS_STATE_BOOTSTRAPPED__ = true; return; }\n"
                         "  const arr = JSON.parse(el.textContent||'[]');\n"
                         "  try {\n"
-                        "    const m = await import('./lib/dars.min.js');\n"
+                        "    const m = await import('/lib/dars.min.js');\n"
                         "    const reg = m.registerState || (m.default && m.default.registerState);\n"
                         "    if (typeof reg === 'function') { arr.forEach(s => reg(s.name, s)); }\n"
                         "  } catch (e) {\n"
@@ -2807,6 +2826,15 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_ ){{ }}
         class_attr = f'class="dars-container {container.class_name or ""}"'
         style_attr = f'style="{self.render_styles(container.style)}"' if container.style else ""
 
+        # Renderizar atributos data-* de props
+        data_attrs = ""
+        if hasattr(container, 'props') and container.props:
+            for key, value in container.props.items():
+                if key.startswith('data-'):
+                    # Escapar el valor para HTML
+                    escaped_value = str(value).replace('"', '&quot;')
+                    data_attrs += f' {key}="{escaped_value}"'
+
         # Protección: asegurar que children es lista de Component
         children_html = ""
         children = container.children
@@ -2822,7 +2850,7 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_ ){{ }}
         for child in flat_children:
             children_html += self.render_component(child)
 
-        return f'<div id="{component_id}" {class_attr} {style_attr}>{children_html}</div>'
+        return f'<div id="{component_id}" {class_attr} {style_attr}{data_attrs}>{children_html}</div>'
 
     def render_section(self, section: Section):
         """Renderiza un componente Section"""
@@ -3212,5 +3240,153 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_ ){{ }}
                 events_attr += f' data-event-{event_name}="true"'
         
         return f'<div id="{component_id}" {class_attr} {style_attr}{events_attr}>{children_html}</div>'
+    
+    def _export_spa(self, app: App, output_path: str, bundle: bool, should_combine_js: bool, project_root: str) -> bool:
+        """Export SPA with client-side routing."""
+        import json, copy
+        from dars.components.basic.container import Container
+        spa_config = {'routes': [], 'index': None, 'notFound': None}
+        for route_name, spa_route in app._spa_routes.items():
+            route_app = copy.copy(app)
+            route_app.root = spa_route.root
+            if spa_route.title: route_app.title = spa_route.title
+            if isinstance(route_app.root, list): route_app.root = Container(children=route_app.root)
+            route_html = self.render_component(route_app.root)
+            route_vdom, route_events_map = {}, {}
+            try:
+                vdom_builder = VDomBuilder(id_provider=self.get_component_id)
+                route_vdom, route_events_map = vdom_builder.build(route_app.root), vdom_builder.events_map
+                if bundle: route_vdom = self._obfuscate_vdom(route_vdom)
+            except: pass
+            
+            # Generate runtime JS with events/states for this route
+            runtime_js = self.generate_javascript(route_app, route_app.root, route_events_map)
+            
+            # Write runtime file for this route
+            runtime_filename = f"runtime_dars_{route_name}.js"
+            self.write_file(os.path.join(output_path, runtime_filename), runtime_js)
+            
+            # Write VDOM file for this route  
+            vdom_json = json.dumps(route_vdom, ensure_ascii=False, separators=(",", ":"))
+            vdom_filename = f"vdom_tree_{route_name}.js"
+            vdom_js_content = f"window.__DARS_VDOM__ = {vdom_json};\n"
+            self.write_file(os.path.join(output_path, vdom_filename), vdom_js_content)
+            
+            # Collect and write scripts for this route (app scripts + page scripts)
+            route_scripts = []
+            route_scripts.extend(getattr(app, 'scripts', []))
+            if hasattr(route_app.root, 'get_scripts'):
+                route_scripts.extend(route_app.root.get_scripts())
+            
+            # Process scripts using _prepare_page_scripts
+            combined_js, external_srcs, is_module = self._prepare_page_scripts(
+                route_scripts, output_path, project_root
+            )
+            
+            # Write combined scripts to file
+            script_filename = f"script_{route_name}.js"
+            if combined_js:
+                self.write_file(os.path.join(output_path, script_filename), combined_js)
+            # Build scripts array: vdom, runtime, then page scripts (use absolute paths)
+            scripts_array = [f"/{vdom_filename}", f"/{runtime_filename}"]
+            if combined_js:
+                scripts_array.append(f"/{script_filename}")
+            
+            route_config = {
+                'name': route_name, 'path': spa_route.route, 'title': spa_route.title or app.title,
+                'html': route_html, 'styles': '',
+                'scripts': scripts_array, 'events': route_events_map, 'vdom': route_vdom, 'states': [], 'preload': spa_route.preload or [],
+                'parent': spa_route.parent
+            }
+            spa_config['routes'].append(route_config)
+            if spa_route.index: spa_config['index'] = route_name
+        if app._spa_404_page:
+            not_found_app = copy.copy(app)
+            not_found_app.root = app._spa_404_page.root
+            if isinstance(not_found_app.root, list): not_found_app.root = Container(children=not_found_app.root)
+            
+            route_404 = {
+                'name': '__404__', 'path': '/404', 'title': '404 Not Found', 
+                'html': self.render_component(not_found_app.root),
+                'styles': '', 'scripts': [], 'events': {}, 'vdom': {}, 'states': [], 'preload': []
+            }
+            spa_config['routes'].append(route_404)
+            spa_config['notFoundPath'] = '/404'
+        else:
+            # Default 404 page
+            from dars.components.basic.text import Text
+            
+            default_404_root = Container(
+                Text("404 Page Not Found", style={"fontSize": "48px", "fontWeight": "bold", "marginBottom": "20px", "color": "#333"}),
+                Text(" The page you are looking for does not exist.", style={"fontSize": "18px", "color": "#666"}),
+                style={
+                    "display": "flex", "flexDirection": "column", "alignItems": "center", 
+                    "justifyContent": "center", "height": "100vh", "fontFamily": "system-ui, -apple-system, sans-serif",
+                    "backgroundColor": "#f9f9f9", "margin": "0", "padding": "20px", "textAlign": "center"
+                }
+            )
+            
+            route_404 = {
+                'name': '__404__', 'path': '/404', 'title': '404 Not Found', 
+                'html': self.render_component(default_404_root),
+                'styles': '', 'scripts': [], 'events': {}, 'vdom': {}, 'states': [], 'preload': []
+            }
+            spa_config['routes'].append(route_404)
+            spa_config['notFoundPath'] = '/404'
+        # Hot reload script for dev mode (only if not bundle)
+        hot_reload_script = ""
+        if not bundle:
+            hot_reload_script = """
+<script>
+(function() {
+    let lastVersion = null;
+    const versionUrl = '/version.txt';
+    let errorCount = 0;
+    const MAX_ERRORS = 10;
+    let intervalId = null;
+    
+    async function checkForUpdates() {
+        try {
+            const response = await fetch(versionUrl + '?t=' + Date.now(), {
+                cache: 'no-store',
+                headers: { 'Cache-Control': 'no-cache' }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            
+            // Reset error count on success
+            errorCount = 0;
+            
+            const currentVersion = await response.text();
+            if (lastVersion === null) {
+                lastVersion = currentVersion;
+            } else if (lastVersion !== currentVersion) {
+                console.log('[Dars Hot Reload] Change detected, reloading...');
+                window.location.reload();
+            }
+        } catch (e) {
+            errorCount++;
+            if (errorCount >= MAX_ERRORS) {
+                console.warn('[Dars Hot Reload] Too many errors (' + errorCount + '), stopping hot reload.');
+                if (intervalId) clearInterval(intervalId);
+            }
+        }
+    }
+    
+    // Check every 500ms for changes
+    intervalId = setInterval(checkForUpdates, 500);
+    checkForUpdates();
+})();
+</script>"""
+        
+        spa_html = f'''<!DOCTYPE html><html lang="{getattr(app, "language", "en")}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>{app.title}</title><link rel="stylesheet" href="/runtime_css.css"><link rel="stylesheet" href="/styles.css"></head><body><div id="__dars_spa_root__"></div><script type="module" src="/lib/dars.min.js"></script><script>const __DARS_SPA_CONFIG__ = {json.dumps(spa_config, ensure_ascii=False, separators=(",", ":"))};window.addEventListener("DOMContentLoaded", function() {{ if (window.Dars && window.Dars.router) window.Dars.router.registerConfig(__DARS_SPA_CONFIG__);else console.error("[Dars SPA] Router not available");}});\u003c/script\u003e{hot_reload_script}</body></html>'''
+        try:
+            soup = BeautifulSoup(spa_html, "html.parser")
+            spa_html = soup.prettify()
+        except: pass
+        self.write_file(os.path.join(output_path, "index.html"), spa_html)
+        return True
 
 

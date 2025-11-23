@@ -1,3 +1,46 @@
+# Release Notes v1.4.5
+
+> **Major Feature Release**: Introduces Single Page Application (SPA) support and a powerful client-side routing system.
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+or
+
+```bash
+pip install dars-framework==1.4.5
+```
+
+## What's New
+
+### Single Page Application (SPA) Support
+
+**New Routing System:**
+- **Client-Side Routing**: Build fast, responsive SPAs with Python.
+- **Nested Routes & Layouts**: Create complex UI hierarchies using the `parent` parameter and the new `Outlet` component.
+- **Persistent Layouts**: Keep headers, sidebars, and navigation bars active while content changes dynamically.
+
+**Robust Error Handling:**
+- **Automatic 404 Handling**: Dars now automatically redirects invalid routes to a 404 page.
+- **Default & Custom 404**: Includes a built-in clean 404 page, or define your own with `app.set_404_page()`.
+
+### Developer Experience
+
+**Hot Reload Stability:**
+- **Intelligent Polling**: New hot reload system for SPAs that detects changes without spamming logs.
+- **Auto-Stop**: Prevents browser lag by stopping polling after 10 consecutive connection failures.
+
+### Fixes & Improvements
+
+- **SPA Export**: Fixed issues where SPA child routes were conflicting with multipage exports.
+- **Preview Server**: Improved handling of SPA routes and query parameters.
+- **Assets**: Enforced absolute paths for SPA assets to ensure correct loading from any depth.
+
+---
+
 # Release Notes v1.4.4
 
 > Critical bug fix release. Removes non-functional features, fixes style merge, and improves state restoration.
