@@ -3586,7 +3586,7 @@ Button("Toggle Theme", on_click=toggleClass("app-root", "dark-mode"))
 - \`setTimeout(delay, code)\`: Set a timeout to execute a script after a delay.
 
 \`\`\`python
-Button("Delayed Action", on_click=setTimeout(code=alert('Delayed!'), delay=2000))
+Button("Delayed Action", on_click=setTimeout(delay=2000, code="alert('Delayed!')"))
 \`\`\`
 
 ### Modals
