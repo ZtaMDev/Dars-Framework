@@ -20,7 +20,7 @@ app = App(
     apple_mobile_web_app_title="Dars Framework",
     keywords=["framework","python","python framework", "dars","dars framework", "ui components", "declarative UI"]
 )
-@route("/")
+@route("/Dars-Framework")
 def index():
     return Page(
         create_navbar(),
