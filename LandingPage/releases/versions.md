@@ -1,4 +1,4 @@
-# Release Notes v1.4.5
+# Release Notes v1.4.6
 
 > **Major Feature Release**: Introduces Single Page Application (SPA) support and a powerful client-side routing system.
 
@@ -40,6 +40,7 @@ pip install dars-framework==1.4.5
 - **Assets**: Enforced absolute paths for SPA assets to ensure correct loading from any depth.
 
 ---
+
 
 # Release Notes v1.4.4
 

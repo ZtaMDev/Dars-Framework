@@ -3302,8 +3302,17 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_ ){{ }}
             if spa_route.index: spa_config['index'] = route_name
         if app._spa_404_page:
             not_found_app = copy.copy(app)
-            not_found_app.root = app._spa_404_page.root
-            if isinstance(not_found_app.root, list): not_found_app.root = Container(children=not_found_app.root)
+            
+            # Handle both component (Page from dars.components) and wrapper (Page from dars.core.app)
+            if hasattr(app._spa_404_page, 'root'):
+                # It's a Page wrapper from dars.core.app
+                not_found_app.root = app._spa_404_page.root
+            else:
+                # It's a component directly (Page component or any other component)
+                not_found_app.root = app._spa_404_page
+            
+            if isinstance(not_found_app.root, list): 
+                not_found_app.root = Container(children=not_found_app.root)
             
             route_404 = {
                 'name': '__404__', 'path': '/404', 'title': '404 Not Found', 
