@@ -38,7 +38,7 @@ Try dars without installing nothing just visit the [Dars Playground](https://dar
 from dars.all import *
 
 app = App(title="Hello World", theme="dark")
-# Crear componentes
+
 index = Page(
      Text(
         text="Hello World",
@@ -62,7 +62,7 @@ index = Page(
 
     Button(
         text="Click Me!",
-        on_click= dScript("alert('Hello World')"),
+        on_click= alert('Hello from DARS!'),
         style={
             'background-color': '#3498db',
             'color': 'white',
@@ -89,7 +89,6 @@ app.add_page("index", index, title="Hello World", index=True)
 
 if __name__ == "__main__":
     app.rTimeCompile()
-
 ```
 
 ---
@@ -137,16 +136,7 @@ The `this()` helper enables direct, event-time component updates without pre-def
 ```python
 from dars.all import *
 
-counter = Text("0", id="count")
-btn = Button("Increment", on_click=this().state(text=Mod.inc("count")))
-
-# Use RawJS for dynamic values (e.g., from async operations)
-from dars.desktop import read_text
-
-display = Text("", id="display")
-read_btn = Button("Load", on_click=read_text("data.txt").then(
-    this().state(text=RawJS(dScript.ARG))  # Update with file content
-))
+btn = Button("Click Me!", on_click=this().state(text="You Clicked!",))
 ```
 
 * Works anywhere: desktop and web exports
