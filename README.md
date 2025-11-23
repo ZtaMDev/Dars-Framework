@@ -180,9 +180,11 @@ Create complex layouts with parent-child routes using the `Outlet` component:
 def dashboard():
     return Page(
         Text("Dashboard", style={"fontSize": "24px"}),
-        Container(id="nav",
+        Container(
             Link("Settings", href="/dashboard/settings"),
-            Link("Profile", href="/dashboard/profile")
+            Link("Profile", href="/dashboard/profile"),
+            id="nav",
+            
         ),
         Outlet(),  # Child routes render here
         style={"padding": "20px"}
@@ -192,7 +194,7 @@ def dashboard():
 settings_page = Page(Text("Settings Content"))
 profile_page = Page(Text("Profile Content"))
 
-app.add_page("dashboard", dashboard())
+app.add_page("dashboard", dashboard(), index=True)
 app.add_page("settings", settings_page, route="/dashboard/settings", parent="dashboard")
 app.add_page("profile", profile_page, route="/dashboard/profile", parent="dashboard")
 ```
