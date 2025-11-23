@@ -141,7 +141,6 @@ btn = Button("Click Me!", on_click=this().state(text="You Clicked!"))
 
 * Works anywhere: desktop and web exports
 * Perfect for async operations and chained scripts
-* Combines with `dScript.then()` for sequencing
 
 ---
 
