@@ -446,8 +446,8 @@
      <a class="sidebar-link sidebar-level-3" href="#increment-and-decrement" style="margin-left: 40px">
       Increment and Decrement
      </a>
-     <a class="sidebar-link sidebar-level-3" href="#set-value" style="margin-left: 40px">
-      Set Value
+     <a class="sidebar-link sidebar-level-3" href="#all-property-types-supported" style="margin-left: 40px">
+      All Property Types Supported
      </a>
      <a class="sidebar-link sidebar-level-3" href="#auto-operations" style="margin-left: 40px">
       Auto Operations
@@ -3243,11 +3243,80 @@ Desktop build target. Only effective when
 <span class="n">button</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">counter</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span><span class="n">by</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
 </code></pre>
       </div>
-      <h3 id="set-value">
-       Set Value
-      </h3>
       <div class="codehilite">
        <pre><span></span><code><span class="n">button</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">counter</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="all-property-types-supported">
+       All Property Types Supported
+      </h3>
+      <p>
+       State V2 supports updating
+       <strong>
+        all component properties
+       </strong>
+       , not just text:
+      </p>
+      <p>
+       <strong>
+        Text Content:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">state</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"New text"</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        HTML Content:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">state</span><span class="o">.</span><span class="n">html</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"&lt;strong&gt;Bold text&lt;/strong&gt;"</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        CSS Styles:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">state</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">set</span><span class="p">({</span><span class="s2">"color"</span><span class="p">:</span> <span class="s2">"red"</span><span class="p">,</span> <span class="s2">"fontSize"</span><span class="p">:</span> <span class="s2">"24px"</span><span class="p">})</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        CSS Classes:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Set class name</span>
+<span class="n">state</span><span class="o">.</span><span class="n">class_name</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"active"</span><span class="p">)</span>
+
+<span class="c1"># Advanced class manipulation</span>
+<span class="n">state</span><span class="o">.</span><span class="n">classes</span><span class="o">.</span><span class="n">set</span><span class="p">({</span><span class="s2">"add"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"active"</span><span class="p">,</span> <span class="s2">"highlight"</span><span class="p">],</span> <span class="s2">"remove"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"disabled"</span><span class="p">]})</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        HTML Attributes:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">state</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">set</span><span class="p">({</span><span class="s2">"data-value"</span><span class="p">:</span> <span class="s2">"100"</span><span class="p">,</span> <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Tooltip"</span><span class="p">})</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Multiple Properties at Once:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">state</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+    <span class="n">text</span><span class="o">=</span><span class="s2">"Updated!"</span><span class="p">,</span>
+    <span class="n">class_name</span><span class="o">=</span><span class="s2">"success"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s2">"color"</span><span class="p">:</span> <span class="s2">"green"</span><span class="p">}</span>
+<span class="p">)</span>
 </code></pre>
       </div>
       <h3 id="auto-operations">

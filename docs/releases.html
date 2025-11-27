@@ -239,6 +239,476 @@
     margin: 0 auto;
     padding: 40px 20px;">
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_171">
+      <h1 id="release-notes-v148">
+       Release Notes v1.4.8
+      </h1>
+      <blockquote>
+       <p>
+        <strong>
+         Critical Fix
+        </strong>
+        : State V2 now properly supports all component properties including
+        <code>
+         class_name
+        </code>
+        ,
+        <code>
+         style
+        </code>
+        ,
+        <code>
+         attrs
+        </code>
+        , and more.
+       </p>
+      </blockquote>
+      <h2 id="installation">
+       Installation
+      </h2>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
+</code></pre>
+      </div>
+      <p>
+       or
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.8
+</code></pre>
+      </div>
+      <h2 id="whats-fixed">
+       What's Fixed
+      </h2>
+      <h3 id="state-v2-complete-property-support">
+       State V2 Complete Property Support
+      </h3>
+      <p>
+       <strong>
+        Previously (v1.4.7):
+       </strong>
+       State V2 only updated
+       <code>
+        text
+       </code>
+       content, incorrectly setting textContent for all properties.
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># This didn't work correctly in v1.4.7</span>
+<span class="n">counter</span><span class="o">.</span><span class="n">class_name</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"active"</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Now (v1.4.8):
+       </strong>
+       State V2 properly handles
+       <strong>
+        all component properties
+       </strong>
+       using the
+       <code>
+        change()
+       </code>
+       client function.
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># All properties now work correctly!</span>
+<span class="n">state</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"New text"</span><span class="p">)</span>
+<span class="n">state</span><span class="o">.</span><span class="n">class_name</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"active"</span><span class="p">)</span>
+<span class="n">state</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">set</span><span class="p">({</span><span class="s2">"color"</span><span class="p">:</span> <span class="s2">"red"</span><span class="p">})</span>
+<span class="n">state</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">set</span><span class="p">({</span><span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Tooltip"</span><span class="p">})</span>
+<span class="n">state</span><span class="o">.</span><span class="n">html</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"&lt;strong&gt;Bold&lt;/strong&gt;"</span><span class="p">)</span> 
+</code></pre>
+      </div>
+      <h3 id="unified-property-handling">
+       Unified Property Handling
+      </h3>
+      <p>
+       All State V2 methods now use the same
+       <code>
+        change()
+       </code>
+       function as
+       <code>
+        this()
+       </code>
+       and
+       <code>
+        dState
+       </code>
+       , ensuring consistent behavior across the framework:
+      </p>
+      <ul>
+       <li>
+        <code>
+         ReactiveProperty.set()
+        </code>
+        - Works with any property type
+       </li>
+       <li>
+        <code>
+         State.update()
+        </code>
+        - Updates multiple properties correctly
+       </li>
+       <li>
+        <code>
+         State.reset()
+        </code>
+        - Resets all property types to defaults
+       </li>
+      </ul>
+      <h3 id="validation-improvements">
+       Validation Improvements
+      </h3>
+      <p>
+       <strong>
+        Increment/Decrement Validation:
+       </strong>
+       Now properly validates that
+       <code>
+        increment()
+       </code>
+       and
+       <code>
+        decrement()
+       </code>
+       are only used on numeric properties:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Correct usage</span>
+<span class="n">counter</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Now throws helpful error</span>
+<span class="n">counter</span><span class="o">.</span><span class="n">class_name</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <h2 id="bug-fixes">
+       Bug Fixes
+      </h2>
+      <h3 id="fixed-property-type-handling">
+       Fixed: Property Type Handling
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Fixed
+        </strong>
+        :
+        <code>
+         class_name.set()
+        </code>
+        now correctly updates element's
+        <code>
+         className
+        </code>
+       </li>
+       <li>
+        <strong>
+         Fixed
+        </strong>
+        :
+        <code>
+         style.set()
+        </code>
+        now correctly updates inline styles
+       </li>
+       <li>
+        <strong>
+         Fixed
+        </strong>
+        :
+        <code>
+         attrs.set()
+        </code>
+        now correctly updates HTML attributes
+       </li>
+       <li>
+        <strong>
+         Fixed
+        </strong>
+        :
+        <code>
+         html.set()
+        </code>
+        now correctly updates
+        <code>
+         innerHTML
+        </code>
+       </li>
+       <li>
+        <strong>
+         Fixed
+        </strong>
+        :
+        <code>
+         update()
+        </code>
+        now correctly handles multiple properties simultaneously
+       </li>
+       <li>
+        <strong>
+         Fixed
+        </strong>
+        :
+        <code>
+         reset()
+        </code>
+        now correctly restores all property types
+       </li>
+      </ul>
+      <h3 id="technical-details">
+       Technical Details
+      </h3>
+      <p>
+       <strong>
+        Root Cause:
+       </strong>
+       State V2 methods were directly manipulating
+       <code>
+        el.textContent
+       </code>
+       instead of using the framework's
+       <code>
+        change()
+       </code>
+       function, which properly routes updates based on property type.
+      </p>
+      <p>
+       <strong>
+        Solution:
+       </strong>
+       Created
+       <code>
+        _generate_change_call()
+       </code>
+       helper that generates proper
+       <code>
+        change()
+       </code>
+       payloads:
+-
+       <code>
+        text
+       </code>
+       →
+       <code>
+        {text: value}
+       </code>
+       -
+       <code>
+        html
+       </code>
+       →
+       <code>
+        {html: value}
+       </code>
+       -
+       <code>
+        style
+       </code>
+       →
+       <code>
+        {style: object}
+       </code>
+       -
+       <code>
+        class_name
+       </code>
+       →
+       <code>
+        {attrs: {class: value}}
+       </code>
+       or
+       <code>
+        {classes: object}
+       </code>
+       -
+       <code>
+        attrs
+       </code>
+       →
+       <code>
+        {attrs: object}
+       </code>
+      </p>
+      <p>
+       All reactive methods now use this helper for consistent, correct property updates.
+      </p>
+      <h2 id="complete-property-examples">
+       Complete Property Examples
+      </h2>
+      <h3 id="setting-different-property-types">
+       Setting Different Property Types
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">display</span> <span class="o">=</span> <span class="n">Container</span><span class="p">(</span><span class="n">Text</span><span class="p">(</span><span class="s2">"Example"</span><span class="p">),</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"demo"</span><span class="p">)</span>
+
+<span class="c1"># Create state with multiple properties</span>
+<span class="n">state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="n">display</span><span class="p">,</span> 
+    <span class="n">text</span><span class="o">=</span><span class="s2">"Hello"</span><span class="p">,</span>
+    <span class="n">class_name</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s2">"background"</span><span class="p">:</span> <span class="s2">"#333"</span><span class="p">}</span>
+<span class="p">)</span>
+
+<span class="c1"># Update text</span>
+<span class="n">text_btn</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"Updated!"</span><span class="p">)</span>
+
+<span class="c1"># Update CSS class</span>
+<span class="n">class_btn</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">class_name</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"active highlight"</span><span class="p">)</span>
+
+<span class="c1"># Update styles</span>
+<span class="n">style_btn</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">set</span><span class="p">({</span>
+    <span class="s2">"background"</span><span class="p">:</span> <span class="s2">"linear-gradient(135deg, #667eea, #764ba2)"</span><span class="p">,</span>
+    <span class="s2">"color"</span><span class="p">:</span> <span class="s2">"white"</span><span class="p">,</span>
+    <span class="s2">"padding"</span><span class="p">:</span> <span class="s2">"20px"</span>
+<span class="p">})</span>
+
+<span class="c1"># Update HTML attributes</span>
+<span class="n">attr_btn</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">set</span><span class="p">({</span>
+    <span class="s2">"data-status"</span><span class="p">:</span> <span class="s2">"complete"</span><span class="p">,</span>
+    <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Completed task"</span>
+<span class="p">})</span>
+</code></pre>
+      </div>
+      <h3 id="advanced-class-manipulation">
+       Advanced Class Manipulation
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Add/remove specific classes</span>
+<span class="n">state</span><span class="o">.</span><span class="n">classes</span><span class="o">.</span><span class="n">set</span><span class="p">({</span>
+    <span class="s2">"add"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"active"</span><span class="p">,</span> <span class="s2">"highlight"</span><span class="p">],</span>
+    <span class="s2">"remove"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"disabled"</span><span class="p">,</span> <span class="s2">"hidden"</span><span class="p">]</span>
+<span class="p">})</span>
+
+<span class="c1"># Toggle classes</span>
+<span class="n">state</span><span class="o">.</span><span class="n">classes</span><span class="o">.</span><span class="n">set</span><span class="p">({</span>
+    <span class="s2">"toggle"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"expanded"</span><span class="p">]</span>
+<span class="p">})</span>
+</code></pre>
+      </div>
+      <h3 id="update-multiple-properties">
+       Update Multiple Properties
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Update several properties at once</span>
+<span class="n">success_btn</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+    <span class="n">text</span><span class="o">=</span><span class="s2">"Success!"</span><span class="p">,</span>
+    <span class="n">class_name</span><span class="o">=</span><span class="s2">"success"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s2">"color"</span><span class="p">:</span> <span class="s2">"green"</span><span class="p">,</span> <span class="s2">"fontSize"</span><span class="p">:</span> <span class="s2">"18px"</span><span class="p">},</span>
+    <span class="n">attrs</span><span class="o">=</span><span class="p">{</span><span class="s2">"data-result"</span><span class="p">:</span> <span class="s2">"ok"</span><span class="p">}</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h2 id="migration-from-v147">
+       Migration from v1.4.7
+      </h2>
+      <p>
+       <strong>
+        No breaking changes
+       </strong>
+       - all existing code continues to work. However, if you tried using non-
+       <code>
+        text
+       </code>
+       properties in v1.4.7 and they didn't work, they will now work correctly in v1.4.8.
+      </p>
+      <p>
+       <strong>
+        If you worked around the limitation:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Old workaround (v1.4.7)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dars.core.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">this</span>
+<span class="n">button</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">class_name</span><span class="o">=</span><span class="s2">"active"</span><span class="p">)</span>  <span class="c1"># Had to use this()</span>
+
+<span class="c1"># Now works directly with State V2 (v1.4.8)</span>
+<span class="n">button</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">class_name</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"active"</span><span class="p">)</span>  <span class="c1"># ✅ Works!</span>
+</code></pre>
+      </div>
+      <h2 id="dependency-cleanup">
+       Dependency Cleanup
+      </h2>
+      <ul>
+       <li>
+        <strong>
+         Removed
+        </strong>
+        :
+        <code>
+         rjsmin
+        </code>
+        dependency (Apache license, replaced with regex fallback)
+       </li>
+       <li>
+        <strong>
+         Removed
+        </strong>
+        :
+        <code>
+         fastapi
+        </code>
+        dependency (not used in framework)
+       </li>
+      </ul>
+      <p>
+       JS/CSS minification now uses:
+1. Vite (if available)
+2. esbuild (if available)
+3. Regex fallback (always available, no external dependencies)
+      </p>
+      <h2 id="performance-compatibility">
+       Performance &amp; Compatibility
+      </h2>
+      <ul>
+       <li>
+        <strong>
+         Zero overhead
+        </strong>
+        : Property handling uses existing
+        <code>
+         change()
+        </code>
+        infrastructure
+       </li>
+       <li>
+        <strong>
+         Backward compatible
+        </strong>
+        : All v1.4.7 code works in v1.4.8
+       </li>
+       <li>
+        <strong>
+         Consistent behavior
+        </strong>
+        : State V2,
+        <code>
+         this()
+        </code>
+        , and dState now all use same property system
+       </li>
+       <li>
+        <strong>
+         Desktop support
+        </strong>
+        : Full Electron compatibility maintained
+       </li>
+      </ul>
+      <hr/>
+      <p>
+       <strong>
+        Upgrade highly recommended
+       </strong>
+       for all projects using State V2, especially if you need to update component properties beyond just
+       <code>
+        text
+       </code>
+       .
+      </p>
+      <hr/>
       <h1 id="release-notes-v147">
        Release Notes v1.4.7
       </h1>
@@ -247,7 +717,7 @@
         Introducing State V2 and comprehensive animation system. This is the biggest update to Dars state management, bringing a pure Pythonic API and 15+ built-in animations.
        </p>
       </blockquote>
-      <h2 id="installation">
+      <h2 id="installation-2">
        Installation
       </h2>
       <div class="codehilite">
@@ -560,7 +1030,7 @@
 - All dState/cState references removed from active docs
 - Migration guides included for existing projects
       </p>
-      <h2 id="bug-fixes">
+      <h2 id="bug-fixes-2">
        Bug Fixes
       </h2>
       <p>
@@ -727,7 +1197,7 @@
 <span class="p">)</span>
 </code></pre>
       </div>
-      <h2 id="performance-compatibility">
+      <h2 id="performance-compatibility-2">
        Performance &amp; Compatibility
       </h2>
       <ul>
@@ -833,7 +1303,7 @@
         : Introduces Single Page Application (SPA) support and a powerful client-side routing system.
        </p>
       </blockquote>
-      <h2 id="installation-2">
+      <h2 id="installation-3">
        Installation
       </h2>
       <div class="codehilite">
@@ -950,7 +1420,7 @@
         Critical bug fix release. Removes non-functional features, fixes style merge, and improves state restoration.
        </p>
       </blockquote>
-      <h2 id="installation-3">
+      <h2 id="installation-4">
        Installation
       </h2>
       <div class="codehilite">
@@ -964,7 +1434,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.4
 </code></pre>
       </div>
-      <h2 id="whats-fixed">
+      <h2 id="whats-fixed-2">
        What's Fixed
       </h2>
       <ul>
@@ -1016,7 +1486,7 @@
         State management enhancements with compile-time validation, component self-navigation, and critical style merge fix. Improves developer experience and fixes property replacement bug.
        </p>
       </blockquote>
-      <h2 id="installation-4">
+      <h2 id="installation-5">
        Installation
       </h2>
       <div class="codehilite">
@@ -1080,7 +1550,7 @@
         for enhanced client-side interactions.
        </p>
       </blockquote>
-      <h2 id="installation-5">
+      <h2 id="installation-6">
        Installation
       </h2>
       <div class="codehilite">
@@ -1284,7 +1754,7 @@
         SEO and Apple device optimizations. Enhanced metadata generation with automatic MIME type detection for favicons and comprehensive iOS/Safari support.
        </p>
       </blockquote>
-      <h2 id="installation-6">
+      <h2 id="installation-7">
        Installation
       </h2>
       <div class="codehilite">
@@ -1613,7 +2083,7 @@
         Simple Template update.
        </p>
       </blockquote>
-      <h2 id="installation-7">
+      <h2 id="installation-8">
        Installation
       </h2>
       <div class="codehilite">
@@ -1641,7 +2111,7 @@
         Desktop File System API, Pythonic Arg helper, keyboard event filtering, and comprehensive template synchronization. Major enhancements to desktop capabilities with improved developer experience.
        </p>
       </blockquote>
-      <h2 id="installation-8">
+      <h2 id="installation-9">
        Installation
       </h2>
       <div class="codehilite">
@@ -1950,7 +2420,7 @@
        and similar events work correctly
 - Maintains backward compatibility with non-filtered events
       </p>
-      <h2 id="bug-fixes-2">
+      <h2 id="bug-fixes-3">
        Bug Fixes
       </h2>
       <ul>
@@ -2106,7 +2576,7 @@
         for async chaining.
        </p>
       </blockquote>
-      <h2 id="installation-9">
+      <h2 id="installation-10">
        Installation
       </h2>
       <div class="codehilite">
@@ -2508,7 +2978,7 @@
 - Production packaging continues in experimental status
 - Native API surface expanding with each release
       </p>
-      <h2 id="performance-compatibility-2">
+      <h2 id="performance-compatibility-3">
        Performance &amp; Compatibility
       </h2>
       <ul>
@@ -2568,7 +3038,7 @@
         for dynamic DOM operations with safe event hydration.
        </p>
       </blockquote>
-      <h2 id="installation-10">
+      <h2 id="installation-11">
        Installation
       </h2>
       <div class="codehilite">
@@ -2745,7 +3215,7 @@
         Enhanced styling and development experience update featuring active styles, improved preview system, and advanced file monitoring. Delivers better visual feedback and faster development workflow.
        </p>
       </blockquote>
-      <h2 id="installation-11">
+      <h2 id="installation-12">
        Installation
       </h2>
       <div class="codehilite">
@@ -2902,7 +3372,7 @@
         Enhanced interactivity update featuring hover styles, multi-handler events, and runtime versioning. Improves component styling and event handling flexibility.
        </p>
       </blockquote>
-      <h2 id="installation-12">
+      <h2 id="installation-13">
        Installation
       </h2>
       <div class="codehilite">
@@ -3051,7 +3521,7 @@
        </strong>
        - No changes from v1.3.3
       </p>
-      <h2 id="performance-compatibility-3">
+      <h2 id="performance-compatibility-4">
        Performance &amp; Compatibility
       </h2>
       <ul>
@@ -3095,7 +3565,7 @@
         Minor update featuring new semantic Section component and enhanced state serialization. Continues JavaScript migration improvements from v1.3.2.
        </p>
       </blockquote>
-      <h2 id="installation-13">
+      <h2 id="installation-14">
        Installation
       </h2>
       <div class="codehilite">
@@ -3259,7 +3729,7 @@
         Major minification improvements with combined JS files and optimized event handling. Electron desktop exporter remains in beta.
        </p>
       </blockquote>
-      <h2 id="installation-14">
+      <h2 id="installation-15">
        Installation
       </h2>
       <div class="codehilite">
@@ -3383,7 +3853,7 @@
         : Fallback minification when Vite is unavailable
        </li>
       </ul>
-      <h2 id="bug-fixes-3">
+      <h2 id="bug-fixes-4">
        Bug Fixes
       </h2>
       <ul>
@@ -3555,7 +4025,7 @@
         Native desktop functions and DX improved with dev mode and file system integration.
        </p>
       </blockquote>
-      <h2 id="installation-15">
+      <h2 id="installation-16">
        Installation
       </h2>
       <div class="codehilite">
@@ -3606,7 +4076,7 @@
       <p>
        Also you can use dScripts to run custom javascript code in the desktop app. and for now 'dars dev' is supported but python main.py with rTimeCompile() is not supported because it have issues with relative paths.
       </p>
-      <h2 id="bug-fixes-4">
+      <h2 id="bug-fixes-5">
        Bug Fixes
       </h2>
       <ul>
@@ -3640,7 +4110,7 @@
         Native desktop export (BETA), improved CLI and doctor integration, and metadata fixes for packaging. This is a BETA release: usable for testing, not recommended for production.
        </p>
       </blockquote>
-      <h2 id="installation-16">
+      <h2 id="installation-17">
        Installation
       </h2>
       <div class="codehilite">
@@ -3826,7 +4296,7 @@ dars<span class="w"> </span>build
 <span class="p">}</span>
 </code></pre>
       </div>
-      <h2 id="bug-fixes-5">
+      <h2 id="bug-fixes-6">
        Bug Fixes
       </h2>
       <ul>
@@ -3923,7 +4393,7 @@ dars<span class="w"> </span>build
         Optional default minification, precise CLI control, faster builds, and clearer minification status.
        </p>
       </blockquote>
-      <h2 id="installation-17">
+      <h2 id="installation-18">
        Installation
       </h2>
       <div class="codehilite">
@@ -4080,7 +4550,7 @@ dars<span class="w"> </span>build
         </ul>
        </li>
       </ul>
-      <h2 id="bug-fixes-6">
+      <h2 id="bug-fixes-7">
        Bug Fixes
       </h2>
       <ul>
@@ -4316,6 +4786,54 @@ dars<span class="w"> </span>build
      <div class="sidebar-category">
       Versions
      </div>
+     <a class="sidebar-link sidebar-level-1" href="#release-notes-v148" style="margin-left: 0px">
+      Release Notes v1.4.8
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#installation" style="margin-left: 20px">
+      Installation
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#whats-fixed" style="margin-left: 20px">
+      What's Fixed
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#state-v2-complete-property-support" style="margin-left: 40px">
+      State V2 Complete Property Support
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#unified-property-handling" style="margin-left: 40px">
+      Unified Property Handling
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#validation-improvements" style="margin-left: 40px">
+      Validation Improvements
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#bug-fixes" style="margin-left: 20px">
+      Bug Fixes
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#fixed-property-type-handling" style="margin-left: 40px">
+      Fixed: Property Type Handling
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#technical-details" style="margin-left: 40px">
+      Technical Details
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#complete-property-examples" style="margin-left: 20px">
+      Complete Property Examples
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#setting-different-property-types" style="margin-left: 40px">
+      Setting Different Property Types
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#advanced-class-manipulation" style="margin-left: 40px">
+      Advanced Class Manipulation
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#update-multiple-properties" style="margin-left: 40px">
+      Update Multiple Properties
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#migration-from-v147" style="margin-left: 20px">
+      Migration from v1.4.7
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#dependency-cleanup" style="margin-left: 20px">
+      Dependency Cleanup
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#performance-compatibility" style="margin-left: 20px">
+      Performance &amp; Compatibility
+     </a>
      <a class="sidebar-link sidebar-level-1" href="#release-notes-v147" style="margin-left: 0px">
       Release Notes v1.4.7
      </a>
