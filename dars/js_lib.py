@@ -883,6 +883,73 @@ function getRouteParams(){{
   return __spaCurrentParams;
 }}
 
+// ==================== STATE V2 LOOP SUPPORT ====================
+
+// Registro de loops activos para auto-increment/decrement
+const __activeLoops = new Map();
+
+/**
+ * Start a continuous operation loop (auto_increment, auto_decrement, etc.)
+ */
+function startLoop(id, config) {{
+    if (__activeLoops.has(id)) {{
+        clearInterval(__activeLoops.get(id).timer);
+    }}
+    
+    const timer = setInterval(() => {{
+        const el = $(id);
+        if (!el) {{
+            console.warn('[Dars] Element not found for loop:', id);
+            stopLoop(id);
+            return;
+        }}
+        
+        if (config.type === 'auto_increment') {{
+            let current = parseFloat(el.textContent || '0');
+            current += config.by || 1;
+            
+            if (config.max !== null && config.max !== undefined && current >= config.max) {{
+                current = config.max;
+                stopLoop(id);
+            }}
+            
+            el.textContent = String(current);
+        }} else if (config.type === 'auto_decrement') {{
+            let current = parseFloat(el.textContent || '0');
+            current -= config.by || 1;
+            
+            if (config.min !== null && config.min !== undefined && current <= config.min) {{
+                current = config.min;
+                stopLoop(id);
+            }}
+            
+            el.textContent = String(current);
+        }} else if (config.type === 'custom') {{
+            try {{
+                (0,eval)(config.code);
+            }} catch(e) {{
+                console.error('[Dars Loop]', e);
+            }}
+        }}
+    }}, config.interval || 1000);
+    
+    __activeLoops.set(id, {{ timer: timer, config: config }});
+}}
+
+function stopLoop(id) {{
+    if (__activeLoops.has(id)) {{
+        clearInterval(__activeLoops.get(id).timer);
+        __activeLoops.delete(id);
+    }}
+}}
+
+function stopAllLoops() {{
+    for (const [id, loop] of __activeLoops) {{
+        clearInterval(loop.timer);
+    }}
+    __activeLoops.clear();
+}}
+
 // ==================== END SPA ROUTER ====================
 
 const Dars = {{ 
@@ -892,6 +959,10 @@ const Dars = {{
     change, 
     $, 
     runtime,
+    // Loop support for State V2
+    startLoop,
+    stopLoop,
+    stopAllLoops,
     router: {{
         registerConfig: registerSPAConfig,
         navigateTo: navigateTo,

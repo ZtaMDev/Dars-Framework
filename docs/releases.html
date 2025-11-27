@@ -239,15 +239,12 @@
     margin: 0 auto;
     padding: 40px 20px;">
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_171">
-      <h1 id="release-notes-v146">
-       Release Notes v1.4.6
+      <h1 id="release-notes-v147">
+       Release Notes v1.4.7
       </h1>
       <blockquote>
        <p>
-        <strong>
-         Major Feature Release
-        </strong>
-        : Introduces Single Page Application (SPA) support and a powerful client-side routing system.
+        Introducing State V2 and comprehensive animation system. This is the biggest update to Dars state management, bringing a pure Pythonic API and 15+ built-in animations.
        </p>
       </blockquote>
       <h2 id="installation">
@@ -261,10 +258,596 @@
        or
       </p>
       <div class="codehilite">
-       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.5
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.7
 </code></pre>
       </div>
       <h2 id="whats-new">
+       What's New
+      </h2>
+      <h3 id="state-v2-pure-pythonic-state-management">
+       State V2 - Pure Pythonic State Management
+      </h3>
+      <p>
+       <strong>
+        New
+        <code>
+         State
+        </code>
+        Class:
+       </strong>
+       - Pure Python API - no more verbose dState syntax
+- Direct property access with reactive operations
+- Built-in auto-increment/auto-decrement operations
+- Clean reset functionality
+- Seamless animation integration
+      </p>
+      <p>
+       <strong>
+        Before (dState - deprecated):
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.core.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">dState</span><span class="p">,</span> <span class="n">Mod</span>
+
+<span class="n">display</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="s2">"0"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"counter"</span><span class="p">)</span>
+<span class="n">st</span> <span class="o">=</span> <span class="n">dState</span><span class="p">(</span><span class="s2">"counter"</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="n">display</span><span class="p">,</span> <span class="n">states</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="n">st</span><span class="o">.</span><span class="n">cState</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="p">[</span><span class="n">Mod</span><span class="o">.</span><span class="n">inc</span><span class="p">(</span><span class="n">display</span><span class="p">,</span> <span class="n">prop</span><span class="o">=</span><span class="s1">'text'</span><span class="p">,</span> <span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">)])</span>
+<span class="n">button</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        After (State V2 - recommended):
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="n">State</span>
+
+<span class="n">display</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="s2">"0"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"counter"</span><span class="p">)</span>
+<span class="n">counter</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="n">display</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">button</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">counter</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Key Features:
+       </strong>
+       -
+       <strong>
+        Reactive Properties
+       </strong>
+       : Direct access with
+       <code>
+        state.property.operation()
+       </code>
+       -
+       <strong>
+        Auto Operations
+       </strong>
+       : Continuous operations with
+       <code>
+        auto_increment()
+       </code>
+       ,
+       <code>
+        auto_decrement()
+       </code>
+       -
+       <strong>
+        Reset
+       </strong>
+       : Simple
+       <code>
+        state.reset()
+       </code>
+       to restore initial values
+-
+       <strong>
+        Intuitive
+       </strong>
+       : Pythonic API that feels natural
+      </p>
+      <p>
+       <strong>
+        Usage:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="c1"># Create component and state</span>
+<span class="n">timer_display</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="s2">"0"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"timer"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s2">"font-size"</span><span class="p">:</span> <span class="s2">"36px"</span><span class="p">})</span>
+<span class="n">timer</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="n">timer_display</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># Auto-incrementing timer</span>
+<span class="n">start_btn</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">timer</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">auto_increment</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="n">stop_btn</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">timer</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">stop_auto</span><span class="p">()</span>
+<span class="n">reset_btn</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">timer</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+</code></pre>
+      </div>
+      <h3 id="comprehensive-animation-system">
+       Comprehensive Animation System
+      </h3>
+      <p>
+       <strong>
+        15+ Built-in Animations:
+       </strong>
+       -
+       <code>
+        fadeIn
+       </code>
+       /
+       <code>
+        fadeOut
+       </code>
+       - Opacity transitions
+-
+       <code>
+        slideIn
+       </code>
+       /
+       <code>
+        slideOut
+       </code>
+       - Position-based slides (8 directions)
+-
+       <code>
+        scaleIn
+       </code>
+       /
+       <code>
+        scaleOut
+       </code>
+       - Size transformations
+-
+       <code>
+        shake
+       </code>
+       - Shake effect for alerts
+-
+       <code>
+        bounce
+       </code>
+       - Bounce effect
+-
+       <code>
+        pulse
+       </code>
+       - Heartbeat/pulse effect
+-
+       <code>
+        rotate
+       </code>
+       - Rotation animations
+-
+       <code>
+        flip
+       </code>
+       - Flip on X/Y axis
+-
+       <code>
+        colorChange
+       </code>
+       - Color transitions
+-
+       <code>
+        morphSize
+       </code>
+       - Size morphing
+-
+       <code>
+        sequence
+       </code>
+       - Chain multiple animations
+      </p>
+      <p>
+       <strong>
+        Animation Chaining:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">button</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">sequence</span><span class="p">(</span>
+    <span class="n">fadeIn</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"box"</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="mi">400</span><span class="p">),</span>
+    <span class="n">pulse</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"box"</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+    <span class="n">shake</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"box"</span><span class="p">,</span> <span class="n">intensity</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Integration with State V2:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">button</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">sequence</span><span class="p">(</span>
+    <span class="n">counter</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+    <span class="n">pulse</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"counter"</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">1.2</span><span class="p">),</span>
+    <span class="n">fadeOut</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"counter"</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="mi">200</span><span class="p">),</span>
+    <span class="n">counter</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+    <span class="n">fadeIn</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"counter"</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        All Animations:
+       </strong>
+       - Return
+       <code>
+        dScript
+       </code>
+       objects for chaining
+- Customizable duration, easing, and parameters
+- Proper async completion handling
+- Work seamlessly with event handlers
+      </p>
+      <h3 id="professional-state-v2-template">
+       Professional State V2 Template
+      </h3>
+      <p>
+       <strong>
+        New Example Template:
+       </strong>
+       - Located in
+       <code>
+        dars/templates/examples/advanced/StateV2/
+       </code>
+       - Professional, production-ready demonstration
+- Function component pattern (LandingPage style)
+- Comprehensive showcases:
+  - Interactive counter with increment/decrement
+  - Auto-incrementing timer
+  - Animation showcase with 15+ animations
+  - State management best practices
+- Responsive design with modern styling
+- Complete documentation and code examples
+      </p>
+      <p>
+       <strong>
+        Template Structure:
+       </strong>
+      </p>
+      <pre>
+<code class="language-none">dars/templates/examples/advanced/StateV2/
+├── index.py                 # Main application
+├── hero_component.py        # Hero section
+├── counter_component.py     # Counter demo
+├── timer_component.py       # Timer demo
+├── animation_component.py   # Animation showcase
+├── styles.css              # Global styles
+└── README.md               # Documentation
+</code></pre>
+      <h2 id="breaking-changes">
+       Breaking Changes
+      </h2>
+      <p>
+       <strong>
+        dState/cState Deprecation:
+       </strong>
+       -
+       <code>
+        dState
+       </code>
+       and
+       <code>
+        cState
+       </code>
+       are now deprecated
+- All functionality replaced by State V2
+- Legacy code still works for backward compatibility
+- Migration path provided in updated documentation
+- New projects should use State V2 exclusively
+      </p>
+      <h2 id="documentation-updates">
+       Documentation Updates
+      </h2>
+      <p>
+       <strong>
+        Updated Files:
+       </strong>
+       -
+       <code>
+        state_management.md
+       </code>
+       - Completely rewritten for State V2
+-
+       <code>
+        scripts.md
+       </code>
+       - Added comprehensive animation system documentation
+- All dState/cState references removed from active docs
+- Migration guides included for existing projects
+      </p>
+      <h2 id="bug-fixes">
+       Bug Fixes
+      </h2>
+      <p>
+       <strong>
+        Animation System:
+       </strong>
+       - Fixed animation chaining with proper Promise handling
+- Fixed initial state rendering with
+       <code>
+        transition='none'
+       </code>
+       pattern
+- Fixed
+       <code>
+        sequence()
+       </code>
+       function trailing semicolon issue
+- All animations now properly await completion
+- Animations use
+       <code>
+        setTimeout(20ms)
+       </code>
+       for reliable state application
+      </p>
+      <p>
+       <strong>
+        State Operations:
+       </strong>
+       -
+       <code>
+        auto_increment
+       </code>
+       and
+       <code>
+        auto_decrement
+       </code>
+       now return proper
+       <code>
+        dScript
+       </code>
+       objects
+- Client-side loop management with
+       <code>
+        startLoop
+       </code>
+       and
+       <code>
+        stopLoop
+       </code>
+       - Proper cleanup of active loops
+      </p>
+      <h2 id="technical-improvements">
+       Technical Improvements
+      </h2>
+      <h3 id="animation-implementation">
+       Animation Implementation
+      </h3>
+      <ul>
+       <li>
+        All animations wrapped in async IIFEs
+       </li>
+       <li>
+        Proper transition timing with
+        <code>
+         setTimeout
+        </code>
+       </li>
+       <li>
+        Force reflow with
+        <code>
+         void el.offsetWidth
+        </code>
+       </li>
+       <li>
+        Set
+        <code>
+         transition='none'
+        </code>
+        before initial styles
+       </li>
+       <li>
+        <code>
+         animation.finished
+        </code>
+        for Web Animations API
+       </li>
+       <li>
+        Proper Promise chaining in
+        <code>
+         sequence()
+        </code>
+       </li>
+      </ul>
+      <h2 id="migration-guide">
+       Migration Guide
+      </h2>
+      <h3 id="from-dstate-to-state-v2">
+       From dState to State V2
+      </h3>
+      <p>
+       <strong>
+        1. Import Changes:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Old</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dars.core.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">dState</span><span class="p">,</span> <span class="n">Mod</span>
+
+<span class="c1"># New</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="n">State</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        2. State Creation:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Old</span>
+<span class="n">counter_state</span> <span class="o">=</span> <span class="n">dState</span><span class="p">(</span><span class="s2">"counter"</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="n">display</span><span class="p">,</span> <span class="n">states</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="n">counter_state</span><span class="o">.</span><span class="n">cState</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="p">[</span><span class="n">Mod</span><span class="o">.</span><span class="n">inc</span><span class="p">(</span><span class="n">display</span><span class="p">,</span> <span class="n">prop</span><span class="o">=</span><span class="s1">'text'</span><span class="p">,</span> <span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">)])</span>
+
+<span class="c1"># New</span>
+<span class="n">counter</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="n">display</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        3. Event Handlers:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1">#Old</span>
+<span class="n">button</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">counter_state</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># New</span>
+<span class="n">button</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">counter</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        4.Auto Operations (New Feature):
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Only available in State V2</span>
+<span class="n">start_btn</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">timer</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">auto_increment</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="n">stop_btn</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">timer</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">stop_auto</span><span class="p">()</span>
+</code></pre>
+      </div>
+      <h3 id="adding-animations">
+       Adding Animations
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="n">fadeIn</span><span class="p">,</span> <span class="n">pulse</span><span class="p">,</span> <span class="n">sequence</span>
+
+<span class="c1"># Simple animation</span>
+<span class="n">button</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">fadeIn</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"element"</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+
+<span class="c1"># Chained animations</span>
+<span class="n">button</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">sequence</span><span class="p">(</span>
+    <span class="n">fadeIn</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"box"</span><span class="p">),</span>
+    <span class="n">pulse</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"box"</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">1.1</span><span class="p">)</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h2 id="performance-compatibility">
+       Performance &amp; Compatibility
+      </h2>
+      <ul>
+       <li>
+        <strong>
+         Zero Overhead
+        </strong>
+        : State V2 only activates when used
+       </li>
+       <li>
+        <strong>
+         Backward Compatible
+        </strong>
+        : dState still works for existing code
+       </li>
+       <li>
+        <strong>
+         Bundle Size
+        </strong>
+        : Minimal impact (+~15KB for animations)
+       </li>
+       <li>
+        <strong>
+         Desktop Support
+        </strong>
+        : Full Electron compatibility
+       </li>
+      </ul>
+      <h2 id="examples">
+       Examples
+      </h2>
+      <h3 id="complete-counter-app">
+       Complete Counter App
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="s2">"Counter Demo"</span><span class="p">)</span>
+
+<span class="c1"># Create display with state</span>
+<span class="n">counter_display</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="s2">"0"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"counter"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="p">{</span>
+    <span class="s2">"font-size"</span><span class="p">:</span> <span class="s2">"48px"</span><span class="p">,</span> 
+    <span class="s2">"color"</span><span class="p">:</span> <span class="s2">"#2563eb"</span>
+<span class="p">})</span>
+<span class="n">counter</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="n">counter_display</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># Buttons with operations</span>
+<span class="n">inc_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"+1"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">counter</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">dec_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"-1"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">counter</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">decrement</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">reset_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Reset"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">counter</span><span class="o">.</span><span class="n">reset</span><span class="p">())</span>
+<span class="n">pulse_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Pulse"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">pulse</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"counter"</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">1.2</span><span class="p">))</span>
+
+<span class="n">page</span> <span class="o">=</span> <span class="n">Page</span><span class="p">(</span><span class="n">Container</span><span class="p">(</span><span class="n">counter_display</span><span class="p">,</span> <span class="n">inc_btn</span><span class="p">,</span> <span class="n">dec_btn</span><span class="p">,</span> <span class="n">reset_btn</span><span class="p">,</span> <span class="n">pulse_btn</span><span class="p">))</span>
+<span class="n">app</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="s2">"index"</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">rTimeCompile</span><span class="p">()</span>
+</code></pre>
+      </div>
+      <h3 id="auto-incrementing-timer">
+       Auto-Incrementing Timer
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="s2">"Timer Demo"</span><span class="p">)</span>
+
+<span class="n">timer_display</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="s2">"0"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"timer"</span><span class="p">)</span>
+<span class="n">timer</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="n">timer_display</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">start_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Start"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">timer</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">auto_increment</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">1000</span><span class="p">))</span>
+<span class="n">stop_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Stop"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">timer</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">stop_auto</span><span class="p">())</span>
+<span class="n">reset_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Reset"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">timer</span><span class="o">.</span><span class="n">reset</span><span class="p">())</span>
+
+<span class="n">page</span> <span class="o">=</span> <span class="n">Page</span><span class="p">(</span><span class="n">Container</span><span class="p">(</span><span class="n">timer_display</span><span class="p">,</span> <span class="n">start_btn</span><span class="p">,</span> <span class="n">stop_btn</span><span class="p">,</span> <span class="n">reset_btn</span><span class="p">))</span>
+<span class="n">app</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="s2">"index"</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">rTimeCompile</span><span class="p">()</span>
+</code></pre>
+      </div>
+      <h2 id="desktop-exporter-status">
+       Desktop Exporter Status
+      </h2>
+      <p>
+       <strong>
+        Still in BETA
+       </strong>
+       - State V2 and animations fully supported in both web and desktop exports.
+      </p>
+      <hr/>
+      <p>
+       <strong>
+        This is a landmark release
+       </strong>
+       - State V2 represents the future of Dars state management. Upgrade highly recommended for all projects.
+      </p>
+      <hr/>
+      <h1 id="release-notes-v146">
+       Release Notes v1.4.6
+      </h1>
+      <blockquote>
+       <p>
+        <strong>
+         Major Feature Release
+        </strong>
+        : Introduces Single Page Application (SPA) support and a powerful client-side routing system.
+       </p>
+      </blockquote>
+      <h2 id="installation-2">
+       Installation
+      </h2>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
+</code></pre>
+      </div>
+      <p>
+       or
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.5
+</code></pre>
+      </div>
+      <h2 id="whats-new-2">
        What's New
       </h2>
       <h3 id="single-page-application-spa-support">
@@ -367,7 +950,7 @@
         Critical bug fix release. Removes non-functional features, fixes style merge, and improves state restoration.
        </p>
       </blockquote>
-      <h2 id="installation-2">
+      <h2 id="installation-3">
        Installation
       </h2>
       <div class="codehilite">
@@ -433,7 +1016,7 @@
         State management enhancements with compile-time validation, component self-navigation, and critical style merge fix. Improves developer experience and fixes property replacement bug.
        </p>
       </blockquote>
-      <h2 id="installation-3">
+      <h2 id="installation-4">
        Installation
       </h2>
       <div class="codehilite">
@@ -447,7 +1030,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.3
 </code></pre>
       </div>
-      <h2 id="whats-new-2">
+      <h2 id="whats-new-3">
        What's New
       </h2>
       <ul>
@@ -497,7 +1080,7 @@
         for enhanced client-side interactions.
        </p>
       </blockquote>
-      <h2 id="installation-4">
+      <h2 id="installation-5">
        Installation
       </h2>
       <div class="codehilite">
@@ -511,7 +1094,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.2
 </code></pre>
       </div>
-      <h2 id="whats-new-3">
+      <h2 id="whats-new-4">
        What's New
       </h2>
       <h3 id="utility-functions-utils_ds">
@@ -701,7 +1284,7 @@
         SEO and Apple device optimizations. Enhanced metadata generation with automatic MIME type detection for favicons and comprehensive iOS/Safari support.
        </p>
       </blockquote>
-      <h2 id="installation-5">
+      <h2 id="installation-6">
        Installation
       </h2>
       <div class="codehilite">
@@ -715,7 +1298,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.1
 </code></pre>
       </div>
-      <h2 id="whats-new-4">
+      <h2 id="whats-new-5">
        What's New
       </h2>
       <h3 id="automatic-favicon-mime-type-detection">
@@ -884,7 +1467,7 @@
 <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">name</span><span class="o">=</span><span class="s">"apple-mobile-web-app-capable"</span> <span class="na">content</span><span class="o">=</span><span class="s">"yes"</span><span class="p">&gt;</span>
 </code></pre>
       </div>
-      <h2 id="technical-improvements">
+      <h2 id="technical-improvements-2">
        Technical Improvements
       </h2>
       <h3 id="exporter-enhancements-darsexporterswebhtml_css_jspy">
@@ -1006,7 +1589,7 @@
         : Superior home screen experience encourages app-like usage
        </li>
       </ul>
-      <h2 id="desktop-exporter-status">
+      <h2 id="desktop-exporter-status-2">
        Desktop Exporter Status
       </h2>
       <p>
@@ -1030,7 +1613,7 @@
         Simple Template update.
        </p>
       </blockquote>
-      <h2 id="installation-6">
+      <h2 id="installation-7">
        Installation
       </h2>
       <div class="codehilite">
@@ -1058,7 +1641,7 @@
         Desktop File System API, Pythonic Arg helper, keyboard event filtering, and comprehensive template synchronization. Major enhancements to desktop capabilities with improved developer experience.
        </p>
       </blockquote>
-      <h2 id="installation-7">
+      <h2 id="installation-8">
        Installation
       </h2>
       <div class="codehilite">
@@ -1072,7 +1655,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.9
 </code></pre>
       </div>
-      <h2 id="whats-new-5">
+      <h2 id="whats-new-6">
        What's New
       </h2>
       <h3 id="desktop-file-system-api-list_directory">
@@ -1367,7 +1950,7 @@
        and similar events work correctly
 - Maintains backward compatibility with non-filtered events
       </p>
-      <h2 id="bug-fixes">
+      <h2 id="bug-fixes-2">
        Bug Fixes
       </h2>
       <ul>
@@ -1416,7 +1999,7 @@
         More powerful keyboard event handling with key-specific filtering
        </li>
       </ul>
-      <h2 id="migration-guide">
+      <h2 id="migration-guide-2">
        Migration Guide
       </h2>
       <h3 id="from-v138-to-v139">
@@ -1523,7 +2106,7 @@
         for async chaining.
        </p>
       </blockquote>
-      <h2 id="installation-8">
+      <h2 id="installation-9">
        Installation
       </h2>
       <div class="codehilite">
@@ -1537,7 +2120,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.8
 </code></pre>
       </div>
-      <h2 id="whats-new-6">
+      <h2 id="whats-new-7">
        What's New
       </h2>
       <h3 id="dynamic-state-updates-with-this">
@@ -1725,7 +2308,7 @@
 - Color-coded messages for different log levels
 - Stack traces properly displayed for JavaScript errors
       </p>
-      <h2 id="technical-improvements-2">
+      <h2 id="technical-improvements-3">
        Technical Improvements
       </h2>
       <h3 id="state-system-enhancements">
@@ -1851,7 +2434,7 @@
         : Reliable Electron termination before restart
        </li>
       </ul>
-      <h2 id="documentation-updates">
+      <h2 id="documentation-updates-2">
        Documentation Updates
       </h2>
       <p>
@@ -1897,7 +2480,7 @@
 - New features are opt-in and additive
 - Event handlers work with both constructor and attribute assignment
       </p>
-      <h2 id="desktop-exporter-status-2">
+      <h2 id="desktop-exporter-status-3">
        Desktop Exporter Status
       </h2>
       <p>
@@ -1925,7 +2508,7 @@
 - Production packaging continues in experimental status
 - Native API surface expanding with each release
       </p>
-      <h2 id="performance-compatibility">
+      <h2 id="performance-compatibility-2">
        Performance &amp; Compatibility
       </h2>
       <ul>
@@ -1985,7 +2568,7 @@
         for dynamic DOM operations with safe event hydration.
        </p>
       </blockquote>
-      <h2 id="installation-9">
+      <h2 id="installation-10">
        Installation
       </h2>
       <div class="codehilite">
@@ -1999,7 +2582,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.6
 </code></pre>
       </div>
-      <h2 id="whats-new-7">
+      <h2 id="whats-new-8">
        What's New
       </h2>
       <h3 id="compile-time-component-manipulation">
@@ -2162,7 +2745,7 @@
         Enhanced styling and development experience update featuring active styles, improved preview system, and advanced file monitoring. Delivers better visual feedback and faster development workflow.
        </p>
       </blockquote>
-      <h2 id="installation-10">
+      <h2 id="installation-11">
        Installation
       </h2>
       <div class="codehilite">
@@ -2176,7 +2759,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.5
 </code></pre>
       </div>
-      <h2 id="whats-new-8">
+      <h2 id="whats-new-9">
        What's New
       </h2>
       <h3 id="active-styles-support">
@@ -2264,7 +2847,7 @@
         : Enhanced display and interaction on mobile devices
        </li>
       </ul>
-      <h2 id="technical-improvements-3">
+      <h2 id="technical-improvements-4">
        Technical Improvements
       </h2>
       <h3 id="development-experience">
@@ -2303,7 +2886,7 @@
        - No breaking changes - all existing code remains compatible
 - Active styles can be added incrementally to enhance user interaction
       </p>
-      <h2 id="desktop-exporter-status-3">
+      <h2 id="desktop-exporter-status-4">
        Desktop Exporter Status
       </h2>
       <p>
@@ -2319,7 +2902,7 @@
         Enhanced interactivity update featuring hover styles, multi-handler events, and runtime versioning. Improves component styling and event handling flexibility.
        </p>
       </blockquote>
-      <h2 id="installation-11">
+      <h2 id="installation-12">
        Installation
       </h2>
       <div class="codehilite">
@@ -2333,7 +2916,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.4
 </code></pre>
       </div>
-      <h2 id="whats-new-9">
+      <h2 id="whats-new-10">
        What's New
       </h2>
       <h3 id="hover-styles-support">
@@ -2396,7 +2979,7 @@
 <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="sb">`Release: </span><span class="si">${</span><span class="nx">Dars</span><span class="p">.</span><span class="nx">releaseUrl</span><span class="si">}</span><span class="sb">`</span><span class="p">);</span>
 </code></pre>
       </div>
-      <h2 id="technical-improvements-4">
+      <h2 id="technical-improvements-5">
        Technical Improvements
       </h2>
       <h3 id="web-exporter-enhancements">
@@ -2459,7 +3042,7 @@
 - Hover styles can be incrementally added to enhance existing components
 - Multi-handler events are optional - single handlers remain fully supported
       </p>
-      <h2 id="desktop-exporter-status-4">
+      <h2 id="desktop-exporter-status-5">
        Desktop Exporter Status
       </h2>
       <p>
@@ -2468,7 +3051,7 @@
        </strong>
        - No changes from v1.3.3
       </p>
-      <h2 id="performance-compatibility-2">
+      <h2 id="performance-compatibility-3">
        Performance &amp; Compatibility
       </h2>
       <ul>
@@ -2512,7 +3095,7 @@
         Minor update featuring new semantic Section component and enhanced state serialization. Continues JavaScript migration improvements from v1.3.2.
        </p>
       </blockquote>
-      <h2 id="installation-12">
+      <h2 id="installation-13">
        Installation
       </h2>
       <div class="codehilite">
@@ -2526,7 +3109,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.3
 </code></pre>
       </div>
-      <h2 id="whats-new-10">
+      <h2 id="whats-new-11">
        What's New
       </h2>
       <h3 id="section-component">
@@ -2583,7 +3166,7 @@
 - Better performance: Streamlined state management
 - Enhanced minification: Better compatibility with Vite optimization
       </p>
-      <h3 id="documentation-updates-2">
+      <h3 id="documentation-updates-3">
        Documentation Updates
       </h3>
       <ul>
@@ -2597,7 +3180,7 @@
         Migration guides for state serialization changes
        </li>
       </ul>
-      <h2 id="technical-improvements-5">
+      <h2 id="technical-improvements-6">
        Technical Improvements
       </h2>
       <ul>
@@ -2647,7 +3230,7 @@
 <span class="n">Section</span><span class="p">(</span><span class="n">children</span><span class="o">=</span><span class="p">[</span><span class="o">...</span><span class="p">])</span>
 </code></pre>
       </div>
-      <h2 id="desktop-exporter-status-5">
+      <h2 id="desktop-exporter-status-6">
        Desktop Exporter Status
       </h2>
       <p>
@@ -2676,7 +3259,7 @@
         Major minification improvements with combined JS files and optimized event handling. Electron desktop exporter remains in beta.
        </p>
       </blockquote>
-      <h2 id="installation-13">
+      <h2 id="installation-14">
        Installation
       </h2>
       <div class="codehilite">
@@ -2800,7 +3383,7 @@
         : Fallback minification when Vite is unavailable
        </li>
       </ul>
-      <h2 id="bug-fixes-2">
+      <h2 id="bug-fixes-3">
        Bug Fixes
       </h2>
       <ul>
@@ -2823,7 +3406,7 @@
         : Multi-page application build performance
        </li>
       </ul>
-      <h2 id="desktop-exporter-status-6">
+      <h2 id="desktop-exporter-status-7">
        Desktop Exporter Status
       </h2>
       <p>
@@ -2972,7 +3555,7 @@
         Native desktop functions and DX improved with dev mode and file system integration.
        </p>
       </blockquote>
-      <h2 id="installation-14">
+      <h2 id="installation-15">
        Installation
       </h2>
       <div class="codehilite">
@@ -3023,7 +3606,7 @@
       <p>
        Also you can use dScripts to run custom javascript code in the desktop app. and for now 'dars dev' is supported but python main.py with rTimeCompile() is not supported because it have issues with relative paths.
       </p>
-      <h2 id="bug-fixes-3">
+      <h2 id="bug-fixes-4">
        Bug Fixes
       </h2>
       <ul>
@@ -3057,7 +3640,7 @@
         Native desktop export (BETA), improved CLI and doctor integration, and metadata fixes for packaging. This is a BETA release: usable for testing, not recommended for production.
        </p>
       </blockquote>
-      <h2 id="installation-15">
+      <h2 id="installation-16">
        Installation
       </h2>
       <div class="codehilite">
@@ -3243,7 +3826,7 @@ dars<span class="w"> </span>build
 <span class="p">}</span>
 </code></pre>
       </div>
-      <h2 id="bug-fixes-4">
+      <h2 id="bug-fixes-5">
        Bug Fixes
       </h2>
       <ul>
@@ -3340,7 +3923,7 @@ dars<span class="w"> </span>build
         Optional default minification, precise CLI control, faster builds, and clearer minification status.
        </p>
       </blockquote>
-      <h2 id="installation-16">
+      <h2 id="installation-17">
        Installation
       </h2>
       <div class="codehilite">
@@ -3497,7 +4080,7 @@ dars<span class="w"> </span>build
         </ul>
        </li>
       </ul>
-      <h2 id="bug-fixes-5">
+      <h2 id="bug-fixes-6">
        Bug Fixes
       </h2>
       <ul>
@@ -3733,6 +4316,63 @@ dars<span class="w"> </span>build
      <div class="sidebar-category">
       Versions
      </div>
+     <a class="sidebar-link sidebar-level-1" href="#release-notes-v147" style="margin-left: 0px">
+      Release Notes v1.4.7
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#installation" style="margin-left: 20px">
+      Installation
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#whats-new" style="margin-left: 20px">
+      What's New
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#state-v2-pure-pythonic-state-management" style="margin-left: 40px">
+      State V2 - Pure Pythonic State Management
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#comprehensive-animation-system" style="margin-left: 40px">
+      Comprehensive Animation System
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#professional-state-v2-template" style="margin-left: 40px">
+      Professional State V2 Template
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#breaking-changes" style="margin-left: 20px">
+      Breaking Changes
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#documentation-updates" style="margin-left: 20px">
+      Documentation Updates
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#bug-fixes" style="margin-left: 20px">
+      Bug Fixes
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#technical-improvements" style="margin-left: 20px">
+      Technical Improvements
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#animation-implementation" style="margin-left: 40px">
+      Animation Implementation
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#migration-guide" style="margin-left: 20px">
+      Migration Guide
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#from-dstate-to-state-v2" style="margin-left: 40px">
+      From dState to State V2
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#adding-animations" style="margin-left: 40px">
+      Adding Animations
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#performance-compatibility" style="margin-left: 20px">
+      Performance &amp; Compatibility
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#examples" style="margin-left: 20px">
+      Examples
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#complete-counter-app" style="margin-left: 40px">
+      Complete Counter App
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#auto-incrementing-timer" style="margin-left: 40px">
+      Auto-Incrementing Timer
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#desktop-exporter-status" style="margin-left: 20px">
+      Desktop Exporter Status
+     </a>
      <a class="sidebar-link sidebar-level-1" href="#release-notes-v146" style="margin-left: 0px">
       Release Notes v1.4.6
      </a>

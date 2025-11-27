@@ -1,4 +1,299 @@
-window.__DARS_VDOM__={type:"T1",id:"page_151",key:"0",children:[{type:"T2",id:"container_152",key:"0/0",children:[{type:"T3",id:"dars-navbar",key:"0/0/0",children:[{type:"T2",id:"navbar-left",key:"0/0/0/0",children:[{type:"T4",id:"image_153",key:"0/0/0/0/0"},{type:"T5",id:"text_154",key:"0/0/0/0/1",text:"Dars Framework"}]},{type:"T2",id:"container_155",key:"0/0/0/1",children:[{type:"T2",id:"navbar-right",key:"0/0/0/1/0",children:[{type:"T6",id:"link_156",key:"0/0/0/1/0/0",text:"Home"},{type:"T6",id:"link_157",key:"0/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_158",key:"0/0/0/1/0/2",text:"Releases"},{type:"T6",id:"link_159",key:"0/0/0/1/0/3",text:"PlayGround"},{type:"T6",id:"link_160",key:"0/0/0/1/0/4",text:"GitHub"}]},{type:"T2",id:"hamburger-menu",key:"0/0/0/1/1",children:[{type:"T2",id:"hamburger-btn",key:"0/0/0/1/1/0",children:[{type:"T2",id:"container_161",key:"0/0/0/1/1/0/0",children:[{type:"T2",id:"container_162",key:"0/0/0/1/1/0/0/0"},{type:"T2",id:"container_163",key:"0/0/0/1/1/0/0/1"},{type:"T2",id:"container_164",key:"0/0/0/1/1/0/0/2"}]}]},{type:"T2",id:"mobile-menu",key:"0/0/0/1/1/1",children:[{type:"T6",id:"link_165",key:"0/0/0/1/1/1/0",text:"Home"},{type:"T6",id:"link_166",key:"0/0/0/1/1/1/1",text:"Documentation"},{type:"T6",id:"link_167",key:"0/0/0/1/1/1/2",text:"Releases"},{type:"T6",id:"link_168",key:"0/0/0/1/1/1/3",text:"PlayGround"},{type:"T6",id:"link_169",key:"0/0/0/1/1/1/4",text:"GitHub"}]}]}]}]}]},{type:"T2",id:"container_170",key:"0/1",children:[{type:"T2",id:"markdown-content-container",key:"0/1/0",children:[{type:"T9",id:"markdown_171",key:"0/1/0/0",text:`# Release Notes v1.4.6
+window.__DARS_VDOM__={type:"T1",id:"page_151",key:"0",children:[{type:"T2",id:"container_152",key:"0/0",children:[{type:"T3",id:"dars-navbar",key:"0/0/0",children:[{type:"T2",id:"navbar-left",key:"0/0/0/0",children:[{type:"T4",id:"image_153",key:"0/0/0/0/0"},{type:"T5",id:"text_154",key:"0/0/0/0/1",text:"Dars Framework"}]},{type:"T2",id:"container_155",key:"0/0/0/1",children:[{type:"T2",id:"navbar-right",key:"0/0/0/1/0",children:[{type:"T6",id:"link_156",key:"0/0/0/1/0/0",text:"Home"},{type:"T6",id:"link_157",key:"0/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_158",key:"0/0/0/1/0/2",text:"Releases"},{type:"T6",id:"link_159",key:"0/0/0/1/0/3",text:"PlayGround"},{type:"T6",id:"link_160",key:"0/0/0/1/0/4",text:"GitHub"}]},{type:"T2",id:"hamburger-menu",key:"0/0/0/1/1",children:[{type:"T2",id:"hamburger-btn",key:"0/0/0/1/1/0",children:[{type:"T2",id:"container_161",key:"0/0/0/1/1/0/0",children:[{type:"T2",id:"container_162",key:"0/0/0/1/1/0/0/0"},{type:"T2",id:"container_163",key:"0/0/0/1/1/0/0/1"},{type:"T2",id:"container_164",key:"0/0/0/1/1/0/0/2"}]}]},{type:"T2",id:"mobile-menu",key:"0/0/0/1/1/1",children:[{type:"T6",id:"link_165",key:"0/0/0/1/1/1/0",text:"Home"},{type:"T6",id:"link_166",key:"0/0/0/1/1/1/1",text:"Documentation"},{type:"T6",id:"link_167",key:"0/0/0/1/1/1/2",text:"Releases"},{type:"T6",id:"link_168",key:"0/0/0/1/1/1/3",text:"PlayGround"},{type:"T6",id:"link_169",key:"0/0/0/1/1/1/4",text:"GitHub"}]}]}]}]}]},{type:"T2",id:"container_170",key:"0/1",children:[{type:"T2",id:"markdown-content-container",key:"0/1/0",children:[{type:"T9",id:"markdown_171",key:"0/1/0/0",text:`# Release Notes v1.4.7
+
+> Introducing State V2 and comprehensive animation system. This is the biggest update to Dars state management, bringing a pure Pythonic API and 15+ built-in animations.
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+or
+
+\`\`\`bash
+pip install dars-framework==1.4.7
+\`\`\`
+
+## What's New
+
+### State V2 - Pure Pythonic State Management
+
+**New \`State\` Class:**
+- Pure Python API - no more verbose dState syntax
+- Direct property access with reactive operations
+- Built-in auto-increment/auto-decrement operations
+- Clean reset functionality
+- Seamless animation integration
+
+**Before (dState - deprecated):**
+\`\`\`python
+from dars.core.state import dState, Mod
+
+display = Text("0", id="counter")
+st = dState("counter", component=display, states=[0, 1, 2])
+st.cState(1, mods=[Mod.inc(display, prop='text', by=1)])
+button.on_click = st.state(1)
+\`\`\`
+
+**After (State V2 - recommended):**
+\`\`\`python
+from dars.all import State
+
+display = Text("0", id="counter")
+counter = State(display, text=0)
+button.on_click = counter.text.increment(by=1)
+\`\`\`
+
+**Key Features:**
+- **Reactive Properties**: Direct access with \`state.property.operation()\`
+- **Auto Operations**: Continuous operations with \`auto_increment()\`, \`auto_decrement()\`
+- **Reset**: Simple \`state.reset()\` to restore initial values
+- **Intuitive**: Pythonic API that feels natural
+
+**Usage:**
+\`\`\`python
+from dars.all import *
+
+# Create component and state
+timer_display = Text("0", id="timer", style={"font-size": "36px"})
+timer = State(timer_display, text=0)
+
+# Auto-incrementing timer
+start_btn.on_click = timer.text.auto_increment(by=1, interval=1000)
+stop_btn.on_click = timer.text.stop_auto()
+reset_btn.on_click = timer.reset()
+\`\`\`
+
+### Comprehensive Animation System
+
+**15+ Built-in Animations:**
+- \`fadeIn\` / \`fadeOut\` - Opacity transitions
+- \`slideIn\` / \`slideOut\` - Position-based slides (8 directions)
+- \`scaleIn\` / \`scaleOut\` - Size transformations
+- \`shake\` - Shake effect for alerts
+- \`bounce\` - Bounce effect
+- \`pulse\` - Heartbeat/pulse effect
+- \`rotate\` - Rotation animations
+- \`flip\` - Flip on X/Y axis
+- \`colorChange\` - Color transitions
+- \`morphSize\` - Size morphing
+- \`sequence\` - Chain multiple animations
+
+**Animation Chaining:**
+\`\`\`python
+from dars.all import *
+
+button.on_click = sequence(
+    fadeIn(id="box", duration=400),
+    pulse(id="box", scale=1.2, iterations=2),
+    shake(id="box", intensity=5)
+)
+\`\`\`
+
+**Integration with State V2:**
+\`\`\`python
+button.on_click = sequence(
+    counter.text.increment(by=1),
+    pulse(id="counter", scale=1.2),
+    fadeOut(id="counter", duration=200),
+    counter.text.set(value=0),
+    fadeIn(id="counter", duration=200)
+)
+\`\`\`
+
+**All Animations:**
+- Return \`dScript\` objects for chaining
+- Customizable duration, easing, and parameters
+- Proper async completion handling
+- Work seamlessly with event handlers
+
+### Professional State V2 Template
+
+**New Example Template:**
+- Located in \`dars/templates/examples/advanced/StateV2/\`
+- Professional, production-ready demonstration
+- Function component pattern (LandingPage style)
+- Comprehensive showcases:
+  - Interactive counter with increment/decrement
+  - Auto-incrementing timer
+  - Animation showcase with 15+ animations
+  - State management best practices
+- Responsive design with modern styling
+- Complete documentation and code examples
+
+**Template Structure:**
+\`\`\`
+dars/templates/examples/advanced/StateV2/
+\u251C\u2500\u2500 index.py                 # Main application
+\u251C\u2500\u2500 hero_component.py        # Hero section
+\u251C\u2500\u2500 counter_component.py     # Counter demo
+\u251C\u2500\u2500 timer_component.py       # Timer demo
+\u251C\u2500\u2500 animation_component.py   # Animation showcase
+\u251C\u2500\u2500 styles.css              # Global styles
+\u2514\u2500\u2500 README.md               # Documentation
+\`\`\`
+
+## Breaking Changes
+
+**dState/cState Deprecation:**
+- \`dState\` and \`cState\` are now deprecated
+- All functionality replaced by State V2
+- Legacy code still works for backward compatibility
+- Migration path provided in updated documentation
+- New projects should use State V2 exclusively
+
+## Documentation Updates
+
+**Updated Files:**
+- \`state_management.md\` - Completely rewritten for State V2
+- \`scripts.md\` - Added comprehensive animation system documentation
+- All dState/cState references removed from active docs
+- Migration guides included for existing projects
+
+## Bug Fixes
+
+**Animation System:**
+- Fixed animation chaining with proper Promise handling
+- Fixed initial state rendering with \`transition='none'\` pattern
+- Fixed \`sequence()\` function trailing semicolon issue
+- All animations now properly await completion
+- Animations use \`setTimeout(20ms)\` for reliable state application
+
+**State Operations:**
+- \`auto_increment\` and \`auto_decrement\` now return proper \`dScript\` objects
+- Client-side loop management with \`startLoop\` and \`stopLoop\`
+- Proper cleanup of active loops
+
+## Technical Improvements
+
+### Animation Implementation
+
+- All animations wrapped in async IIFEs
+- Proper transition timing with \`setTimeout\`
+- Force reflow with \`void el.offsetWidth\`
+- Set \`transition='none'\` before initial styles
+- \`animation.finished\` for Web Animations API
+- Proper Promise chaining in \`sequence()\`
+
+## Migration Guide
+
+### From dState to State V2
+
+**1. Import Changes:**
+\`\`\`python
+# Old
+from dars.core.state import dState, Mod
+
+# New
+from dars.all import State
+\`\`\`
+
+**2. State Creation:**
+\`\`\`python
+# Old
+counter_state = dState("counter", component=display, states=[0, 1, 2])
+counter_state.cState(1, mods=[Mod.inc(display, prop='text', by=1)])
+
+# New
+counter = State(display, text=0)
+\`\`\`
+
+**3. Event Handlers:**
+\`\`\`python
+#Old
+button.on_click = counter_state.state(1)
+
+# New
+button.on_click = counter.text.increment(by=1)
+\`\`\`
+
+**4.Auto Operations (New Feature):**
+\`\`\`python
+# Only available in State V2
+start_btn.on_click = timer.text.auto_increment(by=1, interval=1000)
+stop_btn.on_click = timer.text.stop_auto()
+\`\`\`
+
+### Adding Animations
+
+\`\`\`python
+from dars.all import fadeIn, pulse, sequence
+
+# Simple animation
+button.on_click = fadeIn(id="element", duration=500)
+
+# Chained animations
+button.on_click = sequence(
+    fadeIn(id="box"),
+    pulse(id="box", scale=1.1)
+)
+\`\`\`
+
+## Performance & Compatibility
+
+- **Zero Overhead**: State V2 only activates when used
+- **Backward Compatible**: dState still works for existing code
+- **Bundle Size**: Minimal impact (+~15KB for animations)
+- **Desktop Support**: Full Electron compatibility
+
+## Examples
+
+### Complete Counter App
+
+\`\`\`python
+from dars.all import *
+
+app = App("Counter Demo")
+
+# Create display with state
+counter_display = Text("0", id="counter", style={
+    "font-size": "48px", 
+    "color": "#2563eb"
+})
+counter = State(counter_display, text=0)
+
+# Buttons with operations
+inc_btn = Button("+1", on_click=counter.text.increment(by=1))
+dec_btn = Button("-1", on_click=counter.text.decrement(by=1))
+reset_btn = Button("Reset", on_click=counter.reset())
+pulse_btn = Button("Pulse", on_click=pulse(id="counter", scale=1.2))
+
+page = Page(Container(counter_display, inc_btn, dec_btn, reset_btn, pulse_btn))
+app.add_page("index", page, index=True)
+app.rTimeCompile()
+\`\`\`
+
+### Auto-Incrementing Timer
+
+\`\`\`python
+from dars.all import *
+
+app = App("Timer Demo")
+
+timer_display = Text("0", id="timer")
+timer = State(timer_display, text=0)
+
+start_btn = Button("Start", on_click=timer.text.auto_increment(by=1, interval=1000))
+stop_btn = Button("Stop", on_click=timer.text.stop_auto())
+reset_btn = Button("Reset", on_click=timer.reset())
+
+page = Page(Container(timer_display, start_btn, stop_btn, reset_btn))
+app.add_page("index", page, index=True)
+app.rTimeCompile()
+\`\`\`
+
+## Desktop Exporter Status
+
+**Still in BETA** - State V2 and animations fully supported in both web and desktop exports.
+
+---
+
+**This is a landmark release** - State V2 represents the future of Dars state management. Upgrade highly recommended for all projects.
+
+---
+
+# Release Notes v1.4.6
+
 
 > **Major Feature Release**: Introduces Single Page Application (SPA) support and a powerful client-side routing system.
 
@@ -1270,4 +1565,4 @@ Upgrade Recommendation: Recommended for all users; especially helpful for projec
 # Older release notes can be found
 
 In the github repository [Here](https://github.com/ZtaMDev/Dars-Framework/releases).
-`}]},{type:"T2",id:"footer-section",key:"0/1/1",children:[{type:"T2",id:"container_172",key:"0/1/1/0",children:[{type:"T2",id:"container_173",key:"0/1/1/0/0",children:[{type:"T2",id:"container_174",key:"0/1/1/0/0/0",children:[{type:"T4",id:"image_175",key:"0/1/1/0/0/0/0"},{type:"T2",id:"container_176",key:"0/1/1/0/0/0/1",children:[{type:"T5",id:"text_177",key:"0/1/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_178",key:"0/1/1/0/0/1",children:[{type:"T2",id:"container_179",key:"0/1/1/0/0/1/0",children:[{type:"T5",id:"text_180",key:"0/1/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_181",key:"0/1/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_182",key:"0/1/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_183",key:"0/1/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_184",key:"0/1/1/0/0/1/1",children:[{type:"T5",id:"text_185",key:"0/1/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_186",key:"0/1/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_187",key:"0/1/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_188",key:"0/1/1/0/0/1/2",children:[{type:"T5",id:"text_189",key:"0/1/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_190",key:"0/1/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_191",key:"0/1/1/0/0/2",children:[{type:"T2",id:"container_192",key:"0/1/1/0/0/2/0",children:[{type:"T5",id:"text_193",key:"0/1/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_194",key:"0/1/1/0/0/2/1",children:[{type:"T5",id:"text_195",key:"0/1/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_196",key:"0/1/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_197",key:"0/1/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_198",key:"0/1/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]},{type:"T10",id:"documentation-sidebar",key:"0/2"}]},function(){const d=new Map;let l=null,u=null;function m(){}function _(){}function b(e,n){if(!e)return;n(e);const t=e.children||[];for(let i=0;i<t.length;i++)b(t[i],n)}function k(e){try{if(typeof atob=="function")return atob(e);if(typeof Buffer<"u")return Buffer.from(e,"base64").toString("utf8")}catch{}return""}function I(e){try{if(!e)return null;if(e&&e.type==="inline"&&e.code)return new Function("event",e.code);const n=e&&(e.b||e.code_b64)||null;if(n){const t=k(n);if(t)return new Function("event",t)}}catch{}return null}function L(e){b(e,n=>{if(n&&n.id&&n.events&&!d.has(n.id)){const t={};for(const i in n.events){const o=n.events[i],c=I(o);c&&(t[i]=c)}Object.keys(t).length?d.set(n.id,t):d.delete(n.id)}})}function H(e,n){if(!(!e||!n))for(const[t,i]of Object.entries(n))try{i===!1||i===null||typeof i>"u"?e.removeAttribute(t):e.setAttribute(t,String(i))}catch{}}function R(e,n={},t={}){for(const i in n)if(!(i in t))try{e.removeAttribute(i)}catch{}for(const i in t){const o=t[i];try{o===!1||o===null||typeof o>"u"?e.removeAttribute(i):e.setAttribute(i,String(o))}catch{}}}function P(e,n={},t={}){for(const i in n)if(!(i in t))try{e.style.removeProperty(i.replace(/_/g,"-"))}catch{}for(const i in t){const o=t[i];try{e.style.setProperty(i.replace(/_/g,"-"),String(o))}catch{}}}function N(e,n){(n||document).addEventListener(e,function(t){let i=t.target;const o=n||document;for(;i&&i!==o;){const c=i.id;if(c&&d.has(c)){const h=d.get(c);if(i&&i.__darsEv&&i.__darsEv[e])return;let p=h[e];if(!p&&(e==="keydown"||e==="keyup"||e==="keypress")){const a=t.key||t.code;if(a){const r=e+"."+a;p=h[r]}}if(typeof p=="function"){try{p.call(i,t)}catch(a){console.error("[Dars] handler error",a)}return}}i=i.parentNode}},!0)}function S(e,n){return e&&n?e.type!==n.type:e!==n}function x(e){if(!e)return;const n=e.children||[];for(let t=0;t<n.length;t++)x(n[t]);if(e.id&&d.delete(e.id),e.id){const t=document.getElementById(e.id);if(t&&t.parentNode)try{t.parentNode.removeChild(t)}catch{}}}function w(e,n){if(!n||!n.id)return{ok:!1,reason:"missing-new"};let t=document.getElementById(n.id);if(!t){const a=e&&e.id?document.getElementById(e.id):null;if(a)try{a.id=n.id,t=a}catch{}}if(!t)return{ok:!1,reason:"missing-el"};if(S(e,n))return{ok:!1,reason:"type-changed"};const i=!!n.isIsland;if(!i&&n.class&&(t.className=n.class),i||R(t,e&&e.props||{},n.props||{}),i||P(t,e&&e.style||{},n.style||{}),!i&&Object.prototype.hasOwnProperty.call(n,"text")&&t.textContent!==String(n.text||"")&&(t.textContent=String(n.text||"")),i)return{ok:!0};const o=e&&e.children?e.children:[],c=n.children?n.children:[],h=new Map;for(let a=0;a<o.length;a++){const r=o[a]&&(o[a].id||o[a].key)||null;r&&h.set(String(r),o[a])}const p=new Set;for(let a=0;a<c.length;a++){const r=c[a],f=r&&(r.id||r.key)||null;if(!f)if(a<o.length){const s=w(o[a],r);if(!s.ok)return s;p.add(o[a]);continue}else return{ok:!1,reason:"children-added"};const v=h.get(String(f));if(v){const s=w(v,r);if(!s.ok)return s;p.add(v)}else{if(a<o.length){const g=o[a];if(!S(g,r)){const y=w(g,r);if(!y.ok)return y;p.add(g);continue}}const s=createSubtree(r);if(s){const g=a<o.length?o[a]:null;if(g&&g.id){const y=document.getElementById(g.id);y&&y.parentNode?y.parentNode.insertBefore(s,y):t.appendChild(s)}else t.appendChild(s);continue}return{ok:!1,reason:"children-added"}}}for(let a=0;a<o.length;a++){const r=o[a];p.has(r)||x(r)}return{ok:!0}}function F(e){typeof requestAnimationFrame=="function"?requestAnimationFrame(e):setTimeout(e,16)}function U(e){const n=l;if(!n){l=e;try{window.__DARS_VDOM__=e}catch{}return}F(()=>{const t=w(n,e);if(!t.ok){console.warn("[Dars] Structural change detected (",t.reason,"), reloading...");try{location.reload()}catch{}return}l=e;try{window.__DARS_VDOM__=e}catch{}})}function B(e){l=e;try{window.__DARS_VDOM__=e}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(t=>N(t,document))}function O(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const e=window.__DARS_VERSION_URL||"version.txt";let n=null,t=!1,i=0;const o=10;let c=!1;function h(a,r,f,v){try{const s=new XMLHttpRequest;v&&(s.responseType=v),s.open("GET",a,!0),s.timeout=5e3,s.onreadystatechange=function(){s.readyState===4&&(s.status>=200&&s.status<300?r(s.response):f())},s.onerror=f,s.ontimeout=f,s.setRequestHeader("Cache-Control","no-store"),s.send()}catch{f()}}function p(){c||h(e,function(a){let r=(a||"").toString().trim();if(!r||r==="0"){if(i+=1,i>=o){console.warn("[Dars] version file not found after",o,"attempts. Hot reload disabled for this session."),c=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(n)try{clearTimeout(n)}catch{}return}t||(console.warn("[Dars] waiting for version file..."),t=!0),n=setTimeout(p,600);return}if(i=0,t=!1,u||(u=r),r&&r!==u){u=r;try{location.reload()}catch{}return}n=setTimeout(p,600)},function(){if(i+=1,i>=o){console.warn("[Dars] version file not reachable after",o,"attempts. Hot reload disabled for this session."),c=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(n)try{clearTimeout(n)}catch{}return}t||(console.warn("[Dars] waiting for version file..."),t=!0),n=setTimeout(p,600)},"text")}return p(),()=>{try{c=!0,n&&clearTimeout(n),window.__DARS_STOP_HOTRELOAD=null}catch{}}}document.addEventListener("DOMContentLoaded",function(){if(window.__DARS_VDOM__?B(window.__DARS_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=O()}catch{}}})}(),window.addEventListener("scroll",()=>{const d=document.getElementById("dars-navbar");window.scrollY>20?d.classList.add("scrolled"):d.classList.remove("scrolled");const l=document.getElementById("features-section");if(l&&!l.classList.contains("visible")){const u=l.getBoundingClientRect().top,m=window.innerHeight/1.5;u<m&&(l.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((b,k)=>{setTimeout(()=>{b.style.opacity="1",b.style.transform="translateY(0)"},k*100)}))}});const E=document.getElementById("hero-logo"),T=document.getElementById("hero-title"),A=document.getElementById("hero-description"),D=document.getElementById("pip-command"),C=document.getElementById("get-started-btn"),M=document.getElementById("scroll-text");E&&setTimeout(()=>E.classList.add("show"),5),T&&setTimeout(()=>T.classList.add("show"),350),A&&setTimeout(()=>A.classList.add("show"),650),D&&setTimeout(()=>D.classList.add("show"),950),C&&setTimeout(()=>C.classList.add("show"),1250),M&&setTimeout(()=>M.classList.add("show"),1500),document.addEventListener("DOMContentLoaded",function(){const d=document.getElementById("hamburger-btn"),l=document.getElementById("mobile-menu"),u=document.body;d&&l&&(d.addEventListener("click",function(m){m.stopPropagation(),l.style.display==="flex"?(l.style.display="none",d.classList.remove("menu-open"),u.classList.remove("menu-open")):(l.style.display="flex",d.classList.add("menu-open"),u.classList.add("menu-open"))}),l.querySelectorAll("a").forEach(m=>{m.addEventListener("click",function(){l.style.display="none",d.classList.remove("menu-open"),u.classList.remove("menu-open")})}),document.addEventListener("click",function(m){!d.contains(m.target)&&!l.contains(m.target)&&(l.style.display="none",d.classList.remove("menu-open"),u.classList.remove("menu-open"))}),document.addEventListener("keydown",function(m){m.key==="Escape"&&l.style.display==="flex"&&(l.style.display="none",d.classList.remove("menu-open"),u.classList.remove("menu-open"))}))});
+`}]},{type:"T2",id:"footer-section",key:"0/1/1",children:[{type:"T2",id:"container_172",key:"0/1/1/0",children:[{type:"T2",id:"container_173",key:"0/1/1/0/0",children:[{type:"T2",id:"container_174",key:"0/1/1/0/0/0",children:[{type:"T4",id:"image_175",key:"0/1/1/0/0/0/0"},{type:"T2",id:"container_176",key:"0/1/1/0/0/0/1",children:[{type:"T5",id:"text_177",key:"0/1/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_178",key:"0/1/1/0/0/1",children:[{type:"T2",id:"container_179",key:"0/1/1/0/0/1/0",children:[{type:"T5",id:"text_180",key:"0/1/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_181",key:"0/1/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_182",key:"0/1/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_183",key:"0/1/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_184",key:"0/1/1/0/0/1/1",children:[{type:"T5",id:"text_185",key:"0/1/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_186",key:"0/1/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_187",key:"0/1/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_188",key:"0/1/1/0/0/1/2",children:[{type:"T5",id:"text_189",key:"0/1/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_190",key:"0/1/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_191",key:"0/1/1/0/0/2",children:[{type:"T2",id:"container_192",key:"0/1/1/0/0/2/0",children:[{type:"T5",id:"text_193",key:"0/1/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_194",key:"0/1/1/0/0/2/1",children:[{type:"T5",id:"text_195",key:"0/1/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_196",key:"0/1/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_197",key:"0/1/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_198",key:"0/1/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]},{type:"T10",id:"documentation-sidebar",key:"0/2"}]},function(){const d=new Map;let l=null,m=null;function u(){}function _(){}function v(e,n){if(!e)return;n(e);const t=e.children||[];for(let i=0;i<t.length;i++)v(t[i],n)}function k(e){try{if(typeof atob=="function")return atob(e);if(typeof Buffer<"u")return Buffer.from(e,"base64").toString("utf8")}catch{}return""}function M(e){try{if(!e)return null;if(e&&e.type==="inline"&&e.code)return new Function("event",e.code);const n=e&&(e.b||e.code_b64)||null;if(n){const t=k(n);if(t)return new Function("event",t)}}catch{}return null}function L(e){v(e,n=>{if(n&&n.id&&n.events&&!d.has(n.id)){const t={};for(const i in n.events){const o=n.events[i],c=M(o);c&&(t[i]=c)}Object.keys(t).length?d.set(n.id,t):d.delete(n.id)}})}function H(e,n){if(!(!e||!n))for(const[t,i]of Object.entries(n))try{i===!1||i===null||typeof i>"u"?e.removeAttribute(t):e.setAttribute(t,String(i))}catch{}}function R(e,n={},t={}){for(const i in n)if(!(i in t))try{e.removeAttribute(i)}catch{}for(const i in t){const o=t[i];try{o===!1||o===null||typeof o>"u"?e.removeAttribute(i):e.setAttribute(i,String(o))}catch{}}}function P(e,n={},t={}){for(const i in n)if(!(i in t))try{e.style.removeProperty(i.replace(/_/g,"-"))}catch{}for(const i in t){const o=t[i];try{e.style.setProperty(i.replace(/_/g,"-"),String(o))}catch{}}}function N(e,n){(n||document).addEventListener(e,function(t){let i=t.target;const o=n||document;for(;i&&i!==o;){const c=i.id;if(c&&d.has(c)){const h=d.get(c);if(i&&i.__darsEv&&i.__darsEv[e])return;let p=h[e];if(!p&&(e==="keydown"||e==="keyup"||e==="keypress")){const a=t.key||t.code;if(a){const r=e+"."+a;p=h[r]}}if(typeof p=="function"){try{p.call(i,t)}catch(a){console.error("[Dars] handler error",a)}return}}i=i.parentNode}},!0)}function S(e,n){return e&&n?e.type!==n.type:e!==n}function x(e){if(!e)return;const n=e.children||[];for(let t=0;t<n.length;t++)x(n[t]);if(e.id&&d.delete(e.id),e.id){const t=document.getElementById(e.id);if(t&&t.parentNode)try{t.parentNode.removeChild(t)}catch{}}}function w(e,n){if(!n||!n.id)return{ok:!1,reason:"missing-new"};let t=document.getElementById(n.id);if(!t){const a=e&&e.id?document.getElementById(e.id):null;if(a)try{a.id=n.id,t=a}catch{}}if(!t)return{ok:!1,reason:"missing-el"};if(S(e,n))return{ok:!1,reason:"type-changed"};const i=!!n.isIsland;if(!i&&n.class&&(t.className=n.class),i||R(t,e&&e.props||{},n.props||{}),i||P(t,e&&e.style||{},n.style||{}),!i&&Object.prototype.hasOwnProperty.call(n,"text")&&t.textContent!==String(n.text||"")&&(t.textContent=String(n.text||"")),i)return{ok:!0};const o=e&&e.children?e.children:[],c=n.children?n.children:[],h=new Map;for(let a=0;a<o.length;a++){const r=o[a]&&(o[a].id||o[a].key)||null;r&&h.set(String(r),o[a])}const p=new Set;for(let a=0;a<c.length;a++){const r=c[a],f=r&&(r.id||r.key)||null;if(!f)if(a<o.length){const s=w(o[a],r);if(!s.ok)return s;p.add(o[a]);continue}else return{ok:!1,reason:"children-added"};const b=h.get(String(f));if(b){const s=w(b,r);if(!s.ok)return s;p.add(b)}else{if(a<o.length){const g=o[a];if(!S(g,r)){const y=w(g,r);if(!y.ok)return y;p.add(g);continue}}const s=createSubtree(r);if(s){const g=a<o.length?o[a]:null;if(g&&g.id){const y=document.getElementById(g.id);y&&y.parentNode?y.parentNode.insertBefore(s,y):t.appendChild(s)}else t.appendChild(s);continue}return{ok:!1,reason:"children-added"}}}for(let a=0;a<o.length;a++){const r=o[a];p.has(r)||x(r)}return{ok:!0}}function B(e){typeof requestAnimationFrame=="function"?requestAnimationFrame(e):setTimeout(e,16)}function U(e){const n=l;if(!n){l=e;try{window.__DARS_VDOM__=e}catch{}return}B(()=>{const t=w(n,e);if(!t.ok){console.warn("[Dars] Structural change detected (",t.reason,"), reloading...");try{location.reload()}catch{}return}l=e;try{window.__DARS_VDOM__=e}catch{}})}function F(e){l=e;try{window.__DARS_VDOM__=e}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(t=>N(t,document))}function O(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const e=window.__DARS_VERSION_URL||"version.txt";let n=null,t=!1,i=0;const o=10;let c=!1;function h(a,r,f,b){try{const s=new XMLHttpRequest;b&&(s.responseType=b),s.open("GET",a,!0),s.timeout=5e3,s.onreadystatechange=function(){s.readyState===4&&(s.status>=200&&s.status<300?r(s.response):f())},s.onerror=f,s.ontimeout=f,s.setRequestHeader("Cache-Control","no-store"),s.send()}catch{f()}}function p(){c||h(e,function(a){let r=(a||"").toString().trim();if(!r||r==="0"){if(i+=1,i>=o){console.warn("[Dars] version file not found after",o,"attempts. Hot reload disabled for this session."),c=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(n)try{clearTimeout(n)}catch{}return}t||(console.warn("[Dars] waiting for version file..."),t=!0),n=setTimeout(p,600);return}if(i=0,t=!1,m||(m=r),r&&r!==m){m=r;try{location.reload()}catch{}return}n=setTimeout(p,600)},function(){if(i+=1,i>=o){console.warn("[Dars] version file not reachable after",o,"attempts. Hot reload disabled for this session."),c=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(n)try{clearTimeout(n)}catch{}return}t||(console.warn("[Dars] waiting for version file..."),t=!0),n=setTimeout(p,600)},"text")}return p(),()=>{try{c=!0,n&&clearTimeout(n),window.__DARS_STOP_HOTRELOAD=null}catch{}}}document.addEventListener("DOMContentLoaded",function(){if(window.__DARS_VDOM__?F(window.__DARS_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=O()}catch{}}})}(),window.addEventListener("scroll",()=>{const d=document.getElementById("dars-navbar");window.scrollY>20?d.classList.add("scrolled"):d.classList.remove("scrolled");const l=document.getElementById("features-section");if(l&&!l.classList.contains("visible")){const m=l.getBoundingClientRect().top,u=window.innerHeight/1.5;m<u&&(l.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((v,k)=>{setTimeout(()=>{v.style.opacity="1",v.style.transform="translateY(0)"},k*100)}))}});const E=document.getElementById("hero-logo"),A=document.getElementById("hero-title"),T=document.getElementById("hero-description"),C=document.getElementById("pip-command"),D=document.getElementById("get-started-btn"),I=document.getElementById("scroll-text");E&&setTimeout(()=>E.classList.add("show"),5),A&&setTimeout(()=>A.classList.add("show"),350),T&&setTimeout(()=>T.classList.add("show"),650),C&&setTimeout(()=>C.classList.add("show"),950),D&&setTimeout(()=>D.classList.add("show"),1250),I&&setTimeout(()=>I.classList.add("show"),1500),document.addEventListener("DOMContentLoaded",function(){const d=document.getElementById("hamburger-btn"),l=document.getElementById("mobile-menu"),m=document.body;d&&l&&(d.addEventListener("click",function(u){u.stopPropagation(),l.style.display==="flex"?(l.style.display="none",d.classList.remove("menu-open"),m.classList.remove("menu-open")):(l.style.display="flex",d.classList.add("menu-open"),m.classList.add("menu-open"))}),l.querySelectorAll("a").forEach(u=>{u.addEventListener("click",function(){l.style.display="none",d.classList.remove("menu-open"),m.classList.remove("menu-open")})}),document.addEventListener("click",function(u){!d.contains(u.target)&&!l.contains(u.target)&&(l.style.display="none",d.classList.remove("menu-open"),m.classList.remove("menu-open"))}),document.addEventListener("keydown",function(u){u.key==="Escape"&&l.style.display==="flex"&&(l.style.display="none",d.classList.remove("menu-open"),m.classList.remove("menu-open"))}))});

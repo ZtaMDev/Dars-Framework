@@ -1,6 +1,5 @@
 from typing import Any, Dict, List, Optional
-from dars.scripts.script import InlineScript
-from dars.scripts.dscript import RawJS
+from dars.scripts.dscript import dScript, RawJS
 import json
 import warnings
 
@@ -37,7 +36,7 @@ class DarsState:
         return d
 
     # state.py - Modificar el método state de DarsState
-    def state(self, idx: Optional[int] = None, cComp: bool = False, render: Optional[Any] = None, goto: Optional[Any] = None, **kwargs) -> InlineScript:
+    def state(self, idx: Optional[int] = None, cComp: bool = False, render: Optional[Any] = None, goto: Optional[Any] = None, **kwargs) -> dScript:
         """
         Convenience: returns an InlineScript that, when added to a page/app,
         triggers a state change via the JS runtime. Intended for quick prototyping.
@@ -126,7 +125,7 @@ class DarsState:
         
         # Minificar el código removiendo espacios extra (pero manteniendo la estructura básica)
         code = ' '.join(code.split())
-        return InlineScript(code, module=True)
+        return dScript(code)  # Changed to dScript for .then() chaining support
 
     # --- cState: define rules/mods for a given state index ---
     def cState(self, idx: int, mods: Optional[List[Dict[str, Any]]] = None) -> 'CStateRuleBuilder':
@@ -346,7 +345,7 @@ class ThisProxy:
     """
     Helper class to generate dynamic state changes for 'this' component.
     """
-    def state(self, **kwargs) -> InlineScript:
+    def state(self, **kwargs) -> dScript:
         """
         Generate JS to update 'this' component's state dynamically.
         """
@@ -383,9 +382,9 @@ class ThisProxy:
             "  } catch (e) { console.error('[Dars] State error:', e); }"
             "})();"
         )
-        return InlineScript(' '.join(code.split()), module=True)
+        return dScript(' '.join(code.split()))  # Changed to dScript for .then() chaining support
 
-    def goto(self, idx: int, _component_id: Optional[str] = None) -> InlineScript:
+    def goto(self, idx: int, _component_id: Optional[str] = None) -> dScript:
         """
         Navigate to a specific state index for this component.
         Requires a dState to be defined for the component.
@@ -478,7 +477,7 @@ class ThisProxy:
             "  }"
             "})();"
         )
-        return InlineScript(' '.join(code.split()), module=True)
+        return dScript(' '.join(code.split()), module=True)  # Changed to dScript for .then() chaining support
 
 def this() -> ThisProxy:
     """

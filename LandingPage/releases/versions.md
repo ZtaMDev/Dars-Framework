@@ -1,4 +1,299 @@
+# Release Notes v1.4.7
+
+> Introducing State V2 and comprehensive animation system. This is the biggest update to Dars state management, bringing a pure Pythonic API and 15+ built-in animations.
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+or
+
+```bash
+pip install dars-framework==1.4.7
+```
+
+## What's New
+
+### State V2 - Pure Pythonic State Management
+
+**New `State` Class:**
+- Pure Python API - no more verbose dState syntax
+- Direct property access with reactive operations
+- Built-in auto-increment/auto-decrement operations
+- Clean reset functionality
+- Seamless animation integration
+
+**Before (dState - deprecated):**
+```python
+from dars.core.state import dState, Mod
+
+display = Text("0", id="counter")
+st = dState("counter", component=display, states=[0, 1, 2])
+st.cState(1, mods=[Mod.inc(display, prop='text', by=1)])
+button.on_click = st.state(1)
+```
+
+**After (State V2 - recommended):**
+```python
+from dars.all import State
+
+display = Text("0", id="counter")
+counter = State(display, text=0)
+button.on_click = counter.text.increment(by=1)
+```
+
+**Key Features:**
+- **Reactive Properties**: Direct access with `state.property.operation()`
+- **Auto Operations**: Continuous operations with `auto_increment()`, `auto_decrement()`
+- **Reset**: Simple `state.reset()` to restore initial values
+- **Intuitive**: Pythonic API that feels natural
+
+**Usage:**
+```python
+from dars.all import *
+
+# Create component and state
+timer_display = Text("0", id="timer", style={"font-size": "36px"})
+timer = State(timer_display, text=0)
+
+# Auto-incrementing timer
+start_btn.on_click = timer.text.auto_increment(by=1, interval=1000)
+stop_btn.on_click = timer.text.stop_auto()
+reset_btn.on_click = timer.reset()
+```
+
+### Comprehensive Animation System
+
+**15+ Built-in Animations:**
+- `fadeIn` / `fadeOut` - Opacity transitions
+- `slideIn` / `slideOut` - Position-based slides (8 directions)
+- `scaleIn` / `scaleOut` - Size transformations
+- `shake` - Shake effect for alerts
+- `bounce` - Bounce effect
+- `pulse` - Heartbeat/pulse effect
+- `rotate` - Rotation animations
+- `flip` - Flip on X/Y axis
+- `colorChange` - Color transitions
+- `morphSize` - Size morphing
+- `sequence` - Chain multiple animations
+
+**Animation Chaining:**
+```python
+from dars.all import *
+
+button.on_click = sequence(
+    fadeIn(id="box", duration=400),
+    pulse(id="box", scale=1.2, iterations=2),
+    shake(id="box", intensity=5)
+)
+```
+
+**Integration with State V2:**
+```python
+button.on_click = sequence(
+    counter.text.increment(by=1),
+    pulse(id="counter", scale=1.2),
+    fadeOut(id="counter", duration=200),
+    counter.text.set(value=0),
+    fadeIn(id="counter", duration=200)
+)
+```
+
+**All Animations:**
+- Return `dScript` objects for chaining
+- Customizable duration, easing, and parameters
+- Proper async completion handling
+- Work seamlessly with event handlers
+
+### Professional State V2 Template
+
+**New Example Template:**
+- Located in `dars/templates/examples/advanced/StateV2/`
+- Professional, production-ready demonstration
+- Function component pattern (LandingPage style)
+- Comprehensive showcases:
+  - Interactive counter with increment/decrement
+  - Auto-incrementing timer
+  - Animation showcase with 15+ animations
+  - State management best practices
+- Responsive design with modern styling
+- Complete documentation and code examples
+
+**Template Structure:**
+```
+dars/templates/examples/advanced/StateV2/
+├── index.py                 # Main application
+├── hero_component.py        # Hero section
+├── counter_component.py     # Counter demo
+├── timer_component.py       # Timer demo
+├── animation_component.py   # Animation showcase
+├── styles.css              # Global styles
+└── README.md               # Documentation
+```
+
+## Breaking Changes
+
+**dState/cState Deprecation:**
+- `dState` and `cState` are now deprecated
+- All functionality replaced by State V2
+- Legacy code still works for backward compatibility
+- Migration path provided in updated documentation
+- New projects should use State V2 exclusively
+
+## Documentation Updates
+
+**Updated Files:**
+- `state_management.md` - Completely rewritten for State V2
+- `scripts.md` - Added comprehensive animation system documentation
+- All dState/cState references removed from active docs
+- Migration guides included for existing projects
+
+## Bug Fixes
+
+**Animation System:**
+- Fixed animation chaining with proper Promise handling
+- Fixed initial state rendering with `transition='none'` pattern
+- Fixed `sequence()` function trailing semicolon issue
+- All animations now properly await completion
+- Animations use `setTimeout(20ms)` for reliable state application
+
+**State Operations:**
+- `auto_increment` and `auto_decrement` now return proper `dScript` objects
+- Client-side loop management with `startLoop` and `stopLoop`
+- Proper cleanup of active loops
+
+## Technical Improvements
+
+### Animation Implementation
+
+- All animations wrapped in async IIFEs
+- Proper transition timing with `setTimeout`
+- Force reflow with `void el.offsetWidth`
+- Set `transition='none'` before initial styles
+- `animation.finished` for Web Animations API
+- Proper Promise chaining in `sequence()`
+
+## Migration Guide
+
+### From dState to State V2
+
+**1. Import Changes:**
+```python
+# Old
+from dars.core.state import dState, Mod
+
+# New
+from dars.all import State
+```
+
+**2. State Creation:**
+```python
+# Old
+counter_state = dState("counter", component=display, states=[0, 1, 2])
+counter_state.cState(1, mods=[Mod.inc(display, prop='text', by=1)])
+
+# New
+counter = State(display, text=0)
+```
+
+**3. Event Handlers:**
+```python
+#Old
+button.on_click = counter_state.state(1)
+
+# New
+button.on_click = counter.text.increment(by=1)
+```
+
+**4.Auto Operations (New Feature):**
+```python
+# Only available in State V2
+start_btn.on_click = timer.text.auto_increment(by=1, interval=1000)
+stop_btn.on_click = timer.text.stop_auto()
+```
+
+### Adding Animations
+
+```python
+from dars.all import fadeIn, pulse, sequence
+
+# Simple animation
+button.on_click = fadeIn(id="element", duration=500)
+
+# Chained animations
+button.on_click = sequence(
+    fadeIn(id="box"),
+    pulse(id="box", scale=1.1)
+)
+```
+
+## Performance & Compatibility
+
+- **Zero Overhead**: State V2 only activates when used
+- **Backward Compatible**: dState still works for existing code
+- **Bundle Size**: Minimal impact (+~15KB for animations)
+- **Desktop Support**: Full Electron compatibility
+
+## Examples
+
+### Complete Counter App
+
+```python
+from dars.all import *
+
+app = App("Counter Demo")
+
+# Create display with state
+counter_display = Text("0", id="counter", style={
+    "font-size": "48px", 
+    "color": "#2563eb"
+})
+counter = State(counter_display, text=0)
+
+# Buttons with operations
+inc_btn = Button("+1", on_click=counter.text.increment(by=1))
+dec_btn = Button("-1", on_click=counter.text.decrement(by=1))
+reset_btn = Button("Reset", on_click=counter.reset())
+pulse_btn = Button("Pulse", on_click=pulse(id="counter", scale=1.2))
+
+page = Page(Container(counter_display, inc_btn, dec_btn, reset_btn, pulse_btn))
+app.add_page("index", page, index=True)
+app.rTimeCompile()
+```
+
+### Auto-Incrementing Timer
+
+```python
+from dars.all import *
+
+app = App("Timer Demo")
+
+timer_display = Text("0", id="timer")
+timer = State(timer_display, text=0)
+
+start_btn = Button("Start", on_click=timer.text.auto_increment(by=1, interval=1000))
+stop_btn = Button("Stop", on_click=timer.text.stop_auto())
+reset_btn = Button("Reset", on_click=timer.reset())
+
+page = Page(Container(timer_display, start_btn, stop_btn, reset_btn))
+app.add_page("index", page, index=True)
+app.rTimeCompile()
+```
+
+## Desktop Exporter Status
+
+**Still in BETA** - State V2 and animations fully supported in both web and desktop exports.
+
+---
+
+**This is a landmark release** - State V2 represents the future of Dars state management. Upgrade highly recommended for all projects.
+
+---
+
 # Release Notes v1.4.6
+
 
 > **Major Feature Release**: Introduces Single Page Application (SPA) support and a powerful client-side routing system.
 

@@ -41,12 +41,16 @@ from dars.core.events import EventTypes
 from dars.core.routing import route, SPARoute, RouteNode  # SPA Routing
 # CLI (optional, for advanced usage)
 # from dars.cli.main import main as dars_cli_main
-from dars.core.state import dState, Mod, this, this_for
+# State Management
+from dars.core.state import dState, Mod, this, this_for  # Legacy (backward compatibility)
+from dars.core.state_v2 import State, ReactiveProperty, StateTransition  # V2 State System (PRIMARY)
 from dars.dars_tests.run_tests import run_app_tests, run_unit_tests, main
 # Exporters (optional, for direct use)
 from dars.exporters.web.html_css_js import HTMLCSSJSExporter
+# Script utilities
 from dars.scripts.dscript import dScript, RawJS, Arg
 from dars.scripts.utils_ds import showModal, hideModal, goTo, goToNew, reload, goBack, goForward, alert, confirm, log, show, hide, toggle, addClass, removeClass, toggleClass, scrollTo, scrollToTop, scrollToBottom, scrollToElement, submitForm, resetForm, getValue, clearInput, saveToLocal, loadFromLocal, removeFromLocal, clearLocalStorage, copyToClipboard, copyElementText, focus, blur, setText, setTimeout
+from dars.scripts.animations import fadeIn, fadeOut, slideIn, slideOut, scaleIn, scaleOut, shake, bounce, pulse, rotate, flip, colorChange, morphSize, popIn, popOut, sequence  # Animation System
 from dars.scripts.script import *
 from dars.version import __version__
 from dars.backend import createComp, deleteComp
@@ -63,6 +67,9 @@ __all__ = [
     'EventTypes', 'EventHandler', 'EventEmitter', 'EventManager', 'Markdown',
     '__version__',
     'run_app_tests', 'run_unit_tests', 'main',
+    # State Management V2 (PRIMARY)
+    'State', 'ReactiveProperty', 'StateTransition',
+    # Legacy State Management (backward compatibility)
     'dState', 'Mod', 'this_for',
     'createComp', 'deleteComp', 'updateComp', 'RawJS', 'this', 'Arg', 'SelectOption', 
     # SPA Routing
@@ -87,4 +94,8 @@ __all__ = [
     'focus', 'blur',
     # Timer utilities
     'setTimeout',
+    # Animation System
+    'fadeIn', 'fadeOut', 'slideIn', 'slideOut', 'scaleIn', 'scaleOut',
+    'shake', 'bounce', 'pulse', 'rotate', 'flip',
+    'colorChange', 'morphSize', 'popIn', 'popOut', 'sequence',
 ]
