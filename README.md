@@ -21,8 +21,6 @@ DeepWiki [here](https://deepwiki.com/ZtaMDev/Dars-Framework) |
 pip install dars-framework
 ```
 
-> Some Javascript and css stack required for advanced personalization.
-
 Try dars without installing nothing(single page mode) just visit the [Dars Playground](https://dars-playground.vercel.app/)
 
 ## How It Works
