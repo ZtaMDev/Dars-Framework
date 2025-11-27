@@ -7,7 +7,7 @@ Welcome to the official Dars Framework documentation. Here you will find detaile
 - [Getting Started with Dars](#getting-started-with-dars)
 - [App class](#app-class-and-pwa-features-in-dars-framework)
 - [SPA Routing](#spa-routing-in-dars-framework)
-- [State Management](#state-management-in-dars-dstate-cstate-goto-mods)
+- [State Management](#state-management-in-dars)
 - [Components](#dars-components-documentation)
 - [Custom Components](#custom-components-in-dars-framework)
 - [Event Handling](#events-in-dars)

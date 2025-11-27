@@ -7,7 +7,7 @@ Welcome to the official Dars Framework documentation. Here you will find detaile
 - [Getting Started with Dars](#getting-started-with-dars)
 - [App class](#app-class-and-pwa-features-in-dars-framework)
 - [SPA Routing](#spa-routing-in-dars-framework)
-- [State Management](#state-management-in-dars-dstate-cstate-goto-mods)
+- [State Management](#state-management-in-dars)
 - [Components](#dars-components-documentation)
 - [Custom Components](#custom-components-in-dars-framework)
 - [Event Handling](#events-in-dars)
@@ -728,9 +728,9 @@ The development server (\`dars dev\`) includes an intelligent hot reload system 
 - **Smart Polling**: It checks for updates every 500ms without spamming your console logs.
 - **Retry Limit**: If the server goes down, the client stops polling after 10 consecutive errors to prevent browser lag.
 - **State Preservation**: When possible, navigation state is preserved across reloads.
-`},{type:"T9",id:"markdown_117",key:"0/2/0/6",text:`# State Management in Dars (State V2)
+`},{type:"T9",id:"markdown_117",key:"0/2/0/6",text:`# State Management in Dars
 
-Dars Framework features a modern, Pythonic state management system that makes building reactive UIs simple and intuitive.
+Dars Framework features a modern, state management system that makes building reactive UIs simple and intuitive.
 
 ## Quick Start
 

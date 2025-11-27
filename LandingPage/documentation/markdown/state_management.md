@@ -1,6 +1,6 @@
-# State Management in Dars (State V2)
+# State Management in Dars
 
-Dars Framework features a modern, Pythonic state management system that makes building reactive UIs simple and intuitive.
+Dars Framework features a modern, state management system that makes building reactive UIs simple and intuitive.
 
 ## Quick Start
 

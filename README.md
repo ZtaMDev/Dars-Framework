@@ -93,56 +93,156 @@ if __name__ == "__main__":
 
 ---
 
-## Reactivity and State System
 
-**Dars Framework** includes a built-in **reactive state system** (`dState` / `cState`) that allows dynamic and modular DOM updates directly from Python.
-It enables fully event-driven interfaces without requiring manual JavaScript.
+## Modern State Management (State V2)
 
-### Key Concepts
+**Dars Framework** includes a **pure state management system** that makes building reactive UIs simple and intuitive. No verbose syntax - just clean Python code.
 
-* **`dState(name, component, states)`**
-  Creates a reactive state controller bound to a specific component and a list of possible states.
-
-* **`cState(idx, mods=[...])`**
-  Defines rules (modifications) that are automatically applied when entering a specific state.
-
-* **`Mod` Helpers**
-  A compact way to modify DOM elements on state changes: `inc`, `dec`, `set`, `toggle_class`, `append_text`, `prepend_text`, `goto`, and more.
-
-* **Deferred Mutations**
-  Using `component.attr(..., defer=True)` or `component.mod(...)` inside a `cComp=True` state defers HTML updates until an event occurs, preventing authoring-time mutations.
-
-### Example Template
-
-A complete example demonstrating `dState`, `cState`, `Mod`, and deferred updates is available [here](https://github.com/ZtaMDev/Dars-Framework/blob/CrystalMain/dars/templates/examples/advanced/dState/state_mods_demo.py)
-
-<img width="384" height="187" alt="imagen" src="https://github.com/user-attachments/assets/7750ee7f-768f-48da-94df-2fa00339a99c" /> <img width="361" height="215" alt="imagen" src="https://github.com/user-attachments/assets/9b8a3e67-2424-49b4-aee0-9f1c0f747d66" />
-
-
-
-### Features
-
-* Reactive Mod system with compact `Mod` helpers
-* Unified event model — any component can use `on_*` props (`on_click`, `on_input`, `on_change`, etc.)
-* Deferred rendering for safer, predictable state transitions (`cComp=True`)
-* Navigation between states using `goto`, including relative moves (`'+1'`, `'-1'`)
-* Consistent, event-time mutation flow for reliable behavior
-* Secure minification for production bundles (strong JS/CSS minifier integrated into the build pipeline)
-
-### Dynamic State Updates with `this()`
-
-The `this()` helper enables direct, event-time component updates without pre-defining states:
+### Quick Start
 
 ```python
 from dars.all import *
 
-btn = Button("Click Me!", on_click=this().state(text="You Clicked!"))
+# Create a component
+display = Text("0", id="counter")
+
+# Create state with default values
+counter = State(display, text=0)
+
+# Use reactive operations
+increment_btn = Button("+1", on_click=counter.text.increment(by=1))
+decrement_btn = Button("-1", on_click=counter.text.decrement(by=1))
+reset_btn = Button("Reset", on_click=counter.reset())
 ```
 
-* Works anywhere: desktop and web exports
-* Perfect for async operations and chained scripts
+### Core Reactive Operations
 
+**Increment/Decrement:**
+```python
+counter.text.increment(by=1)      # Increase by 1
+counter.text.decrement(by=1)      # Decrease by 1
+counter.text.set(value=100)       # Set to specific value
+```
+
+**Auto Operations (Continuous):**
+```python
+# Auto-increment every second
+timer.text.auto_increment(by=1, interval=1000)
+
+# Stop auto operation
+timer.text.stop_auto()
+```
+
+**Reset to Defaults:**
+```python
+state.reset()  # Restore all properties to initial values
+```
+
+### Auto-Incrementing Timer Example
+
+```python
+from dars.all import *
+
+app = App("Timer Demo")
+
+# Create timer display
+timer_display = Text("0", id="timer", style={"font-size": "36px"})
+timer = State(timer_display, text=0)
+
+# Control buttons
+start_btn = Button("Start", on_click=timer.text.auto_increment(by=1, interval=1000))
+stop_btn = Button("Stop", on_click=timer.text.stop_auto())
+reset_btn = Button("Reset", on_click=timer.reset())
+
+page = Page(Container(timer_display, start_btn, stop_btn, reset_btn))
+app.add_page("index", page, index=True)
+```
+
+### Animation System
+
+Dars includes **15+ built-in animations** that integrate seamlessly with state management:
+
+**Basic Animations:**
+```python
+from dars.all import fadeIn, fadeOut, pulse, shake, sequence
+
+# Single animation
+button.on_click = fadeIn(id="element", duration=500)
+
+# Chained animations
+button.on_click = sequence(
+    fadeIn(id="box", duration=400),
+    pulse(id="box", scale=1.2, iterations=2),
+    shake(id="box", intensity=5)
+)
+```
+
+**Available Animations:**
+- **Opacity:** `fadeIn`, `fadeOut`
+- **Movement:** `slideIn`, `slideOut` (8 directions)
+- **Scaling:** `scaleIn`, `scaleOut`
+- **Interactive:** `shake`, `bounce`, `pulse`, `rotate`, `flip`
+- **Effects:** `colorChange`, `morphSize`
+
+**Combining State & Animations:**
+```python
+button.on_click = sequence(
+    counter.text.increment(by=1),
+    pulse(id="counter", scale=1.2),
+    fadeOut(id="counter", duration=200),
+    counter.text.set(value=0),
+    fadeIn(id="counter", duration=200)
+)
+```
+
+### Dynamic Updates with `this()`
+
+Update components directly without pre-defining states:
+
+```python
+from dars.all import *
+
+# Self-updating button
+btn = Button("Click Me!", on_click=this().state(
+    text="Clicked!",
+    style={"background-color": "green"}
+))
+
+# With animations
+btn = Button("Pulse", on_click=[
+    pulse(id="btn", scale=1.1),
+    this().state(text="Done!")
+])
+```
+
+### Script Chaining with `.then()`
+
+Chain asynchronous operations using `.then()`:
+
+```python
+from dars.all import *
+from dars.scripts.dscript import RawJS, dScript
+
+# Chain file read with state update
+read_btn = Button("Load", on_click=
+    read_text("data.txt").then(
+        this().state(text=RawJS(dScript.ARG))
+    )
+)
+
+# Multi-step chain
+button.on_click = sequence(
+    fadeOut(id="status"),
+    state.text.set(value="Loading...")
+).then(
+    fadeIn(id="status")
+).then(
+    this().state(text="Complete!")
+)
+```
+New State V2 docs here: [State V2](http://localhost:8000/docs.html#state-management-in-dars)
 ---
+
 
 ## SPA Routing System
 

@@ -83,7 +83,7 @@ This phase will focus on expanding Dars' capabilities to new platforms and build
     - [ ] Develop a clear API for developers to create their own plugins and extensions for Dars, facilitating integration with third-party tools and framework customization.
 
 - [ ] **dScript Enhancements**
-    - [ ] **dScript Modules**: Allow importing and exporting modules within dScript to better organize JavaScript logic.
+    - [x] **dScript Modules**: Allow importing and exporting modules within dScript to better organize JavaScript logic.
     - [ ] **Integration with Popular JS Libraries**: Facilitate the integration of popular JavaScript libraries (e.g., for animations, DOM manipulation, etc.) within dScript.
 
 ### Phase 3: Maturity and Adoption (Long-Term)
@@ -104,16 +104,10 @@ This phase will focus on mass adoption, long-term stability, and community growt
     - [ ] **Interactive Tutorials and Advanced Examples**: Create a series of step-by-step tutorials and complete application examples for different use cases.
     - [ ] **Contribution Guides**: Facilitate contribution to the Dars codebase and its documentation.
     - [ ] **Forums and Support Channels**: Establish active communication channels for the community (Discord, Stack Overflow, etc.).
-    - [ ] **Certification Program**: Consider a certification program for Dars developers.
 
 - [ ] **Continuous Performance and Scalability**
-    - [ ] **Benchmarking and Constant Optimization**: Conduct continuous performance testing and optimizations to ensure Dars remains competitive as applications grow in complexity.
+    - [x] **Benchmarking and Constant Optimization**: Conduct continuous performance testing and optimizations to ensure Dars remains competitive as applications grow in complexity.
     - [ ] **Server-Side Rendering (SSR) and Hydration Support**: Research and implement SSR support to improve SEO and initial performance of web applications.
-
-- [ ] **Adoption and Marketing**
-    - [ ] **Case Studies and Testimonials**: Collect and publish case studies of companies and projects successfully using Dars.
-    - [ ] **Conference and Event Participation**: Present Dars at Python and web development conferences to increase its visibility.
-    - [ ] **Strategic Collaborations**: Seek collaborations with other Python communities and projects.
 
 This roadmap is a living document and will be updated as Dars Framework evolves and the community grows. The ultimate goal is to provide Python developers with a powerful and enjoyable tool for building modern, cross-platform user interfaces.
 
