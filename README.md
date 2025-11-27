@@ -260,7 +260,7 @@ button.on_click = sequence(
     this().state(text="Complete!")
 )
 ```
-New State V2 docs here: [State V2](http://localhost:8000/docs.html#state-management-in-dars)
+New State V2 docs here: [State V2](https://ztamdev.github.io/Dars-Framework/docs.html#state-management-in-dars)
 ---
 
 
