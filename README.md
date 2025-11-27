@@ -213,6 +213,8 @@ button.on_click = sequence(
 )
 ```
 
+### State V2 docs [here:](https://ztamdev.github.io/Dars-Framework/docs.html#state-management-in-dars)
+
 ### Dynamic Updates with `this()`
 
 Update components directly without pre-defining states:
@@ -258,7 +260,7 @@ button.on_click = sequence(
     this().state(text="Complete!")
 )
 ```
-New State V2 docs here: [State V2](https://ztamdev.github.io/Dars-Framework/docs.html#state-management-in-dars)
+
 ---
 
 
