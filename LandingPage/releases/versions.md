@@ -1,4 +1,71 @@
+# Release Notes v1.4.9
+
+> **Event Handler Support & Dual State System Documentation**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### State V2: Event Handler Support
+
+State V2 now supports updating event handlers:
+
+```python
+from dars.all import *
+
+# Update events in State V2
+state.update(
+    text="Click me",
+    on_click=alert("Success!"),
+    on_mouseover=dScript("showTooltip()")
+)
+
+# Works with dScript objects
+button_state.update(on_click=dScript("console.log('clicked')"))
+```
+
+**Implementation:**
+- Automatic detection of `on_*` properties
+- Extracts `.code` from dScript objects  
+- Handles arrays of event handlers
+- Gracefully skips non-serializable values
+
+### Dual State System Documentation
+
+Documentation now presents **two coexisting state management systems**:
+
+**State V2 (Dynamic)**
+- Auto-increment/decrement built-in
+- Best for: counters, timers, simple updates
+
+**dState/cState (Indexed)**
+- Full state machine support
+- Immutable state 0
+- Cross-state calls with `Mod.call()`
+- Best for: workflows, complex UI transitions
+
+Comprehensive comparison table and use case guidance added to state management documentation.
+
+## Bug Fixes
+
+- **Fixed**: State V2 can now handle dScript event handlers without errors
+- **Fixed**: `_generate_change_call()` properly handles non-JSON-serializable values
+
+## Documentation
+
+- Complete restructure of `state_management.md` to include both systems
+- Added comparison table for State V2 vs dState/cState
+- Restored all original dState/cState documentation
+- Added use case recommendations for choosing the right system
+
+---
+
 # Release Notes v1.4.8
+
 
 > **Critical Fix**: State V2 now properly supports all component properties including `class_name`, `style`, `attrs`, and more.
 

@@ -239,6 +239,139 @@
     margin: 0 auto;
     padding: 40px 20px;">
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_171">
+      <h1 id="release-notes-v149">
+       Release Notes v1.4.9
+      </h1>
+      <blockquote>
+       <p>
+        <strong>
+         Event Handler Support &amp; Dual State System Documentation
+        </strong>
+       </p>
+      </blockquote>
+      <h2 id="installation">
+       Installation
+      </h2>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
+</code></pre>
+      </div>
+      <h2 id="whats-new">
+       What's New
+      </h2>
+      <h3 id="state-v2-event-handler-support">
+       State V2: Event Handler Support
+      </h3>
+      <p>
+       State V2 now supports updating event handlers:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="c1"># Update events in State V2</span>
+<span class="n">state</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+    <span class="n">text</span><span class="o">=</span><span class="s2">"Click me"</span><span class="p">,</span>
+    <span class="n">on_click</span><span class="o">=</span><span class="n">alert</span><span class="p">(</span><span class="s2">"Success!"</span><span class="p">),</span>
+    <span class="n">on_mouseover</span><span class="o">=</span><span class="n">dScript</span><span class="p">(</span><span class="s2">"showTooltip()"</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># Works with dScript objects</span>
+<span class="n">button_state</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">on_click</span><span class="o">=</span><span class="n">dScript</span><span class="p">(</span><span class="s2">"console.log('clicked')"</span><span class="p">))</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Implementation:
+       </strong>
+       - Automatic detection of
+       <code>
+        on_*
+       </code>
+       properties
+- Extracts
+       <code>
+        .code
+       </code>
+       from dScript objects
+       <br/>
+       - Handles arrays of event handlers
+- Gracefully skips non-serializable values
+      </p>
+      <h3 id="dual-state-system-documentation">
+       Dual State System Documentation
+      </h3>
+      <p>
+       Documentation now presents
+       <strong>
+        two coexisting state management systems
+       </strong>
+       :
+      </p>
+      <p>
+       <strong>
+        State V2 (Dynamic)
+       </strong>
+       - Auto-increment/decrement built-in
+- Best for: counters, timers, simple updates
+      </p>
+      <p>
+       <strong>
+        dState/cState (Indexed)
+       </strong>
+       - Full state machine support
+- Immutable state 0
+- Cross-state calls with
+       <code>
+        Mod.call()
+       </code>
+       - Best for: workflows, complex UI transitions
+      </p>
+      <p>
+       Comprehensive comparison table and use case guidance added to state management documentation.
+      </p>
+      <h2 id="bug-fixes">
+       Bug Fixes
+      </h2>
+      <ul>
+       <li>
+        <strong>
+         Fixed
+        </strong>
+        : State V2 can now handle dScript event handlers without errors
+       </li>
+       <li>
+        <strong>
+         Fixed
+        </strong>
+        :
+        <code>
+         _generate_change_call()
+        </code>
+        properly handles non-JSON-serializable values
+       </li>
+      </ul>
+      <h2 id="documentation">
+       Documentation
+      </h2>
+      <ul>
+       <li>
+        Complete restructure of
+        <code>
+         state_management.md
+        </code>
+        to include both systems
+       </li>
+       <li>
+        Added comparison table for State V2 vs dState/cState
+       </li>
+       <li>
+        Restored all original dState/cState documentation
+       </li>
+       <li>
+        Added use case recommendations for choosing the right system
+       </li>
+      </ul>
+      <hr/>
       <h1 id="release-notes-v148">
        Release Notes v1.4.8
       </h1>
@@ -262,7 +395,7 @@
         , and more.
        </p>
       </blockquote>
-      <h2 id="installation">
+      <h2 id="installation-2">
        Installation
       </h2>
       <div class="codehilite">
@@ -383,7 +516,7 @@
 <span class="n">counter</span><span class="o">.</span><span class="n">class_name</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </code></pre>
       </div>
-      <h2 id="bug-fixes">
+      <h2 id="bug-fixes-2">
        Bug Fixes
       </h2>
       <h3 id="fixed-property-type-handling">
@@ -717,7 +850,7 @@
         Introducing State V2 and comprehensive animation system. This is the biggest update to Dars state management, bringing a pure Pythonic API and 15+ built-in animations.
        </p>
       </blockquote>
-      <h2 id="installation-2">
+      <h2 id="installation-3">
        Installation
       </h2>
       <div class="codehilite">
@@ -731,7 +864,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.7
 </code></pre>
       </div>
-      <h2 id="whats-new">
+      <h2 id="whats-new-2">
        What's New
       </h2>
       <h3 id="state-v2-pure-pythonic-state-management">
@@ -1030,7 +1163,7 @@
 - All dState/cState references removed from active docs
 - Migration guides included for existing projects
       </p>
-      <h2 id="bug-fixes-2">
+      <h2 id="bug-fixes-3">
        Bug Fixes
       </h2>
       <p>
@@ -1303,7 +1436,7 @@
         : Introduces Single Page Application (SPA) support and a powerful client-side routing system.
        </p>
       </blockquote>
-      <h2 id="installation-3">
+      <h2 id="installation-4">
        Installation
       </h2>
       <div class="codehilite">
@@ -1317,7 +1450,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.5
 </code></pre>
       </div>
-      <h2 id="whats-new-2">
+      <h2 id="whats-new-3">
        What's New
       </h2>
       <h3 id="single-page-application-spa-support">
@@ -1420,7 +1553,7 @@
         Critical bug fix release. Removes non-functional features, fixes style merge, and improves state restoration.
        </p>
       </blockquote>
-      <h2 id="installation-4">
+      <h2 id="installation-5">
        Installation
       </h2>
       <div class="codehilite">
@@ -1486,7 +1619,7 @@
         State management enhancements with compile-time validation, component self-navigation, and critical style merge fix. Improves developer experience and fixes property replacement bug.
        </p>
       </blockquote>
-      <h2 id="installation-5">
+      <h2 id="installation-6">
        Installation
       </h2>
       <div class="codehilite">
@@ -1500,7 +1633,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.3
 </code></pre>
       </div>
-      <h2 id="whats-new-3">
+      <h2 id="whats-new-4">
        What's New
       </h2>
       <ul>
@@ -1550,7 +1683,7 @@
         for enhanced client-side interactions.
        </p>
       </blockquote>
-      <h2 id="installation-6">
+      <h2 id="installation-7">
        Installation
       </h2>
       <div class="codehilite">
@@ -1564,7 +1697,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.2
 </code></pre>
       </div>
-      <h2 id="whats-new-4">
+      <h2 id="whats-new-5">
        What's New
       </h2>
       <h3 id="utility-functions-utils_ds">
@@ -1754,7 +1887,7 @@
         SEO and Apple device optimizations. Enhanced metadata generation with automatic MIME type detection for favicons and comprehensive iOS/Safari support.
        </p>
       </blockquote>
-      <h2 id="installation-7">
+      <h2 id="installation-8">
        Installation
       </h2>
       <div class="codehilite">
@@ -1768,7 +1901,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.1
 </code></pre>
       </div>
-      <h2 id="whats-new-5">
+      <h2 id="whats-new-6">
        What's New
       </h2>
       <h3 id="automatic-favicon-mime-type-detection">
@@ -2083,7 +2216,7 @@
         Simple Template update.
        </p>
       </blockquote>
-      <h2 id="installation-8">
+      <h2 id="installation-9">
        Installation
       </h2>
       <div class="codehilite">
@@ -2111,7 +2244,7 @@
         Desktop File System API, Pythonic Arg helper, keyboard event filtering, and comprehensive template synchronization. Major enhancements to desktop capabilities with improved developer experience.
        </p>
       </blockquote>
-      <h2 id="installation-9">
+      <h2 id="installation-10">
        Installation
       </h2>
       <div class="codehilite">
@@ -2125,7 +2258,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.9
 </code></pre>
       </div>
-      <h2 id="whats-new-6">
+      <h2 id="whats-new-7">
        What's New
       </h2>
       <h3 id="desktop-file-system-api-list_directory">
@@ -2420,7 +2553,7 @@
        and similar events work correctly
 - Maintains backward compatibility with non-filtered events
       </p>
-      <h2 id="bug-fixes-3">
+      <h2 id="bug-fixes-4">
        Bug Fixes
       </h2>
       <ul>
@@ -2538,7 +2671,7 @@
 <span class="p">)</span>
 </code></pre>
       </div>
-      <h2 id="documentation">
+      <h2 id="documentation-2">
        Documentation
       </h2>
       <ul>
@@ -2576,7 +2709,7 @@
         for async chaining.
        </p>
       </blockquote>
-      <h2 id="installation-10">
+      <h2 id="installation-11">
        Installation
       </h2>
       <div class="codehilite">
@@ -2590,7 +2723,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.8
 </code></pre>
       </div>
-      <h2 id="whats-new-7">
+      <h2 id="whats-new-8">
        What's New
       </h2>
       <h3 id="dynamic-state-updates-with-this">
@@ -3038,7 +3171,7 @@
         for dynamic DOM operations with safe event hydration.
        </p>
       </blockquote>
-      <h2 id="installation-11">
+      <h2 id="installation-12">
        Installation
       </h2>
       <div class="codehilite">
@@ -3052,7 +3185,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.6
 </code></pre>
       </div>
-      <h2 id="whats-new-8">
+      <h2 id="whats-new-9">
        What's New
       </h2>
       <h3 id="compile-time-component-manipulation">
@@ -3215,7 +3348,7 @@
         Enhanced styling and development experience update featuring active styles, improved preview system, and advanced file monitoring. Delivers better visual feedback and faster development workflow.
        </p>
       </blockquote>
-      <h2 id="installation-12">
+      <h2 id="installation-13">
        Installation
       </h2>
       <div class="codehilite">
@@ -3229,7 +3362,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.5
 </code></pre>
       </div>
-      <h2 id="whats-new-9">
+      <h2 id="whats-new-10">
        What's New
       </h2>
       <h3 id="active-styles-support">
@@ -3372,7 +3505,7 @@
         Enhanced interactivity update featuring hover styles, multi-handler events, and runtime versioning. Improves component styling and event handling flexibility.
        </p>
       </blockquote>
-      <h2 id="installation-13">
+      <h2 id="installation-14">
        Installation
       </h2>
       <div class="codehilite">
@@ -3386,7 +3519,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.4
 </code></pre>
       </div>
-      <h2 id="whats-new-10">
+      <h2 id="whats-new-11">
        What's New
       </h2>
       <h3 id="hover-styles-support">
@@ -3565,7 +3698,7 @@
         Minor update featuring new semantic Section component and enhanced state serialization. Continues JavaScript migration improvements from v1.3.2.
        </p>
       </blockquote>
-      <h2 id="installation-14">
+      <h2 id="installation-15">
        Installation
       </h2>
       <div class="codehilite">
@@ -3579,7 +3712,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.3
 </code></pre>
       </div>
-      <h2 id="whats-new-11">
+      <h2 id="whats-new-12">
        What's New
       </h2>
       <h3 id="section-component">
@@ -3729,7 +3862,7 @@
         Major minification improvements with combined JS files and optimized event handling. Electron desktop exporter remains in beta.
        </p>
       </blockquote>
-      <h2 id="installation-15">
+      <h2 id="installation-16">
        Installation
       </h2>
       <div class="codehilite">
@@ -3853,7 +3986,7 @@
         : Fallback minification when Vite is unavailable
        </li>
       </ul>
-      <h2 id="bug-fixes-4">
+      <h2 id="bug-fixes-5">
        Bug Fixes
       </h2>
       <ul>
@@ -4025,7 +4158,7 @@
         Native desktop functions and DX improved with dev mode and file system integration.
        </p>
       </blockquote>
-      <h2 id="installation-16">
+      <h2 id="installation-17">
        Installation
       </h2>
       <div class="codehilite">
@@ -4076,7 +4209,7 @@
       <p>
        Also you can use dScripts to run custom javascript code in the desktop app. and for now 'dars dev' is supported but python main.py with rTimeCompile() is not supported because it have issues with relative paths.
       </p>
-      <h2 id="bug-fixes-5">
+      <h2 id="bug-fixes-6">
        Bug Fixes
       </h2>
       <ul>
@@ -4110,7 +4243,7 @@
         Native desktop export (BETA), improved CLI and doctor integration, and metadata fixes for packaging. This is a BETA release: usable for testing, not recommended for production.
        </p>
       </blockquote>
-      <h2 id="installation-17">
+      <h2 id="installation-18">
        Installation
       </h2>
       <div class="codehilite">
@@ -4296,7 +4429,7 @@ dars<span class="w"> </span>build
 <span class="p">}</span>
 </code></pre>
       </div>
-      <h2 id="bug-fixes-6">
+      <h2 id="bug-fixes-7">
        Bug Fixes
       </h2>
       <ul>
@@ -4393,7 +4526,7 @@ dars<span class="w"> </span>build
         Optional default minification, precise CLI control, faster builds, and clearer minification status.
        </p>
       </blockquote>
-      <h2 id="installation-18">
+      <h2 id="installation-19">
        Installation
       </h2>
       <div class="codehilite">
@@ -4550,7 +4683,7 @@ dars<span class="w"> </span>build
         </ul>
        </li>
       </ul>
-      <h2 id="bug-fixes-7">
+      <h2 id="bug-fixes-8">
        Bug Fixes
       </h2>
       <ul>
@@ -4786,6 +4919,27 @@ dars<span class="w"> </span>build
      <div class="sidebar-category">
       Versions
      </div>
+     <a class="sidebar-link sidebar-level-1" href="#release-notes-v149" style="margin-left: 0px">
+      Release Notes v1.4.9
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#installation" style="margin-left: 20px">
+      Installation
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#whats-new" style="margin-left: 20px">
+      What's New
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#state-v2-event-handler-support" style="margin-left: 40px">
+      State V2: Event Handler Support
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#dual-state-system-documentation" style="margin-left: 40px">
+      Dual State System Documentation
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#bug-fixes" style="margin-left: 20px">
+      Bug Fixes
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#documentation" style="margin-left: 20px">
+      Documentation
+     </a>
      <a class="sidebar-link sidebar-level-1" href="#release-notes-v148" style="margin-left: 0px">
       Release Notes v1.4.8
      </a>

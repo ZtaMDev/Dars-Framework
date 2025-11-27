@@ -57,15 +57,39 @@ class ReactiveProperty:
     def _generate_change_call(self, **props) -> str:
         """
         Generate JS code to call window.Dars.change() with proper payload.
-        This is the correct way to update component properties client-side.
+        This handles all property types including events (dScript objects).
         """
+        from dars.scripts.dscript import dScript
+        
         component_id = self._state.component.id
         
         # Build payload parts
         parts = [f"id: '{component_id}'", "dynamic: true"]
         
         for k, v in props.items():
-            if k == 'text':
+            # Handle events (on_click, on_change, etc.)
+            if k.startswith('on_'):
+                if isinstance(v, dScript):
+                    # Extract JS code from dScript object
+                    event_code = v.code if hasattr(v, 'code') else str(v)
+                    parts.append(f"{k}: {json.dumps(event_code)}")
+                elif isinstance(v, (list, tuple)):
+                    # Handle array of event handlers
+                    codes = []
+                    for handler in v:
+                        if isinstance(handler, dScript):
+                            codes.append(handler.code if hasattr(handler, 'code') else str(handler))
+                        elif isinstance(handler, str):
+                            codes.append(handler)
+                    parts.append(f"{k}: {json.dumps(codes)}")
+                elif isinstance(v, str):
+                    # Raw JS string
+                    parts.append(f"{k}: {json.dumps(v)}")
+                else:
+                    # Skip unsupported event types
+                    continue
+            # Handle regular properties
+            elif k == 'text':
                 parts.append(f"text: {json.dumps(v)}")
             elif k == 'html':
                 parts.append(f"html: {json.dumps(v)}")
@@ -85,7 +109,11 @@ class ReactiveProperty:
                 parts.append(f"classes: {json.dumps(v)}")
             else:
                 # Generic attribute
-                parts.append(f"attrs: {{{json.dumps(k)}: {json.dumps(v)}}}")
+                try:
+                    parts.append(f"attrs: {{{json.dumps(k)}: {json.dumps(v)}}}")
+                except (TypeError, ValueError):
+                    # Skip non-JSON-serializable values
+                    continue
         
         payload = "{" +  ", ".join(parts) + "}"
         
@@ -108,6 +136,7 @@ class ReactiveProperty:
 """.strip()
         
         return code
+
     
     def increment(self, by: int = 1) -> Callable:
         """
@@ -407,7 +436,28 @@ class State:
         parts = [f"id: '{component_id}'", "dynamic: true"]
         
         for k, v in self._default_snapshot.items():
-            if k == 'text':
+            # Handle events (on_click, on_change, etc.)
+            if k.startswith('on_'):
+                if isinstance(v, dScript):
+                    # Extract JS code from dScript object
+                    event_code = v.code if hasattr(v, 'code') else str(v)
+                    parts.append(f"{k}: {json.dumps(event_code)}")
+                elif isinstance(v, (list, tuple)):
+                    # Handle array of event handlers
+                    codes = []
+                    for handler in v:
+                        if isinstance(handler, dScript):
+                            codes.append(handler.code if hasattr(handler, 'code') else str(handler))
+                        elif isinstance(handler, str):
+                            codes.append(handler)
+                    parts.append(f"{k}: {json.dumps(codes)}")
+                elif isinstance(v, str):
+                    # Raw JS string
+                    parts.append(f"{k}: {json.dumps(v)}")
+                else:
+                    # Skip unsupported event types
+                    continue
+            elif k == 'text':
                 parts.append(f"text: {json.dumps(v)}")
             elif k == 'html':
                 parts.append(f"html: {json.dumps(v)}")
@@ -421,7 +471,10 @@ class State:
             elif k == 'attrs' and isinstance(v, dict):
                 parts.append(f"attrs: {json.dumps(v)}")
             else:
-                parts.append(f"attrs: {{{json.dumps(k)}: {json.dumps(v)}}}")
+                try:
+                    parts.append(f"attrs: {{{json.dumps(k)}: {json.dumps(v)}}}")
+                except (TypeError, ValueError):
+                    continue
         
         payload = "{" + ", ".join(parts) + "}"
         
@@ -466,7 +519,28 @@ class State:
         parts = [f"id: '{component_id}'", "dynamic: true"]
         
         for k, v in props.items():
-            if k == 'text':
+            # Handle events (on_click, on_change, etc.)
+            if k.startswith('on_'):
+                if isinstance(v, dScript):
+                    # Extract JS code from dScript object
+                    event_code = v.code if hasattr(v, 'code') else str(v)
+                    parts.append(f"{k}: {json.dumps(event_code)}")
+                elif isinstance(v, (list, tuple)):
+                    # Handle array of event handlers
+                    codes = []
+                    for handler in v:
+                        if isinstance(handler, dScript):
+                            codes.append(handler.code if hasattr(handler, 'code') else str(handler))
+                        elif isinstance(handler, str):
+                            codes.append(handler)
+                    parts.append(f"{k}: {json.dumps(codes)}")
+                elif isinstance(v, str):
+                    # Raw JS string
+                    parts.append(f"{k}: {json.dumps(v)}")
+                else:
+                    # Skip unsupported event types
+                    continue
+            elif k == 'text':
                 parts.append(f"text: {json.dumps(v)}")
             elif k == 'html':
                 parts.append(f"html: {json.dumps(v)}")
@@ -482,7 +556,10 @@ class State:
             elif k == 'classes' and isinstance(v, dict):
                 parts.append(f"classes: {json.dumps(v)}")
             else:
-                parts.append(f"attrs: {{{json.dumps(k)}: {json.dumps(v)}}}")
+                try:
+                    parts.append(f"attrs: {{{json.dumps(k)}: {json.dumps(v)}}}")
+                except (TypeError, ValueError):
+                    continue
         
         payload = "{" + ", ".join(parts) + "}"
         

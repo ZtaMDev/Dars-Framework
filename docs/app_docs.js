@@ -730,7 +730,30 @@ The development server (\`dars dev\`) includes an intelligent hot reload system 
 - **State Preservation**: When possible, navigation state is preserved across reloads.
 `},{type:"T9",id:"markdown_117",key:"0/2/0/6",text:`# State Management in Dars
 
-Dars Framework features a modern, state management system that makes building reactive UIs simple and intuitive.
+Dars Framework features **two powerful state management systems**, each designed for different use cases:
+
+- **State V2** - Modern, dynamic state management for simple reactive updates
+- **dState & cState** - Indexed state system for complex state machines and workflows
+
+##Choose the Right System
+
+| Feature | State V2 | dState/cState |
+|---------|----------|---------------|
+| **API Style** | Clean Pythonic | Verbose but explicit |
+| **Setup** | Minimal | Requires registration |
+| **State Tracking** | Dynamic | Indexed (0, 1, 2...) |
+| **Auto Operations** | Built-in | Manual with Mod |
+| **Event Updates** | Supported | Supported |
+| **State Machines** | Limited |  Full support |
+| **Cross-State Calls** | No |  Mod.call() |
+| **Immutable Default** | No |  State 0 |
+| **Best For** | Counters, timers, simple updates | Workflows, toggles, complex UI transitions |
+
+---
+
+# State V2 - Dynamic State Management
+
+Modern, Pythonic state management for reactive UIs.
 
 ## Quick Start
 
@@ -851,12 +874,23 @@ state.classes.set({"add": ["active", "highlight"], "remove": ["disabled"]})
 state.attrs.set({"data-value": "100", "title": "Tooltip"})
 \`\`\`
 
+**Event Handlers:**
+\`\`\`python
+# Update event handler dynamically
+state.update(on_click=alert("New handler!"))
+
+# Or with dScript
+from dars.scripts.dscript import dScript
+state.update(on_click=dScript("console.log('clicked')"))
+\`\`\`
+
 **Multiple Properties at Once:**
 \`\`\`python
 state.update(
     text="Updated!",
     class_name="success",
-    style={"color": "green"}
+    style={"color": "green"},
+    on_click=alert("Done!")
 )
 \`\`\`
 
@@ -869,239 +903,362 @@ Auto operations create continuous reactive updates:
 # Auto-increment timer
 timer = State(display, text=0)
 
-start_btn.on_click = timer.text.auto_increment(
-    by=1,           # Increment amount
-    interval=1000,  # Every 1 second
-    max=60          # Optional: stop at max value
-)
-
+start_btn.on_click = timer.text.auto_increment(by=1, interval=1000)
 stop_btn.on_click = timer.text.stop_auto()
 \`\`\`
 
-**Parameters:**
-- \`by\`: Amount to increment/decrement (default: 1)
-- \`interval\`: Milliseconds between updates (default: 1000)
-- \`max\`: Optional maximum value (auto-stops when reached)
-- \`min\`: Optional minimum value (auto-stops when reached)
-
-## Complete Examples
-
-### Interactive Counter
-
+**With Limits:**
 \`\`\`python
-from dars.all import *
+# Auto-increment up to 100
+timer.text.auto_increment(by=1, interval=1000, max=100)
 
-app = App("Counter Demo")
-
-# Create display
-counter_display = Text("0", id="counter", style={
-    "font-size": "48px",
-    "color": "#2563eb"
-})
-
-# Create state
-counter = State(counter_display, text=0)
-
-# Control buttons
-inc_btn = Button("+1", on_click=counter.text.increment(by=1))
-dec_btn = Button("-1", on_click=counter.text.decrement(by=1))
-reset_btn = Button("Reset", on_click=counter.reset())
-
-# Add animation
-pulse_btn = Button("Pulse", on_click=pulse(id="counter", scale=1.2))
-
-page = Page(Container(counter_display, inc_btn, dec_btn, reset_btn, pulse_btn))
-app.add_page("index", page, index=True)
+# Auto-decrement down to 0
+countdown.text.auto_decrement(by=1, interval=1000, min=0)
 \`\`\`
 
-### Auto-Incrementing Timer
+## Complete Example
 
 \`\`\`python
 from dars.all import *
 
-app = App("Timer Demo")
+app = App("State V2 Demo")
 
 # Timer display
-timer_display = Text("0", id="timer", style={
-    "font-size": "36px",
-    "color": "#059669"
-})
-
-# Timer state
+timer_display = Text("0", id="timer", style={"font-size": "36px"})
 timer = State(timer_display, text=0)
 
-# Control buttons
-start_btn = Button("Start", on_click=timer.text.auto_increment(by=1, interval=1000))
-stop_btn = Button("Stop", on_click=timer.text.stop_auto())
-reset_btn = Button("Reset", on_click=timer.reset())
+# Status display
+status = Text("Paused", id="status")
+status_state = State(status, text="Paused", class_name="paused")
 
-page = Page(Container(timer_display, start_btn, stop_btn, reset_btn))
+# Control buttons
+start_btn = Button("Start",
+    on_click=timer.text.auto_increment(by=1, interval=1000)
+)
+stop_btn = Button("Stop", 
+    on_click=[
+        timer.text.stop_auto(),
+        status_state.update(text="Paused", class_name="paused")
+    ]
+)
+reset_btn = Button("Reset",
+    on_click=[
+        timer.text.stop_auto(),
+        timer.reset(),
+        status_state.reset()
+    ]
+)
+
+page = Page(Container(timer_display, status, start_btn, stop_btn, reset_btn))
 app.add_page("index", page, index=True)
+app.rTimeCompile()
 \`\`\`
 
-## Dynamic Updates with \`this()\`
+### When to Use State V2
 
-The \`this()\` helper allows components to update themselves dynamically:
+** Good for:**
+- Simple counters and timers
+- Dynamic text/style updates
+- Auto-incrementing values
+- Quick prototypes
+- Single-component state
+
+** Not ideal for:**
+- Complex state machines
+- Multi-step workflows
+- State history/undo
+- Cross-component state coordination
+
+For these cases, use **dState & cState** instead.
+
+---
+
+# dState & cState - Indexed State Management
+
+Powerful indexed state system for complex UI transitions and state machines.
+
+## Quick Start with dState
 
 \`\`\`python
-from dars.all import this
+from dars.all import *
+from dars.core.state import dState, Mod
 
-# Update self on click
-button = Button("Click me", 
-    on_click=this().state(
-        text="Clicked!",
-        style={"background-color": "green"}
-    )
-)
+app = App(title="State Demo")
+label = Text("0", id="Counter")
+st = dState("counter", component=label, states=[0,1,2,3])
 
-# Chain with animations
-button = Button("Animate", 
-    on_click=fadeIn(id="box").then(
-        this().state(text="Animation complete!")
-    )
+# Rules on state entry
+st.cState(1, mods=[Mod.inc(label, prop='text', by=1)])
+st.cState(2, mods=[Mod.dec(label, prop='text', by=1)])
+st.cState(3, mods=[Mod.toggle_class(label, name='highlight', on=None)])
+
+# Buttons to navigate
+next_btn = Button("Next", on_click=st.state(goto='+1'))
+prev_btn = Button("Prev", on_click=st.state(goto='-1'))
+\`\`\`
+
+## Mod Operations
+
+- \`inc/dec(target, prop='text', by=1)\`: increments or decrements a numeric value (textContent by default).
+- \`set(target, **attrs)\`: sets attributes; \`text\` sets textContent; \`html\` sets innerHTML; other keys map to element attributes.
+- \`toggle_class(target, name, on=None)\`: toggles a class; when \`on\` is True/False, forces add/remove.
+- \`append_text / prepend_text\`: concatenates to textContent.
+
+## Cross-State Calls with Mod.call
+
+Use \`Mod.call(target, state=None, goto=None)\` inside a \`cState\` to trigger another \`dState\`.
+
+\`target\` can be the \`DarsState\` instance or its name (string). Example:
+
+\`\`\`python
+txt = dState("txt", id="txt1", states=[0,1])
+btn = dState("btn", id="btn1", states=[0,1])
+
+txt.cState(1, mods=[
+    Mod.set("txt1", text="Bye"),
+    Mod.call(btn, state=1)  # or Mod.call("btn", state=1)
+])
+\`\`\`
+
+## Immutable Default State (Index 0)
+
+- State \`0\` is the component's default configuration (as instantiated) and is **immutable**.
+- Authoring-time: \`cState(0, ...)\` is forbidden and raises an error.
+- Runtime: switching to state \`0\` restores the initial DOM snapshot (attributes except \`id\`, plus innerHTML) and ignores any rules for state \`0\`.
+- This guarantees that returning to \`0\` reverts the UI to its original state.
+
+## Mod.set with Multiple Attributes
+
+You can set multiple properties in one call:
+
+\`\`\`python
+Mod.set("btn1", text="Don't click it", class_name="warn")
+\`\`\`
+
+Event attributes accept a single script or an array of scripts (executed sequentially). Valid values are:
+- InlineScript, FileScript, dScript, or plain JS strings
+
+\`\`\`python
+Mod.set("btn1", on_click=[txt.state(0), dScript(code="console.log('clicked')")])
+\`\`\`
+
+The runtime ensures only one dynamic listener per event is active at a time and cleans it up when returning to state \`0\`.
+
+## Full HTML Replacement (Custom Components)
+
+If you need full HTML replacement on state change:
+\`\`\`python
+swap_btn = Button(
+    "Swap",
+    on_click=st.state(2, cComp=True, render=label.mod(text="SWAPPED"))
 )
 \`\`\`
 
-**Supported properties:**
-- \`text\`: Update text content
-- \`html\`: Update inner HTML
-- \`style\`: Dictionary of CSS styles
-- \`attrs\`: Dictionary of HTML attributes
-- \`classes\`: Dictionary with \`add\`, \`remove\`, or \`toggle\` operations
+\`render\` accepts:
+- A DeferredAttr produced by \`component.mod(...)\` or \`component.attr(..., defer=True)\`.
+- A Component instance (will be rendered to HTML at event time).
+- A raw HTML string.
 
-### Using RawJS for Dynamic Values
+## State Navigation Patterns
+
+There are two main ways to trigger state changes in Dars:
+
+### 1. Using \`state.state(idx)\` - Recommended
+
+The \`state.state(idx)\` method is the standard way to navigate to a specific state when you have a reference to the dState object:
+
+\`\`\`python
+from dars.all import *
+from dars.core.state import dState
+
+# Create a toggle button
+btn = Button("Off", id="ToggleBtn")
+
+# Define state with 2 options
+toggle = dState("toggle", component=btn, states=[0, 1])
+
+# Configure "On" state
+toggle.cState(1, mods=[
+    Mod.set(btn, 
+        text="On",
+        style={'background-color': 'green'},
+        on_click=toggle.state(0)  # Use state.state() to go back
+    )
+])
+
+# Initial click goes to state 1
+btn.on_click = toggle.state(1)
+\`\`\`
+
+**Advantages:**
+- Clean and straightforward syntax
+- Compile-time safety (if state object doesn't exist, Python will error)
+- No runtime lookups needed
+- Works in all contexts
+
+### 2. Multi-State Cycles
+
+\`\`\`python
+# Create a button that cycles through 4 states
+cycle_btn = Button("State 0", id="StatusBtn")
+status = dState("status", component=cycle_btn, states=[0, 1, 2, 3])
+
+# Define each state to navigate to the next
+status.cState(1, mods=[
+    Mod.set(cycle_btn, text="State 1 - Loading...", on_click=status.state(2))
+])
+status.cState(2, mods=[
+    Mod.set(cycle_btn, text="State 2 - Processing...", on_click=status.state(3))
+])
+status.cState(3, mods=[
+    Mod.set(cycle_btn, text="State 3 - Complete!", on_click=status.state(0))
+])
+
+# Start the cycle
+cycle_btn.on_click = status.state(1)
+\`\`\`
+
+## Complete Interactive Example
+
+\`\`\`python
+from dars.all import *
+from dars.core.state import dState
+
+app = App(title="Status Indicator")
+
+# Create button and status text
+status_btn = Button("Idle", id="StatusBtn", style={
+    'padding': '12px 24px',
+    'background': '#gray'
+})
+status_text = Text("Ready", id="StatusText")
+
+# Define 4-state workflow
+workflow = dState("workflow", component=status_btn, states=[0, 1, 2, 3])
+
+# State 1: Loading
+workflow.cState(1, mods=[
+    Mod.set(status_btn, 
+        text="Loading...",
+        style={'background': '#blue'},
+        on_click=workflow.state(2)
+    ),
+    Mod.set(status_text, text="Fetching data...")
+])
+
+# State 2: Processing
+workflow.cState(2, mods=[
+    Mod.set(status_btn,
+        text="Processing...",
+        style={'background': '#orange'},
+        on_click=workflow.state(3)
+    ),
+    Mod.set(status_text, text="Analyzing results...")
+])
+
+# State 3: Complete
+workflow.cState(3, mods=[
+    Mod.set(status_btn,
+        text="Complete!",
+        style={'background': '#green'},
+        on_click=workflow.state(0)  # Back to idle
+    ),
+    Mod.set(status_text, text="All done!")
+])
+
+# Start workflow on click
+status_btn.on_click = workflow.state(1)
+
+index = Page(Container(status_btn, status_text))
+app.add_page("index", index, index=True)
+\`\`\`
+
+### When to Use dState/cState
+
+**Good for:**
+- Complex state machines
+- Multi-step workflows (wizards, forms)
+- UI toggles with multiple states
+- State history and reversion
+- Cross-component state coordination
+
+**Overkill for:**
+- Simple counters
+- Single property updates
+- Quick prototypes
+- Auto operations
+
+For these cases, **State V2** is simpler.
+
+---
+
+## Dynamic State Updates & \`this()\`
+
+Dars introduces dynamic state updates, allowing you to modify component properties directly without pre-registering state indices.
+
+### \`this()\` helper
+
+The \`this()\` helper allows a component to refer to itself in an event handler and apply updates dynamically.
+
+\`\`\`python
+from dars.core.state import this
+
+btn = Button("Click me", on_click=this().state(text="Clicked!", style={"color": "red"}))
+\`\`\`
+
+Supported dynamic properties:
+- \`text\`: Update text content.
+- \`html\`: Update inner HTML.
+- \`style\`: Dictionary of CSS styles.
+- \`attrs\`: Dictionary of attributes.
+- \`classes\`: Dictionary with \`add\`, \`remove\`, or \`toggle\` (single string or list of strings).
+
+\`\`\`python
+this().state(
+    text="Updated",
+    style={"backgroundColor": "#f0f0f0"},
+    classes={"add": ["active"], "remove": ["inactive"]}
+)
+\`\`\`
+
+### Using Raw JavaScript Values (\`RawJS\`)
+
+You can pass raw JavaScript variables to dynamic updates using \`RawJS\`. This is particularly useful when:
+- Chaining scripts where a previous script returns a value
+- Working with async operations like file reading
+- Using \`dScript.ARG\` to reference values from previous scripts
 
 \`\`\`python
 from dars.scripts.dscript import RawJS, dScript
 
-# Use JavaScript expressions
-button.on_click = this().state(
-    text=RawJS("new Date().toLocaleTimeString()")
-)
+# Using dScript.ARG placeholder for chained values
+this().state(text=RawJS(dScript.ARG))
 
-# Chain with dScript results
-read_btn.on_click = read_file("data.txt").then(
-    this().state(text=RawJS(dScript.ARG))
-)
+# Using custom JavaScript expressions
+this().state(text=RawJS("someVar + ' processed'"))
 \`\`\`
-
-## Animation Integration
-
-State V2 works seamlessly with the animation system:
-
-\`\`\`python
-from dars.all import *
-
-display = Text("Hello", id="message")
-state = State(display, text="Hello")
-
-# Trigger animation on state change
-button.on_click = sequence(
-    state.text.set(value="Loading..."),
-    fadeOut(id="message", duration=300),
-    fadeIn(id="message", duration=300),
-    state.text.set(value="Complete!")
-)
-\`\`\`
-
-## Best Practices
-
-1. **Use descriptive IDs**: Components need unique IDs for state management
-   \`\`\`python
-   display = Text("0", id="counter-display")  # Good
-   display = Text("0")  # Bad - no ID for targeting
-   \`\`\`
-
-2. **Initialize with defaults**: Always provide default values for reactive properties
-   \`\`\`python
-   state = State(display, text=0)  # Good
-   state = State(display)  # Works, but no defaults to reset to
-   \`\`\`
-
-3. **One state per component**: Each component should have its own State instance
-   \`\`\`python
-   # Good
-   counter1 = State(display1, text=0)
-   counter2 = State(display2, text=0)
-   
-   # Avoid
-   shared_state = State(display1, text=0)  # Don't reuse for display2
-   \`\`\`
-
-4. **Use auto operations wisely**: Remember to provide stop controls
-   \`\`\`python
-   start_btn.on_click = timer.text.auto_increment()
-   stop_btn.on_click = timer.text.stop_auto()  # Always provide a way to stop
-   \`\`\`
-
-## Migration from dState
-
-If you're migrating from the legacy dState system:
-
-**Old (dState):**
-\`\`\`python
-from dars.core.state import dState, Mod
-
-display = Text("0", id="counter")
-st = dState("counter", component=display, states=[0, 1, 2])
-st.cState(1, mods=[Mod.inc(display, prop='text', by=1)])
-button.on_click = st.state(1)
-\`\`\`
-
-**New (State V2):**
-\`\`\`python
-from dars.all import State
-
-display = Text("0", id="counter")
-counter = State(display, text=0)
-button.on_click = counter.text.increment(by=1)
-\`\`\`
-
-Key improvements:
-- No state indices - direct property operations
-- Cleaner, more Pythonic syntax
-- Built-in auto operations
-- Seamless animation integration
-- More intuitive API
 
 ---
 
-## Advanced Features
+## Best Practices
 
-### Custom Intervals
+### Choose State V2 When:
+- Building simple counters or timers
+- Need auto-increment/decrement
+- Want quick reactive updates
+- Working with single components
 
-\`\`\`python
-# Very fast updates (100ms)
-timer.text.auto_increment(by=1, interval=100)
+### Choose dState/cState When:
+- Building complex state machines
+- Need immutable default state (state 0)
+- Require cross-state calls
+- Managing multi-step workflows
 
-# Slow countdown (2 seconds)
-countdown.text.auto_decrement(by=1, interval=2000)
-\`\`\`
-
-### Bounded Auto Operations
-
-\`\`\`python
-# Count from 0 to 10, then stop
-timer.text.auto_increment(by=1, interval=1000, max=10)
-
-# Count from 100 to 0, then stop
-countdown.text.auto_decrement(by=1, interval=1000, min=0)
-\`\`\`
-
-### Multiple Properties
-
-\`\`\`python
-# State can manage multiple properties
-state = State(component, 
-    text="Hello",
-    style={"color": "blue"},
-    custom_attr="value"
-)
-
-# Each property gets reactive operations
-state.text.set(value="Goodbye")
-state.custom_attr.set(value="new_value")
-\`\`\``},{type:"T9",id:"markdown_118",key:"0/2/0/7",text:`# Dars - Components Documentation
+### Use \`this()\` When:
+- Don't need state tracking
+- Making one-off updates
+- Working with async operations
+- Targeting the clicked element`},{type:"T9",id:"markdown_118",key:"0/2/0/7",text:`# Dars - Components Documentation
 
 ---
 
@@ -4244,4 +4401,4 @@ dars init  -L
 - Applying minification (vite): Vite/esbuild minification is active (JS/CSS) and default is disabled.
 - Applying minification (default + vite): both are active.
 
-For more, see the [Getting Started](#getting-started-with-dars) guide and the main documentation index.`}]},{type:"T2",id:"footer-section",key:"0/2/1",children:[{type:"T2",id:"container_124",key:"0/2/1/0",children:[{type:"T2",id:"container_125",key:"0/2/1/0/0",children:[{type:"T2",id:"container_126",key:"0/2/1/0/0/0",children:[{type:"T4",id:"image_127",key:"0/2/1/0/0/0/0"},{type:"T2",id:"container_128",key:"0/2/1/0/0/0/1",children:[{type:"T5",id:"text_129",key:"0/2/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_130",key:"0/2/1/0/0/1",children:[{type:"T2",id:"container_131",key:"0/2/1/0/0/1/0",children:[{type:"T5",id:"text_132",key:"0/2/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_133",key:"0/2/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_134",key:"0/2/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_135",key:"0/2/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_136",key:"0/2/1/0/0/1/1",children:[{type:"T5",id:"text_137",key:"0/2/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_138",key:"0/2/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_139",key:"0/2/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_140",key:"0/2/1/0/0/1/2",children:[{type:"T5",id:"text_141",key:"0/2/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_142",key:"0/2/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_143",key:"0/2/1/0/0/2",children:[{type:"T2",id:"container_144",key:"0/2/1/0/0/2/0",children:[{type:"T5",id:"text_145",key:"0/2/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_146",key:"0/2/1/0/0/2/1",children:[{type:"T5",id:"text_147",key:"0/2/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_148",key:"0/2/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_149",key:"0/2/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_150",key:"0/2/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]}]},function(){const c=new Map;let l=null,m=null;function u(){}function k(){}function _(n,e){if(!n)return;e(n);const t=n.children||[];for(let o=0;o<t.length;o++)_(t[o],e)}function w(n){try{if(typeof atob=="function")return atob(n);if(typeof Buffer<"u")return Buffer.from(n,"base64").toString("utf8")}catch{}return""}function E(n){try{if(!n)return null;if(n&&n.type==="inline"&&n.code)return new Function("event",n.code);const e=n&&(n.b||n.code_b64)||null;if(e){const t=w(e);if(t)return new Function("event",t)}}catch{}return null}function j(n){_(n,e=>{if(e&&e.id&&e.events&&!c.has(e.id)){const t={};for(const o in e.events){const i=e.events[o],d=E(i);d&&(t[o]=d)}Object.keys(t).length?c.set(e.id,t):c.delete(e.id)}})}function H(n,e){if(!(!n||!e))for(const[t,o]of Object.entries(e))try{o===!1||o===null||typeof o>"u"?n.removeAttribute(t):n.setAttribute(t,String(o))}catch{}}function I(n,e={},t={}){for(const o in e)if(!(o in t))try{n.removeAttribute(o)}catch{}for(const o in t){const i=t[o];try{i===!1||i===null||typeof i>"u"?n.removeAttribute(o):n.setAttribute(o,String(i))}catch{}}}function L(n,e={},t={}){for(const o in e)if(!(o in t))try{n.style.removeProperty(o.replace(/_/g,"-"))}catch{}for(const o in t){const i=t[o];try{n.style.setProperty(o.replace(/_/g,"-"),String(i))}catch{}}}function M(n,e){(e||document).addEventListener(n,function(t){let o=t.target;const i=e||document;for(;o&&o!==i;){const d=o.id;if(d&&c.has(d)){const f=c.get(d);if(o&&o.__darsEv&&o.__darsEv[n])return;let p=f[n];if(!p&&(n==="keydown"||n==="keyup"||n==="keypress")){const a=t.key||t.code;if(a){const r=n+"."+a;p=f[r]}}if(typeof p=="function"){try{p.call(o,t)}catch(a){console.error("[Dars] handler error",a)}return}}o=o.parentNode}},!0)}function S(n,e){return n&&e?n.type!==e.type:n!==e}function v(n){if(!n)return;const e=n.children||[];for(let t=0;t<e.length;t++)v(e[t]);if(n.id&&c.delete(n.id),n.id){const t=document.getElementById(n.id);if(t&&t.parentNode)try{t.parentNode.removeChild(t)}catch{}}}function x(n,e){if(!e||!e.id)return{ok:!1,reason:"missing-new"};let t=document.getElementById(e.id);if(!t){const a=n&&n.id?document.getElementById(n.id):null;if(a)try{a.id=e.id,t=a}catch{}}if(!t)return{ok:!1,reason:"missing-el"};if(S(n,e))return{ok:!1,reason:"type-changed"};const o=!!e.isIsland;if(!o&&e.class&&(t.className=e.class),o||I(t,n&&n.props||{},e.props||{}),o||L(t,n&&n.style||{},e.style||{}),!o&&Object.prototype.hasOwnProperty.call(e,"text")&&t.textContent!==String(e.text||"")&&(t.textContent=String(e.text||"")),o)return{ok:!0};const i=n&&n.children?n.children:[],d=e.children?e.children:[],f=new Map;for(let a=0;a<i.length;a++){const r=i[a]&&(i[a].id||i[a].key)||null;r&&f.set(String(r),i[a])}const p=new Set;for(let a=0;a<d.length;a++){const r=d[a],h=r&&(r.id||r.key)||null;if(!h)if(a<i.length){const s=x(i[a],r);if(!s.ok)return s;p.add(i[a]);continue}else return{ok:!1,reason:"children-added"};const b=f.get(String(h));if(b){const s=x(b,r);if(!s.ok)return s;p.add(b)}else{if(a<i.length){const y=i[a];if(!S(y,r)){const g=x(y,r);if(!g.ok)return g;p.add(y);continue}}const s=createSubtree(r);if(s){const y=a<i.length?i[a]:null;if(y&&y.id){const g=document.getElementById(y.id);g&&g.parentNode?g.parentNode.insertBefore(s,g):t.appendChild(s)}else t.appendChild(s);continue}return{ok:!1,reason:"children-added"}}}for(let a=0;a<i.length;a++){const r=i[a];p.has(r)||v(r)}return{ok:!0}}function O(n){typeof requestAnimationFrame=="function"?requestAnimationFrame(n):setTimeout(n,16)}function U(n){const e=l;if(!e){l=n;try{window.__DARS_VDOM__=n}catch{}return}O(()=>{const t=x(e,n);if(!t.ok){console.warn("[Dars] Structural change detected (",t.reason,"), reloading...");try{location.reload()}catch{}return}l=n;try{window.__DARS_VDOM__=n}catch{}})}function F(n){l=n;try{window.__DARS_VDOM__=n}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(t=>M(t,document))}function R(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const n=window.__DARS_VERSION_URL||"version.txt";let e=null,t=!1,o=0;const i=10;let d=!1;function f(a,r,h,b){try{const s=new XMLHttpRequest;b&&(s.responseType=b),s.open("GET",a,!0),s.timeout=5e3,s.onreadystatechange=function(){s.readyState===4&&(s.status>=200&&s.status<300?r(s.response):h())},s.onerror=h,s.ontimeout=h,s.setRequestHeader("Cache-Control","no-store"),s.send()}catch{h()}}function p(){d||f(n,function(a){let r=(a||"").toString().trim();if(!r||r==="0"){if(o+=1,o>=i){console.warn("[Dars] version file not found after",i,"attempts. Hot reload disabled for this session."),d=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(e)try{clearTimeout(e)}catch{}return}t||(console.warn("[Dars] waiting for version file..."),t=!0),e=setTimeout(p,600);return}if(o=0,t=!1,m||(m=r),r&&r!==m){m=r;try{location.reload()}catch{}return}e=setTimeout(p,600)},function(){if(o+=1,o>=i){console.warn("[Dars] version file not reachable after",i,"attempts. Hot reload disabled for this session."),d=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(e)try{clearTimeout(e)}catch{}return}t||(console.warn("[Dars] waiting for version file..."),t=!0),e=setTimeout(p,600)},"text")}return p(),()=>{try{d=!0,e&&clearTimeout(e),window.__DARS_STOP_HOTRELOAD=null}catch{}}}document.addEventListener("DOMContentLoaded",function(){if(window.__DARS_VDOM__?F(window.__DARS_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=R()}catch{}}})}(),window.addEventListener("scroll",()=>{const c=document.getElementById("dars-navbar");window.scrollY>20?c.classList.add("scrolled"):c.classList.remove("scrolled");const l=document.getElementById("features-section");if(l&&!l.classList.contains("visible")){const m=l.getBoundingClientRect().top,u=window.innerHeight/1.5;m<u&&(l.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((_,w)=>{setTimeout(()=>{_.style.opacity="1",_.style.transform="translateY(0)"},w*100)}))}});const T=document.getElementById("hero-logo"),C=document.getElementById("hero-title"),A=document.getElementById("hero-description"),B=document.getElementById("pip-command"),D=document.getElementById("get-started-btn"),P=document.getElementById("scroll-text");T&&setTimeout(()=>T.classList.add("show"),5),C&&setTimeout(()=>C.classList.add("show"),350),A&&setTimeout(()=>A.classList.add("show"),650),B&&setTimeout(()=>B.classList.add("show"),950),D&&setTimeout(()=>D.classList.add("show"),1250),P&&setTimeout(()=>P.classList.add("show"),1500),document.addEventListener("DOMContentLoaded",function(){const c=document.getElementById("hamburger-btn"),l=document.getElementById("mobile-menu"),m=document.body;c&&l&&(c.addEventListener("click",function(u){u.stopPropagation(),l.style.display==="flex"?(l.style.display="none",c.classList.remove("menu-open"),m.classList.remove("menu-open")):(l.style.display="flex",c.classList.add("menu-open"),m.classList.add("menu-open"))}),l.querySelectorAll("a").forEach(u=>{u.addEventListener("click",function(){l.style.display="none",c.classList.remove("menu-open"),m.classList.remove("menu-open")})}),document.addEventListener("click",function(u){!c.contains(u.target)&&!l.contains(u.target)&&(l.style.display="none",c.classList.remove("menu-open"),m.classList.remove("menu-open"))}),document.addEventListener("keydown",function(u){u.key==="Escape"&&l.style.display==="flex"&&(l.style.display="none",c.classList.remove("menu-open"),m.classList.remove("menu-open"))}))});
+For more, see the [Getting Started](#getting-started-with-dars) guide and the main documentation index.`}]},{type:"T2",id:"footer-section",key:"0/2/1",children:[{type:"T2",id:"container_124",key:"0/2/1/0",children:[{type:"T2",id:"container_125",key:"0/2/1/0/0",children:[{type:"T2",id:"container_126",key:"0/2/1/0/0/0",children:[{type:"T4",id:"image_127",key:"0/2/1/0/0/0/0"},{type:"T2",id:"container_128",key:"0/2/1/0/0/0/1",children:[{type:"T5",id:"text_129",key:"0/2/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_130",key:"0/2/1/0/0/1",children:[{type:"T2",id:"container_131",key:"0/2/1/0/0/1/0",children:[{type:"T5",id:"text_132",key:"0/2/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_133",key:"0/2/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_134",key:"0/2/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_135",key:"0/2/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_136",key:"0/2/1/0/0/1/1",children:[{type:"T5",id:"text_137",key:"0/2/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_138",key:"0/2/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_139",key:"0/2/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_140",key:"0/2/1/0/0/1/2",children:[{type:"T5",id:"text_141",key:"0/2/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_142",key:"0/2/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_143",key:"0/2/1/0/0/2",children:[{type:"T2",id:"container_144",key:"0/2/1/0/0/2/0",children:[{type:"T5",id:"text_145",key:"0/2/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_146",key:"0/2/1/0/0/2/1",children:[{type:"T5",id:"text_147",key:"0/2/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_148",key:"0/2/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_149",key:"0/2/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_150",key:"0/2/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]}]},function(){const c=new Map;let l=null,m=null;function u(){}function S(){}function _(n,e){if(!n)return;e(n);const t=n.children||[];for(let o=0;o<t.length;o++)_(t[o],e)}function w(n){try{if(typeof atob=="function")return atob(n);if(typeof Buffer<"u")return Buffer.from(n,"base64").toString("utf8")}catch{}return""}function E(n){try{if(!n)return null;if(n&&n.type==="inline"&&n.code)return new Function("event",n.code);const e=n&&(n.b||n.code_b64)||null;if(e){const t=w(e);if(t)return new Function("event",t)}}catch{}return null}function j(n){_(n,e=>{if(e&&e.id&&e.events&&!c.has(e.id)){const t={};for(const o in e.events){const i=e.events[o],d=E(i);d&&(t[o]=d)}Object.keys(t).length?c.set(e.id,t):c.delete(e.id)}})}function U(n,e){if(!(!n||!e))for(const[t,o]of Object.entries(e))try{o===!1||o===null||typeof o>"u"?n.removeAttribute(t):n.setAttribute(t,String(o))}catch{}}function M(n,e={},t={}){for(const o in e)if(!(o in t))try{n.removeAttribute(o)}catch{}for(const o in t){const i=t[o];try{i===!1||i===null||typeof i>"u"?n.removeAttribute(o):n.setAttribute(o,String(i))}catch{}}}function I(n,e={},t={}){for(const o in e)if(!(o in t))try{n.style.removeProperty(o.replace(/_/g,"-"))}catch{}for(const o in t){const i=t[o];try{n.style.setProperty(o.replace(/_/g,"-"),String(i))}catch{}}}function L(n,e){(e||document).addEventListener(n,function(t){let o=t.target;const i=e||document;for(;o&&o!==i;){const d=o.id;if(d&&c.has(d)){const f=c.get(d);if(o&&o.__darsEv&&o.__darsEv[n])return;let p=f[n];if(!p&&(n==="keydown"||n==="keyup"||n==="keypress")){const a=t.key||t.code;if(a){const r=n+"."+a;p=f[r]}}if(typeof p=="function"){try{p.call(o,t)}catch(a){console.error("[Dars] handler error",a)}return}}o=o.parentNode}},!0)}function k(n,e){return n&&e?n.type!==e.type:n!==e}function v(n){if(!n)return;const e=n.children||[];for(let t=0;t<e.length;t++)v(e[t]);if(n.id&&c.delete(n.id),n.id){const t=document.getElementById(n.id);if(t&&t.parentNode)try{t.parentNode.removeChild(t)}catch{}}}function x(n,e){if(!e||!e.id)return{ok:!1,reason:"missing-new"};let t=document.getElementById(e.id);if(!t){const a=n&&n.id?document.getElementById(n.id):null;if(a)try{a.id=e.id,t=a}catch{}}if(!t)return{ok:!1,reason:"missing-el"};if(k(n,e))return{ok:!1,reason:"type-changed"};const o=!!e.isIsland;if(!o&&e.class&&(t.className=e.class),o||M(t,n&&n.props||{},e.props||{}),o||I(t,n&&n.style||{},e.style||{}),!o&&Object.prototype.hasOwnProperty.call(e,"text")&&t.textContent!==String(e.text||"")&&(t.textContent=String(e.text||"")),o)return{ok:!0};const i=n&&n.children?n.children:[],d=e.children?e.children:[],f=new Map;for(let a=0;a<i.length;a++){const r=i[a]&&(i[a].id||i[a].key)||null;r&&f.set(String(r),i[a])}const p=new Set;for(let a=0;a<d.length;a++){const r=d[a],h=r&&(r.id||r.key)||null;if(!h)if(a<i.length){const s=x(i[a],r);if(!s.ok)return s;p.add(i[a]);continue}else return{ok:!1,reason:"children-added"};const b=f.get(String(h));if(b){const s=x(b,r);if(!s.ok)return s;p.add(b)}else{if(a<i.length){const y=i[a];if(!k(y,r)){const g=x(y,r);if(!g.ok)return g;p.add(y);continue}}const s=createSubtree(r);if(s){const y=a<i.length?i[a]:null;if(y&&y.id){const g=document.getElementById(y.id);g&&g.parentNode?g.parentNode.insertBefore(s,g):t.appendChild(s)}else t.appendChild(s);continue}return{ok:!1,reason:"children-added"}}}for(let a=0;a<i.length;a++){const r=i[a];p.has(r)||v(r)}return{ok:!0}}function R(n){typeof requestAnimationFrame=="function"?requestAnimationFrame(n):setTimeout(n,16)}function H(n){const e=l;if(!e){l=n;try{window.__DARS_VDOM__=n}catch{}return}R(()=>{const t=x(e,n);if(!t.ok){console.warn("[Dars] Structural change detected (",t.reason,"), reloading...");try{location.reload()}catch{}return}l=n;try{window.__DARS_VDOM__=n}catch{}})}function F(n){l=n;try{window.__DARS_VDOM__=n}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(t=>L(t,document))}function O(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const n=window.__DARS_VERSION_URL||"version.txt";let e=null,t=!1,o=0;const i=10;let d=!1;function f(a,r,h,b){try{const s=new XMLHttpRequest;b&&(s.responseType=b),s.open("GET",a,!0),s.timeout=5e3,s.onreadystatechange=function(){s.readyState===4&&(s.status>=200&&s.status<300?r(s.response):h())},s.onerror=h,s.ontimeout=h,s.setRequestHeader("Cache-Control","no-store"),s.send()}catch{h()}}function p(){d||f(n,function(a){let r=(a||"").toString().trim();if(!r||r==="0"){if(o+=1,o>=i){console.warn("[Dars] version file not found after",i,"attempts. Hot reload disabled for this session."),d=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(e)try{clearTimeout(e)}catch{}return}t||(console.warn("[Dars] waiting for version file..."),t=!0),e=setTimeout(p,600);return}if(o=0,t=!1,m||(m=r),r&&r!==m){m=r;try{location.reload()}catch{}return}e=setTimeout(p,600)},function(){if(o+=1,o>=i){console.warn("[Dars] version file not reachable after",i,"attempts. Hot reload disabled for this session."),d=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(e)try{clearTimeout(e)}catch{}return}t||(console.warn("[Dars] waiting for version file..."),t=!0),e=setTimeout(p,600)},"text")}return p(),()=>{try{d=!0,e&&clearTimeout(e),window.__DARS_STOP_HOTRELOAD=null}catch{}}}document.addEventListener("DOMContentLoaded",function(){if(window.__DARS_VDOM__?F(window.__DARS_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=O()}catch{}}})}(),window.addEventListener("scroll",()=>{const c=document.getElementById("dars-navbar");window.scrollY>20?c.classList.add("scrolled"):c.classList.remove("scrolled");const l=document.getElementById("features-section");if(l&&!l.classList.contains("visible")){const m=l.getBoundingClientRect().top,u=window.innerHeight/1.5;m<u&&(l.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((_,w)=>{setTimeout(()=>{_.style.opacity="1",_.style.transform="translateY(0)"},w*100)}))}});const T=document.getElementById("hero-logo"),C=document.getElementById("hero-title"),A=document.getElementById("hero-description"),D=document.getElementById("pip-command"),B=document.getElementById("get-started-btn"),P=document.getElementById("scroll-text");T&&setTimeout(()=>T.classList.add("show"),5),C&&setTimeout(()=>C.classList.add("show"),350),A&&setTimeout(()=>A.classList.add("show"),650),D&&setTimeout(()=>D.classList.add("show"),950),B&&setTimeout(()=>B.classList.add("show"),1250),P&&setTimeout(()=>P.classList.add("show"),1500),document.addEventListener("DOMContentLoaded",function(){const c=document.getElementById("hamburger-btn"),l=document.getElementById("mobile-menu"),m=document.body;c&&l&&(c.addEventListener("click",function(u){u.stopPropagation(),l.style.display==="flex"?(l.style.display="none",c.classList.remove("menu-open"),m.classList.remove("menu-open")):(l.style.display="flex",c.classList.add("menu-open"),m.classList.add("menu-open"))}),l.querySelectorAll("a").forEach(u=>{u.addEventListener("click",function(){l.style.display="none",c.classList.remove("menu-open"),m.classList.remove("menu-open")})}),document.addEventListener("click",function(u){!c.contains(u.target)&&!l.contains(u.target)&&(l.style.display="none",c.classList.remove("menu-open"),m.classList.remove("menu-open"))}),document.addEventListener("keydown",function(u){u.key==="Escape"&&l.style.display==="flex"&&(l.style.display="none",c.classList.remove("menu-open"),m.classList.remove("menu-open"))}))});

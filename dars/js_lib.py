@@ -431,6 +431,32 @@ function change(opt){{
               toToggle.forEach(c => el.classList.toggle(c));
           }}
       }}
+
+      // Apply event handlers (on_click, on_mouseover, etc.)
+      for (const k in opt) {{
+          if (k.startsWith('on_')) {{
+              const eventName = k.substring(3); // remove 'on_'
+              const code = opt[k];
+              
+              // Create handler function
+              let handler = null;
+              if (Array.isArray(code)) {{
+                  // Chain multiple handlers
+                  handler = function(e) {{
+                      code.forEach(c => {{
+                          try {{ new Function('event', c).call(this, e); }} catch(err) {{ console.error('[Dars] Event error:', err); }}
+                      }});
+                  }};
+              }} else if (typeof code === 'string') {{
+                  try {{ handler = new Function('event', code); }} catch(e) {{ console.error('[Dars] Event compilation error:', e); }}
+              }}
+              
+              if (handler) {{
+                  // Set event handler directly on element (overrides previous)
+                  el['on' + eventName] = handler;
+              }}
+          }}
+      }}
       
       return;
   }}

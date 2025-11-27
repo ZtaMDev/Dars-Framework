@@ -425,6 +425,9 @@
      <a class="sidebar-link sidebar-level-1" href="#state-management-in-dars" style="margin-left: 0px">
       State Management in Dars
      </a>
+     <a class="sidebar-link sidebar-level-1" href="#state-v2-dynamic-state-management" style="margin-left: 0px">
+      State V2 - Dynamic State Management
+     </a>
      <a class="sidebar-link sidebar-level-2" href="#quick-start" style="margin-left: 20px">
       Quick Start
      </a>
@@ -452,41 +455,68 @@
      <a class="sidebar-link sidebar-level-3" href="#auto-operations" style="margin-left: 40px">
       Auto Operations
      </a>
-     <a class="sidebar-link sidebar-level-2" href="#complete-examples" style="margin-left: 20px">
-      Complete Examples
+     <a class="sidebar-link sidebar-level-2" href="#complete-example" style="margin-left: 20px">
+      Complete Example
      </a>
-     <a class="sidebar-link sidebar-level-3" href="#interactive-counter" style="margin-left: 40px">
-      Interactive Counter
+     <a class="sidebar-link sidebar-level-3" href="#when-to-use-state-v2" style="margin-left: 40px">
+      When to Use State V2
      </a>
-     <a class="sidebar-link sidebar-level-3" href="#auto-incrementing-timer" style="margin-left: 40px">
-      Auto-Incrementing Timer
+     <a class="sidebar-link sidebar-level-1" href="#dstate-cstate-indexed-state-management" style="margin-left: 0px">
+      dState &amp; cState - Indexed State Management
      </a>
-     <a class="sidebar-link sidebar-level-2" href="#dynamic-updates-with-this" style="margin-left: 20px">
-      Dynamic Updates with `this()`
+     <a class="sidebar-link sidebar-level-2" href="#quick-start-with-dstate" style="margin-left: 20px">
+      Quick Start with dState
      </a>
-     <a class="sidebar-link sidebar-level-3" href="#using-rawjs-for-dynamic-values" style="margin-left: 40px">
-      Using RawJS for Dynamic Values
+     <a class="sidebar-link sidebar-level-2" href="#mod-operations" style="margin-left: 20px">
+      Mod Operations
      </a>
-     <a class="sidebar-link sidebar-level-2" href="#animation-integration" style="margin-left: 20px">
-      Animation Integration
+     <a class="sidebar-link sidebar-level-2" href="#cross-state-calls-with-modcall" style="margin-left: 20px">
+      Cross-State Calls with Mod.call
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#immutable-default-state-index-0" style="margin-left: 20px">
+      Immutable Default State (Index 0)
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#modset-with-multiple-attributes" style="margin-left: 20px">
+      Mod.set with Multiple Attributes
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#full-html-replacement-custom-components" style="margin-left: 20px">
+      Full HTML Replacement (Custom Components)
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#state-navigation-patterns" style="margin-left: 20px">
+      State Navigation Patterns
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#1-using-statestateidx-recommended" style="margin-left: 40px">
+      1. Using `state.state(idx)` - Recommended
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#2-multi-state-cycles" style="margin-left: 40px">
+      2. Multi-State Cycles
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#complete-interactive-example" style="margin-left: 20px">
+      Complete Interactive Example
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#when-to-use-dstatecstate" style="margin-left: 40px">
+      When to Use dState/cState
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#dynamic-state-updates-this" style="margin-left: 20px">
+      Dynamic State Updates &amp; `this()`
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#this-helper" style="margin-left: 40px">
+      `this()` helper
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#using-raw-javascript-values-rawjs" style="margin-left: 40px">
+      Using Raw JavaScript Values (`RawJS`)
      </a>
      <a class="sidebar-link sidebar-level-2" href="#best-practices" style="margin-left: 20px">
       Best Practices
      </a>
-     <a class="sidebar-link sidebar-level-2" href="#migration-from-dstate" style="margin-left: 20px">
-      Migration from dState
+     <a class="sidebar-link sidebar-level-3" href="#choose-state-v2-when" style="margin-left: 40px">
+      Choose State V2 When:
      </a>
-     <a class="sidebar-link sidebar-level-2" href="#advanced-features" style="margin-left: 20px">
-      Advanced Features
+     <a class="sidebar-link sidebar-level-3" href="#choose-dstatecstate-when" style="margin-left: 40px">
+      Choose dState/cState When:
      </a>
-     <a class="sidebar-link sidebar-level-3" href="#custom-intervals" style="margin-left: 40px">
-      Custom Intervals
-     </a>
-     <a class="sidebar-link sidebar-level-3" href="#bounded-auto-operations" style="margin-left: 40px">
-      Bounded Auto Operations
-     </a>
-     <a class="sidebar-link sidebar-level-3" href="#multiple-properties" style="margin-left: 40px">
-      Multiple Properties
+     <a class="sidebar-link sidebar-level-3" href="#use-this-when" style="margin-left: 40px">
+      Use `this()` When:
      </a>
      <div class="sidebar-divider">
      </div>
@@ -3122,7 +3152,169 @@ Desktop build target. Only effective when
        State Management in Dars
       </h1>
       <p>
-       Dars Framework features a modern, state management system that makes building reactive UIs simple and intuitive.
+       Dars Framework features
+       <strong>
+        two powerful state management systems
+       </strong>
+       , each designed for different use cases:
+      </p>
+      <ul>
+       <li>
+        <strong>
+         State V2
+        </strong>
+        - Modern, dynamic state management for simple reactive updates
+       </li>
+       <li>
+        <strong>
+         dState &amp; cState
+        </strong>
+        - Indexed state system for complex state machines and workflows
+       </li>
+      </ul>
+      <h2 id="choose-the-right-system">
+       Choose the Right System
+      </h2>
+      <table>
+       <thead>
+        <tr>
+         <th>
+          Feature
+         </th>
+         <th>
+          State V2
+         </th>
+         <th>
+          dState/cState
+         </th>
+        </tr>
+       </thead>
+       <tbody>
+        <tr>
+         <td>
+          <strong>
+           API Style
+          </strong>
+         </td>
+         <td>
+          Clean Pythonic
+         </td>
+         <td>
+          Verbose but explicit
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <strong>
+           Setup
+          </strong>
+         </td>
+         <td>
+          Minimal
+         </td>
+         <td>
+          Requires registration
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <strong>
+           State Tracking
+          </strong>
+         </td>
+         <td>
+          Dynamic
+         </td>
+         <td>
+          Indexed (0, 1, 2...)
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <strong>
+           Auto Operations
+          </strong>
+         </td>
+         <td>
+          Built-in
+         </td>
+         <td>
+          Manual with Mod
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <strong>
+           Event Updates
+          </strong>
+         </td>
+         <td>
+          Supported
+         </td>
+         <td>
+          Supported
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <strong>
+           State Machines
+          </strong>
+         </td>
+         <td>
+          Limited
+         </td>
+         <td>
+          Full support
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <strong>
+           Cross-State Calls
+          </strong>
+         </td>
+         <td>
+          No
+         </td>
+         <td>
+          Mod.call()
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <strong>
+           Immutable Default
+          </strong>
+         </td>
+         <td>
+          No
+         </td>
+         <td>
+          State 0
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <strong>
+           Best For
+          </strong>
+         </td>
+         <td>
+          Counters, timers, simple updates
+         </td>
+         <td>
+          Workflows, toggles, complex UI transitions
+         </td>
+        </tr>
+       </tbody>
+      </table>
+      <hr/>
+      <h1 id="state-v2-dynamic-state-management">
+       State V2 - Dynamic State Management
+      </h1>
+      <p>
+       Modern, Pythonic state management for reactive UIs.
       </p>
       <h2 id="quick-start">
        Quick Start
@@ -3308,6 +3500,20 @@ Desktop build target. Only effective when
       </div>
       <p>
        <strong>
+        Event Handlers:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Update event handler dynamically</span>
+<span class="n">state</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">on_click</span><span class="o">=</span><span class="n">alert</span><span class="p">(</span><span class="s2">"New handler!"</span><span class="p">))</span>
+
+<span class="c1"># Or with dScript</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dars.scripts.dscript</span><span class="w"> </span><span class="kn">import</span> <span class="n">dScript</span>
+<span class="n">state</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">on_click</span><span class="o">=</span><span class="n">dScript</span><span class="p">(</span><span class="s2">"console.log('clicked')"</span><span class="p">))</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
         Multiple Properties at Once:
        </strong>
       </p>
@@ -3315,7 +3521,8 @@ Desktop build target. Only effective when
        <pre><span></span><code><span class="n">state</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
     <span class="n">text</span><span class="o">=</span><span class="s2">"Updated!"</span><span class="p">,</span>
     <span class="n">class_name</span><span class="o">=</span><span class="s2">"success"</span><span class="p">,</span>
-    <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s2">"color"</span><span class="p">:</span> <span class="s2">"green"</span><span class="p">}</span>
+    <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s2">"color"</span><span class="p">:</span> <span class="s2">"green"</span><span class="p">},</span>
+    <span class="n">on_click</span><span class="o">=</span><span class="n">alert</span><span class="p">(</span><span class="s2">"Done!"</span><span class="p">)</span>
 <span class="p">)</span>
 </code></pre>
       </div>
@@ -3329,154 +3536,511 @@ Desktop build target. Only effective when
        <pre><span></span><code><span class="c1"># Auto-increment timer</span>
 <span class="n">timer</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="n">display</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-<span class="n">start_btn</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">timer</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">auto_increment</span><span class="p">(</span>
-    <span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>           <span class="c1"># Increment amount</span>
-    <span class="n">interval</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>  <span class="c1"># Every 1 second</span>
-    <span class="nb">max</span><span class="o">=</span><span class="mi">60</span>          <span class="c1"># Optional: stop at max value</span>
-<span class="p">)</span>
-
+<span class="n">start_btn</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">timer</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">auto_increment</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
 <span class="n">stop_btn</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">timer</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">stop_auto</span><span class="p">()</span>
 </code></pre>
       </div>
       <p>
        <strong>
-        Parameters:
+        With Limits:
        </strong>
-       -
-       <code>
-        by
-       </code>
-       : Amount to increment/decrement (default: 1)
--
-       <code>
-        interval
-       </code>
-       : Milliseconds between updates (default: 1000)
--
-       <code>
-        max
-       </code>
-       : Optional maximum value (auto-stops when reached)
--
-       <code>
-        min
-       </code>
-       : Optional minimum value (auto-stops when reached)
       </p>
-      <h2 id="complete-examples">
-       Complete Examples
-      </h2>
-      <h3 id="interactive-counter">
-       Interactive Counter
-      </h3>
       <div class="codehilite">
-       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+       <pre><span></span><code><span class="c1"># Auto-increment up to 100</span>
+<span class="n">timer</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">auto_increment</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
 
-<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="s2">"Counter Demo"</span><span class="p">)</span>
-
-<span class="c1"># Create display</span>
-<span class="n">counter_display</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="s2">"0"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"counter"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="p">{</span>
-    <span class="s2">"font-size"</span><span class="p">:</span> <span class="s2">"48px"</span><span class="p">,</span>
-    <span class="s2">"color"</span><span class="p">:</span> <span class="s2">"#2563eb"</span>
-<span class="p">})</span>
-
-<span class="c1"># Create state</span>
-<span class="n">counter</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="n">counter_display</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-
-<span class="c1"># Control buttons</span>
-<span class="n">inc_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"+1"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">counter</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
-<span class="n">dec_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"-1"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">counter</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">decrement</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
-<span class="n">reset_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Reset"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">counter</span><span class="o">.</span><span class="n">reset</span><span class="p">())</span>
-
-<span class="c1"># Add animation</span>
-<span class="n">pulse_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Pulse"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">pulse</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"counter"</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">1.2</span><span class="p">))</span>
-
-<span class="n">page</span> <span class="o">=</span> <span class="n">Page</span><span class="p">(</span><span class="n">Container</span><span class="p">(</span><span class="n">counter_display</span><span class="p">,</span> <span class="n">inc_btn</span><span class="p">,</span> <span class="n">dec_btn</span><span class="p">,</span> <span class="n">reset_btn</span><span class="p">,</span> <span class="n">pulse_btn</span><span class="p">))</span>
-<span class="n">app</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="s2">"index"</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># Auto-decrement down to 0</span>
+<span class="n">countdown</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">auto_decrement</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 </code></pre>
       </div>
-      <h3 id="auto-incrementing-timer">
-       Auto-Incrementing Timer
-      </h3>
+      <h2 id="complete-example">
+       Complete Example
+      </h2>
       <div class="codehilite">
        <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
-<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="s2">"Timer Demo"</span><span class="p">)</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="s2">"State V2 Demo"</span><span class="p">)</span>
 
 <span class="c1"># Timer display</span>
-<span class="n">timer_display</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="s2">"0"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"timer"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="p">{</span>
-    <span class="s2">"font-size"</span><span class="p">:</span> <span class="s2">"36px"</span><span class="p">,</span>
-    <span class="s2">"color"</span><span class="p">:</span> <span class="s2">"#059669"</span>
-<span class="p">})</span>
-
-<span class="c1"># Timer state</span>
+<span class="n">timer_display</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="s2">"0"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"timer"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s2">"font-size"</span><span class="p">:</span> <span class="s2">"36px"</span><span class="p">})</span>
 <span class="n">timer</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="n">timer_display</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-<span class="c1"># Control buttons</span>
-<span class="n">start_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Start"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">timer</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">auto_increment</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">1000</span><span class="p">))</span>
-<span class="n">stop_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Stop"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">timer</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">stop_auto</span><span class="p">())</span>
-<span class="n">reset_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Reset"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">timer</span><span class="o">.</span><span class="n">reset</span><span class="p">())</span>
+<span class="c1"># Status display</span>
+<span class="n">status</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="s2">"Paused"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"status"</span><span class="p">)</span>
+<span class="n">status_state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">"Paused"</span><span class="p">,</span> <span class="n">class_name</span><span class="o">=</span><span class="s2">"paused"</span><span class="p">)</span>
 
-<span class="n">page</span> <span class="o">=</span> <span class="n">Page</span><span class="p">(</span><span class="n">Container</span><span class="p">(</span><span class="n">timer_display</span><span class="p">,</span> <span class="n">start_btn</span><span class="p">,</span> <span class="n">stop_btn</span><span class="p">,</span> <span class="n">reset_btn</span><span class="p">))</span>
+<span class="c1"># Control buttons</span>
+<span class="n">start_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Start"</span><span class="p">,</span>
+    <span class="n">on_click</span><span class="o">=</span><span class="n">timer</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">auto_increment</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="n">stop_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Stop"</span><span class="p">,</span> 
+    <span class="n">on_click</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">timer</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">stop_auto</span><span class="p">(),</span>
+        <span class="n">status_state</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">"Paused"</span><span class="p">,</span> <span class="n">class_name</span><span class="o">=</span><span class="s2">"paused"</span><span class="p">)</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+<span class="n">reset_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Reset"</span><span class="p">,</span>
+    <span class="n">on_click</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">timer</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">stop_auto</span><span class="p">(),</span>
+        <span class="n">timer</span><span class="o">.</span><span class="n">reset</span><span class="p">(),</span>
+        <span class="n">status_state</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+
+<span class="n">page</span> <span class="o">=</span> <span class="n">Page</span><span class="p">(</span><span class="n">Container</span><span class="p">(</span><span class="n">timer_display</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">start_btn</span><span class="p">,</span> <span class="n">stop_btn</span><span class="p">,</span> <span class="n">reset_btn</span><span class="p">))</span>
 <span class="n">app</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="s2">"index"</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">rTimeCompile</span><span class="p">()</span>
 </code></pre>
       </div>
-      <h2 id="dynamic-updates-with-this">
-       Dynamic Updates with
+      <h3 id="when-to-use-state-v2">
+       When to Use State V2
+      </h3>
+      <p>
+       <em>
+        * Good for:
+       </em>
+       *
+- Simple counters and timers
+- Dynamic text/style updates
+- Auto-incrementing values
+- Quick prototypes
+- Single-component state
+      </p>
+      <p>
+       <em>
+        * Not ideal for:
+       </em>
+       *
+- Complex state machines
+- Multi-step workflows
+- State history/undo
+- Cross-component state coordination
+      </p>
+      <p>
+       For these cases, use
+       <strong>
+        dState &amp; cState
+       </strong>
+       instead.
+      </p>
+      <hr/>
+      <h1 id="dstate-cstate-indexed-state-management">
+       dState &amp; cState - Indexed State Management
+      </h1>
+      <p>
+       Powerful indexed state system for complex UI transitions and state machines.
+      </p>
+      <h2 id="quick-start-with-dstate">
+       Quick Start with dState
+      </h2>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dars.core.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">dState</span><span class="p">,</span> <span class="n">Mod</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"State Demo"</span><span class="p">)</span>
+<span class="n">label</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="s2">"0"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"Counter"</span><span class="p">)</span>
+<span class="n">st</span> <span class="o">=</span> <span class="n">dState</span><span class="p">(</span><span class="s2">"counter"</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">states</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+
+<span class="c1"># Rules on state entry</span>
+<span class="n">st</span><span class="o">.</span><span class="n">cState</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="p">[</span><span class="n">Mod</span><span class="o">.</span><span class="n">inc</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">prop</span><span class="o">=</span><span class="s1">'text'</span><span class="p">,</span> <span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">)])</span>
+<span class="n">st</span><span class="o">.</span><span class="n">cState</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="p">[</span><span class="n">Mod</span><span class="o">.</span><span class="n">dec</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">prop</span><span class="o">=</span><span class="s1">'text'</span><span class="p">,</span> <span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">)])</span>
+<span class="n">st</span><span class="o">.</span><span class="n">cState</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="p">[</span><span class="n">Mod</span><span class="o">.</span><span class="n">toggle_class</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'highlight'</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="kc">None</span><span class="p">)])</span>
+
+<span class="c1"># Buttons to navigate</span>
+<span class="n">next_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Next"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">st</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">goto</span><span class="o">=</span><span class="s1">'+1'</span><span class="p">))</span>
+<span class="n">prev_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Prev"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">st</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">goto</span><span class="o">=</span><span class="s1">'-1'</span><span class="p">))</span>
+</code></pre>
+      </div>
+      <h2 id="mod-operations">
+       Mod Operations
+      </h2>
+      <ul>
+       <li>
+        <code>
+         inc/dec(target, prop='text', by=1)
+        </code>
+        : increments or decrements a numeric value (textContent by default).
+       </li>
+       <li>
+        <code>
+         set(target, **attrs)
+        </code>
+        : sets attributes;
+        <code>
+         text
+        </code>
+        sets textContent;
+        <code>
+         html
+        </code>
+        sets innerHTML; other keys map to element attributes.
+       </li>
+       <li>
+        <code>
+         toggle_class(target, name, on=None)
+        </code>
+        : toggles a class; when
+        <code>
+         on
+        </code>
+        is True/False, forces add/remove.
+       </li>
+       <li>
+        <code>
+         append_text / prepend_text
+        </code>
+        : concatenates to textContent.
+       </li>
+      </ul>
+      <h2 id="cross-state-calls-with-modcall">
+       Cross-State Calls with Mod.call
+      </h2>
+      <p>
+       Use
+       <code>
+        Mod.call(target, state=None, goto=None)
+       </code>
+       inside a
+       <code>
+        cState
+       </code>
+       to trigger another
+       <code>
+        dState
+       </code>
+       .
+      </p>
+      <p>
+       <code>
+        target
+       </code>
+       can be the
+       <code>
+        DarsState
+       </code>
+       instance or its name (string). Example:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">txt</span> <span class="o">=</span> <span class="n">dState</span><span class="p">(</span><span class="s2">"txt"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"txt1"</span><span class="p">,</span> <span class="n">states</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">btn</span> <span class="o">=</span> <span class="n">dState</span><span class="p">(</span><span class="s2">"btn"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"btn1"</span><span class="p">,</span> <span class="n">states</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="n">txt</span><span class="o">.</span><span class="n">cState</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="p">[</span>
+    <span class="n">Mod</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"txt1"</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">"Bye"</span><span class="p">),</span>
+    <span class="n">Mod</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">btn</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># or Mod.call("btn", state=1)</span>
+<span class="p">])</span>
+</code></pre>
+      </div>
+      <h2 id="immutable-default-state-index-0">
+       Immutable Default State (Index 0)
+      </h2>
+      <ul>
+       <li>
+        State
+        <code>
+         0
+        </code>
+        is the component's default configuration (as instantiated) and is
+        <strong>
+         immutable
+        </strong>
+        .
+       </li>
+       <li>
+        Authoring-time:
+        <code>
+         cState(0, ...)
+        </code>
+        is forbidden and raises an error.
+       </li>
+       <li>
+        Runtime: switching to state
+        <code>
+         0
+        </code>
+        restores the initial DOM snapshot (attributes except
+        <code>
+         id
+        </code>
+        , plus innerHTML) and ignores any rules for state
+        <code>
+         0
+        </code>
+        .
+       </li>
+       <li>
+        This guarantees that returning to
+        <code>
+         0
+        </code>
+        reverts the UI to its original state.
+       </li>
+      </ul>
+      <h2 id="modset-with-multiple-attributes">
+       Mod.set with Multiple Attributes
+      </h2>
+      <p>
+       You can set multiple properties in one call:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">Mod</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"btn1"</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">"Don't click it"</span><span class="p">,</span> <span class="n">class_name</span><span class="o">=</span><span class="s2">"warn"</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       Event attributes accept a single script or an array of scripts (executed sequentially). Valid values are:
+- InlineScript, FileScript, dScript, or plain JS strings
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">Mod</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"btn1"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="p">[</span><span class="n">txt</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">dScript</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s2">"console.log('clicked')"</span><span class="p">)])</span>
+</code></pre>
+      </div>
+      <p>
+       The runtime ensures only one dynamic listener per event is active at a time and cleans it up when returning to state
+       <code>
+        0
+       </code>
+       .
+      </p>
+      <h2 id="full-html-replacement-custom-components">
+       Full HTML Replacement (Custom Components)
+      </h2>
+      <p>
+       If you need full HTML replacement on state change:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">swap_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span>
+    <span class="s2">"Swap"</span><span class="p">,</span>
+    <span class="n">on_click</span><span class="o">=</span><span class="n">st</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">cComp</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">render</span><span class="o">=</span><span class="n">label</span><span class="o">.</span><span class="n">mod</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">"SWAPPED"</span><span class="p">))</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       <code>
+        render
+       </code>
+       accepts:
+- A DeferredAttr produced by
+       <code>
+        component.mod(...)
+       </code>
+       or
+       <code>
+        component.attr(..., defer=True)
+       </code>
+       .
+- A Component instance (will be rendered to HTML at event time).
+- A raw HTML string.
+      </p>
+      <h2 id="state-navigation-patterns">
+       State Navigation Patterns
+      </h2>
+      <p>
+       There are two main ways to trigger state changes in Dars:
+      </p>
+      <h3 id="1-using-statestateidx-recommended">
+       1. Using
+       <code>
+        state.state(idx)
+       </code>
+       - Recommended
+      </h3>
+      <p>
+       The
+       <code>
+        state.state(idx)
+       </code>
+       method is the standard way to navigate to a specific state when you have a reference to the dState object:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dars.core.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">dState</span>
+
+<span class="c1"># Create a toggle button</span>
+<span class="n">btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Off"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"ToggleBtn"</span><span class="p">)</span>
+
+<span class="c1"># Define state with 2 options</span>
+<span class="n">toggle</span> <span class="o">=</span> <span class="n">dState</span><span class="p">(</span><span class="s2">"toggle"</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="n">btn</span><span class="p">,</span> <span class="n">states</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+<span class="c1"># Configure "On" state</span>
+<span class="n">toggle</span><span class="o">.</span><span class="n">cState</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="p">[</span>
+    <span class="n">Mod</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">btn</span><span class="p">,</span> 
+        <span class="n">text</span><span class="o">=</span><span class="s2">"On"</span><span class="p">,</span>
+        <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s1">'background-color'</span><span class="p">:</span> <span class="s1">'green'</span><span class="p">},</span>
+        <span class="n">on_click</span><span class="o">=</span><span class="n">toggle</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># Use state.state() to go back</span>
+    <span class="p">)</span>
+<span class="p">])</span>
+
+<span class="c1"># Initial click goes to state 1</span>
+<span class="n">btn</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">toggle</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Advantages:
+       </strong>
+       - Clean and straightforward syntax
+- Compile-time safety (if state object doesn't exist, Python will error)
+- No runtime lookups needed
+- Works in all contexts
+      </p>
+      <h3 id="2-multi-state-cycles">
+       2. Multi-State Cycles
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Create a button that cycles through 4 states</span>
+<span class="n">cycle_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"State 0"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"StatusBtn"</span><span class="p">)</span>
+<span class="n">status</span> <span class="o">=</span> <span class="n">dState</span><span class="p">(</span><span class="s2">"status"</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="n">cycle_btn</span><span class="p">,</span> <span class="n">states</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+
+<span class="c1"># Define each state to navigate to the next</span>
+<span class="n">status</span><span class="o">.</span><span class="n">cState</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="p">[</span>
+    <span class="n">Mod</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cycle_btn</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">"State 1 - Loading..."</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+<span class="p">])</span>
+<span class="n">status</span><span class="o">.</span><span class="n">cState</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="p">[</span>
+    <span class="n">Mod</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cycle_btn</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">"State 2 - Processing..."</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+<span class="p">])</span>
+<span class="n">status</span><span class="o">.</span><span class="n">cState</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="p">[</span>
+    <span class="n">Mod</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cycle_btn</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">"State 3 - Complete!"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+<span class="p">])</span>
+
+<span class="c1"># Start the cycle</span>
+<span class="n">cycle_btn</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">status</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <h2 id="complete-interactive-example">
+       Complete Interactive Example
+      </h2>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dars.core.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">dState</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"Status Indicator"</span><span class="p">)</span>
+
+<span class="c1"># Create button and status text</span>
+<span class="n">status_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Idle"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"StatusBtn"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="p">{</span>
+    <span class="s1">'padding'</span><span class="p">:</span> <span class="s1">'12px 24px'</span><span class="p">,</span>
+    <span class="s1">'background'</span><span class="p">:</span> <span class="s1">'#gray'</span>
+<span class="p">})</span>
+<span class="n">status_text</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="s2">"Ready"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"StatusText"</span><span class="p">)</span>
+
+<span class="c1"># Define 4-state workflow</span>
+<span class="n">workflow</span> <span class="o">=</span> <span class="n">dState</span><span class="p">(</span><span class="s2">"workflow"</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="n">status_btn</span><span class="p">,</span> <span class="n">states</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+
+<span class="c1"># State 1: Loading</span>
+<span class="n">workflow</span><span class="o">.</span><span class="n">cState</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="p">[</span>
+    <span class="n">Mod</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">status_btn</span><span class="p">,</span> 
+        <span class="n">text</span><span class="o">=</span><span class="s2">"Loading..."</span><span class="p">,</span>
+        <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s1">'background'</span><span class="p">:</span> <span class="s1">'#blue'</span><span class="p">},</span>
+        <span class="n">on_click</span><span class="o">=</span><span class="n">workflow</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="p">),</span>
+    <span class="n">Mod</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">status_text</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">"Fetching data..."</span><span class="p">)</span>
+<span class="p">])</span>
+
+<span class="c1"># State 2: Processing</span>
+<span class="n">workflow</span><span class="o">.</span><span class="n">cState</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="p">[</span>
+    <span class="n">Mod</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">status_btn</span><span class="p">,</span>
+        <span class="n">text</span><span class="o">=</span><span class="s2">"Processing..."</span><span class="p">,</span>
+        <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s1">'background'</span><span class="p">:</span> <span class="s1">'#orange'</span><span class="p">},</span>
+        <span class="n">on_click</span><span class="o">=</span><span class="n">workflow</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="p">),</span>
+    <span class="n">Mod</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">status_text</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">"Analyzing results..."</span><span class="p">)</span>
+<span class="p">])</span>
+
+<span class="c1"># State 3: Complete</span>
+<span class="n">workflow</span><span class="o">.</span><span class="n">cState</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="p">[</span>
+    <span class="n">Mod</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">status_btn</span><span class="p">,</span>
+        <span class="n">text</span><span class="o">=</span><span class="s2">"Complete!"</span><span class="p">,</span>
+        <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s1">'background'</span><span class="p">:</span> <span class="s1">'#green'</span><span class="p">},</span>
+        <span class="n">on_click</span><span class="o">=</span><span class="n">workflow</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># Back to idle</span>
+    <span class="p">),</span>
+    <span class="n">Mod</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">status_text</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">"All done!"</span><span class="p">)</span>
+<span class="p">])</span>
+
+<span class="c1"># Start workflow on click</span>
+<span class="n">status_btn</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">workflow</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">index</span> <span class="o">=</span> <span class="n">Page</span><span class="p">(</span><span class="n">Container</span><span class="p">(</span><span class="n">status_btn</span><span class="p">,</span> <span class="n">status_text</span><span class="p">))</span>
+<span class="n">app</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="s2">"index"</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="when-to-use-dstatecstate">
+       When to Use dState/cState
+      </h3>
+      <p>
+       <strong>
+        Good for:
+       </strong>
+       - Complex state machines
+- Multi-step workflows (wizards, forms)
+- UI toggles with multiple states
+- State history and reversion
+- Cross-component state coordination
+      </p>
+      <p>
+       <strong>
+        Overkill for:
+       </strong>
+       - Simple counters
+- Single property updates
+- Quick prototypes
+- Auto operations
+      </p>
+      <p>
+       For these cases,
+       <strong>
+        State V2
+       </strong>
+       is simpler.
+      </p>
+      <hr/>
+      <h2 id="dynamic-state-updates-this">
+       Dynamic State Updates &amp;
        <code>
         this()
        </code>
       </h2>
+      <p>
+       Dars introduces dynamic state updates, allowing you to modify component properties directly without pre-registering state indices.
+      </p>
+      <h3 id="this-helper">
+       <code>
+        this()
+       </code>
+       helper
+      </h3>
       <p>
        The
        <code>
         this()
        </code>
-       helper allows components to update themselves dynamically:
+       helper allows a component to refer to itself in an event handler and apply updates dynamically.
       </p>
       <div class="codehilite">
-       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="n">this</span>
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.core.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">this</span>
 
-<span class="c1"># Update self on click</span>
-<span class="n">button</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Click me"</span><span class="p">,</span> 
-    <span class="n">on_click</span><span class="o">=</span><span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span>
-        <span class="n">text</span><span class="o">=</span><span class="s2">"Clicked!"</span><span class="p">,</span>
-        <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s2">"background-color"</span><span class="p">:</span> <span class="s2">"green"</span><span class="p">}</span>
-    <span class="p">)</span>
-<span class="p">)</span>
-
-<span class="c1"># Chain with animations</span>
-<span class="n">button</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Animate"</span><span class="p">,</span> 
-    <span class="n">on_click</span><span class="o">=</span><span class="n">fadeIn</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"box"</span><span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span>
-        <span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">"Animation complete!"</span><span class="p">)</span>
-    <span class="p">)</span>
-<span class="p">)</span>
+<span class="n">btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Click me"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">"Clicked!"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s2">"color"</span><span class="p">:</span> <span class="s2">"red"</span><span class="p">}))</span>
 </code></pre>
       </div>
       <p>
-       <strong>
-        Supported properties:
-       </strong>
-       -
+       Supported dynamic properties:
+-
        <code>
         text
        </code>
-       : Update text content
+       : Update text content.
 -
        <code>
         html
        </code>
-       : Update inner HTML
+       : Update inner HTML.
 -
        <code>
         style
        </code>
-       : Dictionary of CSS styles
+       : Dictionary of CSS styles.
 -
        <code>
         attrs
        </code>
-       : Dictionary of HTML attributes
+       : Dictionary of attributes.
 -
        <code>
         classes
@@ -3493,190 +4057,106 @@ Desktop build target. Only effective when
        <code>
         toggle
        </code>
-       operations
+       (single string or list of strings).
       </p>
-      <h3 id="using-rawjs-for-dynamic-values">
-       Using RawJS for Dynamic Values
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span>
+    <span class="n">text</span><span class="o">=</span><span class="s2">"Updated"</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s2">"backgroundColor"</span><span class="p">:</span> <span class="s2">"#f0f0f0"</span><span class="p">},</span>
+    <span class="n">classes</span><span class="o">=</span><span class="p">{</span><span class="s2">"add"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"active"</span><span class="p">],</span> <span class="s2">"remove"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"inactive"</span><span class="p">]}</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="using-raw-javascript-values-rawjs">
+       Using Raw JavaScript Values (
+       <code>
+        RawJS
+       </code>
+       )
       </h3>
+      <p>
+       You can pass raw JavaScript variables to dynamic updates using
+       <code>
+        RawJS
+       </code>
+       . This is particularly useful when:
+- Chaining scripts where a previous script returns a value
+- Working with async operations like file reading
+- Using
+       <code>
+        dScript.ARG
+       </code>
+       to reference values from previous scripts
+      </p>
       <div class="codehilite">
        <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.scripts.dscript</span><span class="w"> </span><span class="kn">import</span> <span class="n">RawJS</span><span class="p">,</span> <span class="n">dScript</span>
 
-<span class="c1"># Use JavaScript expressions</span>
-<span class="n">button</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span>
-    <span class="n">text</span><span class="o">=</span><span class="n">RawJS</span><span class="p">(</span><span class="s2">"new Date().toLocaleTimeString()"</span><span class="p">)</span>
-<span class="p">)</span>
+<span class="c1"># Using dScript.ARG placeholder for chained values</span>
+<span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">RawJS</span><span class="p">(</span><span class="n">dScript</span><span class="o">.</span><span class="n">ARG</span><span class="p">))</span>
 
-<span class="c1"># Chain with dScript results</span>
-<span class="n">read_btn</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">read_file</span><span class="p">(</span><span class="s2">"data.txt"</span><span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span>
-    <span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">RawJS</span><span class="p">(</span><span class="n">dScript</span><span class="o">.</span><span class="n">ARG</span><span class="p">))</span>
-<span class="p">)</span>
+<span class="c1"># Using custom JavaScript expressions</span>
+<span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">RawJS</span><span class="p">(</span><span class="s2">"someVar + ' processed'"</span><span class="p">))</span>
 </code></pre>
       </div>
-      <h2 id="animation-integration">
-       Animation Integration
-      </h2>
-      <p>
-       State V2 works seamlessly with the animation system:
-      </p>
-      <div class="codehilite">
-       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
-
-<span class="n">display</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="s2">"Hello"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"message"</span><span class="p">)</span>
-<span class="n">state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="n">display</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">"Hello"</span><span class="p">)</span>
-
-<span class="c1"># Trigger animation on state change</span>
-<span class="n">button</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">sequence</span><span class="p">(</span>
-    <span class="n">state</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="s2">"Loading..."</span><span class="p">),</span>
-    <span class="n">fadeOut</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"message"</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="mi">300</span><span class="p">),</span>
-    <span class="n">fadeIn</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"message"</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="mi">300</span><span class="p">),</span>
-    <span class="n">state</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="s2">"Complete!"</span><span class="p">)</span>
-<span class="p">)</span>
-</code></pre>
-      </div>
+      <hr/>
       <h2 id="best-practices">
        Best Practices
       </h2>
-      <ol>
-       <li>
-        <p>
-         <strong>
-          Use descriptive IDs
-         </strong>
-         : Components need unique IDs for state management
-        </p>
-        <div class="codehilite">
-         <pre><span></span><code><span class="n">display</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="s2">"0"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"counter-display"</span><span class="p">)</span>  <span class="c1"># Good</span>
-<span class="n">display</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="s2">"0"</span><span class="p">)</span>  <span class="c1"># Bad - no ID for targeting</span>
-</code></pre>
-        </div>
-       </li>
-       <li>
-        <p>
-         <strong>
-          Initialize with defaults
-         </strong>
-         : Always provide default values for reactive properties
-        </p>
-        <div class="codehilite">
-         <pre><span></span><code><span class="n">state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="n">display</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># Good</span>
-<span class="n">state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="n">display</span><span class="p">)</span>  <span class="c1"># Works, but no defaults to reset to</span>
-</code></pre>
-        </div>
-       </li>
-       <li>
-        <p>
-         <strong>
-          One state per component
-         </strong>
-         : Each component should have its own State instance
-        </p>
-        <div class="codehilite">
-         <pre><span></span><code><span class="c1"># Good</span>
-<span class="n">counter1</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="n">display1</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">counter2</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="n">display2</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-
-<span class="c1"># Avoid</span>
-<span class="n">shared_state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="n">display1</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># Don't reuse for display2</span>
-</code></pre>
-        </div>
-       </li>
-       <li>
-        <p>
-         <strong>
-          Use auto operations wisely
-         </strong>
-         : Remember to provide stop controls
-        </p>
-        <div class="codehilite">
-         <pre><span></span><code><span class="n">start_btn</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">timer</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">auto_increment</span><span class="p">()</span>
-<span class="n">stop_btn</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">timer</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">stop_auto</span><span class="p">()</span>  <span class="c1"># Always provide a way to stop</span>
-</code></pre>
-        </div>
-       </li>
-      </ol>
-      <h2 id="migration-from-dstate">
-       Migration from dState
-      </h2>
-      <p>
-       If you're migrating from the legacy dState system:
-      </p>
-      <p>
-       <strong>
-        Old (dState):
-       </strong>
-      </p>
-      <div class="codehilite">
-       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.core.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">dState</span><span class="p">,</span> <span class="n">Mod</span>
-
-<span class="n">display</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="s2">"0"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"counter"</span><span class="p">)</span>
-<span class="n">st</span> <span class="o">=</span> <span class="n">dState</span><span class="p">(</span><span class="s2">"counter"</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="n">display</span><span class="p">,</span> <span class="n">states</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
-<span class="n">st</span><span class="o">.</span><span class="n">cState</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="p">[</span><span class="n">Mod</span><span class="o">.</span><span class="n">inc</span><span class="p">(</span><span class="n">display</span><span class="p">,</span> <span class="n">prop</span><span class="o">=</span><span class="s1">'text'</span><span class="p">,</span> <span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">)])</span>
-<span class="n">button</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-</code></pre>
-      </div>
-      <p>
-       <strong>
-        New (State V2):
-       </strong>
-      </p>
-      <div class="codehilite">
-       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="n">State</span>
-
-<span class="n">display</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="s2">"0"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"counter"</span><span class="p">)</span>
-<span class="n">counter</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="n">display</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">button</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">counter</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-</code></pre>
-      </div>
-      <p>
-       Key improvements:
-- No state indices - direct property operations
-- Cleaner, more Pythonic syntax
-- Built-in auto operations
-- Seamless animation integration
-- More intuitive API
-      </p>
-      <hr/>
-      <h2 id="advanced-features">
-       Advanced Features
-      </h2>
-      <h3 id="custom-intervals">
-       Custom Intervals
+      <h3 id="choose-state-v2-when">
+       Choose State V2 When:
       </h3>
-      <div class="codehilite">
-       <pre><span></span><code><span class="c1"># Very fast updates (100ms)</span>
-<span class="n">timer</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">auto_increment</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
-
-<span class="c1"># Slow countdown (2 seconds)</span>
-<span class="n">countdown</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">auto_decrement</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">2000</span><span class="p">)</span>
-</code></pre>
-      </div>
-      <h3 id="bounded-auto-operations">
-       Bounded Auto Operations
+      <ul>
+       <li>
+        Building simple counters or timers
+       </li>
+       <li>
+        Need auto-increment/decrement
+       </li>
+       <li>
+        Want quick reactive updates
+       </li>
+       <li>
+        Working with single components
+       </li>
+      </ul>
+      <h3 id="choose-dstatecstate-when">
+       Choose dState/cState When:
       </h3>
-      <div class="codehilite">
-       <pre><span></span><code><span class="c1"># Count from 0 to 10, then stop</span>
-<span class="n">timer</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">auto_increment</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-
-<span class="c1"># Count from 100 to 0, then stop</span>
-<span class="n">countdown</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">auto_decrement</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-</code></pre>
-      </div>
-      <h3 id="multiple-properties">
-       Multiple Properties
+      <ul>
+       <li>
+        Building complex state machines
+       </li>
+       <li>
+        Need immutable default state (state 0)
+       </li>
+       <li>
+        Require cross-state calls
+       </li>
+       <li>
+        Managing multi-step workflows
+       </li>
+      </ul>
+      <h3 id="use-this-when">
+       Use
+       <code>
+        this()
+       </code>
+       When:
       </h3>
-      <div class="codehilite">
-       <pre><span></span><code><span class="c1"># State can manage multiple properties</span>
-<span class="n">state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> 
-    <span class="n">text</span><span class="o">=</span><span class="s2">"Hello"</span><span class="p">,</span>
-    <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s2">"color"</span><span class="p">:</span> <span class="s2">"blue"</span><span class="p">},</span>
-    <span class="n">custom_attr</span><span class="o">=</span><span class="s2">"value"</span>
-<span class="p">)</span>
-
-<span class="c1"># Each property gets reactive operations</span>
-<span class="n">state</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="s2">"Goodbye"</span><span class="p">)</span>
-<span class="n">state</span><span class="o">.</span><span class="n">custom_attr</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="s2">"new_value"</span><span class="p">)</span>
-</code></pre>
-      </div>
+      <ul>
+       <li>
+        Don't need state tracking
+       </li>
+       <li>
+        Making one-off updates
+       </li>
+       <li>
+        Working with async operations
+       </li>
+       <li>
+        Targeting the clicked element
+       </li>
+      </ul>
      </div>
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_118">
       <h1 id="dars-components-documentation">

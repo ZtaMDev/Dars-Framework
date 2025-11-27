@@ -1,7 +1,7 @@
 <h1 align="center">Dars Framework</h1>
  
 <p align="center">
-  <img src="./Dars-logo.png" alt="Dars Framework Logo" width="200" />
+  <img src="https://raw.githubusercontent.com/ZtaMDev/Dars-Framework/CrystalMain/Dars-logo.png" alt="Dars Framework Logo" width="200" />
 </p>
 
 <p align="center">
