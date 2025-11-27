@@ -25,7 +25,7 @@ class ReactiveProperty:
     Represents a single reactive property of a component.
     
     Supports Pythonic operations like +=, -=, and methods like increment(), set(), etc.
-    All mutations automatically sync to the client-side DOM.
+    All mutations automatically sync to the client-side DOM via the change() function.
     """
     
     def __init__(self, state: 'State', name: str, initial_value: Any):
@@ -54,6 +54,61 @@ class ReactiveProperty:
         # This will be collected during export and injected as event handlers
         pass
     
+    def _generate_change_call(self, **props) -> str:
+        """
+        Generate JS code to call window.Dars.change() with proper payload.
+        This is the correct way to update component properties client-side.
+        """
+        component_id = self._state.component.id
+        
+        # Build payload parts
+        parts = [f"id: '{component_id}'", "dynamic: true"]
+        
+        for k, v in props.items():
+            if k == 'text':
+                parts.append(f"text: {json.dumps(v)}")
+            elif k == 'html':
+                parts.append(f"html: {json.dumps(v)}")
+            elif k == 'style' and isinstance(v, dict):
+                parts.append(f"style: {json.dumps(v)}")
+            elif k == 'class_name':
+                # Map class_name to classes object
+                if isinstance(v, str):
+                    # Setting a single class - we should replace all classes
+                    parts.append(f"attrs: {{class: {json.dumps(v)}}}")
+                elif isinstance(v, dict):
+                    # Advanced class manipulation
+                    parts.append(f"classes: {json.dumps(v)}")
+            elif k == 'attrs' and isinstance(v, dict):
+                parts.append(f"attrs: {json.dumps(v)}")
+            elif k == 'classes' and isinstance(v, dict):
+                parts.append(f"classes: {json.dumps(v)}")
+            else:
+                # Generic attribute
+                parts.append(f"attrs: {{{json.dumps(k)}: {json.dumps(v)}}}")
+        
+        payload = "{" +  ", ".join(parts) + "}"
+        
+        code = f"""
+(async () => {{
+    try {{
+        let ch = window.__DARS_CHANGE_FN;
+        if (!ch) {{
+            if (window.Dars && typeof window.Dars.change === 'function') {{
+                ch = window.Dars.change.bind(window.Dars);
+            }} else {{
+                const m = await import('/lib/dars.min.js');
+                ch = (m.change || (m.default && m.default.change));
+            }}
+            if (typeof ch === 'function') window.__DARS_CHANGE_FN = ch;
+        }}
+        if (typeof ch === 'function') ch({payload});
+    }} catch (e) {{ console.error('[Dars] State error:', e); }}
+}})();
+""".strip()
+        
+        return code
+    
     def increment(self, by: int = 1) -> Callable:
         """
         Returns an event handler function that increments this property.
@@ -66,9 +121,11 @@ class ReactiveProperty:
         """
         from dars.scripts.dscript import dScript
         
-        # Generate JS code to increment
+        # Only numeric properties can be incremented
+        if self._name not in ('text',):
+            raise ValueError(f"Cannot increment non-numeric property '{self._name}'. Use .set() instead.")
+        
         component_id = self._state.component.id
-        prop_name = self._name
         
         code = f"""
 const el = document.getElementById('{component_id}');
@@ -79,7 +136,7 @@ if (el) {{
     
     // Dispatch state update event
     const ev = new CustomEvent('dars:state-update', {{
-        detail: {{ id: '{component_id}', property: '{prop_name}', value: newValue }}
+        detail: {{ id: '{component_id}', property: 'text', value: newValue }}
     }});
     el.dispatchEvent(ev);
 }}
@@ -103,36 +160,20 @@ if (el) {{
         """
         Returns an event handler that sets this property to a specific value.
         
+        Works with any property type: text, html, style, class_name, attrs, etc.
+        
         Args:
             value: The value to set
             
         Example:
             button.on_click = status_state.text.set("Loading...")
+            button.on_click = state.class_name.set("active")
+            button.on_click = state.style.set({"color": "red"})
         """
         from dars.scripts.dscript import dScript
         
-        component_id = self._state.component.id
-        prop_name = self._name
-        
-        # Escape value for JS
-        if isinstance(value, str):
-            js_value = json.dumps(value)
-        else:
-            js_value = json.dumps(value)
-        
-        code = f"""
-const el = document.getElementById('{component_id}');
-if (el) {{
-    el.textContent = {js_value};
-    
-    // Dispatch state update event
-    const ev = new CustomEvent('dars:state-update', {{
-        detail: {{ id: '{component_id}', property: '{prop_name}', value: {js_value} }}
-    }});
-    el.dispatchEvent(ev);
-}}
-""".strip()
-        
+        # Use the change() function to properly handle different property types
+        code = self._generate_change_call(**{self._name: value})
         return dScript(code)
     
     def auto_increment(self, by: int = 1, interval: int = 1000, max: Optional[int] = None) -> Callable:
@@ -251,6 +292,7 @@ if (window.Dars && window.Dars.stopLoop) {{
         return f"ReactiveProperty(name='{self._name}', value={self._value})"
 
 
+
 class StateTransition:
     """
     Represents a conditional state transition.
@@ -360,38 +402,45 @@ class State:
         from dars.scripts.dscript import dScript
         
         component_id = self.component.id
-        default_props = json.dumps(self._default_snapshot)
+        
+        # Build payload with all default properties
+        parts = [f"id: '{component_id}'", "dynamic: true"]
+        
+        for k, v in self._default_snapshot.items():
+            if k == 'text':
+                parts.append(f"text: {json.dumps(v)}")
+            elif k == 'html':
+                parts.append(f"html: {json.dumps(v)}")
+            elif k == 'style' and isinstance(v, dict):
+                parts.append(f"style: {json.dumps(v)}")
+            elif k == 'class_name':
+                if isinstance(v, str):
+                    parts.append(f"attrs: {{class: {json.dumps(v)}}}")
+                elif isinstance(v, dict):
+                    parts.append(f"classes: {json.dumps(v)}")
+            elif k == 'attrs' and isinstance(v, dict):
+                parts.append(f"attrs: {json.dumps(v)}")
+            else:
+                parts.append(f"attrs: {{{json.dumps(k)}: {json.dumps(v)}}}")
+        
+        payload = "{" + ", ".join(parts) + "}"
         
         code = f"""
-const el = document.getElementById('{component_id}');
-if (el) {{
-    const defaults = {default_props};
-    
-    // Reset text if present
-    if (defaults.text !== undefined) {{
-        el.textContent = String(defaults.text);
-    }}
-    
-    // Reset style if present
-    if (defaults.style) {{
-        for (const [key, value] of Object.entries(defaults.style)) {{
-            el.style[key] = value;
+(async () => {{
+    try {{
+        let ch = window.__DARS_CHANGE_FN;
+        if (!ch) {{
+            if (window.Dars && typeof window.Dars.change === 'function') {{
+                ch = window.Dars.change.bind(window.Dars);
+            }} else {{
+                const m = await import('/lib/dars.min.js');
+                ch = (m.change || (m.default && m.default.change));
+            }}
+            if (typeof ch === 'function') window.__DARS_CHANGE_FN = ch;
         }}
-    }}
-    
-    // Reset other attributes
-    for (const [key, value] of Object.entries(defaults)) {{
-        if (key !== 'text' && key !== 'style') {{
-            el.setAttribute(key, String(value));
-        }}
-    }}
-    
-    // Dispatch reset event
-    const ev = new CustomEvent('dars:state-reset', {{
-        detail: {{ id: '{component_id}', defaults: defaults }}
-    }});
-    el.dispatchEvent(ev);
-}}
+        if (typeof ch === 'function') ch({payload});
+    }} catch (e) {{ console.error('[Dars] State reset error:', e); }}
+}})();
 """.strip()
         
         return dScript(code)
@@ -400,47 +449,59 @@ if (el) {{
         """
         Returns an event handler that updates multiple properties at once.
         
+        Supports all property types: text, html, style, class_name, attrs, etc.
+        
         Args:
             **props: Properties to update
             
         Example:
             button.on_click = state.update(text="New", style={'color': 'red'})
+            button.on_click = state.update(class_name="active", style={'opacity': '1'})
         """
         from dars.scripts.dscript import dScript
         
         component_id = self.component.id
-        props_json = json.dumps(props)
+        
+        # Build payload with proper property mapping
+        parts = [f"id: '{component_id}'", "dynamic: true"]
+        
+        for k, v in props.items():
+            if k == 'text':
+                parts.append(f"text: {json.dumps(v)}")
+            elif k == 'html':
+                parts.append(f"html: {json.dumps(v)}")
+            elif k == 'style' and isinstance(v, dict):
+                parts.append(f"style: {json.dumps(v)}")
+            elif k == 'class_name':
+                if isinstance(v, str):
+                    parts.append(f"attrs: {{class: {json.dumps(v)}}}")
+                elif isinstance(v, dict):
+                    parts.append(f"classes: {json.dumps(v)}")
+            elif k == 'attrs' and isinstance(v, dict):
+                parts.append(f"attrs: {json.dumps(v)}")
+            elif k == 'classes' and isinstance(v, dict):
+                parts.append(f"classes: {json.dumps(v)}")
+            else:
+                parts.append(f"attrs: {{{json.dumps(k)}: {json.dumps(v)}}}")
+        
+        payload = "{" + ", ".join(parts) + "}"
         
         code = f"""
-const el = document.getElementById('{component_id}');
-if (el) {{
-    const updates = {props_json};
-    
-    // Apply text update
-    if (updates.text !== undefined) {{
-        el.textContent = String(updates.text);
-    }}
-    
-    // Apply style updates
-    if (updates.style) {{
-        for (const [key, value] of Object.entries(updates.style)) {{
-            el.style[key] = value;
+(async () => {{
+    try {{
+        let ch = window.__DARS_CHANGE_FN;
+        if (!ch) {{
+            if (window.Dars && typeof window.Dars.change === 'function') {{
+                ch = window.Dars.change.bind(window.Dars);
+            }} else {{
+                const m = await import('/lib/dars.min.js');
+                ch = (m.change || (m.default && m.default.change));
+            }}
+            if (typeof ch === 'function') window.__DARS_CHANGE_FN = ch;
         }}
-    }}
-    
-    // Apply other attribute updates
-    for (const [key, value] of Object.entries(updates)) {{
-        if (key !== 'text' && key !== 'style') {{
-            el.setAttribute(key, String(value));
-        }}
-    }}
-    
-    // Dispatch update event
-    const ev = new CustomEvent('dars:state-update', {{
-        detail: {{ id: '{component_id}', updates: updates }}
-    }});
-    el.dispatchEvent(ev);
-}}
+        if (typeof ch === 'function') ch({payload});
+    }} catch (e) {{ console.error('[Dars] State update error:', e); }}
+}})();
 """.strip()
         
         return dScript(code)

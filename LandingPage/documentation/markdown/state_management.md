@@ -84,13 +84,54 @@ button.on_click = counter.text.decrement(by=1)
 button.on_click = counter.text.increment(by=-1)
 ```
 
-### Set Value
-
 ```python
 button.on_click = counter.text.set(value=0)
 ```
 
+### All Property Types Supported
+
+State V2 supports updating **all component properties**, not just text:
+
+**Text Content:**
+```python
+state.text.set("New text")
+```
+
+**HTML Content:**
+```python
+state.html.set("<strong>Bold text</strong>")
+```
+
+**CSS Styles:**
+```python
+state.style.set({"color": "red", "fontSize": "24px"})
+```
+
+**CSS Classes:**
+```python
+# Set class name
+state.class_name.set("active")
+
+# Advanced class manipulation
+state.classes.set({"add": ["active", "highlight"], "remove": ["disabled"]})
+```
+
+**HTML Attributes:**
+```python
+state.attrs.set({"data-value": "100", "title": "Tooltip"})
+```
+
+**Multiple Properties at Once:**
+```python
+state.update(
+    text="Updated!",
+    class_name="success",
+    style={"color": "green"}
+)
+```
+
 ### Auto Operations
+
 
 Auto operations create continuous reactive updates:
 

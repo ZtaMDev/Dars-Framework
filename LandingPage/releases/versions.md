@@ -1,4 +1,190 @@
+# Release Notes v1.4.8
+
+> **Critical Fix**: State V2 now properly supports all component properties including `class_name`, `style`, `attrs`, and more.
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+or
+
+```bash
+pip install dars-framework==1.4.8
+```
+
+## What's Fixed
+
+### State V2 Complete Property Support
+
+**Previously (v1.4.7):** State V2 only updated `text` content, incorrectly setting textContent for all properties.
+
+```python
+# This didn't work correctly in v1.4.7
+counter.class_name.set("active")
+```
+
+**Now (v1.4.8):** State V2 properly handles **all component properties** using the `change()` client function.
+
+```python
+# All properties now work correctly!
+state.text.set("New text")
+state.class_name.set("active")
+state.style.set({"color": "red"})
+state.attrs.set({"title": "Tooltip"})
+state.html.set("<strong>Bold</strong>") 
+```
+
+### Unified Property Handling
+
+All State V2 methods now use the same `change()` function as `this()` and `dState`, ensuring consistent behavior across the framework:
+
+- `ReactiveProperty.set()` - Works with any property type
+- `State.update()` - Updates multiple properties correctly
+- `State.reset()` - Resets all property types to defaults
+
+### Validation Improvements
+
+**Increment/Decrement Validation:**
+Now properly validates that `increment()` and `decrement()` are only used on numeric properties:
+
+```python
+# Correct usage
+counter.text.increment(by=1)
+
+# Now throws helpful error
+counter.class_name.increment(by=1)
+```
+
+## Bug Fixes
+
+### Fixed: Property Type Handling
+
+- **Fixed**: `class_name.set()` now correctly updates element's `className`
+- **Fixed**: `style.set()` now correctly updates inline styles
+- **Fixed**: `attrs.set()` now correctly updates HTML attributes
+- **Fixed**: `html.set()` now correctly updates `innerHTML`
+- **Fixed**: `update()` now correctly handles multiple properties simultaneously
+- **Fixed**: `reset()` now correctly restores all property types
+
+### Technical Details
+
+**Root Cause:** 
+State V2 methods were directly manipulating `el.textContent` instead of using the framework's `change()` function, which properly routes updates based on property type.
+
+**Solution:**
+Created `_generate_change_call()` helper that generates proper `change()` payloads:
+- `text` → `{text: value}`
+- `html` → `{html: value}`
+- `style` → `{style: object}`
+- `class_name` → `{attrs: {class: value}}` or `{classes: object}`
+- `attrs` → `{attrs: object}`
+
+All reactive methods now use this helper for consistent, correct property updates.
+
+## Complete Property Examples
+
+### Setting Different Property Types
+
+```python
+from dars.all import *
+
+display = Container(Text("Example"), id="demo")
+
+# Create state with multiple properties
+state = State(display, 
+    text="Hello",
+    class_name="",
+    style={"background": "#333"}
+)
+
+# Update text
+text_btn.on_click = state.text.set("Updated!")
+
+# Update CSS class
+class_btn.on_click = state.class_name.set("active highlight")
+
+# Update styles
+style_btn.on_click = state.style.set({
+    "background": "linear-gradient(135deg, #667eea, #764ba2)",
+    "color": "white",
+    "padding": "20px"
+})
+
+# Update HTML attributes
+attr_btn.on_click = state.attrs.set({
+    "data-status": "complete",
+    "title": "Completed task"
+})
+```
+
+### Advanced Class Manipulation
+
+```python
+# Add/remove specific classes
+state.classes.set({
+    "add": ["active", "highlight"],
+    "remove": ["disabled", "hidden"]
+})
+
+# Toggle classes
+state.classes.set({
+    "toggle": ["expanded"]
+})
+```
+
+### Update Multiple Properties
+
+```python
+# Update several properties at once
+success_btn.on_click = state.update(
+    text="Success!",
+    class_name="success",
+    style={"color": "green", "fontSize": "18px"},
+    attrs={"data-result": "ok"}
+)
+```
+
+## Migration from v1.4.7
+
+**No breaking changes** - all existing code continues to work. However, if you tried using non-`text` properties in v1.4.7 and they didn't work, they will now work correctly in v1.4.8.
+
+**If you worked around the limitation:**
+```python
+# Old workaround (v1.4.7)
+from dars.core.state import this
+button.on_click = this().state(class_name="active")  # Had to use this()
+
+# Now works directly with State V2 (v1.4.8)
+button.on_click = state.class_name.set("active")  # ✅ Works!
+```
+
+## Dependency Cleanup
+
+- **Removed**: `rjsmin` dependency (Apache license, replaced with regex fallback)
+- **Removed**: `fastapi` dependency (not used in framework)
+
+JS/CSS minification now uses:
+1. Vite (if available)
+2. esbuild (if available)
+3. Regex fallback (always available, no external dependencies)
+
+## Performance & Compatibility
+
+- **Zero overhead**: Property handling uses existing `change()` infrastructure
+- **Backward compatible**: All v1.4.7 code works in v1.4.8
+- **Consistent behavior**: State V2, `this()`, and dState now all use same property system
+- **Desktop support**: Full Electron compatibility maintained
+
+---
+
+**Upgrade highly recommended** for all projects using State V2, especially if you need to update component properties beyond just `text`.
+
+---
+
 # Release Notes v1.4.7
+
 
 > Introducing State V2 and comprehensive animation system. This is the biggest update to Dars state management, bringing a pure Pythonic API and 15+ built-in animations.
 

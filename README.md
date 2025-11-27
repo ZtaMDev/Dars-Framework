@@ -117,12 +117,32 @@ reset_btn = Button("Reset", on_click=counter.reset())
 
 ### Core Reactive Operations
 
-**Increment/Decrement:**
+**All Property Types Supported:**
+State V2 can update any component property: `text`, `html`, `style`, `class_name`, `attrs`.
+
+**Increment/Decrement (numeric props only):**
 ```python
 counter.text.increment(by=1)      # Increase by 1
 counter.text.decrement(by=1)      # Decrease by 1
-counter.text.set(value=100)       # Set to specific value
 ```
+
+**Set Any Property:**
+```python
+counter.text.set(value=100)           # Set text
+counter.class_name.set("active")      # Set CSS class
+counter.style.set({"color": "red"})   # Set styles
+counter.attrs.set({"title": "Info"})  # Set attributes
+```
+
+**Update Multiple Properties:**
+```python
+state.update(
+    text="Done!",
+    class_name="success",
+    style={"color": "green"}
+)
+```
+
 
 **Auto Operations (Continuous):**
 ```python
