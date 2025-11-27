@@ -96,12 +96,6 @@ def minify_js(src: str) -> str:
                     except Exception: pass
         except Exception:
             pass
-    # Prefer fast/robust rjsmin if available
-    try:
-        import rjsmin  # type: ignore
-        return rjsmin.jsmin(src)
-    except Exception:
-        pass
     # Conservative regex fallback
     try:
         s = _js_block_comments.sub("", src)

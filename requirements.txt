@@ -2,5 +2,4 @@ bs4==0.0.2
 rich==14.2.0
 uvicorn==0.38.0
 markdown2==2.5.4
-rjsmin==1.2.5
 pydepm==1.1.2
