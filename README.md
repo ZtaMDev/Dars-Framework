@@ -92,128 +92,59 @@ if __name__ == "__main__":
 ---
 
 
-## Modern State Management (State V2)
+## State Management System
 
-**Dars Framework** includes a **pure state management system** that makes building reactive UIs simple and intuitive. No verbose syntax - just clean Python code.
+Dars Framework features **two powerful state management systems**, each designed for different use cases:
 
-### Quick Start
-
-```python
-from dars.all import *
-
-# Create a component
-display = Text("0", id="counter")
-
-# Create state with default values
-counter = State(display, text=0)
-
-# Use reactive operations
-increment_btn = Button("+1", on_click=counter.text.increment(by=1))
-decrement_btn = Button("-1", on_click=counter.text.decrement(by=1))
-reset_btn = Button("Reset", on_click=counter.reset())
-```
-
-### Core Reactive Operations
-
-**All Property Types Supported:**
-State V2 can update any component property: `text`, `html`, `style`, `class_name`, `attrs`.
-
-**Increment/Decrement (numeric props only):**
-```python
-counter.text.increment(by=1)      # Increase by 1
-counter.text.decrement(by=1)      # Decrease by 1
-```
-
-**Set Any Property:**
-```python
-counter.text.set(value=100)           # Set text
-counter.class_name.set("active")      # Set CSS class
-counter.style.set({"color": "red"})   # Set styles
-counter.attrs.set({"title": "Info"})  # Set attributes
-```
-
-**Update Multiple Properties:**
-```python
-state.update(
-    text="Done!",
-    class_name="success",
-    style={"color": "green"}
-)
-```
-
-
-**Auto Operations (Continuous):**
-```python
-# Auto-increment every second
-timer.text.auto_increment(by=1, interval=1000)
-
-# Stop auto operation
-timer.text.stop_auto()
-```
-
-**Reset to Defaults:**
-```python
-state.reset()  # Restore all properties to initial values
-```
-
-### Auto-Incrementing Timer Example
+### 1. State V2 (Dynamic)
+Modern, Pythonic state management for simple reactive updates. Best for counters, timers, and single-component interactions.
 
 ```python
 from dars.all import *
 
-app = App("Timer Demo")
+# Create state
+counter = State(Text("0", id="counter"), text=0)
 
-# Create timer display
-timer_display = Text("0", id="timer", style={"font-size": "36px"})
-timer = State(timer_display, text=0)
+# Reactive operations
+inc_btn = Button("+1", on_click=counter.text.increment(by=1))
+set_btn = Button("Reset", on_click=counter.reset())
 
-# Control buttons
-start_btn = Button("Start", on_click=timer.text.auto_increment(by=1, interval=1000))
-stop_btn = Button("Stop", on_click=timer.text.stop_auto())
-reset_btn = Button("Reset", on_click=timer.reset())
-
-page = Page(Container(timer_display, start_btn, stop_btn, reset_btn))
-app.add_page("index", page, index=True)
+# Auto-increment
+start_btn = Button("Start", on_click=counter.text.auto_increment(by=1, interval=1000))
 ```
 
-### Animation System
+### 2. dState & cState (Indexed)
+Powerful indexed state system for complex state machines, multi-step workflows, and cross-component coordination.
 
-Dars includes **15+ built-in animations** that integrate seamlessly with state management:
-
-**Basic Animations:**
 ```python
-from dars.all import fadeIn, fadeOut, pulse, shake, sequence
+from dars.core.state import dState, Mod
 
-# Single animation
-button.on_click = fadeIn(id="element", duration=500)
+# Define state with indices [0, 1, 2]
+toggle = dState("toggle", component=btn, states=[0, 1, 2])
 
-# Chained animations
-button.on_click = sequence(
-    fadeIn(id="box", duration=400),
-    pulse(id="box", scale=1.2, iterations=2),
-    shake(id="box", intensity=5)
-)
+# Define rules for state 1
+toggle.cState(1, mods=[
+    Mod.set(btn, text="Active", style={'background': 'green'}),
+    Mod.set(status_text, text="System Online")
+])
+
+# Navigate by index
+btn.on_click = toggle.state(1)
 ```
 
-**Available Animations:**
-- **Opacity:** `fadeIn`, `fadeOut`
-- **Movement:** `slideIn`, `slideOut` (8 directions)
-- **Scaling:** `scaleIn`, `scaleOut`
-- **Interactive:** `shake`, `bounce`, `pulse`, `rotate`, `flip`
-- **Effects:** `colorChange`, `morphSize`
+### Comparison
 
-**Combining State & Animations:**
-```python
-button.on_click = sequence(
-    counter.text.increment(by=1),
-    pulse(id="counter", scale=1.2),
-    fadeOut(id="counter", duration=200),
-    counter.text.set(value=0),
-    fadeIn(id="counter", duration=200)
-)
-```
+| Feature | State V2 (Dynamic) | dState/cState (Indexed) |
+|---------|-------------------|-------------------------|
+| **Best For** | Simple updates, counters, timers | Complex workflows, state machines |
+| **API Style** | Clean, Pythonic | Explicit, Indexed |
+| **State Tracking** | Dynamic values | Fixed Indices (0, 1, 2...) |
+| **Auto Ops** | Built-in (`auto_increment`) | Manual via Mod |
+| **Cross-State** | No | `Mod.call()` supported |
 
-### State V2 docs [here:](https://ztamdev.github.io/Dars-Framework/docs.html#state-management-in-dars)
+For detailed documentation, visit the [State Management Guide](https://ztamdev.github.io/Dars-Framework/docs.html#state-management-in-dars).
+
+---
 
 ### Dynamic Updates with `this()`
 
@@ -227,37 +158,21 @@ btn = Button("Click Me!", on_click=this().state(
     text="Clicked!",
     style={"background-color": "green"}
 ))
-
-# With animations
-btn = Button("Pulse", on_click=[
-    pulse(id="btn", scale=1.1),
-    this().state(text="Done!")
-])
 ```
 
 ### Script Chaining with `.then()`
 
-Chain asynchronous operations using `.then()`:
+Chain asynchronous operations using `.then()` or `sequence()`:
 
 ```python
 from dars.all import *
-from dars.scripts.dscript import RawJS, dScript
 
-# Chain file read with state update
-read_btn = Button("Load", on_click=
-    read_text("data.txt").then(
-        this().state(text=RawJS(dScript.ARG))
-    )
-)
-
-# Multi-step chain
+# Chain animation + state update
 button.on_click = sequence(
     fadeOut(id="status"),
     state.text.set(value="Loading...")
 ).then(
     fadeIn(id="status")
-).then(
-    this().state(text="Complete!")
 )
 ```
 
