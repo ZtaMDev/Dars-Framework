@@ -146,6 +146,41 @@ For detailed documentation, visit the [State Management Guide](https://ztamdev.g
 
 ---
 
+## Animation System
+
+Dars includes **15+ built-in animations** that work seamlessly with state management:
+
+```python
+from dars.all import fadeIn, fadeOut, pulse, shake, sequence
+
+# Single animation
+button.on_click = fadeIn(id="modal", duration=500)
+
+# Chain multiple animations
+button.on_click = sequence(
+    fadeIn(id="box"),
+    pulse(id="box", scale=1.2, iterations=2),
+    shake(id="box", intensity=5)
+)
+
+# Combine with state updates
+button.on_click = sequence(
+    counter.text.increment(by=1),
+    pulse(id="counter", scale=1.2)
+)
+```
+
+**Available Animations:**
+- **Opacity:** `fadeIn`, `fadeOut`
+- **Movement:** `slideIn`, `slideOut` (up, down, left, right)
+- **Scaling:** `scaleIn`, `scaleOut`, `pulse`
+- **Interactive:** `shake`, `bounce`, `rotate`, `flip`
+- **Effects:** `colorChange`, `morphSize`
+
+For complete animation documentation, visit the [Animation Guide](https://ztamdev.github.io/Dars-Framework/docs.html#dars-animation-system).
+
+---
+
 ### Dynamic Updates with `this()`
 
 Update components directly without pre-defining states:
