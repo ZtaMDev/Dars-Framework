@@ -21,8 +21,6 @@ DeepWiki [here](https://deepwiki.com/ZtaMDev/Dars-Framework) |
 pip install dars-framework
 ```
 
-> Some Javascript and css stack required for advanced personalization.
-
 Try dars without installing nothing(single page mode) just visit the [Dars Playground](https://dars-playground.vercel.app/)
 
 ## How It Works
@@ -215,6 +213,8 @@ button.on_click = sequence(
 )
 ```
 
+### State V2 docs [here:](https://ztamdev.github.io/Dars-Framework/docs.html#state-management-in-dars)
+
 ### Dynamic Updates with `this()`
 
 Update components directly without pre-defining states:
@@ -260,7 +260,7 @@ button.on_click = sequence(
     this().state(text="Complete!")
 )
 ```
-New State V2 docs here: [State V2](https://ztamdev.github.io/Dars-Framework/docs.html#state-management-in-dars)
+
 ---
 
 
