@@ -1,3 +1,42 @@
+# Release Notes v1.5.0
+
+> **Animation System Stability & Runtime Improvements**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Animation System Stability
+
+Significant improvements to the animation system's reliability and ease of use:
+
+- **Fixed Infinite Pulse**: `pulse(iterations="infinite")` now works correctly (fixed `TypeError`).
+- **Chaining Support**: State updates like `increment()` can now be chained with animations using `.then()` or `sequence()`.
+- **Documentation**: Added comprehensive [Animation Guide](https://ztamdev.github.io/Dars-Framework/docs.html#dars-animation-system) to the documentation.
+
+### Dynamic Event Updates
+
+The client-side runtime has been upgraded to fully support dynamic event handler updates:
+
+```python
+# This now works perfectly in real-time
+button.on_click = state.update(
+    text="Clicked!",
+    on_click=alert("New handler attached!")
+)
+```
+
+## Bug Fixes
+
+- **Fixed**: `pulse` animation now correctly handles `iterations="infinite"` (mapped to `Infinity`).
+- **Fixed**: `SyntaxError` when chaining state updates (wrapped in async IIFE).
+
+---
+
 # Release Notes v1.4.9
 
 > **Event Handler Support & Dual State System Documentation**

@@ -157,6 +157,7 @@ class ReactiveProperty:
         component_id = self._state.component.id
         
         code = f"""
+(async () => {{
 const el = document.getElementById('{component_id}');
 if (el) {{
     const current = parseFloat(el.textContent || '0') || 0;
@@ -169,6 +170,7 @@ if (el) {{
     }});
     el.dispatchEvent(ev);
 }}
+}})();
 """.strip()
         
         return dScript(code)
@@ -233,9 +235,11 @@ if (el) {{
         config_json = json.dumps(config)
         
         code = f"""
+(async () => {{
 if (window.Dars && window.Dars.startLoop) {{
     window.Dars.startLoop('{component_id}', {config_json});
 }}
+}})();
 """.strip()
         return dScript(code)
     
@@ -267,9 +271,11 @@ if (window.Dars && window.Dars.startLoop) {{
         config_json = json.dumps(config)
         
         code = f"""
+(async () => {{
 if (window.Dars && window.Dars.startLoop) {{
     window.Dars.startLoop('{component_id}', {config_json});
 }}
+}})();
 """.strip()
         return dScript(code)
     
@@ -285,9 +291,11 @@ if (window.Dars && window.Dars.startLoop) {{
         component_id = self._state.component.id
         
         code = f"""
+(async () => {{
 if (window.Dars && window.Dars.stopLoop) {{
     window.Dars.stopLoop('{component_id}');
 }}
+}})();
 """.strip()
         
         return dScript(code)

@@ -306,7 +306,7 @@ def pulse(id: str, scale: float = 1.1, duration: int = 400, iterations: Union[in
     Example:
         Button("Pulse", on_click=pulse(id="button", scale=1.2, iterations=3))
     """
-    iter_value = f"'{iterations}'" if iterations == 'infinite' else str(iterations)
+    iter_value = "Infinity" if iterations == 'infinite' else str(iterations)
     code = f"""
 (async () => {{
 const el = document.getElementById('{id}');
