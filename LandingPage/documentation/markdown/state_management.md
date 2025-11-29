@@ -56,8 +56,40 @@ counter_state = State(display, text=0)
 ```
 
 **Constructor Parameters:**
-- `component`: The component to manage
+- `component`: The component to manage (can be a component object or string ID)
 - `**default_props`: Default property values (e.g., `text=0`, `style={...}`)
+
+### State with String IDs (for Dynamic Components)
+
+`State()` can accept either a component object or a string ID. This is useful for components created dynamically:
+
+```python
+from dars.all import *
+from dars.backend import createComp
+
+# Traditional: State with component object
+existing_text = Text("0", id="counter")
+existing_state = State(existing_text, text=0)
+
+# New: State with string ID (for components created later)
+dynamic_state = State("dynamic-counter", text=0)
+
+# Create the component later
+create_btn.on_click = createComp(
+    target=Text("0", id="dynamic-counter"),
+    root="container-id"
+)
+
+# State works even though component was created after state!
+increment_btn.on_click = dynamic_state.text.increment(by=1)
+```
+
+**Use Cases:**
+- Components created with `createComp()`
+- Dynamically generated UIs
+- Conditional component rendering
+- Server-side rendered components
+
 
 ### Reactive Properties
 
@@ -185,6 +217,43 @@ timer.text.auto_increment(by=1, interval=1000, max=100)
 # Auto-decrement down to 0
 countdown.text.auto_decrement(by=1, interval=1000, min=0)
 ```
+
+## Backend Integration with useData()
+
+State V2 integrates seamlessly with Dars backend HTTP utilities for reactive API-driven UIs:
+
+```python
+from dars.all import *
+from dars.backend import get, useData
+
+# Create components
+user_name = Text("", id="user-name")
+user_email = Text("", id="user-email")
+
+# Create states
+name_state = State(user_name, text="")
+email_state = State(user_email, text="")
+
+# Fetch and bind API data - pure Python!
+fetch_btn = Button(
+    "Load User",
+    on_click=get(
+        id="userData",
+        url="https://api.example.com/users/1",
+        # Access nested data with dot notation
+        callback=(
+            name_state.text.set(useData('userData').name)
+            .then(email_state.text.set(useData('userData').email))
+        )
+    )
+)
+```
+
+**Key Features:**
+- **`useData('id')`** - Access fetched data by operation ID
+- **Dot notation** - `useData('userData').name` accesses nested properties
+- **`.then()` chaining** - Chain multiple state updates sequentially
+- **No JavaScript** - Everything is pure Python
 
 ## Complete Example
 

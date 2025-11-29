@@ -67,3 +67,48 @@ Runtime behavior:
 - Dynamic handlers run in capture phase and stop propagation for the same event.
 - Returning to the default state (index 0) removes any dynamic listeners from that element and restores its initial DOM.
 
+
+---
+
+## Backend HTTP Integration
+
+Dars provides HTTP utilities that can be used directly in event handlers:
+
+```python
+from dars.all import *
+from dars.backend import get, post, useData
+
+# GET request on button click
+fetch_btn = Button(
+    "Fetch Data",
+    on_click=get(
+        id="apiData",
+        url="https://api.example.com/data",
+        callback=status_state.text.set("✅ Loaded!")
+    )
+)
+
+# POST request with data binding
+submit_btn = Button(
+    "Submit",
+    on_click=post(
+        id="submitResult",
+        url="https://api.example.com/submit",
+        body={"name": "John", "email": "john@example.com"},
+        callback=result_state.text.set(useData('submitResult').message)
+    )
+)
+
+# Chain HTTP request with state updates
+button.on_click = [
+    status_state.text.set("Loading..."),
+    get(
+        id="userData",
+        url="https://api.example.com/user/1",
+        callback=(
+            name_state.text.set(useData('userData').name)
+            .then(status_state.text.set("Done!"))
+        )
+    )
+]
+```

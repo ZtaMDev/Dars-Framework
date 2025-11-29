@@ -53,8 +53,13 @@ from dars.scripts.utils_ds import showModal, hideModal, goTo, goToNew, reload, g
 from dars.scripts.animations import fadeIn, fadeOut, slideIn, slideOut, scaleIn, scaleOut, shake, bounce, pulse, rotate, flip, colorChange, morphSize, popIn, popOut, sequence  # Animation System
 from dars.scripts.script import *
 from dars.version import __version__
-from dars.backend import createComp, deleteComp
-from dars.backend import updateComp
+
+# Backend HTTP Utilities (complete import)
+from dars.backend.http import fetch, get, post, put, delete, patch
+from dars.backend.data import useData, DataAccessor
+from dars.backend.json_utils import stringify, parse, get_value
+from dars.backend.components import createComp, updateComp, deleteComp
+
 # from dars.core.properties import *
 
 __all__ = [
@@ -71,6 +76,10 @@ __all__ = [
     'State', 'ReactiveProperty', 'StateTransition',
     # Legacy State Management (backward compatibility)
     'dState', 'Mod', 'this_for',
+    # Backend HTTP Utilities
+    'fetch', 'get', 'post', 'put', 'delete', 'patch',
+    'useData', 'DataAccessor',
+    'stringify', 'parse', 'get_value',
     'createComp', 'deleteComp', 'updateComp', 'RawJS', 'this', 'Arg', 'SelectOption', 
     # SPA Routing
     'route', 'SPARoute', 'RouteNode',

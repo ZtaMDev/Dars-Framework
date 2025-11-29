@@ -55,13 +55,10 @@ class dScript(Script):
         
         combined_code = f"""
 (async () => {{
-    console.log("Starting chained script execution");
     try {{
-        console.log("Awaiting first script...");
         const result = await {current_code};
         // Make result available as 'value' or argument to next script
         const value = result; 
-        console.log("Dars chained script value:", value);
         await (async (value) => {{ 
             {next_code} 
         }})(result);

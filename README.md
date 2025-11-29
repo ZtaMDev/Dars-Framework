@@ -91,6 +91,54 @@ if __name__ == "__main__":
 
 ---
 
+## Backend HTTP Utilities & API Communication
+
+Dars provides a system for HTTP requests and API communication without writing JavaScript. Use `useData()` for clean data binding:
+
+```python
+from dars.all import *
+from dars.backend import get, useData
+
+# Create components
+user_display = Text("", id="user-name")
+user_state = State(user_display, text="")
+
+# Fetch and bind data - pure Python!
+fetch_btn = Button(
+    "Fetch User",
+    on_click=get(
+        id="userData",
+        url="https://api.example.com/users/1",
+        # Access nested data with dot notation
+        callback=user_state.text.set(useData('userData').name)
+    )
+)
+```
+
+### Chain Multiple Updates
+
+Use `.then()` to chain state updates sequentially:
+
+```python
+# Update multiple components from API response
+callback=(
+    name_state.text.set(useData('userData').name)
+    .then(email_state.text.set(useData('userData').email))
+    .then(website_state.text.set(useData('userData').website))
+)
+```
+
+### Available HTTP Methods
+
+- **`get(id, url, **options)`** - GET request
+- **`post(id, url, body, **options)`** - POST request  
+- **`put(id, url, body, **options)`** - PUT request
+- **`delete(id, url, **options)`** - DELETE request
+
+For complete documentation, see the [Backend API Guide](https://ztamdev.github.io/Dars-Framework/docs.html#backend-http-utilities).
+
+---
+
 
 ## State Management System
 
@@ -102,8 +150,11 @@ Modern, Pythonic state management for simple reactive updates. Best for counters
 ```python
 from dars.all import *
 
-# Create state
+# Create state with component
 counter = State(Text("0", id="counter"), text=0)
+
+# Or use string ID for dynamic components
+dynamic_state = State("dynamic-counter", text=0)
 
 # Reactive operations
 inc_btn = Button("+1", on_click=counter.text.increment(by=1))
@@ -112,6 +163,9 @@ set_btn = Button("Reset", on_click=counter.reset())
 # Auto-increment
 start_btn = Button("Start", on_click=counter.text.auto_increment(by=1, interval=1000))
 ```
+
+**String ID Support:** State() can accept either a component object or a string ID, perfect for components created dynamically with `createComp()`.
+
 
 ### 2. dState & cState (Indexed)
 Powerful indexed state system for complex state machines, multi-step workflows, and cross-component coordination.
@@ -141,6 +195,7 @@ btn.on_click = toggle.state(1)
 | **State Tracking** | Dynamic values | Fixed Indices (0, 1, 2...) |
 | **Auto Ops** | Built-in (`auto_increment`) | Manual via Mod |
 | **Cross-State** | No | `Mod.call()` supported |
+| **Dynamic Components** | String ID support | Component required |
 
 For detailed documentation, visit the [State Management Guide](https://ztamdev.github.io/Dars-Framework/docs.html#state-management-in-dars).
 

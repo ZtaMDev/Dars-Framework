@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "dars_framework",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "Dars is a Python UI framework for building modern, interactive web apps with only Python code. Write your interface in Python, export it to static HTML/CSS/JS, and deploy anywhere.",
   "authors": [
     {
@@ -23,9 +23,17 @@
     "bs4": "==0.0.2",
     "uvicorn": "==0.38.0",
     "markdown2": "==2.5.4",
-    "requests": "==2.32.5"
+    "requests": "==2.32.5",
+    "plotly": "==5.18.0"
   },
-  "optionalDependencies": {},
+  "optionalDependencies": {
+    "dev": {
+      "matplotlib": "==3.8.2",
+      "seaborn": "==0.13.0",
+      "altair": "==5.2.0",
+      "mpld3": "==0.5.10"
+    }
+  },
   "scripts": {
     "dev": "python LandingPage/index.py"
   },

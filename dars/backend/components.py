@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Any, Union
 import json
 
-from dars.scripts.dscript import dScript
+from dars.scripts.dscript import dScript, RawJS
 
 # VDOM builder to serialize Component -> vdom dict
 try:

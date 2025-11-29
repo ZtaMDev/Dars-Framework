@@ -6,3 +6,4 @@ recursive-include dars/docs *
 recursive-include dars *.json
 recursive-include dars *.md
 exclude LandingPage
+exclude tst

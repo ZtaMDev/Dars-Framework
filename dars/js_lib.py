@@ -409,10 +409,39 @@ function change(opt){{
           }}
       }}
       
-      // Apply attribute changes
+      // Apply attribute changes with special handling for 'class' to preserve Dars framework classes
       if (opt.attrs && typeof opt.attrs === 'object') {{
           for (const k in opt.attrs) {{
-              try {{ el.setAttribute(k, String(opt.attrs[k])); }} catch (_) {{}}
+              try {{
+                  // Special handling for 'class' attribute to preserve framework classes
+                  if (k === 'class') {{
+                      // Define prefixes for framework-reserved classes that should never be removed
+                      const reservedPrefixes = ['dars-', 'dars-id-', 'dars-ev-'];
+                      
+                      // Get current classes
+                      const currentClasses = Array.from(el.classList || []);
+                      
+                      // Filter out framework-reserved classes
+                      const reservedClasses = currentClasses.filter(cls => 
+                          reservedPrefixes.some(prefix => String(cls).startsWith(prefix))
+                      );
+                      
+                      // Get new user classes from the update
+                      const newUserClasses = String(opt.attrs[k] || '')
+                          .split(' ')
+                          .map(c => String(c).trim())
+                          .filter(c => c.length > 0);
+                      
+                      // Merge: reserved classes + new user classes
+                      const mergedClasses = [...reservedClasses, ...newUserClasses];
+                      
+                      // Set the merged class list
+                      el.className = mergedClasses.join(' ');
+                  }} else {{
+                      // Normal attribute handling for non-class attributes
+                      el.setAttribute(k, String(opt.attrs[k]));
+                  }}
+              }} catch (_) {{}}
           }}
       }}
       

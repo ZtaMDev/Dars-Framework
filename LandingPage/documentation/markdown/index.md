@@ -7,6 +7,7 @@ Welcome to the official Dars Framework documentation. Here you will find detaile
 - [Getting Started with Dars](#getting-started-with-dars)
 - [App class](#app-class-and-pwa-features-in-dars-framework)
 - [SPA Routing](#spa-routing-in-dars-framework)
+- [Backend HTTP Utilities & API Communication](#backend-http-utilities)
 - [State Management](#state-management-in-dars)
 - [Components](#dars-components-documentation)
 - [Animation System](#dars-animation-system)

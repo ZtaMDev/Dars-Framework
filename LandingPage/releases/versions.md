@@ -1,3 +1,225 @@
+# Release Notes v1.5.1
+
+> **Backend HTTP Utilities & Pythonic API Communication**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Backend HTTP Utilities System
+
+Dars now includes a comprehensive **Pythonic system** for HTTP requests and API communication without writing any JavaScript. The new `dars.backend` module enables you to fetch data, bind it to components, and create reactive UIs entirely in Python.
+
+**Key Features:**
+- HTTP functions (get, post, put, delete, patch, fetch)
+- `useData()` with dot notation for nested data access
+- Seamless StateV2 integration
+- `.then()` chaining for sequential operations
+- Component management (createComp, updateComp, deleteComp)
+- JSON utilities (stringify, parse, get_value)
+- **State() string ID support** - Create states for dynamic components
+
+### HTTP Functions
+
+```python
+from dars.all import *
+from dars.backend import get, post, useData
+
+# GET request with data binding
+fetch_btn = Button(
+    "Fetch User",
+    on_click=get(
+        id="userData",
+        url="https://api.example.com/users/1",
+        callback=name_state.text.set(useData('userData').name)
+    )
+)
+
+# POST request
+submit_btn = Button(
+    "Submit",
+    on_click=post(
+        id="result",
+        url="https://api.example.com/submit",
+        body={"name": "John", "email": "john@example.com"},
+        callback=status_state.text.set("✅ Submitted!")
+    )
+)
+```
+
+### useData() with Dot Notation
+
+Access fetched data using Pythonic dot notation:
+
+```python
+# Access nested properties
+useData('userData').name           # → window.userData?.name
+useData('user').address.city       # → window.user?.address?.city
+useData('posts').items[0].title    # → window.posts?.items?.[0]?.title
+```
+
+### Chaining with .then()
+
+Chain multiple state updates sequentially:
+
+```python
+callback=(
+    status_state.text.set("Loading...")
+    .then(name_state.text.set(useData('userData').name))
+    .then(email_state.text.set(useData('userData').email))
+    .then(status_state.text.set("✅ Loaded!"))
+)
+```
+
+### Component Management
+
+Create, update, and delete components dynamically at runtime:
+
+```python
+from dars.backend import createComp, updateComp, deleteComp
+
+# Create new component
+create_btn.on_click = createComp(
+    target=Text("Hello!", id="new-item"),
+    root="container-id",
+    position="append"
+)
+
+# Update component
+update_btn.on_click = updateComp(
+    "my-component-id",
+    text="Updated!",
+    style={"color": "red"}
+)
+
+# Delete component
+delete_btn.on_click = deleteComp("component-id")
+```
+
+### JSON Utilities
+
+Helper functions for working with JSON data:
+
+```python
+from dars.backend import stringify, parse, get_value
+
+# Stringify with pretty printing
+display_state.text.set(stringify(useData('userData'), pretty=True))
+
+# Parse JSON string
+data = parse('{"name": "John"}')
+
+# Safe nested access
+city = get_value(useData('userData'), 'address.city', default='Unknown')
+```
+
+### State() String ID Support
+
+`State()` now accepts both component objects and string IDs, enabling state management for dynamically created components:
+
+```python
+from dars.all import *
+from dars.backend import createComp
+
+# Traditional: State with component object
+existing_text = Text("0", id="counter")
+existing_state = State(existing_text, text=0)
+
+# New: State with string ID (for components created later)
+dynamic_state = State("dynamic-counter", text=0)
+
+# Create the component later
+create_btn.on_click = createComp(
+    target=Text("0", id="dynamic-counter"),
+    root="container-id"
+)
+
+# State works even though component was created after state!
+increment_btn.on_click = dynamic_state.text.increment(by=1)
+```
+
+**Use Cases:**
+- Components created with `createComp()`
+- Dynamically generated UIs
+- Conditional component rendering
+- Server-side rendered components
+
+## Technical Implementation
+
+### DataAccessor Class
+
+New `DataAccessor` class with:
+- `__getattr__` for dot notation support
+- `.code` property for RawJS generation
+- `.bind()` method for StateV2 integration
+- `.get()` method for safe property access
+
+### StateV2 Enhancements
+
+Updated `StateV2._generate_change_call()` to handle `DataAccessor` objects:
+- Automatically detects `DataAccessor` instances
+- Extracts `.code` property for JavaScript generation
+- Seamless integration with existing state management
+
+## Documentation
+
+### New Documentation
+
+**`backend_api.md`** - Comprehensive guide (500+ lines) covering:
+- Quick Start examples
+- HTTP Functions reference
+- Data Binding with useData()
+- JSON Utilities
+- Component Management
+- 3 Advanced Examples
+- Best Practices
+- Complete API Reference
+
+**Documentation URL:** https://ztamdev.github.io/Dars-Framework/docs.html#backend-http-utilities
+
+## Breaking Changes
+
+**None** - This is a fully backward-compatible release. All existing code continues to work.
+
+## Bug Fixes
+
+- **Fixed**: `StateV2` now correctly handles `DataAccessor` objects in `to_js_value()`
+- **Fixed**: `RawJS` objects are properly serialized in state updates
+- **Fixed**: `dScript.then()` chaining works correctly with backend operations
+
+## Performance & Compatibility
+
+- **Zero Overhead**: Backend utilities only activate when imported
+- **Backward Compatible**: All existing code works without changes
+- **Bundle Size**: Minimal impact (+~10KB for backend module)
+- **Desktop Support**: Full Electron compatibility maintained
+
+## Migration Guide
+
+No migration needed - this is an additive release. To start using the new features:
+
+```python
+# Add to your imports
+from dars.backend import get, post, useData
+
+# Start using Pythonic HTTP
+button.on_click = get(
+    id="data",
+    url="https://api.example.com/data",
+    callback=state.text.set(useData('data').message)
+)
+```
+
+---
+
+**This release makes Dars fully self-contained for building reactive, API-driven UIs without writing any JavaScript!**
+
+---
+
 # Release Notes v1.5.0
 
 > **Animation System Stability & Runtime Improvements**

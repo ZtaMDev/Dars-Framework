@@ -59,7 +59,7 @@ class ReactiveProperty:
         Generate JS code to call window.Dars.change() with proper payload.
         This handles all property types including events (dScript objects).
         """
-        from dars.scripts.dscript import dScript
+        from dars.scripts.dscript import dScript, RawJS
         
         component_id = self._state.component.id
         
@@ -67,6 +67,20 @@ class ReactiveProperty:
         parts = [f"id: '{component_id}'", "dynamic: true"]
         
         for k, v in props.items():
+            # Helper to get JS code or JSON string
+            def to_js_value(val):
+                # Import DataAccessor locally to avoid circular imports
+                try:
+                    from dars.backend.data import DataAccessor
+                    if isinstance(val, DataAccessor):
+                        return val.code
+                except ImportError:
+                    pass
+                
+                if isinstance(val, (dScript, RawJS)):
+                    return val.code if hasattr(val, 'code') else str(val)
+                return json.dumps(val)
+
             # Handle events (on_click, on_change, etc.)
             if k.startswith('on_'):
                 if isinstance(v, dScript):
@@ -90,27 +104,36 @@ class ReactiveProperty:
                     continue
             # Handle regular properties
             elif k == 'text':
-                parts.append(f"text: {json.dumps(v)}")
+                parts.append(f"text: {to_js_value(v)}")
             elif k == 'html':
-                parts.append(f"html: {json.dumps(v)}")
+                parts.append(f"html: {to_js_value(v)}")
             elif k == 'style' and isinstance(v, dict):
-                parts.append(f"style: {json.dumps(v)}")
+                # Handle style dict where values might be RawJS
+                style_parts = []
+                for sk, sv in v.items():
+                    style_parts.append(f"{json.dumps(sk)}: {to_js_value(sv)}")
+                parts.append(f"style: {{{', '.join(style_parts)}}}")
             elif k == 'class_name':
                 # Map class_name to classes object
                 if isinstance(v, str):
                     # Setting a single class - we should replace all classes
                     parts.append(f"attrs: {{class: {json.dumps(v)}}}")
+                elif isinstance(v, (dScript, RawJS)):
+                     parts.append(f"attrs: {{class: {v.code}}}")
                 elif isinstance(v, dict):
                     # Advanced class manipulation
                     parts.append(f"classes: {json.dumps(v)}")
             elif k == 'attrs' and isinstance(v, dict):
-                parts.append(f"attrs: {json.dumps(v)}")
+                attrs_parts = []
+                for ak, av in v.items():
+                    attrs_parts.append(f"{json.dumps(ak)}: {to_js_value(av)}")
+                parts.append(f"attrs: {{{', '.join(attrs_parts)}}}")
             elif k == 'classes' and isinstance(v, dict):
                 parts.append(f"classes: {json.dumps(v)}")
             else:
                 # Generic attribute
                 try:
-                    parts.append(f"attrs: {{{json.dumps(k)}: {json.dumps(v)}}}")
+                    parts.append(f"attrs: {{{json.dumps(k)}: {to_js_value(v)}}}")
                 except (TypeError, ValueError):
                     # Skip non-JSON-serializable values
                     continue
@@ -384,10 +407,19 @@ class State:
         Initialize a new State bound to a component.
         
         Args:
-            component: The Dars component to bind this state to
+            component: The Dars component to bind this state to, or a string ID
             **initial_props: Initial property values (e.g., text=0, style={...})
         """
-        self.component = component
+        # Handle both component objects and string IDs
+        if isinstance(component, str):
+            # Create a mock component object with just the ID
+            class MockComponent:
+                def __init__(self, component_id):
+                    self.id = component_id
+            self.component = MockComponent(component)
+        else:
+            self.component = component
+            
         self._props: Dict[str, ReactiveProperty] = {}
         self._default_snapshot = deepcopy(initial_props)
         self._transitions: List[StateTransition] = []
@@ -403,8 +435,8 @@ class State:
         # Register in global registry
         STATE_V2_REGISTRY.append(self)
         
-        # Bind to component if it has bind_state method
-        if hasattr(component, 'bind_state'):
+        # Bind to component if it has bind_state method (only for real components)
+        if hasattr(component, 'bind_state') and not isinstance(component, str):
             component.bind_state(self)
     
     @property
