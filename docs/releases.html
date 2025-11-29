@@ -239,13 +239,13 @@
     margin: 0 auto;
     padding: 40px 20px;">
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_173">
-      <h1 id="release-notes-v151">
-       Release Notes v1.5.1
+      <h1 id="release-notes-v152">
+       Release Notes v1.5.2
       </h1>
       <blockquote>
        <p>
         <strong>
-         Backend HTTP Utilities &amp; Pythonic API Communication
+         Function Components
         </strong>
        </p>
       </blockquote>
@@ -257,6 +257,214 @@
 </code></pre>
       </div>
       <h2 id="whats-new">
+       What's New
+      </h2>
+      <h3 id="function-components-system">
+       Function Components System
+      </h3>
+      <p>
+       Dars Framework now features
+       <strong>
+        Function Components
+       </strong>
+       as the primary and recommended way to create custom UI components. This new system provides a clean, Pythonic approach to component creation without the complexity of class inheritance.
+      </p>
+      <h4 id="what-are-function-components">
+       What are Function Components?
+      </h4>
+      <p>
+       Function Components allow you to create reusable UI elements using simple Python functions with f-string templates. The framework automatically handles IDs, styling, events, and other properties.
+      </p>
+      <p>
+       <strong>
+        Key Benefits:
+       </strong>
+       -
+       <strong>
+        Simple &amp; Pythonic
+       </strong>
+       : Just write a function that returns an HTML string
+-
+       <strong>
+        No Boilerplate
+       </strong>
+       : No need to inherit from Component class or implement render methods
+-
+       <strong>
+        Automatic Property Injection
+       </strong>
+       : Framework handles
+       <code>
+        id
+       </code>
+       ,
+       <code>
+        class_name
+       </code>
+       ,
+       <code>
+        style
+       </code>
+       , and
+       <code>
+        children
+       </code>
+       automatically
+-
+       <strong>
+        Linter-Friendly
+       </strong>
+       : Two patterns available to avoid linter warnings
+-
+       <strong>
+        State Compatible
+       </strong>
+       : Works seamlessly with State V2 for reactive UIs
+      </p>
+      <h4 id="basic-usage">
+       Basic Usage
+      </h4>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="n">FunctionComponent</span><span class="p">,</span> <span class="n">Props</span>
+
+<span class="nd">@FunctionComponent</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">UserCard</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">email</span><span class="p">,</span> <span class="o">**</span><span class="n">props</span><span class="p">):</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"""</span>
+<span class="s2">    &lt;div </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">class_name</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">style</span><span class="si">}</span><span class="s2">&gt;</span>
+<span class="s2">        &lt;h3&gt;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&lt;/h3&gt;</span>
+<span class="s2">        &lt;p&gt;</span><span class="si">{</span><span class="n">email</span><span class="si">}</span><span class="s2">&lt;/p&gt;</span>
+<span class="s2">        &lt;div class="card-body"&gt;</span>
+<span class="s2">            </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">children</span><span class="si">}</span>
+<span class="s2">        &lt;/div&gt;</span>
+<span class="s2">    &lt;/div&gt;</span>
+<span class="s2">    """</span>
+
+<span class="c1"># Usage</span>
+<span class="n">card</span> <span class="o">=</span> <span class="n">UserCard</span><span class="p">(</span><span class="s2">"John Doe"</span><span class="p">,</span> <span class="s2">"john@example.com"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"user-1"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s2">"padding"</span><span class="p">:</span> <span class="s2">"20px"</span><span class="p">})</span>
+</code></pre>
+      </div>
+      <h4 id="two-supported-patterns">
+       Two Supported Patterns
+      </h4>
+      <p>
+       <strong>
+        Option 1: Using Props Helper (Recommended)
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="nd">@FunctionComponent</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">MyComponent</span><span class="p">(</span><span class="o">**</span><span class="n">props</span><span class="p">):</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"""</span>
+<span class="s2">    &lt;div </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">class_name</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">style</span><span class="si">}</span><span class="s2">&gt;</span>
+<span class="s2">        </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">children</span><span class="si">}</span>
+<span class="s2">    &lt;/div&gt;</span>
+<span class="s2">    """</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Option 2: Explicit Arguments
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="nd">@FunctionComponent</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">MyComponent</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">class_name</span><span class="p">,</span> <span class="n">style</span><span class="p">,</span> <span class="n">children</span><span class="p">,</span> <span class="o">**</span><span class="n">props</span><span class="p">):</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"""</span>
+<span class="s2">    &lt;div </span><span class="si">{</span><span class="nb">id</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">class_name</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">style</span><span class="si">}</span><span class="s2">&gt;</span>
+<span class="s2">        </span><span class="si">{</span><span class="n">children</span><span class="si">}</span>
+<span class="s2">    &lt;/div&gt;</span>
+<span class="s2">    """</span>
+</code></pre>
+      </div>
+      <p>
+       Both patterns are fully supported and avoid linter warnings about undefined variables.
+      </p>
+      <h4 id="props-helper-class">
+       Props Helper Class
+      </h4>
+      <p>
+       The new
+       <code>
+        Props
+       </code>
+       class provides static constants for framework properties:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">Props</span><span class="o">.</span><span class="n">id</span>          <span class="c1"># "{id}"</span>
+<span class="n">Props</span><span class="o">.</span><span class="n">class_name</span>  <span class="c1"># "{class_name}"</span>
+<span class="n">Props</span><span class="o">.</span><span class="n">style</span>       <span class="c1"># "{style}"</span>
+<span class="n">Props</span><span class="o">.</span><span class="n">children</span>    <span class="c1"># "{children}"</span>
+</code></pre>
+      </div>
+      <p>
+       These resolve to the correct placeholders that the framework replaces during rendering.
+      </p>
+      <h4 id="state-v2-integration-clarification">
+       State V2 Integration Clarification
+      </h4>
+      <p>
+       <strong>
+        Important Concept:
+       </strong>
+       State V2 updates DOM properties, not arbitrary component arguments.
+      </p>
+      <p>
+       <strong>
+        Correct Usage:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="nd">@FunctionComponent</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Counter</span><span class="p">(</span><span class="o">**</span><span class="n">props</span><span class="p">):</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"""</span>
+<span class="s2">    &lt;div </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&gt;</span>
+<span class="s2">        Current count: </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">children</span><span class="si">}</span>
+<span class="s2">    &lt;/div&gt;</span>
+<span class="s2">    """</span>
+
+<span class="n">counter</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"my-counter"</span><span class="p">,</span> <span class="n">children</span><span class="o">=</span><span class="s2">"0"</span><span class="p">)</span>
+<span class="n">state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="n">counter</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">"Current count: 0"</span><span class="p">)</span>
+
+<span class="c1"># Updates textContent of the div</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Increment"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"Current count: 5"</span><span class="p">))</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Why:
+       </strong>
+       Dars exports to static HTML/JS. The JavaScript runtime can only manipulate DOM properties (
+       <code>
+        textContent
+       </code>
+       ,
+       <code>
+        style
+       </code>
+       ,
+       <code>
+        innerHTML
+       </code>
+       ), not re-execute Python functions with new arguments.
+      </p>
+      <h1 id="release-notes-v151">
+       Release Notes v1.5.1
+      </h1>
+      <blockquote>
+       <p>
+        <strong>
+         Backend HTTP Utilities &amp; Pythonic API Communication
+        </strong>
+       </p>
+      </blockquote>
+      <h2 id="installation-2">
+       Installation
+      </h2>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
+</code></pre>
+      </div>
+      <h2 id="whats-new-2">
        What's New
       </h2>
       <h3 id="backend-http-utilities-system">
@@ -643,14 +851,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-2">
+      <h2 id="installation-3">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-2">
+      <h2 id="whats-new-3">
        What's New
       </h2>
       <h3 id="animation-system-stability">
@@ -761,14 +969,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-3">
+      <h2 id="installation-4">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-3">
+      <h2 id="whats-new-4">
        What's New
       </h2>
       <h3 id="state-v2-event-handler-support">
@@ -907,7 +1115,7 @@
         , and more.
        </p>
       </blockquote>
-      <h2 id="installation-4">
+      <h2 id="installation-5">
        Installation
       </h2>
       <div class="codehilite">
@@ -1362,7 +1570,7 @@
         Introducing State V2 and comprehensive animation system. This is the biggest update to Dars state management, bringing a pure Pythonic API and 15+ built-in animations.
        </p>
       </blockquote>
-      <h2 id="installation-5">
+      <h2 id="installation-6">
        Installation
       </h2>
       <div class="codehilite">
@@ -1376,7 +1584,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.7
 </code></pre>
       </div>
-      <h2 id="whats-new-4">
+      <h2 id="whats-new-5">
        What's New
       </h2>
       <h3 id="state-v2-pure-pythonic-state-management">
@@ -1948,7 +2156,7 @@
         : Introduces Single Page Application (SPA) support and a powerful client-side routing system.
        </p>
       </blockquote>
-      <h2 id="installation-6">
+      <h2 id="installation-7">
        Installation
       </h2>
       <div class="codehilite">
@@ -1962,7 +2170,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.5
 </code></pre>
       </div>
-      <h2 id="whats-new-5">
+      <h2 id="whats-new-6">
        What's New
       </h2>
       <h3 id="single-page-application-spa-support">
@@ -2065,7 +2273,7 @@
         Critical bug fix release. Removes non-functional features, fixes style merge, and improves state restoration.
        </p>
       </blockquote>
-      <h2 id="installation-7">
+      <h2 id="installation-8">
        Installation
       </h2>
       <div class="codehilite">
@@ -2131,7 +2339,7 @@
         State management enhancements with compile-time validation, component self-navigation, and critical style merge fix. Improves developer experience and fixes property replacement bug.
        </p>
       </blockquote>
-      <h2 id="installation-8">
+      <h2 id="installation-9">
        Installation
       </h2>
       <div class="codehilite">
@@ -2145,7 +2353,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.3
 </code></pre>
       </div>
-      <h2 id="whats-new-6">
+      <h2 id="whats-new-7">
        What's New
       </h2>
       <ul>
@@ -2195,7 +2403,7 @@
         for enhanced client-side interactions.
        </p>
       </blockquote>
-      <h2 id="installation-9">
+      <h2 id="installation-10">
        Installation
       </h2>
       <div class="codehilite">
@@ -2209,7 +2417,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.2
 </code></pre>
       </div>
-      <h2 id="whats-new-7">
+      <h2 id="whats-new-8">
        What's New
       </h2>
       <h3 id="utility-functions-utils_ds">
@@ -2399,7 +2607,7 @@
         SEO and Apple device optimizations. Enhanced metadata generation with automatic MIME type detection for favicons and comprehensive iOS/Safari support.
        </p>
       </blockquote>
-      <h2 id="installation-10">
+      <h2 id="installation-11">
        Installation
       </h2>
       <div class="codehilite">
@@ -2413,7 +2621,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.1
 </code></pre>
       </div>
-      <h2 id="whats-new-8">
+      <h2 id="whats-new-9">
        What's New
       </h2>
       <h3 id="automatic-favicon-mime-type-detection">
@@ -2728,7 +2936,7 @@
         Simple Template update.
        </p>
       </blockquote>
-      <h2 id="installation-11">
+      <h2 id="installation-12">
        Installation
       </h2>
       <div class="codehilite">
@@ -2756,7 +2964,7 @@
         Desktop File System API, Pythonic Arg helper, keyboard event filtering, and comprehensive template synchronization. Major enhancements to desktop capabilities with improved developer experience.
        </p>
       </blockquote>
-      <h2 id="installation-12">
+      <h2 id="installation-13">
        Installation
       </h2>
       <div class="codehilite">
@@ -2770,7 +2978,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.9
 </code></pre>
       </div>
-      <h2 id="whats-new-9">
+      <h2 id="whats-new-10">
        What's New
       </h2>
       <h3 id="desktop-file-system-api-list_directory">
@@ -3221,7 +3429,7 @@
         for async chaining.
        </p>
       </blockquote>
-      <h2 id="installation-13">
+      <h2 id="installation-14">
        Installation
       </h2>
       <div class="codehilite">
@@ -3235,7 +3443,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.8
 </code></pre>
       </div>
-      <h2 id="whats-new-10">
+      <h2 id="whats-new-11">
        What's New
       </h2>
       <h3 id="dynamic-state-updates-with-this">
@@ -3683,7 +3891,7 @@
         for dynamic DOM operations with safe event hydration.
        </p>
       </blockquote>
-      <h2 id="installation-14">
+      <h2 id="installation-15">
        Installation
       </h2>
       <div class="codehilite">
@@ -3697,7 +3905,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.6
 </code></pre>
       </div>
-      <h2 id="whats-new-11">
+      <h2 id="whats-new-12">
        What's New
       </h2>
       <h3 id="compile-time-component-manipulation">
@@ -3860,7 +4068,7 @@
         Enhanced styling and development experience update featuring active styles, improved preview system, and advanced file monitoring. Delivers better visual feedback and faster development workflow.
        </p>
       </blockquote>
-      <h2 id="installation-15">
+      <h2 id="installation-16">
        Installation
       </h2>
       <div class="codehilite">
@@ -3874,7 +4082,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.5
 </code></pre>
       </div>
-      <h2 id="whats-new-12">
+      <h2 id="whats-new-13">
        What's New
       </h2>
       <h3 id="active-styles-support">
@@ -4017,7 +4225,7 @@
         Enhanced interactivity update featuring hover styles, multi-handler events, and runtime versioning. Improves component styling and event handling flexibility.
        </p>
       </blockquote>
-      <h2 id="installation-16">
+      <h2 id="installation-17">
        Installation
       </h2>
       <div class="codehilite">
@@ -4031,7 +4239,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.4
 </code></pre>
       </div>
-      <h2 id="whats-new-13">
+      <h2 id="whats-new-14">
        What's New
       </h2>
       <h3 id="hover-styles-support">
@@ -4210,7 +4418,7 @@
         Minor update featuring new semantic Section component and enhanced state serialization. Continues JavaScript migration improvements from v1.3.2.
        </p>
       </blockquote>
-      <h2 id="installation-17">
+      <h2 id="installation-18">
        Installation
       </h2>
       <div class="codehilite">
@@ -4224,7 +4432,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.3
 </code></pre>
       </div>
-      <h2 id="whats-new-14">
+      <h2 id="whats-new-15">
        What's New
       </h2>
       <h3 id="section-component">
@@ -4374,7 +4582,7 @@
         Major minification improvements with combined JS files and optimized event handling. Electron desktop exporter remains in beta.
        </p>
       </blockquote>
-      <h2 id="installation-18">
+      <h2 id="installation-19">
        Installation
       </h2>
       <div class="codehilite">
@@ -4670,7 +4878,7 @@
         Native desktop functions and DX improved with dev mode and file system integration.
        </p>
       </blockquote>
-      <h2 id="installation-19">
+      <h2 id="installation-20">
        Installation
       </h2>
       <div class="codehilite">
@@ -4755,7 +4963,7 @@
         Native desktop export (BETA), improved CLI and doctor integration, and metadata fixes for packaging. This is a BETA release: usable for testing, not recommended for production.
        </p>
       </blockquote>
-      <h2 id="installation-20">
+      <h2 id="installation-21">
        Installation
       </h2>
       <div class="codehilite">
@@ -5038,7 +5246,7 @@ dars<span class="w"> </span>build
         Optional default minification, precise CLI control, faster builds, and clearer minification status.
        </p>
       </blockquote>
-      <h2 id="installation-21">
+      <h2 id="installation-22">
        Installation
       </h2>
       <div class="codehilite">
@@ -5431,6 +5639,33 @@ dars<span class="w"> </span>build
      <div class="sidebar-category">
       Versions
      </div>
+     <a class="sidebar-link sidebar-level-1" href="#release-notes-v152" style="margin-left: 0px">
+      Release Notes v1.5.2
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#installation" style="margin-left: 20px">
+      Installation
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#whats-new" style="margin-left: 20px">
+      What's New
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#function-components-system" style="margin-left: 40px">
+      Function Components System
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#what-are-function-components" style="margin-left: 60px">
+      What are Function Components?
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#basic-usage" style="margin-left: 60px">
+      Basic Usage
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#two-supported-patterns" style="margin-left: 60px">
+      Two Supported Patterns
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#props-helper-class" style="margin-left: 60px">
+      Props Helper Class
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#state-v2-integration-clarification" style="margin-left: 60px">
+      State V2 Integration Clarification
+     </a>
      <a class="sidebar-link sidebar-level-1" href="#release-notes-v151" style="margin-left: 0px">
       Release Notes v1.5.1
      </a>

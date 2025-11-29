@@ -1,3 +1,113 @@
+# Release Notes v1.5.2
+
+> **Function Components**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Function Components System
+
+Dars Framework now features **Function Components** as the primary and recommended way to create custom UI components. This new system provides a clean, Pythonic approach to component creation without the complexity of class inheritance.
+
+#### What are Function Components?
+
+Function Components allow you to create reusable UI elements using simple Python functions with f-string templates. The framework automatically handles IDs, styling, events, and other properties.
+
+**Key Benefits:**
+- **Simple & Pythonic**: Just write a function that returns an HTML string
+- **No Boilerplate**: No need to inherit from Component class or implement render methods
+- **Automatic Property Injection**: Framework handles `id`, `class_name`, `style`, and `children` automatically
+- **Linter-Friendly**: Two patterns available to avoid linter warnings
+- **State Compatible**: Works seamlessly with State V2 for reactive UIs
+
+#### Basic Usage
+
+```python
+from dars.all import FunctionComponent, Props
+
+@FunctionComponent
+def UserCard(name, email, **props):
+    return f"""
+    <div {Props.id} {Props.class_name} {Props.style}>
+        <h3>{name}</h3>
+        <p>{email}</p>
+        <div class="card-body">
+            {Props.children}
+        </div>
+    </div>
+    """
+
+# Usage
+card = UserCard("John Doe", "john@example.com", id="user-1", style={"padding": "20px"})
+```
+
+#### Two Supported Patterns
+
+**Option 1: Using Props Helper (Recommended)**
+```python
+@FunctionComponent
+def MyComponent(**props):
+    return f"""
+    <div {Props.id} {Props.class_name} {Props.style}>
+        {Props.children}
+    </div>
+    """
+```
+
+**Option 2: Explicit Arguments**
+```python
+@FunctionComponent
+def MyComponent(id, class_name, style, children, **props):
+    return f"""
+    <div {id} {class_name} {style}>
+        {children}
+    </div>
+    """
+```
+
+Both patterns are fully supported and avoid linter warnings about undefined variables.
+
+#### Props Helper Class
+
+The new `Props` class provides static constants for framework properties:
+
+```python
+Props.id          # "{id}"
+Props.class_name  # "{class_name}"
+Props.style       # "{style}"
+Props.children    # "{children}"
+```
+
+These resolve to the correct placeholders that the framework replaces during rendering.
+
+#### State V2 Integration Clarification
+
+**Important Concept:** State V2 updates DOM properties, not arbitrary component arguments.
+
+**Correct Usage:**
+```python
+@FunctionComponent
+def Counter(**props):
+    return f"""
+    <div {Props.id}>
+        Current count: {Props.children}
+    </div>
+    """
+
+counter = Counter(id="my-counter", children="0")
+state = State(counter, text="Current count: 0")
+
+# Updates textContent of the div
+Button("Increment", on_click=state.text.set("Current count: 5"))
+```
+
+**Why:** Dars exports to static HTML/JS. The JavaScript runtime can only manipulate DOM properties (`textContent`, `style`, `innerHTML`), not re-execute Python functions with new arguments.
+
 # Release Notes v1.5.1
 
 > **Backend HTTP Utilities & Pythonic API Communication**

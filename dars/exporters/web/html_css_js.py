@@ -2591,11 +2591,97 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_ ){{ }}
         obf = 'd' + h
         m[original] = obf
         return obf
+    def render_function_component(self, component: Component) -> str:
+        """
+        Render a function component with automatic property injection.
+        
+        Validates and injects:
+        - {id} -> id="component-id" or empty
+        - {class_name} -> class="..." with framework classes
+        - {style} -> style="..." 
+        - {children} -> rendered children HTML
+        
+        Note: Events are handled separately by the exporter using the component ID.
+        """
+        
+        # Ensure component has an ID (required for events and state)
+        if not component.id:
+            import uuid
+            component.id = f"fc_{str(uuid.uuid4())[:8]}"
+        
+        # Get template from component
+        template = component.get_template()
+        
+        # Build framework properties
+        framework_props = {}
+        
+        # 1. ID (required placeholder)
+        framework_props['id'] = f'id="{component.id}"'
+        
+        # 2. Class name (required placeholder)
+        classes = []
+        if component.class_name:
+            classes.append(component.class_name)
+        
+        # Always add framework ID class
+        # classes.append(f"dars-id-{component.id}") # Removed as per user request
+        
+        # Add event classes if has events
+        if component.events:
+            for event_type in component.events.keys():
+                classes.append(f"dars-ev-{event_type}")
+        
+        if classes:
+            framework_props['class_name'] = f'class="{" ".join(classes)}"'
+        else:
+            framework_props['class_name'] = ''
+        
+        # 3. Style (required placeholder)
+        if component.style:
+            style_str = self.render_styles(component.style)
+            framework_props['style'] = f'style="{style_str}"'
+        else:
+            framework_props['style'] = ''
+        
+        # 4. Children (optional)
+        if component.children:
+            children_html = ''
+            for child in component.children:
+                children_html += self.render_component(child)
+            framework_props['children'] = children_html
+        else:
+            framework_props['children'] = ''
+        
+        # Validate required placeholders
+        required = ['id', 'class_name', 'style']
+        for req in required:
+            if f'{{{req}}}' not in template:
+                raise ValueError(
+                    f"Function component '{component._func_name}' template "
+                    f"must include {{{req}}} placeholder"
+                )
+        
+        # Inject framework properties into template
+        try:
+            rendered = template.format(**framework_props)
+        except KeyError as e:
+            raise ValueError(
+                f"Function component '{component._func_name}' template "
+                f"has undefined placeholder: {e}"
+            )
+        
+        return rendered
+
 
     def render_component(self, component: Component) -> str:
         if not isinstance(component, Component):
             raise TypeError(f"render_component wait to recived an instance of Component, but recive an {component}")
         """Render an HTML component"""
+        
+        # Check if it's a function component
+        if hasattr(component, '_is_function_component') and component._is_function_component:
+            return self.render_function_component(component)
+            
         from dars.components.basic.page import Page
         from dars.components.layout.grid import GridLayout
         from dars.components.layout.flex import FlexLayout

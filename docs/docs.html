@@ -1167,6 +1167,27 @@
      <a class="sidebar-link sidebar-level-1" href="#custom-components-in-dars-framework" style="margin-left: 0px">
       Custom Components in Dars Framework
      </a>
+     <a class="sidebar-link sidebar-level-2" href="#function-components-recommended" style="margin-left: 20px">
+      Function Components (Recommended)
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#basic-syntax" style="margin-left: 40px">
+      Basic Syntax
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#option-1-using-props-object-cleanest" style="margin-left: 60px">
+      Option 1: Using `Props` Object (Cleanest)
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#option-2-explicit-arguments" style="margin-left: 60px">
+      Option 2: Explicit Arguments
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#key-features" style="margin-left: 40px">
+      Key Features
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#example-with-state-and-events" style="margin-left: 40px">
+      Example with State and Events
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#class-components-legacy" style="margin-left: 20px">
+      Class Components (Legacy)
+     </a>
      <div class="sidebar-divider">
      </div>
      <div class="sidebar-category">
@@ -10880,42 +10901,208 @@ def hello():
        Custom Components in Dars Framework
       </h1>
       <p>
-       This is an example of how to create a custom component in Dars. The
+       Dars offers two ways to create custom components:
+       <strong>
+        Function Components
+       </strong>
+       (Recommended) and
+       <strong>
+        Class Components
+       </strong>
+       (Legacy).
+      </p>
+      <h2 id="function-components-recommended">
+       Function Components (Recommended)
+      </h2>
+      <p>
+       Function Components are the modern way to create reusable UI elements. They use simple functions with f-string templates and automatically handle framework features like IDs, styling, and events.
+      </p>
+      <h3 id="basic-syntax">
+       Basic Syntax
+      </h3>
+      <p>
+       Use the
        <code>
-        Button
+        @FunctionComponent
        </code>
-       class inherits from
+       decorator. You can access framework properties (
+       <code>
+        id
+       </code>
+       ,
+       <code>
+        class_name
+       </code>
+       ,
+       <code>
+        style
+       </code>
+       ,
+       <code>
+        children
+       </code>
+       ) using the
+       <code>
+        Props
+       </code>
+       helper object or by declaring them as arguments.
+      </p>
+      <h4 id="option-1-using-props-object-cleanest">
+       Option 1: Using
+       <code>
+        Props
+       </code>
+       Object (Cleanest)
+      </h4>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="nd">@FunctionComponent</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">UserCard</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">email</span><span class="p">,</span> <span class="o">**</span><span class="n">props</span><span class="p">):</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"""</span>
+<span class="s2">    &lt;div </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">class_name</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">style</span><span class="si">}</span><span class="s2">&gt;</span>
+<span class="s2">        &lt;h3&gt;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&lt;/h3&gt;</span>
+<span class="s2">        &lt;p&gt;</span><span class="si">{</span><span class="n">email</span><span class="si">}</span><span class="s2">&lt;/p&gt;</span>
+<span class="s2">        &lt;div class="card-body"&gt;</span>
+<span class="s2">            </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">children</span><span class="si">}</span>
+<span class="s2">        &lt;/div&gt;</span>
+<span class="s2">    &lt;/div&gt;</span>
+<span class="s2">    """</span>
+
+<span class="c1"># Usage</span>
+<span class="n">card</span> <span class="o">=</span> <span class="n">UserCard</span><span class="p">(</span><span class="s2">"John Doe"</span><span class="p">,</span> <span class="s2">"john@example.com"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"user-1"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s2">"padding"</span><span class="p">:</span> <span class="s2">"20px"</span><span class="p">})</span>
+</code></pre>
+      </div>
+      <h4 id="option-2-explicit-arguments">
+       Option 2: Explicit Arguments
+      </h4>
+      <div class="codehilite">
+       <pre><span></span><code><span class="nd">@FunctionComponent</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">UserCard</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">email</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">class_name</span><span class="p">,</span> <span class="n">style</span><span class="p">,</span> <span class="n">children</span><span class="p">,</span> <span class="o">**</span><span class="n">props</span><span class="p">):</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"""</span>
+<span class="s2">    &lt;div </span><span class="si">{</span><span class="nb">id</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">class_name</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">style</span><span class="si">}</span><span class="s2">&gt;</span>
+<span class="s2">        &lt;h3&gt;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&lt;/h3&gt;</span>
+<span class="s2">        &lt;p&gt;</span><span class="si">{</span><span class="n">email</span><span class="si">}</span><span class="s2">&lt;/p&gt;</span>
+<span class="s2">        &lt;div class="card-body"&gt;</span>
+<span class="s2">            </span><span class="si">{</span><span class="n">children</span><span class="si">}</span>
+<span class="s2">        &lt;/div&gt;</span>
+<span class="s2">    &lt;/div&gt;</span>
+<span class="s2">    """</span>
+</code></pre>
+      </div>
+      <h3 id="key-features">
+       Key Features
+      </h3>
+      <ol>
+       <li>
+        <strong>
+         Automatic Property Injection
+        </strong>
+        : The framework automatically injects the correct HTML attributes for
+        <code>
+         {id}
+        </code>
+        ,
+        <code>
+         {class_name}
+        </code>
+        , and
+        <code>
+         {style}
+        </code>
+        .
+       </li>
+       <li>
+        <strong>
+         State V2 Compatible
+        </strong>
+        : Function components work seamlessly with
+        <code>
+         State()
+        </code>
+        and reactive updates.
+       </li>
+       <li>
+        <strong>
+         Event Handling
+        </strong>
+        : Events like
+        <code>
+         on_click
+        </code>
+        are handled automatically by the framework (passed via
+        <code>
+         **props
+        </code>
+        ).
+       </li>
+       <li>
+        <strong>
+         Children Support
+        </strong>
+        : Use
+        <code>
+         {Props.children}
+        </code>
+        or
+        <code>
+         {children}
+        </code>
+        to render nested content.
+       </li>
+      </ol>
+      <h3 id="example-with-state-and-events">
+       Example with State and Events
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="nd">@FunctionComponent</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Counter</span><span class="p">(</span><span class="o">**</span><span class="n">props</span><span class="p">):</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"""</span>
+<span class="s2">    &lt;div </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">class_name</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">style</span><span class="si">}</span><span class="s2">&gt;</span>
+<span class="s2">        0 </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">children</span><span class="si">}</span>
+<span class="s2">    &lt;/div&gt;</span>
+<span class="s2">    """</span>
+
+<span class="c1"># Create component with initial value "0"</span>
+<span class="n">counter</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"my-counter"</span><span class="p">,</span> <span class="n">children</span><span class="o">=</span><span class="s2">"0"</span><span class="p">)</span>
+
+<span class="c1"># Make it reactive controlling the 'text' property (textContent)</span>
+<span class="c1"># Note: This replaces the entire content of the div with the new text</span>
+<span class="n">state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="n">counter</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">"0"</span><span class="p">)</span>
+
+<span class="c1"># Update it</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Increment"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"5"</span><span class="p">))</span>
+</code></pre>
+      </div>
+      <hr/>
+      <h2 id="class-components-legacy">
+       Class Components (Legacy)
+      </h2>
+      <p>
+       This is the older method of creating components by inheriting from the
        <code>
         Component
        </code>
-       and defines its own initialization and rendering logic. You can use
-       <code>
-        self.set_event
-       </code>
-       to attach event handlers to components.
+       class. It is more verbose and requires manual handling of rendering logic.
       </p>
-      <blockquote>
-       <p>
-        Note: when you instance a CustomComponent you need to do it like this CustomComponent(id="") &lt;-- with parentesis
-       </p>
-      </blockquote>
       <div class="codehilite">
        <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dars.core.component</span><span class="w"> </span><span class="kn">import</span> <span class="n">Component</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dars.exporters.web.html_css_js</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">CustomComponent</span><span class="p">(</span><span class="n">Component</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">props</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">props</span><span class="p">)</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">title</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="nb">id</span>
+        <span class="c1"># Manual event attachment</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_event</span><span class="p">(</span><span class="n">EventTypes</span><span class="o">.</span><span class="n">CLICK</span><span class="p">,</span> <span class="n">dScript</span><span class="p">(</span><span class="s2">"console.log('click')"</span><span class="p">))</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exporter</span><span class="p">:</span> <span class="s1">'Exporter'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="c1"># Use the exporter to consistently render children</span>
+        <span class="c1"># Manual children rendering</span>
         <span class="n">children_html</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">render_children</span><span class="p">(</span><span class="n">exporter</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="sa">f</span><span class="s1">'''</span>
-<span class="s1">        &lt;div class="my-component" id="</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">"&gt;</span>
+<span class="s1">        &lt;div class="my-component" id="</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">" style="</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">style</span><span class="si">}</span><span class="s1">"&gt;</span>
 <span class="s1">            &lt;h2&gt;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="si">}</span><span class="s1">&lt;/h2&gt;</span>
 <span class="s1">            &lt;div class="content"&gt;</span>
 <span class="s1">                </span><span class="si">{</span><span class="n">children_html</span><span class="si">}</span>

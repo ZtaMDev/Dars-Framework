@@ -401,6 +401,18 @@ function change(opt){{
       if (opt.hasOwnProperty('html')) {{
           el.innerHTML = String(opt.html);
       }}
+
+      // Apply Plotly figure update
+      if (opt.hasOwnProperty('figure') && window.Plotly) {{
+          let figData = opt.figure;
+          if (typeof figData === 'string') {{
+              try {{ figData = JSON.parse(figData); }} catch(e) {{}}
+          }}
+          
+          if (figData) {{
+             Plotly.react(el, figData.data || [], figData.layout || {{}}, figData.config || {{}});
+          }}
+      }}
       
       // Apply style changes
       if (opt.style && typeof opt.style === 'object') {{

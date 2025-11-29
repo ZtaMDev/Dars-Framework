@@ -34,7 +34,7 @@ from dars.components.advanced.outlet import Outlet
 from dars.components.layout.grid import GridLayout, LayoutBase
 # Core
 from dars.core.app import App
-from dars.core.component import Component
+from dars.core.component import Component, FunctionComponent, Props
 from dars.core.events import EventHandler, EventEmitter, EventManager
 from dars.core.events import EventManager
 from dars.core.events import EventTypes
@@ -70,7 +70,7 @@ __all__ = [
     'GridLayout', 'FlexLayout', 'LayoutBase', 'AnchorPoint',
     'InlineScript', 'FileScript', 'dScript', 'HTMLCSSJSExporter',
     'EventTypes', 'EventHandler', 'EventEmitter', 'EventManager', 'Markdown',
-    '__version__',
+    '__version__', 'FunctionComponent', 'Props',
     'run_app_tests', 'run_unit_tests', 'main',
     # State Management V2 (PRIMARY)
     'State', 'ReactiveProperty', 'StateTransition',

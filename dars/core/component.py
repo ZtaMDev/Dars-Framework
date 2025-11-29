@@ -429,3 +429,143 @@ class DeferredAttr:
         pass
 
 
+
+import inspect
+
+class Props:
+    """Helper class with placeholders for Function Components to avoid linter errors."""
+    id = "{id}"
+    class_name = "{class_name}"
+    style = "{style}"
+    children = "{children}"
+    events = "" # Events are handled separately
+
+def FunctionComponent(func: Callable) -> type:
+    """
+    Decorator to create a component from a function that returns an f-string template.
+    
+    You can access framework properties in two ways:
+    1. Import `Props` and use `Props.id`, `Props.class_name`, etc.
+    2. Declare arguments `id`, `class_name`, `style`, `children` in your function.
+    
+    Example 1 (Props object):
+        @FunctionComponent
+        def Card(title, **props):
+            return f'''
+            <div {Props.id} {Props.class_name} {Props.style}>
+                {title}
+                {Props.children}
+            </div>
+            '''
+            
+    Example 2 (Arguments):
+        @FunctionComponent
+        def Card(title, id, class_name, style, children, **props):
+            return f'''
+            <div {id} {class_name} {style}>
+                {title}
+                {children}
+            </div>
+            '''
+    """
+    
+    # Extract function signature
+    sig = inspect.signature(func)
+    func_name = func.__name__
+    
+    # Create dynamic Component subclass
+    class DynamicFunctionComponent(Component):
+        _template_func = staticmethod(func)
+        _func_name = func_name
+        _is_function_component = True
+        
+        def __init__(self, *args, **kwargs):
+            # Extract function parameters
+            bound_args = sig.bind_partial(*args, **kwargs)
+            bound_args.apply_defaults()
+            
+            # Separate component props from template props
+            component_props = {}
+            template_props = {}
+            
+            # Props that belong to the Component base class
+            component_keys = ['id', 'class_name', 'style', 'hover_style', 
+                             'active_style', 'key', 'children']
+            
+            for key, value in kwargs.items():
+                if key in component_keys or key.startswith('on_'):
+                    component_props[key] = value
+                else:
+                    template_props[key] = value
+            
+            # Initialize Component base
+            super().__init__(**component_props)
+            
+            # Prepare arguments for the template function
+            # We need to inject placeholders for framework props if they are expected arguments
+            
+            func_args = bound_args.arguments
+            
+            # Inject placeholders if arguments exist in signature
+            placeholders = {
+                'id': '{id}',
+                'class_name': '{class_name}',
+                'style': '{style}',
+                'children': '{children}'
+            }
+            
+            for name, placeholder in placeholders.items():
+                if name in sig.parameters:
+                    # Only inject if not already provided (though usually they shouldn't be provided manually)
+                    if name not in func_args or func_args[name] is None:
+                         # We can't modify bound_args easily, so we'll handle it in get_template
+                         pass
+            
+            self.template_props = template_props
+            self.template_args = args
+            self.template_kwargs = kwargs # Store original kwargs to check for overrides
+        
+        def get_template(self) -> str:
+            """Get the template string from the function"""
+            
+            # Prepare arguments
+            # We need to reconstruct the arguments to pass to the function
+            # mixing user-provided args and our placeholders
+            
+            placeholders = {
+                'id': '{id}',
+                'class_name': '{class_name}',
+                'style': '{style}',
+                'children': '{children}'
+            }
+            
+            # Get bound arguments again
+            bound = sig.bind_partial(*self.template_args, **self.template_props)
+            bound.apply_defaults()
+            args_dict = bound.arguments
+            
+            # Inject placeholders for missing arguments that are in signature
+            for name, placeholder in placeholders.items():
+                if name in sig.parameters:
+                    # Always inject placeholder so the function returns a string with {id}
+                    # which the exporter will then format.
+                    # We override whatever might have been bound (though usually these are consumed by __init__)
+                    args_dict[name] = placeholder
+            
+            # Call function
+            return self._template_func(**args_dict)
+            
+        def render(self, exporter) -> str:
+            """
+            Render the function component using the provided exporter.
+            This is required when the component is nested in other components that call .render() on their children.
+            """
+            if hasattr(exporter, 'render_function_component'):
+                return exporter.render_function_component(self)
+            return exporter.render_component(self)
+    
+    # Set class name to function name
+    DynamicFunctionComponent.__name__ = func_name
+    DynamicFunctionComponent.__qualname__ = func_name
+    
+    return DynamicFunctionComponent
