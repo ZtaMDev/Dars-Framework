@@ -166,14 +166,6 @@ state.style.set({"color": "red", "fontSize": "24px"})
 ```python
 # Set class name
 state.class_name.set("active")
-
-# Advanced class manipulation
-state.classes.set({"add": ["active", "highlight"], "remove": ["disabled"]})
-```
-
-**HTML Attributes:**
-```python
-state.attrs.set({"data-value": "100", "title": "Tooltip"})
 ```
 
 **Event Handlers:**

@@ -460,8 +460,8 @@
      <a class="sidebar-link sidebar-level-2" href="#table-of-contents" style="margin-left: 20px">
       Table of Contents
      </a>
-     <a class="sidebar-link sidebar-level-2" href="#quick-start" style="margin-left: 20px">
-      Quick Start
+     <a class="sidebar-link sidebar-level-2" href="#quick-start-with-http-utils" style="margin-left: 20px">
+      Quick Start with HTTP UTILS
      </a>
      <a class="sidebar-link sidebar-level-2" href="#http-functions" style="margin-left: 20px">
       HTTP Functions
@@ -520,18 +520,6 @@
      <a class="sidebar-link sidebar-level-3" href="#deletecompid" style="margin-left: 40px">
       `deleteComp(id)`
      </a>
-     <a class="sidebar-link sidebar-level-2" href="#advanced-examples" style="margin-left: 20px">
-      Advanced Examples
-     </a>
-     <a class="sidebar-link sidebar-level-3" href="#example-1-user-profile-loader" style="margin-left: 40px">
-      Example 1: User Profile Loader
-     </a>
-     <a class="sidebar-link sidebar-level-3" href="#example-2-dynamic-list-with-post" style="margin-left: 40px">
-      Example 2: Dynamic List with POST
-     </a>
-     <a class="sidebar-link sidebar-level-3" href="#example-3-real-time-search" style="margin-left: 40px">
-      Example 3: Real-time Search
-     </a>
      <a class="sidebar-link sidebar-level-2" href="#best-practices" style="margin-left: 20px">
       Best Practices
      </a>
@@ -566,6 +554,9 @@
      </a>
      <a class="sidebar-link sidebar-level-3" href="#state-class" style="margin-left: 40px">
       State Class
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#state-with-string-ids-for-dynamic-components" style="margin-left: 40px">
+      State with String IDs (for Dynamic Components)
      </a>
      <a class="sidebar-link sidebar-level-3" href="#reactive-properties" style="margin-left: 40px">
       Reactive Properties
@@ -3394,8 +3385,8 @@ Desktop build target. Only effective when
       </h2>
       <ul>
        <li>
-        <a href="#quick-start">
-         Quick Start
+        <a href="#quick-start-with-http-utils">
+         Quick Start with HTTP UTILS
         </a>
        </li>
        <li>
@@ -3418,15 +3409,10 @@ Desktop build target. Only effective when
          Component Management
         </a>
        </li>
-       <li>
-        <a href="#advanced-examples">
-         Advanced Examples
-        </a>
-       </li>
       </ul>
       <hr/>
-      <h2 id="quick-start">
-       Quick Start
+      <h2 id="quick-start-with-http-utils">
+       Quick Start with HTTP UTILS
       </h2>
       <div class="codehilite">
        <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
@@ -3948,6 +3934,30 @@ Desktop build target. Only effective when
 <span class="p">)</span>
 </code></pre>
       </div>
+      <p>
+       <strong>
+        Tip:
+       </strong>
+       You can create a
+       <code>
+        State()
+       </code>
+       for a component before it exists using a string ID:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Create state with string ID</span>
+<span class="n">item_state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"new-item"</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">"Hello!"</span><span class="p">)</span>
+
+<span class="c1"># Create component later</span>
+<span class="n">create_btn</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">createComp</span><span class="p">(</span>
+    <span class="n">target</span><span class="o">=</span><span class="n">Text</span><span class="p">(</span><span class="s2">"Hello!"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"new-item"</span><span class="p">),</span>
+    <span class="n">root</span><span class="o">=</span><span class="s2">"container-id"</span>
+<span class="p">)</span>
+
+<span class="c1"># State works immediately!</span>
+<span class="n">update_btn</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">item_state</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"Updated!"</span><span class="p">)</span>
+</code></pre>
+      </div>
       <h3 id="updatecomptarget-props">
        <code>
         updateComp(target, **props)
@@ -3980,129 +3990,6 @@ Desktop build target. Only effective when
 
 <span class="c1"># Delete component</span>
 <span class="n">delete_btn</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">deleteComp</span><span class="p">(</span><span class="s2">"component-id"</span><span class="p">)</span>
-</code></pre>
-      </div>
-      <hr/>
-      <h2 id="advanced-examples">
-       Advanced Examples
-      </h2>
-      <h3 id="example-1-user-profile-loader">
-       Example 1: User Profile Loader
-      </h3>
-      <div class="codehilite">
-       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dars.backend</span><span class="w"> </span><span class="kn">import</span> <span class="n">get</span><span class="p">,</span> <span class="n">useData</span>
-
-<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"User Profile"</span><span class="p">)</span>
-
-<span class="c1"># UI Components</span>
-<span class="n">name_display</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"name"</span><span class="p">)</span>
-<span class="n">email_display</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"email"</span><span class="p">)</span>
-<span class="n">website_display</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"website"</span><span class="p">)</span>
-<span class="n">status_display</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="s2">"Ready"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"status"</span><span class="p">)</span>
-
-<span class="c1"># States</span>
-<span class="n">name_state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="n">name_display</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">""</span><span class="p">)</span>
-<span class="n">email_state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="n">email_display</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">""</span><span class="p">)</span>
-<span class="n">website_state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="n">website_display</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">""</span><span class="p">)</span>
-<span class="n">status_state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="n">status_display</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">"Ready"</span><span class="p">)</span>
-
-<span class="c1"># Fetch button with chained updates</span>
-<span class="n">fetch_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span>
-    <span class="s2">"Load User"</span><span class="p">,</span>
-    <span class="n">on_click</span><span class="o">=</span><span class="n">get</span><span class="p">(</span>
-        <span class="nb">id</span><span class="o">=</span><span class="s2">"user"</span><span class="p">,</span>
-        <span class="n">url</span><span class="o">=</span><span class="s2">"https://jsonplaceholder.typicode.com/users/1"</span><span class="p">,</span>
-        <span class="n">callback</span><span class="o">=</span><span class="p">(</span>
-            <span class="n">status_state</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"⏳ Loading..."</span><span class="p">)</span>
-            <span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="n">name_state</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">useData</span><span class="p">(</span><span class="s1">'user'</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
-            <span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="n">email_state</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">useData</span><span class="p">(</span><span class="s1">'user'</span><span class="p">)</span><span class="o">.</span><span class="n">email</span><span class="p">))</span>
-            <span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="n">website_state</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">useData</span><span class="p">(</span><span class="s1">'user'</span><span class="p">)</span><span class="o">.</span><span class="n">website</span><span class="p">))</span>
-            <span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="n">status_state</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"✅ Loaded!"</span><span class="p">))</span>
-        <span class="p">),</span>
-        <span class="n">on_error</span><span class="o">=</span><span class="n">status_state</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"❌ Error loading user"</span><span class="p">)</span>
-    <span class="p">)</span>
-<span class="p">)</span>
-
-<span class="n">app</span><span class="o">.</span><span class="n">set_root</span><span class="p">(</span><span class="n">Container</span><span class="p">(</span>
-    <span class="n">name_display</span><span class="p">,</span>
-    <span class="n">email_display</span><span class="p">,</span>
-    <span class="n">website_display</span><span class="p">,</span>
-    <span class="n">status_display</span><span class="p">,</span>
-    <span class="n">fetch_btn</span>
-<span class="p">))</span>
-
-<span class="n">app</span><span class="o">.</span><span class="n">rTimeCompile</span><span class="p">()</span>
-</code></pre>
-      </div>
-      <h3 id="example-2-dynamic-list-with-post">
-       Example 2: Dynamic List with POST
-      </h3>
-      <div class="codehilite">
-       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dars.backend</span><span class="w"> </span><span class="kn">import</span> <span class="n">get</span><span class="p">,</span> <span class="n">post</span><span class="p">,</span> <span class="n">useData</span><span class="p">,</span> <span class="n">createComp</span>
-
-<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"Todo List"</span><span class="p">)</span>
-
-<span class="c1"># Input and list container</span>
-<span class="n">todo_input</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">placeholder</span><span class="o">=</span><span class="s2">"New todo..."</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"todo-input"</span><span class="p">)</span>
-<span class="n">todo_list</span> <span class="o">=</span> <span class="n">Container</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"todo-list"</span><span class="p">)</span>
-
-<span class="c1"># Add todo button</span>
-<span class="n">add_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span>
-    <span class="s2">"Add Todo"</span><span class="p">,</span>
-    <span class="n">on_click</span><span class="o">=</span><span class="n">post</span><span class="p">(</span>
-        <span class="nb">id</span><span class="o">=</span><span class="s2">"newTodo"</span><span class="p">,</span>
-        <span class="n">url</span><span class="o">=</span><span class="s2">"https://jsonplaceholder.typicode.com/todos"</span><span class="p">,</span>
-        <span class="n">body</span><span class="o">=</span><span class="p">{</span><span class="s2">"title"</span><span class="p">:</span> <span class="s2">"{{todo-input.value}}"</span><span class="p">,</span> <span class="s2">"completed"</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
-        <span class="n">callback</span><span class="o">=</span><span class="n">createComp</span><span class="p">(</span>
-            <span class="n">target</span><span class="o">=</span><span class="n">Text</span><span class="p">(</span><span class="n">useData</span><span class="p">(</span><span class="s1">'newTodo'</span><span class="p">)</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"todo-item"</span><span class="p">),</span>
-            <span class="n">root</span><span class="o">=</span><span class="s2">"todo-list"</span><span class="p">,</span>
-            <span class="n">position</span><span class="o">=</span><span class="s2">"append"</span>
-        <span class="p">)</span>
-    <span class="p">)</span>
-<span class="p">)</span>
-
-<span class="c1"># Load existing todos</span>
-<span class="n">load_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span>
-    <span class="s2">"Load Todos"</span><span class="p">,</span>
-    <span class="n">on_click</span><span class="o">=</span><span class="n">get</span><span class="p">(</span>
-        <span class="nb">id</span><span class="o">=</span><span class="s2">"todos"</span><span class="p">,</span>
-        <span class="n">url</span><span class="o">=</span><span class="s2">"https://jsonplaceholder.typicode.com/todos?_limit=5"</span>
-    <span class="p">)</span>
-<span class="p">)</span>
-
-<span class="n">app</span><span class="o">.</span><span class="n">set_root</span><span class="p">(</span><span class="n">Container</span><span class="p">(</span><span class="n">todo_input</span><span class="p">,</span> <span class="n">add_btn</span><span class="p">,</span> <span class="n">load_btn</span><span class="p">,</span> <span class="n">todo_list</span><span class="p">))</span>
-<span class="n">app</span><span class="o">.</span><span class="n">rTimeCompile</span><span class="p">()</span>
-</code></pre>
-      </div>
-      <h3 id="example-3-real-time-search">
-       Example 3: Real-time Search
-      </h3>
-      <div class="codehilite">
-       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dars.backend</span><span class="w"> </span><span class="kn">import</span> <span class="n">get</span><span class="p">,</span> <span class="n">useData</span>
-
-<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"User Search"</span><span class="p">)</span>
-
-<span class="c1"># Search input</span>
-<span class="n">search_input</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">placeholder</span><span class="o">=</span><span class="s2">"Search users..."</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"search"</span><span class="p">)</span>
-
-<span class="c1"># Results display</span>
-<span class="n">results_display</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"results"</span><span class="p">)</span>
-<span class="n">results_state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="n">results_display</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">""</span><span class="p">)</span>
-
-<span class="c1"># Search on input change</span>
-<span class="n">search_input</span><span class="o">.</span><span class="n">on_input</span> <span class="o">=</span> <span class="n">get</span><span class="p">(</span>
-    <span class="nb">id</span><span class="o">=</span><span class="s2">"searchResults"</span><span class="p">,</span>
-    <span class="n">url</span><span class="o">=</span><span class="s2">"https://api.example.com/users/search?q={{search.value}}"</span><span class="p">,</span>
-    <span class="n">callback</span><span class="o">=</span><span class="n">results_state</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
-        <span class="n">stringify</span><span class="p">(</span><span class="n">useData</span><span class="p">(</span><span class="s1">'searchResults'</span><span class="p">),</span> <span class="n">pretty</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="p">)</span>
-<span class="p">)</span>
-
-<span class="n">app</span><span class="o">.</span><span class="n">set_root</span><span class="p">(</span><span class="n">Container</span><span class="p">(</span><span class="n">search_input</span><span class="p">,</span> <span class="n">results_display</span><span class="p">))</span>
-<span class="n">app</span><span class="o">.</span><span class="n">rTimeCompile</span><span class="p">()</span>
 </code></pre>
       </div>
       <hr/>
@@ -4478,7 +4365,7 @@ Desktop build target. Only effective when
        <code>
         component
        </code>
-       : The component to manage
+       : The component to manage (can be a component object or string ID)
 -
        <code>
         **default_props
@@ -4492,6 +4379,48 @@ Desktop build target. Only effective when
         style={...}
        </code>
        )
+      </p>
+      <h3 id="state-with-string-ids-for-dynamic-components">
+       State with String IDs (for Dynamic Components)
+      </h3>
+      <p>
+       <code>
+        State()
+       </code>
+       can accept either a component object or a string ID. This is useful for components created dynamically:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dars.backend</span><span class="w"> </span><span class="kn">import</span> <span class="n">createComp</span>
+
+<span class="c1"># Traditional: State with component object</span>
+<span class="n">existing_text</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="s2">"0"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"counter"</span><span class="p">)</span>
+<span class="n">existing_state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="n">existing_text</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># New: State with string ID (for components created later)</span>
+<span class="n">dynamic_state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"dynamic-counter"</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># Create the component later</span>
+<span class="n">create_btn</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">createComp</span><span class="p">(</span>
+    <span class="n">target</span><span class="o">=</span><span class="n">Text</span><span class="p">(</span><span class="s2">"0"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"dynamic-counter"</span><span class="p">),</span>
+    <span class="n">root</span><span class="o">=</span><span class="s2">"container-id"</span>
+<span class="p">)</span>
+
+<span class="c1"># State works even though component was created after state!</span>
+<span class="n">increment_btn</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">dynamic_state</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Use Cases:
+       </strong>
+       - Components created with
+       <code>
+        createComp()
+       </code>
+       - Dynamically generated UIs
+- Conditional component rendering
+- Server-side rendered components
       </p>
       <h3 id="reactive-properties">
        Reactive Properties
@@ -4600,18 +4529,6 @@ Desktop build target. Only effective when
       <div class="codehilite">
        <pre><span></span><code><span class="c1"># Set class name</span>
 <span class="n">state</span><span class="o">.</span><span class="n">class_name</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"active"</span><span class="p">)</span>
-
-<span class="c1"># Advanced class manipulation</span>
-<span class="n">state</span><span class="o">.</span><span class="n">classes</span><span class="o">.</span><span class="n">set</span><span class="p">({</span><span class="s2">"add"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"active"</span><span class="p">,</span> <span class="s2">"highlight"</span><span class="p">],</span> <span class="s2">"remove"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"disabled"</span><span class="p">]})</span>
-</code></pre>
-      </div>
-      <p>
-       <strong>
-        HTML Attributes:
-       </strong>
-      </p>
-      <div class="codehilite">
-       <pre><span></span><code><span class="n">state</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">set</span><span class="p">({</span><span class="s2">"data-value"</span><span class="p">:</span> <span class="s2">"100"</span><span class="p">,</span> <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Tooltip"</span><span class="p">})</span>
 </code></pre>
       </div>
       <p>
