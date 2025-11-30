@@ -41,12 +41,38 @@ class DynamicBinding:
     def __repr__(self):
         return f"DynamicBinding({self.state_path!r})"
 
+    def get_initial_value(self):
+        """
+        Resolve the current value from the state registry.
+        Returns None if state or property not found.
+        """
+        try:
+            from dars.core.state_v2 import STATE_V2_REGISTRY
+            
+            parts = self.state_path.split('.')
+            if len(parts) < 2:
+                return None
+                
+            state_id = parts[0]
+            prop_name = parts[1]
+            
+            # Find state by ID
+            state = next((s for s in STATE_V2_REGISTRY if s.component.id == state_id), None)
+            if state:
+                # Get property value
+                prop = getattr(state, prop_name, None)
+                if prop:
+                    return prop.value
+            return None
+        except Exception:
+            return None
+
 
 def useDynamic(state_path: str) -> DynamicBinding:
     """
     Create a reactive binding to a state property.
     
-    This hook allows FunctionComponents to reactively bind to external State objects.
+    This hook allows FunctionComponents and built-in components props to reactively bind to external State objects.
     When the state value changes, the DOM element will automatically update.
     
     Args:
@@ -70,6 +96,10 @@ def useDynamic(state_path: str) -> DynamicBinding:
         # Later, when state changes:
         userState.name.set("Jane")  # DOM automatically updates
     
+    Example 2:
+        userState = State("user", name="John", email="john@example.com")
+        
+        Text(text=useDynamic("user.name"))
     Notes:
         - The state_path must reference a registered State object
         - The binding is one-way: state → DOM

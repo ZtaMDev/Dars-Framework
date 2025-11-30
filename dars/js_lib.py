@@ -371,8 +371,18 @@ function _resolveGoto(cur, goto, statesLen){{
   return cur;
 }}
 
+// ==================== WATCHERS & HOOKS ====================
+const __watchers = new Map(); // state_path -> [callbacks]
+
+function watch(state_path, callback) {{
+  if (!state_path || typeof callback !== 'function') return;
+  if (!__watchers.has(state_path)) __watchers.set(state_path, []);
+  __watchers.get(state_path).push(callback);
+}}
+
 function change(opt){{
   if(!opt||!opt.id) return;
+  
   if(opt.useCustomRender && typeof opt.html === 'string'){{
     const el = $(opt.id);
     if(!el) return;
@@ -381,121 +391,133 @@ function change(opt){{
     return;
   }}
 
-  // Dynamic state support: if opt contains direct modifications (text, style, etc.)
-  // apply them directly without looking up a registered state.
+  // Dynamic state support
   if (opt.dynamic) {{
       const el = $(opt.id);
-      if (!el) return;
       
-      // Apply text change (use .value for form elements, .textContent for others)
-      if (opt.hasOwnProperty('text')) {{
-          const isFormElement = el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT';
-          if (isFormElement) {{
-              el.value = String(opt.text);
-          }} else {{
-              el.textContent = String(opt.text);
+      // Helper to trigger watchers for a property
+      const notifyWatchers = (prop, val) => {{
+          const path = opt.id + '.' + prop;
+          if (__watchers.has(path)) {{
+              __watchers.get(path).forEach(cb => {{
+                  try {{ cb(val); }} catch(e) {{ console.error('[Dars] Watcher error:', e); }}
+              }});
           }}
-      }}
-      
-      // Apply HTML change
-      if (opt.hasOwnProperty('html')) {{
-          el.innerHTML = String(opt.html);
-      }}
+      }};
 
-      // Apply Plotly figure update
-      if (opt.hasOwnProperty('figure') && window.Plotly) {{
-          let figData = opt.figure;
-          if (typeof figData === 'string') {{
-              try {{ figData = JSON.parse(figData); }} catch(e) {{}}
+      if (el) {{
+          // Apply text change
+          if (opt.hasOwnProperty('text')) {{
+              const isFormElement = el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT';
+              if (isFormElement) {{
+                  el.value = String(opt.text);
+              }} else {{
+                  el.textContent = String(opt.text);
+              }}
+              notifyWatchers('text', opt.text);
           }}
           
-          if (figData) {{
-             Plotly.react(el, figData.data || [], figData.layout || {{}}, figData.config || {{}});
+          // Apply HTML change
+          if (opt.hasOwnProperty('html')) {{
+              el.innerHTML = String(opt.html);
+              notifyWatchers('html', opt.html);
           }}
-      }}
-      
-      // Apply style changes
-      if (opt.style && typeof opt.style === 'object') {{
-          for (const k in opt.style) {{
-              try {{ el.style[k] = opt.style[k]; }} catch (_) {{}}
-          }}
-      }}
-      
-      // Apply attribute changes with special handling for 'class' to preserve Dars framework classes
-      if (opt.attrs && typeof opt.attrs === 'object') {{
-          for (const k in opt.attrs) {{
-              try {{
-                  // Special handling for 'class' attribute to preserve framework classes
-                  if (k === 'class') {{
-                      // Define prefixes for framework-reserved classes that should never be removed
-                      const reservedPrefixes = ['dars-', 'dars-id-', 'dars-ev-'];
-                      
-                      // Get current classes
-                      const currentClasses = Array.from(el.classList || []);
-                      
-                      // Filter out framework-reserved classes
-                      const reservedClasses = currentClasses.filter(cls => 
-                          reservedPrefixes.some(prefix => String(cls).startsWith(prefix))
-                      );
-                      
-                      // Get new user classes from the update
-                      const newUserClasses = String(opt.attrs[k] || '')
-                          .split(' ')
-                          .map(c => String(c).trim())
-                          .filter(c => c.length > 0);
-                      
-                      // Merge: reserved classes + new user classes
-                      const mergedClasses = [...reservedClasses, ...newUserClasses];
-                      
-                      // Set the merged class list
-                      el.className = mergedClasses.join(' ');
-                  }} else {{
-                      // Normal attribute handling for non-class attributes
-                      el.setAttribute(k, String(opt.attrs[k]));
-                  }}
-              }} catch (_) {{}}
-          }}
-      }}
-      
-      // Apply class changes
-      if (opt.classes && typeof opt.classes === 'object') {{
-          if (opt.classes.add) {{
-              const toAdd = Array.isArray(opt.classes.add) ? opt.classes.add : [opt.classes.add];
-              toAdd.forEach(c => el.classList.add(c));
-          }}
-          if (opt.classes.remove) {{
-              const toRemove = Array.isArray(opt.classes.remove) ? opt.classes.remove : [opt.classes.remove];
-              toRemove.forEach(c => el.classList.remove(c));
-          }}
-          if (opt.classes.toggle) {{
-              const toToggle = Array.isArray(opt.classes.toggle) ? opt.classes.toggle : [opt.classes.toggle];
-              toToggle.forEach(c => el.classList.toggle(c));
-          }}
-      }}
 
-      // Apply event handlers (on_click, on_mouseover, etc.)
-      for (const k in opt) {{
-          if (k.startsWith('on_')) {{
-              const eventName = k.substring(3); // remove 'on_'
-              const code = opt[k];
-              
-              // Create handler function
-              let handler = null;
-              if (Array.isArray(code)) {{
-                  // Chain multiple handlers
-                  handler = function(e) {{
-                      code.forEach(c => {{
-                          try {{ new Function('event', c).call(this, e); }} catch(err) {{ console.error('[Dars] Event error:', err); }}
-                      }});
-                  }};
-              }} else if (typeof code === 'string') {{
-                  try {{ handler = new Function('event', code); }} catch(e) {{ console.error('[Dars] Event compilation error:', e); }}
+          // Apply Plotly figure update
+          if (opt.hasOwnProperty('figure') && window.Plotly) {{
+              let figData = opt.figure;
+              if (typeof figData === 'string') {{
+                  try {{ figData = JSON.parse(figData); }} catch(e) {{}}
               }}
               
-              if (handler) {{
-                  // Set event handler directly on element (overrides previous)
-                  el['on' + eventName] = handler;
+              if (figData) {{
+                 Plotly.react(el, figData.data || [], figData.layout || {{}}, figData.config || {{}});
+                 notifyWatchers('figure', figData);
               }}
+          }}
+          
+          // Apply style changes
+          if (opt.style && typeof opt.style === 'object') {{
+              for (const k in opt.style) {{
+                  try {{ el.style[k] = opt.style[k]; }} catch (_) {{}}
+              }}
+              notifyWatchers('style', opt.style);
+          }}
+          
+          // Apply attribute changes
+          if (opt.attrs && typeof opt.attrs === 'object') {{
+              for (const k in opt.attrs) {{
+                  try {{
+                      // Special handling for 'class'
+                      if (k === 'class') {{
+                          const reservedPrefixes = ['dars-', 'dars-id-', 'dars-ev-'];
+                          const currentClasses = Array.from(el.classList || []);
+                          const reservedClasses = currentClasses.filter(cls => 
+                              reservedPrefixes.some(prefix => String(cls).startsWith(prefix))
+                          );
+                          const newUserClasses = String(opt.attrs[k] || '')
+                              .split(' ')
+                              .map(c => String(c).trim())
+                              .filter(c => c.length > 0);
+                          const mergedClasses = [...reservedClasses, ...newUserClasses];
+                          el.className = mergedClasses.join(' ');
+                      }} else {{
+                          // Normal attribute
+                          el.setAttribute(k, String(opt.attrs[k]));
+                          // If it's 'value' for input, also set property
+                          if (k === 'value' && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT')) {{
+                              el.value = String(opt.attrs[k]);
+                          }}
+                      }}
+                      notifyWatchers(k, opt.attrs[k]);
+                  }} catch (_) {{}}
+              }}
+          }}
+          
+          // Apply class changes
+          if (opt.classes && typeof opt.classes === 'object') {{
+              if (opt.classes.add) {{
+                  const toAdd = Array.isArray(opt.classes.add) ? opt.classes.add : [opt.classes.add];
+                  toAdd.forEach(c => el.classList.add(c));
+              }}
+              if (opt.classes.remove) {{
+                  const toRemove = Array.isArray(opt.classes.remove) ? opt.classes.remove : [opt.classes.remove];
+                  toRemove.forEach(c => el.classList.remove(c));
+              }}
+              if (opt.classes.toggle) {{
+                  const toToggle = Array.isArray(opt.classes.toggle) ? opt.classes.toggle : [opt.classes.toggle];
+                  toToggle.forEach(c => el.classList.toggle(c));
+              }}
+              notifyWatchers('classes', opt.classes);
+          }}
+
+          // Apply event handlers
+          for (const k in opt) {{
+              if (k.startsWith('on_')) {{
+                  const eventName = k.substring(3);
+                  const code = opt[k];
+                  let handler = null;
+                  if (Array.isArray(code)) {{
+                      handler = function(e) {{
+                          code.forEach(c => {{
+                              try {{ new Function('event', c).call(this, e); }} catch(err) {{ console.error('[Dars] Event error:', err); }}
+                          }});
+                      }};
+                  }} else if (typeof code === 'string') {{
+                      try {{ handler = new Function('event', code); }} catch(e) {{ console.error('[Dars] Event compilation error:', e); }}
+                  }}
+                  if (handler) {{
+                      el['on' + eventName] = handler;
+                  }}
+              }}
+          }}
+      }} else {{
+          // Element not found, but we should still notify watchers!
+          if (opt.hasOwnProperty('text')) notifyWatchers('text', opt.text);
+          if (opt.hasOwnProperty('html')) notifyWatchers('html', opt.html);
+          if (opt.style) notifyWatchers('style', opt.style);
+          if (opt.attrs) {{
+              for (const k in opt.attrs) notifyWatchers(k, opt.attrs[k]);
           }}
       }}
       
@@ -512,8 +534,6 @@ function change(opt){{
     if(goto !== null){{ targetState = _resolveGoto(cur, goto, len); }}
     if(targetState === null){{ targetState = cur; }}
     
-    // Prevent infinite loops if targetState is same as current and no goto logic involved
-    // But here we might want to re-apply rules if forced.
     st.current = targetState;
     
     const rules = st.rules && st.rules[String(targetState)];
@@ -525,7 +545,6 @@ function change(opt){{
       if(rules.hasOwnProperty('goto')){{
         const nxt = _resolveGoto(st.current, rules.goto, len);
         if(nxt !== st.current){{ 
-            // Recursive transition via setTimeout to allow render cycle to complete
             setTimeout(() => {{
                 change({{ id: opt.id, name: name, state: nxt }});
             }}, 0);
@@ -1024,6 +1043,7 @@ const Dars = {{
     registerStates, 
     getState, 
     change, 
+    watch,
     $, 
     runtime,
     // Loop support for State V2

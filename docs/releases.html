@@ -252,6 +252,124 @@
       (function(){function addCopyButtons(){document.querySelectorAll("pre code").forEach(function(code){var pre=code.parentElement;if(!pre||pre.querySelector(".dars-code-copy"))return;var btn=document.createElement("button");btn.className="dars-code-copy";btn.type="button";btn.textContent="Copy";btn.addEventListener("click",async function(e){e.stopPropagation();try{await navigator.clipboard.writeText(code.innerText);btn.textContent="Copied";btn.classList.add("copied");setTimeout(function(){btn.textContent="Copy";btn.classList.remove("copied")},1200)}catch(err){btn.textContent="Error";setTimeout(function(){btn.textContent="Copy"},1200)}});pre.appendChild(btn);});}function guessLang(text){var t=text.trim();if(/^{[\s\S]*}$/.test(t)||/^\[/.test(t))return "json";if(/^(pip |python |python3 |dars |#|\$ )/m.test(t))return "bash";if(/\b(def |class |import |from |print\(|self\b)/.test(t))return "python";return null;}function stripPygments(code){if(code && code.innerHTML && code.innerHTML.indexOf("<span")!==-1){code.textContent = code.innerText;}}function prepareAndHighlight(){document.querySelectorAll("pre code").forEach(function(code){stripPygments(code);if(!code.className||code.className.indexOf("language-")===-1){var g=guessLang(code.innerText);code.classList.add("language-"+(g||"none"));}if(window.Prism&&Prism.highlightElement){Prism.highlightElement(code);}});}document.addEventListener("DOMContentLoaded",function(){try{prepareAndHighlight();}catch(e){};try{addCopyButtons()}catch(e){}});})();
      </script>
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_174">
+      <h1 id="release-notes-v155">
+       Release Notes v1.5.5
+      </h1>
+      <blockquote>
+       <p>
+        <strong>
+         Hooks System Enhanced
+        </strong>
+        :
+        <code>
+         useDynamic
+        </code>
+        for built-in components and new
+        <code>
+         useWatch
+        </code>
+        hook.
+       </p>
+      </blockquote>
+      <h2 id="installation">
+       Installation
+      </h2>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
+</code></pre>
+      </div>
+      <h2 id="whats-new">
+       What's New
+      </h2>
+      <h3 id="1-usedynamic-for-built-in-components">
+       1.
+       <code>
+        useDynamic
+       </code>
+       for Built-in Components
+      </h3>
+      <p>
+       You can now use
+       <code>
+        useDynamic
+       </code>
+       directly in properties of built-in components!
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Bind directly to component props</span>
+<span class="n">Text</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"user.name"</span><span class="p">))</span>
+<span class="n">Input</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"user.name"</span><span class="p">))</span>
+<span class="n">Button</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"user.status"</span><span class="p">))</span>
+</code></pre>
+      </div>
+      <p>
+       This works for
+       <code>
+        Text
+       </code>
+       ,
+       <code>
+        Button
+       </code>
+       ,
+       <code>
+        Input
+       </code>
+       ,
+       <code>
+        Textarea
+       </code>
+       , and more.
+      </p>
+      <h3 id="2-new-usewatch-hook">
+       2. New
+       <code>
+        useWatch
+       </code>
+       Hook
+      </h3>
+      <p>
+       Monitor state changes and execute side effects with
+       <code>
+        useWatch
+       </code>
+       .
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Global watcher</span>
+<span class="n">app</span><span class="o">.</span><span class="n">useWatch</span><span class="p">(</span><span class="s2">"cart.total"</span><span class="p">,</span> <span class="n">log</span><span class="p">(</span><span class="s2">"Cart updated!"</span><span class="p">))</span>
+
+<span class="c1"># Page-specific watcher</span>
+<span class="nd">@route</span><span class="p">(</span><span class="s2">"/cart"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cart_page</span><span class="p">():</span>
+    <span class="n">page</span> <span class="o">=</span> <span class="n">Page</span><span class="p">()</span>
+    <span class="n">page</span><span class="o">.</span><span class="n">useWatch</span><span class="p">(</span><span class="s2">"cart.total"</span><span class="p">,</span> <span class="n">log</span><span class="p">(</span><span class="s2">"Total changed!"</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">page</span>
+</code></pre>
+      </div>
+      <p>
+       New methods
+       <code>
+        app.useWatch()
+       </code>
+       and
+       <code>
+        page.useWatch()
+       </code>
+       make integration seamless.
+      </p>
+      <h3 id="3-fixes">
+       3. Fixes
+      </h3>
+      <ul>
+       <li>
+        Fixed execution order in exporter to ensure reactive bindings are generated correctly.
+       </li>
+       <li>
+        Improved state initialization for dynamic props.
+       </li>
+      </ul>
+      <hr/>
       <h1 id="release-notes-v154-relaunch-from-153">
        Release Notes v1.5.4 (Relaunch from 1.5.3)
       </h1>
@@ -263,14 +381,14 @@
         relaunch with correct license.
        </p>
       </blockquote>
-      <h2 id="installation">
+      <h2 id="installation-2">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new">
+      <h2 id="whats-new-2">
        What's New
       </h2>
       <h3 id="hooks-system-usedynamic">
@@ -694,14 +812,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-2">
+      <h2 id="installation-3">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-2">
+      <h2 id="whats-new-3">
        What's New
       </h2>
       <h3 id="hooks-system-usedynamic-2">
@@ -1125,14 +1243,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-3">
+      <h2 id="installation-4">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-3">
+      <h2 id="whats-new-4">
        What's New
       </h2>
       <h3 id="function-components-system">
@@ -1333,14 +1451,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-4">
+      <h2 id="installation-5">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-4">
+      <h2 id="whats-new-5">
        What's New
       </h2>
       <h3 id="backend-http-utilities-system">
@@ -1727,14 +1845,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-5">
+      <h2 id="installation-6">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-5">
+      <h2 id="whats-new-6">
        What's New
       </h2>
       <h3 id="animation-system-stability">
@@ -1845,14 +1963,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-6">
+      <h2 id="installation-7">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-6">
+      <h2 id="whats-new-7">
        What's New
       </h2>
       <h3 id="state-v2-event-handler-support">
@@ -1991,7 +2109,7 @@
         , and more.
        </p>
       </blockquote>
-      <h2 id="installation-7">
+      <h2 id="installation-8">
        Installation
       </h2>
       <div class="codehilite">
@@ -2446,7 +2564,7 @@
         Introducing State V2 and comprehensive animation system. This is the biggest update to Dars state management, bringing a pure Pythonic API and 15+ built-in animations.
        </p>
       </blockquote>
-      <h2 id="installation-8">
+      <h2 id="installation-9">
        Installation
       </h2>
       <div class="codehilite">
@@ -2460,7 +2578,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.7
 </code></pre>
       </div>
-      <h2 id="whats-new-7">
+      <h2 id="whats-new-8">
        What's New
       </h2>
       <h3 id="state-v2-pure-pythonic-state-management">
@@ -3032,7 +3150,7 @@
         : Introduces Single Page Application (SPA) support and a powerful client-side routing system.
        </p>
       </blockquote>
-      <h2 id="installation-9">
+      <h2 id="installation-10">
        Installation
       </h2>
       <div class="codehilite">
@@ -3046,7 +3164,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.5
 </code></pre>
       </div>
-      <h2 id="whats-new-8">
+      <h2 id="whats-new-9">
        What's New
       </h2>
       <h3 id="single-page-application-spa-support">
@@ -3149,7 +3267,7 @@
         Critical bug fix release. Removes non-functional features, fixes style merge, and improves state restoration.
        </p>
       </blockquote>
-      <h2 id="installation-10">
+      <h2 id="installation-11">
        Installation
       </h2>
       <div class="codehilite">
@@ -3215,7 +3333,7 @@
         State management enhancements with compile-time validation, component self-navigation, and critical style merge fix. Improves developer experience and fixes property replacement bug.
        </p>
       </blockquote>
-      <h2 id="installation-11">
+      <h2 id="installation-12">
        Installation
       </h2>
       <div class="codehilite">
@@ -3229,7 +3347,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.3
 </code></pre>
       </div>
-      <h2 id="whats-new-9">
+      <h2 id="whats-new-10">
        What's New
       </h2>
       <ul>
@@ -3279,7 +3397,7 @@
         for enhanced client-side interactions.
        </p>
       </blockquote>
-      <h2 id="installation-12">
+      <h2 id="installation-13">
        Installation
       </h2>
       <div class="codehilite">
@@ -3293,7 +3411,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.2
 </code></pre>
       </div>
-      <h2 id="whats-new-10">
+      <h2 id="whats-new-11">
        What's New
       </h2>
       <h3 id="utility-functions-utils_ds">
@@ -3483,7 +3601,7 @@
         SEO and Apple device optimizations. Enhanced metadata generation with automatic MIME type detection for favicons and comprehensive iOS/Safari support.
        </p>
       </blockquote>
-      <h2 id="installation-13">
+      <h2 id="installation-14">
        Installation
       </h2>
       <div class="codehilite">
@@ -3497,7 +3615,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.1
 </code></pre>
       </div>
-      <h2 id="whats-new-11">
+      <h2 id="whats-new-12">
        What's New
       </h2>
       <h3 id="automatic-favicon-mime-type-detection">
@@ -3812,7 +3930,7 @@
         Simple Template update.
        </p>
       </blockquote>
-      <h2 id="installation-14">
+      <h2 id="installation-15">
        Installation
       </h2>
       <div class="codehilite">
@@ -3840,7 +3958,7 @@
         Desktop File System API, Pythonic Arg helper, keyboard event filtering, and comprehensive template synchronization. Major enhancements to desktop capabilities with improved developer experience.
        </p>
       </blockquote>
-      <h2 id="installation-15">
+      <h2 id="installation-16">
        Installation
       </h2>
       <div class="codehilite">
@@ -3854,7 +3972,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.9
 </code></pre>
       </div>
-      <h2 id="whats-new-12">
+      <h2 id="whats-new-13">
        What's New
       </h2>
       <h3 id="desktop-file-system-api-list_directory">
@@ -4305,7 +4423,7 @@
         for async chaining.
        </p>
       </blockquote>
-      <h2 id="installation-16">
+      <h2 id="installation-17">
        Installation
       </h2>
       <div class="codehilite">
@@ -4319,7 +4437,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.8
 </code></pre>
       </div>
-      <h2 id="whats-new-13">
+      <h2 id="whats-new-14">
        What's New
       </h2>
       <h3 id="dynamic-state-updates-with-this">
@@ -4767,7 +4885,7 @@
         for dynamic DOM operations with safe event hydration.
        </p>
       </blockquote>
-      <h2 id="installation-17">
+      <h2 id="installation-18">
        Installation
       </h2>
       <div class="codehilite">
@@ -4781,7 +4899,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.6
 </code></pre>
       </div>
-      <h2 id="whats-new-14">
+      <h2 id="whats-new-15">
        What's New
       </h2>
       <h3 id="compile-time-component-manipulation">
@@ -4944,7 +5062,7 @@
         Enhanced styling and development experience update featuring active styles, improved preview system, and advanced file monitoring. Delivers better visual feedback and faster development workflow.
        </p>
       </blockquote>
-      <h2 id="installation-18">
+      <h2 id="installation-19">
        Installation
       </h2>
       <div class="codehilite">
@@ -4958,7 +5076,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.5
 </code></pre>
       </div>
-      <h2 id="whats-new-15">
+      <h2 id="whats-new-16">
        What's New
       </h2>
       <h3 id="active-styles-support">
@@ -5101,7 +5219,7 @@
         Enhanced interactivity update featuring hover styles, multi-handler events, and runtime versioning. Improves component styling and event handling flexibility.
        </p>
       </blockquote>
-      <h2 id="installation-19">
+      <h2 id="installation-20">
        Installation
       </h2>
       <div class="codehilite">
@@ -5115,7 +5233,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.4
 </code></pre>
       </div>
-      <h2 id="whats-new-16">
+      <h2 id="whats-new-17">
        What's New
       </h2>
       <h3 id="hover-styles-support">
@@ -5294,7 +5412,7 @@
         Minor update featuring new semantic Section component and enhanced state serialization. Continues JavaScript migration improvements from v1.3.2.
        </p>
       </blockquote>
-      <h2 id="installation-20">
+      <h2 id="installation-21">
        Installation
       </h2>
       <div class="codehilite">
@@ -5308,7 +5426,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.3
 </code></pre>
       </div>
-      <h2 id="whats-new-17">
+      <h2 id="whats-new-18">
        What's New
       </h2>
       <h3 id="section-component">
@@ -5458,7 +5576,7 @@
         Major minification improvements with combined JS files and optimized event handling. Electron desktop exporter remains in beta.
        </p>
       </blockquote>
-      <h2 id="installation-21">
+      <h2 id="installation-22">
        Installation
       </h2>
       <div class="codehilite">
@@ -5754,7 +5872,7 @@
         Native desktop functions and DX improved with dev mode and file system integration.
        </p>
       </blockquote>
-      <h2 id="installation-22">
+      <h2 id="installation-23">
        Installation
       </h2>
       <div class="codehilite">
@@ -5839,7 +5957,7 @@
         Native desktop export (BETA), improved CLI and doctor integration, and metadata fixes for packaging. This is a BETA release: usable for testing, not recommended for production.
        </p>
       </blockquote>
-      <h2 id="installation-23">
+      <h2 id="installation-24">
        Installation
       </h2>
       <div class="codehilite">
@@ -6122,7 +6240,7 @@ dars<span class="w"> </span>build
         Optional default minification, precise CLI control, faster builds, and clearer minification status.
        </p>
       </blockquote>
-      <h2 id="installation-24">
+      <h2 id="installation-25">
        Installation
       </h2>
       <div class="codehilite">
@@ -6515,6 +6633,24 @@ dars<span class="w"> </span>build
      <div class="sidebar-category">
       Versions
      </div>
+     <a class="sidebar-link sidebar-level-1" href="#release-notes-v155" style="margin-left: 0px">
+      Release Notes v1.5.5
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#installation" style="margin-left: 20px">
+      Installation
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#whats-new" style="margin-left: 20px">
+      What's New
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#1-usedynamic-for-built-in-components" style="margin-left: 40px">
+      1. `useDynamic` for Built-in Components
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#2-new-usewatch-hook" style="margin-left: 40px">
+      2. New `useWatch` Hook
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#3-fixes" style="margin-left: 40px">
+      3. Fixes
+     </a>
      <a class="sidebar-link sidebar-level-1" href="#release-notes-v154-relaunch-from-153" style="margin-left: 0px">
       Release Notes v1.5.4 (Relaunch from 1.5.3)
      </a>

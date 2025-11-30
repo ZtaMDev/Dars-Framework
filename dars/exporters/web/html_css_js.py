@@ -41,6 +41,8 @@ class HTMLCSSJSExporter(Exporter):
     def export(self, app: App, output_path: str, bundle: bool = False) -> bool:
         """Exporta la aplicación a HTML/CSS/JS (soporta multipágina)."""
         try:
+            # Initialize watch scripts list for this export
+            self._watch_scripts = []
             # Initialize obfuscation context for this export
             self._hash_ids = False
             self._id_hash_map = {}
@@ -199,6 +201,10 @@ class HTMLCSSJSExporter(Exporter):
                         vdom_js = "window.__DARS_VDOM__ = { };\n"
                         page_events_map = {}
                     
+                    # Collect bindings by traversing component tree (without rendering)
+                    # This avoids breaking Markdown script injection and other side effects
+                    self._collect_bindings_from_tree(page_app.root)
+                    
                     # Generar runtime JS con eventos
                     runtime_js = self.generate_javascript(page_app, page.root, page_events_map)
                     
@@ -340,6 +346,10 @@ class HTMLCSSJSExporter(Exporter):
                 except Exception:
                     vdom_js = "window.__DARS_VDOM__ = { };\n"
                     page_events_map = {}
+
+                # Pre-render components to populate bindings (useDynamic, etc.)
+                # This is critical so that _generate_reactive_bindings_js has data
+                self.render_component(app.root)
 
                 # Generar runtime JS con eventos
                 runtime_js = self.generate_javascript(app, app.root, page_events_map)
@@ -2662,48 +2672,192 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
             # Fallback: convertir a string
             return f'"{str(value)}"'
     
+    def _process_dynamic_props(self, component: Component) -> dict:
+        """
+        Process component props to detect and handle DynamicBinding objects.
+        
+        Returns dict with:
+        - 'bindings': List of {prop, state_path, component_id}
+        - 'initial_values': Dict of {prop: initial_value}
+        """
+        from dars.hooks.use_dynamic import DynamicBinding, get_bindings_registry
+        import re
+        
+        bindings = []
+        initial_values = {}
+        registry = get_bindings_registry()
+        marker_pattern = r'__DARS_DYNAMIC_\d+_\d+__'
+        
+        # Check common props
+        props_to_check = ['text', 'html', 'value', 'placeholder', 'src', 'alt', 'href', 'style', 'class_name']
+        
+        for prop_name in props_to_check:
+            prop_value = getattr(component, prop_name, None)
+            
+            state_path = None
+            initial_val = None
+            
+            if isinstance(prop_value, DynamicBinding):
+                state_path = prop_value.state_path
+                initial_val = prop_value.get_initial_value()
+            elif isinstance(prop_value, str):
+                # Check if it's a marker string
+                match = re.match(marker_pattern, prop_value)
+                if match and prop_value in registry:
+                    state_path = registry[prop_value]
+                    # We need to resolve initial value manually since we don't have the object
+                    # But we can create a temp binding to resolve it or use a helper
+                    # For now, let's try to resolve it using the same logic as DynamicBinding.get_initial_value
+                    try:
+                        from dars.core.state_v2 import STATE_V2_REGISTRY
+                        parts = state_path.split('.')
+                        if len(parts) >= 2:
+                            state_id = parts[0]
+                            p_name = parts[1]
+                            state = next((s for s in STATE_V2_REGISTRY if s.component.id == state_id), None)
+                            if state:
+                                prop = getattr(state, p_name, None)
+                                if prop:
+                                    initial_val = prop.value
+                    except Exception:
+                        pass
+
+            if state_path:
+                comp_id = self.get_component_id(component)
+                
+                bindings.append({
+                    'component_id': comp_id,
+                    'property': prop_name,
+                    'state_path': state_path
+                })
+                
+                # Get initial value from state registry
+                initial_values[prop_name] = initial_val
+        
+        return {'bindings': bindings, 'initial_values': initial_values}
+    
+    def _collect_bindings_from_tree(self, component):
+        """
+        Recursively traverse component tree to collect dynamic bindings.
+        This avoids rendering components (which can have side effects like script injection).
+        """
+        if not hasattr(self, '_built_in_bindings'):
+            self._built_in_bindings = []
+        
+        # Process this component's dynamic props
+        result = self._process_dynamic_props(component)
+        if result['bindings']:
+            self._built_in_bindings.extend(result['bindings'])
+        
+        # Recursively process children
+        if hasattr(component, 'children') and component.children:
+            for child in component.children:
+                if child is not None:
+                    self._collect_bindings_from_tree(child)
+
+
     def _generate_reactive_bindings_js(self) -> str:
         """Generate JavaScript for reactive bindings from useDynamic"""
-        if not hasattr(self, '_dynamic_bindings') or not self._dynamic_bindings:
+        # Collect all bindings: FunctionComponent spans (self._dynamic_bindings) AND built-in props (self._built_in_bindings)
+        
+        has_fc_bindings = hasattr(self, '_dynamic_bindings') and self._dynamic_bindings
+        has_builtin_bindings = hasattr(self, '_built_in_bindings') and self._built_in_bindings
+        
+        if not has_fc_bindings and not has_builtin_bindings:
             return "    // No reactive bindings"
         
         lines = []
         lines.append("    // Reactive bindings for useDynamic")
         lines.append("    try {")
-        lines.append("        // Hook into window.Dars.change to update reactive spans")
+        lines.append("        // Hook into window.Dars.change to update reactive elements")
         lines.append("        const originalChange = window.Dars && window.Dars.change;")
         lines.append("        if (originalChange) {")
         lines.append("            window.Dars.change = function(payload) {")
         lines.append("                // Call original change")
         lines.append("                const result = originalChange.call(this, payload);")
         lines.append("                ")
-        lines.append("                // Update reactive spans if this is a dynamic change")
-        lines.append("                if (payload && payload.dynamic && payload.attrs) {")
+        lines.append("                // Update reactive elements if this is a dynamic change")
+        lines.append("                if (payload && payload.dynamic && payload.id) {")
         
-        # Group bindings by component ID
-        bindings_by_component = {}
-        for state_path, component_ids in self._dynamic_bindings.items():
-            parts = state_path.split('.')
-            if len(parts) >= 2:
-                component_id = parts[0]  # e.g., "userCard" from "userCard.name"
-                property_name = parts[1]
-                
-                if component_id not in bindings_by_component:
-                    bindings_by_component[component_id] = {}
-                bindings_by_component[component_id][property_name] = state_path
-        
-        # Generate update logic for each component
-        for component_id, properties in bindings_by_component.items():
-            lines.append(f"                    // Check if this change is for {component_id}")
-            lines.append(f"                    if (payload.id === '{component_id}') {{")
-            for property_name, state_path in properties.items():
-                lines.append(f"                        if (payload.attrs.{property_name} !== undefined) {{")
-                lines.append(f"                            document.querySelectorAll('[data-dynamic=\"{state_path}\"]').forEach(function(el) {{")
-                lines.append(f"                                el.textContent = payload.attrs.{property_name};")
-                lines.append("                            });")
-                lines.append("                        }")
-            lines.append("                    }")
-        
+        # 1. Handle FunctionComponent spans (data-dynamic="{state_path}")
+        if has_fc_bindings:
+            # Group by component ID (state ID)
+            bindings_by_component = {}
+            for state_path, component_ids in self._dynamic_bindings.items():
+                parts = state_path.split('.')
+                if len(parts) >= 2:
+                    component_id = parts[0]
+                    property_name = parts[1]
+                    if component_id not in bindings_by_component:
+                        bindings_by_component[component_id] = {}
+                    bindings_by_component[component_id][property_name] = state_path
+            
+            for component_id, properties in bindings_by_component.items():
+                lines.append(f"                    // FunctionComponent bindings for {component_id}")
+                lines.append(f"                    if (payload.id === '{component_id}') {{")
+                for property_name, state_path in properties.items():
+                    lines.append(f"                        if (payload.attrs && payload.attrs.{property_name} !== undefined) {{")
+                    lines.append(f"                            document.querySelectorAll('[data-dynamic=\"{state_path}\"]').forEach(function(el) {{")
+                    lines.append(f"                                el.textContent = payload.attrs.{property_name};")
+                    lines.append("                            });")
+                    lines.append(f"                        }} else if (payload.{property_name} !== undefined) {{")
+                    lines.append(f"                            document.querySelectorAll('[data-dynamic=\"{state_path}\"]').forEach(function(el) {{")
+                    lines.append(f"                                el.textContent = payload.{property_name};")
+                    lines.append("                            });")
+                    lines.append("                        }")
+                lines.append("                    }")
+
+        # 2. Handle Built-in Component bindings (direct ID update)
+        if has_builtin_bindings:
+            # Group bindings by State ID
+            # self._built_in_bindings is list of {component_id, property, state_path}
+            bindings_by_state = {}
+            for binding in self._built_in_bindings:
+                state_path = binding['state_path']
+                parts = state_path.split('.')
+                if len(parts) >= 2:
+                    state_id = parts[0]
+                    state_prop = parts[1]
+                    
+                    if state_id not in bindings_by_state:
+                        bindings_by_state[state_id] = {}
+                    if state_prop not in bindings_by_state[state_id]:
+                        bindings_by_state[state_id][state_prop] = []
+                    
+                    bindings_by_state[state_id][state_prop].append({
+                        'target_id': binding['component_id'],
+                        'target_prop': binding['property']
+                    })
+
+            for state_id, props in bindings_by_state.items():
+                lines.append(f"                    // Built-in bindings for state '{state_id}'")
+                lines.append(f"                    if (payload.id === '{state_id}') {{")
+                for state_prop, targets in props.items():
+                    # Check if this property changed
+                    lines.append(f"                        let val_{state_prop} = undefined;")
+                    lines.append(f"                        if (payload.attrs && payload.attrs.{state_prop} !== undefined) val_{state_prop} = payload.attrs.{state_prop};")
+                    lines.append(f"                        else if (payload.{state_prop} !== undefined) val_{state_prop} = payload.{state_prop};")
+                    
+                    lines.append(f"                        if (val_{state_prop} !== undefined) {{")
+                    for target in targets:
+                        target_id = target['target_id']
+                        target_prop = target['target_prop']
+                        lines.append(f"                            const el_{target_id} = document.getElementById('{target_id}');")
+                        lines.append(f"                            if (el_{target_id}) {{")
+                        if target_prop == 'text':
+                            lines.append(f"                                el_{target_id}.textContent = String(val_{state_prop});")
+                        elif target_prop == 'html':
+                            lines.append(f"                                el_{target_id}.innerHTML = String(val_{state_prop});")
+                        elif target_prop == 'value':
+                            lines.append(f"                                el_{target_id}.value = String(val_{state_prop});")
+                        elif target_prop == 'placeholder':
+                            lines.append(f"                                el_{target_id}.setAttribute('placeholder', String(val_{state_prop}));")
+                        else:
+                            lines.append(f"                                el_{target_id}.setAttribute('{target_prop}', String(val_{state_prop}));")
+                        lines.append("                            }")
+                    lines.append("                        }")
+                lines.append("                    }")
+
         lines.append("                }")
         lines.append("                return result;")
         lines.append("            };")
@@ -3132,7 +3286,23 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
         class_attr = f'class="dars-text {text.class_name or ""}"'
         style_attr = f'style="{self.render_styles(text.style)}"' if text.style else ""
         
-        return f'<span id="{component_id}" {class_attr} {style_attr}>{text.text}</span>'
+        # Process dynamic props
+        dynamic_info = self._process_dynamic_props(text)
+        
+        if dynamic_info['bindings']:
+            # Store bindings for runtime processing
+            if not hasattr(self, '_built_in_bindings'):
+                self._built_in_bindings = []
+            self._built_in_bindings.extend(dynamic_info['bindings'])
+            
+            # Use initial value from state if available
+            text_value = dynamic_info['initial_values'].get('text', text.text)
+            if text_value is None:
+                text_value = text.text
+        else:
+            text_value = text.text
+            
+        return f'<span id="{component_id}" {class_attr} {style_attr}>{text_value}</span>'
         
     def render_button(self, button: Button) -> str:
         """Renderiza un componente Button"""
@@ -3147,7 +3317,23 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
         type_attr = f'type="{button.button_type}"'
         disabled_attr = "disabled" if button.disabled else ""
         
-        return f'<button id="{component_id}" {class_attr} {style_attr} {type_attr} {disabled_attr}>{button.text}</button>'
+        # Process dynamic props
+        dynamic_info = self._process_dynamic_props(button)
+        
+        if dynamic_info['bindings']:
+            # Store bindings for runtime processing
+            if not hasattr(self, '_built_in_bindings'):
+                self._built_in_bindings = []
+            self._built_in_bindings.extend(dynamic_info['bindings'])
+            
+            # Use initial value from state if available
+            text_value = dynamic_info['initial_values'].get('text', button.text)
+            if text_value is None:
+                text_value = button.text
+        else:
+            text_value = button.text
+        
+        return f'<button id="{component_id}" {class_attr} {style_attr} {type_attr} {disabled_attr}>{text_value}</button>'
         
     def render_input(self, input_comp: Input) -> str:
         """Renderiza un componente Input"""
@@ -3155,17 +3341,35 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
         class_attr = f'class="dars-input {input_comp.class_name or ""}"'
         style_attr = f'style="{self.render_styles(input_comp.style)}"' if input_comp.style else ""
         type_attr = f'type="{input_comp.input_type}"'
-        value_attr = f'value="{input_comp.value}"' if input_comp.value else ""
-        placeholder_attr = f'placeholder="{input_comp.placeholder}"' if input_comp.placeholder else ""
+        
+        # Process dynamic props
+        dynamic_info = self._process_dynamic_props(input_comp)
+        
+        if dynamic_info['bindings']:
+            # Store bindings for runtime processing
+            if not hasattr(self, '_built_in_bindings'):
+                self._built_in_bindings = []
+            self._built_in_bindings.extend(dynamic_info['bindings'])
+        
+        # Handle value
+        if 'value' in dynamic_info['initial_values'] and dynamic_info['initial_values']['value'] is not None:
+            value_val = dynamic_info['initial_values']['value']
+        else:
+            value_val = input_comp.value
+            
+        # Handle placeholder
+        if 'placeholder' in dynamic_info['initial_values'] and dynamic_info['initial_values']['placeholder'] is not None:
+            placeholder_val = dynamic_info['initial_values']['placeholder']
+        else:
+            placeholder_val = input_comp.placeholder
+
+        value_attr = f'value="{value_val}"' if value_val else ""
+        placeholder_attr = f'placeholder="{placeholder_val}"' if placeholder_val else ""
         disabled_attr = "disabled" if input_comp.disabled else ""
         readonly_attr = "readonly" if input_comp.readonly else ""
         required_attr = "required" if input_comp.required else ""
         
-        attrs = [class_attr, style_attr, type_attr, value_attr, placeholder_attr, 
-                disabled_attr, readonly_attr, required_attr]
-        attrs_str = " ".join(attr for attr in attrs if attr)
-        
-        return f'<input id="{component_id}" {attrs_str} />'
+        return f'<input id="{component_id}" {class_attr} {style_attr} {type_attr} {value_attr} {placeholder_attr} {disabled_attr} {readonly_attr} {required_attr} />'
         
     def render_container(self, container: Container) -> str:
         """Renderiza un componente Container"""
@@ -3246,7 +3450,29 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
         style_attr = f'style="{self.render_styles(textarea.style)}"' if textarea.style else ""
         rows_attr = f'rows="{textarea.rows}"'
         cols_attr = f'cols="{textarea.cols}"'
-        placeholder_attr = f'placeholder="{textarea.placeholder}"' if textarea.placeholder else ""
+        
+        # Process dynamic props
+        dynamic_info = self._process_dynamic_props(textarea)
+        
+        if dynamic_info['bindings']:
+            # Store bindings for runtime processing
+            if not hasattr(self, '_built_in_bindings'):
+                self._built_in_bindings = []
+            self._built_in_bindings.extend(dynamic_info['bindings'])
+        
+        # Handle value
+        if 'value' in dynamic_info['initial_values'] and dynamic_info['initial_values']['value'] is not None:
+            value_val = dynamic_info['initial_values']['value']
+        else:
+            value_val = textarea.value
+            
+        # Handle placeholder
+        if 'placeholder' in dynamic_info['initial_values'] and dynamic_info['initial_values']['placeholder'] is not None:
+            placeholder_val = dynamic_info['initial_values']['placeholder']
+        else:
+            placeholder_val = textarea.placeholder
+            
+        placeholder_attr = f'placeholder="{placeholder_val}"' if placeholder_val else ""
         disabled_attr = "disabled" if textarea.disabled else ""
         readonly_attr = "readonly" if textarea.readonly else ""
         required_attr = "required" if textarea.required else ""
@@ -3255,8 +3481,8 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
         attrs = [class_attr, style_attr, rows_attr, cols_attr, placeholder_attr,
                  disabled_attr, readonly_attr, required_attr, maxlength_attr]
         attrs_str = " ".join(attr for attr in attrs if attr)
-
-        return f'<textarea id="{component_id}" {attrs_str}>{textarea.value}</textarea>'
+        
+        return f'<textarea id="{component_id}" {attrs_str}>{value_val or ""}</textarea>'
 
     def render_card(self, card: Card) -> str:
         """Renderiza un componente Card"""

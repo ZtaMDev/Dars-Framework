@@ -1,3 +1,52 @@
+# Release Notes v1.5.5
+
+> **Hooks System Enhanced**: `useDynamic` for built-in components and new `useWatch` hook.
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### 1. `useDynamic` for Built-in Components
+
+You can now use `useDynamic` directly in properties of built-in components!
+
+```python
+# Bind directly to component props
+Text(text=useDynamic("user.name"))
+Input(value=useDynamic("user.name"))
+Button(text=useDynamic("user.status"))
+```
+
+This works for `Text`, `Button`, `Input`, `Textarea`, and more.
+
+### 2. New `useWatch` Hook
+Monitor state changes and execute side effects with `useWatch`.
+
+```python
+# Global watcher
+app.useWatch("cart.total", log("Cart updated!"))
+
+# Page-specific watcher
+@route("/cart")
+def cart_page():
+    page = Page()
+    page.useWatch("cart.total", log("Total changed!"))
+    return page
+```
+
+New methods `app.useWatch()` and `page.useWatch()` make integration seamless.
+
+### 3. Fixes
+
+- Fixed execution order in exporter to ensure reactive bindings are generated correctly.
+- Improved state initialization for dynamic props.
+
+---
+
 # Release Notes v1.5.4 (Relaunch from 1.5.3)
 
 > **Hooks System & Reactive Bindings** relaunch with correct license.

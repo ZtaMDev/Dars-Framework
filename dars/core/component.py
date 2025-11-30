@@ -449,6 +449,7 @@ def FunctionComponent(func: Callable) -> type:
     2. Declare arguments `id`, `class_name`, `style`, `children` in your function.
     
     Example 1 (Props object):
+
         @FunctionComponent
         def Card(title, **props):
             return f'''
@@ -459,6 +460,7 @@ def FunctionComponent(func: Callable) -> type:
             '''
             
     Example 2 (Arguments):
+    
         @FunctionComponent
         def Card(title, id, class_name, style, children, **props):
             return f'''

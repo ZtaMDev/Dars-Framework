@@ -12,6 +12,29 @@ class Page(Component):
     def add_script(self, script):
         self.scripts.append(script)
 
+    def useWatch(self, state_path: str, *js_helpers):
+        """
+        Watch a state property and execute callback when it changes.
+        
+        Usage with app.add_script():
+            app.add_script(useWatch("user.name", log("Name changed!")))
+        
+        Usage with page.add_script():
+            page.add_script(useWatch("user.name", log("Name changed!")))
+            
+        Usage with app.useWatch() (convenience):
+            app.useWatch("user.name", log("Name changed!"))
+            
+        Usage with page.useWatch() (convenience):
+            page.useWatch("user.name", log("Name changed!"))
+        
+        The returned WatchMarker has a get_code() method that generates the JavaScript.
+        """
+        from dars.hooks.use_watch import useWatch
+        watcher = useWatch(state_path, *js_helpers)
+        self.add_script(watcher)
+        return self
+
     def get_scripts(self):
         return self.scripts
 

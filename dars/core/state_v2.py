@@ -474,6 +474,7 @@ class State:
         
         # Build payload with all default properties
         parts = [f"id: '{component_id}'", "dynamic: true"]
+        attrs_dict = {}  # Collect all attrs in a single object
         
         for k, v in self._default_snapshot.items():
             # Handle events (on_click, on_change, etc.)
@@ -505,16 +506,22 @@ class State:
                 parts.append(f"style: {json.dumps(v)}")
             elif k == 'class_name':
                 if isinstance(v, str):
-                    parts.append(f"attrs: {{class: {json.dumps(v)}}}")
+                    attrs_dict['class'] = v
                 elif isinstance(v, dict):
                     parts.append(f"classes: {json.dumps(v)}")
             elif k == 'attrs' and isinstance(v, dict):
-                parts.append(f"attrs: {json.dumps(v)}")
+                # Merge attrs dict
+                attrs_dict.update(v)
             else:
+                # Add to attrs dict
                 try:
-                    parts.append(f"attrs: {{{json.dumps(k)}: {json.dumps(v)}}}")
+                    attrs_dict[k] = v
                 except (TypeError, ValueError):
                     continue
+        
+        # Add attrs as a single object if there are any
+        if attrs_dict:
+            parts.append(f"attrs: {json.dumps(attrs_dict)}")
         
         payload = "{" + ", ".join(parts) + "}"
         

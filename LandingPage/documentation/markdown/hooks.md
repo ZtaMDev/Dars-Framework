@@ -1,51 +1,58 @@
 # Hooks System
 
-Dars Framework introduces a **Hooks system** inspired by React, enabling reactive and stateful behavior in FunctionComponents.
+Dars Framework introduces a **Hooks system** inspired by React, enabling reactive and stateful behavior in both FunctionComponents and built-in components.
 
-## Overview
+## Overview Hooks
 
-Hooks provide a way to add reactive capabilities to FunctionComponents without using class-based components. They enable features like:
+Hooks provide a way to add reactive capabilities to your application. They enable features like:
 
 - **Reactive state bindings** - Automatically update UI when data changes
+- **State monitoring** - Watch for state changes and execute side effects
 - **External state integration** - Connect components to global state
-- **Reusable stateful logic** - Share behavior across components
 
 ---
 
 ## useDynamic() - Reactive State Binding
 
-The `useDynamic()` hook creates reactive bindings between external `State` objects and FunctionComponents.
+The `useDynamic()` hook creates reactive bindings between external `State` objects and component properties.
 
-### Basic Usage
+### 1. Usage in Built-in Components
+
+You can pass `useDynamic()` directly to properties of built-in components like `Text`, `Button`, `Input`, etc.
 
 ```python
 from dars.all import *
 
 # Create state
-userState = State("user", name="John Doe", email="john@example.com")
+userState = State("user", name="John Doe", status="Active")
 
-# Use in FunctionComponent with useDynamic
+# Bind directly to props
+card = Container(
+    # Bind text property
+    Text(text=useDynamic("user.name"), style={"font-weight": "bold"}),
+    
+    # Bind input value
+    Input(value=useDynamic("user.name"), placeholder="Edit name"),
+    
+    # Bind button text
+    Button(text=useDynamic("user.status"), on_click=userState.status.set("Clicked!"))
+)
+```
+
+### 2. Usage in FunctionComponents
+
+You can also use `useDynamic()` within `FunctionComponent` templates to create reactive spans.
+
+```python
 @FunctionComponent
 def UserCard(**props):
     return f'''
     <div {Props.id} {Props.class_name} {Props.style}>
         <h3>Name: {useDynamic("user.name")}</h3>
-        <p>Email: {useDynamic("user.email")}</p>
+        <p>Status: {useDynamic("user.status")}</p>
     </div>
     '''
-
-# Render the component
-card = UserCard(id="userCard", style={"padding": "20px"})
-
-# When you update the state, the DOM automatically updates!
-app.add_script(userState.name.set("Jane Doe"))  # UI updates instantly
 ```
-
-### How It Works
-
-1. **Initial Render**: `useDynamic()` creates a reactive span with the initial prop value
-2. **State Changes**: When you call `.set()` on a state property, the hook intercepts it
-3. **DOM Updates**: All matching reactive spans update automatically
 
 ### Syntax
 
@@ -57,154 +64,75 @@ useDynamic(state_path: str) -> DynamicBinding
 - `state_path`: Dot-notation path to state property (e.g., `"user.name"`, `"cart.total"`)
 
 **Returns:**
-- `DynamicBinding` object that renders as a reactive `<span>` element
+- `DynamicBinding` object that resolves to the current value during render and updates automatically when state changes.
 
-### Complete Example
+---
 
+## useWatch() - State Monitoring
+
+The `useWatch()` hook allows you to monitor state changes and execute callbacks (side effects).
+
+### Usage
+
+The recommended way to use `useWatch` is via the `app.useWatch()` or `page.useWatch()` methods:
+
+**Global Watchers (app.useWatch)**
 ```python
 from dars.all import *
 
-app = App("User Profile Editor")
+cartState = State("cart", count=0, total=0.0)
 
-# Create state for user data
-userState = State("user", 
-    name="John Doe", 
-    email="john@example.com",
-    bio="Software Developer"
-)
+# Logs to console whenever cart.count changes
+app.useWatch("cart.count", log("Cart updated!"))
+app.useWatch("cart.total", log("Total changed"))
+```
 
-# Display component with reactive bindings
-@FunctionComponent
-def ProfileDisplay(**props):
-    return f'''
-    <div {Props.id} {Props.class_name} {Props.style}>
-        <h2>{useDynamic("user.name")}</h2>
-        <p>Email: {useDynamic("user.email")}</p>
-        <p>Bio: {useDynamic("user.bio")}</p>
-    </div>
-    '''
-
-# Edit form
-def ProfileEditor():
-    return Container(
-        Text("Name:"),
-        Input(id="nameInput", value="John Doe"),
-        
-        Text("Email:"),
-        Input(id="emailInput", type="email", value="john@example.com"),
-        
-        Text("Bio:"),
-        TextArea(id="bioInput", value="Software Developer"),
-        
-        Button("Save", on_click=[
-            userState.name.set(getInputValue("nameInput")),
-            userState.email.set(getInputValue("emailInput")),
-            userState.bio.set(getInputValue("bioInput"))
-        ])
+**Page-Specific Watchers (page.useWatch)**
+```python
+@route("/cart")
+def cart_page():
+    page = Page()
+    
+    # This watcher only runs on the cart page
+    page.useWatch("cart.total", log("Total changed!"))
+    
+    page.add(
+        Container(
+            Text(useDynamic("cart.total"))
+        )
     )
-
-# Page
-@route("/")
-def index():
-    return Page(
-        ProfileDisplay(id="profile", style={"margin-bottom": "20px"}),
-        ProfileEditor()
-    )
-
-app.add_page("index", index())
-
-if __name__ == "__main__":
-    app.rTimeCompile()
+    return page
 ```
 
-### Integration with State V2
+You can also use the classic syntax with `add_script`:
+```python
+app.add_script(useWatch("state.prop", log("Changed!")))
+```
 
-`useDynamic()` works seamlessly with State V2's dynamic state system:
+### Syntax
 
 ```python
-# State V2 with ID
-userState = State("user", name="John", age=25)
-
-# Use in FunctionComponent
-@FunctionComponent
-def UserInfo(**props):
-    return f'''
-    <div {Props.id}>
-        <p>Name: {useDynamic("user.name")}</p>
-        <p>Age: {useDynamic("user.age")}</p>
-    </div>
-    '''
-
-# Updates work automatically
-btn = Button("Birthday", on_click=userState.age.increment(by=1))
+useWatch(state_path: str, callback: Union[dScript, str, Callable]) -> Union[dScript, WatchMarker]
 ```
 
-### With `getInputValue()`
+**Parameters:**
+- `state_path`: Dot-notation path to state property (e.g., `"user.name"`)
+- `callback`: The script or function to execute when the state changes. Can be:
+    - `dScript` object (e.g., `log("Changed")`, `alert("Update")`)
+    - Inline JavaScript string
+    - Python callable returning a `dScript`
 
-Combine `useDynamic()` with `getInputValue()` for form-to-display updates:
+---
 
-```python
-state = State("product", title="", price=0)
-
-@FunctionComponent
-def ProductCard(**props):
-    return f'''
-    <div {Props.id}>
-        <h3>{useDynamic("product.title")}</h3>
-        <p>Price: ${useDynamic("product.price")}</p>
-    </div>
-    '''
-
-# Form
-form = Container(
-    Input(id="titleInput", placeholder="Product name"),
-    Input(id="priceInput", type="number", placeholder="Price"),
-    Button("Update", on_click=[
-        state.title.set(getInputValue("titleInput")),
-        state.price.set(getInputValue("priceInput"))
-    ])
-)
-```
-
-### Multiple Components, Same State
-
-Multiple components can bind to the same state - all update when state changes:
-
-```python
-state = State("counter", value=0)
-
-@FunctionComponent
-def Display1(**props):
-    return f'<div {Props.id}>Display 1: {useDynamic("counter.value")}</div>'
-
-@FunctionComponent
-def Display2(**props):
-    return f'<div {Props.id}>Display 2: {useDynamic("counter.value")}</div>'
-
-# Both update when button is clicked
-page = Page(
-    Display1(id="d1"),
-    Display2(id="d2"),
-    Button("Increment", on_click=state.value.increment())
-)
-```
-
-### Best Practices
+## Best Practices
 
 **Do:**
-- Use for simple reactive bindings in FunctionComponents
-- Combine with `getInputValue()` for form updates
-- Use consistent state naming (e.g., `"user"`, `"cart"`)
+- Use `useDynamic` for simple text/value updates.
+- Use `useWatch` for side effects like logging, analytics, or complex logic.
+- Use consistent state naming (e.g., `"user"`, `"cart"`).
 
 **Don't:**
-- Use with non-existent state paths (will render empty)
-- Use for complex state machines (use dState instead)
-- Nest state paths more than 2 levels deep
-
-### Limitations
-
-- **One-way binding**: State → DOM only (not DOM → State)
-- **Property depth**: Currently supports `stateName.property` format only
-- **String values**: Best for text content; style objects need `.set()`
+- Use with non-existent state paths.
+- Nest state paths more than 2 levels deep (currently supports `stateName.property`).
 
 ---

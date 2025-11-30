@@ -86,6 +86,13 @@ class Page:
         """Returns the list of scripts added to the page."""
         return list(self.scripts)
 
+    def useWatch(self, state_path: str, *js_helpers):
+        """Adds a watcher to this page."""
+        from dars.hooks.use_watch import useWatch
+        watcher = useWatch(state_path, *js_helpers)
+        self.add_script(watcher)
+        return self
+
     # -----------------------------
     # Helpers para construcción segura
     # -----------------------------
@@ -1384,6 +1391,29 @@ class App:
     def add_script(self, script: 'Script'):
         """Adds a script to the app"""
         self.scripts.append(script)
+
+    def useWatch(self, state_path: str, *js_helpers):
+        """
+        Watch a state property and execute callback when it changes.
+        
+        Usage with app.add_script():
+            app.add_script(useWatch("user.name", log("Name changed!")))
+        
+        Usage with page.add_script():
+            page.add_script(useWatch("user.name", log("Name changed!")))
+            
+        Usage with app.useWatch() (convenience):
+            app.useWatch("user.name", log("Name changed!"))
+            
+        Usage with page.useWatch() (convenience):
+            page.useWatch("user.name", log("Name changed!"))
+        
+        The returned WatchMarker has a get_code() method that generates the JavaScript.
+        """
+        from dars.hooks.use_watch import useWatch
+        watcher = useWatch(state_path, *js_helpers)
+        self.add_script(watcher)
+        return self
         
     def add_global_style(self, selector: str = None, styles: Dict[str, Any] = None, file_path: str = None):
         """

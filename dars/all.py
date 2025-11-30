@@ -57,6 +57,7 @@ from dars.scripts.animations import fadeIn, fadeOut, slideIn, slideOut, scaleIn,
 from dars.scripts.script import *
 # Hooks
 from dars.hooks import useDynamic
+from dars.hooks.use_watch import useWatch
 from dars.version import __version__
 
 # Backend HTTP Utilities (complete import)
@@ -117,5 +118,5 @@ __all__ = [
     # Input utilities
     'getInputValue',
     # Hooks
-    'useDynamic',
+    'useDynamic', 'useWatch',
 ]
