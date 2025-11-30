@@ -8,6 +8,9 @@ from dars.components.advanced.modal import Modal
 from dars.components.advanced.navbar import Navbar
 from dars.components.advanced.table import Table
 from dars.components.advanced.tabs import Tabs
+# Visualization Components
+from dars.components.visualization.chart import Chart
+from dars.components.visualization.table import DataTable
 # Basic Components
 from dars.components.basic.button import Button
 from dars.components.basic.checkbox import Checkbox
@@ -49,9 +52,11 @@ from dars.dars_tests.run_tests import run_app_tests, run_unit_tests, main
 from dars.exporters.web.html_css_js import HTMLCSSJSExporter
 # Script utilities
 from dars.scripts.dscript import dScript, RawJS, Arg
-from dars.scripts.utils_ds import showModal, hideModal, goTo, goToNew, reload, goBack, goForward, alert, confirm, log, show, hide, toggle, addClass, removeClass, toggleClass, scrollTo, scrollToTop, scrollToBottom, scrollToElement, submitForm, resetForm, getValue, clearInput, saveToLocal, loadFromLocal, removeFromLocal, clearLocalStorage, copyToClipboard, copyElementText, focus, blur, setText, setTimeout
+from dars.scripts.utils_ds import showModal, hideModal, goTo, goToNew, reload, goBack, goForward, alert, confirm, log, show, hide, toggle, addClass, removeClass, toggleClass, scrollTo, scrollToTop, scrollToBottom, scrollToElement, submitForm, resetForm, getValue, clearInput, saveToLocal, loadFromLocal, removeFromLocal, clearLocalStorage, copyToClipboard, copyElementText, focus, blur, setText, setTimeout, getInputValue
 from dars.scripts.animations import fadeIn, fadeOut, slideIn, slideOut, scaleIn, scaleOut, shake, bounce, pulse, rotate, flip, colorChange, morphSize, popIn, popOut, sequence  # Animation System
 from dars.scripts.script import *
+# Hooks
+from dars.hooks import useDynamic
 from dars.version import __version__
 
 # Backend HTTP Utilities (complete import)
@@ -67,6 +72,8 @@ __all__ = [
     'Button', 'Checkbox', 'Container', 'DatePicker', 'Image', 'Input', 'Link', 'Page', 'ProgressBar',
     'RadioButton', 'Select', 'Slider', 'Spinner', 'Text', 'Textarea', 'Tooltip',
     'Accordion', 'Card', 'Modal', 'Navbar', 'Table', 'Tabs', 'Section', 'Outlet',
+    # Visualization
+    'Chart', 'DataTable',
     'GridLayout', 'FlexLayout', 'LayoutBase', 'AnchorPoint',
     'InlineScript', 'FileScript', 'dScript', 'HTMLCSSJSExporter',
     'EventTypes', 'EventHandler', 'EventEmitter', 'EventManager', 'Markdown',
@@ -107,4 +114,8 @@ __all__ = [
     'fadeIn', 'fadeOut', 'slideIn', 'slideOut', 'scaleIn', 'scaleOut',
     'shake', 'bounce', 'pulse', 'rotate', 'flip',
     'colorChange', 'morphSize', 'popIn', 'popOut', 'sequence',
+    # Input utilities
+    'getInputValue',
+    # Hooks
+    'useDynamic',
 ]

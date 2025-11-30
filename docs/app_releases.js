@@ -1,4 +1,245 @@
-window.__DARS_VDOM__={type:"T1",id:"page_153",key:"0",children:[{type:"T2",id:"container_154",key:"0/0",children:[{type:"T3",id:"dars-navbar",key:"0/0/0",children:[{type:"T2",id:"navbar-left",key:"0/0/0/0",children:[{type:"T4",id:"image_155",key:"0/0/0/0/0"},{type:"T5",id:"text_156",key:"0/0/0/0/1",text:"Dars Framework"}]},{type:"T2",id:"container_157",key:"0/0/0/1",children:[{type:"T2",id:"navbar-right",key:"0/0/0/1/0",children:[{type:"T6",id:"link_158",key:"0/0/0/1/0/0",text:"Home"},{type:"T6",id:"link_159",key:"0/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_160",key:"0/0/0/1/0/2",text:"Releases"},{type:"T6",id:"link_161",key:"0/0/0/1/0/3",text:"PlayGround"},{type:"T6",id:"link_162",key:"0/0/0/1/0/4",text:"GitHub"}]},{type:"T2",id:"hamburger-menu",key:"0/0/0/1/1",children:[{type:"T2",id:"hamburger-btn",key:"0/0/0/1/1/0",children:[{type:"T2",id:"container_163",key:"0/0/0/1/1/0/0",children:[{type:"T2",id:"container_164",key:"0/0/0/1/1/0/0/0"},{type:"T2",id:"container_165",key:"0/0/0/1/1/0/0/1"},{type:"T2",id:"container_166",key:"0/0/0/1/1/0/0/2"}]}]},{type:"T2",id:"mobile-menu",key:"0/0/0/1/1/1",children:[{type:"T6",id:"link_167",key:"0/0/0/1/1/1/0",text:"Home"},{type:"T6",id:"link_168",key:"0/0/0/1/1/1/1",text:"Documentation"},{type:"T6",id:"link_169",key:"0/0/0/1/1/1/2",text:"Releases"},{type:"T6",id:"link_170",key:"0/0/0/1/1/1/3",text:"PlayGround"},{type:"T6",id:"link_171",key:"0/0/0/1/1/1/4",text:"GitHub"}]}]}]}]}]},{type:"T2",id:"container_172",key:"0/1",children:[{type:"T2",id:"markdown-content-container",key:"0/1/0",children:[{type:"T9",id:"markdown_173",key:"0/1/0/0",text:`# Release Notes v1.5.2
+window.__DARS_VDOM__={type:"T1",id:"page_154",key:"0",children:[{type:"T2",id:"container_155",key:"0/0",children:[{type:"T3",id:"dars-navbar",key:"0/0/0",children:[{type:"T2",id:"navbar-left",key:"0/0/0/0",children:[{type:"T4",id:"image_156",key:"0/0/0/0/0"},{type:"T5",id:"text_157",key:"0/0/0/0/1",text:"Dars Framework"}]},{type:"T2",id:"container_158",key:"0/0/0/1",children:[{type:"T2",id:"navbar-right",key:"0/0/0/1/0",children:[{type:"T6",id:"link_159",key:"0/0/0/1/0/0",text:"Home"},{type:"T6",id:"link_160",key:"0/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_161",key:"0/0/0/1/0/2",text:"Releases"},{type:"T6",id:"link_162",key:"0/0/0/1/0/3",text:"PlayGround"},{type:"T6",id:"link_163",key:"0/0/0/1/0/4",text:"GitHub"}]},{type:"T2",id:"hamburger-menu",key:"0/0/0/1/1",children:[{type:"T2",id:"hamburger-btn",key:"0/0/0/1/1/0",children:[{type:"T2",id:"container_164",key:"0/0/0/1/1/0/0",children:[{type:"T2",id:"container_165",key:"0/0/0/1/1/0/0/0"},{type:"T2",id:"container_166",key:"0/0/0/1/1/0/0/1"},{type:"T2",id:"container_167",key:"0/0/0/1/1/0/0/2"}]}]},{type:"T2",id:"mobile-menu",key:"0/0/0/1/1/1",children:[{type:"T6",id:"link_168",key:"0/0/0/1/1/1/0",text:"Home"},{type:"T6",id:"link_169",key:"0/0/0/1/1/1/1",text:"Documentation"},{type:"T6",id:"link_170",key:"0/0/0/1/1/1/2",text:"Releases"},{type:"T6",id:"link_171",key:"0/0/0/1/1/1/3",text:"PlayGround"},{type:"T6",id:"link_172",key:"0/0/0/1/1/1/4",text:"GitHub"}]}]}]}]}]},{type:"T2",id:"container_173",key:"0/1",children:[{type:"T2",id:"markdown-content-container",key:"0/1/0",children:[{type:"T9",id:"markdown_174",key:"0/1/0/0",text:`# Release Notes v1.5.3
+
+> **Hooks System & Reactive Bindings**
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+## What's New
+
+### Hooks System - \`useDynamic()\`
+
+Dars Framework introduces its **first hook** - \`useDynamic()\` - enabling reactive state bindings in FunctionComponents!
+
+#### Reactive State Bindings
+
+Create components that automatically update when state changes:
+
+\`\`\`python
+from dars.all import *
+
+# Create state
+userState = State("user", name="John Doe", email="john@example.com")
+
+# Use useDynamic in FunctionComponent
+@FunctionComponent
+def UserCard(**props):
+    return f'''
+    <div {Props.id} {Props.class_name} {Props.style}>
+        <h3>{useDynamic("user.name")}</h3>
+        <p>{useDynamic("user.email")}</p>
+    </div>
+    '''
+
+# Render
+card = UserCard(id="userCard")
+
+# Update - DOM automatically reacts!
+app.add_script(userState.name.set("Jane Doe"))  # UI updates instantly
+\`\`\`
+
+#### How It Works
+
+1. **Initial Render**: \`useDynamic()\` inserts reactive spans with initial prop values
+2. **State Changes**: When you call \`.set()\`, the hook intercepts the change
+3. **Auto Updates**: All matching reactive spans update automatically
+
+#### Key Features
+
+- **Zero boilerplate** - Just use \`useDynamic("state.property")  in templates
+- **Automatic updates** - No manual DOM manipulation needed
+- **Multiple bindings** - Multiple components can bind to the same state
+- **State V2 integration** - Works seamlessly with dynamic state system
+
+---
+
+### \`getInputValue()\` Utility
+
+New utility function specifically designed for State V2 integration:
+
+\`\`\`python
+state = State("product", title="", price=0)
+
+Button("Save", on_click=[
+    state.title.set(getInputValue("titleInput")),
+    state.price.set(getInputValue("priceInput"))
+])
+\`\`\`
+
+**Features:**
+- Returns input value as JavaScript expression
+- Works with \`State.set()\` and other dynamic operations
+- Optional \`parent_id\` parameter for scoped searches
+- Complements existing \`getValue()\` for assignments
+
+**Difference from \`getValue()\`:**
+- \`getValue(input_id, target_id)\` - Performs assignment (sets textContent)
+- \`getInputValue(input_id)\` - Returns value expression (for State.set())
+
+---
+
+### CSS Improvements
+
+#### Modern Default Styles
+
+- Updated all component CSS to use CSS variables for easy theming
+- Removed opinionated sizing - better CSS flow and overridability
+- Added \`accent-color\` support for form controls
+- Improved transitions and hover effects
+- Better disabled states across all components
+
+#### CSS Variables
+
+Components now respect theme colors:
+
+\`\`\`css
+--dars-primary: #007bff;
+--dars-spacing-md: 12px;
+/* ... and more */
+\`\`\`
+
+#### Better Customization
+
+\`\`\`python
+# Inline styles work better now
+Button("Click", style={"width": "200px", "padding": "16px"})
+
+# Global styles via app.add_global_styles()
+app.add_global_styles("""
+    .dars-button {
+        border-radius: 8px;
+    }
+""")
+\`\`\`
+
+---
+
+### Bug Fixes
+
+#### Fixed Markdown Syntax Highlighting in Multipage Apps
+
+- **Issue**: Prism.js scripts were only injected on first page with Markdown
+- **Fix**: Per-page script injection tracking ensures all pages get highlighting(Markdown Component)
+- **Impact**: Multipage apps now correctly highlight code on all routes
+
+\`\`\`python
+# Now works correctly across all pages
+@route("/docs")
+def docs():
+    return Page(Markdown(content=code_example))
+
+@route("/tutorial")
+def tutorial():
+    return Page(Markdown(content=tutorial_code))  # Also highlighted now!
+\`\`\`
+
+---
+
+## Breaking Changes
+
+None! This release is 100% backwards compatible.
+
+---
+
+## Complete Example
+
+**User Profile with Reactive Updates:**
+
+\`\`\`python
+from dars.all import *
+
+app = App("Reactive Profile")
+
+# State for user data
+userState = State("user", 
+    name="John Doe",
+    email="john@example.com"
+)
+
+# Reactive display component
+@FunctionComponent
+def ProfileDisplay(**props):
+    return f'''
+    <div {Props.id} {Props.class_name} {Props.style}>
+        <h2>{useDynamic("user.name")}</h2>
+        <p>Email: {useDynamic("user.email")}</p>
+    </div>
+    '''
+
+# Edit form
+def ProfileEditor():
+    return Container(
+        Input(id="nameInput", value="John Doe"),
+        Input(id="emailInput", value="john@example.com"),
+        Button("Save", on_click=[
+            userState.name.set(getInputValue("nameInput")),
+            userState.email.set(getInputValue("emailInput"))
+        ])
+    )
+
+# Page
+@route("/")
+def index():
+    return Page(
+        ProfileDisplay(id="profile"),
+        ProfileEditor()
+    )
+
+app.add_page("index", index())
+
+if __name__ == "__main__":
+    app.rTimeCompile()
+\`\`\`
+
+**Result**: Edit the inputs and click Save - the profile display updates instantly!
+
+---
+
+## Migration Guide
+
+No migration needed! Add \`useDynamic()\` to new or existing FunctionComponents:
+
+**Before (static):**
+\`\`\`python
+@FunctionComponent
+def UserCard(name, email, **props):
+    return f'<div {Props.id}><h3>{name}</h3><p>{email}</p></div>'
+\`\`\`
+
+**After (reactive):**
+\`\`\`python
+@FunctionComponent
+def UserCard(**props):
+    return f'''
+    <div {Props.id}>
+        <h3>{useDynamic("user.name")}</h3>
+        <p>{useDynamic("user.email")}</p>
+    </div>
+    '''
+\`\`\`
+
+---
+
+## Documentation
+
+New documentation added:
+
+- **Hooks System** - Complete guide to \`useDynamic()\` and future hooks
+- **\`getInputValue()\`** - Usage guide in Scripts documentation
+- **Updated Examples** - Reactive patterns and best practices
+
+Visit the [Dars Documentation](https://ztamdev.github.io/Dars-Framework/docs.html) for more details.
+
+---
+
+## What's Next
+
+The hooks system opens the door for more reactive features...
+
+# Release Notes v1.5.2
 
 > **Function Components**
 
@@ -2189,4 +2430,4 @@ Upgrade Recommendation: Recommended for all users; especially helpful for projec
 # Older release notes can be found
 
 In the github repository [Here](https://github.com/ZtaMDev/Dars-Framework/releases).
-`}]},{type:"T2",id:"footer-section",key:"0/1/1",children:[{type:"T2",id:"container_174",key:"0/1/1/0",children:[{type:"T2",id:"container_175",key:"0/1/1/0/0",children:[{type:"T2",id:"container_176",key:"0/1/1/0/0/0",children:[{type:"T4",id:"image_177",key:"0/1/1/0/0/0/0"},{type:"T2",id:"container_178",key:"0/1/1/0/0/0/1",children:[{type:"T5",id:"text_179",key:"0/1/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_180",key:"0/1/1/0/0/1",children:[{type:"T2",id:"container_181",key:"0/1/1/0/0/1/0",children:[{type:"T5",id:"text_182",key:"0/1/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_183",key:"0/1/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_184",key:"0/1/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_185",key:"0/1/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_186",key:"0/1/1/0/0/1/1",children:[{type:"T5",id:"text_187",key:"0/1/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_188",key:"0/1/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_189",key:"0/1/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_190",key:"0/1/1/0/0/1/2",children:[{type:"T5",id:"text_191",key:"0/1/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_192",key:"0/1/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_193",key:"0/1/1/0/0/2",children:[{type:"T2",id:"container_194",key:"0/1/1/0/0/2/0",children:[{type:"T5",id:"text_195",key:"0/1/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_196",key:"0/1/1/0/0/2/1",children:[{type:"T5",id:"text_197",key:"0/1/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_198",key:"0/1/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_199",key:"0/1/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_200",key:"0/1/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]},{type:"T10",id:"documentation-sidebar",key:"0/2"}]},function(){const d=new Map;let l=null,m=null;function u(){}function _(){}function w(e,n){if(!e)return;n(e);const t=e.children||[];for(let i=0;i<t.length;i++)w(t[i],n)}function k(e){try{if(typeof atob=="function")return atob(e);if(typeof Buffer<"u")return Buffer.from(e,"base64").toString("utf8")}catch{}return""}function P(e){try{if(!e)return null;if(e&&e.type==="inline"&&e.code)return new Function("event",e.code);const n=e&&(e.b||e.code_b64)||null;if(n){const t=k(n);if(t)return new Function("event",t)}}catch{}return null}function U(e){w(e,n=>{if(n&&n.id&&n.events&&!d.has(n.id)){const t={};for(const i in n.events){const o=n.events[i],c=P(o);c&&(t[i]=c)}Object.keys(t).length?d.set(n.id,t):d.delete(n.id)}})}function L(e,n){if(!(!e||!n))for(const[t,i]of Object.entries(n))try{i===!1||i===null||typeof i>"u"?e.removeAttribute(t):e.setAttribute(t,String(i))}catch{}}function M(e,n={},t={}){for(const i in n)if(!(i in t))try{e.removeAttribute(i)}catch{}for(const i in t){const o=t[i];try{o===!1||o===null||typeof o>"u"?e.removeAttribute(i):e.setAttribute(i,String(o))}catch{}}}function R(e,n={},t={}){for(const i in n)if(!(i in t))try{e.style.removeProperty(i.replace(/_/g,"-"))}catch{}for(const i in t){const o=t[i];try{e.style.setProperty(i.replace(/_/g,"-"),String(o))}catch{}}}function F(e,n){(n||document).addEventListener(e,function(t){let i=t.target;const o=n||document;for(;i&&i!==o;){const c=i.id;if(c&&d.has(c)){const f=d.get(c);if(i&&i.__darsEv&&i.__darsEv[e])return;let p=f[e];if(!p&&(e==="keydown"||e==="keyup"||e==="keypress")){const a=t.key||t.code;if(a){const r=e+"."+a;p=f[r]}}if(typeof p=="function"){try{p.call(i,t)}catch(a){console.error("[Dars] handler error",a)}return}}i=i.parentNode}},!0)}function S(e,n){return e&&n?e.type!==n.type:e!==n}function x(e){if(!e)return;const n=e.children||[];for(let t=0;t<n.length;t++)x(n[t]);if(e.id&&d.delete(e.id),e.id){const t=document.getElementById(e.id);if(t&&t.parentNode)try{t.parentNode.removeChild(t)}catch{}}}function v(e,n){if(!n||!n.id)return{ok:!1,reason:"missing-new"};let t=document.getElementById(n.id);if(!t){const a=e&&e.id?document.getElementById(e.id):null;if(a)try{a.id=n.id,t=a}catch{}}if(!t)return{ok:!1,reason:"missing-el"};if(S(e,n))return{ok:!1,reason:"type-changed"};const i=!!n.isIsland;if(!i&&n.class&&(t.className=n.class),i||M(t,e&&e.props||{},n.props||{}),i||R(t,e&&e.style||{},n.style||{}),!i&&Object.prototype.hasOwnProperty.call(n,"text")&&t.textContent!==String(n.text||"")&&(t.textContent=String(n.text||"")),i)return{ok:!0};const o=e&&e.children?e.children:[],c=n.children?n.children:[],f=new Map;for(let a=0;a<o.length;a++){const r=o[a]&&(o[a].id||o[a].key)||null;r&&f.set(String(r),o[a])}const p=new Set;for(let a=0;a<c.length;a++){const r=c[a],h=r&&(r.id||r.key)||null;if(!h)if(a<o.length){const s=v(o[a],r);if(!s.ok)return s;p.add(o[a]);continue}else return{ok:!1,reason:"children-added"};const b=f.get(String(h));if(b){const s=v(b,r);if(!s.ok)return s;p.add(b)}else{if(a<o.length){const y=o[a];if(!S(y,r)){const g=v(y,r);if(!g.ok)return g;p.add(y);continue}}const s=createSubtree(r);if(s){const y=a<o.length?o[a]:null;if(y&&y.id){const g=document.getElementById(y.id);g&&g.parentNode?g.parentNode.insertBefore(s,g):t.appendChild(s)}else t.appendChild(s);continue}return{ok:!1,reason:"children-added"}}}for(let a=0;a<o.length;a++){const r=o[a];p.has(r)||x(r)}return{ok:!0}}function N(e){typeof requestAnimationFrame=="function"?requestAnimationFrame(e):setTimeout(e,16)}function H(e){const n=l;if(!n){l=e;try{window.__DARS_VDOM__=e}catch{}return}N(()=>{const t=v(n,e);if(!t.ok){console.warn("[Dars] Structural change detected (",t.reason,"), reloading...");try{location.reload()}catch{}return}l=e;try{window.__DARS_VDOM__=e}catch{}})}function B(e){l=e;try{window.__DARS_VDOM__=e}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(t=>F(t,document))}function O(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const e=window.__DARS_VERSION_URL||"version.txt";let n=null,t=!1,i=0;const o=10;let c=!1;function f(a,r,h,b){try{const s=new XMLHttpRequest;b&&(s.responseType=b),s.open("GET",a,!0),s.timeout=5e3,s.onreadystatechange=function(){s.readyState===4&&(s.status>=200&&s.status<300?r(s.response):h())},s.onerror=h,s.ontimeout=h,s.setRequestHeader("Cache-Control","no-store"),s.send()}catch{h()}}function p(){c||f(e,function(a){let r=(a||"").toString().trim();if(!r||r==="0"){if(i+=1,i>=o){console.warn("[Dars] version file not found after",o,"attempts. Hot reload disabled for this session."),c=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(n)try{clearTimeout(n)}catch{}return}t||(console.warn("[Dars] waiting for version file..."),t=!0),n=setTimeout(p,600);return}if(i=0,t=!1,m||(m=r),r&&r!==m){m=r;try{location.reload()}catch{}return}n=setTimeout(p,600)},function(){if(i+=1,i>=o){console.warn("[Dars] version file not reachable after",o,"attempts. Hot reload disabled for this session."),c=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(n)try{clearTimeout(n)}catch{}return}t||(console.warn("[Dars] waiting for version file..."),t=!0),n=setTimeout(p,600)},"text")}return p(),()=>{try{c=!0,n&&clearTimeout(n),window.__DARS_STOP_HOTRELOAD=null}catch{}}}document.addEventListener("DOMContentLoaded",function(){if(window.__DARS_VDOM__?B(window.__DARS_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=O()}catch{}}})}(),window.addEventListener("scroll",()=>{const d=document.getElementById("dars-navbar");window.scrollY>20?d.classList.add("scrolled"):d.classList.remove("scrolled");const l=document.getElementById("features-section");if(l&&!l.classList.contains("visible")){const m=l.getBoundingClientRect().top,u=window.innerHeight/1.5;m<u&&(l.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((w,k)=>{setTimeout(()=>{w.style.opacity="1",w.style.transform="translateY(0)"},k*100)}))}});const T=document.getElementById("hero-logo"),C=document.getElementById("hero-title"),A=document.getElementById("hero-description"),E=document.getElementById("pip-command"),D=document.getElementById("get-started-btn"),I=document.getElementById("scroll-text");T&&setTimeout(()=>T.classList.add("show"),5),C&&setTimeout(()=>C.classList.add("show"),350),A&&setTimeout(()=>A.classList.add("show"),650),E&&setTimeout(()=>E.classList.add("show"),950),D&&setTimeout(()=>D.classList.add("show"),1250),I&&setTimeout(()=>I.classList.add("show"),1500),document.addEventListener("DOMContentLoaded",function(){const d=document.getElementById("hamburger-btn"),l=document.getElementById("mobile-menu"),m=document.body;d&&l&&(d.addEventListener("click",function(u){u.stopPropagation(),l.style.display==="flex"?(l.style.display="none",d.classList.remove("menu-open"),m.classList.remove("menu-open")):(l.style.display="flex",d.classList.add("menu-open"),m.classList.add("menu-open"))}),l.querySelectorAll("a").forEach(u=>{u.addEventListener("click",function(){l.style.display="none",d.classList.remove("menu-open"),m.classList.remove("menu-open")})}),document.addEventListener("click",function(u){!d.contains(u.target)&&!l.contains(u.target)&&(l.style.display="none",d.classList.remove("menu-open"),m.classList.remove("menu-open"))}),document.addEventListener("keydown",function(u){u.key==="Escape"&&l.style.display==="flex"&&(l.style.display="none",d.classList.remove("menu-open"),m.classList.remove("menu-open"))}))});
+`}]},{type:"T2",id:"footer-section",key:"0/1/1",children:[{type:"T2",id:"container_175",key:"0/1/1/0",children:[{type:"T2",id:"container_176",key:"0/1/1/0/0",children:[{type:"T2",id:"container_177",key:"0/1/1/0/0/0",children:[{type:"T4",id:"image_178",key:"0/1/1/0/0/0/0"},{type:"T2",id:"container_179",key:"0/1/1/0/0/0/1",children:[{type:"T5",id:"text_180",key:"0/1/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_181",key:"0/1/1/0/0/1",children:[{type:"T2",id:"container_182",key:"0/1/1/0/0/1/0",children:[{type:"T5",id:"text_183",key:"0/1/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_184",key:"0/1/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_185",key:"0/1/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_186",key:"0/1/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_187",key:"0/1/1/0/0/1/1",children:[{type:"T5",id:"text_188",key:"0/1/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_189",key:"0/1/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_190",key:"0/1/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_191",key:"0/1/1/0/0/1/2",children:[{type:"T5",id:"text_192",key:"0/1/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_193",key:"0/1/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_194",key:"0/1/1/0/0/2",children:[{type:"T2",id:"container_195",key:"0/1/1/0/0/2/0",children:[{type:"T5",id:"text_196",key:"0/1/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_197",key:"0/1/1/0/0/2/1",children:[{type:"T5",id:"text_198",key:"0/1/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_199",key:"0/1/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_200",key:"0/1/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_201",key:"0/1/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]},{type:"T10",id:"documentation-sidebar",key:"0/2"}]},function(){const d=new Map;let l=null,m=null;function u(){}function _(){}function w(e,n){if(!e)return;n(e);const t=e.children||[];for(let i=0;i<t.length;i++)w(t[i],n)}function k(e){try{if(typeof atob=="function")return atob(e);if(typeof Buffer<"u")return Buffer.from(e,"base64").toString("utf8")}catch{}return""}function P(e){try{if(!e)return null;if(e&&e.type==="inline"&&e.code)return new Function("event",e.code);const n=e&&(e.b||e.code_b64)||null;if(n){const t=k(n);if(t)return new Function("event",t)}}catch{}return null}function U(e){w(e,n=>{if(n&&n.id&&n.events&&!d.has(n.id)){const t={};for(const i in n.events){const o=n.events[i],c=P(o);c&&(t[i]=c)}Object.keys(t).length?d.set(n.id,t):d.delete(n.id)}})}function L(e,n){if(!(!e||!n))for(const[t,i]of Object.entries(n))try{i===!1||i===null||typeof i>"u"?e.removeAttribute(t):e.setAttribute(t,String(i))}catch{}}function M(e,n={},t={}){for(const i in n)if(!(i in t))try{e.removeAttribute(i)}catch{}for(const i in t){const o=t[i];try{o===!1||o===null||typeof o>"u"?e.removeAttribute(i):e.setAttribute(i,String(o))}catch{}}}function F(e,n={},t={}){for(const i in n)if(!(i in t))try{e.style.removeProperty(i.replace(/_/g,"-"))}catch{}for(const i in t){const o=t[i];try{e.style.setProperty(i.replace(/_/g,"-"),String(o))}catch{}}}function R(e,n){(n||document).addEventListener(e,function(t){let i=t.target;const o=n||document;for(;i&&i!==o;){const c=i.id;if(c&&d.has(c)){const f=d.get(c);if(i&&i.__darsEv&&i.__darsEv[e])return;let p=f[e];if(!p&&(e==="keydown"||e==="keyup"||e==="keypress")){const a=t.key||t.code;if(a){const r=e+"."+a;p=f[r]}}if(typeof p=="function"){try{p.call(i,t)}catch(a){console.error("[Dars] handler error",a)}return}}i=i.parentNode}},!0)}function S(e,n){return e&&n?e.type!==n.type:e!==n}function x(e){if(!e)return;const n=e.children||[];for(let t=0;t<n.length;t++)x(n[t]);if(e.id&&d.delete(e.id),e.id){const t=document.getElementById(e.id);if(t&&t.parentNode)try{t.parentNode.removeChild(t)}catch{}}}function v(e,n){if(!n||!n.id)return{ok:!1,reason:"missing-new"};let t=document.getElementById(n.id);if(!t){const a=e&&e.id?document.getElementById(e.id):null;if(a)try{a.id=n.id,t=a}catch{}}if(!t)return{ok:!1,reason:"missing-el"};if(S(e,n))return{ok:!1,reason:"type-changed"};const i=!!n.isIsland;if(!i&&n.class&&(t.className=n.class),i||M(t,e&&e.props||{},n.props||{}),i||F(t,e&&e.style||{},n.style||{}),!i&&Object.prototype.hasOwnProperty.call(n,"text")&&t.textContent!==String(n.text||"")&&(t.textContent=String(n.text||"")),i)return{ok:!0};const o=e&&e.children?e.children:[],c=n.children?n.children:[],f=new Map;for(let a=0;a<o.length;a++){const r=o[a]&&(o[a].id||o[a].key)||null;r&&f.set(String(r),o[a])}const p=new Set;for(let a=0;a<c.length;a++){const r=c[a],h=r&&(r.id||r.key)||null;if(!h)if(a<o.length){const s=v(o[a],r);if(!s.ok)return s;p.add(o[a]);continue}else return{ok:!1,reason:"children-added"};const b=f.get(String(h));if(b){const s=v(b,r);if(!s.ok)return s;p.add(b)}else{if(a<o.length){const y=o[a];if(!S(y,r)){const g=v(y,r);if(!g.ok)return g;p.add(y);continue}}const s=createSubtree(r);if(s){const y=a<o.length?o[a]:null;if(y&&y.id){const g=document.getElementById(y.id);g&&g.parentNode?g.parentNode.insertBefore(s,g):t.appendChild(s)}else t.appendChild(s);continue}return{ok:!1,reason:"children-added"}}}for(let a=0;a<o.length;a++){const r=o[a];p.has(r)||x(r)}return{ok:!0}}function N(e){typeof requestAnimationFrame=="function"?requestAnimationFrame(e):setTimeout(e,16)}function H(e){const n=l;if(!n){l=e;try{window.__DARS_VDOM__=e}catch{}return}N(()=>{const t=v(n,e);if(!t.ok){console.warn("[Dars] Structural change detected (",t.reason,"), reloading...");try{location.reload()}catch{}return}l=e;try{window.__DARS_VDOM__=e}catch{}})}function B(e){l=e;try{window.__DARS_VDOM__=e}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(t=>R(t,document))}function O(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const e=window.__DARS_VERSION_URL||"version.txt";let n=null,t=!1,i=0;const o=10;let c=!1;function f(a,r,h,b){try{const s=new XMLHttpRequest;b&&(s.responseType=b),s.open("GET",a,!0),s.timeout=5e3,s.onreadystatechange=function(){s.readyState===4&&(s.status>=200&&s.status<300?r(s.response):h())},s.onerror=h,s.ontimeout=h,s.setRequestHeader("Cache-Control","no-store"),s.send()}catch{h()}}function p(){c||f(e,function(a){let r=(a||"").toString().trim();if(!r||r==="0"){if(i+=1,i>=o){console.warn("[Dars] version file not found after",o,"attempts. Hot reload disabled for this session."),c=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(n)try{clearTimeout(n)}catch{}return}t||(console.warn("[Dars] waiting for version file..."),t=!0),n=setTimeout(p,600);return}if(i=0,t=!1,m||(m=r),r&&r!==m){m=r;try{location.reload()}catch{}return}n=setTimeout(p,600)},function(){if(i+=1,i>=o){console.warn("[Dars] version file not reachable after",o,"attempts. Hot reload disabled for this session."),c=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(n)try{clearTimeout(n)}catch{}return}t||(console.warn("[Dars] waiting for version file..."),t=!0),n=setTimeout(p,600)},"text")}return p(),()=>{try{c=!0,n&&clearTimeout(n),window.__DARS_STOP_HOTRELOAD=null}catch{}}}document.addEventListener("DOMContentLoaded",function(){if(window.__DARS_VDOM__?B(window.__DARS_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=O()}catch{}}})}(),window.addEventListener("scroll",()=>{const d=document.getElementById("dars-navbar");window.scrollY>20?d.classList.add("scrolled"):d.classList.remove("scrolled");const l=document.getElementById("features-section");if(l&&!l.classList.contains("visible")){const m=l.getBoundingClientRect().top,u=window.innerHeight/1.5;m<u&&(l.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((w,k)=>{setTimeout(()=>{w.style.opacity="1",w.style.transform="translateY(0)"},k*100)}))}});const C=document.getElementById("hero-logo"),T=document.getElementById("hero-title"),D=document.getElementById("hero-description"),A=document.getElementById("pip-command"),E=document.getElementById("get-started-btn"),I=document.getElementById("scroll-text");C&&setTimeout(()=>C.classList.add("show"),5),T&&setTimeout(()=>T.classList.add("show"),350),D&&setTimeout(()=>D.classList.add("show"),650),A&&setTimeout(()=>A.classList.add("show"),950),E&&setTimeout(()=>E.classList.add("show"),1250),I&&setTimeout(()=>I.classList.add("show"),1500),document.addEventListener("DOMContentLoaded",function(){const d=document.getElementById("hamburger-btn"),l=document.getElementById("mobile-menu"),m=document.body;d&&l&&(d.addEventListener("click",function(u){u.stopPropagation(),l.style.display==="flex"?(l.style.display="none",d.classList.remove("menu-open"),m.classList.remove("menu-open")):(l.style.display="flex",d.classList.add("menu-open"),m.classList.add("menu-open"))}),l.querySelectorAll("a").forEach(u=>{u.addEventListener("click",function(){l.style.display="none",d.classList.remove("menu-open"),m.classList.remove("menu-open")})}),document.addEventListener("click",function(u){!d.contains(u.target)&&!l.contains(u.target)&&(l.style.display="none",d.classList.remove("menu-open"),m.classList.remove("menu-open"))}),document.addEventListener("keydown",function(u){u.key==="Escape"&&l.style.display==="flex"&&(l.style.display="none",d.classList.remove("menu-open"),m.classList.remove("menu-open"))}))});

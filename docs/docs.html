@@ -25,7 +25,6 @@
   <meta content="Dars framework landing page for the UI multiplatform python framework" property="og:description"/>
   <meta content="website" property="og:type"/>
   <meta content="summary" name="twitter:card"/>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"/>
   <link href="runtime_css.css" rel="stylesheet"/>
   <link href="styles.css" rel="stylesheet"/>
  </head>
@@ -1191,6 +1190,47 @@
      <div class="sidebar-divider">
      </div>
      <div class="sidebar-category">
+      Hooks
+     </div>
+     <a class="sidebar-link sidebar-level-1" href="#hooks-system" style="margin-left: 0px">
+      Hooks System
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#overview" style="margin-left: 20px">
+      Overview
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#usedynamic-reactive-state-binding" style="margin-left: 20px">
+      useDynamic() - Reactive State Binding
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#basic-usage" style="margin-left: 40px">
+      Basic Usage
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#how-it-works" style="margin-left: 40px">
+      How It Works
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#syntax" style="margin-left: 40px">
+      Syntax
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#complete-example" style="margin-left: 40px">
+      Complete Example
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#integration-with-state-v2" style="margin-left: 40px">
+      Integration with State V2
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#with-getinputvalue" style="margin-left: 40px">
+      With `getInputValue()`
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#multiple-components-same-state" style="margin-left: 40px">
+      Multiple Components, Same State
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#best-practices" style="margin-left: 40px">
+      Best Practices
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#limitations" style="margin-left: 40px">
+      Limitations
+     </a>
+     <div class="sidebar-divider">
+     </div>
+     <div class="sidebar-category">
       Events
      </div>
      <a class="sidebar-link sidebar-level-1" href="#events-in-dars" style="margin-left: 0px">
@@ -1370,12 +1410,6 @@
      </a>
      <a class="sidebar-link sidebar-level-3" href="#alerts-focus" style="margin-left: 40px">
       Alerts &amp; Focus
-     </a>
-     <a class="sidebar-link sidebar-level-1" href="#read-a-file-and-update-a-component-with-its-content" style="margin-left: 0px">
-      Read a file and update a component with its content
-     </a>
-     <a class="sidebar-link sidebar-level-1" href="#the-result-of-the-previous-script-is-available-as-dscriptarg-which-resolves-to-value" style="margin-left: 0px">
-      The result of the previous script is available as dScript.ARG (which resolves to 'value')
      </a>
      <a class="sidebar-link sidebar-level-3" href="#state-navigation-with-statestate" style="margin-left: 40px">
       State Navigation with `state.state()`
@@ -1829,6 +1863,11 @@
        <li>
         <a href="#custom-components-in-dars-framework">
          Custom Components
+        </a>
+       </li>
+       <li>
+        <a href="#hooks-system">
+         Hooks
         </a>
        </li>
        <li>
@@ -11113,6 +11152,368 @@ def hello():
       </div>
      </div>
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_122">
+      <h1 id="hooks-system">
+       Hooks System
+      </h1>
+      <p>
+       Dars Framework introduces a
+       <strong>
+        Hooks system
+       </strong>
+       inspired by React, enabling reactive and stateful behavior in FunctionComponents.
+      </p>
+      <h2 id="overview">
+       Overview
+      </h2>
+      <p>
+       Hooks provide a way to add reactive capabilities to FunctionComponents without using class-based components. They enable features like:
+      </p>
+      <ul>
+       <li>
+        <strong>
+         Reactive state bindings
+        </strong>
+        - Automatically update UI when data changes
+       </li>
+       <li>
+        <strong>
+         External state integration
+        </strong>
+        - Connect components to global state
+       </li>
+       <li>
+        <strong>
+         Reusable stateful logic
+        </strong>
+        - Share behavior across components
+       </li>
+      </ul>
+      <hr/>
+      <h2 id="usedynamic-reactive-state-binding">
+       useDynamic() - Reactive State Binding
+      </h2>
+      <p>
+       The
+       <code>
+        useDynamic()
+       </code>
+       hook creates reactive bindings between external
+       <code>
+        State
+       </code>
+       objects and FunctionComponents.
+      </p>
+      <h3 id="basic-usage">
+       Basic Usage
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="c1"># Create state</span>
+<span class="n">userState</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"user"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"John Doe"</span><span class="p">,</span> <span class="n">email</span><span class="o">=</span><span class="s2">"john@example.com"</span><span class="p">)</span>
+
+<span class="c1"># Use in FunctionComponent with useDynamic</span>
+<span class="nd">@FunctionComponent</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">UserCard</span><span class="p">(</span><span class="o">**</span><span class="n">props</span><span class="p">):</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">'''</span>
+<span class="s1">    &lt;div </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">class_name</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">style</span><span class="si">}</span><span class="s1">&gt;</span>
+<span class="s1">        &lt;h3&gt;Name: </span><span class="si">{</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"user.name"</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/h3&gt;</span>
+<span class="s1">        &lt;p&gt;Email: </span><span class="si">{</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"user.email"</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/p&gt;</span>
+<span class="s1">    &lt;/div&gt;</span>
+<span class="s1">    '''</span>
+
+<span class="c1"># Render the component</span>
+<span class="n">card</span> <span class="o">=</span> <span class="n">UserCard</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"userCard"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s2">"padding"</span><span class="p">:</span> <span class="s2">"20px"</span><span class="p">})</span>
+
+<span class="c1"># When you update the state, the DOM automatically updates!</span>
+<span class="n">app</span><span class="o">.</span><span class="n">add_script</span><span class="p">(</span><span class="n">userState</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"Jane Doe"</span><span class="p">))</span>  <span class="c1"># UI updates instantly</span>
+</code></pre>
+      </div>
+      <h3 id="how-it-works">
+       How It Works
+      </h3>
+      <ol>
+       <li>
+        <strong>
+         Initial Render
+        </strong>
+        :
+        <code>
+         useDynamic()
+        </code>
+        creates a reactive span with the initial prop value
+       </li>
+       <li>
+        <strong>
+         State Changes
+        </strong>
+        : When you call
+        <code>
+         .set()
+        </code>
+        on a state property, the hook intercepts it
+       </li>
+       <li>
+        <strong>
+         DOM Updates
+        </strong>
+        : All matching reactive spans update automatically
+       </li>
+      </ol>
+      <h3 id="syntax">
+       Syntax
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">useDynamic</span><span class="p">(</span><span class="n">state_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DynamicBinding</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Parameters:
+       </strong>
+       -
+       <code>
+        state_path
+       </code>
+       : Dot-notation path to state property (e.g.,
+       <code>
+        "user.name"
+       </code>
+       ,
+       <code>
+        "cart.total"
+       </code>
+       )
+      </p>
+      <p>
+       <strong>
+        Returns:
+       </strong>
+       -
+       <code>
+        DynamicBinding
+       </code>
+       object that renders as a reactive
+       <code>
+        &lt;span&gt;
+       </code>
+       element
+      </p>
+      <h3 id="complete-example">
+       Complete Example
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="s2">"User Profile Editor"</span><span class="p">)</span>
+
+<span class="c1"># Create state for user data</span>
+<span class="n">userState</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"user"</span><span class="p">,</span> 
+    <span class="n">name</span><span class="o">=</span><span class="s2">"John Doe"</span><span class="p">,</span> 
+    <span class="n">email</span><span class="o">=</span><span class="s2">"john@example.com"</span><span class="p">,</span>
+    <span class="n">bio</span><span class="o">=</span><span class="s2">"Software Developer"</span>
+<span class="p">)</span>
+
+<span class="c1"># Display component with reactive bindings</span>
+<span class="nd">@FunctionComponent</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ProfileDisplay</span><span class="p">(</span><span class="o">**</span><span class="n">props</span><span class="p">):</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">'''</span>
+<span class="s1">    &lt;div </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">class_name</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">style</span><span class="si">}</span><span class="s1">&gt;</span>
+<span class="s1">        &lt;h2&gt;</span><span class="si">{</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"user.name"</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/h2&gt;</span>
+<span class="s1">        &lt;p&gt;Email: </span><span class="si">{</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"user.email"</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/p&gt;</span>
+<span class="s1">        &lt;p&gt;Bio: </span><span class="si">{</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"user.bio"</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/p&gt;</span>
+<span class="s1">    &lt;/div&gt;</span>
+<span class="s1">    '''</span>
+
+<span class="c1"># Edit form</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ProfileEditor</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Container</span><span class="p">(</span>
+        <span class="n">Text</span><span class="p">(</span><span class="s2">"Name:"</span><span class="p">),</span>
+        <span class="n">Input</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"nameInput"</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s2">"John Doe"</span><span class="p">),</span>
+
+        <span class="n">Text</span><span class="p">(</span><span class="s2">"Email:"</span><span class="p">),</span>
+        <span class="n">Input</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"emailInput"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">"email"</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s2">"john@example.com"</span><span class="p">),</span>
+
+        <span class="n">Text</span><span class="p">(</span><span class="s2">"Bio:"</span><span class="p">),</span>
+        <span class="n">TextArea</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"bioInput"</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s2">"Software Developer"</span><span class="p">),</span>
+
+        <span class="n">Button</span><span class="p">(</span><span class="s2">"Save"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="p">[</span>
+            <span class="n">userState</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">getInputValue</span><span class="p">(</span><span class="s2">"nameInput"</span><span class="p">)),</span>
+            <span class="n">userState</span><span class="o">.</span><span class="n">email</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">getInputValue</span><span class="p">(</span><span class="s2">"emailInput"</span><span class="p">)),</span>
+            <span class="n">userState</span><span class="o">.</span><span class="n">bio</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">getInputValue</span><span class="p">(</span><span class="s2">"bioInput"</span><span class="p">))</span>
+        <span class="p">])</span>
+    <span class="p">)</span>
+
+<span class="c1"># Page</span>
+<span class="nd">@route</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span>
+        <span class="n">ProfileDisplay</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"profile"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s2">"margin-bottom"</span><span class="p">:</span> <span class="s2">"20px"</span><span class="p">}),</span>
+        <span class="n">ProfileEditor</span><span class="p">()</span>
+    <span class="p">)</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="s2">"index"</span><span class="p">,</span> <span class="n">index</span><span class="p">())</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">rTimeCompile</span><span class="p">()</span>
+</code></pre>
+      </div>
+      <h3 id="integration-with-state-v2">
+       Integration with State V2
+      </h3>
+      <p>
+       <code>
+        useDynamic()
+       </code>
+       works seamlessly with State V2's dynamic state system:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># State V2 with ID</span>
+<span class="n">userState</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"user"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"John"</span><span class="p">,</span> <span class="n">age</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
+
+<span class="c1"># Use in FunctionComponent</span>
+<span class="nd">@FunctionComponent</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">UserInfo</span><span class="p">(</span><span class="o">**</span><span class="n">props</span><span class="p">):</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">'''</span>
+<span class="s1">    &lt;div </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">&gt;</span>
+<span class="s1">        &lt;p&gt;Name: </span><span class="si">{</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"user.name"</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/p&gt;</span>
+<span class="s1">        &lt;p&gt;Age: </span><span class="si">{</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"user.age"</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/p&gt;</span>
+<span class="s1">    &lt;/div&gt;</span>
+<span class="s1">    '''</span>
+
+<span class="c1"># Updates work automatically</span>
+<span class="n">btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Birthday"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">userState</span><span class="o">.</span><span class="n">age</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+</code></pre>
+      </div>
+      <h3 id="with-getinputvalue">
+       With
+       <code>
+        getInputValue()
+       </code>
+      </h3>
+      <p>
+       Combine
+       <code>
+        useDynamic()
+       </code>
+       with
+       <code>
+        getInputValue()
+       </code>
+       for form-to-display updates:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"product"</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span> <span class="n">price</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="nd">@FunctionComponent</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ProductCard</span><span class="p">(</span><span class="o">**</span><span class="n">props</span><span class="p">):</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">'''</span>
+<span class="s1">    &lt;div </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">&gt;</span>
+<span class="s1">        &lt;h3&gt;</span><span class="si">{</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"product.title"</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/h3&gt;</span>
+<span class="s1">        &lt;p&gt;Price: $</span><span class="si">{</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"product.price"</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/p&gt;</span>
+<span class="s1">    &lt;/div&gt;</span>
+<span class="s1">    '''</span>
+
+<span class="c1"># Form</span>
+<span class="n">form</span> <span class="o">=</span> <span class="n">Container</span><span class="p">(</span>
+    <span class="n">Input</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"titleInput"</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">"Product name"</span><span class="p">),</span>
+    <span class="n">Input</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"priceInput"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">"number"</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">"Price"</span><span class="p">),</span>
+    <span class="n">Button</span><span class="p">(</span><span class="s2">"Update"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">title</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">getInputValue</span><span class="p">(</span><span class="s2">"titleInput"</span><span class="p">)),</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">price</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">getInputValue</span><span class="p">(</span><span class="s2">"priceInput"</span><span class="p">))</span>
+    <span class="p">])</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="multiple-components-same-state">
+       Multiple Components, Same State
+      </h3>
+      <p>
+       Multiple components can bind to the same state - all update when state changes:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"counter"</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="nd">@FunctionComponent</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Display1</span><span class="p">(</span><span class="o">**</span><span class="n">props</span><span class="p">):</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">'&lt;div </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">&gt;Display 1: </span><span class="si">{</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"counter.value"</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/div&gt;'</span>
+
+<span class="nd">@FunctionComponent</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Display2</span><span class="p">(</span><span class="o">**</span><span class="n">props</span><span class="p">):</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">'&lt;div </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">&gt;Display 2: </span><span class="si">{</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"counter.value"</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/div&gt;'</span>
+
+<span class="c1"># Both update when button is clicked</span>
+<span class="n">page</span> <span class="o">=</span> <span class="n">Page</span><span class="p">(</span>
+    <span class="n">Display1</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"d1"</span><span class="p">),</span>
+    <span class="n">Display2</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"d2"</span><span class="p">),</span>
+    <span class="n">Button</span><span class="p">(</span><span class="s2">"Increment"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">increment</span><span class="p">())</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="best-practices">
+       Best Practices
+      </h3>
+      <p>
+       <strong>
+        Do:
+       </strong>
+       - Use for simple reactive bindings in FunctionComponents
+- Combine with
+       <code>
+        getInputValue()
+       </code>
+       for form updates
+- Use consistent state naming (e.g.,
+       <code>
+        "user"
+       </code>
+       ,
+       <code>
+        "cart"
+       </code>
+       )
+      </p>
+      <p>
+       <strong>
+        Don't:
+       </strong>
+       - Use with non-existent state paths (will render empty)
+- Use for complex state machines (use dState instead)
+- Nest state paths more than 2 levels deep
+      </p>
+      <h3 id="limitations">
+       Limitations
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         One-way binding
+        </strong>
+        : State → DOM only (not DOM → State)
+       </li>
+       <li>
+        <strong>
+         Property depth
+        </strong>
+        : Currently supports
+        <code>
+         stateName.property
+        </code>
+        format only
+       </li>
+       <li>
+        <strong>
+         String values
+        </strong>
+        : Best for text content; style objects need
+        <code>
+         .set()
+        </code>
+       </li>
+      </ul>
+      <hr/>
+     </div>
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_123">
       <h1 id="events-in-dars">
        Events in Dars
       </h1>
@@ -11375,7 +11776,7 @@ def hello():
 </code></pre>
       </div>
      </div>
-     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_123">
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_124">
       <h1 id="dars-exporter-documentation">
        Dars - Exporter Documentation
       </h1>
@@ -11945,7 +12346,7 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
        </li>
       </ul>
      </div>
-     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_124">
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_125">
       <h1 id="dars-script-system">
        Dars - Script System
       </h1>
@@ -12581,56 +12982,91 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
          confirm(message, on_ok, on_cancel)
         </code>
         : Show confirm dialog.
-        <h1 id="read-a-file-and-update-a-component-with-its-content">
-         Read a file and update a component with its content
-        </h1>
        </li>
       </ul>
-      <h1 id="the-result-of-the-previous-script-is-available-as-dscriptarg-which-resolves-to-value">
-       The result of the previous script is available as dScript.ARG (which resolves to 'value')
-      </h1>
-      <p>
-       read_op = read_text("data.txt")
-update_op = this().state(text=RawJS(dScript.ARG))
-      </p>
-      <p>
-       chained_script = read_op.then(update_op)
-      </p>
-      <pre>
-<code class="language-none">
-The `RawJS` wrapper ensures that `dScript.ARG` is treated as a variable name (`value`) rather than a string literal `"value"`.
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">read_op</span> <span class="o">=</span> <span class="n">read_text</span><span class="p">(</span><span class="s2">"data.txt"</span><span class="p">)</span>
+<span class="n">update_op</span> <span class="o">=</span> <span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">RawJS</span><span class="p">(</span><span class="n">dScript</span><span class="o">.</span><span class="n">ARG</span><span class="p">))</span>
 
-### State Navigation with `state.state()`
-
-The `state.state(idx)` method allows you to navigate a component to a specific state index. This is the recommended way to trigger state transitions.
-
-**Requirements**:
-- The component must have a `dState` defined with the target index in its `states` array
-- The index must be valid (0 to states.length - 1)
-
-**Example: Toggle Button**
-```python
-from dars.all import *
-from dars.core.state import dState
-
-# Create a button that toggles between two states
-toggle_btn = Button("Off", id="ToggleBtn")
-
-# Define states for the button
-toggle_state = dState("toggle", component=toggle_btn, states=[0, 1])
-
-# Configure state 1 appearance and behavior
-toggle_state.cState(1, mods=[
-    Mod.set(toggle_btn, 
-        text="On",
-        style={'background-color': 'green', 'color': 'white'},
-        on_click=toggle_state.state(0)  # Return to state 0 when clicked
-    )
-])
-
-# Initial click navigates to state 1
-toggle_btn.on_click = toggle_state.state(1)
+<span class="n">chained_script</span> <span class="o">=</span> <span class="n">read_op</span><span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="n">update_op</span><span class="p">)</span>
 </code></pre>
+      </div>
+      <p>
+       The
+       <code>
+        RawJS
+       </code>
+       wrapper ensures that
+       <code>
+        dScript.ARG
+       </code>
+       is treated as a variable name (
+       <code>
+        value
+       </code>
+       ) rather than a string literal
+       <code>
+        "value"
+       </code>
+       .
+      </p>
+      <h3 id="state-navigation-with-statestate-2">
+       State Navigation with
+       <code>
+        state.state()
+       </code>
+      </h3>
+      <p>
+       The
+       <code>
+        state.state(idx)
+       </code>
+       method allows you to navigate a component to a specific state index. This is the recommended way to trigger state transitions.
+      </p>
+      <p>
+       <strong>
+        Requirements
+       </strong>
+       :
+- The component must have a
+       <code>
+        dState
+       </code>
+       defined with the target index in its
+       <code>
+        states
+       </code>
+       array
+- The index must be valid (0 to states.length - 1)
+      </p>
+      <p>
+       <strong>
+        Example: Toggle Button
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dars.core.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">dState</span>
+
+<span class="c1"># Create a button that toggles between two states</span>
+<span class="n">toggle_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Off"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"ToggleBtn"</span><span class="p">)</span>
+
+<span class="c1"># Define states for the button</span>
+<span class="n">toggle_state</span> <span class="o">=</span> <span class="n">dState</span><span class="p">(</span><span class="s2">"toggle"</span><span class="p">,</span> <span class="n">component</span><span class="o">=</span><span class="n">toggle_btn</span><span class="p">,</span> <span class="n">states</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+<span class="c1"># Configure state 1 appearance and behavior</span>
+<span class="n">toggle_state</span><span class="o">.</span><span class="n">cState</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">mods</span><span class="o">=</span><span class="p">[</span>
+    <span class="n">Mod</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">toggle_btn</span><span class="p">,</span> 
+        <span class="n">text</span><span class="o">=</span><span class="s2">"On"</span><span class="p">,</span>
+        <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s1">'background-color'</span><span class="p">:</span> <span class="s1">'green'</span><span class="p">,</span> <span class="s1">'color'</span><span class="p">:</span> <span class="s1">'white'</span><span class="p">},</span>
+        <span class="n">on_click</span><span class="o">=</span><span class="n">toggle_state</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># Return to state 0 when clicked</span>
+    <span class="p">)</span>
+<span class="p">])</span>
+
+<span class="c1"># Initial click navigates to state 1</span>
+<span class="n">toggle_btn</span><span class="o">.</span><span class="n">on_click</span> <span class="o">=</span> <span class="n">toggle_state</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</code></pre>
+      </div>
       <p>
        <strong>
         Example: Cycle Through States
@@ -13833,7 +14269,7 @@ toggle_btn.on_click = toggle_state.state(1)
        for advanced chaining.
       </p>
      </div>
-     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_125">
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_126">
       <h1 id="dars-cli-reference">
        Dars CLI Reference
       </h1>
@@ -14163,19 +14599,19 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
     </div>
     <div class="dars-container" id="footer-section" style="background: linear-gradient(135deg, #0a1512 0%, #0f1e1a 100%);
     margin-top: auto;">
-     <div class="dars-container" id="container_126" style="background: rgba(10, 15, 13, 0.8);
+     <div class="dars-container" id="container_127" style="background: rgba(10, 15, 13, 0.8);
     backdrop-filter: blur(12px);
     border-top: 1px solid rgba(100,255,200,0.15);">
-      <div class="dars-container" id="container_127" style="max-width: 1200px;
+      <div class="dars-container" id="container_128" style="max-width: 1200px;
     margin: 0 auto;
     padding: 50px 20px;">
-       <div class="dars-container" id="container_128" style="display: flex;
+       <div class="dars-container" id="container_129" style="display: flex;
     align-items: center;
     margin-bottom: 30px;">
-        <img alt="Dars Framework" class="dars-image" height="50px" id="image_129" src="Dars-logo.png" style="margin-right: 15px;
+        <img alt="Dars Framework" class="dars-image" height="50px" id="image_130" src="Dars-logo.png" style="margin-right: 15px;
     filter: drop-shadow(0 0 10px rgba(162, 255, 226, 0.4));" width="50px"/>
-        <div class="dars-container" id="container_130" style="text-align: left;">
-         <span class="dars-text" id="text_131" style="font-size: 24px;
+        <div class="dars-container" id="container_131" style="text-align: left;">
+         <span class="dars-text" id="text_132" style="font-size: 24px;
     font-weight: 700;
     color: #a2ffe2;
     margin-bottom: 5px;">
@@ -14183,20 +14619,20 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
          </span>
         </div>
        </div>
-       <div class="dars-container" id="container_132" style="display: flex;
+       <div class="dars-container" id="container_133" style="display: flex;
     flex-wrap: wrap;
     gap: 40px;
     justify-content: space-between;
     margin-bottom: 30px;">
-        <div class="dars-container" id="container_133" style="flex: 1;
+        <div class="dars-container" id="container_134" style="flex: 1;
     min-width: 150px;">
-         <span class="dars-text" id="text_134" style="font-size: 18px;
+         <span class="dars-text" id="text_135" style="font-size: 18px;
     font-weight: 600;
     color: #a2ffe2;
     margin-bottom: 15px;">
           Quick Links
          </span>
-         <a class="dars-link" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_135" style="color: #a0cfc0;
+         <a class="dars-link" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_136" style="color: #a0cfc0;
     text-decoration: none;
     display: block;
     margin-bottom: 8px;
@@ -14204,7 +14640,7 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
     font-size: 14px;" target="_self">
           Documentation
          </a>
-         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework" id="link_136" style="color: #a0cfc0;
+         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework" id="link_137" style="color: #a0cfc0;
     text-decoration: none;
     display: block;
     margin-bottom: 8px;
@@ -14212,7 +14648,7 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
     font-size: 14px;" target="_self">
           GitHub
          </a>
-         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework/tree/CrystalMain/dars/templates/examples" id="link_137" style="color: #a0cfc0;
+         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework/tree/CrystalMain/dars/templates/examples" id="link_138" style="color: #a0cfc0;
     text-decoration: none;
     display: block;
     margin-bottom: 8px;
@@ -14221,15 +14657,15 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
           Examples
          </a>
         </div>
-        <div class="dars-container" id="container_138" style="flex: 1;
+        <div class="dars-container" id="container_139" style="flex: 1;
     min-width: 150px;">
-         <span class="dars-text" id="text_139" style="font-size: 18px;
+         <span class="dars-text" id="text_140" style="font-size: 18px;
     font-weight: 600;
     color: #a2ffe2;
     margin-bottom: 15px;">
           Resources
          </span>
-         <a class="dars-link" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_140" style="color: #a0cfc0;
+         <a class="dars-link" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_141" style="color: #a0cfc0;
     text-decoration: none;
     display: block;
     margin-bottom: 8px;
@@ -14237,7 +14673,7 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
     font-size: 14px;" target="_self">
           Getting Started
          </a>
-         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework/releases.html" id="link_141" style="color: #a0cfc0;
+         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework/releases.html" id="link_142" style="color: #a0cfc0;
     text-decoration: none;
     display: block;
     margin-bottom: 8px;
@@ -14246,15 +14682,15 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
           Releases
          </a>
         </div>
-        <div class="dars-container" id="container_142" style="flex: 2;
+        <div class="dars-container" id="container_143" style="flex: 2;
     min-width: 200px;">
-         <span class="dars-text" id="text_143" style="font-size: 18px;
+         <span class="dars-text" id="text_144" style="font-size: 18px;
     font-weight: 600;
     color: #a2ffe2;
     margin-bottom: 15px;">
           Info:
          </span>
-         <span class="dars-text" id="text_144" style="color: #a0cfc0;
+         <span class="dars-text" id="text_145" style="color: #a0cfc0;
     font-size: 14px;
     line-height: 1.5;
     margin-bottom: 15px;">
@@ -14262,41 +14698,41 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
          </span>
         </div>
        </div>
-       <div class="dars-container" id="container_145" style="display: flex;
+       <div class="dars-container" id="container_146" style="display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
     padding-top: 20px;
     border-top: 1px solid rgba(100,255,200,0.1);">
-        <div class="dars-container" id="container_146" style="flex: 1;">
-         <span class="dars-text" id="text_147" style="color: #a0cfc0;
+        <div class="dars-container" id="container_147" style="flex: 1;">
+         <span class="dars-text" id="text_148" style="color: #a0cfc0;
     font-size: 14px;
     opacity: 0.7;">
           © 2024 Dars Framework.
          </span>
         </div>
-        <div class="dars-container" id="container_148" style="flex: 1;
+        <div class="dars-container" id="container_149" style="flex: 1;
     text-align: right;">
-         <span class="dars-text" id="text_149" style="color: #a0cfc0;
+         <span class="dars-text" id="text_150" style="color: #a0cfc0;
     font-size: 14px;
     opacity: 0.7;
     display: inline;">
           Created with
          </span>
-         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework" id="link_150" style="color: #a2ffe2;
+         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework" id="link_151" style="color: #a2ffe2;
     text-decoration: none;
     font-weight: 600;
     display: inline;
     font-size: 14px;" target="_self">
           Dars Framework
          </a>
-         <span class="dars-text" id="text_151" style="color: #a0cfc0;
+         <span class="dars-text" id="text_152" style="color: #a0cfc0;
     font-size: 14px;
     opacity: 0.7;
     display: inline;">
           by
          </span>
-         <a class="dars-link" href="https://github.com/ZtaMDev" id="link_152" style="color: #a2ffe2;
+         <a class="dars-link" href="https://github.com/ZtaMDev" id="link_153" style="color: #a2ffe2;
     text-decoration: none;
     font-weight: 600;
     display: inline;

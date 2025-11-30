@@ -1,3 +1,244 @@
+# Release Notes v1.5.3
+
+> **Hooks System & Reactive Bindings**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Hooks System - `useDynamic()`
+
+Dars Framework introduces its **first hook** - `useDynamic()` - enabling reactive state bindings in FunctionComponents!
+
+#### Reactive State Bindings
+
+Create components that automatically update when state changes:
+
+```python
+from dars.all import *
+
+# Create state
+userState = State("user", name="John Doe", email="john@example.com")
+
+# Use useDynamic in FunctionComponent
+@FunctionComponent
+def UserCard(**props):
+    return f'''
+    <div {Props.id} {Props.class_name} {Props.style}>
+        <h3>{useDynamic("user.name")}</h3>
+        <p>{useDynamic("user.email")}</p>
+    </div>
+    '''
+
+# Render
+card = UserCard(id="userCard")
+
+# Update - DOM automatically reacts!
+app.add_script(userState.name.set("Jane Doe"))  # UI updates instantly
+```
+
+#### How It Works
+
+1. **Initial Render**: `useDynamic()` inserts reactive spans with initial prop values
+2. **State Changes**: When you call `.set()`, the hook intercepts the change
+3. **Auto Updates**: All matching reactive spans update automatically
+
+#### Key Features
+
+- **Zero boilerplate** - Just use `useDynamic("state.property")  in templates
+- **Automatic updates** - No manual DOM manipulation needed
+- **Multiple bindings** - Multiple components can bind to the same state
+- **State V2 integration** - Works seamlessly with dynamic state system
+
+---
+
+### `getInputValue()` Utility
+
+New utility function specifically designed for State V2 integration:
+
+```python
+state = State("product", title="", price=0)
+
+Button("Save", on_click=[
+    state.title.set(getInputValue("titleInput")),
+    state.price.set(getInputValue("priceInput"))
+])
+```
+
+**Features:**
+- Returns input value as JavaScript expression
+- Works with `State.set()` and other dynamic operations
+- Optional `parent_id` parameter for scoped searches
+- Complements existing `getValue()` for assignments
+
+**Difference from `getValue()`:**
+- `getValue(input_id, target_id)` - Performs assignment (sets textContent)
+- `getInputValue(input_id)` - Returns value expression (for State.set())
+
+---
+
+### CSS Improvements
+
+#### Modern Default Styles
+
+- Updated all component CSS to use CSS variables for easy theming
+- Removed opinionated sizing - better CSS flow and overridability
+- Added `accent-color` support for form controls
+- Improved transitions and hover effects
+- Better disabled states across all components
+
+#### CSS Variables
+
+Components now respect theme colors:
+
+```css
+--dars-primary: #007bff;
+--dars-spacing-md: 12px;
+/* ... and more */
+```
+
+#### Better Customization
+
+```python
+# Inline styles work better now
+Button("Click", style={"width": "200px", "padding": "16px"})
+
+# Global styles via app.add_global_styles()
+app.add_global_styles("""
+    .dars-button {
+        border-radius: 8px;
+    }
+""")
+```
+
+---
+
+### Bug Fixes
+
+#### Fixed Markdown Syntax Highlighting in Multipage Apps
+
+- **Issue**: Prism.js scripts were only injected on first page with Markdown
+- **Fix**: Per-page script injection tracking ensures all pages get highlighting(Markdown Component)
+- **Impact**: Multipage apps now correctly highlight code on all routes
+
+```python
+# Now works correctly across all pages
+@route("/docs")
+def docs():
+    return Page(Markdown(content=code_example))
+
+@route("/tutorial")
+def tutorial():
+    return Page(Markdown(content=tutorial_code))  # Also highlighted now!
+```
+
+---
+
+## Breaking Changes
+
+None! This release is 100% backwards compatible.
+
+---
+
+## Complete Example
+
+**User Profile with Reactive Updates:**
+
+```python
+from dars.all import *
+
+app = App("Reactive Profile")
+
+# State for user data
+userState = State("user", 
+    name="John Doe",
+    email="john@example.com"
+)
+
+# Reactive display component
+@FunctionComponent
+def ProfileDisplay(**props):
+    return f'''
+    <div {Props.id} {Props.class_name} {Props.style}>
+        <h2>{useDynamic("user.name")}</h2>
+        <p>Email: {useDynamic("user.email")}</p>
+    </div>
+    '''
+
+# Edit form
+def ProfileEditor():
+    return Container(
+        Input(id="nameInput", value="John Doe"),
+        Input(id="emailInput", value="john@example.com"),
+        Button("Save", on_click=[
+            userState.name.set(getInputValue("nameInput")),
+            userState.email.set(getInputValue("emailInput"))
+        ])
+    )
+
+# Page
+@route("/")
+def index():
+    return Page(
+        ProfileDisplay(id="profile"),
+        ProfileEditor()
+    )
+
+app.add_page("index", index())
+
+if __name__ == "__main__":
+    app.rTimeCompile()
+```
+
+**Result**: Edit the inputs and click Save - the profile display updates instantly!
+
+---
+
+## Migration Guide
+
+No migration needed! Add `useDynamic()` to new or existing FunctionComponents:
+
+**Before (static):**
+```python
+@FunctionComponent
+def UserCard(name, email, **props):
+    return f'<div {Props.id}><h3>{name}</h3><p>{email}</p></div>'
+```
+
+**After (reactive):**
+```python
+@FunctionComponent
+def UserCard(**props):
+    return f'''
+    <div {Props.id}>
+        <h3>{useDynamic("user.name")}</h3>
+        <p>{useDynamic("user.email")}</p>
+    </div>
+    '''
+```
+
+---
+
+## Documentation
+
+New documentation added:
+
+- **Hooks System** - Complete guide to `useDynamic()` and future hooks
+- **`getInputValue()`** - Usage guide in Scripts documentation
+- **Updated Examples** - Reactive patterns and best practices
+
+Visit the [Dars Documentation](https://ztamdev.github.io/Dars-Framework/docs.html) for more details.
+
+---
+
+## What's Next
+
+The hooks system opens the door for more reactive features...
+
 # Release Notes v1.5.2
 
 > **Function Components**

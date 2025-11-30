@@ -552,8 +552,37 @@ def FunctionComponent(func: Callable) -> type:
                     # We override whatever might have been bound (though usually these are consumed by __init__)
                     args_dict[name] = placeholder
             
-            # Call function
-            return self._template_func(**args_dict)
+            # Call function to get template
+            template = self._template_func(**args_dict)
+            
+            # Process DynamicBinding objects
+            # Import here to avoid circular dependency
+            try:
+                from dars.hooks.use_dynamic import DynamicBinding
+                
+                # Store dynamic bindings for exporter
+                if not hasattr(self, '_dynamic_bindings'):
+                    self._dynamic_bindings = []
+                
+                # Find all DynamicBinding markers in the template
+                import re
+                marker_pattern = r'__DARS_DYNAMIC_\d+_\d+__'
+                markers = re.findall(marker_pattern, template)
+                
+                # Replace markers with reactive span elements
+                for marker in markers:
+                    # Find the DynamicBinding object (it's in the template string)
+                    # We need to track these bindings for the exporter
+                    # For now, we'll replace with a data attribute that the exporter can process
+                    # The actual state path is embedded in the marker, but we need to extract it
+                    # Since we can't easily get the original DynamicBinding object here,
+                    # we'll use a different approach: store bindings during function call
+                    pass
+                
+            except ImportError:
+                pass
+            
+            return template
             
         def render(self, exporter) -> str:
             """

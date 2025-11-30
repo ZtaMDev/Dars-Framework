@@ -475,3 +475,27 @@ def setTimeout(delay: int, code: dScript) -> dScript:
         Button("Delayed Action", on_click=setTimeout(code=alert('Delayed!'), delay=2000))
     """
     return dScript(f"const _self=this; const _ev=typeof event!=='undefined'?event:null; setTimeout(()=>{{ (function(event){{ {code.code} }}).call(_self, _ev); }}, {delay});")
+
+def getInputValue(input_id: str, parent_id: str = None) -> dScript:
+    """
+    Get the value from an input element (for use with State.set()).
+    
+    This returns a JavaScript expression that evaluates to the input's value,
+    which can be used with State.set() or other dynamic operations.
+    
+    Args:
+        input_id: The ID of the input element
+        parent_id: Optional parent container ID to search within
+        
+    Example:
+        # Use with State.set()
+        state.name.set(getInputValue("username"))
+        
+        # With parent container
+        state.email.set(getInputValue("email", parent_id="modal"))
+    """
+    if parent_id:
+        code = f"document.getElementById('{parent_id}').querySelector('#{input_id}').value"
+    else:
+        code = f"document.getElementById('{input_id}').value"
+    return dScript(code)

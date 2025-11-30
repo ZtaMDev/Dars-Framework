@@ -287,8 +287,8 @@ Button("Back to Top", on_click=scrollToTop())
 
 - `alert(message)`: Show browser alert.
 - `confirm(message, on_ok, on_cancel)`: Show confirm dialog.
-# Read a file and update a component with its content
-# The result of the previous script is available as dScript.ARG (which resolves to 'value')
+
+```python
 read_op = read_text("data.txt")
 update_op = this().state(text=RawJS(dScript.ARG))
 
