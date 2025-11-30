@@ -404,28 +404,6 @@ def UserCard(name, email, id, class_name, style, children, **props):
     """
 ```
 
-### Example with State and Events
-
-```python
-@FunctionComponent
-def Counter(**props):
-    return f"""
-    <div {Props.id} {Props.class_name} {Props.style}>
-        0 {Props.children}
-    </div>
-    """
-
-# Create component with initial value "0"
-counter = Counter(id="my-counter", children="0")
-
-# Make it reactive controlling the 'text' property (textContent)
-# Note: This replaces the entire content of the div with the new text
-state = State(counter, text="0")
-
-# Update it
-Button("Increment", on_click=state.text.set("5"))
-```
-
 ---
 
 ## CLI Usage
