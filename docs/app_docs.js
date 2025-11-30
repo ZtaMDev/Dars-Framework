@@ -2745,6 +2745,76 @@ area_text = Textarea(
 | \`required\` | bool | Campo obligatorio | \`True\`, \`False\` |
 | \`max_length\` | int | Longitud m\xE1xima | \`500\` |
 
+---
+
+### Chart
+
+The \`Chart\` component renders interactive charts using Plotly.js.
+
+#### Chart Syntax
+
+\`\`\`python
+from dars.components.visualization.chart import Chart
+import plotly.graph_objects as go
+
+fig = go.Figure(data=[go.Bar(x=['A', 'B'], y=[10, 20])])
+
+chart = Chart(
+    figure=fig,
+    width=800,
+    height=400,
+    style={"margin": "20px auto"}
+)
+\`\`\`
+
+#### Chart Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| \`figure\` | plotly.graph_objects.Figure | Plotly figure object |
+| \`width\` | int/str | Width in pixels or CSS value |
+| \`height\` | int/str | Height in pixels or CSS value |
+| \`config\` | dict | Plotly configuration options |
+
+### DataTable
+
+The \`DataTable\` component displays tabular data with support for Pandas DataFrames, sorting, filtering, and themes.
+
+#### DataTable Syntax
+
+\`\`\`python
+from dars.components.visualization.table import DataTable
+import pandas as pd
+
+# Using Pandas DataFrame
+df = pd.DataFrame({'Name': ['Alice', 'Bob'], 'Age': [30, 25]})
+table = DataTable(df, theme='dark')
+
+# Using list of dicts
+data = [{'price': 99.99, 'qty': 5}]
+table = DataTable(
+    data,
+    columns=[
+        {'key': 'price', 'label': 'Price', 'formatter': lambda x: f'\${x:.2f}'},
+        {'key': 'qty', 'label': 'Quantity', 'align': 'center'}
+    ]
+)
+\`\`\`
+
+#### DataTable Properties
+
+| Property | Type | Description | Default |
+|----------|------|-------------|---------|
+| \`data\` | DataFrame/list | Data source | - |
+| \`columns\` | list | Column definitions | Auto-inferred |
+| \`index\` | bool | Show DataFrame index | \`False\` |
+| \`header\` | bool | Show header row | \`True\` |
+| \`striped\` | bool | Alternating row colors | \`True\` |
+| \`hover\` | bool | Hover effects | \`True\` |
+| \`bordered\` | bool | Cell borders | \`True\` |
+| \`compact\` | bool | Compact spacing | \`False\` |
+| \`theme\` | str/dict | 'light', 'dark', or custom | \`'light'\` |
+
 
 ---
 
@@ -3511,9 +3581,7 @@ cancel_button = Button("Cancelar", style=SECONDARY_BUTTON_STYLES)
 save_button = Button("Guardar", style=PRIMARY_BUTTON_STYLES)
 \`\`\`
 
-Components provide a solid foundation for creating modern and responsive user interfaces that can be exported to multiple platforms while maintaining consistency and functionality.
-
-`},{type:"T9",id:"markdown_120",key:"0/2/0/9",text:`# Dars Animation System
+Components provide a solid foundation for creating modern and responsive user interfaces that can be exported to multiple platforms while maintaining consistency and functionality.`},{type:"T9",id:"markdown_120",key:"0/2/0/9",text:`# Dars Animation System
 
 Dars provides a powerful and easy-to-use animation system built on top of the Web Animations API. It allows you to add professional-grade animations to your components with simple Python function calls.
 
@@ -3822,145 +3890,7 @@ class CustomComponent(Component):
         '''
 \`\`\`
 
-`},{type:"T9",id:"markdown_122",key:"0/2/0/11",text:`# Hooks System
-
-Dars Framework introduces a **Hooks system** inspired by React, enabling reactive and stateful behavior in both FunctionComponents and built-in components.
-
-## Overview Hooks
-
-Hooks provide a way to add reactive capabilities to your application. They enable features like:
-
-- **Reactive state bindings** - Automatically update UI when data changes
-- **State monitoring** - Watch for state changes and execute side effects
-- **External state integration** - Connect components to global state
-
----
-
-## useDynamic() - Reactive State Binding
-
-The \`useDynamic()\` hook creates reactive bindings between external \`State\` objects and component properties.
-
-### 1. Usage in Built-in Components
-
-You can pass \`useDynamic()\` directly to properties of built-in components like \`Text\`, \`Button\`, \`Input\`, etc.
-
-\`\`\`python
-from dars.all import *
-
-# Create state
-userState = State("user", name="John Doe", status="Active")
-
-# Bind directly to props
-card = Container(
-    # Bind text property
-    Text(text=useDynamic("user.name"), style={"font-weight": "bold"}),
-    
-    # Bind input value
-    Input(value=useDynamic("user.name"), placeholder="Edit name"),
-    
-    # Bind button text
-    Button(text=useDynamic("user.status"), on_click=userState.status.set("Clicked!"))
-)
-\`\`\`
-
-### 2. Usage in FunctionComponents
-
-You can also use \`useDynamic()\` within \`FunctionComponent\` templates to create reactive spans.
-
-\`\`\`python
-@FunctionComponent
-def UserCard(**props):
-    return f'''
-    <div {Props.id} {Props.class_name} {Props.style}>
-        <h3>Name: {useDynamic("user.name")}</h3>
-        <p>Status: {useDynamic("user.status")}</p>
-    </div>
-    '''
-\`\`\`
-
-### Syntax
-
-\`\`\`python
-useDynamic(state_path: str) -> DynamicBinding
-\`\`\`
-
-**Parameters:**
-- \`state_path\`: Dot-notation path to state property (e.g., \`"user.name"\`, \`"cart.total"\`)
-
-**Returns:**
-- \`DynamicBinding\` object that resolves to the current value during render and updates automatically when state changes.
-
----
-
-## useWatch() - State Monitoring
-
-The \`useWatch()\` hook allows you to monitor state changes and execute callbacks (side effects).
-
-### Usage
-
-The recommended way to use \`useWatch\` is via the \`app.useWatch()\` or \`page.useWatch()\` methods:
-
-**Global Watchers (app.useWatch)**
-\`\`\`python
-from dars.all import *
-
-cartState = State("cart", count=0, total=0.0)
-
-# Logs to console whenever cart.count changes
-app.useWatch("cart.count", log("Cart updated!"))
-app.useWatch("cart.total", log("Total changed"))
-\`\`\`
-
-**Page-Specific Watchers (page.useWatch)**
-\`\`\`python
-@route("/cart")
-def cart_page():
-    page = Page()
-    
-    # This watcher only runs on the cart page
-    page.useWatch("cart.total", log("Total changed!"))
-    
-    page.add(
-        Container(
-            Text(useDynamic("cart.total"))
-        )
-    )
-    return page
-\`\`\`
-
-You can also use the classic syntax with \`add_script\`:
-\`\`\`python
-app.add_script(useWatch("state.prop", log("Changed!")))
-\`\`\`
-
-### Syntax
-
-\`\`\`python
-useWatch(state_path: str, callback: Union[dScript, str, Callable]) -> Union[dScript, WatchMarker]
-\`\`\`
-
-**Parameters:**
-- \`state_path\`: Dot-notation path to state property (e.g., \`"user.name"\`)
-- \`callback\`: The script or function to execute when the state changes. Can be:
-    - \`dScript\` object (e.g., \`log("Changed")\`, \`alert("Update")\`)
-    - Inline JavaScript string
-    - Python callable returning a \`dScript\`
-
----
-
-## Best Practices
-
-**Do:**
-- Use \`useDynamic\` for simple text/value updates.
-- Use \`useWatch\` for side effects like logging, analytics, or complex logic.
-- Use consistent state naming (e.g., \`"user"\`, \`"cart"\`).
-
-**Don't:**
-- Use with non-existent state paths.
-- Nest state paths more than 2 levels deep (currently supports \`stateName.property\`).
-
----
-`},{type:"T9",id:"markdown_123",key:"0/2/0/12",text:`# Events in Dars
+`},{type:"T9",id:"markdown_122",key:"0/2/0/11",text:'# Hooks System\n\nDars Framework introduces a **Hooks system** inspired by React, enabling reactive and stateful behavior in both FunctionComponents and built-in components.\n\n## Overview Hooks\n\nHooks provide a way to add reactive capabilities to your application. They enable features like:\n\n- **Reactive state bindings** - Automatically update UI when data changes\n- **State monitoring** - Watch for state changes and execute side effects\n- **External state integration** - Connect components to global state\n\n---\n\n## useDynamic() - Reactive State Binding\n\nThe `useDynamic()` hook creates reactive bindings between external `State` objects and component properties.\n\n### 1. Usage in Built-in Components\n\nYou can pass `useDynamic()` directly to properties of built-in components like `Text`, `Button`, `Input`, etc.\n\n```python\nfrom dars.all import *\n\n# Create state\nuserState = State("user", name="John Doe", status="Active", is_admin=False)\n\n# Bind directly to props\ncard = Container(\n    # Bind text property\n    Text(text=useDynamic("user.name"), style={"font-weight": "bold"}),\n    \n    # Bind input value\n    Input(value=useDynamic("user.name"), placeholder="Edit name"),\n    \n    # Bind button text and disabled state\n    Button(\n        text=useDynamic("user.status"), \n        disabled=useDynamic("user.is_admin"), # Disables button if is_admin is True (or False depending on logic)\n        on_click=userState.status.set("Clicked!")\n    )\n)\n```\n\n### Supported Properties\n\n`useDynamic` supports binding to the following properties on built-in components:\n\n| Component | Properties |\n|-----------|------------|\n| `Text` | `text`, `innerHTML` |\n| `Button` | `text`, `disabled` |\n| `Input` | `value`, `placeholder`, `disabled`, `readonly`, `required` |\n| `Textarea` | `value`, `placeholder`, `disabled`, `readonly`, `required` |\n| `Image` | `src`, `alt` |\n| `Link` | `href`, `text` |\n| `Checkbox` | `checked`, `disabled`, `required` |\n| `RadioButton` | `checked`, `disabled`, `required` |\n| `Select` | `disabled`, `required` |\n| `Slider` | `disabled` |\n\nBoolean attributes like `disabled` and `checked` will be toggled based on the truthiness of the state value.\n\n### 2. Usage in FunctionComponents\n\nYou can also use `useDynamic()` within `FunctionComponent` templates to create reactive spans.\n\n```python\n@FunctionComponent\ndef UserCard(**props):\n    return f\'\'\'\n    <div {Props.id} {Props.class_name} {Props.style}>\n        <h3>Name: {useDynamic("user.name")}</h3>\n        <p>Status: {useDynamic("user.status")}</p>\n    </div>\n    \'\'\'\n```\n\n### Syntax\n\n```python\nuseDynamic(state_path: str) -> DynamicBinding\n```\n\n**Parameters:**\n- `state_path`: Dot-notation path to state property (e.g., `"user.name"`, `"cart.total"`)\n\n**Returns:**\n- `DynamicBinding` object that resolves to the current value during render and updates automatically when state changes.\n\n---\n\n## useWatch() - State Monitoring\n\nThe `useWatch()` hook allows you to monitor state changes and execute callbacks (side effects).\n\n### Usage\n\nThe recommended way to use `useWatch` is via the `app.useWatch()` or `page.useWatch()` methods:\n\n**Global Watchers (app.useWatch)**\n```python\nfrom dars.all import *\n\ncartState = State("cart", count=0, total=0.0)\n\n# Logs to console whenever cart.count changes\napp.useWatch("cart.count", log("Cart updated!"))\napp.useWatch("cart.total", log("Total changed"))\n```\n\n**Page-Specific Watchers (page.useWatch)**\n```python\n@route("/cart")\ndef cart_page():\n    page = Page()\n    \n    # This watcher only runs on the cart page\n    page.useWatch("cart.total", log("Total changed!"))\n    \n    page.add(\n        Container(\n            Text(useDynamic("cart.total"))\n        )\n    )\n    return page\n```\n\nYou can also use the classic syntax with `add_script`:\n```python\napp.add_script(useWatch("state.prop", log("Changed!")))\n```\n\n### Syntax\n\n```python\nuseWatch(state_path: str, callback: Union[dScript, str, Callable]) -> Union[dScript, WatchMarker]\n```\n\n**Parameters:**\n- `state_path`: Dot-notation path to state property (e.g., `"user.name"`)\n- `callback`: The script or function to execute when the state changes. Can be:\n    - `dScript` object (e.g., `log("Changed")`, `alert("Update")`)\n    - Inline JavaScript string\n    - Python callable returning a `dScript`\n\n---\n\n## Best Practices\n\n**Do:**\n- Use `useDynamic` for simple text/value updates.\n- Use `useWatch` for side effects like logging, analytics, or complex logic.\n- Use consistent state naming (e.g., `"user"`, `"cart"`).\n\n**Don\'t:**\n- Use with non-existent state paths.\n- Nest state paths more than 2 levels deep (currently supports `stateName.property`).\n\n---'},{type:"T9",id:"markdown_123",key:"0/2/0/12",text:`# Events in Dars
 
 This is the documentation for the events in Dars.
 

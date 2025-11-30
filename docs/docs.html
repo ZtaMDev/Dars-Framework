@@ -838,6 +838,24 @@
      <a class="sidebar-link sidebar-level-4" href="#textarea-properties" style="margin-left: 60px">
       Textarea Properties
      </a>
+     <a class="sidebar-link sidebar-level-3" href="#chart" style="margin-left: 40px">
+      Chart
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#chart-syntax" style="margin-left: 60px">
+      Chart Syntax
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#chart-properties" style="margin-left: 60px">
+      Chart Properties
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#datatable" style="margin-left: 40px">
+      DataTable
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#datatable-syntax" style="margin-left: 60px">
+      DataTable Syntax
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#datatable-properties" style="margin-left: 60px">
+      DataTable Properties
+     </a>
      <a class="sidebar-link sidebar-level-3" href="#progressbar" style="margin-left: 40px">
       ProgressBar
      </a>
@@ -1203,6 +1221,9 @@
      </a>
      <a class="sidebar-link sidebar-level-3" href="#1-usage-in-built-in-components" style="margin-left: 40px">
       1. Usage in Built-in Components
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#supported-properties" style="margin-left: 40px">
+      Supported Properties
      </a>
      <a class="sidebar-link sidebar-level-3" href="#2-usage-in-functioncomponents" style="margin-left: 40px">
       2. Usage in FunctionComponents
@@ -8387,6 +8408,319 @@ def hello():
        </tbody>
       </table>
       <hr/>
+      <h3 id="chart">
+       Chart
+      </h3>
+      <p>
+       The
+       <code>
+        Chart
+       </code>
+       component renders interactive charts using Plotly.js.
+      </p>
+      <h4 id="chart-syntax">
+       Chart Syntax
+      </h4>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.components.visualization.chart</span><span class="w"> </span><span class="kn">import</span> <span class="n">Chart</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">plotly.graph_objects</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">go</span>
+
+<span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="n">go</span><span class="o">.</span><span class="n">Bar</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="s1">'A'</span><span class="p">,</span> <span class="s1">'B'</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">])])</span>
+
+<span class="n">chart</span> <span class="o">=</span> <span class="n">Chart</span><span class="p">(</span>
+    <span class="n">figure</span><span class="o">=</span><span class="n">fig</span><span class="p">,</span>
+    <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span>
+    <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s2">"margin"</span><span class="p">:</span> <span class="s2">"20px auto"</span><span class="p">}</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h4 id="chart-properties">
+       Chart Properties
+      </h4>
+      <table>
+       <thead>
+        <tr>
+         <th>
+          Property
+         </th>
+         <th>
+          Type
+         </th>
+         <th>
+          Description
+         </th>
+        </tr>
+       </thead>
+       <tbody>
+        <tr>
+         <td>
+          <code>
+           figure
+          </code>
+         </td>
+         <td>
+          plotly.graph_objects.Figure
+         </td>
+         <td>
+          Plotly figure object
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           width
+          </code>
+         </td>
+         <td>
+          int/str
+         </td>
+         <td>
+          Width in pixels or CSS value
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           height
+          </code>
+         </td>
+         <td>
+          int/str
+         </td>
+         <td>
+          Height in pixels or CSS value
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           config
+          </code>
+         </td>
+         <td>
+          dict
+         </td>
+         <td>
+          Plotly configuration options
+         </td>
+        </tr>
+       </tbody>
+      </table>
+      <h3 id="datatable">
+       DataTable
+      </h3>
+      <p>
+       The
+       <code>
+        DataTable
+       </code>
+       component displays tabular data with support for Pandas DataFrames, sorting, filtering, and themes.
+      </p>
+      <h4 id="datatable-syntax">
+       DataTable Syntax
+      </h4>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.components.visualization.table</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataTable</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="c1"># Using Pandas DataFrame</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">'Name'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'Alice'</span><span class="p">,</span> <span class="s1">'Bob'</span><span class="p">],</span> <span class="s1">'Age'</span><span class="p">:</span> <span class="p">[</span><span class="mi">30</span><span class="p">,</span> <span class="mi">25</span><span class="p">]})</span>
+<span class="n">table</span> <span class="o">=</span> <span class="n">DataTable</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">theme</span><span class="o">=</span><span class="s1">'dark'</span><span class="p">)</span>
+
+<span class="c1"># Using list of dicts</span>
+<span class="n">data</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">'price'</span><span class="p">:</span> <span class="mf">99.99</span><span class="p">,</span> <span class="s1">'qty'</span><span class="p">:</span> <span class="mi">5</span><span class="p">}]</span>
+<span class="n">table</span> <span class="o">=</span> <span class="n">DataTable</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">,</span>
+    <span class="n">columns</span><span class="o">=</span><span class="p">[</span>
+        <span class="p">{</span><span class="s1">'key'</span><span class="p">:</span> <span class="s1">'price'</span><span class="p">,</span> <span class="s1">'label'</span><span class="p">:</span> <span class="s1">'Price'</span><span class="p">,</span> <span class="s1">'formatter'</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="sa">f</span><span class="s1">'$</span><span class="si">{</span><span class="n">x</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">'</span><span class="p">},</span>
+        <span class="p">{</span><span class="s1">'key'</span><span class="p">:</span> <span class="s1">'qty'</span><span class="p">,</span> <span class="s1">'label'</span><span class="p">:</span> <span class="s1">'Quantity'</span><span class="p">,</span> <span class="s1">'align'</span><span class="p">:</span> <span class="s1">'center'</span><span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h4 id="datatable-properties">
+       DataTable Properties
+      </h4>
+      <table>
+       <thead>
+        <tr>
+         <th>
+          Property
+         </th>
+         <th>
+          Type
+         </th>
+         <th>
+          Description
+         </th>
+         <th>
+          Default
+         </th>
+        </tr>
+       </thead>
+       <tbody>
+        <tr>
+         <td>
+          <code>
+           data
+          </code>
+         </td>
+         <td>
+          DataFrame/list
+         </td>
+         <td>
+          Data source
+         </td>
+         <td>
+          -
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           columns
+          </code>
+         </td>
+         <td>
+          list
+         </td>
+         <td>
+          Column definitions
+         </td>
+         <td>
+          Auto-inferred
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           index
+          </code>
+         </td>
+         <td>
+          bool
+         </td>
+         <td>
+          Show DataFrame index
+         </td>
+         <td>
+          <code>
+           False
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           header
+          </code>
+         </td>
+         <td>
+          bool
+         </td>
+         <td>
+          Show header row
+         </td>
+         <td>
+          <code>
+           True
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           striped
+          </code>
+         </td>
+         <td>
+          bool
+         </td>
+         <td>
+          Alternating row colors
+         </td>
+         <td>
+          <code>
+           True
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           hover
+          </code>
+         </td>
+         <td>
+          bool
+         </td>
+         <td>
+          Hover effects
+         </td>
+         <td>
+          <code>
+           True
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           bordered
+          </code>
+         </td>
+         <td>
+          bool
+         </td>
+         <td>
+          Cell borders
+         </td>
+         <td>
+          <code>
+           True
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           compact
+          </code>
+         </td>
+         <td>
+          bool
+         </td>
+         <td>
+          Compact spacing
+         </td>
+         <td>
+          <code>
+           False
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           theme
+          </code>
+         </td>
+         <td>
+          str/dict
+         </td>
+         <td>
+          'light', 'dark', or custom
+         </td>
+         <td>
+          <code>
+           'light'
+          </code>
+         </td>
+        </tr>
+       </tbody>
+      </table>
+      <hr/>
       <h3 id="progressbar">
        ProgressBar
       </h3>
@@ -11223,7 +11557,7 @@ def hello():
        <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
 <span class="c1"># Create state</span>
-<span class="n">userState</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"user"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"John Doe"</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="s2">"Active"</span><span class="p">)</span>
+<span class="n">userState</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"user"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"John Doe"</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="s2">"Active"</span><span class="p">,</span> <span class="n">is_admin</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
 <span class="c1"># Bind directly to props</span>
 <span class="n">card</span> <span class="o">=</span> <span class="n">Container</span><span class="p">(</span>
@@ -11233,11 +11567,237 @@ def hello():
     <span class="c1"># Bind input value</span>
     <span class="n">Input</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"user.name"</span><span class="p">),</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">"Edit name"</span><span class="p">),</span>
 
-    <span class="c1"># Bind button text</span>
-    <span class="n">Button</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"user.status"</span><span class="p">),</span> <span class="n">on_click</span><span class="o">=</span><span class="n">userState</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"Clicked!"</span><span class="p">))</span>
+    <span class="c1"># Bind button text and disabled state</span>
+    <span class="n">Button</span><span class="p">(</span>
+        <span class="n">text</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"user.status"</span><span class="p">),</span> 
+        <span class="n">disabled</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"user.is_admin"</span><span class="p">),</span> <span class="c1"># Disables button if is_admin is True (or False depending on logic)</span>
+        <span class="n">on_click</span><span class="o">=</span><span class="n">userState</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"Clicked!"</span><span class="p">)</span>
+    <span class="p">)</span>
 <span class="p">)</span>
 </code></pre>
       </div>
+      <h3 id="supported-properties">
+       Supported Properties
+      </h3>
+      <p>
+       <code>
+        useDynamic
+       </code>
+       supports binding to the following properties on built-in components:
+      </p>
+      <table>
+       <thead>
+        <tr>
+         <th>
+          Component
+         </th>
+         <th>
+          Properties
+         </th>
+        </tr>
+       </thead>
+       <tbody>
+        <tr>
+         <td>
+          <code>
+           Text
+          </code>
+         </td>
+         <td>
+          <code>
+           text
+          </code>
+          ,
+          <code>
+           innerHTML
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           Button
+          </code>
+         </td>
+         <td>
+          <code>
+           text
+          </code>
+          ,
+          <code>
+           disabled
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           Input
+          </code>
+         </td>
+         <td>
+          <code>
+           value
+          </code>
+          ,
+          <code>
+           placeholder
+          </code>
+          ,
+          <code>
+           disabled
+          </code>
+          ,
+          <code>
+           readonly
+          </code>
+          ,
+          <code>
+           required
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           Textarea
+          </code>
+         </td>
+         <td>
+          <code>
+           value
+          </code>
+          ,
+          <code>
+           placeholder
+          </code>
+          ,
+          <code>
+           disabled
+          </code>
+          ,
+          <code>
+           readonly
+          </code>
+          ,
+          <code>
+           required
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           Image
+          </code>
+         </td>
+         <td>
+          <code>
+           src
+          </code>
+          ,
+          <code>
+           alt
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           Link
+          </code>
+         </td>
+         <td>
+          <code>
+           href
+          </code>
+          ,
+          <code>
+           text
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           Checkbox
+          </code>
+         </td>
+         <td>
+          <code>
+           checked
+          </code>
+          ,
+          <code>
+           disabled
+          </code>
+          ,
+          <code>
+           required
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           RadioButton
+          </code>
+         </td>
+         <td>
+          <code>
+           checked
+          </code>
+          ,
+          <code>
+           disabled
+          </code>
+          ,
+          <code>
+           required
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           Select
+          </code>
+         </td>
+         <td>
+          <code>
+           disabled
+          </code>
+          ,
+          <code>
+           required
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           Slider
+          </code>
+         </td>
+         <td>
+          <code>
+           disabled
+          </code>
+         </td>
+        </tr>
+       </tbody>
+      </table>
+      <p>
+       Boolean attributes like
+       <code>
+        disabled
+       </code>
+       and
+       <code>
+        checked
+       </code>
+       will be toggled based on the truthiness of the state value.
+      </p>
       <h3 id="2-usage-in-functioncomponents">
        2. Usage in FunctionComponents
       </h3>

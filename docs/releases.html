@@ -252,6 +252,354 @@
       (function(){function addCopyButtons(){document.querySelectorAll("pre code").forEach(function(code){var pre=code.parentElement;if(!pre||pre.querySelector(".dars-code-copy"))return;var btn=document.createElement("button");btn.className="dars-code-copy";btn.type="button";btn.textContent="Copy";btn.addEventListener("click",async function(e){e.stopPropagation();try{await navigator.clipboard.writeText(code.innerText);btn.textContent="Copied";btn.classList.add("copied");setTimeout(function(){btn.textContent="Copy";btn.classList.remove("copied")},1200)}catch(err){btn.textContent="Error";setTimeout(function(){btn.textContent="Copy"},1200)}});pre.appendChild(btn);});}function guessLang(text){var t=text.trim();if(/^{[\s\S]*}$/.test(t)||/^\[/.test(t))return "json";if(/^(pip |python |python3 |dars |#|\$ )/m.test(t))return "bash";if(/\b(def |class |import |from |print\(|self\b)/.test(t))return "python";return null;}function stripPygments(code){if(code && code.innerHTML && code.innerHTML.indexOf("<span")!==-1){code.textContent = code.innerText;}}function prepareAndHighlight(){document.querySelectorAll("pre code").forEach(function(code){stripPygments(code);if(!code.className||code.className.indexOf("language-")===-1){var g=guessLang(code.innerText);code.classList.add("language-"+(g||"none"));}if(window.Prism&&Prism.highlightElement){Prism.highlightElement(code);}});}document.addEventListener("DOMContentLoaded",function(){try{prepareAndHighlight();}catch(e){};try{addCopyButtons()}catch(e){}});})();
      </script>
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_174">
+      <h1 id="release-notes-v156">
+       Release Notes v1.5.6
+      </h1>
+      <blockquote>
+       <p>
+        <strong>
+         Enhanced
+         <code>
+          useDynamic
+         </code>
+         Support &amp; StateV2 Fixes
+        </strong>
+       </p>
+      </blockquote>
+      <h2 id="installation">
+       Installation
+      </h2>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
+</code></pre>
+      </div>
+      <h2 id="whats-new">
+       What's New
+      </h2>
+      <h3 id="1-expanded-usedynamic-support-for-built-in-components">
+       1. Expanded
+       <code>
+        useDynamic
+       </code>
+       Support for Built-in Components
+      </h3>
+      <p>
+       <code>
+        useDynamic
+       </code>
+       now works with
+       <strong>
+        all properties
+       </strong>
+       of built-in components, including:
+      </p>
+      <h4 id="image-link-components">
+       Image &amp; Link Components
+      </h4>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Dynamic image source and alt text</span>
+<span class="n">Image</span><span class="p">(</span>
+    <span class="n">src</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"product.imageUrl"</span><span class="p">),</span>
+    <span class="n">alt</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"product.name"</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># Dynamic link href and text</span>
+<span class="n">Link</span><span class="p">(</span>
+    <span class="n">href</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"navigation.url"</span><span class="p">),</span>
+    <span class="n">text</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"navigation.label"</span><span class="p">)</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h4 id="boolean-attributes">
+       Boolean Attributes
+      </h4>
+      <p>
+       All boolean attributes now support dynamic binding:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Dynamic disabled state</span>
+<span class="n">Button</span><span class="p">(</span>
+    <span class="n">text</span><span class="o">=</span><span class="s2">"Submit"</span><span class="p">,</span>
+    <span class="n">disabled</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"form.isSubmitting"</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># Dynamic checked state</span>
+<span class="n">Checkbox</span><span class="p">(</span>
+    <span class="n">checked</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"settings.notifications"</span><span class="p">),</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">"Enable Notifications"</span>
+<span class="p">)</span>
+
+<span class="c1"># Dynamic readonly and required</span>
+<span class="n">Input</span><span class="p">(</span>
+    <span class="n">value</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"user.email"</span><span class="p">),</span>
+    <span class="n">readonly</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"form.isLocked"</span><span class="p">),</span>
+    <span class="n">required</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"form.emailRequired"</span><span class="p">)</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Supported Boolean Properties:
+       </strong>
+       -
+       <code>
+        disabled
+       </code>
+       - Button, Input, Textarea, Checkbox, RadioButton, Select, Slider
+-
+       <code>
+        checked
+       </code>
+       - Checkbox, RadioButton
+-
+       <code>
+        readonly
+       </code>
+       - Input, Textarea
+-
+       <code>
+        required
+       </code>
+       - Input, Textarea, Checkbox, RadioButton, Select
+      </p>
+      <h3 id="2-statev2-increment-decrement-fixes">
+       2. StateV2
+       <code>
+        increment()
+       </code>
+       &amp;
+       <code>
+        decrement()
+       </code>
+       Fixes
+      </h3>
+      <p>
+       Fixed critical issues with
+       <code>
+        StateV2
+       </code>
+       reactive operations:
+      </p>
+      <h4 id="fixed-validation-error">
+       Fixed Validation Error
+      </h4>
+      <p>
+       Previously,
+       <code>
+        increment()
+       </code>
+       and
+       <code>
+        decrement()
+       </code>
+       only worked on properties named
+       <code>
+        text
+       </code>
+       . Now they work on
+       <strong>
+        any numeric property
+       </strong>
+       :
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Before: This would error</span>
+<span class="n">state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"counter"</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Increment"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">count</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>  <span class="c1"># ❌ ValueError</span>
+
+<span class="c1"># After: Works perfectly!</span>
+<span class="n">state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"counter"</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Increment"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">count</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>  <span class="c1"># ✅ Works!</span>
+</code></pre>
+      </div>
+      <h4 id="fixed-persistence-issue">
+       Fixed Persistence Issue
+      </h4>
+      <p>
+       Increment/decrement operations now correctly persist across multiple clicks:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"counter"</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># Before: Would increment 0→1, then stay at 1 forever</span>
+<span class="c1"># After: Correctly increments 0→1→2→3→...</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Increment"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">count</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Decrement"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">count</span><span class="o">.</span><span class="n">decrement</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Technical Details:
+       </strong>
+       - Implemented client-side state value tracking in
+       <code>
+        window.Dars.getState()
+       </code>
+       - State registry now maintains current values for all properties
+-
+       <code>
+        increment()
+       </code>
+       /
+       <code>
+        decrement()
+       </code>
+       use
+       <code>
+        window.Dars.change()
+       </code>
+       for proper state updates
+- Watchers and UI updates now trigger correctly on every operation
+      </p>
+      <h3 id="3-documentation-updates">
+       3. Documentation Updates
+      </h3>
+      <h4 id="enhanced-hooks-documentation">
+       Enhanced Hooks Documentation
+      </h4>
+      <ul>
+       <li>
+        Added comprehensive "Supported Properties" table showing which properties work with
+        <code>
+         useDynamic
+        </code>
+        for each component type
+       </li>
+       <li>
+        Documented boolean attribute support
+       </li>
+      </ul>
+      <h4 id="new-component-documentation">
+       New Component Documentation
+      </h4>
+      <p>
+       Added documentation for visualization components in
+       <code>
+        components.md
+       </code>
+       :
+      </p>
+      <p>
+       <strong>
+        Chart Component:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">plotly.graph_objects</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">go</span>
+
+<span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="n">go</span><span class="o">.</span><span class="n">Bar</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="s1">'A'</span><span class="p">,</span> <span class="s1">'B'</span><span class="p">,</span> <span class="s1">'C'</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">])])</span>
+<span class="n">Chart</span><span class="p">(</span><span class="n">figure</span><span class="o">=</span><span class="n">fig</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="s2">"100%"</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="s2">"400px"</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        DataTable Component:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s1">'Name'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'Alice'</span><span class="p">,</span> <span class="s1">'Bob'</span><span class="p">],</span>
+    <span class="s1">'Age'</span><span class="p">:</span> <span class="p">[</span><span class="mi">25</span><span class="p">,</span> <span class="mi">30</span><span class="p">]</span>
+<span class="p">})</span>
+<span class="n">DataTable</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">theme</span><span class="o">=</span><span class="s2">"striped"</span><span class="p">,</span> <span class="n">page_size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <h2 id="bug-fixes">
+       Bug Fixes
+      </h2>
+      <h3 id="statev2-incrementdecrement">
+       StateV2 Increment/Decrement
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Issue
+        </strong>
+        :
+        <code>
+         increment()
+        </code>
+        raised
+        <code>
+         ValueError
+        </code>
+        for non-
+        <code>
+         text
+        </code>
+        properties
+       </li>
+       <li>
+        <strong>
+         Fix
+        </strong>
+        : Validation now checks if value is numeric (
+        <code>
+         int
+        </code>
+        or
+        <code>
+         float
+        </code>
+        ) instead of checking property name
+       </li>
+       <li>
+        <strong>
+         Impact
+        </strong>
+        : All numeric state properties can now use
+        <code>
+         increment()
+        </code>
+        and
+        <code>
+         decrement()
+        </code>
+       </li>
+      </ul>
+      <h3 id="statev2-state-persistence">
+       StateV2 State Persistence
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Issue
+        </strong>
+        : Increment operations stuck at first value (0→1, then stayed at 1)
+       </li>
+       <li>
+        <strong>
+         Fix
+        </strong>
+        : Implemented proper client-side state tracking and payload structuring
+       </li>
+       <li>
+        <strong>
+         Impact
+        </strong>
+        : Reactive operations now work correctly across multiple invocations
+       </li>
+      </ul>
+      <h2 id="breaking-changes">
+       Breaking Changes
+      </h2>
+      <p>
+       None.
+      </p>
+      <hr/>
+      <h2 id="whats-next">
+       What's Next
+      </h2>
+      <p>
+       The enhanced
+       <code>
+        useDynamic
+       </code>
+       system and robust StateV2 operations pave the way for more advanced reactive patterns and state management features in future releases.
+      </p>
+      <hr/>
       <h1 id="release-notes-v155">
        Release Notes v1.5.5
       </h1>
@@ -271,14 +619,14 @@
         hook.
        </p>
       </blockquote>
-      <h2 id="installation">
+      <h2 id="installation-2">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new">
+      <h2 id="whats-new-2">
        What's New
       </h2>
       <h3 id="1-usedynamic-for-built-in-components">
@@ -381,14 +729,14 @@
         relaunch with correct license.
        </p>
       </blockquote>
-      <h2 id="installation-2">
+      <h2 id="installation-3">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-2">
+      <h2 id="whats-new-3">
        What's New
       </h2>
       <h3 id="hooks-system-usedynamic">
@@ -612,7 +960,7 @@
 </code></pre>
       </div>
       <hr/>
-      <h3 id="bug-fixes">
+      <h3 id="bug-fixes-2">
        Bug Fixes
       </h3>
       <h4 id="fixed-markdown-syntax-highlighting-in-multipage-apps">
@@ -650,7 +998,7 @@
 </code></pre>
       </div>
       <hr/>
-      <h2 id="breaking-changes">
+      <h2 id="breaking-changes-2">
        Breaking Changes
       </h2>
       <p>
@@ -796,7 +1144,7 @@
        for more details.
       </p>
       <hr/>
-      <h2 id="whats-next">
+      <h2 id="whats-next-2">
        What's Next
       </h2>
       <p>
@@ -812,14 +1160,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-3">
+      <h2 id="installation-4">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-3">
+      <h2 id="whats-new-4">
        What's New
       </h2>
       <h3 id="hooks-system-usedynamic-2">
@@ -1043,7 +1391,7 @@
 </code></pre>
       </div>
       <hr/>
-      <h3 id="bug-fixes-2">
+      <h3 id="bug-fixes-3">
        Bug Fixes
       </h3>
       <h4 id="fixed-markdown-syntax-highlighting-in-multipage-apps-2">
@@ -1081,7 +1429,7 @@
 </code></pre>
       </div>
       <hr/>
-      <h2 id="breaking-changes-2">
+      <h2 id="breaking-changes-3">
        Breaking Changes
       </h2>
       <p>
@@ -1227,7 +1575,7 @@
        for more details.
       </p>
       <hr/>
-      <h2 id="whats-next-2">
+      <h2 id="whats-next-3">
        What's Next
       </h2>
       <p>
@@ -1243,14 +1591,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-4">
+      <h2 id="installation-5">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-4">
+      <h2 id="whats-new-5">
        What's New
       </h2>
       <h3 id="function-components-system">
@@ -1451,14 +1799,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-5">
+      <h2 id="installation-6">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-5">
+      <h2 id="whats-new-6">
        What's New
       </h2>
       <h3 id="backend-http-utilities-system">
@@ -1730,7 +2078,7 @@
        </strong>
        https://ztamdev.github.io/Dars-Framework/docs.html#backend-http-utilities
       </p>
-      <h2 id="breaking-changes-3">
+      <h2 id="breaking-changes-4">
        Breaking Changes
       </h2>
       <p>
@@ -1739,7 +2087,7 @@
        </strong>
        - This is a fully backward-compatible release. All existing code continues to work.
       </p>
-      <h2 id="bug-fixes-3">
+      <h2 id="bug-fixes-4">
        Bug Fixes
       </h2>
       <ul>
@@ -1845,14 +2193,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-6">
+      <h2 id="installation-7">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-6">
+      <h2 id="whats-new-7">
        What's New
       </h2>
       <h3 id="animation-system-stability">
@@ -1919,7 +2267,7 @@
 <span class="p">)</span>
 </code></pre>
       </div>
-      <h2 id="bug-fixes-4">
+      <h2 id="bug-fixes-5">
        Bug Fixes
       </h2>
       <ul>
@@ -1963,14 +2311,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-7">
+      <h2 id="installation-8">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-7">
+      <h2 id="whats-new-8">
        What's New
       </h2>
       <h3 id="state-v2-event-handler-support">
@@ -2043,7 +2391,7 @@
       <p>
        Comprehensive comparison table and use case guidance added to state management documentation.
       </p>
-      <h2 id="bug-fixes-5">
+      <h2 id="bug-fixes-6">
        Bug Fixes
       </h2>
       <ul>
@@ -2109,7 +2457,7 @@
         , and more.
        </p>
       </blockquote>
-      <h2 id="installation-8">
+      <h2 id="installation-9">
        Installation
       </h2>
       <div class="codehilite">
@@ -2230,7 +2578,7 @@
 <span class="n">counter</span><span class="o">.</span><span class="n">class_name</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </code></pre>
       </div>
-      <h2 id="bug-fixes-6">
+      <h2 id="bug-fixes-7">
        Bug Fixes
       </h2>
       <h3 id="fixed-property-type-handling">
@@ -2564,7 +2912,7 @@
         Introducing State V2 and comprehensive animation system. This is the biggest update to Dars state management, bringing a pure Pythonic API and 15+ built-in animations.
        </p>
       </blockquote>
-      <h2 id="installation-9">
+      <h2 id="installation-10">
        Installation
       </h2>
       <div class="codehilite">
@@ -2578,7 +2926,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.7
 </code></pre>
       </div>
-      <h2 id="whats-new-8">
+      <h2 id="whats-new-9">
        What's New
       </h2>
       <h3 id="state-v2-pure-pythonic-state-management">
@@ -2836,7 +3184,7 @@
 ├── styles.css              # Global styles
 └── README.md               # Documentation
 </code></pre>
-      <h2 id="breaking-changes-4">
+      <h2 id="breaking-changes-5">
        Breaking Changes
       </h2>
       <p>
@@ -2877,7 +3225,7 @@
 - All dState/cState references removed from active docs
 - Migration guides included for existing projects
       </p>
-      <h2 id="bug-fixes-7">
+      <h2 id="bug-fixes-8">
        Bug Fixes
       </h2>
       <p>
@@ -3150,7 +3498,7 @@
         : Introduces Single Page Application (SPA) support and a powerful client-side routing system.
        </p>
       </blockquote>
-      <h2 id="installation-10">
+      <h2 id="installation-11">
        Installation
       </h2>
       <div class="codehilite">
@@ -3164,7 +3512,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.5
 </code></pre>
       </div>
-      <h2 id="whats-new-9">
+      <h2 id="whats-new-10">
        What's New
       </h2>
       <h3 id="single-page-application-spa-support">
@@ -3267,7 +3615,7 @@
         Critical bug fix release. Removes non-functional features, fixes style merge, and improves state restoration.
        </p>
       </blockquote>
-      <h2 id="installation-11">
+      <h2 id="installation-12">
        Installation
       </h2>
       <div class="codehilite">
@@ -3333,7 +3681,7 @@
         State management enhancements with compile-time validation, component self-navigation, and critical style merge fix. Improves developer experience and fixes property replacement bug.
        </p>
       </blockquote>
-      <h2 id="installation-12">
+      <h2 id="installation-13">
        Installation
       </h2>
       <div class="codehilite">
@@ -3347,7 +3695,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.3
 </code></pre>
       </div>
-      <h2 id="whats-new-10">
+      <h2 id="whats-new-11">
        What's New
       </h2>
       <ul>
@@ -3397,7 +3745,7 @@
         for enhanced client-side interactions.
        </p>
       </blockquote>
-      <h2 id="installation-13">
+      <h2 id="installation-14">
        Installation
       </h2>
       <div class="codehilite">
@@ -3411,7 +3759,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.2
 </code></pre>
       </div>
-      <h2 id="whats-new-11">
+      <h2 id="whats-new-12">
        What's New
       </h2>
       <h3 id="utility-functions-utils_ds">
@@ -3601,7 +3949,7 @@
         SEO and Apple device optimizations. Enhanced metadata generation with automatic MIME type detection for favicons and comprehensive iOS/Safari support.
        </p>
       </blockquote>
-      <h2 id="installation-14">
+      <h2 id="installation-15">
        Installation
       </h2>
       <div class="codehilite">
@@ -3615,7 +3963,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.1
 </code></pre>
       </div>
-      <h2 id="whats-new-12">
+      <h2 id="whats-new-13">
        What's New
       </h2>
       <h3 id="automatic-favicon-mime-type-detection">
@@ -3930,7 +4278,7 @@
         Simple Template update.
        </p>
       </blockquote>
-      <h2 id="installation-15">
+      <h2 id="installation-16">
        Installation
       </h2>
       <div class="codehilite">
@@ -3958,7 +4306,7 @@
         Desktop File System API, Pythonic Arg helper, keyboard event filtering, and comprehensive template synchronization. Major enhancements to desktop capabilities with improved developer experience.
        </p>
       </blockquote>
-      <h2 id="installation-16">
+      <h2 id="installation-17">
        Installation
       </h2>
       <div class="codehilite">
@@ -3972,7 +4320,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.9
 </code></pre>
       </div>
-      <h2 id="whats-new-13">
+      <h2 id="whats-new-14">
        What's New
       </h2>
       <h3 id="desktop-file-system-api-list_directory">
@@ -4267,7 +4615,7 @@
        and similar events work correctly
 - Maintains backward compatibility with non-filtered events
       </p>
-      <h2 id="bug-fixes-8">
+      <h2 id="bug-fixes-9">
        Bug Fixes
       </h2>
       <ul>
@@ -4423,7 +4771,7 @@
         for async chaining.
        </p>
       </blockquote>
-      <h2 id="installation-17">
+      <h2 id="installation-18">
        Installation
       </h2>
       <div class="codehilite">
@@ -4437,7 +4785,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.8
 </code></pre>
       </div>
-      <h2 id="whats-new-14">
+      <h2 id="whats-new-15">
        What's New
       </h2>
       <h3 id="dynamic-state-updates-with-this">
@@ -4885,7 +5233,7 @@
         for dynamic DOM operations with safe event hydration.
        </p>
       </blockquote>
-      <h2 id="installation-18">
+      <h2 id="installation-19">
        Installation
       </h2>
       <div class="codehilite">
@@ -4899,7 +5247,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.6
 </code></pre>
       </div>
-      <h2 id="whats-new-15">
+      <h2 id="whats-new-16">
        What's New
       </h2>
       <h3 id="compile-time-component-manipulation">
@@ -5062,7 +5410,7 @@
         Enhanced styling and development experience update featuring active styles, improved preview system, and advanced file monitoring. Delivers better visual feedback and faster development workflow.
        </p>
       </blockquote>
-      <h2 id="installation-19">
+      <h2 id="installation-20">
        Installation
       </h2>
       <div class="codehilite">
@@ -5076,7 +5424,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.5
 </code></pre>
       </div>
-      <h2 id="whats-new-16">
+      <h2 id="whats-new-17">
        What's New
       </h2>
       <h3 id="active-styles-support">
@@ -5219,7 +5567,7 @@
         Enhanced interactivity update featuring hover styles, multi-handler events, and runtime versioning. Improves component styling and event handling flexibility.
        </p>
       </blockquote>
-      <h2 id="installation-20">
+      <h2 id="installation-21">
        Installation
       </h2>
       <div class="codehilite">
@@ -5233,7 +5581,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.4
 </code></pre>
       </div>
-      <h2 id="whats-new-17">
+      <h2 id="whats-new-18">
        What's New
       </h2>
       <h3 id="hover-styles-support">
@@ -5412,7 +5760,7 @@
         Minor update featuring new semantic Section component and enhanced state serialization. Continues JavaScript migration improvements from v1.3.2.
        </p>
       </blockquote>
-      <h2 id="installation-21">
+      <h2 id="installation-22">
        Installation
       </h2>
       <div class="codehilite">
@@ -5426,7 +5774,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.3
 </code></pre>
       </div>
-      <h2 id="whats-new-18">
+      <h2 id="whats-new-19">
        What's New
       </h2>
       <h3 id="section-component">
@@ -5576,7 +5924,7 @@
         Major minification improvements with combined JS files and optimized event handling. Electron desktop exporter remains in beta.
        </p>
       </blockquote>
-      <h2 id="installation-22">
+      <h2 id="installation-23">
        Installation
       </h2>
       <div class="codehilite">
@@ -5700,7 +6048,7 @@
         : Fallback minification when Vite is unavailable
        </li>
       </ul>
-      <h2 id="bug-fixes-9">
+      <h2 id="bug-fixes-10">
        Bug Fixes
       </h2>
       <ul>
@@ -5872,7 +6220,7 @@
         Native desktop functions and DX improved with dev mode and file system integration.
        </p>
       </blockquote>
-      <h2 id="installation-23">
+      <h2 id="installation-24">
        Installation
       </h2>
       <div class="codehilite">
@@ -5923,7 +6271,7 @@
       <p>
        Also you can use dScripts to run custom javascript code in the desktop app. and for now 'dars dev' is supported but python main.py with rTimeCompile() is not supported because it have issues with relative paths.
       </p>
-      <h2 id="bug-fixes-10">
+      <h2 id="bug-fixes-11">
        Bug Fixes
       </h2>
       <ul>
@@ -5957,7 +6305,7 @@
         Native desktop export (BETA), improved CLI and doctor integration, and metadata fixes for packaging. This is a BETA release: usable for testing, not recommended for production.
        </p>
       </blockquote>
-      <h2 id="installation-24">
+      <h2 id="installation-25">
        Installation
       </h2>
       <div class="codehilite">
@@ -6143,7 +6491,7 @@ dars<span class="w"> </span>build
 <span class="p">}</span>
 </code></pre>
       </div>
-      <h2 id="bug-fixes-11">
+      <h2 id="bug-fixes-12">
        Bug Fixes
       </h2>
       <ul>
@@ -6240,7 +6588,7 @@ dars<span class="w"> </span>build
         Optional default minification, precise CLI control, faster builds, and clearer minification status.
        </p>
       </blockquote>
-      <h2 id="installation-25">
+      <h2 id="installation-26">
        Installation
       </h2>
       <div class="codehilite">
@@ -6397,7 +6745,7 @@ dars<span class="w"> </span>build
         </ul>
        </li>
       </ul>
-      <h2 id="bug-fixes-12">
+      <h2 id="bug-fixes-13">
        Bug Fixes
       </h2>
       <ul>
@@ -6633,6 +6981,57 @@ dars<span class="w"> </span>build
      <div class="sidebar-category">
       Versions
      </div>
+     <a class="sidebar-link sidebar-level-1" href="#release-notes-v156" style="margin-left: 0px">
+      Release Notes v1.5.6
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#installation" style="margin-left: 20px">
+      Installation
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#whats-new" style="margin-left: 20px">
+      What's New
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#1-expanded-usedynamic-support-for-built-in-components" style="margin-left: 40px">
+      1. Expanded `useDynamic` Support for Built-in Components
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#image-link-components" style="margin-left: 60px">
+      Image &amp; Link Components
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#boolean-attributes" style="margin-left: 60px">
+      Boolean Attributes
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#2-statev2-increment-decrement-fixes" style="margin-left: 40px">
+      2. StateV2 `increment()` &amp; `decrement()` Fixes
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#fixed-validation-error" style="margin-left: 60px">
+      Fixed Validation Error
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#fixed-persistence-issue" style="margin-left: 60px">
+      Fixed Persistence Issue
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#3-documentation-updates" style="margin-left: 40px">
+      3. Documentation Updates
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#enhanced-hooks-documentation" style="margin-left: 60px">
+      Enhanced Hooks Documentation
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#new-component-documentation" style="margin-left: 60px">
+      New Component Documentation
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#bug-fixes" style="margin-left: 20px">
+      Bug Fixes
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#statev2-incrementdecrement" style="margin-left: 40px">
+      StateV2 Increment/Decrement
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#statev2-state-persistence" style="margin-left: 40px">
+      StateV2 State Persistence
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#breaking-changes" style="margin-left: 20px">
+      Breaking Changes
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#whats-next" style="margin-left: 20px">
+      What's Next
+     </a>
      <a class="sidebar-link sidebar-level-1" href="#release-notes-v155" style="margin-left: 0px">
       Release Notes v1.5.5
      </a>

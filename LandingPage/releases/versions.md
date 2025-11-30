@@ -1,4 +1,153 @@
+# Release Notes v1.5.6
+
+> **Enhanced `useDynamic` Support & StateV2 Fixes**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### 1. Expanded `useDynamic` Support for Built-in Components
+
+`useDynamic` now works with **all properties** of built-in components, including:
+
+#### Image & Link Components
+```python
+# Dynamic image source and alt text
+Image(
+    src=useDynamic("product.imageUrl"),
+    alt=useDynamic("product.name")
+)
+
+# Dynamic link href and text
+Link(
+    href=useDynamic("navigation.url"),
+    text=useDynamic("navigation.label")
+)
+```
+
+#### Boolean Attributes
+All boolean attributes now support dynamic binding:
+```python
+# Dynamic disabled state
+Button(
+    text="Submit",
+    disabled=useDynamic("form.isSubmitting")
+)
+
+# Dynamic checked state
+Checkbox(
+    checked=useDynamic("settings.notifications"),
+    label="Enable Notifications"
+)
+
+# Dynamic readonly and required
+Input(
+    value=useDynamic("user.email"),
+    readonly=useDynamic("form.isLocked"),
+    required=useDynamic("form.emailRequired")
+)
+```
+
+**Supported Boolean Properties:**
+- `disabled` - Button, Input, Textarea, Checkbox, RadioButton, Select, Slider
+- `checked` - Checkbox, RadioButton
+- `readonly` - Input, Textarea
+- `required` - Input, Textarea, Checkbox, RadioButton, Select
+
+### 2. StateV2 `increment()` & `decrement()` Fixes
+
+Fixed critical issues with `StateV2` reactive operations:
+
+#### Fixed Validation Error
+Previously, `increment()` and `decrement()` only worked on properties named `text`. Now they work on **any numeric property**:
+
+```python
+# Before: This would error
+state = State("counter", count=0)
+Button("Increment", on_click=state.count.increment(by=1))  # ❌ ValueError
+
+# After: Works perfectly!
+state = State("counter", count=0)
+Button("Increment", on_click=state.count.increment(by=1))  # ✅ Works!
+```
+
+#### Fixed Persistence Issue
+Increment/decrement operations now correctly persist across multiple clicks:
+
+```python
+state = State("counter", count=0)
+
+# Before: Would increment 0→1, then stay at 1 forever
+# After: Correctly increments 0→1→2→3→...
+Button("Increment", on_click=state.count.increment(by=1))
+Button("Decrement", on_click=state.count.decrement(by=1))
+```
+
+**Technical Details:**
+- Implemented client-side state value tracking in `window.Dars.getState()`
+- State registry now maintains current values for all properties
+- `increment()`/`decrement()` use `window.Dars.change()` for proper state updates
+- Watchers and UI updates now trigger correctly on every operation
+
+### 3. Documentation Updates
+
+#### Enhanced Hooks Documentation
+- Added comprehensive "Supported Properties" table showing which properties work with `useDynamic` for each component type
+- Documented boolean attribute support
+
+#### New Component Documentation
+Added documentation for visualization components in `components.md`:
+
+**Chart Component:**
+```python
+import plotly.graph_objects as go
+
+fig = go.Figure(data=[go.Bar(x=['A', 'B', 'C'], y=[1, 3, 2])])
+Chart(figure=fig, width="100%", height="400px")
+```
+
+**DataTable Component:**
+```python
+import pandas as pd
+
+df = pd.DataFrame({
+    'Name': ['Alice', 'Bob'],
+    'Age': [25, 30]
+})
+DataTable(data=df, theme="striped", page_size=10)
+```
+
+## Bug Fixes
+
+### StateV2 Increment/Decrement
+- **Issue**: `increment()` raised `ValueError` for non-`text` properties
+- **Fix**: Validation now checks if value is numeric (`int` or `float`) instead of checking property name
+- **Impact**: All numeric state properties can now use `increment()` and `decrement()`
+
+### StateV2 State Persistence
+- **Issue**: Increment operations stuck at first value (0→1, then stayed at 1)
+- **Fix**: Implemented proper client-side state tracking and payload structuring
+- **Impact**: Reactive operations now work correctly across multiple invocations
+
+## Breaking Changes
+
+None.
+
+---
+
+
+## What's Next
+
+The enhanced `useDynamic` system and robust StateV2 operations pave the way for more advanced reactive patterns and state management features in future releases.
+
+---
+
 # Release Notes v1.5.5
+
 
 > **Hooks System Enhanced**: `useDynamic` for built-in components and new `useWatch` hook.
 

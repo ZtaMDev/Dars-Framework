@@ -166,6 +166,7 @@ function registerState(name, cfg){{
     rules: (cfg.rules && typeof cfg.rules === 'object') ? cfg.rules : {{}},
     defaultIndex: (typeof cfg.defaultIndex === 'number') ? cfg.defaultIndex : 0,
     defaultValue: (cfg.hasOwnProperty('defaultValue') ? cfg.defaultValue : null),
+    values: (cfg.hasOwnProperty('defaultValue') ? Object.assign({{}}, cfg.defaultValue) : {{}}),
     __defaultSnapshot: null,
     __vnode: null  // Store vnode reference for event re-hydration
   }};
@@ -397,6 +398,11 @@ function change(opt){{
       
       // Helper to trigger watchers for a property
       const notifyWatchers = (prop, val) => {{
+          const st = __registry.get(opt.id);
+          if (st && st.values) {{
+              st.values[prop] = val;
+          }}
+          
           const path = opt.id + '.' + prop;
           if (__watchers.has(path)) {{
               __watchers.get(path).forEach(cb => {{
@@ -991,7 +997,16 @@ function startLoop(id, config) {{
         }}
         
         if (config.type === 'auto_increment') {{
-            let current = parseFloat(el.textContent || '0');
+            let current = 0;
+            const st = __registry.get(id);
+            const prop = config.property || 'text';
+            
+            if (st && st.values) {{
+                current = parseFloat(st.values[prop] || 0);
+            }} else if (el) {{
+                current = parseFloat(el.textContent || '0');
+            }}
+            
             current += config.by || 1;
             
             if (config.max !== null && config.max !== undefined && current >= config.max) {{
@@ -999,9 +1014,26 @@ function startLoop(id, config) {{
                 stopLoop(id);
             }}
             
-            el.textContent = String(current);
+            const payload = {{ id: id, dynamic: true }};
+            if (prop === 'text' || prop === 'html') {{
+                payload[prop] = current;
+            }} else {{
+                payload.attrs = {{}};
+                payload.attrs[prop] = current;
+            }}
+            change(payload);
+            
         }} else if (config.type === 'auto_decrement') {{
-            let current = parseFloat(el.textContent || '0');
+            let current = 0;
+            const st = __registry.get(id);
+            const prop = config.property || 'text';
+            
+            if (st && st.values) {{
+                current = parseFloat(st.values[prop] || 0);
+            }} else if (el) {{
+                current = parseFloat(el.textContent || '0');
+            }}
+            
             current -= config.by || 1;
             
             if (config.min !== null && config.min !== undefined && current <= config.min) {{
@@ -1009,7 +1041,14 @@ function startLoop(id, config) {{
                 stopLoop(id);
             }}
             
-            el.textContent = String(current);
+            const payload = {{ id: id, dynamic: true }};
+            if (prop === 'text' || prop === 'html') {{
+                payload[prop] = current;
+            }} else {{
+                payload.attrs = {{}};
+                payload.attrs[prop] = current;
+            }}
+            change(payload);
         }} else if (config.type === 'custom') {{
             try {{
                 (0,eval)(config.code);

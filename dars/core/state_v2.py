@@ -174,25 +174,46 @@ class ReactiveProperty:
         from dars.scripts.dscript import dScript
         
         # Only numeric properties can be incremented
-        if self._name not in ('text',):
-            raise ValueError(f"Cannot increment non-numeric property '{self._name}'. Use .set() instead.")
+        if not isinstance(self._value, (int, float)):
+            raise ValueError(f"Cannot increment non-numeric property '{self._name}' (value: {self._value}). Use .set() instead.")
         
         component_id = self._state.component.id
         
         code = f"""
 (async () => {{
-const el = document.getElementById('{component_id}');
-if (el) {{
-    const current = parseFloat(el.textContent || '0') || 0;
-    const newValue = current + {by};
-    el.textContent = String(newValue);
-    
-    // Dispatch state update event
-    const ev = new CustomEvent('dars:state-update', {{
-        detail: {{ id: '{component_id}', property: 'text', value: newValue }}
-    }});
-    el.dispatchEvent(ev);
-}}
+    try {{
+        // Get current value from state registry
+        let current = 0;
+        if (window.Dars && window.Dars.getState) {{
+            const st = window.Dars.getState('{component_id}');
+            if (st && st.values) {{
+                current = parseFloat(st.values['{self._name}'] || 0);
+            }}
+        }}
+        
+        const newValue = current + {by};
+        
+        // Update state via window.Dars.change
+        // This handles DOM updates, watchers, and state registry update
+        const payload = {{
+            id: '{component_id}',
+            dynamic: true
+        }};
+        
+        // Correctly structure payload based on property name
+        if ('{self._name}' === 'text' || '{self._name}' === 'html') {{
+            payload['{self._name}'] = newValue;
+        }} else {{
+            payload.attrs = {{}};
+            payload.attrs['{self._name}'] = newValue;
+        }}
+        
+        if (window.Dars && window.Dars.change) {{
+            window.Dars.change(payload);
+        }} else if (window.__DARS_CHANGE_FN) {{
+            window.__DARS_CHANGE_FN(payload);
+        }}
+    }} catch (e) {{ console.error('[Dars] Increment error:', e); }}
 }})();
 """.strip()
         

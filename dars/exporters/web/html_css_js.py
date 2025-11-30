@@ -2571,7 +2571,9 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
         """Genera código JS puro para inicializar todos los estados directamente en el runtime"""
         try:
             from dars.core.state import STATE_BOOTSTRAP
-            if not STATE_BOOTSTRAP:
+            from dars.core.state_v2 import STATE_V2_REGISTRY
+            
+            if not STATE_BOOTSTRAP and not STATE_V2_REGISTRY:
                 return "    // No hay estados para inicializar"
 
             lines = []
@@ -2579,10 +2581,38 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
             lines.append('    try {')
             lines.append('        const statesConfig = [')
 
-            # Generar cada estado como objeto JS literal
-            for i, state in enumerate(STATE_BOOTSTRAP):
-                state_js = self._state_to_js(state)
-                lines.append(f'            {state_js}' + (',' if i < len(STATE_BOOTSTRAP) - 1 else ''))
+            # 1. Generar estados V1 (STATE_BOOTSTRAP)
+            if STATE_BOOTSTRAP:
+                for i, state in enumerate(STATE_BOOTSTRAP):
+                    state_js = self._state_to_js(state)
+                    lines.append(f'            {state_js},')
+
+            # 2. Generar estados V2 (STATE_V2_REGISTRY)
+            if STATE_V2_REGISTRY:
+                for state in STATE_V2_REGISTRY:
+                    # Crear objeto de configuración para V2
+                    # Necesitamos serializar el snapshot por defecto
+                    default_vals = {}
+                    if hasattr(state, '_default_snapshot'):
+                        default_vals = state._default_snapshot
+                    
+                    # Convertir valores a JS safe
+                    js_defaults = []
+                    for k, v in default_vals.items():
+                        js_defaults.append(f'"{k}": {self._value_to_js(v)}')
+                    
+                    defaults_str = '{ ' + ', '.join(js_defaults) + ' }'
+                    
+                    # ID del componente o nombre del estado
+                    state_id = state.component.id if hasattr(state.component, 'id') else str(state.component)
+                    
+                    state_config = f'''{{
+                        "name": "{state_id}",
+                        "id": "{state_id}",
+                        "defaultValue": {defaults_str},
+                        "isV2": true
+                    }}'''
+                    lines.append(f'            {state_config},')
 
             lines.append('        ];')
             lines.append('        if (window.Dars && typeof window.Dars.registerStates === "function") {')
@@ -2688,8 +2718,8 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
         registry = get_bindings_registry()
         marker_pattern = r'__DARS_DYNAMIC_\d+_\d+__'
         
-        # Check common props
-        props_to_check = ['text', 'html', 'value', 'placeholder', 'src', 'alt', 'href', 'style', 'class_name']
+        # Check common props (expanded to include disabled, checked)
+        props_to_check = ['text', 'html', 'value', 'placeholder', 'src', 'alt', 'href', 'disabled', 'checked', 'style', 'class_name']
         
         for prop_name in props_to_check:
             prop_value = getattr(component, prop_name, None)
@@ -2733,6 +2763,12 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
                 
                 # Get initial value from state registry
                 initial_values[prop_name] = initial_val
+                
+                # CRITICAL: Update the component's property with the resolved initial value
+                # This ensures that when component.render() is called, it uses the actual value
+                # instead of the marker string
+                if initial_val is not None:
+                    setattr(component, prop_name, initial_val)
         
         return {'bindings': bindings, 'initial_values': initial_values}
     
@@ -3315,23 +3351,25 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
         class_attr = f'class="dars-button {button.class_name or ""}"'
         style_attr = f'style="{self.render_styles(button.style)}"' if button.style else ""
         type_attr = f'type="{button.button_type}"'
-        disabled_attr = "disabled" if button.disabled else ""
         
         # Process dynamic props
         dynamic_info = self._process_dynamic_props(button)
         
         if dynamic_info['bindings']:
-            # Store bindings for runtime processing
             if not hasattr(self, '_built_in_bindings'):
                 self._built_in_bindings = []
             self._built_in_bindings.extend(dynamic_info['bindings'])
             
-            # Use initial value from state if available
-            text_value = dynamic_info['initial_values'].get('text', button.text)
-            if text_value is None:
-                text_value = button.text
-        else:
-            text_value = button.text
+        # Handle text
+        text_value = dynamic_info['initial_values'].get('text', button.text)
+        if hasattr(text_value, 'marker'): text_value = ""
+        if text_value is None: text_value = button.text
+
+        # Handle disabled
+        disabled_val = dynamic_info['initial_values'].get('disabled', button.disabled)
+        if hasattr(disabled_val, 'marker'): disabled_val = False
+        
+        disabled_attr = "disabled" if disabled_val else ""
         
         return f'<button id="{component_id}" {class_attr} {style_attr} {type_attr} {disabled_attr}>{text_value}</button>'
         
@@ -3365,9 +3403,21 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
 
         value_attr = f'value="{value_val}"' if value_val else ""
         placeholder_attr = f'placeholder="{placeholder_val}"' if placeholder_val else ""
-        disabled_attr = "disabled" if input_comp.disabled else ""
-        readonly_attr = "readonly" if input_comp.readonly else ""
-        required_attr = "required" if input_comp.required else ""
+        
+        # Handle disabled
+        disabled_val = dynamic_info['initial_values'].get('disabled', input_comp.disabled)
+        if hasattr(disabled_val, 'marker'): disabled_val = False
+        disabled_attr = "disabled" if disabled_val else ""
+        
+        # Handle readonly
+        readonly_val = dynamic_info['initial_values'].get('readonly', input_comp.readonly)
+        if hasattr(readonly_val, 'marker'): readonly_val = False
+        readonly_attr = "readonly" if readonly_val else ""
+        
+        # Handle required
+        required_val = dynamic_info['initial_values'].get('required', input_comp.required)
+        if hasattr(required_val, 'marker'): required_val = False
+        required_attr = "required" if required_val else ""
         
         return f'<input id="{component_id}" {class_attr} {style_attr} {type_attr} {value_attr} {placeholder_attr} {disabled_attr} {readonly_attr} {required_attr} />'
         
@@ -3432,7 +3482,24 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
         width_attr = f'width="{image.width}"' if image.width else ""
         height_attr = f'height="{image.height}"' if image.height else ""
 
-        return f'<img id="{component_id}" src="{image.src}" alt="{image.alt}" {width_attr} {height_attr} {class_attr} {style_attr} />'
+        # Process dynamic props
+        dynamic_info = self._process_dynamic_props(image)
+        
+        if dynamic_info['bindings']:
+            if not hasattr(self, '_built_in_bindings'):
+                self._built_in_bindings = []
+            self._built_in_bindings.extend(dynamic_info['bindings'])
+            
+        # Handle src
+        src_val = dynamic_info['initial_values'].get('src', image.src)
+        # If unresolved binding, use empty string to avoid 404s
+        if hasattr(src_val, 'marker'): src_val = ""
+        
+        # Handle alt
+        alt_val = dynamic_info['initial_values'].get('alt', image.alt)
+        if hasattr(alt_val, 'marker'): alt_val = ""
+
+        return f'<img id="{component_id}" src="{src_val}" alt="{alt_val}" {width_attr} {height_attr} {class_attr} {style_attr} />'
 
     def render_link(self, link: Link) -> str:
         """Renderiza un componente Link"""
@@ -3440,8 +3507,24 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
         class_attr = f'class="dars-link {link.class_name or ""}"'
         style_attr = f'style="{self.render_styles(link.style)}"' if link.style else ""
         target_attr = f'target="{link.target}"'
+        
+        # Process dynamic props
+        dynamic_info = self._process_dynamic_props(link)
+        
+        if dynamic_info['bindings']:
+            if not hasattr(self, '_built_in_bindings'):
+                self._built_in_bindings = []
+            self._built_in_bindings.extend(dynamic_info['bindings'])
+            
+        # Handle href
+        href_val = dynamic_info['initial_values'].get('href', link.href)
+        if hasattr(href_val, 'marker'): href_val = "#"
+        
+        # Handle text
+        text_val = dynamic_info['initial_values'].get('text', link.text)
+        if hasattr(text_val, 'marker'): text_val = ""
 
-        return f'<a id="{component_id}" href="{link.href}" {target_attr} {class_attr} {style_attr}>{link.text}</a>'
+        return f'<a id="{component_id}" href="{href_val}" {target_attr} {class_attr} {style_attr}>{text_val}</a>'
 
     def render_textarea(self, textarea: Textarea) -> str:
         """Renderiza un componente Textarea"""
@@ -3473,10 +3556,26 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
             placeholder_val = textarea.placeholder
             
         placeholder_attr = f'placeholder="{placeholder_val}"' if placeholder_val else ""
-        disabled_attr = "disabled" if textarea.disabled else ""
-        readonly_attr = "readonly" if textarea.readonly else ""
-        required_attr = "required" if textarea.required else ""
-        maxlength_attr = f'maxlength="{textarea.max_length}"' if textarea.max_length else ""
+        
+        # Handle disabled
+        disabled_val = dynamic_info['initial_values'].get('disabled', textarea.disabled)
+        if hasattr(disabled_val, 'marker'): disabled_val = False
+        disabled_attr = "disabled" if disabled_val else ""
+        
+        # Handle readonly
+        readonly_val = dynamic_info['initial_values'].get('readonly', textarea.readonly)
+        if hasattr(readonly_val, 'marker'): readonly_val = False
+        readonly_attr = "readonly" if readonly_val else ""
+        
+        # Handle required
+        required_val = dynamic_info['initial_values'].get('required', textarea.required)
+        if hasattr(required_val, 'marker'): required_val = False
+        required_attr = "required" if required_val else ""
+        
+        # Handle maxlength
+        maxlength_val = dynamic_info['initial_values'].get('max_length', textarea.max_length)
+        if hasattr(maxlength_val, 'marker'): maxlength_val = None # Or some default if needed
+        maxlength_attr = f'maxlength="{maxlength_val}"' if maxlength_val is not None else ""
 
         attrs = [class_attr, style_attr, rows_attr, cols_attr, placeholder_attr,
                  disabled_attr, readonly_attr, required_attr, maxlength_attr]
@@ -3548,9 +3647,30 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
         component_id = self.get_component_id(checkbox, prefix="checkbox")
         class_attr = f'class="dars-checkbox {checkbox.class_name or ""}"'
         style_attr = f'style="{self.render_styles(checkbox.style)}"' if checkbox.style else ""
-        checked_attr = "checked" if checkbox.checked else ""
-        disabled_attr = "disabled" if checkbox.disabled else ""
-        required_attr = "required" if checkbox.required else ""
+        
+        # Process dynamic props
+        dynamic_info = self._process_dynamic_props(checkbox)
+        
+        if dynamic_info['bindings']:
+            if not hasattr(self, '_built_in_bindings'):
+                self._built_in_bindings = []
+            self._built_in_bindings.extend(dynamic_info['bindings'])
+            
+        # Handle checked
+        checked_val = dynamic_info['initial_values'].get('checked', checkbox.checked)
+        if hasattr(checked_val, 'marker'): checked_val = False
+        checked_attr = "checked" if checked_val else ""
+        
+        # Handle disabled
+        disabled_val = dynamic_info['initial_values'].get('disabled', checkbox.disabled)
+        if hasattr(disabled_val, 'marker'): disabled_val = False
+        disabled_attr = "disabled" if disabled_val else ""
+        
+        # Handle required
+        required_val = dynamic_info['initial_values'].get('required', checkbox.required)
+        if hasattr(required_val, 'marker'): required_val = False
+        required_attr = "required" if required_val else ""
+        
         name_attr = f'name="{checkbox.name}"' if checkbox.name else ""
         value_attr = f'value="{checkbox.value}"' if checkbox.value else ""
         
@@ -3566,9 +3686,30 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
         component_id = self.get_component_id(radio, prefix="radiobutton")
         class_attr = f'class="dars-radio {radio.class_name or ""}"'
         style_attr = f'style="{self.render_styles(radio.style)}"' if radio.style else ""
-        checked_attr = "checked" if radio.checked else ""
-        disabled_attr = "disabled" if radio.disabled else ""
-        required_attr = "required" if radio.required else ""
+        
+        # Process dynamic props
+        dynamic_info = self._process_dynamic_props(radio)
+        
+        if dynamic_info['bindings']:
+            if not hasattr(self, '_built_in_bindings'):
+                self._built_in_bindings = []
+            self._built_in_bindings.extend(dynamic_info['bindings'])
+            
+        # Handle checked
+        checked_val = dynamic_info['initial_values'].get('checked', radio.checked)
+        if hasattr(checked_val, 'marker'): checked_val = False
+        checked_attr = "checked" if checked_val else ""
+        
+        # Handle disabled
+        disabled_val = dynamic_info['initial_values'].get('disabled', radio.disabled)
+        if hasattr(disabled_val, 'marker'): disabled_val = False
+        disabled_attr = "disabled" if disabled_val else ""
+        
+        # Handle required
+        required_val = dynamic_info['initial_values'].get('required', radio.required)
+        if hasattr(required_val, 'marker'): required_val = False
+        required_attr = "required" if required_val else ""
+        
         name_attr = f'name="{radio.name}"'
         value_attr = f'value="{radio.value}"'
         
@@ -3584,8 +3725,25 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
         component_id = self.get_component_id(select, prefix="select")
         class_attr = f'class="dars-select {select.class_name or ""}"'
         style_attr = f'style="{self.render_styles(select.style)}"' if select.style else ""
-        disabled_attr = "disabled" if select.disabled else ""
-        required_attr = "required" if select.required else ""
+        
+        # Process dynamic props
+        dynamic_info = self._process_dynamic_props(select)
+        
+        if dynamic_info['bindings']:
+            if not hasattr(self, '_built_in_bindings'):
+                self._built_in_bindings = []
+            self._built_in_bindings.extend(dynamic_info['bindings'])
+            
+        # Handle disabled
+        disabled_val = dynamic_info['initial_values'].get('disabled', select.disabled)
+        if hasattr(disabled_val, 'marker'): disabled_val = False
+        disabled_attr = "disabled" if disabled_val else ""
+        
+        # Handle required
+        required_val = dynamic_info['initial_values'].get('required', select.required)
+        if hasattr(required_val, 'marker'): required_val = False
+        required_attr = "required" if required_val else ""
+        
         multiple_attr = "multiple" if select.multiple else ""
         size_attr = f'size="{select.size}"' if select.size else ""
         
@@ -3610,7 +3768,19 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
         component_id = self.get_component_id(slider, prefix="slider")
         class_attr = f'class="dars-slider {slider.class_name or ""}"'
         style_attr = f'style="{self.render_styles(slider.style)}"' if slider.style else ""
-        disabled_attr = "disabled" if slider.disabled else ""
+        
+        # Process dynamic props
+        dynamic_info = self._process_dynamic_props(slider)
+        
+        if dynamic_info['bindings']:
+            if not hasattr(self, '_built_in_bindings'):
+                self._built_in_bindings = []
+            self._built_in_bindings.extend(dynamic_info['bindings'])
+            
+        # Handle disabled
+        disabled_val = dynamic_info['initial_values'].get('disabled', slider.disabled)
+        if hasattr(disabled_val, 'marker'): disabled_val = False
+        disabled_attr = "disabled" if disabled_val else ""
         min_attr = f'min="{slider.min_value}"'
         max_attr = f'max="{slider.max_value}"'
         value_attr = f'value="{slider.value}"'

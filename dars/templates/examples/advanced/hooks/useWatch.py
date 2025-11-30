@@ -3,13 +3,9 @@ from dars.hooks.use_watch import useWatch
 
 app = App("Surgical useDynamic Test")
 
-# Create state
 user_state = State("user", name="John Doe", bio="Software Developer", status="Active")
 
-# Watcher for name changes (New convenience syntax)
 app.useWatch("user.name", log("Name changed (app.useWatch)!"))
-
-# Watcher for bio changes (Classic syntax)
 app.add_script(useWatch("user.bio", log("Bio changed (app.add_script)!")))
 
 @FunctionComponent
@@ -56,7 +52,6 @@ def index():
             
             WatcherComp(),
 
-            # Controls - USAR state.prop.set() NO state.update()
             Container(
                     Button("Update Name", on_click=user_state.name.set("Updated Name")),
                     Button("Update Bio", on_click=user_state.bio.set("Updated Bio Content")),
@@ -68,7 +63,6 @@ def index():
         style={"padding": "20px", "font-family": "Arial"}
     )
     
-    # Test page.useWatch
     page.useWatch("user.status", log("Status changed (page.useWatch)!"))
     
     return page

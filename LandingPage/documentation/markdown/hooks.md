@@ -24,7 +24,7 @@ You can pass `useDynamic()` directly to properties of built-in components like `
 from dars.all import *
 
 # Create state
-userState = State("user", name="John Doe", status="Active")
+userState = State("user", name="John Doe", status="Active", is_admin=False)
 
 # Bind directly to props
 card = Container(
@@ -34,10 +34,33 @@ card = Container(
     # Bind input value
     Input(value=useDynamic("user.name"), placeholder="Edit name"),
     
-    # Bind button text
-    Button(text=useDynamic("user.status"), on_click=userState.status.set("Clicked!"))
+    # Bind button text and disabled state
+    Button(
+        text=useDynamic("user.status"), 
+        disabled=useDynamic("user.is_admin"), # Disables button if is_admin is True (or False depending on logic)
+        on_click=userState.status.set("Clicked!")
+    )
 )
 ```
+
+### Supported Properties
+
+`useDynamic` supports binding to the following properties on built-in components:
+
+| Component | Properties |
+|-----------|------------|
+| `Text` | `text`, `innerHTML` |
+| `Button` | `text`, `disabled` |
+| `Input` | `value`, `placeholder`, `disabled`, `readonly`, `required` |
+| `Textarea` | `value`, `placeholder`, `disabled`, `readonly`, `required` |
+| `Image` | `src`, `alt` |
+| `Link` | `href`, `text` |
+| `Checkbox` | `checked`, `disabled`, `required` |
+| `RadioButton` | `checked`, `disabled`, `required` |
+| `Select` | `disabled`, `required` |
+| `Slider` | `disabled` |
+
+Boolean attributes like `disabled` and `checked` will be toggled based on the truthiness of the state value.
 
 ### 2. Usage in FunctionComponents
 
