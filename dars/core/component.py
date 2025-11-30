@@ -526,6 +526,30 @@ def FunctionComponent(func: Callable) -> type:
             self.template_props = template_props
             self.template_args = args
             self.template_kwargs = kwargs # Store original kwargs to check for overrides
+            
+            # Handle children population
+            # We need to populate self.children so the exporter can render them
+            _children = component_props.get('children')
+            
+            # If not in component_props (kwargs), check bound arguments if 'children' is a parameter
+            if _children is None and 'children' in bound_args.arguments:
+                _children = bound_args.arguments['children']
+            
+            if _children:
+                # Import Text to wrap strings if needed
+                try:
+                    from dars.components.basic.text import Text
+                except ImportError:
+                    # Fallback if circular import, though unlikely
+                    Text = None
+
+                items = _children if isinstance(_children, (list, tuple)) else [_children]
+                
+                for item in items:
+                    if isinstance(item, Component):
+                        self.add_child(item)
+                    elif isinstance(item, str) and Text:
+                        self.add_child(Text(item))
         
         def get_template(self) -> str:
             """Get the template string from the function"""

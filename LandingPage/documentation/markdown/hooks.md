@@ -12,6 +12,45 @@ Hooks provide a way to add reactive capabilities to your application. They enabl
 
 ---
 
+## useValue() - Initial Value Access
+
+The `useValue()` hook allows you to access the **initial value** of a state property without creating a reactive binding. This is ideal for form inputs where you want to set a default value but allow the user to edit it freely.
+
+### Usage
+
+Pass `useValue()` to component properties to set their initial value from state:
+
+```python
+from dars.all import *
+
+userState = State("user", name="John Doe", email="john@example.com")
+
+# Input with initial value from state (editable by user)
+Input(value=useValue("user.name"))
+
+# Textarea with initial value
+Textarea(value=useValue("user.email"))
+```
+
+### Difference from useDynamic(next hook after useValue)
+
+- **`useDynamic("state.prop")`**: Creates a **two-way binding** (or one-way reactive binding). If the state changes, the input value updates automatically.
+- **`useValue("state.prop")`**: Sets the **initial value only**. If the state changes later, the input value does NOT update. This prevents overwriting user input while they are typing.
+
+### Syntax
+
+```python
+useValue(state_path: str) -> ValueMarker
+```
+
+**Parameters:**
+- `state_path`: Dot-notation path to state property (e.g., `"user.name"`)
+
+**Returns:**
+- `ValueMarker` object that resolves to the initial value during component rendering.
+
+---
+
 ## useDynamic() - Reactive State Binding
 
 The `useDynamic()` hook creates reactive bindings between external `State` objects and component properties.
@@ -45,7 +84,7 @@ card = Container(
 
 ### Supported Properties
 
-`useDynamic` supports binding to the following properties on built-in components:
+`useDynamic` and `useValue` supports binding to the following properties on built-in components:
 
 | Component | Properties |
 |-----------|------------|
@@ -144,6 +183,66 @@ useWatch(state_path: str, callback: Union[dScript, str, Callable]) -> Union[dScr
     - `dScript` object (e.g., `log("Changed")`, `alert("Update")`)
     - Inline JavaScript string
     - Python callable returning a `dScript`
+
+---
+
+## Pythonic Value Helpers
+
+Dars provides a set of helpers to make working with DOM values completely Pythonic, eliminating the need for raw JavaScript.
+
+### V() - Value Reference
+
+The `V()` helper allows you to select DOM elements and perform operations directly in Python.
+
+```python
+from dars.all import *
+
+# Select by ID
+V("#myInput")
+
+# Select by Class
+V(".myClass")
+```
+
+#### Transformations
+
+You can chain transformation methods to process values before using them:
+
+```python
+# String transformations
+V("#name").upper()   # "JOHN"
+V("#name").lower()   # "john"
+
+# Numeric transformations (crucial for math operations)
+V("#age").int()      # 25 (integer)
+V("#price").float()  # 19.99 (float)
+```
+
+#### Operations
+
+`ValueRef` objects support standard Python operators:
+
+```python
+# Concatenation
+state.fullname.set(V("#first") + " " + V("#last"))
+
+# Math operations (requires numeric transformation)
+state.age.set(V("#age").int() + 10)
+state.total.set(V("#price").float() * V("#quantity").int())
+```
+
+### url() - URL Builder
+
+The `url()` helper constructs dynamic URLs by interpolating `ValueRef` objects into a template string.
+
+```python
+# Generates: https://api.example.com/users/123/profile
+fetch(
+    url("https://api.example.com/users/{id}/profile", id=V("#userId"))
+)
+```
+
+**Note:** Use standard Python format string syntax `{key}` for placeholders.
 
 ---
 

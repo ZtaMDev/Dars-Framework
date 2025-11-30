@@ -1,3 +1,59 @@
+# Release Notes v1.5.7
+
+> **useValue hook & Value Access Helpers**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### 1. `useValue` Hook
+
+The new `useValue` hook allows you to access the **initial value** of a state property without creating a reactive binding. This is perfect for form inputs where you want to set a default value but allow the user to edit it freely.
+
+```python
+# Initial value from state, but editable by user
+Input(value=useValue("user.name"))
+
+# In FunctionComponent templates (resolves to initial value string)
+@FunctionComponent
+def Profile(**props):
+    return f"<div>{useValue('user.name')}</div>"
+```
+
+### 2. Pythonic Helpers (`V`, `url`, `transform`)
+
+Introducing a set of helpers to make working with DOM values completely Pythonic, eliminating the need for `RawJS`.
+
+#### V() - Value Reference
+Select DOM elements and perform operations directly in Python:
+
+```python
+# Concatenation
+Button("Combine", on_click=state.fullname.set(
+    V("#first") + " " + V("#last")
+))
+
+# Transformations
+Button("Upper", on_click=state.name.set(V("#name").upper()))
+Button("Add", on_click=state.count.set(V("#num1").int() + 10))
+```
+
+#### url() - URL Builder
+Construct dynamic URLs easily with proper interpolation:
+
+```python
+Button("Fetch", on_click=fetch(
+    url("https://api.example.com/users/{id}", id=V("#userId"))
+))
+```
+
+### Stability
+- **Fix**: Resolved an issue where reactive bindings could generate duplicate JavaScript variables, causing "Identifier has already been declared" errors during hot reloads or complex state updates.
+
 # Release Notes v1.5.6
 
 > **Enhanced `useDynamic` Support & StateV2 Fixes**

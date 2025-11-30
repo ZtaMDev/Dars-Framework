@@ -77,8 +77,18 @@ class ReactiveProperty:
                 except ImportError:
                     pass
                 
+                # Support for ValueRef and other objects with to_dscript
+                if hasattr(val, 'to_dscript'):
+                    val = val.to_dscript()
+                
                 if isinstance(val, (dScript, RawJS)):
-                    return val.code if hasattr(val, 'code') else str(val)
+                    code = val.code if hasattr(val, 'code') else str(val)
+                    # Check if it's an async IIFE (starts with "(async")
+                    code_stripped = code.strip()
+                    if code_stripped.startswith('(async'):
+                        # It's an async IIFE, wrap it in await
+                        return f"(await {code_stripped})"
+                    return code
                 return json.dumps(val)
 
             # Handle events (on_click, on_change, etc.)

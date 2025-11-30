@@ -1216,6 +1216,18 @@
      <a class="sidebar-link sidebar-level-2" href="#overview-hooks" style="margin-left: 20px">
       Overview Hooks
      </a>
+     <a class="sidebar-link sidebar-level-2" href="#usevalue-initial-value-access" style="margin-left: 20px">
+      useValue() - Initial Value Access
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#usage" style="margin-left: 40px">
+      Usage
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#difference-from-usedynamicnext-hook-after-usevalue" style="margin-left: 40px">
+      Difference from useDynamic(next hook after useValue)
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#syntax" style="margin-left: 40px">
+      Syntax
+     </a>
      <a class="sidebar-link sidebar-level-2" href="#usedynamic-reactive-state-binding" style="margin-left: 20px">
       useDynamic() - Reactive State Binding
      </a>
@@ -1239,6 +1251,21 @@
      </a>
      <a class="sidebar-link sidebar-level-3" href="#syntax" style="margin-left: 40px">
       Syntax
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#pythonic-value-helpers" style="margin-left: 20px">
+      Pythonic Value Helpers
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#v-value-reference" style="margin-left: 40px">
+      V() - Value Reference
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#transformations" style="margin-left: 60px">
+      Transformations
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#operations" style="margin-left: 60px">
+      Operations
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#url-url-builder" style="margin-left: 40px">
+      url() - URL Builder
      </a>
      <a class="sidebar-link sidebar-level-2" href="#best-practices" style="margin-left: 20px">
       Best Practices
@@ -11531,6 +11558,103 @@ def hello():
        </li>
       </ul>
       <hr/>
+      <h2 id="usevalue-initial-value-access">
+       useValue() - Initial Value Access
+      </h2>
+      <p>
+       The
+       <code>
+        useValue()
+       </code>
+       hook allows you to access the
+       <strong>
+        initial value
+       </strong>
+       of a state property without creating a reactive binding. This is ideal for form inputs where you want to set a default value but allow the user to edit it freely.
+      </p>
+      <h3 id="usage">
+       Usage
+      </h3>
+      <p>
+       Pass
+       <code>
+        useValue()
+       </code>
+       to component properties to set their initial value from state:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">userState</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"user"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"John Doe"</span><span class="p">,</span> <span class="n">email</span><span class="o">=</span><span class="s2">"john@example.com"</span><span class="p">)</span>
+
+<span class="c1"># Input with initial value from state (editable by user)</span>
+<span class="n">Input</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">useValue</span><span class="p">(</span><span class="s2">"user.name"</span><span class="p">))</span>
+
+<span class="c1"># Textarea with initial value</span>
+<span class="n">Textarea</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">useValue</span><span class="p">(</span><span class="s2">"user.email"</span><span class="p">))</span>
+</code></pre>
+      </div>
+      <h3 id="difference-from-usedynamicnext-hook-after-usevalue">
+       Difference from useDynamic(next hook after useValue)
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         <code>
+          useDynamic("state.prop")
+         </code>
+        </strong>
+        : Creates a
+        <strong>
+         two-way binding
+        </strong>
+        (or one-way reactive binding). If the state changes, the input value updates automatically.
+       </li>
+       <li>
+        <strong>
+         <code>
+          useValue("state.prop")
+         </code>
+        </strong>
+        : Sets the
+        <strong>
+         initial value only
+        </strong>
+        . If the state changes later, the input value does NOT update. This prevents overwriting user input while they are typing.
+       </li>
+      </ul>
+      <h3 id="syntax">
+       Syntax
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">useValue</span><span class="p">(</span><span class="n">state_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ValueMarker</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Parameters:
+       </strong>
+       -
+       <code>
+        state_path
+       </code>
+       : Dot-notation path to state property (e.g.,
+       <code>
+        "user.name"
+       </code>
+       )
+      </p>
+      <p>
+       <strong>
+        Returns:
+       </strong>
+       -
+       <code>
+        ValueMarker
+       </code>
+       object that resolves to the initial value during component rendering.
+      </p>
+      <hr/>
       <h2 id="usedynamic-reactive-state-binding">
        useDynamic() - Reactive State Binding
       </h2>
@@ -11596,6 +11720,10 @@ def hello():
       <p>
        <code>
         useDynamic
+       </code>
+       and
+       <code>
+        useValue
        </code>
        supports binding to the following properties on built-in components:
       </p>
@@ -11837,7 +11965,7 @@ def hello():
 <span class="s1">    '''</span>
 </code></pre>
       </div>
-      <h3 id="syntax">
+      <h3 id="syntax-2">
        Syntax
       </h3>
       <div class="codehilite">
@@ -11883,7 +12011,7 @@ def hello():
        </code>
        hook allows you to monitor state changes and execute callbacks (side effects).
       </p>
-      <h3 id="usage">
+      <h3 id="usage-2">
        Usage
       </h3>
       <p>
@@ -11948,7 +12076,7 @@ def hello():
        <pre><span></span><code><span class="n">app</span><span class="o">.</span><span class="n">add_script</span><span class="p">(</span><span class="n">useWatch</span><span class="p">(</span><span class="s2">"state.prop"</span><span class="p">,</span> <span class="n">log</span><span class="p">(</span><span class="s2">"Changed!"</span><span class="p">)))</span>
 </code></pre>
       </div>
-      <h3 id="syntax-2">
+      <h3 id="syntax-3">
        Syntax
       </h3>
       <div class="codehilite">
@@ -11991,6 +12119,98 @@ def hello():
        <code>
         dScript
        </code>
+      </p>
+      <hr/>
+      <h2 id="pythonic-value-helpers">
+       Pythonic Value Helpers
+      </h2>
+      <p>
+       Dars provides a set of helpers to make working with DOM values completely Pythonic, eliminating the need for raw JavaScript.
+      </p>
+      <h3 id="v-value-reference">
+       V() - Value Reference
+      </h3>
+      <p>
+       The
+       <code>
+        V()
+       </code>
+       helper allows you to select DOM elements and perform operations directly in Python.
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="c1"># Select by ID</span>
+<span class="n">V</span><span class="p">(</span><span class="s2">"#myInput"</span><span class="p">)</span>
+
+<span class="c1"># Select by Class</span>
+<span class="n">V</span><span class="p">(</span><span class="s2">".myClass"</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <h4 id="transformations">
+       Transformations
+      </h4>
+      <p>
+       You can chain transformation methods to process values before using them:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># String transformations</span>
+<span class="n">V</span><span class="p">(</span><span class="s2">"#name"</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>   <span class="c1"># "JOHN"</span>
+<span class="n">V</span><span class="p">(</span><span class="s2">"#name"</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>   <span class="c1"># "john"</span>
+
+<span class="c1"># Numeric transformations (crucial for math operations)</span>
+<span class="n">V</span><span class="p">(</span><span class="s2">"#age"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span>      <span class="c1"># 25 (integer)</span>
+<span class="n">V</span><span class="p">(</span><span class="s2">"#price"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>  <span class="c1"># 19.99 (float)</span>
+</code></pre>
+      </div>
+      <h4 id="operations">
+       Operations
+      </h4>
+      <p>
+       <code>
+        ValueRef
+       </code>
+       objects support standard Python operators:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Concatenation</span>
+<span class="n">state</span><span class="o">.</span><span class="n">fullname</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#first"</span><span class="p">)</span> <span class="o">+</span> <span class="s2">" "</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#last"</span><span class="p">))</span>
+
+<span class="c1"># Math operations (requires numeric transformation)</span>
+<span class="n">state</span><span class="o">.</span><span class="n">age</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#age"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">+</span> <span class="mi">10</span><span class="p">)</span>
+<span class="n">state</span><span class="o">.</span><span class="n">total</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#price"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">*</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#quantity"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">())</span>
+</code></pre>
+      </div>
+      <h3 id="url-url-builder">
+       url() - URL Builder
+      </h3>
+      <p>
+       The
+       <code>
+        url()
+       </code>
+       helper constructs dynamic URLs by interpolating
+       <code>
+        ValueRef
+       </code>
+       objects into a template string.
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Generates: https://api.example.com/users/123/profile</span>
+<span class="n">fetch</span><span class="p">(</span>
+    <span class="n">url</span><span class="p">(</span><span class="s2">"https://api.example.com/users/</span><span class="si">{id}</span><span class="s2">/profile"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">V</span><span class="p">(</span><span class="s2">"#userId"</span><span class="p">))</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Note:
+       </strong>
+       Use standard Python format string syntax
+       <code>
+        {key}
+       </code>
+       for placeholders.
       </p>
       <hr/>
       <h2 id="best-practices">

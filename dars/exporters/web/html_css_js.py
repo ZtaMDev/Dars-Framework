@@ -2771,6 +2771,64 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
                     setattr(component, prop_name, initial_val)
         
         return {'bindings': bindings, 'initial_values': initial_values}
+
+    def _process_value_props(self, component: Component) -> dict:
+        """
+        Process component props to detect and handle ValueMarker objects (useValue).
+        
+        Unlike _process_dynamic_props, this does NOT create reactive bindings.
+        It only resolves and sets the initial value from state.
+        
+        Returns dict with:
+        - 'initial_values': Dict of {prop: initial_value}
+        - 'selectors': Dict of {prop: selector} for CSS class addition
+        """
+        from dars.hooks.use_value import ValueMarker, get_value_registry
+        import re
+        
+        initial_values = {}
+        selectors = {}
+        registry = get_value_registry()
+        marker_pattern = r'__DARS_VALUE_\d+_\d+__'
+        
+        # Check common props
+        props_to_check = ['value', 'placeholder', 'text', 'html', 'checked']
+        
+        for prop_name in props_to_check:
+            prop_value = getattr(component, prop_name, None)
+            
+            selector = None
+            initial_val = None
+            
+            if isinstance(prop_value, ValueMarker):
+                selector = prop_value.selector
+                initial_val = prop_value.get_initial_value()
+            elif isinstance(prop_value, str):
+                # Check if it's a marker string
+                match = re.match(marker_pattern, prop_value)
+                if match and prop_value in registry:
+                    marker = registry[prop_value]
+                    selector = marker.selector
+                    initial_val = marker.get_initial_value()
+            
+            if selector:
+                selectors[prop_name] = selector
+                initial_values[prop_name] = initial_val
+                
+                # CRITICAL: Update the component's property with the resolved initial value
+                # This ensures that when component.render() is called, it uses the actual value
+                if initial_val is not None:
+                    setattr(component, prop_name, initial_val)
+                
+                # Add selector as CSS class if it's a class selector
+                if selector.startswith('.'):
+                    class_name = selector[1:]  # Remove the leading dot
+                    if hasattr(component, 'class_name'):
+                        existing_classes = component.class_name or ""
+                        if class_name not in existing_classes:
+                            component.class_name = f"{existing_classes} {class_name}".strip()
+        
+        return {'initial_values': initial_values, 'selectors': selectors}
     
     def _collect_bindings_from_tree(self, component):
         """
@@ -2875,21 +2933,28 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
                     lines.append(f"                        else if (payload.{state_prop} !== undefined) val_{state_prop} = payload.{state_prop};")
                     
                     lines.append(f"                        if (val_{state_prop} !== undefined) {{")
+                    # Group targets by ID to avoid duplicate declarations
+                    targets_by_id = {}
                     for target in targets:
-                        target_id = target['target_id']
-                        target_prop = target['target_prop']
+                        tid = target['target_id']
+                        if tid not in targets_by_id:
+                            targets_by_id[tid] = []
+                        targets_by_id[tid].append(target['target_prop'])
+                    
+                    for target_id, target_props in targets_by_id.items():
                         lines.append(f"                            const el_{target_id} = document.getElementById('{target_id}');")
                         lines.append(f"                            if (el_{target_id}) {{")
-                        if target_prop == 'text':
-                            lines.append(f"                                el_{target_id}.textContent = String(val_{state_prop});")
-                        elif target_prop == 'html':
-                            lines.append(f"                                el_{target_id}.innerHTML = String(val_{state_prop});")
-                        elif target_prop == 'value':
-                            lines.append(f"                                el_{target_id}.value = String(val_{state_prop});")
-                        elif target_prop == 'placeholder':
-                            lines.append(f"                                el_{target_id}.setAttribute('placeholder', String(val_{state_prop}));")
-                        else:
-                            lines.append(f"                                el_{target_id}.setAttribute('{target_prop}', String(val_{state_prop}));")
+                        for target_prop in target_props:
+                            if target_prop == 'text':
+                                lines.append(f"                                el_{target_id}.textContent = String(val_{state_prop});")
+                            elif target_prop == 'html':
+                                lines.append(f"                                el_{target_id}.innerHTML = String(val_{state_prop});")
+                            elif target_prop == 'value':
+                                lines.append(f"                                el_{target_id}.value = String(val_{state_prop});")
+                            elif target_prop == 'placeholder':
+                                lines.append(f"                                el_{target_id}.setAttribute('placeholder', String(val_{state_prop}));")
+                            else:
+                                lines.append(f"                                el_{target_id}.setAttribute('{target_prop}', String(val_{state_prop}));")
                         lines.append("                            }")
                     lines.append("                        }")
                 lines.append("                    }")
@@ -2941,12 +3006,12 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
                     # NUEVO: Ejecutar cada handler en su propio contexto
                     if len(valid_handlers) == 1:
                         # Caso único handler - mantener compatibilidad
-                        lines.append(f'    eventMap.get("{comp_id}")["{event_name}"] = function(event) {{')
+                        lines.append(f'    eventMap.get("{comp_id}")["{event_name}"] = async function(event) {{')
                         lines.append(f'        try {{ {valid_handlers[0]} }} catch(e) {{ console.error("Error en handler:", e); }}')
                         lines.append(f'    }};')
                     else:
                         # Múltiples handlers - ejecutar cada uno individualmente
-                        lines.append(f'    eventMap.get("{comp_id}")["{event_name}"] = function(event) {{')
+                        lines.append(f'    eventMap.get("{comp_id}")["{event_name}"] = async function(event) {{')
                         for i, handler_code in enumerate(valid_handlers):
                             lines.append(f'        // Handler {i+1}')
                             lines.append(f'        try {{ {handler_code} }} catch(e) {{ console.error("Error en handler {i+1}:", e); }}')
@@ -3322,7 +3387,10 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
         class_attr = f'class="dars-text {text.class_name or ""}"'
         style_attr = f'style="{self.render_styles(text.style)}"' if text.style else ""
         
-        # Process dynamic props
+        # Process useValue props FIRST (non-reactive initial values)
+        value_info = self._process_value_props(text)
+        
+        # Then process dynamic props (reactive bindings)
         dynamic_info = self._process_dynamic_props(text)
         
         if dynamic_info['bindings']:
@@ -3352,7 +3420,10 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
         style_attr = f'style="{self.render_styles(button.style)}"' if button.style else ""
         type_attr = f'type="{button.button_type}"'
         
-        # Process dynamic props
+        # Process useValue props FIRST (non-reactive initial values)
+        value_info = self._process_value_props(button)
+        
+        # Then process dynamic props (reactive bindings)
         dynamic_info = self._process_dynamic_props(button)
         
         if dynamic_info['bindings']:
@@ -3380,7 +3451,10 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
         style_attr = f'style="{self.render_styles(input_comp.style)}"' if input_comp.style else ""
         type_attr = f'type="{input_comp.input_type}"'
         
-        # Process dynamic props
+        # Process useValue props FIRST (non-reactive initial values)
+        value_info = self._process_value_props(input_comp)
+        
+        # Then process dynamic props (reactive bindings)
         dynamic_info = self._process_dynamic_props(input_comp)
         
         if dynamic_info['bindings']:
@@ -3482,7 +3556,10 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
         width_attr = f'width="{image.width}"' if image.width else ""
         height_attr = f'height="{image.height}"' if image.height else ""
 
-        # Process dynamic props
+        # Process useValue props FIRST (non-reactive initial values)
+        value_info = self._process_value_props(image)
+        
+        # Then process dynamic props (reactive bindings)
         dynamic_info = self._process_dynamic_props(image)
         
         if dynamic_info['bindings']:
@@ -3508,7 +3585,10 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
         style_attr = f'style="{self.render_styles(link.style)}"' if link.style else ""
         target_attr = f'target="{link.target}"'
         
-        # Process dynamic props
+        # Process useValue props FIRST (non-reactive initial values)
+        value_info = self._process_value_props(link)
+        
+        # Then process dynamic props (reactive bindings)
         dynamic_info = self._process_dynamic_props(link)
         
         if dynamic_info['bindings']:
@@ -3534,7 +3614,10 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
         rows_attr = f'rows="{textarea.rows}"'
         cols_attr = f'cols="{textarea.cols}"'
         
-        # Process dynamic props
+        # Process useValue props FIRST (non-reactive initial values)
+        value_info = self._process_value_props(textarea)
+        
+        # Then process dynamic props (reactive bindings)
         dynamic_info = self._process_dynamic_props(textarea)
         
         if dynamic_info['bindings']:
@@ -3648,7 +3731,10 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
         class_attr = f'class="dars-checkbox {checkbox.class_name or ""}"'
         style_attr = f'style="{self.render_styles(checkbox.style)}"' if checkbox.style else ""
         
-        # Process dynamic props
+        # Process useValue props FIRST (non-reactive initial values)
+        value_info = self._process_value_props(checkbox)
+        
+        # Then process dynamic props (reactive bindings)
         dynamic_info = self._process_dynamic_props(checkbox)
         
         if dynamic_info['bindings']:
@@ -3687,7 +3773,10 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
         class_attr = f'class="dars-radio {radio.class_name or ""}"'
         style_attr = f'style="{self.render_styles(radio.style)}"' if radio.style else ""
         
-        # Process dynamic props
+        # Process useValue props FIRST (non-reactive initial values)
+        value_info = self._process_value_props(radio)
+        
+        # Then process dynamic props (reactive bindings)
         dynamic_info = self._process_dynamic_props(radio)
         
         if dynamic_info['bindings']:
@@ -3726,7 +3815,10 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
         class_attr = f'class="dars-select {select.class_name or ""}"'
         style_attr = f'style="{self.render_styles(select.style)}"' if select.style else ""
         
-        # Process dynamic props
+        # Process useValue props FIRST (non-reactive initial values)
+        value_info = self._process_value_props(select)
+        
+        # Then process dynamic props (reactive bindings)
         dynamic_info = self._process_dynamic_props(select)
         
         if dynamic_info['bindings']:
@@ -3769,7 +3861,10 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
         class_attr = f'class="dars-slider {slider.class_name or ""}"'
         style_attr = f'style="{self.render_styles(slider.style)}"' if slider.style else ""
         
-        # Process dynamic props
+        # Process useValue props FIRST (non-reactive initial values)
+        value_info = self._process_value_props(slider)
+        
+        # Then process dynamic props (reactive bindings)
         dynamic_info = self._process_dynamic_props(slider)
         
         if dynamic_info['bindings']:
