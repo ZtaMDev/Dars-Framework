@@ -98,30 +98,6 @@ if __name__ == "__main__":
 3.  **Event Handling**: Events like `on_click` are handled automatically by the framework (passed via `**props`).
 4.  **Children Support**: Use `{Props.children}` or `{children}` to render nested content.
 
-### Example with State and Events
-
-```python
-@FunctionComponent
-def Counter(**props):
-    return f"""
-    <div {Props.id} {Props.class_name} {Props.style}>
-        0 {Props.children}
-    </div>
-    """
-
-# Create component with initial value "0"
-counter = Counter(id="my-counter", children="0")
-
-# Make it reactive controlling the 'text' property (textContent)
-# Note: This replaces the entire content of the div with the new text
-state = State(counter, text="0")
-
-# Update it
-Button("Increment", on_click=state.text.set("5"))
-```
-
----
-
 ## Backend HTTP Utilities & API Communication
 
 Dars provides a system for HTTP requests and API communication without writing JavaScript. Use `useData()` for clean data binding:
@@ -427,6 +403,29 @@ def UserCard(name, email, id, class_name, style, children, **props):
     </div>
     """
 ```
+
+### Example with State and Events
+
+```python
+@FunctionComponent
+def Counter(**props):
+    return f"""
+    <div {Props.id} {Props.class_name} {Props.style}>
+        0 {Props.children}
+    </div>
+    """
+
+# Create component with initial value "0"
+counter = Counter(id="my-counter", children="0")
+
+# Make it reactive controlling the 'text' property (textContent)
+# Note: This replaces the entire content of the div with the new text
+state = State(counter, text="0")
+
+# Update it
+Button("Increment", on_click=state.text.set("5"))
+```
+
 ---
 
 ## CLI Usage
