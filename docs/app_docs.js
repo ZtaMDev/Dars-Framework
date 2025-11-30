@@ -1833,6 +1833,8 @@ input_field = Input(
 - [Markdown](#markdown)
 - [Image](#image)
 - [Link](#link)
+- [Chart](#chart)
+- [DataTable](#datatable)
 - [Textarea](#textarea)
 - [Checkbox](#checkbox)
 - [RadioButton](#radiobutton)
