@@ -1084,7 +1084,7 @@ The `Chart` component renders interactive charts using Plotly.js.
 from dars.components.visualization.chart import Chart
 import plotly.graph_objects as go
 
-fig = go.Figure(data=[go.Bar(x=['A', 'B'], y=[10, 20])])
+fig = go.Figure(data=[go.Bar(x=['A', 'B', 'C'], y=[10, 20, 15])])
 
 chart = Chart(
     figure=fig,
@@ -1105,26 +1105,30 @@ chart = Chart(
 
 ### DataTable
 
-The `DataTable` component displays tabular data with support for Pandas DataFrames, sorting, filtering, and themes.
+The `DataTable` component displays tabular data with optional Pandas DataFrame support.
 
 #### DataTable Syntax
 
 ```python
 from dars.components.visualization.table import DataTable
-import pandas as pd
 
-# Using Pandas DataFrame
-df = pd.DataFrame({'Name': ['Alice', 'Bob'], 'Age': [30, 25]})
-table = DataTable(df, theme='dark')
+# Using list of dicts (recommended)
+data = [
+    {'Name': 'Alice', 'Age': 30, 'City': 'New York'},
+    {'Name': 'Bob', 'Age': 25, 'City': 'London'}
+]
+table = DataTable(data, theme='dark')
 
-# Using list of dicts
-data = [{'price': 99.99, 'qty': 5}]
+# With custom columns and formatters
+data = [{'price': 99.99, 'qty': 5}, {'price': 149.99, 'qty': 3}]
 table = DataTable(
     data,
     columns=[
         {'key': 'price', 'label': 'Price', 'formatter': lambda x: f'${x:.2f}'},
         {'key': 'qty', 'label': 'Quantity', 'align': 'center'}
-    ]
+    ],
+    striped=True,
+    hover=True
 )
 ```
 

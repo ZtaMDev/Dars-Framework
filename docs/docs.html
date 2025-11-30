@@ -8425,7 +8425,7 @@ def hello():
        <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.components.visualization.chart</span><span class="w"> </span><span class="kn">import</span> <span class="n">Chart</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">plotly.graph_objects</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">go</span>
 
-<span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="n">go</span><span class="o">.</span><span class="n">Bar</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="s1">'A'</span><span class="p">,</span> <span class="s1">'B'</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">])])</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="n">go</span><span class="o">.</span><span class="n">Bar</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="s1">'A'</span><span class="p">,</span> <span class="s1">'B'</span><span class="p">,</span> <span class="s1">'C'</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">15</span><span class="p">])])</span>
 
 <span class="n">chart</span> <span class="o">=</span> <span class="n">Chart</span><span class="p">(</span>
     <span class="n">figure</span><span class="o">=</span><span class="n">fig</span><span class="p">,</span>
@@ -8515,27 +8515,31 @@ def hello():
        <code>
         DataTable
        </code>
-       component displays tabular data with support for Pandas DataFrames, sorting, filtering, and themes.
+       component displays tabular data with optional Pandas DataFrame support.
       </p>
       <h4 id="datatable-syntax">
        DataTable Syntax
       </h4>
       <div class="codehilite">
        <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.components.visualization.table</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataTable</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 
-<span class="c1"># Using Pandas DataFrame</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">'Name'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'Alice'</span><span class="p">,</span> <span class="s1">'Bob'</span><span class="p">],</span> <span class="s1">'Age'</span><span class="p">:</span> <span class="p">[</span><span class="mi">30</span><span class="p">,</span> <span class="mi">25</span><span class="p">]})</span>
-<span class="n">table</span> <span class="o">=</span> <span class="n">DataTable</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">theme</span><span class="o">=</span><span class="s1">'dark'</span><span class="p">)</span>
+<span class="c1"># Using list of dicts (recommended)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s1">'Name'</span><span class="p">:</span> <span class="s1">'Alice'</span><span class="p">,</span> <span class="s1">'Age'</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span> <span class="s1">'City'</span><span class="p">:</span> <span class="s1">'New York'</span><span class="p">},</span>
+    <span class="p">{</span><span class="s1">'Name'</span><span class="p">:</span> <span class="s1">'Bob'</span><span class="p">,</span> <span class="s1">'Age'</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span> <span class="s1">'City'</span><span class="p">:</span> <span class="s1">'London'</span><span class="p">}</span>
+<span class="p">]</span>
+<span class="n">table</span> <span class="o">=</span> <span class="n">DataTable</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">theme</span><span class="o">=</span><span class="s1">'dark'</span><span class="p">)</span>
 
-<span class="c1"># Using list of dicts</span>
-<span class="n">data</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">'price'</span><span class="p">:</span> <span class="mf">99.99</span><span class="p">,</span> <span class="s1">'qty'</span><span class="p">:</span> <span class="mi">5</span><span class="p">}]</span>
+<span class="c1"># With custom columns and formatters</span>
+<span class="n">data</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">'price'</span><span class="p">:</span> <span class="mf">99.99</span><span class="p">,</span> <span class="s1">'qty'</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span> <span class="p">{</span><span class="s1">'price'</span><span class="p">:</span> <span class="mf">149.99</span><span class="p">,</span> <span class="s1">'qty'</span><span class="p">:</span> <span class="mi">3</span><span class="p">}]</span>
 <span class="n">table</span> <span class="o">=</span> <span class="n">DataTable</span><span class="p">(</span>
     <span class="n">data</span><span class="p">,</span>
     <span class="n">columns</span><span class="o">=</span><span class="p">[</span>
         <span class="p">{</span><span class="s1">'key'</span><span class="p">:</span> <span class="s1">'price'</span><span class="p">,</span> <span class="s1">'label'</span><span class="p">:</span> <span class="s1">'Price'</span><span class="p">,</span> <span class="s1">'formatter'</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="sa">f</span><span class="s1">'$</span><span class="si">{</span><span class="n">x</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">'</span><span class="p">},</span>
         <span class="p">{</span><span class="s1">'key'</span><span class="p">:</span> <span class="s1">'qty'</span><span class="p">,</span> <span class="s1">'label'</span><span class="p">:</span> <span class="s1">'Quantity'</span><span class="p">,</span> <span class="s1">'align'</span><span class="p">:</span> <span class="s1">'center'</span><span class="p">}</span>
-    <span class="p">]</span>
+    <span class="p">],</span>
+    <span class="n">striped</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">hover</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">)</span>
 </code></pre>
       </div>
