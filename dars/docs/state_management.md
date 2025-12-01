@@ -1,15 +1,314 @@
-# State management in Dars (dState, cState, goto, mods)
+# State Management in Dars
 
-This document describes the new state system available in Dars 1.1.9.
+Dars Framework features **two powerful state management systems**, each designed for different use cases:
 
-- dState(name, component|id, states): declares a state tied to a DOM target (component id).
-- state(idx=None, goto=None, cComp=False, render=None): triggers a state change from Python by producing a JS inline script.
-- cState(idx, mods=[...]): declares rules to execute when entering a state.
-- Mod helpers: inc, dec, set, toggle_class, append_text, prepend_text.
-- goto: absolute (e.g. 2) or relative ("+1", "-1") state jumps.
+- **State V2** - Modern, dynamic state management for simple reactive updates
+- **dState & cState** - Indexed state system for complex state machines and workflows
+
+##Choose the Right System
+
+| Feature | State V2 | dState/cState |
+|---------|----------|---------------|
+| **API Style** | Clean Pythonic | Verbose but explicit |
+| **Setup** | Minimal | Requires registration |
+| **State Tracking** | Dynamic | Indexed (0, 1, 2...) |
+| **Auto Operations** | Built-in | Manual with Mod |
+| **Event Updates** | Supported | Supported |
+| **State Machines** | Limited |  Full support |
+| **Cross-State Calls** | No |  Mod.call() |
+| **Immutable Default** | No |  State 0 |
+| **Best For** | Counters, timers, simple updates | Workflows, toggles, complex UI transitions |
+
+---
+
+# State V2 - Dynamic State Management
+
+Modern, Pythonic state management for reactive UIs.
+
+## Quick Start
+
+```python
+from dars.all import *
+
+# Create a component
+display = Text("0", id="counter")
+
+# Create state
+counter = State(display, text=0)
+
+# Use reactive properties
+increment_btn = Button("Increment", on_click=counter.text.increment(by=1))
+decrement_btn = Button("Decrement", on_click=counter.text.decrement(by=1))
+reset_btn = Button("Reset", on_click=counter.reset())
+```
+
+## Core Concepts
+
+### State Class
+
+The `State` class wraps a component and provides reactive property access.
+
+```python
+from dars.all import State
+
+display = Text("0", id="counter")
+counter_state = State(display, text=0)
+```
+
+**Constructor Parameters:**
+- `component`: The component to manage (can be a component object or string ID)
+- `**default_props`: Default property values (e.g., `text=0`, `style={...}`)
+
+### State with String IDs (for Dynamic Components)
+
+`State()` can accept either a component object or a string ID. This is useful for components created dynamically:
+
+```python
+from dars.all import *
+from dars.backend import createComp
+
+# Traditional: State with component object
+existing_text = Text("0", id="counter")
+existing_state = State(existing_text, text=0)
+
+# New: State with string ID (for components created later)
+dynamic_state = State("dynamic-counter", text=0)
+
+# Create the component later
+create_btn.on_click = createComp(
+    target=Text("0", id="dynamic-counter"),
+    root="container-id"
+)
+
+# State works even though component was created after state!
+increment_btn.on_click = dynamic_state.text.increment(by=1)
+```
+
+**Use Cases:**
+- Components created with `createComp()`
+- Dynamically generated UIs
+- Conditional component rendering
+- Server-side rendered components
 
 
-## Quick start with states
+### Reactive Properties
+
+Access component properties through the state object to get reactive operations:
+
+```python
+# Increment/decrement numeric properties
+counter.text.increment(by=1)
+counter.text.decrement(by=2)
+
+# Set property values
+counter.text.set(value=100)
+
+# Auto operations (continuous)
+counter.text.auto_increment(by=1, interval=1000)  # +1 every second
+counter.text.auto_decrement(by=1, interval=500)   # -1 every 500ms
+counter.text.stop_auto()  # Stop auto operations
+```
+
+### Reset to Defaults
+
+The `reset()` method restores all properties to their initial values:
+
+```python
+state = State(display, text=0, style={"color": "blue"})
+
+# ... user modifies the component ...
+
+# Reset everything back to initial state
+reset_btn.on_click = state.reset()
+```
+
+## Reactive Operations
+
+### Increment and Decrement
+
+```python
+# Increment by 1 (default)
+button.on_click = counter.text.increment()
+
+# Increment by custom amount
+button.on_click = counter.text.increment(by=5)
+
+# Decrement (negative increment)
+button.on_click = counter.text.decrement(by=1)
+# OR
+button.on_click = counter.text.increment(by=-1)
+```
+
+```python
+button.on_click = counter.text.set(value=0)
+```
+
+### All Property Types Supported
+
+State V2 supports updating **all component properties**, not just text:
+
+**Text Content:**
+```python
+state.text.set("New text")
+```
+
+**HTML Content:**
+```python
+state.html.set("<strong>Bold text</strong>")
+```
+
+**CSS Styles:**
+```python
+state.style.set({"color": "red", "fontSize": "24px"})
+```
+
+**CSS Classes:**
+```python
+# Set class name
+state.class_name.set("active")
+```
+
+**Event Handlers:**
+```python
+# Update event handler dynamically
+state.update(on_click=alert("New handler!"))
+
+# Or with dScript
+from dars.scripts.dscript import dScript
+state.update(on_click=dScript("console.log('clicked')"))
+```
+
+**Multiple Properties at Once:**
+```python
+state.update(
+    text="Updated!",
+    class_name="success",
+    style={"color": "green"},
+    on_click=alert("Done!")
+)
+```
+
+### Auto Operations
+
+
+Auto operations create continuous reactive updates:
+
+```python
+# Auto-increment timer
+timer = State(display, text=0)
+
+start_btn.on_click = timer.text.auto_increment(by=1, interval=1000)
+stop_btn.on_click = timer.text.stop_auto()
+```
+
+**With Limits:**
+```python
+# Auto-increment up to 100
+timer.text.auto_increment(by=1, interval=1000, max=100)
+
+# Auto-decrement down to 0
+countdown.text.auto_decrement(by=1, interval=1000, min=0)
+```
+
+## Backend Integration with useData()
+
+State V2 integrates seamlessly with Dars backend HTTP utilities for reactive API-driven UIs:
+
+```python
+from dars.all import *
+from dars.backend import get, useData
+
+# Create components
+user_name = Text("", id="user-name")
+user_email = Text("", id="user-email")
+
+# Create states
+name_state = State(user_name, text="")
+email_state = State(user_email, text="")
+
+# Fetch and bind API data - pure Python!
+fetch_btn = Button(
+    "Load User",
+    on_click=get(
+        id="userData",
+        url="https://api.example.com/users/1",
+        # Access nested data with dot notation
+        callback=(
+            name_state.text.set(useData('userData').name)
+            .then(email_state.text.set(useData('userData').email))
+        )
+    )
+)
+```
+
+**Key Features:**
+- **`useData('id')`** - Access fetched data by operation ID
+- **Dot notation** - `useData('userData').name` accesses nested properties
+- **`.then()` chaining** - Chain multiple state updates sequentially
+- **No JavaScript** - Everything is pure Python
+
+## Complete Example
+
+```python
+from dars.all import *
+
+app = App("State V2 Demo")
+
+# Timer display
+timer_display = Text("0", id="timer", style={"font-size": "36px"})
+timer = State(timer_display, text=0)
+
+# Status display
+status = Text("Paused", id="status")
+status_state = State(status, text="Paused", class_name="paused")
+
+# Control buttons
+start_btn = Button("Start",
+    on_click=timer.text.auto_increment(by=1, interval=1000)
+)
+stop_btn = Button("Stop", 
+    on_click=[
+        timer.text.stop_auto(),
+        status_state.update(text="Paused", class_name="paused")
+    ]
+)
+reset_btn = Button("Reset",
+    on_click=[
+        timer.text.stop_auto(),
+        timer.reset(),
+        status_state.reset()
+    ]
+)
+
+page = Page(Container(timer_display, status, start_btn, stop_btn, reset_btn))
+app.add_page("index", page, index=True)
+app.rTimeCompile()
+```
+
+### When to Use State V2
+
+** Good for:**
+- Simple counters and timers
+- Dynamic text/style updates
+- Auto-incrementing values
+- Quick prototypes
+- Single-component state
+
+** Not ideal for:**
+- Complex state machines
+- Multi-step workflows
+- State history/undo
+- Cross-component state coordination
+
+For these cases, use **dState & cState** instead.
+
+---
+
+# dState & cState - Indexed State Management
+
+Powerful indexed state system for complex UI transitions and state machines.
+
+## Quick Start with dState
 
 ```python
 from dars.all import *
@@ -29,17 +328,18 @@ next_btn = Button("Next", on_click=st.state(goto='+1'))
 prev_btn = Button("Prev", on_click=st.state(goto='-1'))
 ```
 
-## Mod operations
+## Mod Operations
 
-- inc/dec(target, prop='text', by=1): increments or decrements a numeric value (textContent by default).
-- set(target, **attrs): sets attributes; `text` sets textContent; `html` sets innerHTML; other keys map to element attributes.
-- toggle_class(target, name, on=None): toggles a class; when `on` is True/False, forces add/remove.
-- append_text / prepend_text: concatenates to textContent.
+- `inc/dec(target, prop='text', by=1)`: increments or decrements a numeric value (textContent by default).
+- `set(target, **attrs)`: sets attributes; `text` sets textContent; `html` sets innerHTML; other keys map to element attributes.
+- `toggle_class(target, name, on=None)`: toggles a class; when `on` is True/False, forces add/remove.
+- `append_text / prepend_text`: concatenates to textContent.
 
-## Cross-state calls with Mod.call
+## Cross-State Calls with Mod.call
 
-- Use `Mod.call(target, state=None, goto=None)` inside a `cState` to trigger another `dState`.
-- `target` can be the `DarsState` instance or its name (string). Example:
+Use `Mod.call(target, state=None, goto=None)` inside a `cState` to trigger another `dState`.
+
+`target` can be the `DarsState` instance or its name (string). Example:
 
 ```python
 txt = dState("txt", id="txt1", states=[0,1])
@@ -51,31 +351,31 @@ txt.cState(1, mods=[
 ])
 ```
 
-## Immutable default state (index 0)
+## Immutable Default State (Index 0)
 
-- State `0` is the component's default configuration (as instantiated) and is immutable.
+- State `0` is the component's default configuration (as instantiated) and is **immutable**.
 - Authoring-time: `cState(0, ...)` is forbidden and raises an error.
 - Runtime: switching to state `0` restores the initial DOM snapshot (attributes except `id`, plus innerHTML) and ignores any rules for state `0`.
 - This guarantees that returning to `0` reverts the UI to its original state.
 
-## Mod.set now supports multiple attributes and event arrays
+## Mod.set with Multiple Attributes
 
-- You can set multiple properties in one call, e.g.:
+You can set multiple properties in one call:
 
 ```python
 Mod.set("btn1", text="Don't click it", class_name="warn")
 ```
 
-- Event attributes accept a single script or an array of scripts (executed sequentially). Valid values are:
-  - InlineScript, FileScript, dScript, or plain JS strings
+Event attributes accept a single script or an array of scripts (executed sequentially). Valid values are:
+- InlineScript, FileScript, dScript, or plain JS strings
 
 ```python
 Mod.set("btn1", on_click=[txt.state(0), dScript(code="console.log('clicked')")])
 ```
 
-- The runtime ensures only one dynamic listener per event is active at a time and cleans it up when returning to state `0`.
+The runtime ensures only one dynamic listener per event is active at a time and cleans it up when returning to state `0`.
 
-## Full HTML replacement (custom components)
+## Full HTML Replacement (Custom Components)
 
 If you need full HTML replacement on state change:
 ```python
@@ -89,128 +389,6 @@ swap_btn = Button(
 - A DeferredAttr produced by `component.mod(...)` or `component.attr(..., defer=True)`.
 - A Component instance (will be rendered to HTML at event time).
 - A raw HTML string.
-
-## Runtime behavior
-
-- At export time, state declarations are embedded in the page as a bootstrap JSON.
-- The runtime (dars.min.js) registers states with: id, states, current index, and optional rules.
-- `change({...})` resolves `goto`, updates `current`, applies `rules[<state>].mods` and optional `rules[<state>].goto` (single hop), then dispatches a `CustomEvent('dars:state', ...)`.
-
-## Best practices
--
-- Keep the label text purely numeric if you plan to use `inc/dec` on `text`.
-- Use `goto` in rules to avoid infinite accumulation when staying at the same state.
-- Prefer `mods` for small changes; use `cComp=True` only when you need full HTML replacement.
-
----
-
-## Dynamic State Updates & `this()`
-
-Dars introduces dynamic state updates, allowing you to modify component properties directly without pre-registering state indices.
-
-### `this()` helper
-
-The `this()` helper allows a component to refer to itself in an event handler and apply updates dynamically.
-
-```python
-from dars.core.state import this
-
-btn = Button("Click me", on_click=this().state(text="Clicked!", style={"color": "red"}))
-```
-
-Supported dynamic properties:
-- `text`: Update text content.
-- `html`: Update inner HTML.
-- `style`: Dictionary of CSS styles.
-- `attrs`: Dictionary of attributes.
-- `classes`: Dictionary with `add`, `remove`, or `toggle` (single string or list of strings).
-
-```python
-this().state(
-    text="Updated",
-    style={"backgroundColor": "#f0f0f0"},
-    classes={"add": ["active"], "remove": ["inactive"]}
-)
-```
-
-### Using Raw JavaScript Values (`RawJS`)
-
-You can pass raw JavaScript variables to dynamic updates using `RawJS`. This is particularly useful when:
-- Chaining scripts where a previous script returns a value
-- Working with async operations like file reading
-- Using `dScript.ARG` to reference values from previous scripts
-
-```python
-from dars.scripts.dscript import RawJS, dScript
-
-# Using dScript.ARG placeholder for chained values
-this().state(text=RawJS(dScript.ARG))
-
-# Using custom JavaScript expressions
-this().state(text=RawJS("someVar + ' processed'"))
-```
-
-### Complete Example: File Reading with Dynamic Updates
-
-```python
-from dars.all import *
-from dars.desktop import read_text, write_text
-
-# Display component that will show file content
-display = Text("No file loaded", id="display")
-
-# Button that reads file and updates display with content
-read_btn = Button("Load File", 
-    on_click=read_text("data.txt").then(
-        this().state(text=RawJS(dScript.ARG))
-    )
-)
-
-# Button that writes file and updates its own text
-write_btn = Button("Save File",
-    on_click=write_text("output.txt", "Hello Dars!").then(
-        this().state(text="Saved!", style={"color": "green"})
-    )
-)
-
-# Counter with increment using Mod
-counter = Text("0", id="count")
-inc_btn = Button("+1", on_click=this().state(text=Mod.inc("count")))
-
-app = App(title="Dynamic Updates Demo", desktop=True)
-app.set_root(Container(display, read_btn, write_btn, counter, inc_btn))
-```
-
-### Targeting Other Components with `updateComp`
-
-While `this()` refers to the clicked component, you can target other components by using the `updateComp` helper from `dars.backend` (exported in `dars.all`).
-
-```python
-from dars.all import updateComp
-
-# Read file and update a different component
-btn = Button("Load to Display",
-    on_click=read_text("data.txt").then(
-        updateComp("display", text=RawJS(dScript.ARG))
-    )
-)
-
-# Update multiple properties of another component
-btn2 = Button("Style It",
-    on_click=updateComp("display", 
-        style={"color": "blue", "fontWeight": "bold"},
-        text="Styled!"
-    )
-)
-```
-
-### Key Benefits
-
-- **No State Pre-registration**: Update components directly without defining states
-- **Works Everywhere**: Both desktop and web exports support dynamic updates
-- **Async-Friendly**: Perfect for chaining with file operations, network requests, etc.
-- **Type-Safe**: Use `RawJS` for JavaScript values, regular Python values for literals
-- **Composable**: Combine with `dScript.then()` for complex workflows
 
 ## State Navigation Patterns
 
@@ -271,39 +449,7 @@ status.cState(3, mods=[
 cycle_btn.on_click = status.state(1)
 ```
 
-### Difference from `this().state()`
-
-- **`this().state(**kwargs)`**: Dynamic property updates without state tracking
-  - Updates component properties directly (text, style, etc.)
-  - No dState required
-  - Changes are immediate and don't follow state rules
-  - Use for simple, one-off updates
-
-- **`state.state(idx)`**: Navigate to a registered dState index
-  - Requires a dState to be defined for the component
-  - Triggers all `cState` rules and mods for that index
-  - Maintains state history and allows returning to previous states
-  - Follows the complete state lifecycle (enter/exit behaviors)
-  - Use for structured state machines
-
-### Error Handling
-
-Runtime validation throws descriptive errors:
-
-**Example: Missing dState**
-```python
-btn = Button("Click me", id="MyBtn")
-btn.on_click = some_state.state(1)  # Error if some_state doesn't exist
-```
-
-**Example: Invalid Index**
-```python
-my_state = dState("st", component=btn, states=[0, 1])
-btn.on_click = my_state.state(5)  # Runtime error: index 5 doesn't exist
-# Error: [Dars.goto] Index 5 out of bounds for state 'st' (valid: 0-1)
-```
-
-### Complete Interactive Example
+## Complete Interactive Example
 
 ```python
 from dars.all import *
@@ -358,10 +504,89 @@ index = Page(Container(status_btn, status_text))
 app.add_page("index", index, index=True)
 ```
 
-### Best Practices
+### When to Use dState/cState
 
-1. **Always use `state.state()`** when you have a reference to the dState object
-2. **Avoid state 0 mutations**: State 0 is immutable and restores default values
-3. **Use states 1+ for toggles**: For a toggle, use states [0, 1, 2] and toggle between 1 and 2
-4. **Name states meaningfully**: Use descriptive dState names like "workflow", "toggle", "menu"
-5. **Keep state machines simple**: Avoid deeply nested or overly complex state transitions
+**Good for:**
+- Complex state machines
+- Multi-step workflows (wizards, forms)
+- UI toggles with multiple states
+- State history and reversion
+- Cross-component state coordination
+
+**Overkill for:**
+- Simple counters
+- Single property updates
+- Quick prototypes
+- Auto operations
+
+For these cases, **State V2** is simpler.
+
+---
+
+## Dynamic State Updates & `this()`
+
+Dars introduces dynamic state updates, allowing you to modify component properties directly without pre-registering state indices.
+
+### `this()` helper
+
+The `this()` helper allows a component to refer to itself in an event handler and apply updates dynamically.
+
+```python
+from dars.core.state import this
+
+btn = Button("Click me", on_click=this().state(text="Clicked!", style={"color": "red"}))
+```
+
+Supported dynamic properties:
+- `text`: Update text content.
+- `html`: Update inner HTML.
+- `style`: Dictionary of CSS styles.
+- `attrs`: Dictionary of attributes.
+- `classes`: Dictionary with `add`, `remove`, or `toggle` (single string or list of strings).
+
+```python
+this().state(
+    text="Updated",
+    style={"backgroundColor": "#f0f0f0"},
+    classes={"add": ["active"], "remove": ["inactive"]}
+)
+```
+
+### Using Raw JavaScript Values (`RawJS`)
+
+You can pass raw JavaScript variables to dynamic updates using `RawJS`. This is particularly useful when:
+- Chaining scripts where a previous script returns a value
+- Working with async operations like file reading
+- Using `dScript.ARG` to reference values from previous scripts
+
+```python
+from dars.scripts.dscript import RawJS, dScript
+
+# Using dScript.ARG placeholder for chained values
+this().state(text=RawJS(dScript.ARG))
+
+# Using custom JavaScript expressions
+this().state(text=RawJS("someVar + ' processed'"))
+```
+
+---
+
+## Best Practices
+
+### Choose State V2 When:
+- Building simple counters or timers
+- Need auto-increment/decrement
+- Want quick reactive updates
+- Working with single components
+
+### Choose dState/cState When:
+- Building complex state machines
+- Need immutable default state (state 0)
+- Require cross-state calls
+- Managing multi-step workflows
+
+### Use `this()` When:
+- Don't need state tracking
+- Making one-off updates
+- Working with async operations
+- Targeting the clicked element

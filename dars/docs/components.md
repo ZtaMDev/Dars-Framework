@@ -160,6 +160,8 @@ input_field = Input(
 - [Markdown](#markdown)
 - [Image](#image)
 - [Link](#link)
+- [Chart](#chart)
+- [DataTable](#datatable)
 - [Textarea](#textarea)
 - [Checkbox](#checkbox)
 - [RadioButton](#radiobutton)
@@ -1072,6 +1074,80 @@ area_text = Textarea(
 | `required` | bool | Campo obligatorio | `True`, `False` |
 | `max_length` | int | Longitud máxima | `500` |
 
+---
+
+### Chart
+
+The `Chart` component renders interactive charts using Plotly.js.
+
+#### Chart Syntax
+
+```python
+from dars.components.visualization.chart import Chart
+import plotly.graph_objects as go
+
+fig = go.Figure(data=[go.Bar(x=['A', 'B', 'C'], y=[10, 20, 15])])
+
+chart = Chart(
+    figure=fig,
+    width=800,
+    height=400,
+    style={"margin": "20px auto"}
+)
+```
+
+#### Chart Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `figure` | plotly.graph_objects.Figure | Plotly figure object |
+| `width` | int/str | Width in pixels or CSS value |
+| `height` | int/str | Height in pixels or CSS value |
+| `config` | dict | Plotly configuration options |
+
+### DataTable
+
+The `DataTable` component displays tabular data with optional Pandas DataFrame support.
+
+#### DataTable Syntax
+
+```python
+from dars.components.visualization.table import DataTable
+
+# Using list of dicts (recommended)
+data = [
+    {'Name': 'Alice', 'Age': 30, 'City': 'New York'},
+    {'Name': 'Bob', 'Age': 25, 'City': 'London'}
+]
+table = DataTable(data, theme='dark')
+
+# With custom columns and formatters
+data = [{'price': 99.99, 'qty': 5}, {'price': 149.99, 'qty': 3}]
+table = DataTable(
+    data,
+    columns=[
+        {'key': 'price', 'label': 'Price', 'formatter': lambda x: f'${x:.2f}'},
+        {'key': 'qty', 'label': 'Quantity', 'align': 'center'}
+    ],
+    striped=True,
+    hover=True
+)
+```
+
+#### DataTable Properties
+
+| Property | Type | Description | Default |
+|----------|------|-------------|---------|
+| `data` | DataFrame/list | Data source | - |
+| `columns` | list | Column definitions | Auto-inferred |
+| `index` | bool | Show DataFrame index | `False` |
+| `header` | bool | Show header row | `True` |
+| `striped` | bool | Alternating row colors | `True` |
+| `hover` | bool | Hover effects | `True` |
+| `bordered` | bool | Cell borders | `True` |
+| `compact` | bool | Compact spacing | `False` |
+| `theme` | str/dict | 'light', 'dark', or custom | `'light'` |
+
 
 ---
 
@@ -1839,4 +1915,3 @@ save_button = Button("Guardar", style=PRIMARY_BUTTON_STYLES)
 ```
 
 Components provide a solid foundation for creating modern and responsive user interfaces that can be exported to multiple platforms while maintaining consistency and functionality.
-
