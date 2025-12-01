@@ -39,10 +39,10 @@ class ValueMarker:
     
     def __str__(self):
         """
-        Return the initial value string.
-        This allows useValue to be used directly in f-strings/templates.
+        Return the marker ID string.
+        This allows the exporter to detect and process the marker in FunctionComponent templates.
         """
-        return str(self.get_initial_value())
+        return self.marker_id
     
     def __repr__(self):
         return f"ValueMarker(state_path='{self.state_path}', selector='{self.selector}')"
@@ -157,10 +157,10 @@ def useValue(state_path: str, selector: str = None) -> ValueMarker:
         ValueMarker instance (resolves to initial value string in templates)
     
     Example:
-        # In FunctionComponent template (resolves to string)
+        In FunctionComponent template (resolves to string)
         <div>{useValue("user.name")}</div>
         
-        # In component props with selector
+        In component props with selector
         Input(value=useValue("user.name", "input.name-field"))
     """
     return ValueMarker(state_path, selector)

@@ -3866,6 +3866,183 @@ Button("Increment", on_click=state.text.set("5"))
 
 ---
 
+## Using Hooks in FunctionComponents
+
+FunctionComponents work seamlessly with all Dars hooks, enabling reactive and interactive behavior.
+
+### useDynamic() - Reactive Bindings
+
+Use \`useDynamic()\` to create reactive text that updates automatically when state changes:
+
+\`\`\`python
+from dars.all import *
+
+userState = State("user", name="John Doe", status="Active")
+
+@FunctionComponent
+def UserCard(**props):
+    return f'''
+    <div {Props.id} {Props.class_name} {Props.style}>
+        <h3>Name: {useDynamic("user.name")}</h3>
+        <p>Status: {useDynamic("user.status")}</p>
+        {Props.children}
+    </div>
+    '''
+
+# The name and status will update automatically when state changes
+card = UserCard(id="user-card")
+Button("Update", on_click=userState.name.set("Jane Doe"))
+\`\`\`
+
+### useValue() - Initial Values with Selectors
+
+Use \`useValue()\` with selectors to set initial values and enable value extraction:
+
+\`\`\`python
+from dars.all import *
+
+app = App("Example of hooks")
+
+userState = State("user", name="Jane Doe", email="jane@example.com", display="None")
+
+@FunctionComponent
+def UserForm(**props):
+    return f'''
+    <div {Props.id} {Props.class_name} {Props.style}>
+        <input value="{useValue("user.name", ".name-input")}" />
+        <input value="{useValue("user.email", "#email-field")}" />
+        <span>{useValue("user.age", ".age-display")}</span>
+        <span>{useDynamic("user.display")}</span>
+    </div>
+    '''
+
+
+@route("/")
+def index():
+    return Page(
+        UserForm(id="user-form"),
+        # Extract values using V() helper with the selectors
+        Button(
+            "Get Name",
+            on_click=userState.display.set(
+                "Name: " + V(".name-input")  # Extract current value
+            )
+        ),
+
+        Button(
+            "Combine Values",
+            on_click=userState.display.set(
+                V(".name-input") + " (" + V("#email-field") + ")"
+            )
+        )
+    )
+
+app.add_page("index", index(), title="hooks", index=True)
+
+if __name__ == "__main__":
+    app.rTimeCompile()
+\`\`\`
+
+### useWatch() - Side Effects
+
+Use \`useWatch()\` to monitor state changes and execute side effects:
+
+\`\`\`python
+from dars.all import *
+
+app = App("Example of hooks")
+
+cartState = State("cart", total=0.0)
+
+@FunctionComponent
+def CartSummary(total=0,**props):
+    return f'''
+    <div {Props.id} {Props.class_name} {Props.style}>
+        <h3>Cart Total: \${useDynamic("cart.total")}</h3>
+        {Props.children}
+    </div>
+    '''
+
+# Watch for cart changes and log
+app.useWatch("cart.total", log("Cart total changed!"))
+
+@route("/")
+def index():
+    return Page(
+        CartSummary(id="cart-summary", total=0),
+        # Button to add $10 to cart total using V() with state path
+        Button("Add $10", on_click=cartState.total.set(
+            V("cart.total").float() + 10
+        ))
+    )
+
+app.add_page("index", index(), title="hooks", index=True)
+
+if __name__ == "__main__":
+    app.rTimeCompile()
+\`\`\`
+
+### Combining Multiple Hooks
+
+You can combine multiple hooks for complex interactive components:
+
+\`\`\`python
+from dars.all import *
+
+app = App("Example of hooks")
+
+productState = State("product", 
+    name="Widget", 
+    price=19.99, 
+    quantity=1,
+    total=19.99
+)
+
+@FunctionComponent
+def ProductCard(**props):
+    return f'''
+    <div {Props.id} {Props.class_name} {Props.style}>
+        <!-- useDynamic for reactive display -->
+        <h3>{useDynamic("product.name")}</h3>
+        <p>Price: \${useDynamic("product.price")}</p>
+        <!-- useValue for editable quantity -->
+        <h3>Number to multiply with price</h3>
+        <input type="number" 
+               value="{useValue("product.quantity", ".qty-input")}"
+               min="1" />
+        
+        
+        <!-- useDynamic for calculated total -->
+        <p>Total: \${useDynamic("product.total")}</p>
+        
+        {Props.children}
+    </div>
+    '''
+
+# Watch for total changes and show alert
+app.useWatch("product.total", log("Total updated!"))
+
+@route("/")
+def index():
+    return Page(
+        ProductCard(id="product-card",name="Milk", price=100, quantity=0, total=0 ),
+        Button(
+            "Calculate Total",
+            on_click=productState.total.set(
+                V(".qty-input").int() * V("product.price").float()
+            )
+        )
+
+    )
+
+app.add_page("index", index(), title="hooks", index=True)
+
+if __name__ == "__main__":
+    app.rTimeCompile()
+\`\`\`
+
+---
+
 ## Class Components (Legacy)
 
 This is the older method of creating components by inheriting from the \`Component\` class. It is more verbose and requires manual handling of rendering logic.
@@ -3896,6 +4073,7 @@ class CustomComponent(Component):
         '''
 \`\`\`
 
+---
 `},{type:"T9",id:"markdown_122",key:"0/2/0/11",text:`# Hooks System
 
 Dars Framework introduces a **Hooks system** inspired by React, enabling reactive and stateful behavior in both FunctionComponents and built-in components.
@@ -3914,7 +4092,7 @@ Hooks provide a way to add reactive capabilities to your application. They enabl
 
 The \`useValue()\` hook allows you to access the **initial value** of a state property without creating a reactive binding. This is ideal for form inputs where you want to set a default value but allow the user to edit it freely.
 
-### Usage
+### Basic Usage
 
 Pass \`useValue()\` to component properties to set their initial value from state:
 
@@ -3930,19 +4108,79 @@ Input(value=useValue("user.name"))
 Textarea(value=useValue("user.email"))
 \`\`\`
 
-### Difference from useDynamic(next hook after useValue)
+### Usage in FunctionComponents with Selectors
 
-- **\`useDynamic("state.prop")\`**: Creates a **two-way binding** (or one-way reactive binding). If the state changes, the input value updates automatically.
+\`useValue()\` supports automatic selector application in FunctionComponents! When you provide a selector (class or ID), it will be automatically applied to the element where the value is used.
+
+\`\`\`python
+from dars.all import *
+
+app = App("Example of hooks")
+
+userState = State("user", name="Jane Doe", email="jane@example.com", display="None")
+
+@FunctionComponent
+def UserForm(**props):
+    return f'''
+    <div {Props.id} {Props.class_name} {Props.style}>
+        <input value="{useValue("user.name", ".name-input")}" />
+        <input value="{useValue("user.email", "#email-field")}" />
+        <span>{useValue("user.age", ".age-display")}</span>
+        <span>{useDynamic("user.display")}</span>
+    </div>
+    '''
+
+
+@route("/")
+def index():
+    return Page(
+        UserForm(id="user-form"),
+        # Extract values using V() helper with the selectors
+        Button(
+            "Get Name",
+            on_click=userState.display.set(
+                "Name: " + V(".name-input")  # Extract current value
+            )
+        ),
+
+        Button(
+            "Combine Values",
+            on_click=userState.display.set(
+                V(".name-input") + " (" + V("#email-field") + ")"
+            )
+        )
+    )
+
+app.add_page("index", index(), title="hooks", index=True)
+
+if __name__ == "__main__":
+    app.rTimeCompile()
+\`\`\`
+
+**How it works:**
+1. \`useValue("user.name", ".name-input")\` sets initial value "Jane Doe" and applies class \`name-input\` to the input
+2. User can edit the value freely
+3. \`V(".name-input")\` extracts the current value (even if modified by user)
+4. Perfect for forms where you need both initial values and value extraction
+
+**Supported selectors:**
+- **Class selectors** (\`.foo\`) \u2192 Added to element's \`class\` attribute
+- **ID selectors** (\`#bar\`) \u2192 Set as element's \`id\` attribute
+
+### Difference from useDynamic
+
+- **\`useDynamic("state.prop")\`**: Creates a **reactive binding**. If the state changes, the input value updates automatically.
 - **\`useValue("state.prop")\`**: Sets the **initial value only**. If the state changes later, the input value does NOT update. This prevents overwriting user input while they are typing.
 
 ### Syntax
 
 \`\`\`python
-useValue(state_path: str) -> ValueMarker
+useValue(state_path: str, selector: str = None) -> ValueMarker
 \`\`\`
 
 **Parameters:**
 - \`state_path\`: Dot-notation path to state property (e.g., \`"user.name"\`)
+- \`selector\`: Optional CSS selector (class or ID) to apply to the element
 
 **Returns:**
 - \`ValueMarker\` object that resolves to the initial value during component rendering.
@@ -3974,7 +4212,7 @@ card = Container(
     # Bind button text and disabled state
     Button(
         text=useDynamic("user.status"), 
-        disabled=useDynamic("user.is_admin"), # Disables button if is_admin is True (or False depending on logic)
+        disabled=useDynamic("user.is_admin"),
         on_click=userState.status.set("Clicked!")
     )
 )
@@ -4086,11 +4324,13 @@ useWatch(state_path: str, callback: Union[dScript, str, Callable]) -> Union[dScr
 
 ## Pythonic Value Helpers
 
-Dars provides a set of helpers to make working with DOM values completely Pythonic, eliminating the need for raw JavaScript.
+Dars provides a set of helpers to make working with DOM values and reactive state completely Pythonic, eliminating the need for raw JavaScript.
 
 ### V() - Value Reference
 
-The \`V()\` helper allows you to select DOM elements and perform operations directly in Python.
+The \`V()\` helper allows you to extract values from **DOM elements** (via CSS selectors) or **reactive state** (via state paths).
+
+#### CSS Selectors (DOM Elements)
 
 \`\`\`python
 from dars.all import *
@@ -4100,7 +4340,24 @@ V("#myInput")
 
 # Select by Class
 V(".myClass")
+
 \`\`\`
+
+#### State Paths (Reactive State)
+
+**New in v1.5.8**: \`V()\` now supports extracting values directly from reactive state created by \`useDynamic()\`:
+
+\`\`\`python
+# Extract from reactive state
+V("cart.total")      # Gets current value of cart.total
+V("user.name")       # Gets current value of user.name
+V("product.price")   # Gets current value of product.price
+\`\`\`
+
+**How it works:**
+- \`V("cart.total")\` finds the reactive element created by \`useDynamic("cart.total")\`
+- Reads its current \`textContent\` value
+- Perfect for combining reactive state with calculations
 
 #### Transformations
 
@@ -4110,23 +4367,107 @@ You can chain transformation methods to process values before using them:
 # String transformations
 V("#name").upper()   # "JOHN"
 V("#name").lower()   # "john"
+V("#name").trim()    # Remove whitespace
 
-# Numeric transformations (crucial for math operations)
+# Numeric transformations (required for math operations!)
 V("#age").int()      # 25 (integer)
 V("#price").float()  # 19.99 (float)
+V("cart.total").float()  # Extract state value as float
 \`\`\`
 
 #### Operations
 
-\`ValueRef\` objects support standard Python operators:
+\`ValueRef\` objects support Python operators with **important validation**:
+
+**String Concatenation (Always Allowed)**
+\`\`\`python
+# Concatenation works without transformations
+state.fullname.set(V("#first") + " " + V("#last"))
+message = "Total: $" + V("cart.total")
+\`\`\`
+
+**Arithmetic Operations (Require Numeric Transformations)**
+
+**New in v1.5.8**: Arithmetic operators (\`*\`, \`/\`, \`-\`, \`%\`, \`**\`) now **require** \`.int()\` or \`.float()\` transformations to prevent accidental string concatenation:
 
 \`\`\`python
-# Concatenation
-state.fullname.set(V("#first") + " " + V("#last"))
-
-# Math operations (requires numeric transformation)
+# CORRECT - With numeric transformations
+state.total.set(V("#price").float() * V("#qty").int())
 state.age.set(V("#age").int() + 10)
-state.total.set(V("#price").float() * V("#quantity").int())
+discount = V("product.price").float() * 0.9
+
+# CORRECT - Combining DOM and state values
+productState.total.set(
+    V(".qty-input").int() * V("product.price").float()
+)
+
+# ERROR - Without transformations
+state.total.set(V("#price") * V("#qty"))
+# TypeError: Multiplication requires numeric transformation.
+#            Use V('#price').int() or V('#price').float() before multiplying.
+\`\`\`
+
+**Supported Operators:**
+- \`+\` - Addition/Concatenation (always allowed)
+- \`*\` - Multiplication (requires \`.int()\` or \`.float()\`)
+- \`/\` - Division (requires \`.int()\` or \`.float()\`)
+- \`-\` - Subtraction (requires \`.int()\` or \`.float()\`)
+- \`%\` - Modulo (requires \`.int()\` or \`.float()\`)
+- \`**\` - Power (requires \`.int()\` or \`.float()\`)
+
+#### Complete Example
+
+\`\`\`python
+from dars.all import *
+
+app = App("Shopping Cart")
+
+# Reactive state
+cartState = State("cart", total=0.0)
+productState = State("product", name="Widget", price=19.99, quantity=1)
+
+@FunctionComponent
+def ProductCard(**props):
+    return f'''
+    <div {Props.id} {Props.class_name} {Props.style}>
+        <!-- Reactive display -->
+        <h3>{useDynamic("product.name")}</h3>
+        <p>Price: \${useDynamic("product.price")}</p>
+        
+        <!-- Editable quantity with selector -->
+        <input type="number" 
+               value="{useValue("product.quantity", ".qty-input")}"
+               min="1" />
+        
+        <!-- Reactive total -->
+        <p>Total: \${useDynamic("cart.total")}</p>
+    </div>
+    '''
+
+@route("/")
+def index():
+    return Page(
+        ProductCard(id="product-card", name="Milk", price=100, quantity=2, total=0),
+        
+        # Calculate: DOM input \xD7 State value
+        Button("Calculate Total", on_click=cartState.total.set(
+            V(".qty-input").int() * V("product.price").float()
+        )),
+        
+        # String concatenation (no transformation needed)
+        Button("Show Info", on_click=productState.name.set(
+            "Product: " + V("product.name") + " - $" + V("product.price")
+            )
+        )
+    )
+
+app.add_page("index", index(), title="Product", index=True)
+
+# Watch for changes
+app.useWatch("cart.total", log("Cart total changed!"))
+
+if __name__ == "__main__":
+    app.rTimeCompile()
 \`\`\`
 
 ### url() - URL Builder
@@ -4134,9 +4475,21 @@ state.total.set(V("#price").float() * V("#quantity").int())
 The \`url()\` helper constructs dynamic URLs by interpolating \`ValueRef\` objects into a template string.
 
 \`\`\`python
-# Generates: https://api.example.com/users/123/profile
+# With DOM values
 fetch(
     url("https://api.example.com/users/{id}/profile", id=V("#userId"))
+)
+
+# With state values
+fetch(
+    url("/api/products/{id}", id=V("product.id"))
+)
+
+# Mixed
+fetch(
+    url("/api/{resource}/{id}", 
+        resource="users", 
+        id=V("#userId"))
 )
 \`\`\`
 
@@ -4149,11 +4502,14 @@ fetch(
 **Do:**
 - Use \`useDynamic\` for simple text/value updates.
 - Use \`useWatch\` for side effects like logging, analytics, or complex logic.
+- Use \`useValue\` with selectors for form inputs that need value extraction.
 - Use consistent state naming (e.g., \`"user"\`, \`"cart"\`).
+- Always use \`.int()\` or \`.float()\` before arithmetic operations with \`V()\`.
 
 **Don't:**
 - Use with non-existent state paths.
 - Nest state paths more than 2 levels deep (currently supports \`stateName.property\`).
+- Use arithmetic operators without numeric transformations.
 
 ---`},{type:"T9",id:"markdown_123",key:"0/2/0/12",text:`# Events in Dars
 
@@ -5470,4 +5826,4 @@ dars init  -L
 - Applying minification (vite): Vite/esbuild minification is active (JS/CSS) and default is disabled.
 - Applying minification (default + vite): both are active.
 
-For more, see the [Getting Started](#getting-started-with-dars) guide and the main documentation index.`}]},{type:"T2",id:"footer-section",key:"0/2/1",children:[{type:"T2",id:"container_127",key:"0/2/1/0",children:[{type:"T2",id:"container_128",key:"0/2/1/0/0",children:[{type:"T2",id:"container_129",key:"0/2/1/0/0/0",children:[{type:"T4",id:"image_130",key:"0/2/1/0/0/0/0"},{type:"T2",id:"container_131",key:"0/2/1/0/0/0/1",children:[{type:"T5",id:"text_132",key:"0/2/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_133",key:"0/2/1/0/0/1",children:[{type:"T2",id:"container_134",key:"0/2/1/0/0/1/0",children:[{type:"T5",id:"text_135",key:"0/2/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_136",key:"0/2/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_137",key:"0/2/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_138",key:"0/2/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_139",key:"0/2/1/0/0/1/1",children:[{type:"T5",id:"text_140",key:"0/2/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_141",key:"0/2/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_142",key:"0/2/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_143",key:"0/2/1/0/0/1/2",children:[{type:"T5",id:"text_144",key:"0/2/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_145",key:"0/2/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_146",key:"0/2/1/0/0/2",children:[{type:"T2",id:"container_147",key:"0/2/1/0/0/2/0",children:[{type:"T5",id:"text_148",key:"0/2/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_149",key:"0/2/1/0/0/2/1",children:[{type:"T5",id:"text_150",key:"0/2/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_151",key:"0/2/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_152",key:"0/2/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_153",key:"0/2/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]}]},function(){const c=new Map;let l=null,u=null;function m(){}function S(){}function _(n,e){if(!n)return;e(n);const t=n.children||[];for(let o=0;o<t.length;o++)_(t[o],e)}function w(n){try{if(typeof atob=="function")return atob(n);if(typeof Buffer<"u")return Buffer.from(n,"base64").toString("utf8")}catch{}return""}function I(n){try{if(!n)return null;if(n&&n.type==="inline"&&n.code)return new Function("event",n.code);const e=n&&(n.b||n.code_b64)||null;if(e){const t=w(e);if(t)return new Function("event",t)}}catch{}return null}function U(n){_(n,e=>{if(e&&e.id&&e.events&&!c.has(e.id)){const t={};for(const o in e.events){const i=e.events[o],d=I(i);d&&(t[o]=d)}Object.keys(t).length?c.set(e.id,t):c.delete(e.id)}})}function j(n,e){if(!(!n||!e))for(const[t,o]of Object.entries(e))try{o===!1||o===null||typeof o>"u"?n.removeAttribute(t):n.setAttribute(t,String(o))}catch{}}function M(n,e={},t={}){for(const o in e)if(!(o in t))try{n.removeAttribute(o)}catch{}for(const o in t){const i=t[o];try{i===!1||i===null||typeof i>"u"?n.removeAttribute(o):n.setAttribute(o,String(i))}catch{}}}function E(n,e={},t={}){for(const o in e)if(!(o in t))try{n.style.removeProperty(o.replace(/_/g,"-"))}catch{}for(const o in t){const i=t[o];try{n.style.setProperty(o.replace(/_/g,"-"),String(i))}catch{}}}function L(n,e){(e||document).addEventListener(n,function(t){let o=t.target;const i=e||document;for(;o&&o!==i;){const d=o.id;if(d&&c.has(d)){const y=c.get(d);if(o&&o.__darsEv&&o.__darsEv[n])return;let p=y[n];if(!p&&(n==="keydown"||n==="keyup"||n==="keypress")){const a=t.key||t.code;if(a){const r=n+"."+a;p=y[r]}}if(typeof p=="function"){try{p.call(o,t)}catch(a){console.error("[Dars] handler error",a)}return}}o=o.parentNode}},!0)}function k(n,e){return n&&e?n.type!==e.type:n!==e}function v(n){if(!n)return;const e=n.children||[];for(let t=0;t<e.length;t++)v(e[t]);if(n.id&&c.delete(n.id),n.id){const t=document.getElementById(n.id);if(t&&t.parentNode)try{t.parentNode.removeChild(t)}catch{}}}function x(n,e){if(!e||!e.id)return{ok:!1,reason:"missing-new"};let t=document.getElementById(e.id);if(!t){const a=n&&n.id?document.getElementById(n.id):null;if(a)try{a.id=e.id,t=a}catch{}}if(!t)return{ok:!1,reason:"missing-el"};if(k(n,e))return{ok:!1,reason:"type-changed"};const o=!!e.isIsland;if(!o&&e.class&&(t.className=e.class),o||M(t,n&&n.props||{},e.props||{}),o||E(t,n&&n.style||{},e.style||{}),!o&&Object.prototype.hasOwnProperty.call(e,"text")&&t.textContent!==String(e.text||"")&&(t.textContent=String(e.text||"")),o)return{ok:!0};const i=n&&n.children?n.children:[],d=e.children?e.children:[],y=new Map;for(let a=0;a<i.length;a++){const r=i[a]&&(i[a].id||i[a].key)||null;r&&y.set(String(r),i[a])}const p=new Set;for(let a=0;a<d.length;a++){const r=d[a],h=r&&(r.id||r.key)||null;if(!h)if(a<i.length){const s=x(i[a],r);if(!s.ok)return s;p.add(i[a]);continue}else return{ok:!1,reason:"children-added"};const b=y.get(String(h));if(b){const s=x(b,r);if(!s.ok)return s;p.add(b)}else{if(a<i.length){const f=i[a];if(!k(f,r)){const g=x(f,r);if(!g.ok)return g;p.add(f);continue}}const s=createSubtree(r);if(s){const f=a<i.length?i[a]:null;if(f&&f.id){const g=document.getElementById(f.id);g&&g.parentNode?g.parentNode.insertBefore(s,g):t.appendChild(s)}else t.appendChild(s);continue}return{ok:!1,reason:"children-added"}}}for(let a=0;a<i.length;a++){const r=i[a];p.has(r)||v(r)}return{ok:!0}}function F(n){typeof requestAnimationFrame=="function"?requestAnimationFrame(n):setTimeout(n,16)}function H(n){const e=l;if(!e){l=n;try{window.__DARS_VDOM__=n}catch{}return}F(()=>{const t=x(e,n);if(!t.ok){console.warn("[Dars] Structural change detected (",t.reason,"), reloading...");try{location.reload()}catch{}return}l=n;try{window.__DARS_VDOM__=n}catch{}})}function O(n){l=n;try{window.__DARS_VDOM__=n}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(t=>L(t,document))}function R(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const n=window.__DARS_VERSION_URL||"version.txt";let e=null,t=!1,o=0;const i=10;let d=!1;function y(a,r,h,b){try{const s=new XMLHttpRequest;b&&(s.responseType=b),s.open("GET",a,!0),s.timeout=5e3,s.onreadystatechange=function(){s.readyState===4&&(s.status>=200&&s.status<300?r(s.response):h())},s.onerror=h,s.ontimeout=h,s.setRequestHeader("Cache-Control","no-store"),s.send()}catch{h()}}function p(){d||y(n,function(a){let r=(a||"").toString().trim();if(!r||r==="0"){if(o+=1,o>=i){console.warn("[Dars] version file not found after",i,"attempts. Hot reload disabled for this session."),d=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(e)try{clearTimeout(e)}catch{}return}t||(console.warn("[Dars] waiting for version file..."),t=!0),e=setTimeout(p,600);return}if(o=0,t=!1,u||(u=r),r&&r!==u){u=r;try{location.reload()}catch{}return}e=setTimeout(p,600)},function(){if(o+=1,o>=i){console.warn("[Dars] version file not reachable after",i,"attempts. Hot reload disabled for this session."),d=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(e)try{clearTimeout(e)}catch{}return}t||(console.warn("[Dars] waiting for version file..."),t=!0),e=setTimeout(p,600)},"text")}return p(),()=>{try{d=!0,e&&clearTimeout(e),window.__DARS_STOP_HOTRELOAD=null}catch{}}}document.addEventListener("DOMContentLoaded",function(){if(window.__DARS_VDOM__?O(window.__DARS_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=R()}catch{}}})}(),window.addEventListener("scroll",()=>{const c=document.getElementById("dars-navbar");window.scrollY>20?c.classList.add("scrolled"):c.classList.remove("scrolled");const l=document.getElementById("features-section");if(l&&!l.classList.contains("visible")){const u=l.getBoundingClientRect().top,m=window.innerHeight/1.5;u<m&&(l.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((_,w)=>{setTimeout(()=>{_.style.opacity="1",_.style.transform="translateY(0)"},w*100)}))}});const T=document.getElementById("hero-logo"),C=document.getElementById("hero-title"),D=document.getElementById("hero-description"),A=document.getElementById("pip-command"),P=document.getElementById("get-started-btn"),B=document.getElementById("scroll-text");T&&setTimeout(()=>T.classList.add("show"),5),C&&setTimeout(()=>C.classList.add("show"),350),D&&setTimeout(()=>D.classList.add("show"),650),A&&setTimeout(()=>A.classList.add("show"),950),P&&setTimeout(()=>P.classList.add("show"),1250),B&&setTimeout(()=>B.classList.add("show"),1500),document.addEventListener("DOMContentLoaded",function(){const c=document.getElementById("hamburger-btn"),l=document.getElementById("mobile-menu"),u=document.body;c&&l&&(c.addEventListener("click",function(m){m.stopPropagation(),l.style.display==="flex"?(l.style.display="none",c.classList.remove("menu-open"),u.classList.remove("menu-open")):(l.style.display="flex",c.classList.add("menu-open"),u.classList.add("menu-open"))}),l.querySelectorAll("a").forEach(m=>{m.addEventListener("click",function(){l.style.display="none",c.classList.remove("menu-open"),u.classList.remove("menu-open")})}),document.addEventListener("click",function(m){!c.contains(m.target)&&!l.contains(m.target)&&(l.style.display="none",c.classList.remove("menu-open"),u.classList.remove("menu-open"))}),document.addEventListener("keydown",function(m){m.key==="Escape"&&l.style.display==="flex"&&(l.style.display="none",c.classList.remove("menu-open"),u.classList.remove("menu-open"))}))});
+For more, see the [Getting Started](#getting-started-with-dars) guide and the main documentation index.`}]},{type:"T2",id:"footer-section",key:"0/2/1",children:[{type:"T2",id:"container_127",key:"0/2/1/0",children:[{type:"T2",id:"container_128",key:"0/2/1/0/0",children:[{type:"T2",id:"container_129",key:"0/2/1/0/0/0",children:[{type:"T4",id:"image_130",key:"0/2/1/0/0/0/0"},{type:"T2",id:"container_131",key:"0/2/1/0/0/0/1",children:[{type:"T5",id:"text_132",key:"0/2/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_133",key:"0/2/1/0/0/1",children:[{type:"T2",id:"container_134",key:"0/2/1/0/0/1/0",children:[{type:"T5",id:"text_135",key:"0/2/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_136",key:"0/2/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_137",key:"0/2/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_138",key:"0/2/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_139",key:"0/2/1/0/0/1/1",children:[{type:"T5",id:"text_140",key:"0/2/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_141",key:"0/2/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_142",key:"0/2/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_143",key:"0/2/1/0/0/1/2",children:[{type:"T5",id:"text_144",key:"0/2/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_145",key:"0/2/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_146",key:"0/2/1/0/0/2",children:[{type:"T2",id:"container_147",key:"0/2/1/0/0/2/0",children:[{type:"T5",id:"text_148",key:"0/2/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_149",key:"0/2/1/0/0/2/1",children:[{type:"T5",id:"text_150",key:"0/2/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_151",key:"0/2/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_152",key:"0/2/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_153",key:"0/2/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]}]},function(){const c=new Map;let l=null,u=null;function m(){}function S(){}function _(n,e){if(!n)return;e(n);const t=n.children||[];for(let o=0;o<t.length;o++)_(t[o],e)}function w(n){try{if(typeof atob=="function")return atob(n);if(typeof Buffer<"u")return Buffer.from(n,"base64").toString("utf8")}catch{}return""}function I(n){try{if(!n)return null;if(n&&n.type==="inline"&&n.code)return new Function("event",n.code);const e=n&&(n.b||n.code_b64)||null;if(e){const t=w(e);if(t)return new Function("event",t)}}catch{}return null}function U(n){_(n,e=>{if(e&&e.id&&e.events&&!c.has(e.id)){const t={};for(const o in e.events){const i=e.events[o],d=I(i);d&&(t[o]=d)}Object.keys(t).length?c.set(e.id,t):c.delete(e.id)}})}function j(n,e){if(!(!n||!e))for(const[t,o]of Object.entries(e))try{o===!1||o===null||typeof o>"u"?n.removeAttribute(t):n.setAttribute(t,String(o))}catch{}}function E(n,e={},t={}){for(const o in e)if(!(o in t))try{n.removeAttribute(o)}catch{}for(const o in t){const i=t[o];try{i===!1||i===null||typeof i>"u"?n.removeAttribute(o):n.setAttribute(o,String(i))}catch{}}}function M(n,e={},t={}){for(const o in e)if(!(o in t))try{n.style.removeProperty(o.replace(/_/g,"-"))}catch{}for(const o in t){const i=t[o];try{n.style.setProperty(o.replace(/_/g,"-"),String(i))}catch{}}}function L(n,e){(e||document).addEventListener(n,function(t){let o=t.target;const i=e||document;for(;o&&o!==i;){const d=o.id;if(d&&c.has(d)){const f=c.get(d);if(o&&o.__darsEv&&o.__darsEv[n])return;let p=f[n];if(!p&&(n==="keydown"||n==="keyup"||n==="keypress")){const a=t.key||t.code;if(a){const r=n+"."+a;p=f[r]}}if(typeof p=="function"){try{p.call(o,t)}catch(a){console.error("[Dars] handler error",a)}return}}o=o.parentNode}},!0)}function k(n,e){return n&&e?n.type!==e.type:n!==e}function v(n){if(!n)return;const e=n.children||[];for(let t=0;t<e.length;t++)v(e[t]);if(n.id&&c.delete(n.id),n.id){const t=document.getElementById(n.id);if(t&&t.parentNode)try{t.parentNode.removeChild(t)}catch{}}}function x(n,e){if(!e||!e.id)return{ok:!1,reason:"missing-new"};let t=document.getElementById(e.id);if(!t){const a=n&&n.id?document.getElementById(n.id):null;if(a)try{a.id=e.id,t=a}catch{}}if(!t)return{ok:!1,reason:"missing-el"};if(k(n,e))return{ok:!1,reason:"type-changed"};const o=!!e.isIsland;if(!o&&e.class&&(t.className=e.class),o||E(t,n&&n.props||{},e.props||{}),o||M(t,n&&n.style||{},e.style||{}),!o&&Object.prototype.hasOwnProperty.call(e,"text")&&t.textContent!==String(e.text||"")&&(t.textContent=String(e.text||"")),o)return{ok:!0};const i=n&&n.children?n.children:[],d=e.children?e.children:[],f=new Map;for(let a=0;a<i.length;a++){const r=i[a]&&(i[a].id||i[a].key)||null;r&&f.set(String(r),i[a])}const p=new Set;for(let a=0;a<d.length;a++){const r=d[a],h=r&&(r.id||r.key)||null;if(!h)if(a<i.length){const s=x(i[a],r);if(!s.ok)return s;p.add(i[a]);continue}else return{ok:!1,reason:"children-added"};const b=f.get(String(h));if(b){const s=x(b,r);if(!s.ok)return s;p.add(b)}else{if(a<i.length){const y=i[a];if(!k(y,r)){const g=x(y,r);if(!g.ok)return g;p.add(y);continue}}const s=createSubtree(r);if(s){const y=a<i.length?i[a]:null;if(y&&y.id){const g=document.getElementById(y.id);g&&g.parentNode?g.parentNode.insertBefore(s,g):t.appendChild(s)}else t.appendChild(s);continue}return{ok:!1,reason:"children-added"}}}for(let a=0;a<i.length;a++){const r=i[a];p.has(r)||v(r)}return{ok:!0}}function F(n){typeof requestAnimationFrame=="function"?requestAnimationFrame(n):setTimeout(n,16)}function N(n){const e=l;if(!e){l=n;try{window.__DARS_VDOM__=n}catch{}return}F(()=>{const t=x(e,n);if(!t.ok){console.warn("[Dars] Structural change detected (",t.reason,"), reloading...");try{location.reload()}catch{}return}l=n;try{window.__DARS_VDOM__=n}catch{}})}function O(n){l=n;try{window.__DARS_VDOM__=n}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(t=>L(t,document))}function R(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const n=window.__DARS_VERSION_URL||"version.txt";let e=null,t=!1,o=0;const i=10;let d=!1;function f(a,r,h,b){try{const s=new XMLHttpRequest;b&&(s.responseType=b),s.open("GET",a,!0),s.timeout=5e3,s.onreadystatechange=function(){s.readyState===4&&(s.status>=200&&s.status<300?r(s.response):h())},s.onerror=h,s.ontimeout=h,s.setRequestHeader("Cache-Control","no-store"),s.send()}catch{h()}}function p(){d||f(n,function(a){let r=(a||"").toString().trim();if(!r||r==="0"){if(o+=1,o>=i){console.warn("[Dars] version file not found after",i,"attempts. Hot reload disabled for this session."),d=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(e)try{clearTimeout(e)}catch{}return}t||(console.warn("[Dars] waiting for version file..."),t=!0),e=setTimeout(p,600);return}if(o=0,t=!1,u||(u=r),r&&r!==u){u=r;try{location.reload()}catch{}return}e=setTimeout(p,600)},function(){if(o+=1,o>=i){console.warn("[Dars] version file not reachable after",i,"attempts. Hot reload disabled for this session."),d=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(e)try{clearTimeout(e)}catch{}return}t||(console.warn("[Dars] waiting for version file..."),t=!0),e=setTimeout(p,600)},"text")}return p(),()=>{try{d=!0,e&&clearTimeout(e),window.__DARS_STOP_HOTRELOAD=null}catch{}}}document.addEventListener("DOMContentLoaded",function(){if(window.__DARS_VDOM__?O(window.__DARS_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=R()}catch{}}})}(),window.addEventListener("scroll",()=>{const c=document.getElementById("dars-navbar");window.scrollY>20?c.classList.add("scrolled"):c.classList.remove("scrolled");const l=document.getElementById("features-section");if(l&&!l.classList.contains("visible")){const u=l.getBoundingClientRect().top,m=window.innerHeight/1.5;u<m&&(l.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((_,w)=>{setTimeout(()=>{_.style.opacity="1",_.style.transform="translateY(0)"},w*100)}))}});const T=document.getElementById("hero-logo"),C=document.getElementById("hero-title"),D=document.getElementById("hero-description"),P=document.getElementById("pip-command"),A=document.getElementById("get-started-btn"),B=document.getElementById("scroll-text");T&&setTimeout(()=>T.classList.add("show"),5),C&&setTimeout(()=>C.classList.add("show"),350),D&&setTimeout(()=>D.classList.add("show"),650),P&&setTimeout(()=>P.classList.add("show"),950),A&&setTimeout(()=>A.classList.add("show"),1250),B&&setTimeout(()=>B.classList.add("show"),1500),document.addEventListener("DOMContentLoaded",function(){const c=document.getElementById("hamburger-btn"),l=document.getElementById("mobile-menu"),u=document.body;c&&l&&(c.addEventListener("click",function(m){m.stopPropagation(),l.style.display==="flex"?(l.style.display="none",c.classList.remove("menu-open"),u.classList.remove("menu-open")):(l.style.display="flex",c.classList.add("menu-open"),u.classList.add("menu-open"))}),l.querySelectorAll("a").forEach(m=>{m.addEventListener("click",function(){l.style.display="none",c.classList.remove("menu-open"),u.classList.remove("menu-open")})}),document.addEventListener("click",function(m){!c.contains(m.target)&&!l.contains(m.target)&&(l.style.display="none",c.classList.remove("menu-open"),u.classList.remove("menu-open"))}),document.addEventListener("keydown",function(m){m.key==="Escape"&&l.style.display==="flex"&&(l.style.display="none",c.classList.remove("menu-open"),u.classList.remove("menu-open"))}))});

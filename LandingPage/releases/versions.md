@@ -1,3 +1,254 @@
+# Release Notes v1.5.8
+
+> **Enhanced V() Helper & useValue Selector Support**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### 1. V() Helper - State Path Support
+
+The `V()` helper now supports extracting values from **reactive state** in addition to DOM elements!
+
+#### State Path Extraction
+
+```python
+# Extract from reactive state created by useDynamic()
+V("cart.total")      # Gets current value of cart.total
+V("user.name")       # Gets current value of user.name
+V("product.price")   # Gets current value of product.price
+```
+
+**How it works:**
+- `V("cart.total")` finds the reactive element created by `useDynamic("cart.total")`
+- Reads its current `textContent` value
+- Perfect for combining reactive state with calculations
+
+#### Complete Integration Example
+
+```python
+from dars.all import *
+
+productState = State("product", price=19.99, quantity=1, total=19.99)
+
+@FunctionComponent
+def ProductCard(**props):
+    return f'''
+    <div {Props.id}>
+        <p>Price: ${useDynamic("product.price")}</p>
+        <input type="number" value="{useValue("product.quantity", ".qty-input")}" />
+        <p>Total: ${useDynamic("product.total")}</p>
+    </div>
+    '''
+
+# Calculate total: DOM input × State value
+Button("Calculate", on_click=productState.total.set(
+    V(".qty-input").int() * V("product.price").float()
+))
+```
+
+### 2. V() Helper - Arithmetic Operator Validation
+
+**Breaking Change (Validation)**: Arithmetic operators now **require** numeric transformations to prevent bugs.
+
+#### The Problem
+
+Previously, you could accidentally multiply strings:
+```python
+# Before: This would concatenate strings, not multiply!
+V("#price") * V("#qty")  # "19.99" * "5" = NaN or unexpected behavior
+```
+
+#### The Solution
+
+Arithmetic operators (`*`, `/`, `-`, `%`, `**`) now require `.int()` or `.float()`:
+
+```python
+# CORRECT - With transformations
+V("#price").float() * V("#qty").int()  # 19.99 * 5 = 99.95
+
+# ERROR - Without transformations
+V("#price") * V("#qty")
+# TypeError: Multiplication requires numeric transformation.
+#            Use V('#price').int() or V('#price').float() before multiplying.
+```
+
+**String concatenation (`+`) still works without transformations:**
+```python
+# Always allowed
+V("#first") + " " + V("#last")  # String concatenation
+"Total: $" + V("cart.total")    # String concatenation
+```
+
+**Supported Operators:**
+- `+` - Addition/Concatenation (always allowed)
+- `*` - Multiplication (requires `.int()` or `.float()`)
+- `/` - Division (requires `.int()` or `.float()`)
+- `-` - Subtraction (requires `.int()` or `.float()`)
+- `%` - Modulo (requires `.int()` or `.float()`)
+- `**` - Power (requires `.int()` or `.float()`)
+
+### 3. useValue() - Selector Support in FunctionComponents
+
+`useValue()` now supports automatic selector application in FunctionComponents!
+
+#### Automatic Selector Application
+
+```python
+@FunctionComponent
+def UserForm(**props):
+    return f'''
+    <div {Props.id}>
+        <input value="{useValue("user.name", ".name-input")}" />
+        <input value="{useValue("user.email", "#email-field")}" />
+    </div>
+    '''
+
+# Extract values using the selectors
+Button("Save", on_click=userState.name.set(V(".name-input")))
+```
+
+**How it works:**
+1. `useValue("user.name", ".name-input")` sets initial value AND applies class `name-input`
+2. `V(".name-input")` extracts the current value (even if modified by user)
+3. Perfect for forms with initial values and value extraction
+
+**Supported selectors:**
+- **Class selectors** (`.foo`) → Added to element's `class` attribute
+- **ID selectors** (`#bar`) → Set as element's `id` attribute
+
+---
+
+## Migration Guide
+
+### V() Arithmetic Operations
+
+If you were using arithmetic operators without transformations, add `.int()` or `.float()`:
+
+**Before:**
+```python
+state.total.set(V("#price") * V("#qty"))
+```
+
+**After:**
+```python
+state.total.set(V("#price").float() * V("#qty").int())
+```
+
+**String concatenation is unchanged:**
+```python
+# Still works the same
+state.fullname.set(V("#first") + " " + V("#last"))
+```
+
+---
+
+## Complete Example
+
+```python
+from dars.all import *
+
+app = App("Shopping Cart")
+
+# Reactive state
+cartState = State("cart", total=0.0)
+productState = State("product", name="Widget", price=19.99, quantity=1)
+
+@FunctionComponent
+def ProductCard(**props):
+    return f'''
+    <div {Props.id} {Props.class_name} {Props.style}>
+        <!-- Reactive display -->
+        <h3>{useDynamic("product.name")}</h3>
+        <p>Price: ${useDynamic("product.price")}</p>
+        
+        <!-- Editable quantity with selector -->
+        <input type="number" 
+               value="{useValue("product.quantity", ".qty-input")}"
+               min="1" />
+        
+        <!-- Reactive total -->
+        <p>Total: ${useDynamic("cart.total")}</p>
+    </div>
+    '''
+
+@route("/")
+def index():
+    return Page(
+        ProductCard(id="product-card", name="Milk", price=100, quantity=2, total=0),
+        
+        # Calculate: DOM input × State value
+        Button("Calculate Total", on_click=cartState.total.set(
+            V(".qty-input").int() * V("product.price").float()
+        )),
+        
+        # String concatenation (no transformation needed)
+        Button("Show Info", on_click=productState.name.set(
+            "Product: " + V("product.name") + " - $" + V("product.price")
+            )
+        )
+    )
+
+app.add_page("index", index(), title="Product", index=True)
+
+# Watch for changes
+app.useWatch("cart.total", log("Cart total changed!"))
+
+if __name__ == "__main__":
+    app.rTimeCompile()
+```
+
+---
+
+## Bug Fixes
+
+### useValue Selector Application
+- **Issue**: Selectors in `useValue()` were not being applied to FunctionComponent elements
+- **Fix**: Implemented BeautifulSoup-based HTML parsing to detect and apply selectors
+- **Impact**: `useValue()` now works identically in FunctionComponents and built-in components
+
+### V() State Path Detection
+- **Issue**: No way to extract values from reactive state without DOM elements
+- **Fix**: Added intelligent state path detection (e.g., `"cart.total"` vs `".cart-total"`)
+- **Impact**: Seamless integration between `useDynamic()`, `useValue()`, and `V()`
+
+---
+
+## Breaking Changes
+
+### Arithmetic Operator Validation
+
+**Change**: Arithmetic operators (`*`, `/`, `-`, `%`, `**`) now require `.int()` or `.float()` transformations.
+
+**Reason**: Prevents accidental string operations that cause bugs.
+
+**Migration**: Add `.int()` or `.float()` before arithmetic operations:
+```python
+V("#price").float() * V("#qty").int()
+```
+
+**Note**: String concatenation (`+`) is unchanged and still works without transformations.
+
+---
+
+## Documentation Updates
+
+- **hooks.md**: Comprehensive V() documentation with state path examples
+- **custom_components.md**: Updated examples showing V() with state paths
+- **New examples**: Complete integration patterns for `useValue()`, `useDynamic()`, and `V()`
+
+---
+
+## What's Next
+
+The enhanced V() helper and complete hooks integration pave the way for more advanced reactive patterns and seamless state management in future releases.
+
+---
+
 # Release Notes v1.5.7
 
 > **useValue hook & Value Access Helpers**

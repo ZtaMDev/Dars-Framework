@@ -3185,6 +3185,150 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
                 f"Function component '{component._func_name}' template "
                 f"has undefined placeholder: {e}"
             )
+            
+        # Process ValueMarker IDs (useValue) using BeautifulSoup
+        # This allows us to find where the value was used (attribute or text) and apply selectors
+        try:
+            from dars.hooks.use_value import get_value_registry
+            from bs4 import BeautifulSoup
+            import re
+            
+            value_registry = get_value_registry()
+            marker_pattern = r'__DARS_VALUE_\d+_\d+__'
+            
+            # Check if there are any markers in the rendered HTML
+            if re.search(marker_pattern, rendered):
+                soup = BeautifulSoup(rendered, 'html.parser')
+                modified = False
+                
+                # 1. Find markers in text content
+                # We need to find text nodes containing the marker
+                # Since BS4 doesn't give easy access to text nodes, we iterate over all elements
+                for element in soup.find_all(string=re.compile(marker_pattern)):
+                    text = element.string
+                    matches = re.findall(marker_pattern, text)
+                    
+                    # Save parent reference BEFORE replacing
+                    parent = element.parent
+                    
+                    for marker_id in matches:
+                        if marker_id in value_registry:
+                            marker = value_registry[marker_id]
+                            initial_val = str(marker.get_initial_value())
+                            
+                            # Replace marker with initial value
+                            new_text = text.replace(marker_id, initial_val)
+                            element.replace_with(new_text)
+                            text = new_text # Update for next iteration
+                            modified = True
+                            
+                            # Apply selector to parent element if present
+                            if marker.selector and parent:
+                                if marker.selector.startswith('.'):
+                                    # Class selector
+                                    class_name = marker.selector[1:]
+                                    existing_classes = parent.get('class', [])
+                                    if class_name not in existing_classes:
+                                        existing_classes.append(class_name)
+                                        parent['class'] = existing_classes
+                                elif marker.selector.startswith('#'):
+                                    # ID selector
+                                    id_value = marker.selector[1:]
+                                    parent['id'] = id_value
+                
+                # 2. Find markers in attributes
+                for tag in soup.find_all(True):  # True finds all tags
+                    for attr_name, attr_value in list(tag.attrs.items()):
+                        # Attributes can be string or list (like class)
+                        if isinstance(attr_value, str):
+                            matches = re.findall(marker_pattern, attr_value)
+                            for marker_id in matches:
+                                if marker_id in value_registry:
+                                    marker = value_registry[marker_id]
+                                    initial_val = str(marker.get_initial_value())
+                                    
+                                    # Replace marker with initial value
+                                    tag[attr_name] = tag[attr_name].replace(marker_id, initial_val)
+                                    modified = True
+                                    
+                                    # Apply selector to this element
+                                    if marker.selector:
+                                        if marker.selector.startswith('.'):
+                                            # Class selector
+                                            class_name = marker.selector[1:]
+                                            existing_classes = tag.get('class', [])
+                                            if class_name not in existing_classes:
+                                                existing_classes.append(class_name)
+                                                tag['class'] = existing_classes
+                                        elif marker.selector.startswith('#'):
+                                            # ID selector
+                                            id_value = marker.selector[1:]
+                                            tag['id'] = id_value
+                        
+                        elif isinstance(attr_value, list):
+                            # Handle list attributes (like class)
+                            new_list = []
+                            list_modified = False
+                            for item in attr_value:
+                                if isinstance(item, str) and re.search(marker_pattern, item):
+                                    matches = re.findall(marker_pattern, item)
+                                    new_item = item
+                                    for marker_id in matches:
+                                        if marker_id in value_registry:
+                                            marker = value_registry[marker_id]
+                                            initial_val = str(marker.get_initial_value())
+                                            new_item = new_item.replace(marker_id, initial_val)
+                                            
+                                            # Apply selector
+                                            if marker.selector:
+                                                if marker.selector.startswith('.'):
+                                                    class_name = marker.selector[1:]
+                                                    # We'll add it to the list later to avoid modifying while iterating
+                                                    # But since we are rebuilding the list, we can just ensure it's added
+                                                    # However, tag['class'] is the list we are iterating (indirectly via attr_value copy)
+                                                    # Let's handle selector addition after loop
+                                                    pass 
+                                                    # Note: Adding to class list while processing class list is tricky
+                                                    # Ideally useValue isn't used INSIDE a class name string often, but if it is:
+                                                    # We should add the selector class as a separate item
+                                    
+                                    new_list.append(new_item)
+                                    list_modified = True
+                                else:
+                                    new_list.append(item)
+                            
+                            if list_modified:
+                                tag[attr_name] = new_list
+                                modified = True
+                                
+                                # Re-scan for selectors to add (simpler approach)
+                                # If any marker in the original list had a selector, add it now
+                                for item in attr_value:
+                                    if isinstance(item, str):
+                                        matches = re.findall(marker_pattern, item)
+                                        for marker_id in matches:
+                                            if marker_id in value_registry:
+                                                marker = value_registry[marker_id]
+                                                if marker.selector and marker.selector.startswith('.'):
+                                                    class_name = marker.selector[1:]
+                                                    current_classes = tag.get('class', [])
+                                                    if class_name not in current_classes:
+                                                        current_classes.append(class_name)
+                                                        tag['class'] = current_classes
+
+                if modified:
+                    # Use prettify() or just str() depending on need. 
+                    # str(soup) might add <html><body> if it parsed a fragment as full doc, 
+                    # but for fragments BeautifulSoup usually behaves well if created from fragment.
+                    # However, to be safe with fragments, we can output the body contents if it added body
+                    # But since we passed a fragment, soup usually is the fragment.
+                    # Let's check if it wrapped it.
+                    rendered = str(soup)
+                    
+        except ImportError:
+            pass
+        except Exception as e:
+            print(f"Warning: Error processing useValue markers in FunctionComponent: {e}")
         
         return rendered
 

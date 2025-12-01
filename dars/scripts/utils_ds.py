@@ -1,5 +1,6 @@
 """Utility functions for creating common dScript patterns"""
 from dars.scripts.dscript import dScript
+from typing import Union
 
 
 # ============= Modal Utilities =============
@@ -94,19 +95,28 @@ def goForward() -> dScript:
 
 # ============= Alert & Console Utilities =============
 
-def alert(message: str) -> dScript:
+def alert(message: Union[str, 'ValueRef']) -> dScript:
     """
     Show a browser alert dialog.
     
     Args:
-        message: The message to display
+        message: The message to display (string or ValueRef from V())
         
     Example:
         Button("Alert", on_click=alert(message="Hello World!"))
+        Button("Alert from State", on_click=alert(V("user.name")))
+        Button("Alert from Input", on_click=alert(V("#myInput")))
     """
-    # Escape single quotes in message
-    escaped_message = message.replace("'", "\\'")
-    return dScript(f"alert('{escaped_message}');")
+    # Import here to avoid circular dependency
+    from dars.hooks.value_helpers import ValueRef
+    
+    if isinstance(message, ValueRef):
+        # ValueRef returns a Promise, so we need to await it
+        return dScript(f"(async () => {{ alert(await {message._get_code()}); }})();")
+    else:
+        # Escape single quotes in message
+        escaped_message = message.replace("'", "\\'")
+        return dScript(f"alert('{escaped_message}');")
 
 
 def confirm(message: str, on_ok: str = "", on_cancel: str = "") -> dScript:
@@ -133,18 +143,24 @@ def confirm(message: str, on_ok: str = "", on_cancel: str = "") -> dScript:
     return dScript(code)
 
 
-def log(message: str) -> dScript:
+def log(message: Union[str, 'ValueRef']) -> dScript:
     """
     Log a message to the browser console.
     
     Args:
-        message: The message to log
+        message: The message to log (string or ValueRef from V())
         
     Example:
         Button("Log", on_click=log(message="Button clicked"))
+        Button("Log State", on_click=log(V("cart.total")))
     """
-    escaped_message = message.replace("'", "\\'")
-    return dScript(f"console.log('{escaped_message}');")
+    from dars.hooks.value_helpers import ValueRef
+    
+    if isinstance(message, ValueRef):
+        return dScript(f"(async () => {{ console.log(await {message._get_code()}); }})();")
+    else:
+        escaped_message = message.replace("'", "\\'")
+        return dScript(f"console.log('{escaped_message}');")
 
 
 # ============= DOM Manipulation Utilities =============
@@ -189,19 +205,25 @@ def toggle(id: str) -> dScript:
     return dScript(code)
 
 
-def setText(id: str, text: str) -> dScript:
+def setText(id: str, text: Union[str, 'ValueRef']) -> dScript:
     """
     Set the text content of an element.
     
     Args:
         id: The ID of the element
-        text: The new text content
+        text: The new text content (string or ValueRef from V())
         
     Example:
         Button("Update", on_click=setText(id="status", text="Done!"))
+        Button("Copy State", on_click=setText(id="display", text=V("user.name")))
     """
-    escaped_text = text.replace("'", "\\'")
-    return dScript(f"document.getElementById('{id}').textContent = '{escaped_text}';")
+    from dars.hooks.value_helpers import ValueRef
+    
+    if isinstance(text, ValueRef):
+        return dScript(f"(async () => {{ document.getElementById('{id}').textContent = await {text._get_code()}; }})();")
+    else:
+        escaped_text = text.replace("'", "\\'")
+        return dScript(f"document.getElementById('{id}').textContent = '{escaped_text}';")
 
 
 def addClass(id: str, class_name: str) -> dScript:
@@ -408,18 +430,25 @@ def clearLocalStorage() -> dScript:
 
 # ============= Clipboard Utilities =============
 
-def copyToClipboard(text: str) -> dScript:
+def copyToClipboard(text: Union[str, 'ValueRef']) -> dScript:
     """
     Copy text to clipboard.
     
     Args:
-        text: The text to copy
+        text: The text to copy (string or ValueRef from V())
         
     Example:
         Button("Copy", on_click=copyToClipboard(text="Hello World"))
+        Button("Copy State", on_click=copyToClipboard(V("user.email")))
+        Button("Copy Input", on_click=copyToClipboard(V("#myInput")))
     """
-    escaped_text = text.replace("'", "\\'")
-    return dScript(f"navigator.clipboard.writeText('{escaped_text}').catch(err => console.error('Copy failed:', err));")
+    from dars.hooks.value_helpers import ValueRef
+    
+    if isinstance(text, ValueRef):
+        return dScript(f"(async () => {{ const val = await {text._get_code()}; navigator.clipboard.writeText(String(val)).catch(err => console.error('Copy failed:', err)); }})();")
+    else:
+        escaped_text = text.replace("'", "\\'")
+        return dScript(f"navigator.clipboard.writeText('{escaped_text}').catch(err => console.error('Copy failed:', err));")
 
 
 def copyElementText(id: str) -> dScript:

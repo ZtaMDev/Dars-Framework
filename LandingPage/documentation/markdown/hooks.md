@@ -16,7 +16,7 @@ Hooks provide a way to add reactive capabilities to your application. They enabl
 
 The `useValue()` hook allows you to access the **initial value** of a state property without creating a reactive binding. This is ideal for form inputs where you want to set a default value but allow the user to edit it freely.
 
-### Usage
+### Basic Usage
 
 Pass `useValue()` to component properties to set their initial value from state:
 
@@ -32,19 +32,79 @@ Input(value=useValue("user.name"))
 Textarea(value=useValue("user.email"))
 ```
 
-### Difference from useDynamic(next hook after useValue)
+### Usage in FunctionComponents with Selectors
 
-- **`useDynamic("state.prop")`**: Creates a **two-way binding** (or one-way reactive binding). If the state changes, the input value updates automatically.
+`useValue()` supports automatic selector application in FunctionComponents! When you provide a selector (class or ID), it will be automatically applied to the element where the value is used.
+
+```python
+from dars.all import *
+
+app = App("Example of hooks")
+
+userState = State("user", name="Jane Doe", email="jane@example.com", display="None")
+
+@FunctionComponent
+def UserForm(**props):
+    return f'''
+    <div {Props.id} {Props.class_name} {Props.style}>
+        <input value="{useValue("user.name", ".name-input")}" />
+        <input value="{useValue("user.email", "#email-field")}" />
+        <span>{useValue("user.age", ".age-display")}</span>
+        <span>{useDynamic("user.display")}</span>
+    </div>
+    '''
+
+
+@route("/")
+def index():
+    return Page(
+        UserForm(id="user-form"),
+        # Extract values using V() helper with the selectors
+        Button(
+            "Get Name",
+            on_click=userState.display.set(
+                "Name: " + V(".name-input")  # Extract current value
+            )
+        ),
+
+        Button(
+            "Combine Values",
+            on_click=userState.display.set(
+                V(".name-input") + " (" + V("#email-field") + ")"
+            )
+        )
+    )
+
+app.add_page("index", index(), title="hooks", index=True)
+
+if __name__ == "__main__":
+    app.rTimeCompile()
+```
+
+**How it works:**
+1. `useValue("user.name", ".name-input")` sets initial value "Jane Doe" and applies class `name-input` to the input
+2. User can edit the value freely
+3. `V(".name-input")` extracts the current value (even if modified by user)
+4. Perfect for forms where you need both initial values and value extraction
+
+**Supported selectors:**
+- **Class selectors** (`.foo`) → Added to element's `class` attribute
+- **ID selectors** (`#bar`) → Set as element's `id` attribute
+
+### Difference from useDynamic
+
+- **`useDynamic("state.prop")`**: Creates a **reactive binding**. If the state changes, the input value updates automatically.
 - **`useValue("state.prop")`**: Sets the **initial value only**. If the state changes later, the input value does NOT update. This prevents overwriting user input while they are typing.
 
 ### Syntax
 
 ```python
-useValue(state_path: str) -> ValueMarker
+useValue(state_path: str, selector: str = None) -> ValueMarker
 ```
 
 **Parameters:**
 - `state_path`: Dot-notation path to state property (e.g., `"user.name"`)
+- `selector`: Optional CSS selector (class or ID) to apply to the element
 
 **Returns:**
 - `ValueMarker` object that resolves to the initial value during component rendering.
@@ -76,7 +136,7 @@ card = Container(
     # Bind button text and disabled state
     Button(
         text=useDynamic("user.status"), 
-        disabled=useDynamic("user.is_admin"), # Disables button if is_admin is True (or False depending on logic)
+        disabled=useDynamic("user.is_admin"),
         on_click=userState.status.set("Clicked!")
     )
 )
@@ -188,11 +248,13 @@ useWatch(state_path: str, callback: Union[dScript, str, Callable]) -> Union[dScr
 
 ## Pythonic Value Helpers
 
-Dars provides a set of helpers to make working with DOM values completely Pythonic, eliminating the need for raw JavaScript.
+Dars provides a set of helpers to make working with DOM values and reactive state completely Pythonic, eliminating the need for raw JavaScript.
 
 ### V() - Value Reference
 
-The `V()` helper allows you to select DOM elements and perform operations directly in Python.
+The `V()` helper allows you to extract values from **DOM elements** (via CSS selectors) or **reactive state** (via state paths).
+
+#### CSS Selectors (DOM Elements)
 
 ```python
 from dars.all import *
@@ -202,7 +264,24 @@ V("#myInput")
 
 # Select by Class
 V(".myClass")
+
 ```
+
+#### State Paths (Reactive State)
+
+**New in v1.5.8**: `V()` now supports extracting values directly from reactive state created by `useDynamic()`:
+
+```python
+# Extract from reactive state
+V("cart.total")      # Gets current value of cart.total
+V("user.name")       # Gets current value of user.name
+V("product.price")   # Gets current value of product.price
+```
+
+**How it works:**
+- `V("cart.total")` finds the reactive element created by `useDynamic("cart.total")`
+- Reads its current `textContent` value
+- Perfect for combining reactive state with calculations
 
 #### Transformations
 
@@ -212,23 +291,107 @@ You can chain transformation methods to process values before using them:
 # String transformations
 V("#name").upper()   # "JOHN"
 V("#name").lower()   # "john"
+V("#name").trim()    # Remove whitespace
 
-# Numeric transformations (crucial for math operations)
+# Numeric transformations (required for math operations!)
 V("#age").int()      # 25 (integer)
 V("#price").float()  # 19.99 (float)
+V("cart.total").float()  # Extract state value as float
 ```
 
 #### Operations
 
-`ValueRef` objects support standard Python operators:
+`ValueRef` objects support Python operators with **important validation**:
+
+**String Concatenation (Always Allowed)**
+```python
+# Concatenation works without transformations
+state.fullname.set(V("#first") + " " + V("#last"))
+message = "Total: $" + V("cart.total")
+```
+
+**Arithmetic Operations (Require Numeric Transformations)**
+
+**New in v1.5.8**: Arithmetic operators (`*`, `/`, `-`, `%`, `**`) now **require** `.int()` or `.float()` transformations to prevent accidental string concatenation:
 
 ```python
-# Concatenation
-state.fullname.set(V("#first") + " " + V("#last"))
-
-# Math operations (requires numeric transformation)
+# CORRECT - With numeric transformations
+state.total.set(V("#price").float() * V("#qty").int())
 state.age.set(V("#age").int() + 10)
-state.total.set(V("#price").float() * V("#quantity").int())
+discount = V("product.price").float() * 0.9
+
+# CORRECT - Combining DOM and state values
+productState.total.set(
+    V(".qty-input").int() * V("product.price").float()
+)
+
+# ERROR - Without transformations
+state.total.set(V("#price") * V("#qty"))
+# TypeError: Multiplication requires numeric transformation.
+#            Use V('#price').int() or V('#price').float() before multiplying.
+```
+
+**Supported Operators:**
+- `+` - Addition/Concatenation (always allowed)
+- `*` - Multiplication (requires `.int()` or `.float()`)
+- `/` - Division (requires `.int()` or `.float()`)
+- `-` - Subtraction (requires `.int()` or `.float()`)
+- `%` - Modulo (requires `.int()` or `.float()`)
+- `**` - Power (requires `.int()` or `.float()`)
+
+#### Complete Example
+
+```python
+from dars.all import *
+
+app = App("Shopping Cart")
+
+# Reactive state
+cartState = State("cart", total=0.0)
+productState = State("product", name="Widget", price=19.99, quantity=1)
+
+@FunctionComponent
+def ProductCard(**props):
+    return f'''
+    <div {Props.id} {Props.class_name} {Props.style}>
+        <!-- Reactive display -->
+        <h3>{useDynamic("product.name")}</h3>
+        <p>Price: ${useDynamic("product.price")}</p>
+        
+        <!-- Editable quantity with selector -->
+        <input type="number" 
+               value="{useValue("product.quantity", ".qty-input")}"
+               min="1" />
+        
+        <!-- Reactive total -->
+        <p>Total: ${useDynamic("cart.total")}</p>
+    </div>
+    '''
+
+@route("/")
+def index():
+    return Page(
+        ProductCard(id="product-card", name="Milk", price=100, quantity=2, total=0),
+        
+        # Calculate: DOM input × State value
+        Button("Calculate Total", on_click=cartState.total.set(
+            V(".qty-input").int() * V("product.price").float()
+        )),
+        
+        # String concatenation (no transformation needed)
+        Button("Show Info", on_click=productState.name.set(
+            "Product: " + V("product.name") + " - $" + V("product.price")
+            )
+        )
+    )
+
+app.add_page("index", index(), title="Product", index=True)
+
+# Watch for changes
+app.useWatch("cart.total", log("Cart total changed!"))
+
+if __name__ == "__main__":
+    app.rTimeCompile()
 ```
 
 ### url() - URL Builder
@@ -236,9 +399,21 @@ state.total.set(V("#price").float() * V("#quantity").int())
 The `url()` helper constructs dynamic URLs by interpolating `ValueRef` objects into a template string.
 
 ```python
-# Generates: https://api.example.com/users/123/profile
+# With DOM values
 fetch(
     url("https://api.example.com/users/{id}/profile", id=V("#userId"))
+)
+
+# With state values
+fetch(
+    url("/api/products/{id}", id=V("product.id"))
+)
+
+# Mixed
+fetch(
+    url("/api/{resource}/{id}", 
+        resource="users", 
+        id=V("#userId"))
 )
 ```
 
@@ -251,10 +426,13 @@ fetch(
 **Do:**
 - Use `useDynamic` for simple text/value updates.
 - Use `useWatch` for side effects like logging, analytics, or complex logic.
+- Use `useValue` with selectors for form inputs that need value extraction.
 - Use consistent state naming (e.g., `"user"`, `"cart"`).
+- Always use `.int()` or `.float()` before arithmetic operations with `V()`.
 
 **Don't:**
 - Use with non-existent state paths.
 - Nest state paths more than 2 levels deep (currently supports `stateName.property`).
+- Use arithmetic operators without numeric transformations.
 
 ---

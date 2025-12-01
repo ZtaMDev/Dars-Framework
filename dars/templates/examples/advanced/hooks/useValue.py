@@ -147,8 +147,8 @@ def index():
                 children=Container(
                     Text("useValue works directly in templates to render initial values.", style={"margin-bottom": "10px", "color": "#666"}),
                     Container(
-                        Text(f"Initial Name: {useValue('form.firstname')} {useValue('form.lastname')}", style={"font-weight": "bold", "color": "blue"}),
-                        Text(f"Initial Bio: {useValue('form.bio')}", style={"font-style": "italic"}),
+                        Text(text=useDynamic('form.firstname'), style={"font-weight": "bold", "color": "blue"}),
+                        Text(text=useDynamic('form.bio'), style={"font-style": "italic"}),
                         style={"padding": "10px", "background": "#eef", "border-radius": "4px"}
                     )
                 )

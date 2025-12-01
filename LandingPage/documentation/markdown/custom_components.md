@@ -78,6 +78,183 @@ Button("Increment", on_click=state.text.set("5"))
 
 ---
 
+## Using Hooks in FunctionComponents
+
+FunctionComponents work seamlessly with all Dars hooks, enabling reactive and interactive behavior.
+
+### useDynamic() - Reactive Bindings
+
+Use `useDynamic()` to create reactive text that updates automatically when state changes:
+
+```python
+from dars.all import *
+
+userState = State("user", name="John Doe", status="Active")
+
+@FunctionComponent
+def UserCard(**props):
+    return f'''
+    <div {Props.id} {Props.class_name} {Props.style}>
+        <h3>Name: {useDynamic("user.name")}</h3>
+        <p>Status: {useDynamic("user.status")}</p>
+        {Props.children}
+    </div>
+    '''
+
+# The name and status will update automatically when state changes
+card = UserCard(id="user-card")
+Button("Update", on_click=userState.name.set("Jane Doe"))
+```
+
+### useValue() - Initial Values with Selectors
+
+Use `useValue()` with selectors to set initial values and enable value extraction:
+
+```python
+from dars.all import *
+
+app = App("Example of hooks")
+
+userState = State("user", name="Jane Doe", email="jane@example.com", display="None")
+
+@FunctionComponent
+def UserForm(**props):
+    return f'''
+    <div {Props.id} {Props.class_name} {Props.style}>
+        <input value="{useValue("user.name", ".name-input")}" />
+        <input value="{useValue("user.email", "#email-field")}" />
+        <span>{useValue("user.age", ".age-display")}</span>
+        <span>{useDynamic("user.display")}</span>
+    </div>
+    '''
+
+
+@route("/")
+def index():
+    return Page(
+        UserForm(id="user-form"),
+        # Extract values using V() helper with the selectors
+        Button(
+            "Get Name",
+            on_click=userState.display.set(
+                "Name: " + V(".name-input")  # Extract current value
+            )
+        ),
+
+        Button(
+            "Combine Values",
+            on_click=userState.display.set(
+                V(".name-input") + " (" + V("#email-field") + ")"
+            )
+        )
+    )
+
+app.add_page("index", index(), title="hooks", index=True)
+
+if __name__ == "__main__":
+    app.rTimeCompile()
+```
+
+### useWatch() - Side Effects
+
+Use `useWatch()` to monitor state changes and execute side effects:
+
+```python
+from dars.all import *
+
+app = App("Example of hooks")
+
+cartState = State("cart", total=0.0)
+
+@FunctionComponent
+def CartSummary(total=0,**props):
+    return f'''
+    <div {Props.id} {Props.class_name} {Props.style}>
+        <h3>Cart Total: ${useDynamic("cart.total")}</h3>
+        {Props.children}
+    </div>
+    '''
+
+# Watch for cart changes and log
+app.useWatch("cart.total", log("Cart total changed!"))
+
+@route("/")
+def index():
+    return Page(
+        CartSummary(id="cart-summary", total=0),
+        # Button to add $10 to cart total using V() with state path
+        Button("Add $10", on_click=cartState.total.set(
+            V("cart.total").float() + 10
+        ))
+    )
+
+app.add_page("index", index(), title="hooks", index=True)
+
+if __name__ == "__main__":
+    app.rTimeCompile()
+```
+
+### Combining Multiple Hooks
+
+You can combine multiple hooks for complex interactive components:
+
+```python
+from dars.all import *
+
+app = App("Example of hooks")
+
+productState = State("product", 
+    name="Widget", 
+    price=19.99, 
+    quantity=1,
+    total=19.99
+)
+
+@FunctionComponent
+def ProductCard(**props):
+    return f'''
+    <div {Props.id} {Props.class_name} {Props.style}>
+        <!-- useDynamic for reactive display -->
+        <h3>{useDynamic("product.name")}</h3>
+        <p>Price: ${useDynamic("product.price")}</p>
+        <!-- useValue for editable quantity -->
+        <h3>Number to multiply with price</h3>
+        <input type="number" 
+               value="{useValue("product.quantity", ".qty-input")}"
+               min="1" />
+        
+        
+        <!-- useDynamic for calculated total -->
+        <p>Total: ${useDynamic("product.total")}</p>
+        
+        {Props.children}
+    </div>
+    '''
+
+# Watch for total changes and show alert
+app.useWatch("product.total", log("Total updated!"))
+
+@route("/")
+def index():
+    return Page(
+        ProductCard(id="product-card",name="Milk", price=100, quantity=0, total=0 ),
+        Button(
+            "Calculate Total",
+            on_click=productState.total.set(
+                V(".qty-input").int() * V("product.price").float()
+            )
+        )
+
+    )
+
+app.add_page("index", index(), title="hooks", index=True)
+
+if __name__ == "__main__":
+    app.rTimeCompile()
+```
+
+---
+
 ## Class Components (Legacy)
 
 This is the older method of creating components by inheriting from the `Component` class. It is more verbose and requires manual handling of rendering logic.
@@ -108,3 +285,4 @@ class CustomComponent(Component):
         '''
 ```
 
+---

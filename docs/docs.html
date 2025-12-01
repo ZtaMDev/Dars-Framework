@@ -1202,6 +1202,21 @@
      <a class="sidebar-link sidebar-level-3" href="#example-with-state-and-events" style="margin-left: 40px">
       Example with State and Events
      </a>
+     <a class="sidebar-link sidebar-level-2" href="#using-hooks-in-functioncomponents" style="margin-left: 20px">
+      Using Hooks in FunctionComponents
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#usedynamic-reactive-bindings" style="margin-left: 40px">
+      useDynamic() - Reactive Bindings
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#usevalue-initial-values-with-selectors" style="margin-left: 40px">
+      useValue() - Initial Values with Selectors
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#usewatch-side-effects" style="margin-left: 40px">
+      useWatch() - Side Effects
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#combining-multiple-hooks" style="margin-left: 40px">
+      Combining Multiple Hooks
+     </a>
      <a class="sidebar-link sidebar-level-2" href="#class-components-legacy" style="margin-left: 20px">
       Class Components (Legacy)
      </a>
@@ -1219,11 +1234,14 @@
      <a class="sidebar-link sidebar-level-2" href="#usevalue-initial-value-access" style="margin-left: 20px">
       useValue() - Initial Value Access
      </a>
-     <a class="sidebar-link sidebar-level-3" href="#usage" style="margin-left: 40px">
-      Usage
+     <a class="sidebar-link sidebar-level-3" href="#basic-usage" style="margin-left: 40px">
+      Basic Usage
      </a>
-     <a class="sidebar-link sidebar-level-3" href="#difference-from-usedynamicnext-hook-after-usevalue" style="margin-left: 40px">
-      Difference from useDynamic(next hook after useValue)
+     <a class="sidebar-link sidebar-level-3" href="#usage-in-functioncomponents-with-selectors" style="margin-left: 40px">
+      Usage in FunctionComponents with Selectors
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#difference-from-usedynamic" style="margin-left: 40px">
+      Difference from useDynamic
      </a>
      <a class="sidebar-link sidebar-level-3" href="#syntax" style="margin-left: 40px">
       Syntax
@@ -1258,11 +1276,20 @@
      <a class="sidebar-link sidebar-level-3" href="#v-value-reference" style="margin-left: 40px">
       V() - Value Reference
      </a>
+     <a class="sidebar-link sidebar-level-4" href="#css-selectors-dom-elements" style="margin-left: 60px">
+      CSS Selectors (DOM Elements)
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#state-paths-reactive-state" style="margin-left: 60px">
+      State Paths (Reactive State)
+     </a>
      <a class="sidebar-link sidebar-level-4" href="#transformations" style="margin-left: 60px">
       Transformations
      </a>
      <a class="sidebar-link sidebar-level-4" href="#operations" style="margin-left: 60px">
       Operations
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#complete-example" style="margin-left: 60px">
+      Complete Example
      </a>
      <a class="sidebar-link sidebar-level-3" href="#url-url-builder" style="margin-left: 40px">
       url() - URL Builder
@@ -11483,6 +11510,204 @@ def hello():
 </code></pre>
       </div>
       <hr/>
+      <h2 id="using-hooks-in-functioncomponents">
+       Using Hooks in FunctionComponents
+      </h2>
+      <p>
+       FunctionComponents work seamlessly with all Dars hooks, enabling reactive and interactive behavior.
+      </p>
+      <h3 id="usedynamic-reactive-bindings">
+       useDynamic() - Reactive Bindings
+      </h3>
+      <p>
+       Use
+       <code>
+        useDynamic()
+       </code>
+       to create reactive text that updates automatically when state changes:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">userState</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"user"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"John Doe"</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="s2">"Active"</span><span class="p">)</span>
+
+<span class="nd">@FunctionComponent</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">UserCard</span><span class="p">(</span><span class="o">**</span><span class="n">props</span><span class="p">):</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">'''</span>
+<span class="s1">    &lt;div </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">class_name</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">style</span><span class="si">}</span><span class="s1">&gt;</span>
+<span class="s1">        &lt;h3&gt;Name: </span><span class="si">{</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"user.name"</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/h3&gt;</span>
+<span class="s1">        &lt;p&gt;Status: </span><span class="si">{</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"user.status"</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/p&gt;</span>
+<span class="s1">        </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">children</span><span class="si">}</span>
+<span class="s1">    &lt;/div&gt;</span>
+<span class="s1">    '''</span>
+
+<span class="c1"># The name and status will update automatically when state changes</span>
+<span class="n">card</span> <span class="o">=</span> <span class="n">UserCard</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"user-card"</span><span class="p">)</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Update"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">userState</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"Jane Doe"</span><span class="p">))</span>
+</code></pre>
+      </div>
+      <h3 id="usevalue-initial-values-with-selectors">
+       useValue() - Initial Values with Selectors
+      </h3>
+      <p>
+       Use
+       <code>
+        useValue()
+       </code>
+       with selectors to set initial values and enable value extraction:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="s2">"Example of hooks"</span><span class="p">)</span>
+
+<span class="n">userState</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"user"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Jane Doe"</span><span class="p">,</span> <span class="n">email</span><span class="o">=</span><span class="s2">"jane@example.com"</span><span class="p">,</span> <span class="n">display</span><span class="o">=</span><span class="s2">"None"</span><span class="p">)</span>
+
+<span class="nd">@FunctionComponent</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">UserForm</span><span class="p">(</span><span class="o">**</span><span class="n">props</span><span class="p">):</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">'''</span>
+<span class="s1">    &lt;div </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">class_name</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">style</span><span class="si">}</span><span class="s1">&gt;</span>
+<span class="s1">        &lt;input value="</span><span class="si">{</span><span class="n">useValue</span><span class="p">(</span><span class="s2">"user.name"</span><span class="p">,</span><span class="w"> </span><span class="s2">".name-input"</span><span class="p">)</span><span class="si">}</span><span class="s1">" /&gt;</span>
+<span class="s1">        &lt;input value="</span><span class="si">{</span><span class="n">useValue</span><span class="p">(</span><span class="s2">"user.email"</span><span class="p">,</span><span class="w"> </span><span class="s2">"#email-field"</span><span class="p">)</span><span class="si">}</span><span class="s1">" /&gt;</span>
+<span class="s1">        &lt;span&gt;</span><span class="si">{</span><span class="n">useValue</span><span class="p">(</span><span class="s2">"user.age"</span><span class="p">,</span><span class="w"> </span><span class="s2">".age-display"</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/span&gt;</span>
+<span class="s1">        &lt;span&gt;</span><span class="si">{</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"user.display"</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/span&gt;</span>
+<span class="s1">    &lt;/div&gt;</span>
+<span class="s1">    '''</span>
+
+
+<span class="nd">@route</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span>
+        <span class="n">UserForm</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"user-form"</span><span class="p">),</span>
+        <span class="c1"># Extract values using V() helper with the selectors</span>
+        <span class="n">Button</span><span class="p">(</span>
+            <span class="s2">"Get Name"</span><span class="p">,</span>
+            <span class="n">on_click</span><span class="o">=</span><span class="n">userState</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+                <span class="s2">"Name: "</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">".name-input"</span><span class="p">)</span>  <span class="c1"># Extract current value</span>
+            <span class="p">)</span>
+        <span class="p">),</span>
+
+        <span class="n">Button</span><span class="p">(</span>
+            <span class="s2">"Combine Values"</span><span class="p">,</span>
+            <span class="n">on_click</span><span class="o">=</span><span class="n">userState</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+                <span class="n">V</span><span class="p">(</span><span class="s2">".name-input"</span><span class="p">)</span> <span class="o">+</span> <span class="s2">" ("</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#email-field"</span><span class="p">)</span> <span class="o">+</span> <span class="s2">")"</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="s2">"index"</span><span class="p">,</span> <span class="n">index</span><span class="p">(),</span> <span class="n">title</span><span class="o">=</span><span class="s2">"hooks"</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">rTimeCompile</span><span class="p">()</span>
+</code></pre>
+      </div>
+      <h3 id="usewatch-side-effects">
+       useWatch() - Side Effects
+      </h3>
+      <p>
+       Use
+       <code>
+        useWatch()
+       </code>
+       to monitor state changes and execute side effects:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="s2">"Example of hooks"</span><span class="p">)</span>
+
+<span class="n">cartState</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"cart"</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+
+<span class="nd">@FunctionComponent</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">CartSummary</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="o">**</span><span class="n">props</span><span class="p">):</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">'''</span>
+<span class="s1">    &lt;div </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">class_name</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">style</span><span class="si">}</span><span class="s1">&gt;</span>
+<span class="s1">        &lt;h3&gt;Cart Total: $</span><span class="si">{</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"cart.total"</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/h3&gt;</span>
+<span class="s1">        </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">children</span><span class="si">}</span>
+<span class="s1">    &lt;/div&gt;</span>
+<span class="s1">    '''</span>
+
+<span class="c1"># Watch for cart changes and log</span>
+<span class="n">app</span><span class="o">.</span><span class="n">useWatch</span><span class="p">(</span><span class="s2">"cart.total"</span><span class="p">,</span> <span class="n">log</span><span class="p">(</span><span class="s2">"Cart total changed!"</span><span class="p">))</span>
+
+<span class="nd">@route</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span>
+        <span class="n">CartSummary</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"cart-summary"</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+        <span class="c1"># Button to add $10 to cart total using V() with state path</span>
+        <span class="n">Button</span><span class="p">(</span><span class="s2">"Add $10"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">cartState</span><span class="o">.</span><span class="n">total</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+            <span class="n">V</span><span class="p">(</span><span class="s2">"cart.total"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">+</span> <span class="mi">10</span>
+        <span class="p">))</span>
+    <span class="p">)</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="s2">"index"</span><span class="p">,</span> <span class="n">index</span><span class="p">(),</span> <span class="n">title</span><span class="o">=</span><span class="s2">"hooks"</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">rTimeCompile</span><span class="p">()</span>
+</code></pre>
+      </div>
+      <h3 id="combining-multiple-hooks">
+       Combining Multiple Hooks
+      </h3>
+      <p>
+       You can combine multiple hooks for complex interactive components:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="s2">"Example of hooks"</span><span class="p">)</span>
+
+<span class="n">productState</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"product"</span><span class="p">,</span> 
+    <span class="n">name</span><span class="o">=</span><span class="s2">"Widget"</span><span class="p">,</span> 
+    <span class="n">price</span><span class="o">=</span><span class="mf">19.99</span><span class="p">,</span> 
+    <span class="n">quantity</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">total</span><span class="o">=</span><span class="mf">19.99</span>
+<span class="p">)</span>
+
+<span class="nd">@FunctionComponent</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ProductCard</span><span class="p">(</span><span class="o">**</span><span class="n">props</span><span class="p">):</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">'''</span>
+<span class="s1">    &lt;div </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">class_name</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">style</span><span class="si">}</span><span class="s1">&gt;</span>
+<span class="s1">        &lt;!-- useDynamic for reactive display --&gt;</span>
+<span class="s1">        &lt;h3&gt;</span><span class="si">{</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"product.name"</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/h3&gt;</span>
+<span class="s1">        &lt;p&gt;Price: $</span><span class="si">{</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"product.price"</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/p&gt;</span>
+<span class="s1">        &lt;!-- useValue for editable quantity --&gt;</span>
+<span class="s1">        &lt;h3&gt;Number to multiply with price&lt;/h3&gt;</span>
+<span class="s1">        &lt;input type="number" </span>
+<span class="s1">               value="</span><span class="si">{</span><span class="n">useValue</span><span class="p">(</span><span class="s2">"product.quantity"</span><span class="p">,</span><span class="w"> </span><span class="s2">".qty-input"</span><span class="p">)</span><span class="si">}</span><span class="s1">"</span>
+<span class="s1">               min="1" /&gt;</span>
+
+
+<span class="s1">        &lt;!-- useDynamic for calculated total --&gt;</span>
+<span class="s1">        &lt;p&gt;Total: $</span><span class="si">{</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"product.total"</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/p&gt;</span>
+
+<span class="s1">        </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">children</span><span class="si">}</span>
+<span class="s1">    &lt;/div&gt;</span>
+<span class="s1">    '''</span>
+
+<span class="c1"># Watch for total changes and show alert</span>
+<span class="n">app</span><span class="o">.</span><span class="n">useWatch</span><span class="p">(</span><span class="s2">"product.total"</span><span class="p">,</span> <span class="n">log</span><span class="p">(</span><span class="s2">"Total updated!"</span><span class="p">))</span>
+
+<span class="nd">@route</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span>
+        <span class="n">ProductCard</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"product-card"</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s2">"Milk"</span><span class="p">,</span> <span class="n">price</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">quantity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="mi">0</span> <span class="p">),</span>
+        <span class="n">Button</span><span class="p">(</span>
+            <span class="s2">"Calculate Total"</span><span class="p">,</span>
+            <span class="n">on_click</span><span class="o">=</span><span class="n">productState</span><span class="o">.</span><span class="n">total</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+                <span class="n">V</span><span class="p">(</span><span class="s2">".qty-input"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">*</span> <span class="n">V</span><span class="p">(</span><span class="s2">"product.price"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="p">)</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="s2">"index"</span><span class="p">,</span> <span class="n">index</span><span class="p">(),</span> <span class="n">title</span><span class="o">=</span><span class="s2">"hooks"</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">rTimeCompile</span><span class="p">()</span>
+</code></pre>
+      </div>
+      <hr/>
       <h2 id="class-components-legacy">
        Class Components (Legacy)
       </h2>
@@ -11519,6 +11744,7 @@ def hello():
 <span class="s1">        '''</span>
 </code></pre>
       </div>
+      <hr/>
      </div>
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_122">
       <h1 id="hooks-system">
@@ -11572,8 +11798,8 @@ def hello():
        </strong>
        of a state property without creating a reactive binding. This is ideal for form inputs where you want to set a default value but allow the user to edit it freely.
       </p>
-      <h3 id="usage">
-       Usage
+      <h3 id="basic-usage">
+       Basic Usage
       </h3>
       <p>
        Pass
@@ -11594,8 +11820,114 @@ def hello():
 <span class="n">Textarea</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">useValue</span><span class="p">(</span><span class="s2">"user.email"</span><span class="p">))</span>
 </code></pre>
       </div>
-      <h3 id="difference-from-usedynamicnext-hook-after-usevalue">
-       Difference from useDynamic(next hook after useValue)
+      <h3 id="usage-in-functioncomponents-with-selectors">
+       Usage in FunctionComponents with Selectors
+      </h3>
+      <p>
+       <code>
+        useValue()
+       </code>
+       supports automatic selector application in FunctionComponents! When you provide a selector (class or ID), it will be automatically applied to the element where the value is used.
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="s2">"Example of hooks"</span><span class="p">)</span>
+
+<span class="n">userState</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"user"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Jane Doe"</span><span class="p">,</span> <span class="n">email</span><span class="o">=</span><span class="s2">"jane@example.com"</span><span class="p">,</span> <span class="n">display</span><span class="o">=</span><span class="s2">"None"</span><span class="p">)</span>
+
+<span class="nd">@FunctionComponent</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">UserForm</span><span class="p">(</span><span class="o">**</span><span class="n">props</span><span class="p">):</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">'''</span>
+<span class="s1">    &lt;div </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">class_name</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">style</span><span class="si">}</span><span class="s1">&gt;</span>
+<span class="s1">        &lt;input value="</span><span class="si">{</span><span class="n">useValue</span><span class="p">(</span><span class="s2">"user.name"</span><span class="p">,</span><span class="w"> </span><span class="s2">".name-input"</span><span class="p">)</span><span class="si">}</span><span class="s1">" /&gt;</span>
+<span class="s1">        &lt;input value="</span><span class="si">{</span><span class="n">useValue</span><span class="p">(</span><span class="s2">"user.email"</span><span class="p">,</span><span class="w"> </span><span class="s2">"#email-field"</span><span class="p">)</span><span class="si">}</span><span class="s1">" /&gt;</span>
+<span class="s1">        &lt;span&gt;</span><span class="si">{</span><span class="n">useValue</span><span class="p">(</span><span class="s2">"user.age"</span><span class="p">,</span><span class="w"> </span><span class="s2">".age-display"</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/span&gt;</span>
+<span class="s1">        &lt;span&gt;</span><span class="si">{</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"user.display"</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/span&gt;</span>
+<span class="s1">    &lt;/div&gt;</span>
+<span class="s1">    '''</span>
+
+
+<span class="nd">@route</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span>
+        <span class="n">UserForm</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"user-form"</span><span class="p">),</span>
+        <span class="c1"># Extract values using V() helper with the selectors</span>
+        <span class="n">Button</span><span class="p">(</span>
+            <span class="s2">"Get Name"</span><span class="p">,</span>
+            <span class="n">on_click</span><span class="o">=</span><span class="n">userState</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+                <span class="s2">"Name: "</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">".name-input"</span><span class="p">)</span>  <span class="c1"># Extract current value</span>
+            <span class="p">)</span>
+        <span class="p">),</span>
+
+        <span class="n">Button</span><span class="p">(</span>
+            <span class="s2">"Combine Values"</span><span class="p">,</span>
+            <span class="n">on_click</span><span class="o">=</span><span class="n">userState</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+                <span class="n">V</span><span class="p">(</span><span class="s2">".name-input"</span><span class="p">)</span> <span class="o">+</span> <span class="s2">" ("</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#email-field"</span><span class="p">)</span> <span class="o">+</span> <span class="s2">")"</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="s2">"index"</span><span class="p">,</span> <span class="n">index</span><span class="p">(),</span> <span class="n">title</span><span class="o">=</span><span class="s2">"hooks"</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">rTimeCompile</span><span class="p">()</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        How it works:
+       </strong>
+       1.
+       <code>
+        useValue("user.name", ".name-input")
+       </code>
+       sets initial value "Jane Doe" and applies class
+       <code>
+        name-input
+       </code>
+       to the input
+2. User can edit the value freely
+3.
+       <code>
+        V(".name-input")
+       </code>
+       extracts the current value (even if modified by user)
+4. Perfect for forms where you need both initial values and value extraction
+      </p>
+      <p>
+       <strong>
+        Supported selectors:
+       </strong>
+       -
+       <strong>
+        Class selectors
+       </strong>
+       (
+       <code>
+        .foo
+       </code>
+       ) → Added to element's
+       <code>
+        class
+       </code>
+       attribute
+-
+       <strong>
+        ID selectors
+       </strong>
+       (
+       <code>
+        #bar
+       </code>
+       ) → Set as element's
+       <code>
+        id
+       </code>
+       attribute
+      </p>
+      <h3 id="difference-from-usedynamic">
+       Difference from useDynamic
       </h3>
       <ul>
        <li>
@@ -11606,9 +11938,9 @@ def hello():
         </strong>
         : Creates a
         <strong>
-         two-way binding
+         reactive binding
         </strong>
-        (or one-way reactive binding). If the state changes, the input value updates automatically.
+        . If the state changes, the input value updates automatically.
        </li>
        <li>
         <strong>
@@ -11627,7 +11959,7 @@ def hello():
        Syntax
       </h3>
       <div class="codehilite">
-       <pre><span></span><code><span class="n">useValue</span><span class="p">(</span><span class="n">state_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ValueMarker</span>
+       <pre><span></span><code><span class="n">useValue</span><span class="p">(</span><span class="n">state_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">selector</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ValueMarker</span>
 </code></pre>
       </div>
       <p>
@@ -11643,6 +11975,11 @@ def hello():
         "user.name"
        </code>
        )
+-
+       <code>
+        selector
+       </code>
+       : Optional CSS selector (class or ID) to apply to the element
       </p>
       <p>
        <strong>
@@ -11708,7 +12045,7 @@ def hello():
     <span class="c1"># Bind button text and disabled state</span>
     <span class="n">Button</span><span class="p">(</span>
         <span class="n">text</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"user.status"</span><span class="p">),</span> 
-        <span class="n">disabled</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"user.is_admin"</span><span class="p">),</span> <span class="c1"># Disables button if is_admin is True (or False depending on logic)</span>
+        <span class="n">disabled</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"user.is_admin"</span><span class="p">),</span>
         <span class="n">on_click</span><span class="o">=</span><span class="n">userState</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"Clicked!"</span><span class="p">)</span>
     <span class="p">)</span>
 <span class="p">)</span>
@@ -12011,7 +12348,7 @@ def hello():
        </code>
        hook allows you to monitor state changes and execute callbacks (side effects).
       </p>
-      <h3 id="usage-2">
+      <h3 id="usage">
        Usage
       </h3>
       <p>
@@ -12125,7 +12462,7 @@ def hello():
        Pythonic Value Helpers
       </h2>
       <p>
-       Dars provides a set of helpers to make working with DOM values completely Pythonic, eliminating the need for raw JavaScript.
+       Dars provides a set of helpers to make working with DOM values and reactive state completely Pythonic, eliminating the need for raw JavaScript.
       </p>
       <h3 id="v-value-reference">
        V() - Value Reference
@@ -12135,8 +12472,19 @@ def hello():
        <code>
         V()
        </code>
-       helper allows you to select DOM elements and perform operations directly in Python.
+       helper allows you to extract values from
+       <strong>
+        DOM elements
+       </strong>
+       (via CSS selectors) or
+       <strong>
+        reactive state
+       </strong>
+       (via state paths).
       </p>
+      <h4 id="css-selectors-dom-elements">
+       CSS Selectors (DOM Elements)
+      </h4>
       <div class="codehilite">
        <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
@@ -12147,6 +12495,49 @@ def hello():
 <span class="n">V</span><span class="p">(</span><span class="s2">".myClass"</span><span class="p">)</span>
 </code></pre>
       </div>
+      <h4 id="state-paths-reactive-state">
+       State Paths (Reactive State)
+      </h4>
+      <p>
+       <strong>
+        New in v1.5.8
+       </strong>
+       :
+       <code>
+        V()
+       </code>
+       now supports extracting values directly from reactive state created by
+       <code>
+        useDynamic()
+       </code>
+       :
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Extract from reactive state</span>
+<span class="n">V</span><span class="p">(</span><span class="s2">"cart.total"</span><span class="p">)</span>      <span class="c1"># Gets current value of cart.total</span>
+<span class="n">V</span><span class="p">(</span><span class="s2">"user.name"</span><span class="p">)</span>       <span class="c1"># Gets current value of user.name</span>
+<span class="n">V</span><span class="p">(</span><span class="s2">"product.price"</span><span class="p">)</span>   <span class="c1"># Gets current value of product.price</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        How it works:
+       </strong>
+       -
+       <code>
+        V("cart.total")
+       </code>
+       finds the reactive element created by
+       <code>
+        useDynamic("cart.total")
+       </code>
+       - Reads its current
+       <code>
+        textContent
+       </code>
+       value
+- Perfect for combining reactive state with calculations
+      </p>
       <h4 id="transformations">
        Transformations
       </h4>
@@ -12157,10 +12548,12 @@ def hello():
        <pre><span></span><code><span class="c1"># String transformations</span>
 <span class="n">V</span><span class="p">(</span><span class="s2">"#name"</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>   <span class="c1"># "JOHN"</span>
 <span class="n">V</span><span class="p">(</span><span class="s2">"#name"</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>   <span class="c1"># "john"</span>
+<span class="n">V</span><span class="p">(</span><span class="s2">"#name"</span><span class="p">)</span><span class="o">.</span><span class="n">trim</span><span class="p">()</span>    <span class="c1"># Remove whitespace</span>
 
-<span class="c1"># Numeric transformations (crucial for math operations)</span>
+<span class="c1"># Numeric transformations (required for math operations!)</span>
 <span class="n">V</span><span class="p">(</span><span class="s2">"#age"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span>      <span class="c1"># 25 (integer)</span>
 <span class="n">V</span><span class="p">(</span><span class="s2">"#price"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>  <span class="c1"># 19.99 (float)</span>
+<span class="n">V</span><span class="p">(</span><span class="s2">"cart.total"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>  <span class="c1"># Extract state value as float</span>
 </code></pre>
       </div>
       <h4 id="operations">
@@ -12170,15 +12563,211 @@ def hello():
        <code>
         ValueRef
        </code>
-       objects support standard Python operators:
+       objects support Python operators with
+       <strong>
+        important validation
+       </strong>
+       :
+      </p>
+      <p>
+       <strong>
+        String Concatenation (Always Allowed)
+       </strong>
       </p>
       <div class="codehilite">
-       <pre><span></span><code><span class="c1"># Concatenation</span>
+       <pre><span></span><code><span class="c1"># Concatenation works without transformations</span>
 <span class="n">state</span><span class="o">.</span><span class="n">fullname</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#first"</span><span class="p">)</span> <span class="o">+</span> <span class="s2">" "</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#last"</span><span class="p">))</span>
-
-<span class="c1"># Math operations (requires numeric transformation)</span>
+<span class="n">message</span> <span class="o">=</span> <span class="s2">"Total: $"</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">"cart.total"</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Arithmetic Operations (Require Numeric Transformations)
+       </strong>
+      </p>
+      <p>
+       <strong>
+        New in v1.5.8
+       </strong>
+       : Arithmetic operators (
+       <code>
+        *
+       </code>
+       ,
+       <code>
+        /
+       </code>
+       ,
+       <code>
+        -
+       </code>
+       ,
+       <code>
+        %
+       </code>
+       ,
+       <code>
+        **
+       </code>
+       ) now
+       <strong>
+        require
+       </strong>
+       <code>
+        .int()
+       </code>
+       or
+       <code>
+        .float()
+       </code>
+       transformations to prevent accidental string concatenation:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># CORRECT - With numeric transformations</span>
+<span class="n">state</span><span class="o">.</span><span class="n">total</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#price"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">*</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#qty"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">())</span>
 <span class="n">state</span><span class="o">.</span><span class="n">age</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#age"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">+</span> <span class="mi">10</span><span class="p">)</span>
-<span class="n">state</span><span class="o">.</span><span class="n">total</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#price"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">*</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#quantity"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">())</span>
+<span class="n">discount</span> <span class="o">=</span> <span class="n">V</span><span class="p">(</span><span class="s2">"product.price"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">*</span> <span class="mf">0.9</span>
+
+<span class="c1"># CORRECT - Combining DOM and state values</span>
+<span class="n">productState</span><span class="o">.</span><span class="n">total</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+    <span class="n">V</span><span class="p">(</span><span class="s2">".qty-input"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">*</span> <span class="n">V</span><span class="p">(</span><span class="s2">"product.price"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+<span class="p">)</span>
+
+<span class="c1"># ERROR - Without transformations</span>
+<span class="n">state</span><span class="o">.</span><span class="n">total</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#price"</span><span class="p">)</span> <span class="o">*</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#qty"</span><span class="p">))</span>
+<span class="c1"># TypeError: Multiplication requires numeric transformation.</span>
+<span class="c1">#            Use V('#price').int() or V('#price').float() before multiplying.</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Supported Operators:
+       </strong>
+       -
+       <code>
+        +
+       </code>
+       - Addition/Concatenation (always allowed)
+-
+       <code>
+        *
+       </code>
+       - Multiplication (requires
+       <code>
+        .int()
+       </code>
+       or
+       <code>
+        .float()
+       </code>
+       )
+-
+       <code>
+        /
+       </code>
+       - Division (requires
+       <code>
+        .int()
+       </code>
+       or
+       <code>
+        .float()
+       </code>
+       )
+-
+       <code>
+        -
+       </code>
+       - Subtraction (requires
+       <code>
+        .int()
+       </code>
+       or
+       <code>
+        .float()
+       </code>
+       )
+-
+       <code>
+        %
+       </code>
+       - Modulo (requires
+       <code>
+        .int()
+       </code>
+       or
+       <code>
+        .float()
+       </code>
+       )
+-
+       <code>
+        **
+       </code>
+       - Power (requires
+       <code>
+        .int()
+       </code>
+       or
+       <code>
+        .float()
+       </code>
+       )
+      </p>
+      <h4 id="complete-example">
+       Complete Example
+      </h4>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="s2">"Shopping Cart"</span><span class="p">)</span>
+
+<span class="c1"># Reactive state</span>
+<span class="n">cartState</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"cart"</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+<span class="n">productState</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"product"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Widget"</span><span class="p">,</span> <span class="n">price</span><span class="o">=</span><span class="mf">19.99</span><span class="p">,</span> <span class="n">quantity</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="nd">@FunctionComponent</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ProductCard</span><span class="p">(</span><span class="o">**</span><span class="n">props</span><span class="p">):</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">'''</span>
+<span class="s1">    &lt;div </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">class_name</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">style</span><span class="si">}</span><span class="s1">&gt;</span>
+<span class="s1">        &lt;!-- Reactive display --&gt;</span>
+<span class="s1">        &lt;h3&gt;</span><span class="si">{</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"product.name"</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/h3&gt;</span>
+<span class="s1">        &lt;p&gt;Price: $</span><span class="si">{</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"product.price"</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/p&gt;</span>
+
+<span class="s1">        &lt;!-- Editable quantity with selector --&gt;</span>
+<span class="s1">        &lt;input type="number" </span>
+<span class="s1">               value="</span><span class="si">{</span><span class="n">useValue</span><span class="p">(</span><span class="s2">"product.quantity"</span><span class="p">,</span><span class="w"> </span><span class="s2">".qty-input"</span><span class="p">)</span><span class="si">}</span><span class="s1">"</span>
+<span class="s1">               min="1" /&gt;</span>
+
+<span class="s1">        &lt;!-- Reactive total --&gt;</span>
+<span class="s1">        &lt;p&gt;Total: $</span><span class="si">{</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"cart.total"</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/p&gt;</span>
+<span class="s1">    &lt;/div&gt;</span>
+<span class="s1">    '''</span>
+
+<span class="nd">@route</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span>
+        <span class="n">ProductCard</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"product-card"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Milk"</span><span class="p">,</span> <span class="n">price</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">quantity</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+
+        <span class="c1"># Calculate: DOM input × State value</span>
+        <span class="n">Button</span><span class="p">(</span><span class="s2">"Calculate Total"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">cartState</span><span class="o">.</span><span class="n">total</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+            <span class="n">V</span><span class="p">(</span><span class="s2">".qty-input"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">*</span> <span class="n">V</span><span class="p">(</span><span class="s2">"product.price"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+        <span class="p">)),</span>
+
+        <span class="c1"># String concatenation (no transformation needed)</span>
+        <span class="n">Button</span><span class="p">(</span><span class="s2">"Show Info"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">productState</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+            <span class="s2">"Product: "</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">"product.name"</span><span class="p">)</span> <span class="o">+</span> <span class="s2">" - $"</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">"product.price"</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="s2">"index"</span><span class="p">,</span> <span class="n">index</span><span class="p">(),</span> <span class="n">title</span><span class="o">=</span><span class="s2">"Product"</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Watch for changes</span>
+<span class="n">app</span><span class="o">.</span><span class="n">useWatch</span><span class="p">(</span><span class="s2">"cart.total"</span><span class="p">,</span> <span class="n">log</span><span class="p">(</span><span class="s2">"Cart total changed!"</span><span class="p">))</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">rTimeCompile</span><span class="p">()</span>
 </code></pre>
       </div>
       <h3 id="url-url-builder">
@@ -12196,9 +12785,21 @@ def hello():
        objects into a template string.
       </p>
       <div class="codehilite">
-       <pre><span></span><code><span class="c1"># Generates: https://api.example.com/users/123/profile</span>
+       <pre><span></span><code><span class="c1"># With DOM values</span>
 <span class="n">fetch</span><span class="p">(</span>
     <span class="n">url</span><span class="p">(</span><span class="s2">"https://api.example.com/users/</span><span class="si">{id}</span><span class="s2">/profile"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">V</span><span class="p">(</span><span class="s2">"#userId"</span><span class="p">))</span>
+<span class="p">)</span>
+
+<span class="c1"># With state values</span>
+<span class="n">fetch</span><span class="p">(</span>
+    <span class="n">url</span><span class="p">(</span><span class="s2">"/api/products/</span><span class="si">{id}</span><span class="s2">"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">V</span><span class="p">(</span><span class="s2">"product.id"</span><span class="p">))</span>
+<span class="p">)</span>
+
+<span class="c1"># Mixed</span>
+<span class="n">fetch</span><span class="p">(</span>
+    <span class="n">url</span><span class="p">(</span><span class="s2">"/api/</span><span class="si">{resource}</span><span class="s2">/</span><span class="si">{id}</span><span class="s2">"</span><span class="p">,</span> 
+        <span class="n">resource</span><span class="o">=</span><span class="s2">"users"</span><span class="p">,</span> 
+        <span class="nb">id</span><span class="o">=</span><span class="n">V</span><span class="p">(</span><span class="s2">"#userId"</span><span class="p">))</span>
 <span class="p">)</span>
 </code></pre>
       </div>
@@ -12230,6 +12831,11 @@ def hello():
         useWatch
        </code>
        for side effects like logging, analytics, or complex logic.
+- Use
+       <code>
+        useValue
+       </code>
+       with selectors for form inputs that need value extraction.
 - Use consistent state naming (e.g.,
        <code>
         "user"
@@ -12239,6 +12845,19 @@ def hello():
         "cart"
        </code>
        ).
+- Always use
+       <code>
+        .int()
+       </code>
+       or
+       <code>
+        .float()
+       </code>
+       before arithmetic operations with
+       <code>
+        V()
+       </code>
+       .
       </p>
       <p>
        <strong>
@@ -12250,6 +12869,7 @@ def hello():
         stateName.property
        </code>
        ).
+- Use arithmetic operators without numeric transformations.
       </p>
       <hr/>
      </div>

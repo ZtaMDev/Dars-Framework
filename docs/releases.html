@@ -252,13 +252,13 @@
       (function(){function addCopyButtons(){document.querySelectorAll("pre code").forEach(function(code){var pre=code.parentElement;if(!pre||pre.querySelector(".dars-code-copy"))return;var btn=document.createElement("button");btn.className="dars-code-copy";btn.type="button";btn.textContent="Copy";btn.addEventListener("click",async function(e){e.stopPropagation();try{await navigator.clipboard.writeText(code.innerText);btn.textContent="Copied";btn.classList.add("copied");setTimeout(function(){btn.textContent="Copy";btn.classList.remove("copied")},1200)}catch(err){btn.textContent="Error";setTimeout(function(){btn.textContent="Copy"},1200)}});pre.appendChild(btn);});}function guessLang(text){var t=text.trim();if(/^{[\s\S]*}$/.test(t)||/^\[/.test(t))return "json";if(/^(pip |python |python3 |dars |#|\$ )/m.test(t))return "bash";if(/\b(def |class |import |from |print\(|self\b)/.test(t))return "python";return null;}function stripPygments(code){if(code && code.innerHTML && code.innerHTML.indexOf("<span")!==-1){code.textContent = code.innerText;}}function prepareAndHighlight(){document.querySelectorAll("pre code").forEach(function(code){stripPygments(code);if(!code.className||code.className.indexOf("language-")===-1){var g=guessLang(code.innerText);code.classList.add("language-"+(g||"none"));}if(window.Prism&&Prism.highlightElement){Prism.highlightElement(code);}});}document.addEventListener("DOMContentLoaded",function(){try{prepareAndHighlight();}catch(e){};try{addCopyButtons()}catch(e){}});})();
      </script>
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_174">
-      <h1 id="release-notes-v157">
-       Release Notes v1.5.7
+      <h1 id="release-notes-v158">
+       Release Notes v1.5.8
       </h1>
       <blockquote>
        <p>
         <strong>
-         useValue hook &amp; Value Access Helpers
+         Enhanced V() Helper &amp; useValue Selector Support
         </strong>
        </p>
       </blockquote>
@@ -270,6 +270,625 @@
 </code></pre>
       </div>
       <h2 id="whats-new">
+       What's New
+      </h2>
+      <h3 id="1-v-helper-state-path-support">
+       1. V() Helper - State Path Support
+      </h3>
+      <p>
+       The
+       <code>
+        V()
+       </code>
+       helper now supports extracting values from
+       <strong>
+        reactive state
+       </strong>
+       in addition to DOM elements!
+      </p>
+      <h4 id="state-path-extraction">
+       State Path Extraction
+      </h4>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Extract from reactive state created by useDynamic()</span>
+<span class="n">V</span><span class="p">(</span><span class="s2">"cart.total"</span><span class="p">)</span>      <span class="c1"># Gets current value of cart.total</span>
+<span class="n">V</span><span class="p">(</span><span class="s2">"user.name"</span><span class="p">)</span>       <span class="c1"># Gets current value of user.name</span>
+<span class="n">V</span><span class="p">(</span><span class="s2">"product.price"</span><span class="p">)</span>   <span class="c1"># Gets current value of product.price</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        How it works:
+       </strong>
+       -
+       <code>
+        V("cart.total")
+       </code>
+       finds the reactive element created by
+       <code>
+        useDynamic("cart.total")
+       </code>
+       - Reads its current
+       <code>
+        textContent
+       </code>
+       value
+- Perfect for combining reactive state with calculations
+      </p>
+      <h4 id="complete-integration-example">
+       Complete Integration Example
+      </h4>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">productState</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"product"</span><span class="p">,</span> <span class="n">price</span><span class="o">=</span><span class="mf">19.99</span><span class="p">,</span> <span class="n">quantity</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="mf">19.99</span><span class="p">)</span>
+
+<span class="nd">@FunctionComponent</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ProductCard</span><span class="p">(</span><span class="o">**</span><span class="n">props</span><span class="p">):</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">'''</span>
+<span class="s1">    &lt;div </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">&gt;</span>
+<span class="s1">        &lt;p&gt;Price: $</span><span class="si">{</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"product.price"</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/p&gt;</span>
+<span class="s1">        &lt;input type="number" value="</span><span class="si">{</span><span class="n">useValue</span><span class="p">(</span><span class="s2">"product.quantity"</span><span class="p">,</span><span class="w"> </span><span class="s2">".qty-input"</span><span class="p">)</span><span class="si">}</span><span class="s1">" /&gt;</span>
+<span class="s1">        &lt;p&gt;Total: $</span><span class="si">{</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"product.total"</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/p&gt;</span>
+<span class="s1">    &lt;/div&gt;</span>
+<span class="s1">    '''</span>
+
+<span class="c1"># Calculate total: DOM input × State value</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Calculate"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">productState</span><span class="o">.</span><span class="n">total</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+    <span class="n">V</span><span class="p">(</span><span class="s2">".qty-input"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">*</span> <span class="n">V</span><span class="p">(</span><span class="s2">"product.price"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+<span class="p">))</span>
+</code></pre>
+      </div>
+      <h3 id="2-v-helper-arithmetic-operator-validation">
+       2. V() Helper - Arithmetic Operator Validation
+      </h3>
+      <p>
+       <strong>
+        Breaking Change (Validation)
+       </strong>
+       : Arithmetic operators now
+       <strong>
+        require
+       </strong>
+       numeric transformations to prevent bugs.
+      </p>
+      <h4 id="the-problem">
+       The Problem
+      </h4>
+      <p>
+       Previously, you could accidentally multiply strings:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Before: This would concatenate strings, not multiply!</span>
+<span class="n">V</span><span class="p">(</span><span class="s2">"#price"</span><span class="p">)</span> <span class="o">*</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#qty"</span><span class="p">)</span>  <span class="c1"># "19.99" * "5" = NaN or unexpected behavior</span>
+</code></pre>
+      </div>
+      <h4 id="the-solution">
+       The Solution
+      </h4>
+      <p>
+       Arithmetic operators (
+       <code>
+        *
+       </code>
+       ,
+       <code>
+        /
+       </code>
+       ,
+       <code>
+        -
+       </code>
+       ,
+       <code>
+        %
+       </code>
+       ,
+       <code>
+        **
+       </code>
+       ) now require
+       <code>
+        .int()
+       </code>
+       or
+       <code>
+        .float()
+       </code>
+       :
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># CORRECT - With transformations</span>
+<span class="n">V</span><span class="p">(</span><span class="s2">"#price"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">*</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#qty"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span>  <span class="c1"># 19.99 * 5 = 99.95</span>
+
+<span class="c1"># ERROR - Without transformations</span>
+<span class="n">V</span><span class="p">(</span><span class="s2">"#price"</span><span class="p">)</span> <span class="o">*</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#qty"</span><span class="p">)</span>
+<span class="c1"># TypeError: Multiplication requires numeric transformation.</span>
+<span class="c1">#            Use V('#price').int() or V('#price').float() before multiplying.</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        String concatenation (
+        <code>
+         +
+        </code>
+        ) still works without transformations:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Always allowed</span>
+<span class="n">V</span><span class="p">(</span><span class="s2">"#first"</span><span class="p">)</span> <span class="o">+</span> <span class="s2">" "</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#last"</span><span class="p">)</span>  <span class="c1"># String concatenation</span>
+<span class="s2">"Total: $"</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">"cart.total"</span><span class="p">)</span>    <span class="c1"># String concatenation</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Supported Operators:
+       </strong>
+       -
+       <code>
+        +
+       </code>
+       - Addition/Concatenation (always allowed)
+-
+       <code>
+        *
+       </code>
+       - Multiplication (requires
+       <code>
+        .int()
+       </code>
+       or
+       <code>
+        .float()
+       </code>
+       )
+-
+       <code>
+        /
+       </code>
+       - Division (requires
+       <code>
+        .int()
+       </code>
+       or
+       <code>
+        .float()
+       </code>
+       )
+-
+       <code>
+        -
+       </code>
+       - Subtraction (requires
+       <code>
+        .int()
+       </code>
+       or
+       <code>
+        .float()
+       </code>
+       )
+-
+       <code>
+        %
+       </code>
+       - Modulo (requires
+       <code>
+        .int()
+       </code>
+       or
+       <code>
+        .float()
+       </code>
+       )
+-
+       <code>
+        **
+       </code>
+       - Power (requires
+       <code>
+        .int()
+       </code>
+       or
+       <code>
+        .float()
+       </code>
+       )
+      </p>
+      <h3 id="3-usevalue-selector-support-in-functioncomponents">
+       3. useValue() - Selector Support in FunctionComponents
+      </h3>
+      <p>
+       <code>
+        useValue()
+       </code>
+       now supports automatic selector application in FunctionComponents!
+      </p>
+      <h4 id="automatic-selector-application">
+       Automatic Selector Application
+      </h4>
+      <div class="codehilite">
+       <pre><span></span><code><span class="nd">@FunctionComponent</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">UserForm</span><span class="p">(</span><span class="o">**</span><span class="n">props</span><span class="p">):</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">'''</span>
+<span class="s1">    &lt;div </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">&gt;</span>
+<span class="s1">        &lt;input value="</span><span class="si">{</span><span class="n">useValue</span><span class="p">(</span><span class="s2">"user.name"</span><span class="p">,</span><span class="w"> </span><span class="s2">".name-input"</span><span class="p">)</span><span class="si">}</span><span class="s1">" /&gt;</span>
+<span class="s1">        &lt;input value="</span><span class="si">{</span><span class="n">useValue</span><span class="p">(</span><span class="s2">"user.email"</span><span class="p">,</span><span class="w"> </span><span class="s2">"#email-field"</span><span class="p">)</span><span class="si">}</span><span class="s1">" /&gt;</span>
+<span class="s1">    &lt;/div&gt;</span>
+<span class="s1">    '''</span>
+
+<span class="c1"># Extract values using the selectors</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Save"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">userState</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">".name-input"</span><span class="p">)))</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        How it works:
+       </strong>
+       1.
+       <code>
+        useValue("user.name", ".name-input")
+       </code>
+       sets initial value AND applies class
+       <code>
+        name-input
+       </code>
+       2.
+       <code>
+        V(".name-input")
+       </code>
+       extracts the current value (even if modified by user)
+3. Perfect for forms with initial values and value extraction
+      </p>
+      <p>
+       <strong>
+        Supported selectors:
+       </strong>
+       -
+       <strong>
+        Class selectors
+       </strong>
+       (
+       <code>
+        .foo
+       </code>
+       ) → Added to element's
+       <code>
+        class
+       </code>
+       attribute
+-
+       <strong>
+        ID selectors
+       </strong>
+       (
+       <code>
+        #bar
+       </code>
+       ) → Set as element's
+       <code>
+        id
+       </code>
+       attribute
+      </p>
+      <hr/>
+      <h2 id="migration-guide">
+       Migration Guide
+      </h2>
+      <h3 id="v-arithmetic-operations">
+       V() Arithmetic Operations
+      </h3>
+      <p>
+       If you were using arithmetic operators without transformations, add
+       <code>
+        .int()
+       </code>
+       or
+       <code>
+        .float()
+       </code>
+       :
+      </p>
+      <p>
+       <strong>
+        Before:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">state</span><span class="o">.</span><span class="n">total</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#price"</span><span class="p">)</span> <span class="o">*</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#qty"</span><span class="p">))</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        After:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">state</span><span class="o">.</span><span class="n">total</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#price"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">*</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#qty"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">())</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        String concatenation is unchanged:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Still works the same</span>
+<span class="n">state</span><span class="o">.</span><span class="n">fullname</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#first"</span><span class="p">)</span> <span class="o">+</span> <span class="s2">" "</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#last"</span><span class="p">))</span>
+</code></pre>
+      </div>
+      <hr/>
+      <h2 id="complete-example">
+       Complete Example
+      </h2>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="s2">"Shopping Cart"</span><span class="p">)</span>
+
+<span class="c1"># Reactive state</span>
+<span class="n">cartState</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"cart"</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+<span class="n">productState</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"product"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Widget"</span><span class="p">,</span> <span class="n">price</span><span class="o">=</span><span class="mf">19.99</span><span class="p">,</span> <span class="n">quantity</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="nd">@FunctionComponent</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ProductCard</span><span class="p">(</span><span class="o">**</span><span class="n">props</span><span class="p">):</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">'''</span>
+<span class="s1">    &lt;div </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">class_name</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">style</span><span class="si">}</span><span class="s1">&gt;</span>
+<span class="s1">        &lt;!-- Reactive display --&gt;</span>
+<span class="s1">        &lt;h3&gt;</span><span class="si">{</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"product.name"</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/h3&gt;</span>
+<span class="s1">        &lt;p&gt;Price: $</span><span class="si">{</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"product.price"</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/p&gt;</span>
+
+<span class="s1">        &lt;!-- Editable quantity with selector --&gt;</span>
+<span class="s1">        &lt;input type="number" </span>
+<span class="s1">               value="</span><span class="si">{</span><span class="n">useValue</span><span class="p">(</span><span class="s2">"product.quantity"</span><span class="p">,</span><span class="w"> </span><span class="s2">".qty-input"</span><span class="p">)</span><span class="si">}</span><span class="s1">"</span>
+<span class="s1">               min="1" /&gt;</span>
+
+<span class="s1">        &lt;!-- Reactive total --&gt;</span>
+<span class="s1">        &lt;p&gt;Total: $</span><span class="si">{</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"cart.total"</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/p&gt;</span>
+<span class="s1">    &lt;/div&gt;</span>
+<span class="s1">    '''</span>
+
+<span class="nd">@route</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span>
+        <span class="n">ProductCard</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"product-card"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Milk"</span><span class="p">,</span> <span class="n">price</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">quantity</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+
+        <span class="c1"># Calculate: DOM input × State value</span>
+        <span class="n">Button</span><span class="p">(</span><span class="s2">"Calculate Total"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">cartState</span><span class="o">.</span><span class="n">total</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+            <span class="n">V</span><span class="p">(</span><span class="s2">".qty-input"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">*</span> <span class="n">V</span><span class="p">(</span><span class="s2">"product.price"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+        <span class="p">)),</span>
+
+        <span class="c1"># String concatenation (no transformation needed)</span>
+        <span class="n">Button</span><span class="p">(</span><span class="s2">"Show Info"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">productState</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+            <span class="s2">"Product: "</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">"product.name"</span><span class="p">)</span> <span class="o">+</span> <span class="s2">" - $"</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">"product.price"</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="s2">"index"</span><span class="p">,</span> <span class="n">index</span><span class="p">(),</span> <span class="n">title</span><span class="o">=</span><span class="s2">"Product"</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Watch for changes</span>
+<span class="n">app</span><span class="o">.</span><span class="n">useWatch</span><span class="p">(</span><span class="s2">"cart.total"</span><span class="p">,</span> <span class="n">log</span><span class="p">(</span><span class="s2">"Cart total changed!"</span><span class="p">))</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">rTimeCompile</span><span class="p">()</span>
+</code></pre>
+      </div>
+      <hr/>
+      <h2 id="bug-fixes">
+       Bug Fixes
+      </h2>
+      <h3 id="usevalue-selector-application">
+       useValue Selector Application
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Issue
+        </strong>
+        : Selectors in
+        <code>
+         useValue()
+        </code>
+        were not being applied to FunctionComponent elements
+       </li>
+       <li>
+        <strong>
+         Fix
+        </strong>
+        : Implemented BeautifulSoup-based HTML parsing to detect and apply selectors
+       </li>
+       <li>
+        <strong>
+         Impact
+        </strong>
+        :
+        <code>
+         useValue()
+        </code>
+        now works identically in FunctionComponents and built-in components
+       </li>
+      </ul>
+      <h3 id="v-state-path-detection">
+       V() State Path Detection
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Issue
+        </strong>
+        : No way to extract values from reactive state without DOM elements
+       </li>
+       <li>
+        <strong>
+         Fix
+        </strong>
+        : Added intelligent state path detection (e.g.,
+        <code>
+         "cart.total"
+        </code>
+        vs
+        <code>
+         ".cart-total"
+        </code>
+        )
+       </li>
+       <li>
+        <strong>
+         Impact
+        </strong>
+        : Seamless integration between
+        <code>
+         useDynamic()
+        </code>
+        ,
+        <code>
+         useValue()
+        </code>
+        , and
+        <code>
+         V()
+        </code>
+       </li>
+      </ul>
+      <hr/>
+      <h2 id="breaking-changes">
+       Breaking Changes
+      </h2>
+      <h3 id="arithmetic-operator-validation">
+       Arithmetic Operator Validation
+      </h3>
+      <p>
+       <strong>
+        Change
+       </strong>
+       : Arithmetic operators (
+       <code>
+        *
+       </code>
+       ,
+       <code>
+        /
+       </code>
+       ,
+       <code>
+        -
+       </code>
+       ,
+       <code>
+        %
+       </code>
+       ,
+       <code>
+        **
+       </code>
+       ) now require
+       <code>
+        .int()
+       </code>
+       or
+       <code>
+        .float()
+       </code>
+       transformations.
+      </p>
+      <p>
+       <strong>
+        Reason
+       </strong>
+       : Prevents accidental string operations that cause bugs.
+      </p>
+      <p>
+       <strong>
+        Migration
+       </strong>
+       : Add
+       <code>
+        .int()
+       </code>
+       or
+       <code>
+        .float()
+       </code>
+       before arithmetic operations:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">V</span><span class="p">(</span><span class="s2">"#price"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">*</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#qty"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Note
+       </strong>
+       : String concatenation (
+       <code>
+        +
+       </code>
+       ) is unchanged and still works without transformations.
+      </p>
+      <hr/>
+      <h2 id="documentation-updates">
+       Documentation Updates
+      </h2>
+      <ul>
+       <li>
+        <strong>
+         hooks.md
+        </strong>
+        : Comprehensive V() documentation with state path examples
+       </li>
+       <li>
+        <strong>
+         custom_components.md
+        </strong>
+        : Updated examples showing V() with state paths
+       </li>
+       <li>
+        <strong>
+         New examples
+        </strong>
+        : Complete integration patterns for
+        <code>
+         useValue()
+        </code>
+        ,
+        <code>
+         useDynamic()
+        </code>
+        , and
+        <code>
+         V()
+        </code>
+       </li>
+      </ul>
+      <hr/>
+      <h2 id="whats-next">
+       What's Next
+      </h2>
+      <p>
+       The enhanced V() helper and complete hooks integration pave the way for more advanced reactive patterns and seamless state management in future releases.
+      </p>
+      <hr/>
+      <h1 id="release-notes-v157">
+       Release Notes v1.5.7
+      </h1>
+      <blockquote>
+       <p>
+        <strong>
+         useValue hook &amp; Value Access Helpers
+        </strong>
+       </p>
+      </blockquote>
+      <h2 id="installation-2">
+       Installation
+      </h2>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
+</code></pre>
+      </div>
+      <h2 id="whats-new-2">
        What's New
       </h2>
       <h3 id="1-usevalue-hook">
@@ -376,14 +995,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-2">
+      <h2 id="installation-3">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-2">
+      <h2 id="whats-new-3">
        What's New
       </h2>
       <h3 id="1-expanded-usedynamic-support-for-built-in-components">
@@ -616,7 +1235,7 @@
 <span class="n">DataTable</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">theme</span><span class="o">=</span><span class="s2">"striped"</span><span class="p">,</span> <span class="n">page_size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 </code></pre>
       </div>
-      <h2 id="bug-fixes">
+      <h2 id="bug-fixes-2">
        Bug Fixes
       </h2>
       <h3 id="statev2-incrementdecrement">
@@ -692,14 +1311,14 @@
         : Reactive operations now work correctly across multiple invocations
        </li>
       </ul>
-      <h2 id="breaking-changes">
+      <h2 id="breaking-changes-2">
        Breaking Changes
       </h2>
       <p>
        None.
       </p>
       <hr/>
-      <h2 id="whats-next">
+      <h2 id="whats-next-2">
        What's Next
       </h2>
       <p>
@@ -729,14 +1348,14 @@
         hook.
        </p>
       </blockquote>
-      <h2 id="installation-3">
+      <h2 id="installation-4">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-3">
+      <h2 id="whats-new-4">
        What's New
       </h2>
       <h3 id="1-usedynamic-for-built-in-components">
@@ -839,14 +1458,14 @@
         relaunch with correct license.
        </p>
       </blockquote>
-      <h2 id="installation-4">
+      <h2 id="installation-5">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-4">
+      <h2 id="whats-new-5">
        What's New
       </h2>
       <h3 id="hooks-system-usedynamic">
@@ -1070,7 +1689,7 @@
 </code></pre>
       </div>
       <hr/>
-      <h3 id="bug-fixes-2">
+      <h3 id="bug-fixes-3">
        Bug Fixes
       </h3>
       <h4 id="fixed-markdown-syntax-highlighting-in-multipage-apps">
@@ -1108,14 +1727,14 @@
 </code></pre>
       </div>
       <hr/>
-      <h2 id="breaking-changes-2">
+      <h2 id="breaking-changes-3">
        Breaking Changes
       </h2>
       <p>
        None! This release is 100% backwards compatible.
       </p>
       <hr/>
-      <h2 id="complete-example">
+      <h2 id="complete-example-2">
        Complete Example
       </h2>
       <p>
@@ -1176,7 +1795,7 @@
        : Edit the inputs and click Save - the profile display updates instantly!
       </p>
       <hr/>
-      <h2 id="migration-guide">
+      <h2 id="migration-guide-2">
        Migration Guide
       </h2>
       <p>
@@ -1254,7 +1873,7 @@
        for more details.
       </p>
       <hr/>
-      <h2 id="whats-next-2">
+      <h2 id="whats-next-3">
        What's Next
       </h2>
       <p>
@@ -1270,14 +1889,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-5">
+      <h2 id="installation-6">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-5">
+      <h2 id="whats-new-6">
        What's New
       </h2>
       <h3 id="hooks-system-usedynamic-2">
@@ -1501,7 +2120,7 @@
 </code></pre>
       </div>
       <hr/>
-      <h3 id="bug-fixes-3">
+      <h3 id="bug-fixes-4">
        Bug Fixes
       </h3>
       <h4 id="fixed-markdown-syntax-highlighting-in-multipage-apps-2">
@@ -1539,14 +2158,14 @@
 </code></pre>
       </div>
       <hr/>
-      <h2 id="breaking-changes-3">
+      <h2 id="breaking-changes-4">
        Breaking Changes
       </h2>
       <p>
        None! This release is 100% backwards compatible.
       </p>
       <hr/>
-      <h2 id="complete-example-2">
+      <h2 id="complete-example-3">
        Complete Example
       </h2>
       <p>
@@ -1607,7 +2226,7 @@
        : Edit the inputs and click Save - the profile display updates instantly!
       </p>
       <hr/>
-      <h2 id="migration-guide-2">
+      <h2 id="migration-guide-3">
        Migration Guide
       </h2>
       <p>
@@ -1685,7 +2304,7 @@
        for more details.
       </p>
       <hr/>
-      <h2 id="whats-next-3">
+      <h2 id="whats-next-4">
        What's Next
       </h2>
       <p>
@@ -1701,14 +2320,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-6">
+      <h2 id="installation-7">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-6">
+      <h2 id="whats-new-7">
        What's New
       </h2>
       <h3 id="function-components-system">
@@ -1909,14 +2528,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-7">
+      <h2 id="installation-8">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-7">
+      <h2 id="whats-new-8">
        What's New
       </h2>
       <h3 id="backend-http-utilities-system">
@@ -2188,7 +2807,7 @@
        </strong>
        https://ztamdev.github.io/Dars-Framework/docs.html#backend-http-utilities
       </p>
-      <h2 id="breaking-changes-4">
+      <h2 id="breaking-changes-5">
        Breaking Changes
       </h2>
       <p>
@@ -2197,7 +2816,7 @@
        </strong>
        - This is a fully backward-compatible release. All existing code continues to work.
       </p>
-      <h2 id="bug-fixes-4">
+      <h2 id="bug-fixes-5">
        Bug Fixes
       </h2>
       <ul>
@@ -2268,7 +2887,7 @@
         : Full Electron compatibility maintained
        </li>
       </ul>
-      <h2 id="migration-guide-3">
+      <h2 id="migration-guide-4">
        Migration Guide
       </h2>
       <p>
@@ -2303,14 +2922,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-8">
+      <h2 id="installation-9">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-8">
+      <h2 id="whats-new-9">
        What's New
       </h2>
       <h3 id="animation-system-stability">
@@ -2377,7 +2996,7 @@
 <span class="p">)</span>
 </code></pre>
       </div>
-      <h2 id="bug-fixes-5">
+      <h2 id="bug-fixes-6">
        Bug Fixes
       </h2>
       <ul>
@@ -2421,14 +3040,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-9">
+      <h2 id="installation-10">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-9">
+      <h2 id="whats-new-10">
        What's New
       </h2>
       <h3 id="state-v2-event-handler-support">
@@ -2501,7 +3120,7 @@
       <p>
        Comprehensive comparison table and use case guidance added to state management documentation.
       </p>
-      <h2 id="bug-fixes-6">
+      <h2 id="bug-fixes-7">
        Bug Fixes
       </h2>
       <ul>
@@ -2567,7 +3186,7 @@
         , and more.
        </p>
       </blockquote>
-      <h2 id="installation-10">
+      <h2 id="installation-11">
        Installation
       </h2>
       <div class="codehilite">
@@ -2688,7 +3307,7 @@
 <span class="n">counter</span><span class="o">.</span><span class="n">class_name</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </code></pre>
       </div>
-      <h2 id="bug-fixes-7">
+      <h2 id="bug-fixes-8">
        Bug Fixes
       </h2>
       <h3 id="fixed-property-type-handling">
@@ -3022,7 +3641,7 @@
         Introducing State V2 and comprehensive animation system. This is the biggest update to Dars state management, bringing a pure Pythonic API and 15+ built-in animations.
        </p>
       </blockquote>
-      <h2 id="installation-11">
+      <h2 id="installation-12">
        Installation
       </h2>
       <div class="codehilite">
@@ -3036,7 +3655,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.7
 </code></pre>
       </div>
-      <h2 id="whats-new-10">
+      <h2 id="whats-new-11">
        What's New
       </h2>
       <h3 id="state-v2-pure-pythonic-state-management">
@@ -3294,7 +3913,7 @@
 ├── styles.css              # Global styles
 └── README.md               # Documentation
 </code></pre>
-      <h2 id="breaking-changes-5">
+      <h2 id="breaking-changes-6">
        Breaking Changes
       </h2>
       <p>
@@ -3315,7 +3934,7 @@
 - Migration path provided in updated documentation
 - New projects should use State V2 exclusively
       </p>
-      <h2 id="documentation-updates">
+      <h2 id="documentation-updates-2">
        Documentation Updates
       </h2>
       <p>
@@ -3335,7 +3954,7 @@
 - All dState/cState references removed from active docs
 - Migration guides included for existing projects
       </p>
-      <h2 id="bug-fixes-8">
+      <h2 id="bug-fixes-9">
        Bug Fixes
       </h2>
       <p>
@@ -3429,7 +4048,7 @@
         </code>
        </li>
       </ul>
-      <h2 id="migration-guide-4">
+      <h2 id="migration-guide-5">
        Migration Guide
       </h2>
       <h3 id="from-dstate-to-state-v2">
@@ -3608,7 +4227,7 @@
         : Introduces Single Page Application (SPA) support and a powerful client-side routing system.
        </p>
       </blockquote>
-      <h2 id="installation-12">
+      <h2 id="installation-13">
        Installation
       </h2>
       <div class="codehilite">
@@ -3622,7 +4241,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.5
 </code></pre>
       </div>
-      <h2 id="whats-new-11">
+      <h2 id="whats-new-12">
        What's New
       </h2>
       <h3 id="single-page-application-spa-support">
@@ -3725,7 +4344,7 @@
         Critical bug fix release. Removes non-functional features, fixes style merge, and improves state restoration.
        </p>
       </blockquote>
-      <h2 id="installation-13">
+      <h2 id="installation-14">
        Installation
       </h2>
       <div class="codehilite">
@@ -3791,7 +4410,7 @@
         State management enhancements with compile-time validation, component self-navigation, and critical style merge fix. Improves developer experience and fixes property replacement bug.
        </p>
       </blockquote>
-      <h2 id="installation-14">
+      <h2 id="installation-15">
        Installation
       </h2>
       <div class="codehilite">
@@ -3805,7 +4424,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.3
 </code></pre>
       </div>
-      <h2 id="whats-new-12">
+      <h2 id="whats-new-13">
        What's New
       </h2>
       <ul>
@@ -3855,7 +4474,7 @@
         for enhanced client-side interactions.
        </p>
       </blockquote>
-      <h2 id="installation-15">
+      <h2 id="installation-16">
        Installation
       </h2>
       <div class="codehilite">
@@ -3869,7 +4488,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.2
 </code></pre>
       </div>
-      <h2 id="whats-new-13">
+      <h2 id="whats-new-14">
        What's New
       </h2>
       <h3 id="utility-functions-utils_ds">
@@ -4059,7 +4678,7 @@
         SEO and Apple device optimizations. Enhanced metadata generation with automatic MIME type detection for favicons and comprehensive iOS/Safari support.
        </p>
       </blockquote>
-      <h2 id="installation-16">
+      <h2 id="installation-17">
        Installation
       </h2>
       <div class="codehilite">
@@ -4073,7 +4692,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.1
 </code></pre>
       </div>
-      <h2 id="whats-new-14">
+      <h2 id="whats-new-15">
        What's New
       </h2>
       <h3 id="automatic-favicon-mime-type-detection">
@@ -4388,7 +5007,7 @@
         Simple Template update.
        </p>
       </blockquote>
-      <h2 id="installation-17">
+      <h2 id="installation-18">
        Installation
       </h2>
       <div class="codehilite">
@@ -4416,7 +5035,7 @@
         Desktop File System API, Pythonic Arg helper, keyboard event filtering, and comprehensive template synchronization. Major enhancements to desktop capabilities with improved developer experience.
        </p>
       </blockquote>
-      <h2 id="installation-18">
+      <h2 id="installation-19">
        Installation
       </h2>
       <div class="codehilite">
@@ -4430,7 +5049,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.9
 </code></pre>
       </div>
-      <h2 id="whats-new-15">
+      <h2 id="whats-new-16">
        What's New
       </h2>
       <h3 id="desktop-file-system-api-list_directory">
@@ -4725,7 +5344,7 @@
        and similar events work correctly
 - Maintains backward compatibility with non-filtered events
       </p>
-      <h2 id="bug-fixes-9">
+      <h2 id="bug-fixes-10">
        Bug Fixes
       </h2>
       <ul>
@@ -4774,7 +5393,7 @@
         More powerful keyboard event handling with key-specific filtering
        </li>
       </ul>
-      <h2 id="migration-guide-5">
+      <h2 id="migration-guide-6">
        Migration Guide
       </h2>
       <h3 id="from-v138-to-v139">
@@ -4881,7 +5500,7 @@
         for async chaining.
        </p>
       </blockquote>
-      <h2 id="installation-19">
+      <h2 id="installation-20">
        Installation
       </h2>
       <div class="codehilite">
@@ -4895,7 +5514,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.8
 </code></pre>
       </div>
-      <h2 id="whats-new-16">
+      <h2 id="whats-new-17">
        What's New
       </h2>
       <h3 id="dynamic-state-updates-with-this">
@@ -5209,7 +5828,7 @@
         : Reliable Electron termination before restart
        </li>
       </ul>
-      <h2 id="documentation-updates-2">
+      <h2 id="documentation-updates-3">
        Documentation Updates
       </h2>
       <p>
@@ -5343,7 +5962,7 @@
         for dynamic DOM operations with safe event hydration.
        </p>
       </blockquote>
-      <h2 id="installation-20">
+      <h2 id="installation-21">
        Installation
       </h2>
       <div class="codehilite">
@@ -5357,7 +5976,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.6
 </code></pre>
       </div>
-      <h2 id="whats-new-17">
+      <h2 id="whats-new-18">
        What's New
       </h2>
       <h3 id="compile-time-component-manipulation">
@@ -5520,7 +6139,7 @@
         Enhanced styling and development experience update featuring active styles, improved preview system, and advanced file monitoring. Delivers better visual feedback and faster development workflow.
        </p>
       </blockquote>
-      <h2 id="installation-21">
+      <h2 id="installation-22">
        Installation
       </h2>
       <div class="codehilite">
@@ -5534,7 +6153,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.5
 </code></pre>
       </div>
-      <h2 id="whats-new-18">
+      <h2 id="whats-new-19">
        What's New
       </h2>
       <h3 id="active-styles-support">
@@ -5677,7 +6296,7 @@
         Enhanced interactivity update featuring hover styles, multi-handler events, and runtime versioning. Improves component styling and event handling flexibility.
        </p>
       </blockquote>
-      <h2 id="installation-22">
+      <h2 id="installation-23">
        Installation
       </h2>
       <div class="codehilite">
@@ -5691,7 +6310,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.4
 </code></pre>
       </div>
-      <h2 id="whats-new-19">
+      <h2 id="whats-new-20">
        What's New
       </h2>
       <h3 id="hover-styles-support">
@@ -5870,7 +6489,7 @@
         Minor update featuring new semantic Section component and enhanced state serialization. Continues JavaScript migration improvements from v1.3.2.
        </p>
       </blockquote>
-      <h2 id="installation-23">
+      <h2 id="installation-24">
        Installation
       </h2>
       <div class="codehilite">
@@ -5884,7 +6503,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.3
 </code></pre>
       </div>
-      <h2 id="whats-new-20">
+      <h2 id="whats-new-21">
        What's New
       </h2>
       <h3 id="section-component">
@@ -5941,7 +6560,7 @@
 - Better performance: Streamlined state management
 - Enhanced minification: Better compatibility with Vite optimization
       </p>
-      <h3 id="documentation-updates-3">
+      <h3 id="documentation-updates-4">
        Documentation Updates
       </h3>
       <ul>
@@ -6034,7 +6653,7 @@
         Major minification improvements with combined JS files and optimized event handling. Electron desktop exporter remains in beta.
        </p>
       </blockquote>
-      <h2 id="installation-24">
+      <h2 id="installation-25">
        Installation
       </h2>
       <div class="codehilite">
@@ -6158,7 +6777,7 @@
         : Fallback minification when Vite is unavailable
        </li>
       </ul>
-      <h2 id="bug-fixes-10">
+      <h2 id="bug-fixes-11">
        Bug Fixes
       </h2>
       <ul>
@@ -6330,7 +6949,7 @@
         Native desktop functions and DX improved with dev mode and file system integration.
        </p>
       </blockquote>
-      <h2 id="installation-25">
+      <h2 id="installation-26">
        Installation
       </h2>
       <div class="codehilite">
@@ -6381,7 +7000,7 @@
       <p>
        Also you can use dScripts to run custom javascript code in the desktop app. and for now 'dars dev' is supported but python main.py with rTimeCompile() is not supported because it have issues with relative paths.
       </p>
-      <h2 id="bug-fixes-11">
+      <h2 id="bug-fixes-12">
        Bug Fixes
       </h2>
       <ul>
@@ -6415,7 +7034,7 @@
         Native desktop export (BETA), improved CLI and doctor integration, and metadata fixes for packaging. This is a BETA release: usable for testing, not recommended for production.
        </p>
       </blockquote>
-      <h2 id="installation-26">
+      <h2 id="installation-27">
        Installation
       </h2>
       <div class="codehilite">
@@ -6601,7 +7220,7 @@ dars<span class="w"> </span>build
 <span class="p">}</span>
 </code></pre>
       </div>
-      <h2 id="bug-fixes-12">
+      <h2 id="bug-fixes-13">
        Bug Fixes
       </h2>
       <ul>
@@ -6698,7 +7317,7 @@ dars<span class="w"> </span>build
         Optional default minification, precise CLI control, faster builds, and clearer minification status.
        </p>
       </blockquote>
-      <h2 id="installation-27">
+      <h2 id="installation-28">
        Installation
       </h2>
       <div class="codehilite">
@@ -6855,7 +7474,7 @@ dars<span class="w"> </span>build
         </ul>
        </li>
       </ul>
-      <h2 id="bug-fixes-13">
+      <h2 id="bug-fixes-14">
        Bug Fixes
       </h2>
       <ul>
@@ -7091,6 +7710,69 @@ dars<span class="w"> </span>build
      <div class="sidebar-category">
       Versions
      </div>
+     <a class="sidebar-link sidebar-level-1" href="#release-notes-v158" style="margin-left: 0px">
+      Release Notes v1.5.8
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#installation" style="margin-left: 20px">
+      Installation
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#whats-new" style="margin-left: 20px">
+      What's New
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#1-v-helper-state-path-support" style="margin-left: 40px">
+      1. V() Helper - State Path Support
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#state-path-extraction" style="margin-left: 60px">
+      State Path Extraction
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#complete-integration-example" style="margin-left: 60px">
+      Complete Integration Example
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#2-v-helper-arithmetic-operator-validation" style="margin-left: 40px">
+      2. V() Helper - Arithmetic Operator Validation
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#the-problem" style="margin-left: 60px">
+      The Problem
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#the-solution" style="margin-left: 60px">
+      The Solution
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#3-usevalue-selector-support-in-functioncomponents" style="margin-left: 40px">
+      3. useValue() - Selector Support in FunctionComponents
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#automatic-selector-application" style="margin-left: 60px">
+      Automatic Selector Application
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#migration-guide" style="margin-left: 20px">
+      Migration Guide
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#v-arithmetic-operations" style="margin-left: 40px">
+      V() Arithmetic Operations
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#complete-example" style="margin-left: 20px">
+      Complete Example
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#bug-fixes" style="margin-left: 20px">
+      Bug Fixes
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#usevalue-selector-application" style="margin-left: 40px">
+      useValue Selector Application
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#v-state-path-detection" style="margin-left: 40px">
+      V() State Path Detection
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#breaking-changes" style="margin-left: 20px">
+      Breaking Changes
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#arithmetic-operator-validation" style="margin-left: 40px">
+      Arithmetic Operator Validation
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#documentation-updates" style="margin-left: 20px">
+      Documentation Updates
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#whats-next" style="margin-left: 20px">
+      What's Next
+     </a>
      <a class="sidebar-link sidebar-level-1" href="#release-notes-v157" style="margin-left: 0px">
       Release Notes v1.5.7
      </a>

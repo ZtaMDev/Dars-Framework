@@ -28,11 +28,35 @@ class ValueRef:
         Initialize a ValueRef.
         
         Args:
-            selector: CSS selector for the target element
+            selector: CSS selector OR state path (e.g., ".class", "#id", "cart.total")
         """
         self.selector = selector
         self._transform = None  # Optional transformation function
         self._custom_code = None  # For complex operations like concatenation chains
+    
+    def _is_state_path(self) -> bool:
+        """
+        Check if selector is a state path (e.g., "cart.total") vs CSS selector.
+        
+        State paths:
+        - Don't start with . or # or [
+        - Contain exactly one dot
+        - Match pattern: word.word
+        
+        Returns:
+            True if selector is a state path, False if CSS selector
+        """
+        # CSS selectors start with special characters
+        if self.selector.startswith(('.', '#', '[')):
+            return False
+        
+        # State paths have format: stateName.property
+        parts = self.selector.split('.')
+        if len(parts) == 2 and parts[0] and parts[1]:
+            # Both parts should be valid identifiers (alphanumeric + underscore)
+            return parts[0].replace('_', '').isalnum() and parts[1].replace('_', '').isalnum()
+        
+        return False
     
     def _get_code(self) -> str:
         """
@@ -45,9 +69,34 @@ class ValueRef:
         if self._custom_code:
             return self._custom_code
         
-        # Generate a simple async IIFE that returns the value
-        # The caller is responsible for awaiting this
-        js_code = f"""
+        # Check if this is a state path or CSS selector
+        if self._is_state_path():
+            # State path: extract from reactive element created by useDynamic
+            # useDynamic creates elements with data-dynamic="stateName.property"
+            js_code = f"""
+(async () => {{
+    try {{
+        // Get value from reactive element (created by useDynamic)
+        const el = document.querySelector('[data-dynamic="{self.selector}"]');
+        if (!el) {{
+            console.warn('ValueRef: No reactive element found for state path: {self.selector}');
+            return '';
+        }}
+        
+        // Get the text content (which is the current state value)
+        let value = el.textContent || '';
+        
+        // Apply transformation if any
+        {f'return {self._transform("value")};' if self._transform else 'return value;'}
+    }} catch (e) {{
+        console.error('ValueRef state error:', e);
+        return '';
+    }}
+}})()
+            """.strip()
+        else:
+            # CSS selector: extract from DOM element
+            js_code = f"""
 (async () => {{
     try {{
         const el = document.querySelector('{self.selector}');
@@ -75,7 +124,7 @@ class ValueRef:
         return '';
     }}
 }})()
-        """.strip()
+            """.strip()
         
         return js_code
     
@@ -115,79 +164,161 @@ class ValueRef:
         new_ref._transform = lambda x: f"parseFloat({x})"
         return new_ref
     
-    # Operators
+    def _has_numeric_transform(self) -> bool:
+        """Check if this ValueRef has a numeric transformation (.int() or .float())"""
+        if self._transform is None:
+            return False
+        # Check if transform contains parseInt or parseFloat
+        test_result = self._transform("x")
+        return "parseInt" in test_result or "parseFloat" in test_result
+    
+    # Arithmetic operators
     def __add__(self, other) -> 'ValueRef':
-        """
-        Concatenation or Addition: val + other
-        
-        Args:
-            other: String, Number, or ValueRef to add/concatenate
-        
-        Returns:
-            New ValueRef with operation applied
-        """
+        """Addition/Concatenation: val + other (always allowed)"""
+        return self._binary_op(other, '+', '')
+    
+    def __radd__(self, other) -> 'ValueRef':
+        """Reverse Addition: other + val (always allowed)"""
+        return self._rbinary_op(other, '+', '')
+    
+    def __mul__(self, other) -> 'ValueRef':
+        """Multiplication: val * other (requires .int() or .float())"""
+        if not self._has_numeric_transform():
+            raise TypeError(
+                f"Multiplication requires numeric transformation. "
+                f"Use V('{self.selector}').int() or V('{self.selector}').float() before multiplying."
+            )
+        return self._binary_op(other, '*', 0)
+    
+    def __rmul__(self, other) -> 'ValueRef':
+        """Reverse Multiplication: other * val (requires .int() or .float())"""
+        if not self._has_numeric_transform():
+            raise TypeError(
+                f"Multiplication requires numeric transformation. "
+                f"Use V('{self.selector}').int() or V('{self.selector}').float() before multiplying."
+            )
+        return self._rbinary_op(other, '*', 0)
+    
+    def __truediv__(self, other) -> 'ValueRef':
+        """Division: val / other (requires .int() or .float())"""
+        if not self._has_numeric_transform():
+            raise TypeError(
+                f"Division requires numeric transformation. "
+                f"Use V('{self.selector}').int() or V('{self.selector}').float() before dividing."
+            )
+        return self._binary_op(other, '/', 0)
+    
+    def __rtruediv__(self, other) -> 'ValueRef':
+        """Reverse Division: other / val (requires .int() or .float())"""
+        if not self._has_numeric_transform():
+            raise TypeError(
+                f"Division requires numeric transformation. "
+                f"Use V('{self.selector}').int() or V('{self.selector}').float() before dividing."
+            )
+        return self._rbinary_op(other, '/', 0)
+    
+    def __sub__(self, other) -> 'ValueRef':
+        """Subtraction: val - other (requires .int() or .float())"""
+        if not self._has_numeric_transform():
+            raise TypeError(
+                f"Subtraction requires numeric transformation. "
+                f"Use V('{self.selector}').int() or V('{self.selector}').float() before subtracting."
+            )
+        return self._binary_op(other, '-', 0)
+    
+    def __rsub__(self, other) -> 'ValueRef':
+        """Reverse Subtraction: other - val (requires .int() or .float())"""
+        if not self._has_numeric_transform():
+            raise TypeError(
+                f"Subtraction requires numeric transformation. "
+                f"Use V('{self.selector}').int() or V('{self.selector}').float() before subtracting."
+            )
+        return self._rbinary_op(other, '-', 0)
+    
+    def __mod__(self, other) -> 'ValueRef':
+        """Modulo: val % other (requires .int() or .float())"""
+        if not self._has_numeric_transform():
+            raise TypeError(
+                f"Modulo requires numeric transformation. "
+                f"Use V('{self.selector}').int() or V('{self.selector}').float() before using modulo."
+            )
+        return self._binary_op(other, '%', 0)
+    
+    def __rmod__(self, other) -> 'ValueRef':
+        """Reverse Modulo: other % val (requires .int() or .float())"""
+        if not self._has_numeric_transform():
+            raise TypeError(
+                f"Modulo requires numeric transformation. "
+                f"Use V('{self.selector}').int() or V('{self.selector}').float() before using modulo."
+            )
+        return self._rbinary_op(other, '%', 0)
+    
+    def __pow__(self, other) -> 'ValueRef':
+        """Power: val ** other (requires .int() or .float())"""
+        if not self._has_numeric_transform():
+            raise TypeError(
+                f"Power requires numeric transformation. "
+                f"Use V('{self.selector}').int() or V('{self.selector}').float() before using power."
+            )
+        return self._binary_op(other, '**', 0)
+    
+    def __rpow__(self, other) -> 'ValueRef':
+        """Reverse Power: other ** val (requires .int() or .float())"""
+        if not self._has_numeric_transform():
+            raise TypeError(
+                f"Power requires numeric transformation. "
+                f"Use V('{self.selector}').int() or V('{self.selector}').float() before using power."
+            )
+        return self._rbinary_op(other, '**', 0)
+    
+    def _binary_op(self, other, operator: str, error_return) -> 'ValueRef':
+        """Helper for binary operations: self op other"""
         new_ref = ValueRef(self.selector)
-        
-        # Get the code for self (which may already have transformations)
         self_code = self._get_code()
         
         if isinstance(other, ValueRef):
-            # Both are ValueRefs - need to await both and add
             other_code = other._get_code()
-            # Create a new async IIFE that awaits both and adds
-            new_ref._transform = None  # Clear transform, we'll override _get_code
+            new_ref._transform = None
             new_ref._custom_code = f"""
 (async () => {{
     try {{
         const left = await {self_code};
         const right = await {other_code};
-        return left + right;
+        return left {operator} right;
     }} catch (e) {{
         console.error('ValueRef op error:', e);
-        return '';
+        return {json.dumps(error_return)};
     }}
 }})()
             """.strip()
         else:
-            # Other is a literal (string/number)
-            # Create a new async IIFE that awaits self and adds the literal
-            new_ref._transform = None  # Clear transform
+            new_ref._transform = None
             new_ref._custom_code = f"""
 (async () => {{
     try {{
         const left = await {self_code};
-        return left + {json.dumps(other)};
+        return left {operator} {json.dumps(other)};
     }} catch (e) {{
         console.error('ValueRef op error:', e);
-        return '';
+        return {json.dumps(error_return)};
     }}
 }})()
             """.strip()
         return new_ref
     
-    def __radd__(self, other) -> 'ValueRef':
-        """
-        Reverse Concatenation/Addition: other + val
-        
-        Args:
-            other: String or Number to prepend/add
-        
-        Returns:
-            New ValueRef with operation applied
-        """
+    def _rbinary_op(self, other, operator: str, error_return) -> 'ValueRef':
+        """Helper for reverse binary operations: other op self"""
         new_ref = ValueRef(self.selector)
         self_code = self._get_code()
-        
-        # Create a new async IIFE that awaits self and adds the literal
         new_ref._transform = None
         new_ref._custom_code = f"""
 (async () => {{
     try {{
         const right = await {self_code};
-        return {json.dumps(other)} + right;
+        return {json.dumps(other)} {operator} right;
     }} catch (e) {{
         console.error('ValueRef op error:', e);
-        return '';
+        return {json.dumps(error_return)};
     }}
 }})()
         """.strip()
@@ -195,8 +326,6 @@ class ValueRef:
     
     def __str__(self):
         """String representation for f-strings"""
-        # For f-strings, we return the code wrapped in ${} so it works in template literals
-        # But we need to be careful not to double-wrap in url()
         return f"${{await {self._get_code()}}}"
     
     def __format__(self, format_spec):
@@ -207,115 +336,61 @@ class ValueRef:
         return f"ValueRef('{self.selector}')"
     
     def to_dscript(self) -> dScript:
-        """
-        Convert this ValueRef to a dScript.
-        
-        This is called automatically when ValueRef is used in event handlers
-        or other contexts that expect dScript.
-        
-        Returns:
-            dScript that extracts and transforms the value
-        """
+        """Convert this ValueRef to a dScript"""
         return dScript(self._get_code())
 
 
 def V(selector: str) -> ValueRef:
     """
-    Short alias for ValueRef - creates a reference to a DOM element's value.
+    Short alias for ValueRef - creates a reference to a value (DOM element or state).
     
     Args:
-        selector: CSS selector for the target element
+        selector: CSS selector OR state path
+            - CSS selector: ".class", "#id", "[attr]", etc.
+            - State path: "stateName.property" (e.g., "cart.total", "user.name")
     
     Returns:
         ValueRef instance
     
     Example:
-        # Basic usage
+        # CSS selectors (DOM elements)
         username = V(".username-input")
+        email = V("#email-field")
         
-        # With transformations
-        upper_name = V(".name").upper()
+        # State paths (reactive state)
+        cartTotal = V("cart.total")
+        userName = V("user.name")
         
-        # Concatenation
+        # String concatenation (always works)
         full_name = V(".first") + " " + V(".last")
+        message = "Total: $" + V("cart.total")
+        
+        # Math operations (requires .int() or .float())
+        result = V(".qty").int() * V("product.price").float()
+        discount = V(".price").float() * 0.9
+        total = V("cart.total").float() + 10
         
         # In state updates
         userState.name.set(V(".input"))
+        cartState.total.set(V("cart.total").float() + 10)
     """
     return ValueRef(selector)
 
 
 def url(template: str, **kwargs) -> str:
-    """
-    Build dynamic URLs with clean syntax.
-    
-    Replaces placeholders in the template with ValueRef or string values,
-    generating a JavaScript template literal.
-    
-    Args:
-        template: URL template with {placeholders}
-        **kwargs: ValueRef or string values for placeholders
-    
-    Returns:
-        Template literal string for use in backend API
-    
-    Example:
-        # With ValueRef
-        url("/api/users/{username}", username=V(".username-input"))
-        # Generates: `/api/users/${(await ...)}`
-        
-        # With string
-        url("/api/users/{id}", id="123")
-        # Generates: `/api/users/123`
-        
-        # Mixed
-        url("/api/{resource}/{id}", resource="users", id=V(".user-id"))
-    """
+    """Build dynamic URLs with clean syntax"""
     result = template
     for key, value in kwargs.items():
         placeholder = f"{{{key}}}"
         if isinstance(value, ValueRef):
-            # ValueRef.__str__ returns ${await ...}, which is exactly what we want inside a backticked string
             result = result.replace(placeholder, str(value))
         else:
-            # Use the string value directly
             result = result.replace(placeholder, str(value))
-    
-    # If the user provided a template like "${base}/...", we need to make sure we don't double-escape
-    # But wait, the user provides "/api/users/{username}", so we replace {username} with ${await ...}
-    # The result is "/api/users/${await ...}"
-    # Wrapping this in backticks gives `/api/users/${await ...}` which is valid JS.
-    
     return RawJS(f"`{result}`")
 
 
 def transform(selector: str, fn: str) -> dScript:
-    """
-    Apply a custom JavaScript transformation to a DOM value.
-    
-    For cases where built-in transformations (upper, lower, etc.) are not enough,
-    this allows you to write custom JavaScript transformations.
-    
-    Args:
-        selector: CSS selector for the target element
-        fn: JavaScript expression using 'value' as the variable name
-    
-    Returns:
-        dScript that extracts and transforms the value
-    
-    Example:
-        # Remove non-alphabetic characters
-        transform(".input", "value.replace(/[^a-zA-Z]/g, '')")
-        
-        # Complex transformation
-        transform(".email", "value.toLowerCase().trim().replace(/\\s+/g, '')")
-        
-        # With state update
-        userState.processed.set(
-            transform(".input", "value.toUpperCase().slice(0, 10)")
-        )
-    """
-    # Generate JS extraction code directly
+    """Apply a custom JavaScript transformation to a DOM value"""
     js_extraction = f"""
 (async () => {{
     try {{
