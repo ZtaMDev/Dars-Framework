@@ -107,14 +107,11 @@ def alert(message: Union[str, 'ValueRef']) -> dScript:
         Button("Alert from State", on_click=alert(V("user.name")))
         Button("Alert from Input", on_click=alert(V("#myInput")))
     """
-    # Import here to avoid circular dependency
     from dars.hooks.value_helpers import ValueRef
     
     if isinstance(message, ValueRef):
-        # ValueRef returns a Promise, so we need to await it
         return dScript(f"(async () => {{ alert(await {message._get_code()}); }})();")
     else:
-        # Escape single quotes in message
         escaped_message = message.replace("'", "\\'")
         return dScript(f"alert('{escaped_message}');")
 
@@ -492,6 +489,78 @@ def blur(id: str) -> dScript:
     """
     return dScript(f"document.getElementById('{id}').blur();")
 
+
+# ============= Keyboard Event Utilities =============
+
+def switch(cases: dict, default=None) -> dScript:
+    """
+    Create a switch-case statement for keyboard events.
+    
+    Works with KeyCode constants for clean keyboard handling.
+    Supports both single actions and lists of actions.
+    
+    Args:
+        cases: Dictionary mapping key codes to dScript actions (or lists of dScript)
+        default: Optional default dScript action if no case matches
+        
+    Example:
+        from dars.scripts.keycode import KeyCode
+        
+        # Single actions
+        Input(on_key_down=switch({
+            KeyCode.ENTER: log("Enter pressed"),
+            KeyCode.ESCAPE: alert("Escape pressed"),
+            KeyCode.TAB: focus("next-input")
+        }))
+        
+        # Multiple actions per key
+        Input(on_key_down=switch({
+            KeyCode.ENTER: [
+                formState.message.set("Submitted!"),
+                alert("Done!")
+            ],
+            KeyCode.ESCAPE: [
+                clearInput("username"),
+                clearInput("password")
+            ]
+        }))
+    """
+    def extract_code(action):
+        """Helper to extract JavaScript code from action"""
+        if hasattr(action, 'code'):
+            return action.code
+        elif hasattr(action, 'get_code'):
+            return action.get_code()
+        else:
+            return str(action)
+    
+    conditions = []
+    
+    for key_code, action in cases.items():
+        # Handle lists of actions
+        if isinstance(action, list):
+            action_codes = [extract_code(act) for act in action]
+            action_code = ' '.join(action_codes)
+        else:
+            # Single action
+            action_code = extract_code(action)
+        
+        conditions.append(f"if (event.key === '{key_code}') {{ {action_code} }}")
+    
+    # Add default case if provided
+    if default:
+        if isinstance(default, list):
+            default_codes = [extract_code(act) for act in default]
+            default_code = ' '.join(default_codes)
+        else:
+            default_code = extract_code(default)
+        conditions.append(f"else {{ {default_code} }}")
+    
+    return dScript(' else '.join(conditions))
+
+
+# ============= Timer Utilities =============
+
 def setTimeout(delay: int, code: dScript) -> dScript:
     """
     Set a timeout to execute a script after a delay.
@@ -504,6 +573,7 @@ def setTimeout(delay: int, code: dScript) -> dScript:
         Button("Delayed Action", on_click=setTimeout(code=alert('Delayed!'), delay=2000))
     """
     return dScript(f"const _self=this; const _ev=typeof event!=='undefined'?event:null; setTimeout(()=>{{ (function(event){{ {code.code} }}).call(_self, _ev); }}, {delay});")
+
 
 def getInputValue(input_id: str, parent_id: str = None) -> dScript:
     """

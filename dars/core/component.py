@@ -96,10 +96,11 @@ class Component(ABC):
                 'on_mouse_enter': EventTypes.MOUSE_ENTER,
                 'on_mouse_leave': EventTypes.MOUSE_LEAVE,
                 'on_mouse_move': EventTypes.MOUSE_MOVE,
+                # Deprecated
                 'on_key_down': EventTypes.KEY_DOWN,
                 'on_key_up': EventTypes.KEY_UP,
+                # Simpler
                 'on_key_press': EventTypes.KEY_PRESS,
-                # Key-specific events
                 'on_keydown_enter': EventTypes.KEY_DOWN_ENTER,
                 'on_keyup_enter': EventTypes.KEY_UP_ENTER,
                 'on_keypress_enter': EventTypes.KEY_PRESS_ENTER,

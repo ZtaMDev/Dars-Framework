@@ -2219,46 +2219,6 @@ body {
         for(let i=0;i<ch.length;i++){{ walk(ch[i], fn); }}
     }}
 
-    function _decodeCodeB64(b64){{
-        try {{
-        if (typeof atob === 'function') return atob(b64);
-        if (typeof Buffer !== 'undefined') {{ return Buffer.from(b64, 'base64').toString('utf8'); }}
-        }} catch(_){{ }}
-        return '';
-    }}
-
-    function _compileHandlerFromSpec(spec){{
-        try {{
-        if (!spec) return null;
-        if (spec && spec.type === 'inline' && spec.code) {{
-            return new Function('event', spec.code);
-        }}
-        const b64 = (spec && (spec.b || spec.code_b64)) || null;
-        if (b64){{
-            const code = _decodeCodeB64(b64);
-            if (code) return new Function('event', code);
-        }}
-        }} catch(_){{ }}
-        return null;
-    }}
-
-    function bindEventsFromVNode(snapshot){{
-        walk(snapshot, (v)=>{{
-        if(v && v.id && v.events){{
-            // Solo procesar eventos si no están ya en el eventMap
-            if(!eventMap.has(v.id)) {{
-            const handlers = {{}};
-            for(const ev in v.events){{
-                const spec = v.events[ev];
-                const fn = _compileHandlerFromSpec(spec);
-                if (fn) {{ handlers[ev] = fn; }}
-            }}
-            if(Object.keys(handlers).length){{ eventMap.set(v.id, handlers); }} else {{ eventMap.delete(v.id); }}
-            }}
-        }}
-        }});
-    }}
-
     // Utilities
     function setProps(el, props){{
         if(!el || !props) return;

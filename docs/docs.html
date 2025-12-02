@@ -1300,6 +1300,92 @@
      <div class="sidebar-divider">
      </div>
      <div class="sidebar-category">
+      Keyevents
+     </div>
+     <a class="sidebar-link sidebar-level-1" href="#keyboard-events-in-dars" style="margin-left: 0px">
+      Keyboard Events in Dars
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#basic-keyboard-events" style="margin-left: 20px">
+      Basic Keyboard Events
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#simple-example" style="margin-left: 40px">
+      Simple Example
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#keycode-constants" style="margin-left: 20px">
+      KeyCode Constants
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#available-keys" style="margin-left: 40px">
+      Available Keys
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#dynamic-key-access" style="margin-left: 40px">
+      Dynamic Key Access
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#the-onkey-helper" style="margin-left: 20px">
+      The onKey() Helper
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#basic-usage" style="margin-left: 40px">
+      Basic Usage
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#with-modifiers" style="margin-left: 40px">
+      With Modifiers
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#available-modifiers" style="margin-left: 40px">
+      Available Modifiers
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#complete-example" style="margin-left: 40px">
+      Complete Example
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#the-switch-function" style="margin-left: 20px">
+      The switch() Function
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#basic-usage" style="margin-left: 40px">
+      Basic Usage
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#with-multiple-actions" style="margin-left: 40px">
+      With Multiple Actions
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#complete-example" style="margin-left: 40px">
+      Complete Example
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#global-keyboard-shortcuts" style="margin-left: 20px">
+      Global Keyboard Shortcuts
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#why-global-shortcuts" style="margin-left: 40px">
+      Why Global Shortcuts?
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#basic-usage" style="margin-left: 40px">
+      Basic Usage
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#with-multiple-actions" style="margin-left: 40px">
+      With Multiple Actions
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#multiple-modifiers" style="margin-left: 40px">
+      Multiple Modifiers
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#complete-example" style="margin-left: 40px">
+      Complete Example
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#best-practices" style="margin-left: 20px">
+      Best Practices
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#1-use-modifiers-for-global-shortcuts" style="margin-left: 40px">
+      1. Use Modifiers for Global Shortcuts
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#2-use-onkey-for-component-specific-keys" style="margin-left: 40px">
+      2. Use onKey() for Component-Specific Keys
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#3-use-switch-for-multiple-keys" style="margin-left: 40px">
+      3. Use switch() for Multiple Keys
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#4-combine-with-state-and-v" style="margin-left: 40px">
+      4. Combine with State and V()
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#summary" style="margin-left: 20px">
+      Summary
+     </a>
+     <div class="sidebar-divider">
+     </div>
+     <div class="sidebar-category">
       Events
      </div>
      <a class="sidebar-link sidebar-level-1" href="#events-in-dars" style="margin-left: 0px">
@@ -1937,6 +2023,11 @@
        <li>
         <a href="#hooks-system">
          Hooks
+        </a>
+       </li>
+       <li>
+        <a href="#keyboard-events-in-dars">
+         Key Events System
         </a>
        </li>
        <li>
@@ -5785,7 +5876,7 @@ Desktop build target. Only effective when
          </td>
          <td>
           <code>
-           on_key_down
+           on_key_press
           </code>
          </td>
          <td>
@@ -6112,7 +6203,7 @@ Desktop build target. Only effective when
        </li>
        <li>
         <strong>
-         on_key_down
+         on_key_press
         </strong>
         event handler receives a dScript object or a comp.state() function
        </li>
@@ -6866,18 +6957,18 @@ Use the
         <tr>
          <td>
           <code>
-           on_key_down
+           on_key_press
           </code>
          </td>
          <td>
           dScript
          </td>
          <td>
-          Key down handler
+          Key press handler
          </td>
          <td>
           <code>
-           dScript("function(e) { ... }")
+           onKey(KeyCode.ENTER, action)
           </code>
          </td>
         </tr>
@@ -7175,18 +7266,18 @@ Use the
         <tr>
          <td>
           <code>
-           on_key_down
+           on_key_press
           </code>
          </td>
          <td>
           dScript
          </td>
          <td>
-          Key down handler
+          Key press handler
          </td>
          <td>
           <code>
-           dScript("function(e) { ... }")
+           onKey(KeyCode.ENTER, action)
           </code>
          </td>
         </tr>
@@ -12874,6 +12965,675 @@ def hello():
       <hr/>
      </div>
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_123">
+      <h1 id="keyboard-events-in-dars">
+       Keyboard Events in Dars
+      </h1>
+      <p>
+       Dars provides a powerful and intuitive system for handling keyboard events in your applications. This guide covers everything from basic key detection to advanced global shortcuts.
+      </p>
+      <hr/>
+      <h2 id="basic-keyboard-events">
+       Basic Keyboard Events
+      </h2>
+      <p>
+       All Dars components support the
+       <code>
+        on_key_press
+       </code>
+       event handler for keyboard interactions.
+      </p>
+      <h3 id="simple-example">
+       Simple Example
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">Input</span><span class="p">(</span>
+    <span class="nb">id</span><span class="o">=</span><span class="s2">"search"</span><span class="p">,</span>
+    <span class="n">on_key_press</span><span class="o">=</span><span class="n">log</span><span class="p">(</span><span class="s2">"Key pressed!"</span><span class="p">)</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <blockquote>
+       <p>
+        <strong>
+         Note:
+        </strong>
+        Use
+        <code>
+         on_key_press
+        </code>
+        as the universal keyboard event. The older
+        <code>
+         on_key_down
+        </code>
+        and
+        <code>
+         on_key_up
+        </code>
+        events have been deprecated in favor of this simpler approach.
+       </p>
+      </blockquote>
+      <hr/>
+      <h2 id="keycode-constants">
+       KeyCode Constants
+      </h2>
+      <p>
+       The
+       <code>
+        KeyCode
+       </code>
+       class provides constants for all keyboard keys, making your code more readable and maintainable.
+      </p>
+      <h3 id="available-keys">
+       Available Keys
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="c1"># Navigation keys</span>
+<span class="n">KeyCode</span><span class="o">.</span><span class="n">ENTER</span>
+<span class="n">KeyCode</span><span class="o">.</span><span class="n">TAB</span>
+<span class="n">KeyCode</span><span class="o">.</span><span class="n">ESCAPE</span>  <span class="c1"># or KeyCode.ESC</span>
+<span class="n">KeyCode</span><span class="o">.</span><span class="n">BACKSPACE</span>
+<span class="n">KeyCode</span><span class="o">.</span><span class="n">DELETE</span>
+
+<span class="c1"># Arrow keys</span>
+<span class="n">KeyCode</span><span class="o">.</span><span class="n">UP</span>       <span class="c1"># or KeyCode.ARROWUP</span>
+<span class="n">KeyCode</span><span class="o">.</span><span class="n">DOWN</span>     <span class="c1"># or KeyCode.ARROWDOWN</span>
+<span class="n">KeyCode</span><span class="o">.</span><span class="n">LEFT</span>     <span class="c1"># or KeyCode.ARROWLEFT</span>
+<span class="n">KeyCode</span><span class="o">.</span><span class="n">RIGHT</span>    <span class="c1"># or KeyCode.ARROWRIGHT</span>
+
+<span class="c1"># Letters (a-z)</span>
+<span class="n">KeyCode</span><span class="o">.</span><span class="n">A</span>
+<span class="n">KeyCode</span><span class="o">.</span><span class="n">B</span>
+<span class="c1"># ... through ...</span>
+<span class="n">KeyCode</span><span class="o">.</span><span class="n">Z</span>
+
+<span class="c1"># Numbers</span>
+<span class="n">KeyCode</span><span class="o">.</span><span class="n">ZERO</span>  <span class="c1"># or KeyCode.0</span>
+<span class="n">KeyCode</span><span class="o">.</span><span class="n">ONE</span>   <span class="c1"># or KeyCode.1</span>
+<span class="c1"># ... through ...</span>
+<span class="n">KeyCode</span><span class="o">.</span><span class="n">NINE</span>  <span class="c1"># or KeyCode.9</span>
+
+<span class="c1"># Function keys</span>
+<span class="n">KeyCode</span><span class="o">.</span><span class="n">F1</span>
+<span class="n">KeyCode</span><span class="o">.</span><span class="n">F2</span>
+<span class="c1"># ... through ...</span>
+<span class="n">KeyCode</span><span class="o">.</span><span class="n">F12</span>
+
+<span class="c1"># Special characters</span>
+<span class="n">KeyCode</span><span class="o">.</span><span class="n">SPACE</span>
+<span class="n">KeyCode</span><span class="o">.</span><span class="n">PLUS</span>
+<span class="n">KeyCode</span><span class="o">.</span><span class="n">MINUS</span>
+<span class="n">KeyCode</span><span class="o">.</span><span class="n">SLASH</span>
+<span class="n">KeyCode</span><span class="o">.</span><span class="n">COMMA</span>
+<span class="n">KeyCode</span><span class="o">.</span><span class="n">PERIOD</span>
+</code></pre>
+      </div>
+      <h3 id="dynamic-key-access">
+       Dynamic Key Access
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Get key code by name</span>
+<span class="n">key</span> <span class="o">=</span> <span class="n">KeyCode</span><span class="o">.</span><span class="n">key</span><span class="p">(</span><span class="s1">'enter'</span><span class="p">)</span>  <span class="c1"># Returns 'Enter'</span>
+<span class="n">key</span> <span class="o">=</span> <span class="n">KeyCode</span><span class="o">.</span><span class="n">key</span><span class="p">(</span><span class="s1">'A'</span><span class="p">)</span>      <span class="c1"># Returns 'a'</span>
+</code></pre>
+      </div>
+      <hr/>
+      <h2 id="the-onkey-helper">
+       The onKey() Helper
+      </h2>
+      <p>
+       The
+       <code>
+        onKey()
+       </code>
+       function is the
+       <strong>
+        recommended way
+       </strong>
+       to handle specific keyboard keys with optional modifier keys.
+      </p>
+      <h3 id="basic-usage">
+       Basic Usage
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="c1"># Simple key detection</span>
+<span class="n">Input</span><span class="p">(</span>
+    <span class="n">on_key_press</span><span class="o">=</span><span class="n">onKey</span><span class="p">(</span><span class="n">KeyCode</span><span class="o">.</span><span class="n">ENTER</span><span class="p">,</span> <span class="n">log</span><span class="p">(</span><span class="s2">"Enter pressed!"</span><span class="p">))</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="with-modifiers">
+       With Modifiers
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Ctrl modifier</span>
+<span class="n">Container</span><span class="p">(</span>
+    <span class="n">on_key_press</span><span class="o">=</span><span class="n">onKey</span><span class="p">(</span><span class="n">KeyCode</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="n">alert</span><span class="p">(</span><span class="s2">"Saving..."</span><span class="p">),</span> <span class="n">ctrl</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># Multiple modifiers</span>
+<span class="n">Container</span><span class="p">(</span>
+    <span class="n">on_key_press</span><span class="o">=</span><span class="n">onKey</span><span class="p">(</span><span class="n">KeyCode</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="n">log</span><span class="p">(</span><span class="s2">"Redo"</span><span class="p">),</span> <span class="n">ctrl</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shift</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="available-modifiers">
+       Available Modifiers
+      </h3>
+      <ul>
+       <li>
+        <code>
+         ctrl
+        </code>
+        - Ctrl key (Command on Mac)
+       </li>
+       <li>
+        <code>
+         shift
+        </code>
+        - Shift key
+       </li>
+       <li>
+        <code>
+         alt
+        </code>
+        - Alt key
+       </li>
+       <li>
+        <code>
+         meta
+        </code>
+        - Meta/Command key
+       </li>
+      </ul>
+      <h3 id="complete-example">
+       Complete Example
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="s2">"onKey Example"</span><span class="p">)</span>
+
+<span class="n">formState</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"form"</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s2">""</span><span class="p">)</span>
+
+<span class="nd">@route</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span>
+        <span class="n">Input</span><span class="p">(</span>
+            <span class="nb">id</span><span class="o">=</span><span class="s2">"input"</span><span class="p">,</span>
+            <span class="n">placeholder</span><span class="o">=</span><span class="s2">"Press Enter to submit"</span><span class="p">,</span>
+            <span class="n">on_key_press</span><span class="o">=</span><span class="n">onKey</span><span class="p">(</span>
+                <span class="n">KeyCode</span><span class="o">.</span><span class="n">ENTER</span><span class="p">,</span>
+                <span class="n">formState</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"Submitted!"</span><span class="p">),</span>
+                <span class="n">ctrl</span><span class="o">=</span><span class="kc">False</span>  <span class="c1"># Just Enter, no modifier needed</span>
+            <span class="p">)</span>
+        <span class="p">),</span>
+        <span class="n">Text</span><span class="p">(</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"form.message"</span><span class="p">))</span>
+    <span class="p">)</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="s2">"index"</span><span class="p">,</span> <span class="n">index</span><span class="p">(),</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <hr/>
+      <h2 id="the-switch-function">
+       The switch() Function
+      </h2>
+      <p>
+       Use
+       <code>
+        switch()
+       </code>
+       to handle multiple different keys in a single event handler.
+      </p>
+      <h3 id="basic-usage-2">
+       Basic Usage
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">Input</span><span class="p">(</span>
+    <span class="n">on_key_press</span><span class="o">=</span><span class="n">switch</span><span class="p">({</span>
+        <span class="n">KeyCode</span><span class="o">.</span><span class="n">ENTER</span><span class="p">:</span> <span class="n">log</span><span class="p">(</span><span class="s2">"Enter pressed"</span><span class="p">),</span>
+        <span class="n">KeyCode</span><span class="o">.</span><span class="n">ESCAPE</span><span class="p">:</span> <span class="n">alert</span><span class="p">(</span><span class="s2">"Escape pressed"</span><span class="p">),</span>
+    <span class="p">})</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="with-multiple-actions">
+       With Multiple Actions
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">formState</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"form"</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s2">""</span><span class="p">)</span>
+
+<span class="n">Input</span><span class="p">(</span>
+    <span class="n">on_key_press</span><span class="o">=</span><span class="n">switch</span><span class="p">({</span>
+        <span class="n">KeyCode</span><span class="o">.</span><span class="n">ENTER</span><span class="p">:</span> <span class="p">[</span>
+            <span class="n">formState</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"Submitted!"</span><span class="p">),</span>
+            <span class="n">alert</span><span class="p">(</span><span class="s2">"Form submitted!"</span><span class="p">)</span>
+        <span class="p">],</span>
+        <span class="n">KeyCode</span><span class="o">.</span><span class="n">ESCAPE</span><span class="p">:</span> <span class="p">[</span>
+            <span class="n">clearInput</span><span class="p">(</span><span class="s2">"username"</span><span class="p">),</span>
+            <span class="n">clearInput</span><span class="p">(</span><span class="s2">"password"</span><span class="p">),</span>
+            <span class="n">formState</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"Cleared!"</span><span class="p">)</span>
+        <span class="p">]</span>
+    <span class="p">})</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="complete-example-2">
+       Complete Example
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="s2">"KeyCode Clean Example"</span><span class="p">)</span>
+
+<span class="c1"># State</span>
+<span class="n">formState</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"form"</span><span class="p">,</span> 
+    <span class="n">username</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span> 
+    <span class="n">password</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span> 
+    <span class="n">message</span><span class="o">=</span><span class="s2">"Use keyboard shortcuts!"</span>
+<span class="p">)</span>
+
+<span class="nd">@FunctionComponent</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">LoginForm</span><span class="p">(</span><span class="o">**</span><span class="n">props</span><span class="p">):</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">'''</span>
+<span class="s1">    &lt;div </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">class_name</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">style</span><span class="si">}</span><span class="s1">&gt;</span>
+<span class="s1">        &lt;h2&gt;Login Form with Keyboard Shortcuts&lt;/h2&gt;</span>
+<span class="s1">        &lt;p style="color: #666;"&gt;</span><span class="si">{</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"form.message"</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/p&gt;</span>
+
+<span class="s1">        &lt;input </span>
+<span class="s1">            type="text" </span>
+<span class="s1">            id="username-input"</span>
+<span class="s1">            placeholder="Username"</span>
+<span class="s1">            style="display: block; margin: 10px 0; padding: 8px; width: 300px;"</span>
+<span class="s1">        /&gt;</span>
+
+<span class="s1">        &lt;input </span>
+<span class="s1">            type="password" </span>
+<span class="s1">            id="password-input"</span>
+<span class="s1">            placeholder="Password"</span>
+<span class="s1">            style="display: block; margin: 10px 0; padding: 8px; width: 300px;"</span>
+<span class="s1">        /&gt;</span>
+
+<span class="s1">        &lt;div style="margin-top: 30px; padding: 15px; background: #f5f5f5; border-radius: 4px;"&gt;</span>
+<span class="s1">            &lt;h3 style="margin-top: 0;"&gt;Global Keyboard Shortcuts:&lt;/h3&gt;</span>
+<span class="s1">            &lt;ul style="margin: 0; padding-left: 20px;"&gt;</span>
+<span class="s1">                &lt;li&gt;&lt;strong&gt;Ctrl+Enter&lt;/strong&gt; - Submit form (shows alert)&lt;/li&gt;</span>
+<span class="s1">                &lt;li&gt;&lt;strong&gt;Ctrl+F&lt;/strong&gt; - Clear form&lt;/li&gt;</span>
+<span class="s1">                &lt;li&gt;&lt;strong&gt;Ctrl+S&lt;/strong&gt; - Save document&lt;/li&gt;</span>
+<span class="s1">            &lt;/ul&gt;</span>
+<span class="s1">            &lt;p style="margin-top: 10px; font-size: 0.9em; color: #666;"&gt;</span>
+<span class="s1">                Note: These are GLOBAL shortcuts that work anywhere on the page without blocking normal typing.</span>
+<span class="s1">            &lt;/p&gt;</span>
+<span class="s1">        &lt;/div&gt;</span>
+<span class="s1">    &lt;/div&gt;</span>
+<span class="s1">    '''</span>
+
+<span class="nd">@route</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span>
+        <span class="n">LoginForm</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"login-form"</span><span class="p">),</span>
+        <span class="n">Input</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span> <span class="n">on_key_up</span><span class="o">=</span><span class="n">onKey</span><span class="p">(</span><span class="s2">"R"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="n">log</span><span class="p">(</span><span class="s2">"Logged"</span><span class="p">))),</span>
+        <span class="c1"># Buttons using State.set() and utils_ds functions</span>
+        <span class="n">Button</span><span class="p">(</span>
+            <span class="s2">"Submit"</span><span class="p">,</span>
+            <span class="n">on_click</span><span class="o">=</span><span class="p">[</span>
+                <span class="n">formState</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"Form submitted via button!"</span><span class="p">),</span>
+                <span class="n">alert</span><span class="p">(</span><span class="s2">"Form submitted!"</span><span class="p">)</span>
+            <span class="p">]</span>
+        <span class="p">),</span>
+
+        <span class="n">Button</span><span class="p">(</span>
+            <span class="s2">"Clear"</span><span class="p">,</span> 
+            <span class="n">on_click</span><span class="o">=</span><span class="p">[</span>
+                <span class="n">formState</span><span class="o">.</span><span class="n">username</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">""</span><span class="p">),</span>
+                <span class="n">formState</span><span class="o">.</span><span class="n">password</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">""</span><span class="p">),</span>
+                <span class="n">formState</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"Form cleared via button!"</span><span class="p">),</span>
+                <span class="n">clearInput</span><span class="p">(</span><span class="s2">"username-input"</span><span class="p">),</span>
+                <span class="n">clearInput</span><span class="p">(</span><span class="s2">"password-input"</span><span class="p">)</span>
+            <span class="p">]</span>
+        <span class="p">),</span>
+
+        <span class="n">Button</span><span class="p">(</span>
+            <span class="s2">"Show Username"</span><span class="p">,</span>
+            <span class="n">on_click</span><span class="o">=</span><span class="n">alert</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#username-input"</span><span class="p">))</span>
+        <span class="p">),</span>
+
+        <span class="n">Button</span><span class="p">(</span>
+            <span class="s2">"Log Message"</span><span class="p">,</span>
+            <span class="n">on_click</span><span class="o">=</span><span class="n">log</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"form.message"</span><span class="p">))</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+
+<span class="n">addGlobalKeys</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="p">{</span>
+    <span class="p">(</span><span class="n">KeyCode</span><span class="o">.</span><span class="n">ENTER</span><span class="p">,</span> <span class="s1">'ctrl'</span><span class="p">):</span> <span class="p">[</span>
+        <span class="n">formState</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"Form submitted with Ctrl+Enter!"</span><span class="p">),</span>
+        <span class="n">alert</span><span class="p">(</span><span class="s2">"Form submitted!"</span><span class="p">)</span>
+    <span class="p">],</span>
+    <span class="p">(</span><span class="n">KeyCode</span><span class="o">.</span><span class="n">F</span><span class="p">,</span> <span class="s1">'ctrl'</span><span class="p">):</span> <span class="p">[</span>
+        <span class="n">formState</span><span class="o">.</span><span class="n">username</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">""</span><span class="p">),</span>
+        <span class="n">formState</span><span class="o">.</span><span class="n">password</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">""</span><span class="p">),</span>
+        <span class="n">formState</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"Form cleared with Ctrl+F!"</span><span class="p">),</span>
+        <span class="n">clearInput</span><span class="p">(</span><span class="s2">"username-input"</span><span class="p">),</span>
+        <span class="n">clearInput</span><span class="p">(</span><span class="s2">"password-input"</span><span class="p">)</span>
+    <span class="p">],</span>
+    <span class="p">(</span><span class="n">KeyCode</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="s1">'ctrl'</span><span class="p">):</span> <span class="n">alert</span><span class="p">(</span><span class="s2">"Document saved! (Ctrl+S)"</span><span class="p">),</span>
+<span class="p">})</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="s2">"index"</span><span class="p">,</span> <span class="n">index</span><span class="p">(),</span> <span class="n">title</span><span class="o">=</span><span class="s2">"KeyCode Example"</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">rTimeCompile</span><span class="p">()</span>
+</code></pre>
+      </div>
+      <hr/>
+      <h2 id="global-keyboard-shortcuts">
+       Global Keyboard Shortcuts
+      </h2>
+      <p>
+       Use
+       <code>
+        addGlobalKeys()
+       </code>
+       to create app-wide keyboard shortcuts that work anywhere on the page.
+      </p>
+      <h3 id="why-global-shortcuts">
+       Why Global Shortcuts?
+      </h3>
+      <p>
+       Global shortcuts are perfect for:
+- App-level commands (Save, Undo, Redo)
+- Navigation shortcuts
+- Quick actions that should work anywhere
+      </p>
+      <blockquote>
+       <p>
+        <strong>
+         Important:
+        </strong>
+        Always use modifier keys (Ctrl, Alt, etc.) with global shortcuts to avoid blocking normal typing in input fields.
+       </p>
+      </blockquote>
+      <h3 id="basic-usage-3">
+       Basic Usage
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="s2">"Global Shortcuts"</span><span class="p">)</span>
+
+<span class="c1"># Define your actions</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">save_document</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">alert</span><span class="p">(</span><span class="s2">"Document saved!"</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">undo</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">log</span><span class="p">(</span><span class="s2">"Undo action"</span><span class="p">)</span>
+
+<span class="c1"># Add global shortcuts</span>
+<span class="n">addGlobalKeys</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="p">{</span>
+    <span class="p">(</span><span class="n">KeyCode</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="s1">'ctrl'</span><span class="p">):</span> <span class="n">save_document</span><span class="p">(),</span>
+    <span class="p">(</span><span class="n">KeyCode</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="s1">'ctrl'</span><span class="p">):</span> <span class="n">undo</span><span class="p">()</span>
+<span class="p">})</span>
+</code></pre>
+      </div>
+      <h3 id="with-multiple-actions-2">
+       With Multiple Actions
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">formState</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"form"</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="s2">""</span><span class="p">)</span>
+
+<span class="n">addGlobalKeys</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="p">{</span>
+    <span class="p">(</span><span class="n">KeyCode</span><span class="o">.</span><span class="n">ENTER</span><span class="p">,</span> <span class="s1">'ctrl'</span><span class="p">):</span> <span class="p">[</span>
+        <span class="n">formState</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"Submitted!"</span><span class="p">),</span>
+        <span class="n">alert</span><span class="p">(</span><span class="s2">"Form submitted with Ctrl+Enter"</span><span class="p">)</span>
+    <span class="p">],</span>
+    <span class="p">(</span><span class="n">KeyCode</span><span class="o">.</span><span class="n">ESCAPE</span><span class="p">,</span> <span class="s1">'ctrl'</span><span class="p">):</span> <span class="p">[</span>
+        <span class="n">formState</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">""</span><span class="p">),</span>
+        <span class="n">log</span><span class="p">(</span><span class="s2">"Form cleared"</span><span class="p">)</span>
+    <span class="p">]</span>
+<span class="p">})</span>
+</code></pre>
+      </div>
+      <h3 id="multiple-modifiers">
+       Multiple Modifiers
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">addGlobalKeys</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="p">{</span>
+    <span class="p">(</span><span class="n">KeyCode</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="s1">'ctrl'</span><span class="p">):</span> <span class="n">undo</span><span class="p">(),</span>
+    <span class="p">(</span><span class="n">KeyCode</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="s1">'ctrl'</span><span class="p">,</span> <span class="s1">'shift'</span><span class="p">):</span> <span class="n">redo</span><span class="p">(),</span>
+    <span class="p">(</span><span class="n">KeyCode</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="s1">'ctrl'</span><span class="p">,</span> <span class="s1">'shift'</span><span class="p">):</span> <span class="n">save_as</span><span class="p">()</span>
+<span class="p">})</span>
+</code></pre>
+      </div>
+      <h3 id="complete-example-3">
+       Complete Example
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="s2">"Global Shortcuts Example"</span><span class="p">)</span>
+
+<span class="n">docState</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"document"</span><span class="p">,</span> 
+    <span class="n">content</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span> 
+    <span class="n">saved</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">message</span><span class="o">=</span><span class="s2">"Ready"</span>
+<span class="p">)</span>
+
+<span class="nd">@route</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span>
+        <span class="n">Container</span><span class="p">(</span>
+            <span class="n">Text</span><span class="p">(</span><span class="s2">"Document Editor"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s2">"font-size"</span><span class="p">:</span> <span class="s2">"24px"</span><span class="p">,</span> <span class="s2">"font-weight"</span><span class="p">:</span> <span class="s2">"bold"</span><span class="p">}),</span>
+            <span class="n">Text</span><span class="p">(</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"document.message"</span><span class="p">),</span> <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s2">"color"</span><span class="p">:</span> <span class="s2">"#666"</span><span class="p">}),</span>
+
+            <span class="n">Input</span><span class="p">(</span>
+                <span class="nb">id</span><span class="o">=</span><span class="s2">"editor"</span><span class="p">,</span>
+                <span class="n">placeholder</span><span class="o">=</span><span class="s2">"Start typing..."</span><span class="p">,</span>
+                <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s2">"width"</span><span class="p">:</span> <span class="s2">"100%"</span><span class="p">,</span> <span class="s2">"min-height"</span><span class="p">:</span> <span class="s2">"200px"</span><span class="p">}</span>
+            <span class="p">),</span>
+
+            <span class="n">Container</span><span class="p">(</span>
+                <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s2">"margin-top"</span><span class="p">:</span> <span class="s2">"20px"</span><span class="p">,</span> <span class="s2">"padding"</span><span class="p">:</span> <span class="s2">"15px"</span><span class="p">,</span> <span class="s2">"background"</span><span class="p">:</span> <span class="s2">"#f5f5f5"</span><span class="p">},</span>
+                <span class="n">children</span><span class="o">=</span><span class="p">[</span>
+                    <span class="n">Text</span><span class="p">(</span><span class="s2">"Global Shortcuts:"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s2">"font-weight"</span><span class="p">:</span> <span class="s2">"bold"</span><span class="p">}),</span>
+                    <span class="n">Text</span><span class="p">(</span><span class="s2">"• Ctrl+S - Save"</span><span class="p">),</span>
+                    <span class="n">Text</span><span class="p">(</span><span class="s2">"• Ctrl+Z - Undo"</span><span class="p">),</span>
+                    <span class="n">Text</span><span class="p">(</span><span class="s2">"• Ctrl+Shift+Z - Redo"</span><span class="p">),</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+<span class="c1"># Global keyboard shortcuts</span>
+<span class="n">addGlobalKeys</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="p">{</span>
+    <span class="p">(</span><span class="n">KeyCode</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="s1">'ctrl'</span><span class="p">):</span> <span class="p">[</span>
+        <span class="n">docState</span><span class="o">.</span><span class="n">saved</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="kc">True</span><span class="p">),</span>
+        <span class="n">docState</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"Document saved!"</span><span class="p">),</span>
+        <span class="n">alert</span><span class="p">(</span><span class="s2">"Saved!"</span><span class="p">)</span>
+    <span class="p">],</span>
+    <span class="p">(</span><span class="n">KeyCode</span><span class="o">.</span><span class="n">Z</span><span class="p">,</span> <span class="s1">'ctrl'</span><span class="p">):</span> <span class="p">[</span>
+        <span class="n">docState</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"Undo"</span><span class="p">),</span>
+        <span class="n">log</span><span class="p">(</span><span class="s2">"Undo action"</span><span class="p">)</span>
+    <span class="p">]</span>
+<span class="p">})</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="s2">"index"</span><span class="p">,</span> <span class="n">index</span><span class="p">(),</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">rTimeCompile</span><span class="p">()</span>
+</code></pre>
+      </div>
+      <hr/>
+      <h2 id="best-practices">
+       Best Practices
+      </h2>
+      <h3 id="1-use-modifiers-for-global-shortcuts">
+       1. Use Modifiers for Global Shortcuts
+      </h3>
+      <p>
+       <strong>
+        Bad - Blocks typing:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">addGlobalKeys</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="p">{</span>
+    <span class="n">KeyCode</span><span class="o">.</span><span class="n">ENTER</span><span class="p">:</span> <span class="n">submit_form</span><span class="p">()</span>  <span class="c1"># Blocks Enter in all inputs!</span>
+<span class="p">})</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Good - Doesn't interfere:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">addGlobalKeys</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="p">{</span>
+    <span class="p">(</span><span class="n">KeyCode</span><span class="o">.</span><span class="n">ENTER</span><span class="p">,</span> <span class="s1">'ctrl'</span><span class="p">):</span> <span class="n">submit_form</span><span class="p">()</span>  <span class="c1"># Only Ctrl+Enter</span>
+<span class="p">})</span>
+</code></pre>
+      </div>
+      <h3 id="2-use-onkey-for-component-specific-keys">
+       2. Use onKey() for Component-Specific Keys
+      </h3>
+      <p>
+       <strong>
+        For specific components:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">Input</span><span class="p">(</span>
+    <span class="nb">id</span><span class="o">=</span><span class="s2">"search"</span><span class="p">,</span>
+    <span class="n">on_key_press</span><span class="o">=</span><span class="n">onKey</span><span class="p">(</span><span class="n">KeyCode</span><span class="o">.</span><span class="n">ENTER</span><span class="p">,</span> <span class="n">perform_search</span><span class="p">())</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        For app-wide shortcuts:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">addGlobalKeys</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="p">{</span>
+    <span class="p">(</span><span class="n">KeyCode</span><span class="o">.</span><span class="n">F</span><span class="p">,</span> <span class="s1">'ctrl'</span><span class="p">):</span> <span class="n">focus</span><span class="p">(</span><span class="s2">"search"</span><span class="p">)</span>
+<span class="p">})</span>
+</code></pre>
+      </div>
+      <h3 id="3-use-switch-for-multiple-keys">
+       3. Use switch() for Multiple Keys
+      </h3>
+      <p>
+       <strong>
+        Bad - Repetitive:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">Input</span><span class="p">(</span>
+    <span class="n">on_key_press</span><span class="o">=</span><span class="n">onKey</span><span class="p">(</span><span class="n">KeyCode</span><span class="o">.</span><span class="n">ENTER</span><span class="p">,</span> <span class="n">action1</span><span class="p">())</span>
+<span class="p">)</span>
+<span class="n">Input</span><span class="p">(</span>
+    <span class="n">on_key_press</span><span class="o">=</span><span class="n">onKey</span><span class="p">(</span><span class="n">KeyCode</span><span class="o">.</span><span class="n">ESCAPE</span><span class="p">,</span> <span class="n">action2</span><span class="p">())</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Good - Clean:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">Container</span><span class="p">(</span>
+    <span class="n">on_key_press</span><span class="o">=</span><span class="n">switch</span><span class="p">({</span>
+        <span class="n">KeyCode</span><span class="o">.</span><span class="n">ENTER</span><span class="p">:</span> <span class="n">action1</span><span class="p">(),</span>
+        <span class="n">KeyCode</span><span class="o">.</span><span class="n">ESCAPE</span><span class="p">:</span> <span class="n">action2</span><span class="p">()</span>
+    <span class="p">})</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="4-combine-with-state-and-v">
+       4. Combine with State and V()
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">formState</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"form"</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="s2">""</span><span class="p">)</span>
+
+<span class="n">Input</span><span class="p">(</span>
+    <span class="nb">id</span><span class="o">=</span><span class="s2">"username"</span><span class="p">,</span>
+    <span class="n">on_key_press</span><span class="o">=</span><span class="n">onKey</span><span class="p">(</span><span class="n">KeyCode</span><span class="o">.</span><span class="n">ENTER</span><span class="p">,</span> <span class="n">formState</span><span class="o">.</span><span class="n">username</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#username"</span><span class="p">)))</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <hr/>
+      <h2 id="summary">
+       Summary
+      </h2>
+      <ul>
+       <li>
+        <strong>
+         Use
+         <code>
+          on_key_press
+         </code>
+        </strong>
+        for all keyboard events (replaces
+        <code>
+         on_key_down
+        </code>
+        and
+        <code>
+         on_key_up
+        </code>
+        )
+       </li>
+       <li>
+        <strong>
+         Use
+         <code>
+          KeyCode
+         </code>
+        </strong>
+        constants for readable key references
+       </li>
+       <li>
+        <strong>
+         Use
+         <code>
+          onKey()
+         </code>
+        </strong>
+        for single key detection with optional modifiers
+       </li>
+       <li>
+        <strong>
+         Use
+         <code>
+          switch()
+         </code>
+        </strong>
+        for handling multiple different keys
+       </li>
+       <li>
+        <strong>
+         Use
+         <code>
+          addGlobalKeys()
+         </code>
+        </strong>
+        for app-wide shortcuts (always with modifiers!)
+       </li>
+       <li>
+        <strong>
+         Combine with State and V()
+        </strong>
+        for dynamic, reactive keyboard interactions
+       </li>
+      </ul>
+     </div>
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_124">
       <h1 id="events-in-dars">
        Events in Dars
       </h1>
@@ -13136,7 +13896,7 @@ def hello():
 </code></pre>
       </div>
      </div>
-     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_124">
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_125">
       <h1 id="dars-exporter-documentation">
        Dars - Exporter Documentation
       </h1>
@@ -13706,7 +14466,7 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
        </li>
       </ul>
      </div>
-     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_125">
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_126">
       <h1 id="dars-script-system">
        Dars - Script System
       </h1>
@@ -15629,7 +16389,7 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
        for advanced chaining.
       </p>
      </div>
-     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_126">
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_127">
       <h1 id="dars-cli-reference">
        Dars CLI Reference
       </h1>
@@ -15959,19 +16719,19 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
     </div>
     <div class="dars-container" id="footer-section" style="background: linear-gradient(135deg, #0a1512 0%, #0f1e1a 100%);
     margin-top: auto;">
-     <div class="dars-container" id="container_127" style="background: rgba(10, 15, 13, 0.8);
+     <div class="dars-container" id="container_128" style="background: rgba(10, 15, 13, 0.8);
     backdrop-filter: blur(12px);
     border-top: 1px solid rgba(100,255,200,0.15);">
-      <div class="dars-container" id="container_128" style="max-width: 1200px;
+      <div class="dars-container" id="container_129" style="max-width: 1200px;
     margin: 0 auto;
     padding: 50px 20px;">
-       <div class="dars-container" id="container_129" style="display: flex;
+       <div class="dars-container" id="container_130" style="display: flex;
     align-items: center;
     margin-bottom: 30px;">
-        <img alt="Dars Framework" class="dars-image" height="50px" id="image_130" src="Dars-logo.png" style="margin-right: 15px;
+        <img alt="Dars Framework" class="dars-image" height="50px" id="image_131" src="Dars-logo.png" style="margin-right: 15px;
     filter: drop-shadow(0 0 10px rgba(162, 255, 226, 0.4));" width="50px"/>
-        <div class="dars-container" id="container_131" style="text-align: left;">
-         <span class="dars-text" id="text_132" style="font-size: 24px;
+        <div class="dars-container" id="container_132" style="text-align: left;">
+         <span class="dars-text" id="text_133" style="font-size: 24px;
     font-weight: 700;
     color: #a2ffe2;
     margin-bottom: 5px;">
@@ -15979,20 +16739,20 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
          </span>
         </div>
        </div>
-       <div class="dars-container" id="container_133" style="display: flex;
+       <div class="dars-container" id="container_134" style="display: flex;
     flex-wrap: wrap;
     gap: 40px;
     justify-content: space-between;
     margin-bottom: 30px;">
-        <div class="dars-container" id="container_134" style="flex: 1;
+        <div class="dars-container" id="container_135" style="flex: 1;
     min-width: 150px;">
-         <span class="dars-text" id="text_135" style="font-size: 18px;
+         <span class="dars-text" id="text_136" style="font-size: 18px;
     font-weight: 600;
     color: #a2ffe2;
     margin-bottom: 15px;">
           Quick Links
          </span>
-         <a class="dars-link" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_136" style="color: #a0cfc0;
+         <a class="dars-link" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_137" style="color: #a0cfc0;
     text-decoration: none;
     display: block;
     margin-bottom: 8px;
@@ -16000,7 +16760,7 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
     font-size: 14px;" target="_self">
           Documentation
          </a>
-         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework" id="link_137" style="color: #a0cfc0;
+         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework" id="link_138" style="color: #a0cfc0;
     text-decoration: none;
     display: block;
     margin-bottom: 8px;
@@ -16008,7 +16768,7 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
     font-size: 14px;" target="_self">
           GitHub
          </a>
-         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework/tree/CrystalMain/dars/templates/examples" id="link_138" style="color: #a0cfc0;
+         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework/tree/CrystalMain/dars/templates/examples" id="link_139" style="color: #a0cfc0;
     text-decoration: none;
     display: block;
     margin-bottom: 8px;
@@ -16017,15 +16777,15 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
           Examples
          </a>
         </div>
-        <div class="dars-container" id="container_139" style="flex: 1;
+        <div class="dars-container" id="container_140" style="flex: 1;
     min-width: 150px;">
-         <span class="dars-text" id="text_140" style="font-size: 18px;
+         <span class="dars-text" id="text_141" style="font-size: 18px;
     font-weight: 600;
     color: #a2ffe2;
     margin-bottom: 15px;">
           Resources
          </span>
-         <a class="dars-link" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_141" style="color: #a0cfc0;
+         <a class="dars-link" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_142" style="color: #a0cfc0;
     text-decoration: none;
     display: block;
     margin-bottom: 8px;
@@ -16033,7 +16793,7 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
     font-size: 14px;" target="_self">
           Getting Started
          </a>
-         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework/releases.html" id="link_142" style="color: #a0cfc0;
+         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework/releases.html" id="link_143" style="color: #a0cfc0;
     text-decoration: none;
     display: block;
     margin-bottom: 8px;
@@ -16042,15 +16802,15 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
           Releases
          </a>
         </div>
-        <div class="dars-container" id="container_143" style="flex: 2;
+        <div class="dars-container" id="container_144" style="flex: 2;
     min-width: 200px;">
-         <span class="dars-text" id="text_144" style="font-size: 18px;
+         <span class="dars-text" id="text_145" style="font-size: 18px;
     font-weight: 600;
     color: #a2ffe2;
     margin-bottom: 15px;">
           Info:
          </span>
-         <span class="dars-text" id="text_145" style="color: #a0cfc0;
+         <span class="dars-text" id="text_146" style="color: #a0cfc0;
     font-size: 14px;
     line-height: 1.5;
     margin-bottom: 15px;">
@@ -16058,41 +16818,41 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
          </span>
         </div>
        </div>
-       <div class="dars-container" id="container_146" style="display: flex;
+       <div class="dars-container" id="container_147" style="display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
     padding-top: 20px;
     border-top: 1px solid rgba(100,255,200,0.1);">
-        <div class="dars-container" id="container_147" style="flex: 1;">
-         <span class="dars-text" id="text_148" style="color: #a0cfc0;
+        <div class="dars-container" id="container_148" style="flex: 1;">
+         <span class="dars-text" id="text_149" style="color: #a0cfc0;
     font-size: 14px;
     opacity: 0.7;">
           © 2024 Dars Framework.
          </span>
         </div>
-        <div class="dars-container" id="container_149" style="flex: 1;
+        <div class="dars-container" id="container_150" style="flex: 1;
     text-align: right;">
-         <span class="dars-text" id="text_150" style="color: #a0cfc0;
+         <span class="dars-text" id="text_151" style="color: #a0cfc0;
     font-size: 14px;
     opacity: 0.7;
     display: inline;">
           Created with
          </span>
-         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework" id="link_151" style="color: #a2ffe2;
+         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework" id="link_152" style="color: #a2ffe2;
     text-decoration: none;
     font-weight: 600;
     display: inline;
     font-size: 14px;" target="_self">
           Dars Framework
          </a>
-         <span class="dars-text" id="text_152" style="color: #a0cfc0;
+         <span class="dars-text" id="text_153" style="color: #a0cfc0;
     font-size: 14px;
     opacity: 0.7;
     display: inline;">
           by
          </span>
-         <a class="dars-link" href="https://github.com/ZtaMDev" id="link_153" style="color: #a2ffe2;
+         <a class="dars-link" href="https://github.com/ZtaMDev" id="link_154" style="color: #a2ffe2;
     text-decoration: none;
     font-weight: 600;
     display: inline;

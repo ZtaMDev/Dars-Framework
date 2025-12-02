@@ -13,6 +13,7 @@ Welcome to the official Dars Framework documentation. Here you will find detaile
 - [Animation System](#dars-animation-system)
 - [Custom Components](#custom-components-in-dars-framework)
 - [Hooks](#hooks-system)
+- [Key Events System](#keyboard-events-in-dars)
 - [Event Handling](#events-in-dars)
 - [Exporters](#dars-exporter-documentation)
 - [Scripts System](#dars-script-system)
@@ -1810,7 +1811,7 @@ input_field = Input(
 | \`Button\` | \`on_mouse_leave\` | Triggered when mouse leaves the button |
 | \`Input\` | \`on_change\` | Triggered when input value changes |
 | \`Input\` | \`on_key_up\` | Triggered when a key is released |
-| \`Input\` | \`on_key_down\` | Triggered when a key is pressed |
+| \`Input\` | \`on_key_press\` | Triggered when a key is pressed |
 
 ### Events and dScriptBest Practices
 
@@ -1895,7 +1896,7 @@ All components support these basic properties:
 - **on_mouse_enter** event handler receives a dScript object or a comp.state() function
 - **on_mouse_leave** event handler receives a dScript object or a comp.state() function
 - **on_mouse_move** event handler receives a dScript object or a comp.state() function
-- **on_key_down** event handler receives a dScript object or a comp.state() function
+- **on_key_press** event handler receives a dScript object or a comp.state() function
 - **on_key_up** event handler receives a dScript object or a comp.state() function
 - **on_key_press** event handler receives a dScript object or a comp.state() function
 - **on_change** event handler receives a dScript object or a comp.state() function
@@ -2146,7 +2147,7 @@ boton = Button(
 | \`on_mouse_enter\` | dScript | Mouse enter handler | \`dScript("function() { ... }")\` |
 | \`on_mouse_leave\` | dScript | Mouse leave handler | \`dScript("function() { ... }")\` |
 | \`on_key_up\` | dScript | Key up handler | \`dScript("function(e) { ... }")\` |
-| \`on_key_down\` | dScript | Key down handler | \`dScript("function(e) { ... }")\` |
+| \`on_key_press\` | dScript | Key press handler | \`onKey(KeyCode.ENTER, action)\` |
 
 #### Button Examples
 
@@ -2252,7 +2253,7 @@ entrada = Input(
 | \`required\` | bool | Campo obligatorio | \`True\`, \`False\` |
 | \`on_change\` | dScript | Change handler | \`dScript("function(e) { ... }")\` |
 | \`on_key_up\` | dScript | Key up handler | \`dScript("function(e) { ... }")\` |
-| \`on_key_down\` | dScript | Key down handler | \`dScript("function(e) { ... }")\` |
+| \`on_key_press\` | dScript | Key press handler | \`onKey(KeyCode.ENTER, action)\` |
 | \`max_length\` | int | Longitud m\xE1xima | \`50\` |
 | \`min_length\` | int | Longitud m\xEDnima | \`3\` |
 | \`pattern\` | str | Validation pattern | \`"[0-9]+"\` |
@@ -4511,7 +4512,499 @@ fetch(
 - Nest state paths more than 2 levels deep (currently supports \`stateName.property\`).
 - Use arithmetic operators without numeric transformations.
 
----`},{type:"T9",id:"markdown_123",key:"0/2/0/12",text:`# Events in Dars
+---`},{type:"T9",id:"markdown_123",key:"0/2/0/12",text:`# Keyboard Events in Dars
+
+Dars provides a powerful and intuitive system for handling keyboard events in your applications. This guide covers everything from basic key detection to advanced global shortcuts.
+
+---
+
+## Basic Keyboard Events
+
+All Dars components support the \`on_key_press\` event handler for keyboard interactions.
+
+### Simple Example
+
+\`\`\`python
+from dars.all import *
+
+Input(
+    id="search",
+    on_key_press=log("Key pressed!")
+)
+\`\`\`
+
+> **Note:** Use \`on_key_press\` as the universal keyboard event. The older \`on_key_down\` and \`on_key_up\` events have been deprecated in favor of this simpler approach.
+
+---
+
+## KeyCode Constants
+
+The \`KeyCode\` class provides constants for all keyboard keys, making your code more readable and maintainable.
+
+### Available Keys
+
+\`\`\`python
+from dars.all import *
+
+# Navigation keys
+KeyCode.ENTER
+KeyCode.TAB
+KeyCode.ESCAPE  # or KeyCode.ESC
+KeyCode.BACKSPACE
+KeyCode.DELETE
+
+# Arrow keys
+KeyCode.UP       # or KeyCode.ARROWUP
+KeyCode.DOWN     # or KeyCode.ARROWDOWN
+KeyCode.LEFT     # or KeyCode.ARROWLEFT
+KeyCode.RIGHT    # or KeyCode.ARROWRIGHT
+
+# Letters (a-z)
+KeyCode.A
+KeyCode.B
+# ... through ...
+KeyCode.Z
+
+# Numbers
+KeyCode.ZERO  # or KeyCode.0
+KeyCode.ONE   # or KeyCode.1
+# ... through ...
+KeyCode.NINE  # or KeyCode.9
+
+# Function keys
+KeyCode.F1
+KeyCode.F2
+# ... through ...
+KeyCode.F12
+
+# Special characters
+KeyCode.SPACE
+KeyCode.PLUS
+KeyCode.MINUS
+KeyCode.SLASH
+KeyCode.COMMA
+KeyCode.PERIOD
+\`\`\`
+
+### Dynamic Key Access
+
+\`\`\`python
+# Get key code by name
+key = KeyCode.key('enter')  # Returns 'Enter'
+key = KeyCode.key('A')      # Returns 'a'
+\`\`\`
+
+---
+
+## The onKey() Helper
+
+The \`onKey()\` function is the **recommended way** to handle specific keyboard keys with optional modifier keys.
+
+### Basic Usage
+
+\`\`\`python
+from dars.all import *
+
+# Simple key detection
+Input(
+    on_key_press=onKey(KeyCode.ENTER, log("Enter pressed!"))
+)
+\`\`\`
+
+### With Modifiers
+
+\`\`\`python
+# Ctrl modifier
+Container(
+    on_key_press=onKey(KeyCode.S, alert("Saving..."), ctrl=True)
+)
+
+# Multiple modifiers
+Container(
+    on_key_press=onKey(KeyCode.Z, log("Redo"), ctrl=True, shift=True)
+)
+\`\`\`
+
+### Available Modifiers
+
+- \`ctrl\` - Ctrl key (Command on Mac)
+- \`shift\` - Shift key
+- \`alt\` - Alt key
+- \`meta\` - Meta/Command key
+
+### Complete Example
+
+\`\`\`python
+from dars.all import *
+
+app = App("onKey Example")
+
+formState = State("form", message="")
+
+@route("/")
+def index():
+    return Page(
+        Input(
+            id="input",
+            placeholder="Press Enter to submit",
+            on_key_press=onKey(
+                KeyCode.ENTER,
+                formState.message.set("Submitted!"),
+                ctrl=False  # Just Enter, no modifier needed
+            )
+        ),
+        Text(useDynamic("form.message"))
+    )
+
+app.add_page("index", index(), index=True)
+\`\`\`
+
+---
+
+## The switch() Function
+
+Use \`switch()\` to handle multiple different keys in a single event handler.
+
+### Basic Usage
+
+\`\`\`python
+from dars.all import *
+
+Input(
+    on_key_press=switch({
+        KeyCode.ENTER: log("Enter pressed"),
+        KeyCode.ESCAPE: alert("Escape pressed"),
+    })
+)
+\`\`\`
+
+### With Multiple Actions
+
+\`\`\`python
+formState = State("form", username="", password="")
+
+Input(
+    on_key_press=switch({
+        KeyCode.ENTER: [
+            formState.message.set("Submitted!"),
+            alert("Form submitted!")
+        ],
+        KeyCode.ESCAPE: [
+            clearInput("username"),
+            clearInput("password"),
+            formState.message.set("Cleared!")
+        ]
+    })
+)
+\`\`\`
+
+### Complete Example
+
+\`\`\`python
+from dars.all import *
+
+app = App("KeyCode Clean Example")
+
+# State
+formState = State("form", 
+    username="", 
+    password="", 
+    message="Use keyboard shortcuts!"
+)
+
+@FunctionComponent
+def LoginForm(**props):
+    return f'''
+    <div {Props.id} {Props.class_name} {Props.style}>
+        <h2>Login Form with Keyboard Shortcuts</h2>
+        <p style="color: #666;">{useDynamic("form.message")}</p>
+        
+        <input 
+            type="text" 
+            id="username-input"
+            placeholder="Username"
+            style="display: block; margin: 10px 0; padding: 8px; width: 300px;"
+        />
+        
+        <input 
+            type="password" 
+            id="password-input"
+            placeholder="Password"
+            style="display: block; margin: 10px 0; padding: 8px; width: 300px;"
+        />
+        
+        <div style="margin-top: 30px; padding: 15px; background: #f5f5f5; border-radius: 4px;">
+            <h3 style="margin-top: 0;">Global Keyboard Shortcuts:</h3>
+            <ul style="margin: 0; padding-left: 20px;">
+                <li><strong>Ctrl+Enter</strong> - Submit form (shows alert)</li>
+                <li><strong>Ctrl+F</strong> - Clear form</li>
+                <li><strong>Ctrl+S</strong> - Save document</li>
+            </ul>
+            <p style="margin-top: 10px; font-size: 0.9em; color: #666;">
+                Note: These are GLOBAL shortcuts that work anywhere on the page without blocking normal typing.
+            </p>
+        </div>
+    </div>
+    '''
+
+@route("/")
+def index():
+    return Page(
+        LoginForm(id="login-form"),
+        Input(value="", on_key_up=onKey("R", action=log("Logged"))),
+        # Buttons using State.set() and utils_ds functions
+        Button(
+            "Submit",
+            on_click=[
+                formState.message.set("Form submitted via button!"),
+                alert("Form submitted!")
+            ]
+        ),
+        
+        Button(
+            "Clear", 
+            on_click=[
+                formState.username.set(""),
+                formState.password.set(""),
+                formState.message.set("Form cleared via button!"),
+                clearInput("username-input"),
+                clearInput("password-input")
+            ]
+        ),
+        
+        Button(
+            "Show Username",
+            on_click=alert(V("#username-input"))
+        ),
+        
+        Button(
+            "Log Message",
+            on_click=log(V("form.message"))
+        ),
+    )
+
+addGlobalKeys(app, {
+    (KeyCode.ENTER, 'ctrl'): [
+        formState.message.set("Form submitted with Ctrl+Enter!"),
+        alert("Form submitted!")
+    ],
+    (KeyCode.F, 'ctrl'): [
+        formState.username.set(""),
+        formState.password.set(""),
+        formState.message.set("Form cleared with Ctrl+F!"),
+        clearInput("username-input"),
+        clearInput("password-input")
+    ],
+    (KeyCode.S, 'ctrl'): alert("Document saved! (Ctrl+S)"),
+})
+
+app.add_page("index", index(), title="KeyCode Example", index=True)
+
+if __name__ == "__main__":
+    app.rTimeCompile()
+\`\`\`
+
+---
+
+## Global Keyboard Shortcuts
+
+Use \`addGlobalKeys()\` to create app-wide keyboard shortcuts that work anywhere on the page.
+
+### Why Global Shortcuts?
+
+Global shortcuts are perfect for:
+- App-level commands (Save, Undo, Redo)
+- Navigation shortcuts
+- Quick actions that should work anywhere
+
+> **Important:** Always use modifier keys (Ctrl, Alt, etc.) with global shortcuts to avoid blocking normal typing in input fields.
+
+### Basic Usage
+
+\`\`\`python
+from dars.all import *
+
+app = App("Global Shortcuts")
+
+# Define your actions
+def save_document():
+    return alert("Document saved!")
+
+def undo():
+    return log("Undo action")
+
+# Add global shortcuts
+addGlobalKeys(app, {
+    (KeyCode.S, 'ctrl'): save_document(),
+    (KeyCode.Z, 'ctrl'): undo()
+})
+\`\`\`
+
+### With Multiple Actions
+
+\`\`\`python
+formState = State("form", data="")
+
+addGlobalKeys(app, {
+    (KeyCode.ENTER, 'ctrl'): [
+        formState.data.set("Submitted!"),
+        alert("Form submitted with Ctrl+Enter")
+    ],
+    (KeyCode.ESCAPE, 'ctrl'): [
+        formState.data.set(""),
+        log("Form cleared")
+    ]
+})
+\`\`\`
+
+### Multiple Modifiers
+
+\`\`\`python
+addGlobalKeys(app, {
+    (KeyCode.Z, 'ctrl'): undo(),
+    (KeyCode.Z, 'ctrl', 'shift'): redo(),
+    (KeyCode.S, 'ctrl', 'shift'): save_as()
+})
+\`\`\`
+
+### Complete Example
+
+\`\`\`python
+from dars.all import *
+
+app = App("Global Shortcuts Example")
+
+docState = State("document", 
+    content="", 
+    saved=False,
+    message="Ready"
+)
+
+@route("/")
+def index():
+    return Page(
+        Container(
+            Text("Document Editor", style={"font-size": "24px", "font-weight": "bold"}),
+            Text(useDynamic("document.message"), style={"color": "#666"}),
+            
+            Input(
+                id="editor",
+                placeholder="Start typing...",
+                style={"width": "100%", "min-height": "200px"}
+            ),
+            
+            Container(
+                style={"margin-top": "20px", "padding": "15px", "background": "#f5f5f5"},
+                children=[
+                    Text("Global Shortcuts:", style={"font-weight": "bold"}),
+                    Text("\u2022 Ctrl+S - Save"),
+                    Text("\u2022 Ctrl+Z - Undo"),
+                    Text("\u2022 Ctrl+Shift+Z - Redo"),
+                ]
+            )
+        )
+    )
+
+# Global keyboard shortcuts
+addGlobalKeys(app, {
+    (KeyCode.S, 'ctrl'): [
+        docState.saved.set(True),
+        docState.message.set("Document saved!"),
+        alert("Saved!")
+    ],
+    (KeyCode.Z, 'ctrl'): [
+        docState.message.set("Undo"),
+        log("Undo action")
+    ]
+})
+
+app.add_page("index", index(), index=True)
+
+if __name__ == "__main__":
+    app.rTimeCompile()
+\`\`\`
+
+---
+
+## Best Practices
+
+### 1. Use Modifiers for Global Shortcuts
+
+**Bad - Blocks typing:**
+\`\`\`python
+addGlobalKeys(app, {
+    KeyCode.ENTER: submit_form()  # Blocks Enter in all inputs!
+})
+\`\`\`
+
+**Good - Doesn't interfere:**
+\`\`\`python
+addGlobalKeys(app, {
+    (KeyCode.ENTER, 'ctrl'): submit_form()  # Only Ctrl+Enter
+})
+\`\`\`
+
+### 2. Use onKey() for Component-Specific Keys
+
+**For specific components:**
+\`\`\`python
+Input(
+    id="search",
+    on_key_press=onKey(KeyCode.ENTER, perform_search())
+)
+\`\`\`
+
+**For app-wide shortcuts:**
+\`\`\`python
+addGlobalKeys(app, {
+    (KeyCode.F, 'ctrl'): focus("search")
+})
+\`\`\`
+
+### 3. Use switch() for Multiple Keys
+
+**Bad - Repetitive:**
+\`\`\`python
+Input(
+    on_key_press=onKey(KeyCode.ENTER, action1())
+)
+Input(
+    on_key_press=onKey(KeyCode.ESCAPE, action2())
+)
+\`\`\`
+
+**Good - Clean:**
+\`\`\`python
+Container(
+    on_key_press=switch({
+        KeyCode.ENTER: action1(),
+        KeyCode.ESCAPE: action2()
+    })
+)
+\`\`\`
+
+### 4. Combine with State and V()
+
+\`\`\`python
+formState = State("form", username="")
+
+Input(
+    id="username",
+    on_key_press=onKey(KeyCode.ENTER, formState.username.set(V("#username")))
+)
+\`\`\`
+
+---
+
+## Summary
+
+- **Use \`on_key_press\`** for all keyboard events (replaces \`on_key_down\` and \`on_key_up\`)
+- **Use \`KeyCode\`** constants for readable key references
+- **Use \`onKey()\`** for single key detection with optional modifiers
+- **Use \`switch()\`** for handling multiple different keys
+- **Use \`addGlobalKeys()\`** for app-wide shortcuts (always with modifiers!)
+- **Combine with State and V()** for dynamic, reactive keyboard interactions
+`},{type:"T9",id:"markdown_124",key:"0/2/0/13",text:`# Events in Dars
 
 This is the documentation for the events in Dars.
 
@@ -4625,7 +5118,7 @@ button.on_click = [
     )
 ]
 \`\`\`
-`},{type:"T9",id:"markdown_124",key:"0/2/0/13",text:`# Dars - Exporter Documentation
+`},{type:"T9",id:"markdown_125",key:"0/2/0/14",text:`# Dars - Exporter Documentation
 
 ## Introduction
 
@@ -4945,7 +5438,7 @@ All file paths are relative to the app's directory. See [State Management](state
 - Not yet recommended for production.
 - Some advanced packaging and signing options may require manual configuration.
 - Expect changes to configuration keys and defaults as the feature matures.
-`},{type:"T9",id:"markdown_125",key:"0/2/0/14",text:`# Dars - Script System
+`},{type:"T9",id:"markdown_126",key:"0/2/0/15",text:`# Dars - Script System
 
 ## Introduction to Scripts
 
@@ -5721,7 +6214,7 @@ app.add_page("index", page, index=True)
 | \`sequence\` | Chain animations | \`*animations\` |
 
 All animations return \`dScript\` objects and can be used with \`.then()\` for advanced chaining.
-`},{type:"T9",id:"markdown_126",key:"0/2/0/15",text:`# Dars CLI Reference
+`},{type:"T9",id:"markdown_127",key:"0/2/0/16",text:`# Dars CLI Reference
 
 The Dars Command Line Interface (CLI) lets you manage your projects, export apps, and preview results quickly from the terminal.
 
@@ -5826,4 +6319,4 @@ dars init  -L
 - Applying minification (vite): Vite/esbuild minification is active (JS/CSS) and default is disabled.
 - Applying minification (default + vite): both are active.
 
-For more, see the [Getting Started](#getting-started-with-dars) guide and the main documentation index.`}]},{type:"T2",id:"footer-section",key:"0/2/1",children:[{type:"T2",id:"container_127",key:"0/2/1/0",children:[{type:"T2",id:"container_128",key:"0/2/1/0/0",children:[{type:"T2",id:"container_129",key:"0/2/1/0/0/0",children:[{type:"T4",id:"image_130",key:"0/2/1/0/0/0/0"},{type:"T2",id:"container_131",key:"0/2/1/0/0/0/1",children:[{type:"T5",id:"text_132",key:"0/2/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_133",key:"0/2/1/0/0/1",children:[{type:"T2",id:"container_134",key:"0/2/1/0/0/1/0",children:[{type:"T5",id:"text_135",key:"0/2/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_136",key:"0/2/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_137",key:"0/2/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_138",key:"0/2/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_139",key:"0/2/1/0/0/1/1",children:[{type:"T5",id:"text_140",key:"0/2/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_141",key:"0/2/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_142",key:"0/2/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_143",key:"0/2/1/0/0/1/2",children:[{type:"T5",id:"text_144",key:"0/2/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_145",key:"0/2/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_146",key:"0/2/1/0/0/2",children:[{type:"T2",id:"container_147",key:"0/2/1/0/0/2/0",children:[{type:"T5",id:"text_148",key:"0/2/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_149",key:"0/2/1/0/0/2/1",children:[{type:"T5",id:"text_150",key:"0/2/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_151",key:"0/2/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_152",key:"0/2/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_153",key:"0/2/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]}]},function(){const c=new Map;let l=null,u=null;function m(){}function S(){}function _(n,e){if(!n)return;e(n);const t=n.children||[];for(let o=0;o<t.length;o++)_(t[o],e)}function w(n){try{if(typeof atob=="function")return atob(n);if(typeof Buffer<"u")return Buffer.from(n,"base64").toString("utf8")}catch{}return""}function I(n){try{if(!n)return null;if(n&&n.type==="inline"&&n.code)return new Function("event",n.code);const e=n&&(n.b||n.code_b64)||null;if(e){const t=w(e);if(t)return new Function("event",t)}}catch{}return null}function U(n){_(n,e=>{if(e&&e.id&&e.events&&!c.has(e.id)){const t={};for(const o in e.events){const i=e.events[o],d=I(i);d&&(t[o]=d)}Object.keys(t).length?c.set(e.id,t):c.delete(e.id)}})}function j(n,e){if(!(!n||!e))for(const[t,o]of Object.entries(e))try{o===!1||o===null||typeof o>"u"?n.removeAttribute(t):n.setAttribute(t,String(o))}catch{}}function E(n,e={},t={}){for(const o in e)if(!(o in t))try{n.removeAttribute(o)}catch{}for(const o in t){const i=t[o];try{i===!1||i===null||typeof i>"u"?n.removeAttribute(o):n.setAttribute(o,String(i))}catch{}}}function M(n,e={},t={}){for(const o in e)if(!(o in t))try{n.style.removeProperty(o.replace(/_/g,"-"))}catch{}for(const o in t){const i=t[o];try{n.style.setProperty(o.replace(/_/g,"-"),String(i))}catch{}}}function L(n,e){(e||document).addEventListener(n,function(t){let o=t.target;const i=e||document;for(;o&&o!==i;){const d=o.id;if(d&&c.has(d)){const f=c.get(d);if(o&&o.__darsEv&&o.__darsEv[n])return;let p=f[n];if(!p&&(n==="keydown"||n==="keyup"||n==="keypress")){const a=t.key||t.code;if(a){const r=n+"."+a;p=f[r]}}if(typeof p=="function"){try{p.call(o,t)}catch(a){console.error("[Dars] handler error",a)}return}}o=o.parentNode}},!0)}function k(n,e){return n&&e?n.type!==e.type:n!==e}function v(n){if(!n)return;const e=n.children||[];for(let t=0;t<e.length;t++)v(e[t]);if(n.id&&c.delete(n.id),n.id){const t=document.getElementById(n.id);if(t&&t.parentNode)try{t.parentNode.removeChild(t)}catch{}}}function x(n,e){if(!e||!e.id)return{ok:!1,reason:"missing-new"};let t=document.getElementById(e.id);if(!t){const a=n&&n.id?document.getElementById(n.id):null;if(a)try{a.id=e.id,t=a}catch{}}if(!t)return{ok:!1,reason:"missing-el"};if(k(n,e))return{ok:!1,reason:"type-changed"};const o=!!e.isIsland;if(!o&&e.class&&(t.className=e.class),o||E(t,n&&n.props||{},e.props||{}),o||M(t,n&&n.style||{},e.style||{}),!o&&Object.prototype.hasOwnProperty.call(e,"text")&&t.textContent!==String(e.text||"")&&(t.textContent=String(e.text||"")),o)return{ok:!0};const i=n&&n.children?n.children:[],d=e.children?e.children:[],f=new Map;for(let a=0;a<i.length;a++){const r=i[a]&&(i[a].id||i[a].key)||null;r&&f.set(String(r),i[a])}const p=new Set;for(let a=0;a<d.length;a++){const r=d[a],h=r&&(r.id||r.key)||null;if(!h)if(a<i.length){const s=x(i[a],r);if(!s.ok)return s;p.add(i[a]);continue}else return{ok:!1,reason:"children-added"};const b=f.get(String(h));if(b){const s=x(b,r);if(!s.ok)return s;p.add(b)}else{if(a<i.length){const y=i[a];if(!k(y,r)){const g=x(y,r);if(!g.ok)return g;p.add(y);continue}}const s=createSubtree(r);if(s){const y=a<i.length?i[a]:null;if(y&&y.id){const g=document.getElementById(y.id);g&&g.parentNode?g.parentNode.insertBefore(s,g):t.appendChild(s)}else t.appendChild(s);continue}return{ok:!1,reason:"children-added"}}}for(let a=0;a<i.length;a++){const r=i[a];p.has(r)||v(r)}return{ok:!0}}function F(n){typeof requestAnimationFrame=="function"?requestAnimationFrame(n):setTimeout(n,16)}function N(n){const e=l;if(!e){l=n;try{window.__DARS_VDOM__=n}catch{}return}F(()=>{const t=x(e,n);if(!t.ok){console.warn("[Dars] Structural change detected (",t.reason,"), reloading...");try{location.reload()}catch{}return}l=n;try{window.__DARS_VDOM__=n}catch{}})}function O(n){l=n;try{window.__DARS_VDOM__=n}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(t=>L(t,document))}function R(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const n=window.__DARS_VERSION_URL||"version.txt";let e=null,t=!1,o=0;const i=10;let d=!1;function f(a,r,h,b){try{const s=new XMLHttpRequest;b&&(s.responseType=b),s.open("GET",a,!0),s.timeout=5e3,s.onreadystatechange=function(){s.readyState===4&&(s.status>=200&&s.status<300?r(s.response):h())},s.onerror=h,s.ontimeout=h,s.setRequestHeader("Cache-Control","no-store"),s.send()}catch{h()}}function p(){d||f(n,function(a){let r=(a||"").toString().trim();if(!r||r==="0"){if(o+=1,o>=i){console.warn("[Dars] version file not found after",i,"attempts. Hot reload disabled for this session."),d=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(e)try{clearTimeout(e)}catch{}return}t||(console.warn("[Dars] waiting for version file..."),t=!0),e=setTimeout(p,600);return}if(o=0,t=!1,u||(u=r),r&&r!==u){u=r;try{location.reload()}catch{}return}e=setTimeout(p,600)},function(){if(o+=1,o>=i){console.warn("[Dars] version file not reachable after",i,"attempts. Hot reload disabled for this session."),d=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(e)try{clearTimeout(e)}catch{}return}t||(console.warn("[Dars] waiting for version file..."),t=!0),e=setTimeout(p,600)},"text")}return p(),()=>{try{d=!0,e&&clearTimeout(e),window.__DARS_STOP_HOTRELOAD=null}catch{}}}document.addEventListener("DOMContentLoaded",function(){if(window.__DARS_VDOM__?O(window.__DARS_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=R()}catch{}}})}(),window.addEventListener("scroll",()=>{const c=document.getElementById("dars-navbar");window.scrollY>20?c.classList.add("scrolled"):c.classList.remove("scrolled");const l=document.getElementById("features-section");if(l&&!l.classList.contains("visible")){const u=l.getBoundingClientRect().top,m=window.innerHeight/1.5;u<m&&(l.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((_,w)=>{setTimeout(()=>{_.style.opacity="1",_.style.transform="translateY(0)"},w*100)}))}});const T=document.getElementById("hero-logo"),C=document.getElementById("hero-title"),D=document.getElementById("hero-description"),P=document.getElementById("pip-command"),A=document.getElementById("get-started-btn"),B=document.getElementById("scroll-text");T&&setTimeout(()=>T.classList.add("show"),5),C&&setTimeout(()=>C.classList.add("show"),350),D&&setTimeout(()=>D.classList.add("show"),650),P&&setTimeout(()=>P.classList.add("show"),950),A&&setTimeout(()=>A.classList.add("show"),1250),B&&setTimeout(()=>B.classList.add("show"),1500),document.addEventListener("DOMContentLoaded",function(){const c=document.getElementById("hamburger-btn"),l=document.getElementById("mobile-menu"),u=document.body;c&&l&&(c.addEventListener("click",function(m){m.stopPropagation(),l.style.display==="flex"?(l.style.display="none",c.classList.remove("menu-open"),u.classList.remove("menu-open")):(l.style.display="flex",c.classList.add("menu-open"),u.classList.add("menu-open"))}),l.querySelectorAll("a").forEach(m=>{m.addEventListener("click",function(){l.style.display="none",c.classList.remove("menu-open"),u.classList.remove("menu-open")})}),document.addEventListener("click",function(m){!c.contains(m.target)&&!l.contains(m.target)&&(l.style.display="none",c.classList.remove("menu-open"),u.classList.remove("menu-open"))}),document.addEventListener("keydown",function(m){m.key==="Escape"&&l.style.display==="flex"&&(l.style.display="none",c.classList.remove("menu-open"),u.classList.remove("menu-open"))}))});
+For more, see the [Getting Started](#getting-started-with-dars) guide and the main documentation index.`}]},{type:"T2",id:"footer-section",key:"0/2/1",children:[{type:"T2",id:"container_128",key:"0/2/1/0",children:[{type:"T2",id:"container_129",key:"0/2/1/0/0",children:[{type:"T2",id:"container_130",key:"0/2/1/0/0/0",children:[{type:"T4",id:"image_131",key:"0/2/1/0/0/0/0"},{type:"T2",id:"container_132",key:"0/2/1/0/0/0/1",children:[{type:"T5",id:"text_133",key:"0/2/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_134",key:"0/2/1/0/0/1",children:[{type:"T2",id:"container_135",key:"0/2/1/0/0/1/0",children:[{type:"T5",id:"text_136",key:"0/2/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_137",key:"0/2/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_138",key:"0/2/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_139",key:"0/2/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_140",key:"0/2/1/0/0/1/1",children:[{type:"T5",id:"text_141",key:"0/2/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_142",key:"0/2/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_143",key:"0/2/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_144",key:"0/2/1/0/0/1/2",children:[{type:"T5",id:"text_145",key:"0/2/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_146",key:"0/2/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_147",key:"0/2/1/0/0/2",children:[{type:"T2",id:"container_148",key:"0/2/1/0/0/2/0",children:[{type:"T5",id:"text_149",key:"0/2/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_150",key:"0/2/1/0/0/2/1",children:[{type:"T5",id:"text_151",key:"0/2/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_152",key:"0/2/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_153",key:"0/2/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_154",key:"0/2/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]}]},function(){const d=new Map;let l=null,p=null;function u(){}function S(){}function _(n,t){if(!n)return;t(n);const e=n.children||[];for(let o=0;o<e.length;o++)_(e[o],t)}function w(n,t){if(!(!n||!t))for(const[e,o]of Object.entries(t))try{o===!1||o===null||typeof o>"u"?n.removeAttribute(e):n.setAttribute(e,String(o))}catch{}}function E(n,t={},e={}){for(const o in t)if(!(o in e))try{n.removeAttribute(o)}catch{}for(const o in e){const i=e[o];try{i===!1||i===null||typeof i>"u"?n.removeAttribute(o):n.setAttribute(o,String(i))}catch{}}}function I(n,t={},e={}){for(const o in t)if(!(o in e))try{n.style.removeProperty(o.replace(/_/g,"-"))}catch{}for(const o in e){const i=e[o];try{n.style.setProperty(o.replace(/_/g,"-"),String(i))}catch{}}}function M(n,t){(t||document).addEventListener(n,function(e){let o=e.target;const i=t||document;for(;o&&o!==i;){const m=o.id;if(m&&d.has(m)){const y=d.get(m);if(o&&o.__darsEv&&o.__darsEv[n])return;let c=y[n];if(!c&&(n==="keydown"||n==="keyup"||n==="keypress")){const a=e.key||e.code;if(a){const r=n+"."+a;c=y[r]}}if(typeof c=="function"){try{c.call(o,e)}catch(a){console.error("[Dars] handler error",a)}return}}o=o.parentNode}},!0)}function k(n,t){return n&&t?n.type!==t.type:n!==t}function v(n){if(!n)return;const t=n.children||[];for(let e=0;e<t.length;e++)v(t[e]);if(n.id&&d.delete(n.id),n.id){const e=document.getElementById(n.id);if(e&&e.parentNode)try{e.parentNode.removeChild(e)}catch{}}}function x(n,t){if(!t||!t.id)return{ok:!1,reason:"missing-new"};let e=document.getElementById(t.id);if(!e){const a=n&&n.id?document.getElementById(n.id):null;if(a)try{a.id=t.id,e=a}catch{}}if(!e)return{ok:!1,reason:"missing-el"};if(k(n,t))return{ok:!1,reason:"type-changed"};const o=!!t.isIsland;if(!o&&t.class&&(e.className=t.class),o||E(e,n&&n.props||{},t.props||{}),o||I(e,n&&n.style||{},t.style||{}),!o&&Object.prototype.hasOwnProperty.call(t,"text")&&e.textContent!==String(t.text||"")&&(e.textContent=String(t.text||"")),o)return{ok:!0};const i=n&&n.children?n.children:[],m=t.children?t.children:[],y=new Map;for(let a=0;a<i.length;a++){const r=i[a]&&(i[a].id||i[a].key)||null;r&&y.set(String(r),i[a])}const c=new Set;for(let a=0;a<m.length;a++){const r=m[a],h=r&&(r.id||r.key)||null;if(!h)if(a<i.length){const s=x(i[a],r);if(!s.ok)return s;c.add(i[a]);continue}else return{ok:!1,reason:"children-added"};const b=y.get(String(h));if(b){const s=x(b,r);if(!s.ok)return s;c.add(b)}else{if(a<i.length){const f=i[a];if(!k(f,r)){const g=x(f,r);if(!g.ok)return g;c.add(f);continue}}const s=createSubtree(r);if(s){const f=a<i.length?i[a]:null;if(f&&f.id){const g=document.getElementById(f.id);g&&g.parentNode?g.parentNode.insertBefore(s,g):e.appendChild(s)}else e.appendChild(s);continue}return{ok:!1,reason:"children-added"}}}for(let a=0;a<i.length;a++){const r=i[a];c.has(r)||v(r)}return{ok:!0}}function L(n){typeof requestAnimationFrame=="function"?requestAnimationFrame(n):setTimeout(n,16)}function O(n){const t=l;if(!t){l=n;try{window.__DARS_VDOM__=n}catch{}return}L(()=>{const e=x(t,n);if(!e.ok){console.warn("[Dars] Structural change detected (",e.reason,"), reloading...");try{location.reload()}catch{}return}l=n;try{window.__DARS_VDOM__=n}catch{}})}function F(n){l=n;try{window.__DARS_VDOM__=n}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(e=>M(e,document))}function R(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const n=window.__DARS_VERSION_URL||"version.txt";let t=null,e=!1,o=0;const i=10;let m=!1;function y(a,r,h,b){try{const s=new XMLHttpRequest;b&&(s.responseType=b),s.open("GET",a,!0),s.timeout=5e3,s.onreadystatechange=function(){s.readyState===4&&(s.status>=200&&s.status<300?r(s.response):h())},s.onerror=h,s.ontimeout=h,s.setRequestHeader("Cache-Control","no-store"),s.send()}catch{h()}}function c(){m||y(n,function(a){let r=(a||"").toString().trim();if(!r||r==="0"){if(o+=1,o>=i){console.warn("[Dars] version file not found after",i,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(c,600);return}if(o=0,e=!1,p||(p=r),r&&r!==p){p=r;try{location.reload()}catch{}return}t=setTimeout(c,600)},function(){if(o+=1,o>=i){console.warn("[Dars] version file not reachable after",i,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(c,600)},"text")}return c(),()=>{try{m=!0,t&&clearTimeout(t),window.__DARS_STOP_HOTRELOAD=null}catch{}}}document.addEventListener("DOMContentLoaded",function(){if(window.__DARS_VDOM__?F(window.__DARS_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=R()}catch{}}})}(),window.addEventListener("scroll",()=>{const d=document.getElementById("dars-navbar");window.scrollY>20?d.classList.add("scrolled"):d.classList.remove("scrolled");const l=document.getElementById("features-section");if(l&&!l.classList.contains("visible")){const p=l.getBoundingClientRect().top,u=window.innerHeight/1.5;p<u&&(l.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((_,w)=>{setTimeout(()=>{_.style.opacity="1",_.style.transform="translateY(0)"},w*100)}))}});const T=document.getElementById("hero-logo"),C=document.getElementById("hero-title"),D=document.getElementById("hero-description"),A=document.getElementById("pip-command"),P=document.getElementById("get-started-btn"),B=document.getElementById("scroll-text");T&&setTimeout(()=>T.classList.add("show"),5),C&&setTimeout(()=>C.classList.add("show"),350),D&&setTimeout(()=>D.classList.add("show"),650),A&&setTimeout(()=>A.classList.add("show"),950),P&&setTimeout(()=>P.classList.add("show"),1250),B&&setTimeout(()=>B.classList.add("show"),1500),document.addEventListener("DOMContentLoaded",function(){const d=document.getElementById("hamburger-btn"),l=document.getElementById("mobile-menu"),p=document.body;d&&l&&(d.addEventListener("click",function(u){u.stopPropagation(),l.style.display==="flex"?(l.style.display="none",d.classList.remove("menu-open"),p.classList.remove("menu-open")):(l.style.display="flex",d.classList.add("menu-open"),p.classList.add("menu-open"))}),l.querySelectorAll("a").forEach(u=>{u.addEventListener("click",function(){l.style.display="none",d.classList.remove("menu-open"),p.classList.remove("menu-open")})}),document.addEventListener("click",function(u){!d.contains(u.target)&&!l.contains(u.target)&&(l.style.display="none",d.classList.remove("menu-open"),p.classList.remove("menu-open"))}),document.addEventListener("keydown",function(u){u.key==="Escape"&&l.style.display==="flex"&&(l.style.display="none",d.classList.remove("menu-open"),p.classList.remove("menu-open"))}))});
