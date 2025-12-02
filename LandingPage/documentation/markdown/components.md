@@ -137,7 +137,7 @@ input_field = Input(
 | `Button` | `on_mouse_leave` | Triggered when mouse leaves the button |
 | `Input` | `on_change` | Triggered when input value changes |
 | `Input` | `on_key_up` | Triggered when a key is released |
-| `Input` | `on_key_down` | Triggered when a key is pressed |
+| `Input` | `on_key_press` | Triggered when a key is pressed |
 
 ### Events and dScriptBest Practices
 
@@ -222,7 +222,7 @@ All components support these basic properties:
 - **on_mouse_enter** event handler receives a dScript object or a comp.state() function
 - **on_mouse_leave** event handler receives a dScript object or a comp.state() function
 - **on_mouse_move** event handler receives a dScript object or a comp.state() function
-- **on_key_down** event handler receives a dScript object or a comp.state() function
+- **on_key_press** event handler receives a dScript object or a comp.state() function
 - **on_key_up** event handler receives a dScript object or a comp.state() function
 - **on_key_press** event handler receives a dScript object or a comp.state() function
 - **on_change** event handler receives a dScript object or a comp.state() function
@@ -473,7 +473,7 @@ boton = Button(
 | `on_mouse_enter` | dScript | Mouse enter handler | `dScript("function() { ... }")` |
 | `on_mouse_leave` | dScript | Mouse leave handler | `dScript("function() { ... }")` |
 | `on_key_up` | dScript | Key up handler | `dScript("function(e) { ... }")` |
-| `on_key_down` | dScript | Key down handler | `dScript("function(e) { ... }")` |
+| `on_key_press` | dScript | Key press handler | `onKey(KeyCode.ENTER, action)` |
 
 #### Button Examples
 
@@ -579,7 +579,7 @@ entrada = Input(
 | `required` | bool | Campo obligatorio | `True`, `False` |
 | `on_change` | dScript | Change handler | `dScript("function(e) { ... }")` |
 | `on_key_up` | dScript | Key up handler | `dScript("function(e) { ... }")` |
-| `on_key_down` | dScript | Key down handler | `dScript("function(e) { ... }")` |
+| `on_key_press` | dScript | Key press handler | `onKey(KeyCode.ENTER, action)` |
 | `max_length` | int | Longitud máxima | `50` |
 | `min_length` | int | Longitud mínima | `3` |
 | `pattern` | str | Validation pattern | `"[0-9]+"` |

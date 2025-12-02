@@ -1,3 +1,100 @@
+# Release Notes v1.5.9
+
+> **Unified Keyboard Events & KeyCode System**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### 1. Unified Keyboard Events (`on_key_press`)
+
+Simplified keyboard event handling by consolidating `on_key_down` and `on_key_up` into a single, robust **`on_key_press`** event. This ensures consistent behavior across all components and browsers.
+
+**Deprecated:**
+- `on_key_down`
+- `on_key_up`
+
+**New Standard:**
+```python
+Input(on_key_press=log("Key pressed!"))
+```
+
+### 2. The `KeyCode` System
+
+No more magic strings or numbers! The new `KeyCode` class provides constants for all keyboard keys, making your code readable and maintainable.
+
+```python
+from dars.all import KeyCode
+
+# Use constants
+KeyCode.ENTER
+KeyCode.ESCAPE
+KeyCode.TAB
+KeyCode.SPACE
+KeyCode.A
+KeyCode.F1
+```
+
+### 3. Powerful Helpers: `onKey`, `switch`, `addGlobalKeys`
+
+Introduced three powerful helpers to make keyboard handling elegant and Pythonic.
+
+#### `onKey()` - Single Key Handler
+Handle specific keys with optional modifiers easily:
+
+```python
+# Simple
+Input(on_key_press=onKey(KeyCode.ENTER, submit_form()))
+
+# With Modifiers
+Container(on_key_press=onKey(KeyCode.S, save(), ctrl=True))
+```
+
+#### `switch()` - Multiple Key Handler
+Handle multiple keys in a single component without messy if-statements:
+
+```python
+Input(on_key_press=switch({
+    KeyCode.ENTER: submit_form(),
+    KeyCode.ESCAPE: clear_form(),
+    KeyCode.TAB: focus_next()
+}))
+```
+
+#### `addGlobalKeys()` - App-wide Shortcuts
+Register global keyboard shortcuts that work anywhere in your app:
+
+```python
+addGlobalKeys(app, {
+    (KeyCode.S, 'ctrl'): save_document(),
+    (KeyCode.Z, 'ctrl'): undo(),
+    (KeyCode.Z, 'ctrl', 'shift'): redo()
+})
+```
+
+### 4. Documentation
+
+A comprehensive guide to the new system is available in `KeyEvents.md`, covering everything from basic usage to advanced global shortcuts and best practices.
+
+## Migration Guide
+
+**From `on_key_down` / `on_key_up`:**
+Simply rename your event handlers to `on_key_press`. The underlying behavior uses `keydown` for maximum reliability.
+
+```python
+# Before
+Input(on_key_down=dScript("..."))
+
+# After
+Input(on_key_press=dScript("..."))
+```
+
+---
+
 # Release Notes v1.5.8
 
 > **Enhanced V() Helper & useValue Selector Support**
