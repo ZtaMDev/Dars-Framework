@@ -12,6 +12,56 @@ Hooks provide a way to add reactive capabilities to your application. They enabl
 
 ---
 
+## Important: State ID Best Practices
+
+> [!IMPORTANT]
+> When using `State` objects with hooks like `useDynamic` and `useValue`, the **state ID should NOT match any component ID** in your DOM. The state ID is a unique identifier for the state object itself, not a component.
+
+### Why This Matters
+
+The reactive system uses **watchers** to update components when state changes. When you create a `State` object, the ID you provide is used to register the state in the internal registry, not to identify a specific DOM element.
+
+### Examples
+
+**X Incorrect - State ID matches component ID:**
+```python
+# DON'T do this
+state = State("my-button", count=0, disabled=False)
+Button(id="my-button", text=useDynamic("my-button.count"))
+```
+
+In this example, both the state and the button have the ID `"my-button"`, which can cause confusion and unexpected behavior.
+
+**✓ Correct - State has unique ID:**
+```python
+# DO this - give state a descriptive, unique ID
+counter_state = State("counter-state", count=0, disabled=False)
+Button(id="my-button", text=useDynamic("counter-state.count"))
+Button(id="another-button", disabled=useDynamic("counter-state.disabled"))
+```
+
+**✓ Also Correct - Multiple components sharing same state:**
+```python
+# One state can control multiple components
+ui_state = State("ui", count=0, is_disabled=False, message="Hello")
+
+Container(
+    Text(text=useDynamic("ui.message")),
+    Button(id="btn-1", disabled=useDynamic("ui.is_disabled")),
+    Button(id="btn-2", disabled=useDynamic("ui.is_disabled")),
+    Text(text=useDynamic("ui.count"))
+)
+```
+
+### Key Takeaways
+
+1. **State IDs are for the state object**, not for DOM elements
+2. **One state can control many components** through reactive bindings
+3. **Component IDs should be unique** across your DOM
+4. **State IDs should be descriptive** of what they manage (e.g., `"user-data"`, `"cart-state"`, `"ui-controls"`)
+
+---
+
 ## useValue() - Initial Value Access
 
 The `useValue()` hook allows you to access the **initial value** of a state property without creating a reactive binding. This is ideal for form inputs where you want to set a default value but allow the user to edit it freely.
@@ -399,7 +449,7 @@ if __name__ == "__main__":
 The `url()` helper constructs dynamic URLs by interpolating `ValueRef` objects into a template string.
 
 ```python
-# With DOM values
+# Generates: https://api.example.com/users/123/profile
 fetch(
     url("https://api.example.com/users/{id}/profile", id=V("#userId"))
 )

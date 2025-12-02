@@ -252,6 +252,398 @@
       (function(){function addCopyButtons(){document.querySelectorAll("pre code").forEach(function(code){var pre=code.parentElement;if(!pre||pre.querySelector(".dars-code-copy"))return;var btn=document.createElement("button");btn.className="dars-code-copy";btn.type="button";btn.textContent="Copy";btn.addEventListener("click",async function(e){e.stopPropagation();try{await navigator.clipboard.writeText(code.innerText);btn.textContent="Copied";btn.classList.add("copied");setTimeout(function(){btn.textContent="Copy";btn.classList.remove("copied")},1200)}catch(err){btn.textContent="Error";setTimeout(function(){btn.textContent="Copy"},1200)}});pre.appendChild(btn);});}function guessLang(text){var t=text.trim();if(/^{[\s\S]*}$/.test(t)||/^\[/.test(t))return "json";if(/^(pip |python |python3 |dars |#|\$ )/m.test(t))return "bash";if(/\b(def |class |import |from |print\(|self\b)/.test(t))return "python";return null;}function stripPygments(code){if(code && code.innerHTML && code.innerHTML.indexOf("<span")!==-1){code.textContent = code.innerText;}}function prepareAndHighlight(){document.querySelectorAll("pre code").forEach(function(code){stripPygments(code);if(!code.className||code.className.indexOf("language-")===-1){var g=guessLang(code.innerText);code.classList.add("language-"+(g||"none"));}if(window.Prism&&Prism.highlightElement){Prism.highlightElement(code);}});}document.addEventListener("DOMContentLoaded",function(){try{prepareAndHighlight();}catch(e){};try{addCopyButtons()}catch(e){}});})();
      </script>
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_175">
+      <h1 id="release-notes-v160">
+       Release Notes v1.6.0
+      </h1>
+      <blockquote>
+       <p>
+        <strong>
+         Critical Bug Fixes &amp; State Management Improvements
+        </strong>
+       </p>
+      </blockquote>
+      <h2 id="installation">
+       Installation
+      </h2>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
+</code></pre>
+      </div>
+      <h2 id="whats-fixed">
+       What's Fixed
+      </h2>
+      <h3 id="1-hook-initialization-fixes">
+       1. Hook Initialization Fixes
+      </h3>
+      <p>
+       Fixed critical bugs where
+       <code>
+        useDynamic
+       </code>
+       and
+       <code>
+        useValue
+       </code>
+       hooks were not properly displaying default values from
+       <code>
+        State
+       </code>
+       objects when used in
+       <code>
+        FunctionComponent
+       </code>
+       s.
+      </p>
+      <p>
+       <strong>
+        Issues Resolved:
+       </strong>
+       -
+       <code>
+        useDynamic
+       </code>
+       now correctly retrieves default values from the state registry even when props are not explicitly passed to the component
+-
+       <code>
+        useValue
+       </code>
+       now works correctly without requiring a selector parameter
+- Both hooks properly display initial state values on first render
+      </p>
+      <p>
+       <strong>
+        Example:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># This now works correctly!</span>
+<span class="n">state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">disabled</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="nd">@FunctionComponent</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Counter</span><span class="p">(</span><span class="o">**</span><span class="n">props</span><span class="p">):</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">'''</span>
+<span class="s1">        &lt;div&gt;</span>
+<span class="s1">            &lt;p&gt;Count: </span><span class="si">{</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"ui.count"</span><span class="p">)</span><span class="si">}</span><span class="s1">&lt;/p&gt;</span>
+<span class="s1">            &lt;button disabled="</span><span class="si">{</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"ui.disabled"</span><span class="p">)</span><span class="si">}</span><span class="s1">"&gt;Click&lt;/button&gt;</span>
+<span class="s1">        &lt;/div&gt;</span>
+<span class="s1">    '''</span>
+</code></pre>
+      </div>
+      <h3 id="2-state-reset-functionality-enhancement">
+       2. State Reset Functionality Enhancement
+      </h3>
+      <p>
+       Completely rewrote the
+       <code>
+        reset()
+       </code>
+       function to correctly handle
+       <strong>
+        all
+       </strong>
+       component properties, including boolean attributes like
+       <code>
+        checked
+       </code>
+       ,
+       <code>
+        disabled
+       </code>
+       ,
+       <code>
+        readonly
+       </code>
+       , and
+       <code>
+        required
+       </code>
+       .
+      </p>
+      <p>
+       <strong>
+        Previous Behavior:
+       </strong>
+       - Boolean attributes were incorrectly set to
+       <code>
+        "false"
+       </code>
+       string instead of being removed
+- Properties like
+       <code>
+        disabled="false"
+       </code>
+       would still disable elements (incorrect HTML behavior)
+      </p>
+      <p>
+       <strong>
+        Fixed Behavior:
+       </strong>
+       - Boolean attributes are now properly removed when
+       <code>
+        False
+       </code>
+       - Both HTML attributes AND DOM properties are synchronized correctly
+- Works for:
+       <code>
+        checked
+       </code>
+       ,
+       <code>
+        disabled
+       </code>
+       ,
+       <code>
+        readonly
+       </code>
+       ,
+       <code>
+        required
+       </code>
+       ,
+       <code>
+        selected
+       </code>
+       ,
+       <code>
+        autofocus
+       </code>
+       ,
+       <code>
+        autoplay
+       </code>
+       ,
+       <code>
+        controls
+       </code>
+       ,
+       <code>
+        loop
+       </code>
+       ,
+       <code>
+        muted
+       </code>
+      </p>
+      <p>
+       <strong>
+        Example:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="n">is_disabled</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">is_checked</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">Button</span><span class="p">(</span><span class="n">disabled</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"ui.is_disabled"</span><span class="p">))</span>
+<span class="n">Checkbox</span><span class="p">(</span><span class="n">checked</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"ui.is_checked"</span><span class="p">))</span>
+
+<span class="c1"># Reset now works perfectly</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Reset All"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">reset</span><span class="p">())</span>
+</code></pre>
+      </div>
+      <h3 id="3-javascript-variable-name-sanitization">
+       3. JavaScript Variable Name Sanitization
+      </h3>
+      <p>
+       Fixed
+       <code>
+        SyntaxError
+       </code>
+       in generated JavaScript caused by HTML IDs containing hyphens being used as variable names.
+      </p>
+      <p>
+       <strong>
+        Issue:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1">// Generated invalid JS</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">el_control</span><span class="o">-</span><span class="nx">panel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...</span><span class="w">  </span><span class="c1">// SyntaxError!</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Fixed:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1">// Now generates valid JS</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">el_control_panel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...</span><span class="w">  </span><span class="c1">// ✓ Valid</span>
+</code></pre>
+      </div>
+      <h3 id="4-boolean-attribute-handling-improvements">
+       4. Boolean Attribute Handling Improvements
+      </h3>
+      <p>
+       Enhanced the reactive binding system to properly handle boolean attributes with the
+       <code>
+        is_
+       </code>
+       prefix.
+      </p>
+      <p>
+       <strong>
+        Supported Patterns:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># All of these now work correctly</span>
+<span class="n">state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="n">is_disabled</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">disabled</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="c1"># Automatic mapping: is_disabled -&gt; disabled attribute</span>
+<span class="n">Button</span><span class="p">(</span><span class="n">disabled</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"ui.is_disabled"</span><span class="p">))</span>
+
+<span class="c1"># State changes properly update the DOM</span>
+<span class="n">state</span><span class="o">.</span><span class="n">is_disabled</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>   <span class="c1"># Adds disabled attribute</span>
+<span class="n">state</span><span class="o">.</span><span class="n">is_disabled</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># Removes disabled attribute completely</span>
+</code></pre>
+      </div>
+      <h2 id="important-notes">
+       Important Notes
+      </h2>
+      <h3 id="state-id-best-practices">
+       State ID Best Practices
+      </h3>
+      <blockquote>
+       <p>
+        <strong>
+         [!IMPORTANT] When using
+         <code>
+          State
+         </code>
+         objects with hooks like
+         <code>
+          useDynamic
+         </code>
+         and
+         <code>
+          useValue
+         </code>
+         , the state ID should
+         <em>
+          *NOT
+         </em>
+        </strong>
+        match any component ID in your DOM. The state ID is a unique identifier for the state object itself, not a component.
+        *
+       </p>
+      </blockquote>
+      <p>
+       <strong>
+        X Incorrect:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># DON'T do this - state ID matches button ID</span>
+<span class="n">state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"my-button"</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">Button</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"my-button"</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"my-button.count"</span><span class="p">))</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        ✓ Correct:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># DO this - state has unique ID</span>
+<span class="n">state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"counter-state"</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">Button</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"my-button"</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"counter-state.count"</span><span class="p">))</span>
+</code></pre>
+      </div>
+      <p>
+       The reactive system uses watchers to update components when state changes, so the state ID doesn't need to (and shouldn't) match any specific component ID.
+      </p>
+      <h2 id="technical-details">
+       Technical Details
+      </h2>
+      <h3 id="changes-to-js_libpy">
+       Changes to
+       <code>
+        js_lib.py
+       </code>
+      </h3>
+      <ol>
+       <li>
+        <strong>
+         <code>
+          change()
+         </code>
+         function
+        </strong>
+        : Added intelligent boolean attribute detection with
+        <code>
+         is_
+        </code>
+        prefix support
+       </li>
+       <li>
+        <strong>
+         <code>
+          _applyMods()
+         </code>
+         function
+        </strong>
+        : Enhanced to handle boolean attributes in state modifications
+       </li>
+       <li>
+        <strong>
+         <code>
+          _restoreDefault()
+         </code>
+         function
+        </strong>
+        : Improved to correctly restore boolean attributes to their initial state
+       </li>
+      </ol>
+      <h3 id="changes-to-html_css_jspy">
+       Changes to
+       <code>
+        html_css_js.py
+       </code>
+      </h3>
+      <ol>
+       <li>
+        <strong>
+         <code>
+          _generate_reactive_bindings_js()
+         </code>
+        </strong>
+        : Added boolean attribute handling in watcher code generation
+       </li>
+       <li>
+        <strong>
+         Variable name sanitization
+        </strong>
+        : Replaces hyphens with underscores in generated JS variable names
+       </li>
+       <li>
+        <strong>
+         <code>
+          _process_function_component()
+         </code>
+        </strong>
+        : Added fallback to
+        <code>
+         STATE_V2_REGISTRY
+        </code>
+        for missing prop values
+       </li>
+      </ol>
+      <h3 id="changes-to-use_valuepy">
+       Changes to
+       <code>
+        use_value.py
+       </code>
+      </h3>
+      <ol>
+       <li>
+        <strong>
+         <code>
+          ValueMarker.__init__()
+         </code>
+        </strong>
+        : Now always registers markers, even without a selector
+       </li>
+      </ol>
+      <hr/>
       <h1 id="release-notes-v159">
        Release Notes v1.5.9
       </h1>
@@ -262,7 +654,7 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation">
+      <h2 id="installation-2">
        Installation
       </h2>
       <div class="codehilite">
@@ -466,7 +858,7 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-2">
+      <h2 id="installation-3">
        Installation
       </h2>
       <div class="codehilite">
@@ -1085,7 +1477,7 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-3">
+      <h2 id="installation-4">
        Installation
       </h2>
       <div class="codehilite">
@@ -1199,7 +1591,7 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-4">
+      <h2 id="installation-5">
        Installation
       </h2>
       <div class="codehilite">
@@ -1552,7 +1944,7 @@
         hook.
        </p>
       </blockquote>
-      <h2 id="installation-5">
+      <h2 id="installation-6">
        Installation
       </h2>
       <div class="codehilite">
@@ -1662,7 +2054,7 @@
         relaunch with correct license.
        </p>
       </blockquote>
-      <h2 id="installation-6">
+      <h2 id="installation-7">
        Installation
       </h2>
       <div class="codehilite">
@@ -2093,7 +2485,7 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-7">
+      <h2 id="installation-8">
        Installation
       </h2>
       <div class="codehilite">
@@ -2524,7 +2916,7 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-8">
+      <h2 id="installation-9">
        Installation
       </h2>
       <div class="codehilite">
@@ -2732,7 +3124,7 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-9">
+      <h2 id="installation-10">
        Installation
       </h2>
       <div class="codehilite">
@@ -3126,7 +3518,7 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-10">
+      <h2 id="installation-11">
        Installation
       </h2>
       <div class="codehilite">
@@ -3244,7 +3636,7 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-11">
+      <h2 id="installation-12">
        Installation
       </h2>
       <div class="codehilite">
@@ -3390,7 +3782,7 @@
         , and more.
        </p>
       </blockquote>
-      <h2 id="installation-12">
+      <h2 id="installation-13">
        Installation
       </h2>
       <div class="codehilite">
@@ -3404,7 +3796,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.8
 </code></pre>
       </div>
-      <h2 id="whats-fixed">
+      <h2 id="whats-fixed-2">
        What's Fixed
       </h2>
       <h3 id="state-v2-complete-property-support">
@@ -3585,7 +3977,7 @@
         now correctly restores all property types
        </li>
       </ul>
-      <h3 id="technical-details">
+      <h3 id="technical-details-2">
        Technical Details
       </h3>
       <p>
@@ -3845,7 +4237,7 @@
         Introducing State V2 and comprehensive animation system. This is the biggest update to Dars state management, bringing a pure Pythonic API and 15+ built-in animations.
        </p>
       </blockquote>
-      <h2 id="installation-13">
+      <h2 id="installation-14">
        Installation
       </h2>
       <div class="codehilite">
@@ -4431,7 +4823,7 @@
         : Introduces Single Page Application (SPA) support and a powerful client-side routing system.
        </p>
       </blockquote>
-      <h2 id="installation-14">
+      <h2 id="installation-15">
        Installation
       </h2>
       <div class="codehilite">
@@ -4548,7 +4940,7 @@
         Critical bug fix release. Removes non-functional features, fixes style merge, and improves state restoration.
        </p>
       </blockquote>
-      <h2 id="installation-15">
+      <h2 id="installation-16">
        Installation
       </h2>
       <div class="codehilite">
@@ -4562,7 +4954,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.4
 </code></pre>
       </div>
-      <h2 id="whats-fixed-2">
+      <h2 id="whats-fixed-3">
        What's Fixed
       </h2>
       <ul>
@@ -4614,7 +5006,7 @@
         State management enhancements with compile-time validation, component self-navigation, and critical style merge fix. Improves developer experience and fixes property replacement bug.
        </p>
       </blockquote>
-      <h2 id="installation-16">
+      <h2 id="installation-17">
        Installation
       </h2>
       <div class="codehilite">
@@ -4678,7 +5070,7 @@
         for enhanced client-side interactions.
        </p>
       </blockquote>
-      <h2 id="installation-17">
+      <h2 id="installation-18">
        Installation
       </h2>
       <div class="codehilite">
@@ -4882,7 +5274,7 @@
         SEO and Apple device optimizations. Enhanced metadata generation with automatic MIME type detection for favicons and comprehensive iOS/Safari support.
        </p>
       </blockquote>
-      <h2 id="installation-18">
+      <h2 id="installation-19">
        Installation
       </h2>
       <div class="codehilite">
@@ -5211,7 +5603,7 @@
         Simple Template update.
        </p>
       </blockquote>
-      <h2 id="installation-19">
+      <h2 id="installation-20">
        Installation
       </h2>
       <div class="codehilite">
@@ -5239,7 +5631,7 @@
         Desktop File System API, Pythonic Arg helper, keyboard event filtering, and comprehensive template synchronization. Major enhancements to desktop capabilities with improved developer experience.
        </p>
       </blockquote>
-      <h2 id="installation-20">
+      <h2 id="installation-21">
        Installation
       </h2>
       <div class="codehilite">
@@ -5704,7 +6096,7 @@
         for async chaining.
        </p>
       </blockquote>
-      <h2 id="installation-21">
+      <h2 id="installation-22">
        Installation
       </h2>
       <div class="codehilite">
@@ -6166,7 +6558,7 @@
         for dynamic DOM operations with safe event hydration.
        </p>
       </blockquote>
-      <h2 id="installation-22">
+      <h2 id="installation-23">
        Installation
       </h2>
       <div class="codehilite">
@@ -6343,7 +6735,7 @@
         Enhanced styling and development experience update featuring active styles, improved preview system, and advanced file monitoring. Delivers better visual feedback and faster development workflow.
        </p>
       </blockquote>
-      <h2 id="installation-23">
+      <h2 id="installation-24">
        Installation
       </h2>
       <div class="codehilite">
@@ -6500,7 +6892,7 @@
         Enhanced interactivity update featuring hover styles, multi-handler events, and runtime versioning. Improves component styling and event handling flexibility.
        </p>
       </blockquote>
-      <h2 id="installation-24">
+      <h2 id="installation-25">
        Installation
       </h2>
       <div class="codehilite">
@@ -6693,7 +7085,7 @@
         Minor update featuring new semantic Section component and enhanced state serialization. Continues JavaScript migration improvements from v1.3.2.
        </p>
       </blockquote>
-      <h2 id="installation-25">
+      <h2 id="installation-26">
        Installation
       </h2>
       <div class="codehilite">
@@ -6857,7 +7249,7 @@
         Major minification improvements with combined JS files and optimized event handling. Electron desktop exporter remains in beta.
        </p>
       </blockquote>
-      <h2 id="installation-26">
+      <h2 id="installation-27">
        Installation
       </h2>
       <div class="codehilite">
@@ -7153,7 +7545,7 @@
         Native desktop functions and DX improved with dev mode and file system integration.
        </p>
       </blockquote>
-      <h2 id="installation-27">
+      <h2 id="installation-28">
        Installation
       </h2>
       <div class="codehilite">
@@ -7238,7 +7630,7 @@
         Native desktop export (BETA), improved CLI and doctor integration, and metadata fixes for packaging. This is a BETA release: usable for testing, not recommended for production.
        </p>
       </blockquote>
-      <h2 id="installation-28">
+      <h2 id="installation-29">
        Installation
       </h2>
       <div class="codehilite">
@@ -7521,7 +7913,7 @@ dars<span class="w"> </span>build
         Optional default minification, precise CLI control, faster builds, and clearer minification status.
        </p>
       </blockquote>
-      <h2 id="installation-29">
+      <h2 id="installation-30">
        Installation
       </h2>
       <div class="codehilite">
@@ -7914,6 +8306,45 @@ dars<span class="w"> </span>build
      <div class="sidebar-category">
       Versions
      </div>
+     <a class="sidebar-link sidebar-level-1" href="#release-notes-v160" style="margin-left: 0px">
+      Release Notes v1.6.0
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#installation" style="margin-left: 20px">
+      Installation
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#whats-fixed" style="margin-left: 20px">
+      What's Fixed
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#1-hook-initialization-fixes" style="margin-left: 40px">
+      1. Hook Initialization Fixes
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#2-state-reset-functionality-enhancement" style="margin-left: 40px">
+      2. State Reset Functionality Enhancement
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#3-javascript-variable-name-sanitization" style="margin-left: 40px">
+      3. JavaScript Variable Name Sanitization
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#4-boolean-attribute-handling-improvements" style="margin-left: 40px">
+      4. Boolean Attribute Handling Improvements
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#important-notes" style="margin-left: 20px">
+      Important Notes
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#state-id-best-practices" style="margin-left: 40px">
+      State ID Best Practices
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#technical-details" style="margin-left: 20px">
+      Technical Details
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#changes-to-jslibpy" style="margin-left: 40px">
+      Changes to `js_lib.py`
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#changes-to-htmlcssjspy" style="margin-left: 40px">
+      Changes to `html_css_js.py`
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#changes-to-usevaluepy" style="margin-left: 40px">
+      Changes to `use_value.py`
+     </a>
      <a class="sidebar-link sidebar-level-1" href="#release-notes-v159" style="margin-left: 0px">
       Release Notes v1.5.9
      </a>

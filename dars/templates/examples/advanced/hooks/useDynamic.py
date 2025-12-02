@@ -252,4 +252,4 @@ def index():
 app.add_page("index", index())
 
 if __name__ == "__main__":
-    app.rTimeCompile(port=8001)
+    app.rTimeCompile(port=8002)

@@ -1,3 +1,138 @@
+# Release Notes v1.6.0
+
+> **Critical Bug Fixes & State Management Improvements**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's Fixed
+
+### 1. Hook Initialization Fixes
+
+Fixed critical bugs where `useDynamic` and `useValue` hooks were not properly displaying default values from `State` objects when used in `FunctionComponent`s.
+
+**Issues Resolved:**
+- `useDynamic` now correctly retrieves default values from the state registry even when props are not explicitly passed to the component
+- `useValue` now works correctly without requiring a selector parameter
+- Both hooks properly display initial state values on first render
+
+**Example:**
+```python
+# This now works correctly!
+state = State("ui", count=0, disabled=False)
+
+@FunctionComponent
+def Counter(**props):
+    return f'''
+        <div>
+            <p>Count: {useDynamic("ui.count")}</p>
+            <button disabled="{useDynamic("ui.disabled")}">Click</button>
+        </div>
+    '''
+```
+
+### 2. State Reset Functionality Enhancement
+
+Completely rewrote the `reset()` function to correctly handle **all** component properties, including boolean attributes like `checked`, `disabled`, `readonly`, and `required`.
+
+**Previous Behavior:**
+- Boolean attributes were incorrectly set to `"false"` string instead of being removed
+- Properties like `disabled="false"` would still disable elements (incorrect HTML behavior)
+
+**Fixed Behavior:**
+- Boolean attributes are now properly removed when `False`
+- Both HTML attributes AND DOM properties are synchronized correctly
+- Works for: `checked`, `disabled`, `readonly`, `required`, `selected`, `autofocus`, `autoplay`, `controls`, `loop`, `muted`
+
+**Example:**
+```python
+state = State("ui", is_disabled=False, is_checked=True)
+
+Button(disabled=useDynamic("ui.is_disabled"))
+Checkbox(checked=useDynamic("ui.is_checked"))
+
+# Reset now works perfectly
+Button("Reset All", on_click=state.reset())
+```
+
+### 3. JavaScript Variable Name Sanitization
+
+Fixed `SyntaxError` in generated JavaScript caused by HTML IDs containing hyphens being used as variable names.
+
+**Issue:**
+```javascript
+// Generated invalid JS
+const el_control-panel = ...  // SyntaxError!
+```
+
+**Fixed:**
+```javascript
+// Now generates valid JS
+const el_control_panel = ...  // ✓ Valid
+```
+
+### 4. Boolean Attribute Handling Improvements
+
+Enhanced the reactive binding system to properly handle boolean attributes with the `is_` prefix.
+
+**Supported Patterns:**
+```python
+# All of these now work correctly
+state = State("ui", is_disabled=False, disabled=False)
+
+# Automatic mapping: is_disabled -> disabled attribute
+Button(disabled=useDynamic("ui.is_disabled"))
+
+# State changes properly update the DOM
+state.is_disabled.set(True)   # Adds disabled attribute
+state.is_disabled.set(False)  # Removes disabled attribute completely
+```
+
+## Important Notes
+
+### State ID Best Practices
+
+> **[!IMPORTANT] When using `State` objects with hooks like `useDynamic` and `useValue`, the state ID should **NOT** match any component ID in your DOM. The state ID is a unique identifier for the state object itself, not a component.**
+
+**X Incorrect:**
+```python
+# DON'T do this - state ID matches button ID
+state = State("my-button", count=0)
+Button(id="my-button", text=useDynamic("my-button.count"))
+```
+
+**✓ Correct:**
+```python
+# DO this - state has unique ID
+state = State("counter-state", count=0)
+Button(id="my-button", text=useDynamic("counter-state.count"))
+```
+
+The reactive system uses watchers to update components when state changes, so the state ID doesn't need to (and shouldn't) match any specific component ID.
+
+## Technical Details
+
+### Changes to `js_lib.py`
+
+1. **`change()` function**: Added intelligent boolean attribute detection with `is_` prefix support
+2. **`_applyMods()` function**: Enhanced to handle boolean attributes in state modifications
+3. **`_restoreDefault()` function**: Improved to correctly restore boolean attributes to their initial state
+
+### Changes to `html_css_js.py`
+
+1. **`_generate_reactive_bindings_js()`**: Added boolean attribute handling in watcher code generation
+2. **Variable name sanitization**: Replaces hyphens with underscores in generated JS variable names
+3. **`_process_function_component()`**: Added fallback to `STATE_V2_REGISTRY` for missing prop values
+
+### Changes to `use_value.py`
+
+1. **`ValueMarker.__init__()`**: Now always registers markers, even without a selector
+
+---
+
 # Release Notes v1.5.9
 
 > **Unified Keyboard Events & KeyCode System**

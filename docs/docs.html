@@ -1231,6 +1231,18 @@
      <a class="sidebar-link sidebar-level-2" href="#overview-hooks" style="margin-left: 20px">
       Overview Hooks
      </a>
+     <a class="sidebar-link sidebar-level-2" href="#important-state-id-best-practices" style="margin-left: 20px">
+      Important: State ID Best Practices
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#why-this-matters" style="margin-left: 40px">
+      Why This Matters
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#examples" style="margin-left: 40px">
+      Examples
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#key-takeaways" style="margin-left: 40px">
+      Key Takeaways
+     </a>
      <a class="sidebar-link sidebar-level-2" href="#usevalue-initial-value-access" style="margin-left: 20px">
       useValue() - Initial Value Access
      </a>
@@ -11875,6 +11887,137 @@ def hello():
        </li>
       </ul>
       <hr/>
+      <h2 id="important-state-id-best-practices">
+       Important: State ID Best Practices
+      </h2>
+      <blockquote>
+       <p>
+        [!IMPORTANT]
+  When using
+        <code>
+         State
+        </code>
+        objects with hooks like
+        <code>
+         useDynamic
+        </code>
+        and
+        <code>
+         useValue
+        </code>
+        , the
+        <strong>
+         state ID should NOT match any component ID
+        </strong>
+        in your DOM. The state ID is a unique identifier for the state object itself, not a component.
+       </p>
+      </blockquote>
+      <h3 id="why-this-matters">
+       Why This Matters
+      </h3>
+      <p>
+       The reactive system uses
+       <strong>
+        watchers
+       </strong>
+       to update components when state changes. When you create a
+       <code>
+        State
+       </code>
+       object, the ID you provide is used to register the state in the internal registry, not to identify a specific DOM element.
+      </p>
+      <h3 id="examples">
+       Examples
+      </h3>
+      <p>
+       <strong>
+        X Incorrect - State ID matches component ID:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># DON'T do this</span>
+<span class="n">state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"my-button"</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">disabled</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">Button</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"my-button"</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"my-button.count"</span><span class="p">))</span>
+</code></pre>
+      </div>
+      <p>
+       In this example, both the state and the button have the ID
+       <code>
+        "my-button"
+       </code>
+       , which can cause confusion and unexpected behavior.
+      </p>
+      <p>
+       <strong>
+        ✓ Correct - State has unique ID:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># DO this - give state a descriptive, unique ID</span>
+<span class="n">counter_state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"counter-state"</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">disabled</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">Button</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"my-button"</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"counter-state.count"</span><span class="p">))</span>
+<span class="n">Button</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"another-button"</span><span class="p">,</span> <span class="n">disabled</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"counter-state.disabled"</span><span class="p">))</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        ✓ Also Correct - Multiple components sharing same state:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># One state can control multiple components</span>
+<span class="n">ui_state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"ui"</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">is_disabled</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s2">"Hello"</span><span class="p">)</span>
+
+<span class="n">Container</span><span class="p">(</span>
+    <span class="n">Text</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"ui.message"</span><span class="p">)),</span>
+    <span class="n">Button</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"btn-1"</span><span class="p">,</span> <span class="n">disabled</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"ui.is_disabled"</span><span class="p">)),</span>
+    <span class="n">Button</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"btn-2"</span><span class="p">,</span> <span class="n">disabled</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"ui.is_disabled"</span><span class="p">)),</span>
+    <span class="n">Text</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"ui.count"</span><span class="p">))</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="key-takeaways">
+       Key Takeaways
+      </h3>
+      <ol>
+       <li>
+        <strong>
+         State IDs are for the state object
+        </strong>
+        , not for DOM elements
+       </li>
+       <li>
+        <strong>
+         One state can control many components
+        </strong>
+        through reactive bindings
+       </li>
+       <li>
+        <strong>
+         Component IDs should be unique
+        </strong>
+        across your DOM
+       </li>
+       <li>
+        <strong>
+         State IDs should be descriptive
+        </strong>
+        of what they manage (e.g.,
+        <code>
+         "user-data"
+        </code>
+        ,
+        <code>
+         "cart-state"
+        </code>
+        ,
+        <code>
+         "ui-controls"
+        </code>
+        )
+       </li>
+      </ol>
+      <hr/>
       <h2 id="usevalue-initial-value-access">
        useValue() - Initial Value Access
       </h2>
@@ -12876,7 +13019,7 @@ def hello():
        objects into a template string.
       </p>
       <div class="codehilite">
-       <pre><span></span><code><span class="c1"># With DOM values</span>
+       <pre><span></span><code><span class="c1"># Generates: https://api.example.com/users/123/profile</span>
 <span class="n">fetch</span><span class="p">(</span>
     <span class="n">url</span><span class="p">(</span><span class="s2">"https://api.example.com/users/</span><span class="si">{id}</span><span class="s2">/profile"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">V</span><span class="p">(</span><span class="s2">"#userId"</span><span class="p">))</span>
 <span class="p">)</span>

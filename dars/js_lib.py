@@ -15,7 +15,7 @@ function _alert(msg){{ try{{ alert(String(msg)); }}catch(_ ){{ try{{ console.err
 // CSS.escape fallback
 function _cssEscape(s){{
   try{{ if (globalThis.CSS && typeof CSS.escape==='function') return CSS.escape(String(s)); }}catch(_ ){{ }}
-  try{{ return String(s).replace(/[^a-zA-Z0-9_\-]/g, '\\$&'); }}catch(_ ){{ return String(s); }}
+  try{{ return String(s).replace(/[^a-zA-Z0-9_\\-]/g, '\\$&'); }}catch(_ ){{ return String(s); }}
 }}
 
 function _attachEventsForVNode(el, vnode, events, markClass){{
@@ -211,14 +211,63 @@ function _restoreDefault(id, snap, vnode, eventsMap){{
         el.__darsEv = {{}};
       }}
     }}catch(_){{ }}
+    
     // Restore attributes
     try{{
       const current = el.getAttributeNames ? el.getAttributeNames() : [];
-      for(const n of current){{ if(n !== 'id') el.removeAttribute(n); }}
-      for(const k in snap.attrs){{ if(k !== 'id') el.setAttribute(k, snap.attrs[k]); }}
+      const booleanAttrs = ['checked', 'disabled', 'readonly', 'required', 'selected', 'autofocus', 'autoplay', 'controls', 'loop', 'muted'];
+      
+      // Remove all current attributes except 'id'
+      for(const n of current){{ 
+        if(n !== 'id') el.removeAttribute(n); 
+      }}
+      
+      // Restore attributes from snapshot
+      for(const k in snap.attrs){{ 
+        if(k !== 'id'){{
+          const val = snap.attrs[k];
+          // Handle boolean attributes
+          if(booleanAttrs.includes(k)){{
+            if(val === true || val === 'true' || val === k || val === ''){{
+              el.setAttribute(k, '');
+              // Also set property for form elements
+              if(k in el) el[k] = true;
+            }} else {{
+              el.removeAttribute(k);
+              if(k in el) el[k] = false;
+            }}
+          }} else {{
+            el.setAttribute(k, String(val));
+          }}
+        }}
+      }}
+      
+      // CRITICAL: Ensure boolean attributes NOT in snapshot are removed and set to false
+      for(const boolAttr of booleanAttrs){{
+        if(!snap.attrs || !(boolAttr in snap.attrs)){{
+          el.removeAttribute(boolAttr);
+          if(boolAttr in el) el[boolAttr] = false;
+        }}
+      }}
     }}catch(_){{ }}
+    
     // Restore innerHTML
     try{{ el.innerHTML = snap.html || ''; }}catch(_){{ }}
+    
+    // Restore value property for form elements
+    try{{
+      if(snap.attrs && snap.attrs.value !== undefined){{
+        if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT'){{
+          el.value = String(snap.attrs.value);
+        }}
+      }} else {{
+        // If no value in snapshot, clear it for form elements
+        if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT'){{
+          el.value = '';
+        }}
+      }}
+    }}catch(_){{ }}
+    
     // Re-attach original event handlers from vnode if available
     try{{
       if(vnode && eventsMap){{
@@ -313,7 +362,33 @@ function _applyMods(defaultId, mods){{
               }}
               continue;
             }}
-            el.setAttribute(k, String(attrs[k]));
+            
+            // Handle boolean attributes
+            const booleanAttrs = ['checked', 'disabled', 'readonly', 'required', 'selected', 'autofocus', 'autoplay', 'controls', 'loop', 'muted'];
+            let attrName = k;
+            let isBooleanAttr = booleanAttrs.includes(k);
+            
+            // Handle is_* prefix (e.g., is_disabled -> disabled)
+            if (!isBooleanAttr \u0026\u0026 k.startsWith('is_')) {{
+              const unprefixed = k.substring(3);
+              if (booleanAttrs.includes(unprefixed)) {{
+                attrName = unprefixed;
+                isBooleanAttr = true;
+              }}
+            }}
+            
+            if (isBooleanAttr) {{
+              const val = attrs[k];
+              if (val === true || val === 'true' || val === k || val === '') {{
+                el.setAttribute(attrName, '');
+                if (attrName in el) el[attrName] = true;
+              }} else {{
+                el.removeAttribute(attrName);
+                if (attrName in el) el[attrName] = false;
+              }}
+            }} else {{
+              el.setAttribute(k, String(attrs[k]));
+            }}
           }}catch(_){{ }}
         }}
       }} else if(op === 'toggleClass'){{
@@ -452,6 +527,8 @@ function change(opt){{
           
           // Apply attribute changes
           if (opt.attrs && typeof opt.attrs === 'object') {{
+              const booleanAttrs = ['checked', 'disabled', 'readonly', 'required', 'selected', 'autofocus', 'autoplay', 'controls', 'loop', 'muted'];
+              
               for (const k in opt.attrs) {{
                   try {{
                       // Special handling for 'class'
@@ -468,11 +545,43 @@ function change(opt){{
                           const mergedClasses = [...reservedClasses, ...newUserClasses];
                           el.className = mergedClasses.join(' ');
                       }} else {{
-                          // Normal attribute
-                          el.setAttribute(k, String(opt.attrs[k]));
-                          // If it's 'value' for input, also set property
-                          if (k === 'value' && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT')) {{
-                              el.value = String(opt.attrs[k]);
+                          // Check if this is a boolean attribute (or has is_ prefix)
+                          let attrName = k;
+                          let isBooleanAttr = booleanAttrs.includes(k);
+                          
+                          // Handle is_* prefix (e.g., is_disabled -> disabled)
+                          if (!isBooleanAttr && k.startsWith('is_')) {{
+                              const unprefixed = k.substring(3); // Remove 'is_'
+                              if (booleanAttrs.includes(unprefixed)) {{
+                                  attrName = unprefixed;
+                                  isBooleanAttr = true;
+                              }}
+                          }}
+                          
+                          if (isBooleanAttr) {{
+                              // Handle boolean attributes
+                              const val = opt.attrs[k];
+                              // Check if value is truthy for boolean attributes
+                              if (val === true || val === 'true' || val === k || val === '') {{
+                                  el.setAttribute(attrName, '');
+                                  // Also set property for form elements
+                                  if (attrName in el) el[attrName] = true;
+                              }} else if (val === false || val === 'false' || val === null || val === undefined) {{
+                                  // Explicitly false values - remove attribute
+                                  el.removeAttribute(attrName);
+                                  if (attrName in el) el[attrName] = false;
+                              }} else {{
+                                  // Any other value - remove attribute (safe default)
+                                  el.removeAttribute(attrName);
+                                  if (attrName in el) el[attrName] = false;
+                              }}
+                          }} else {{
+                              // Normal attribute
+                              el.setAttribute(k, String(opt.attrs[k]));
+                              // If it's 'value' for input, also set property
+                              if (k === 'value' && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT')) {{
+                                  el.value = String(opt.attrs[k]);
+                              }}
                           }}
                       }}
                       notifyWatchers(k, opt.attrs[k]);

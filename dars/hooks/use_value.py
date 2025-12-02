@@ -33,9 +33,8 @@ class ValueMarker:
         self.selector = selector
         self.marker_id = f"__DARS_VALUE_{id(self)}_{int(time.time()*1000)}__"
         
-        # Register in global registry only if selector is provided
-        if selector:
-            _VALUE_REGISTRY[self.marker_id] = self
+        # Always register in global registry to allow template resolution
+        _VALUE_REGISTRY[self.marker_id] = self
     
     def __str__(self):
         """

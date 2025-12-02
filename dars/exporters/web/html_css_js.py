@@ -2902,19 +2902,44 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
                         targets_by_id[tid].append(target['target_prop'])
                     
                     for target_id, target_props in targets_by_id.items():
-                        lines.append(f"                            const el_{target_id} = document.getElementById('{target_id}');")
-                        lines.append(f"                            if (el_{target_id}) {{")
+                        # Sanitize variable name (replace hyphens with underscores)
+                        var_name = f"el_{target_id.replace('-', '_')}"
+                        lines.append(f"                            const {var_name} = document.getElementById('{target_id}');")
+                        lines.append(f"                            if ({var_name}) {{")
                         for target_prop in target_props:
                             if target_prop == 'text':
-                                lines.append(f"                                el_{target_id}.textContent = String(val_{state_prop});")
+                                lines.append(f"                                {var_name}.textContent = String(val_{state_prop});")
                             elif target_prop == 'html':
-                                lines.append(f"                                el_{target_id}.innerHTML = String(val_{state_prop});")
+                                lines.append(f"                                {var_name}.innerHTML = String(val_{state_prop});")
                             elif target_prop == 'value':
-                                lines.append(f"                                el_{target_id}.value = String(val_{state_prop});")
+                                lines.append(f"                                {var_name}.value = String(val_{state_prop});")
                             elif target_prop == 'placeholder':
-                                lines.append(f"                                el_{target_id}.setAttribute('placeholder', String(val_{state_prop}));")
+                                lines.append(f"                                {var_name}.setAttribute('placeholder', String(val_{state_prop}));")
                             else:
-                                lines.append(f"                                el_{target_id}.setAttribute('{target_prop}', String(val_{state_prop}));")
+                                # Check if this is a boolean attribute or has is_ prefix
+                                boolean_attrs = ['checked', 'disabled', 'readonly', 'required', 'selected', 'autofocus', 'autoplay', 'controls', 'loop', 'muted']
+                                actual_attr = target_prop
+                                is_boolean = target_prop in boolean_attrs
+                                
+                                # Handle is_* prefix (e.g., is_disabled -> disabled)
+                                if not is_boolean and target_prop.startswith('is_'):
+                                    unprefixed = target_prop[3:]  # Remove 'is_'
+                                    if unprefixed in boolean_attrs:
+                                        actual_attr = unprefixed
+                                        is_boolean = True
+                                
+                                if is_boolean:
+                                    # Handle boolean attributes
+                                    lines.append(f"                                if (val_{state_prop} === true || val_{state_prop} === 'true' || val_{state_prop} === '{actual_attr}' || val_{state_prop} === '') {{")
+                                    lines.append(f"                                    {var_name}.setAttribute('{actual_attr}', '');")
+                                    lines.append(f"                                    if ('{actual_attr}' in {var_name}) {var_name}['{actual_attr}'] = true;")
+                                    lines.append(f"                                }} else {{")
+                                    lines.append(f"                                    {var_name}.removeAttribute('{actual_attr}');")
+                                    lines.append(f"                                    if ('{actual_attr}' in {var_name}) {var_name}['{actual_attr}'] = false;")
+                                    lines.append(f"                                }}")
+                                else:
+                                    # Normal attribute
+                                    lines.append(f"                                {var_name}.setAttribute('{target_prop}', String(val_{state_prop}));")
                         lines.append("                            }")
                     lines.append("                        }")
                 lines.append("                    }")
@@ -3081,7 +3106,23 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
                                 template_kwargs = component.template_kwargs
                                 if isinstance(template_kwargs, dict) and property_name in template_kwargs:
                                     initial_value = str(template_kwargs[property_name])
-                    except Exception:
+                            
+                            # Fallback: Try to get from STATE_V2_REGISTRY directly
+                            if not initial_value:
+                                # Ensure we have state_id and property_name
+                                parts = state_path.split('.')
+                                if len(parts) >= 2:
+                                    state_id = parts[0]
+                                    property_name = parts[1]
+                                    
+                                    state = next((s for s in STATE_V2_REGISTRY if s.component.id == state_id), None)
+                                    if state:
+                                        prop = getattr(state, property_name, None)
+                                        if prop:
+                                            initial_value = str(prop.value)
+                                            # print(f"DEBUG: Resolved fallback for {state_path}: {initial_value}")
+                    except Exception as e:
+                        # print(f"DEBUG: Error resolving dynamic binding: {e}")
                         pass
                     
                     # Create reactive span with initial value
@@ -3195,6 +3236,7 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
                                     # ID selector
                                     id_value = marker.selector[1:]
                                     parent['id'] = id_value
+                            # If no selector, we just replaced the value which is correct behavior
                 
                 # 2. Find markers in attributes
                 for tag in soup.find_all(True):  # True finds all tags

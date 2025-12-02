@@ -1,4 +1,139 @@
-window.__DARS_VDOM__={type:"T1",id:"page_155",key:"0",children:[{type:"T2",id:"container_156",key:"0/0",children:[{type:"T3",id:"dars-navbar",key:"0/0/0",children:[{type:"T2",id:"navbar-left",key:"0/0/0/0",children:[{type:"T4",id:"image_157",key:"0/0/0/0/0"},{type:"T5",id:"text_158",key:"0/0/0/0/1",text:"Dars Framework"}]},{type:"T2",id:"container_159",key:"0/0/0/1",children:[{type:"T2",id:"navbar-right",key:"0/0/0/1/0",children:[{type:"T6",id:"link_160",key:"0/0/0/1/0/0",text:"Home"},{type:"T6",id:"link_161",key:"0/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_162",key:"0/0/0/1/0/2",text:"Releases"},{type:"T6",id:"link_163",key:"0/0/0/1/0/3",text:"PlayGround"},{type:"T6",id:"link_164",key:"0/0/0/1/0/4",text:"GitHub"}]},{type:"T2",id:"hamburger-menu",key:"0/0/0/1/1",children:[{type:"T2",id:"hamburger-btn",key:"0/0/0/1/1/0",children:[{type:"T2",id:"container_165",key:"0/0/0/1/1/0/0",children:[{type:"T2",id:"container_166",key:"0/0/0/1/1/0/0/0"},{type:"T2",id:"container_167",key:"0/0/0/1/1/0/0/1"},{type:"T2",id:"container_168",key:"0/0/0/1/1/0/0/2"}]}]},{type:"T2",id:"mobile-menu",key:"0/0/0/1/1/1",children:[{type:"T6",id:"link_169",key:"0/0/0/1/1/1/0",text:"Home"},{type:"T6",id:"link_170",key:"0/0/0/1/1/1/1",text:"Documentation"},{type:"T6",id:"link_171",key:"0/0/0/1/1/1/2",text:"Releases"},{type:"T6",id:"link_172",key:"0/0/0/1/1/1/3",text:"PlayGround"},{type:"T6",id:"link_173",key:"0/0/0/1/1/1/4",text:"GitHub"}]}]}]}]}]},{type:"T2",id:"container_174",key:"0/1",children:[{type:"T2",id:"markdown-content-container",key:"0/1/0",children:[{type:"T9",id:"markdown_175",key:"0/1/0/0",text:`# Release Notes v1.5.9
+window.__DARS_VDOM__={type:"T1",id:"page_155",key:"0",children:[{type:"T2",id:"container_156",key:"0/0",children:[{type:"T3",id:"dars-navbar",key:"0/0/0",children:[{type:"T2",id:"navbar-left",key:"0/0/0/0",children:[{type:"T4",id:"image_157",key:"0/0/0/0/0"},{type:"T5",id:"text_158",key:"0/0/0/0/1",text:"Dars Framework"}]},{type:"T2",id:"container_159",key:"0/0/0/1",children:[{type:"T2",id:"navbar-right",key:"0/0/0/1/0",children:[{type:"T6",id:"link_160",key:"0/0/0/1/0/0",text:"Home"},{type:"T6",id:"link_161",key:"0/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_162",key:"0/0/0/1/0/2",text:"Releases"},{type:"T6",id:"link_163",key:"0/0/0/1/0/3",text:"PlayGround"},{type:"T6",id:"link_164",key:"0/0/0/1/0/4",text:"GitHub"}]},{type:"T2",id:"hamburger-menu",key:"0/0/0/1/1",children:[{type:"T2",id:"hamburger-btn",key:"0/0/0/1/1/0",children:[{type:"T2",id:"container_165",key:"0/0/0/1/1/0/0",children:[{type:"T2",id:"container_166",key:"0/0/0/1/1/0/0/0"},{type:"T2",id:"container_167",key:"0/0/0/1/1/0/0/1"},{type:"T2",id:"container_168",key:"0/0/0/1/1/0/0/2"}]}]},{type:"T2",id:"mobile-menu",key:"0/0/0/1/1/1",children:[{type:"T6",id:"link_169",key:"0/0/0/1/1/1/0",text:"Home"},{type:"T6",id:"link_170",key:"0/0/0/1/1/1/1",text:"Documentation"},{type:"T6",id:"link_171",key:"0/0/0/1/1/1/2",text:"Releases"},{type:"T6",id:"link_172",key:"0/0/0/1/1/1/3",text:"PlayGround"},{type:"T6",id:"link_173",key:"0/0/0/1/1/1/4",text:"GitHub"}]}]}]}]}]},{type:"T2",id:"container_174",key:"0/1",children:[{type:"T2",id:"markdown-content-container",key:"0/1/0",children:[{type:"T9",id:"markdown_175",key:"0/1/0/0",text:`# Release Notes v1.6.0
+
+> **Critical Bug Fixes & State Management Improvements**
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+## What's Fixed
+
+### 1. Hook Initialization Fixes
+
+Fixed critical bugs where \`useDynamic\` and \`useValue\` hooks were not properly displaying default values from \`State\` objects when used in \`FunctionComponent\`s.
+
+**Issues Resolved:**
+- \`useDynamic\` now correctly retrieves default values from the state registry even when props are not explicitly passed to the component
+- \`useValue\` now works correctly without requiring a selector parameter
+- Both hooks properly display initial state values on first render
+
+**Example:**
+\`\`\`python
+# This now works correctly!
+state = State("ui", count=0, disabled=False)
+
+@FunctionComponent
+def Counter(**props):
+    return f'''
+        <div>
+            <p>Count: {useDynamic("ui.count")}</p>
+            <button disabled="{useDynamic("ui.disabled")}">Click</button>
+        </div>
+    '''
+\`\`\`
+
+### 2. State Reset Functionality Enhancement
+
+Completely rewrote the \`reset()\` function to correctly handle **all** component properties, including boolean attributes like \`checked\`, \`disabled\`, \`readonly\`, and \`required\`.
+
+**Previous Behavior:**
+- Boolean attributes were incorrectly set to \`"false"\` string instead of being removed
+- Properties like \`disabled="false"\` would still disable elements (incorrect HTML behavior)
+
+**Fixed Behavior:**
+- Boolean attributes are now properly removed when \`False\`
+- Both HTML attributes AND DOM properties are synchronized correctly
+- Works for: \`checked\`, \`disabled\`, \`readonly\`, \`required\`, \`selected\`, \`autofocus\`, \`autoplay\`, \`controls\`, \`loop\`, \`muted\`
+
+**Example:**
+\`\`\`python
+state = State("ui", is_disabled=False, is_checked=True)
+
+Button(disabled=useDynamic("ui.is_disabled"))
+Checkbox(checked=useDynamic("ui.is_checked"))
+
+# Reset now works perfectly
+Button("Reset All", on_click=state.reset())
+\`\`\`
+
+### 3. JavaScript Variable Name Sanitization
+
+Fixed \`SyntaxError\` in generated JavaScript caused by HTML IDs containing hyphens being used as variable names.
+
+**Issue:**
+\`\`\`javascript
+// Generated invalid JS
+const el_control-panel = ...  // SyntaxError!
+\`\`\`
+
+**Fixed:**
+\`\`\`javascript
+// Now generates valid JS
+const el_control_panel = ...  // \u2713 Valid
+\`\`\`
+
+### 4. Boolean Attribute Handling Improvements
+
+Enhanced the reactive binding system to properly handle boolean attributes with the \`is_\` prefix.
+
+**Supported Patterns:**
+\`\`\`python
+# All of these now work correctly
+state = State("ui", is_disabled=False, disabled=False)
+
+# Automatic mapping: is_disabled -> disabled attribute
+Button(disabled=useDynamic("ui.is_disabled"))
+
+# State changes properly update the DOM
+state.is_disabled.set(True)   # Adds disabled attribute
+state.is_disabled.set(False)  # Removes disabled attribute completely
+\`\`\`
+
+## Important Notes
+
+### State ID Best Practices
+
+> **[!IMPORTANT] When using \`State\` objects with hooks like \`useDynamic\` and \`useValue\`, the state ID should **NOT** match any component ID in your DOM. The state ID is a unique identifier for the state object itself, not a component.**
+
+**X Incorrect:**
+\`\`\`python
+# DON'T do this - state ID matches button ID
+state = State("my-button", count=0)
+Button(id="my-button", text=useDynamic("my-button.count"))
+\`\`\`
+
+**\u2713 Correct:**
+\`\`\`python
+# DO this - state has unique ID
+state = State("counter-state", count=0)
+Button(id="my-button", text=useDynamic("counter-state.count"))
+\`\`\`
+
+The reactive system uses watchers to update components when state changes, so the state ID doesn't need to (and shouldn't) match any specific component ID.
+
+## Technical Details
+
+### Changes to \`js_lib.py\`
+
+1. **\`change()\` function**: Added intelligent boolean attribute detection with \`is_\` prefix support
+2. **\`_applyMods()\` function**: Enhanced to handle boolean attributes in state modifications
+3. **\`_restoreDefault()\` function**: Improved to correctly restore boolean attributes to their initial state
+
+### Changes to \`html_css_js.py\`
+
+1. **\`_generate_reactive_bindings_js()\`**: Added boolean attribute handling in watcher code generation
+2. **Variable name sanitization**: Replaces hyphens with underscores in generated JS variable names
+3. **\`_process_function_component()\`**: Added fallback to \`STATE_V2_REGISTRY\` for missing prop values
+
+### Changes to \`use_value.py\`
+
+1. **\`ValueMarker.__init__()\`**: Now always registers markers, even without a selector
+
+---
+
+# Release Notes v1.5.9
 
 > **Unified Keyboard Events & KeyCode System**
 
@@ -3274,4 +3409,4 @@ Upgrade Recommendation: Recommended for all users; especially helpful for projec
 # Older release notes can be found
 
 In the github repository [Here](https://github.com/ZtaMDev/Dars-Framework/releases).
-`}]},{type:"T2",id:"footer-section",key:"0/1/1",children:[{type:"T2",id:"container_176",key:"0/1/1/0",children:[{type:"T2",id:"container_177",key:"0/1/1/0/0",children:[{type:"T2",id:"container_178",key:"0/1/1/0/0/0",children:[{type:"T4",id:"image_179",key:"0/1/1/0/0/0/0"},{type:"T2",id:"container_180",key:"0/1/1/0/0/0/1",children:[{type:"T5",id:"text_181",key:"0/1/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_182",key:"0/1/1/0/0/1",children:[{type:"T2",id:"container_183",key:"0/1/1/0/0/1/0",children:[{type:"T5",id:"text_184",key:"0/1/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_185",key:"0/1/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_186",key:"0/1/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_187",key:"0/1/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_188",key:"0/1/1/0/0/1/1",children:[{type:"T5",id:"text_189",key:"0/1/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_190",key:"0/1/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_191",key:"0/1/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_192",key:"0/1/1/0/0/1/2",children:[{type:"T5",id:"text_193",key:"0/1/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_194",key:"0/1/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_195",key:"0/1/1/0/0/2",children:[{type:"T2",id:"container_196",key:"0/1/1/0/0/2/0",children:[{type:"T5",id:"text_197",key:"0/1/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_198",key:"0/1/1/0/0/2/1",children:[{type:"T5",id:"text_199",key:"0/1/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_200",key:"0/1/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_201",key:"0/1/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_202",key:"0/1/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]},{type:"T10",id:"documentation-sidebar",key:"0/2"}]},function(){const c=new Map;let l=null,p=null;function u(){}function k(){}function v(n,t){if(!n)return;t(n);const e=n.children||[];for(let a=0;a<e.length;a++)v(e[a],t)}function _(n,t){if(!(!n||!t))for(const[e,a]of Object.entries(t))try{a===!1||a===null||typeof a>"u"?n.removeAttribute(e):n.setAttribute(e,String(a))}catch{}}function P(n,t={},e={}){for(const a in t)if(!(a in e))try{n.removeAttribute(a)}catch{}for(const a in e){const o=e[a];try{o===!1||o===null||typeof o>"u"?n.removeAttribute(a):n.setAttribute(a,String(o))}catch{}}}function M(n,t={},e={}){for(const a in t)if(!(a in e))try{n.style.removeProperty(a.replace(/_/g,"-"))}catch{}for(const a in e){const o=e[a];try{n.style.setProperty(a.replace(/_/g,"-"),String(o))}catch{}}}function R(n,t){(t||document).addEventListener(n,function(e){let a=e.target;const o=t||document;for(;a&&a!==o;){const m=a.id;if(m&&c.has(m)){const y=c.get(m);if(a&&a.__darsEv&&a.__darsEv[n])return;let d=y[n];if(!d&&(n==="keydown"||n==="keyup"||n==="keypress")){const i=e.key||e.code;if(i){const r=n+"."+i;d=y[r]}}if(typeof d=="function"){try{d.call(a,e)}catch(i){console.error("[Dars] handler error",i)}return}}a=a.parentNode}},!0)}function S(n,t){return n&&t?n.type!==t.type:n!==t}function x(n){if(!n)return;const t=n.children||[];for(let e=0;e<t.length;e++)x(t[e]);if(n.id&&c.delete(n.id),n.id){const e=document.getElementById(n.id);if(e&&e.parentNode)try{e.parentNode.removeChild(e)}catch{}}}function b(n,t){if(!t||!t.id)return{ok:!1,reason:"missing-new"};let e=document.getElementById(t.id);if(!e){const i=n&&n.id?document.getElementById(n.id):null;if(i)try{i.id=t.id,e=i}catch{}}if(!e)return{ok:!1,reason:"missing-el"};if(S(n,t))return{ok:!1,reason:"type-changed"};const a=!!t.isIsland;if(!a&&t.class&&(e.className=t.class),a||P(e,n&&n.props||{},t.props||{}),a||M(e,n&&n.style||{},t.style||{}),!a&&Object.prototype.hasOwnProperty.call(t,"text")&&e.textContent!==String(t.text||"")&&(e.textContent=String(t.text||"")),a)return{ok:!0};const o=n&&n.children?n.children:[],m=t.children?t.children:[],y=new Map;for(let i=0;i<o.length;i++){const r=o[i]&&(o[i].id||o[i].key)||null;r&&y.set(String(r),o[i])}const d=new Set;for(let i=0;i<m.length;i++){const r=m[i],h=r&&(r.id||r.key)||null;if(!h)if(i<o.length){const s=b(o[i],r);if(!s.ok)return s;d.add(o[i]);continue}else return{ok:!1,reason:"children-added"};const w=y.get(String(h));if(w){const s=b(w,r);if(!s.ok)return s;d.add(w)}else{if(i<o.length){const f=o[i];if(!S(f,r)){const g=b(f,r);if(!g.ok)return g;d.add(f);continue}}const s=createSubtree(r);if(s){const f=i<o.length?o[i]:null;if(f&&f.id){const g=document.getElementById(f.id);g&&g.parentNode?g.parentNode.insertBefore(s,g):e.appendChild(s)}else e.appendChild(s);continue}return{ok:!1,reason:"children-added"}}}for(let i=0;i<o.length;i++){const r=o[i];d.has(r)||x(r)}return{ok:!0}}function F(n){typeof requestAnimationFrame=="function"?requestAnimationFrame(n):setTimeout(n,16)}function V(n){const t=l;if(!t){l=n;try{window.__DARS_VDOM__=n}catch{}return}F(()=>{const e=b(t,n);if(!e.ok){console.warn("[Dars] Structural change detected (",e.reason,"), reloading...");try{location.reload()}catch{}return}l=n;try{window.__DARS_VDOM__=n}catch{}})}function B(n){l=n;try{window.__DARS_VDOM__=n}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(e=>R(e,document))}function N(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const n=window.__DARS_VERSION_URL||"version.txt";let t=null,e=!1,a=0;const o=10;let m=!1;function y(i,r,h,w){try{const s=new XMLHttpRequest;w&&(s.responseType=w),s.open("GET",i,!0),s.timeout=5e3,s.onreadystatechange=function(){s.readyState===4&&(s.status>=200&&s.status<300?r(s.response):h())},s.onerror=h,s.ontimeout=h,s.setRequestHeader("Cache-Control","no-store"),s.send()}catch{h()}}function d(){m||y(n,function(i){let r=(i||"").toString().trim();if(!r||r==="0"){if(a+=1,a>=o){console.warn("[Dars] version file not found after",o,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(d,600);return}if(a=0,e=!1,p||(p=r),r&&r!==p){p=r;try{location.reload()}catch{}return}t=setTimeout(d,600)},function(){if(a+=1,a>=o){console.warn("[Dars] version file not reachable after",o,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(d,600)},"text")}return d(),()=>{try{m=!0,t&&clearTimeout(t),window.__DARS_STOP_HOTRELOAD=null}catch{}}}document.addEventListener("DOMContentLoaded",function(){if(window.__DARS_VDOM__?B(window.__DARS_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=N()}catch{}}})}(),window.addEventListener("scroll",()=>{const c=document.getElementById("dars-navbar");window.scrollY>20?c.classList.add("scrolled"):c.classList.remove("scrolled");const l=document.getElementById("features-section");if(l&&!l.classList.contains("visible")){const p=l.getBoundingClientRect().top,u=window.innerHeight/1.5;p<u&&(l.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((v,_)=>{setTimeout(()=>{v.style.opacity="1",v.style.transform="translateY(0)"},_*100)}))}});const C=document.getElementById("hero-logo"),D=document.getElementById("hero-title"),T=document.getElementById("hero-description"),A=document.getElementById("pip-command"),I=document.getElementById("get-started-btn"),E=document.getElementById("scroll-text");C&&setTimeout(()=>C.classList.add("show"),5),D&&setTimeout(()=>D.classList.add("show"),350),T&&setTimeout(()=>T.classList.add("show"),650),A&&setTimeout(()=>A.classList.add("show"),950),I&&setTimeout(()=>I.classList.add("show"),1250),E&&setTimeout(()=>E.classList.add("show"),1500),document.addEventListener("DOMContentLoaded",function(){const c=document.getElementById("hamburger-btn"),l=document.getElementById("mobile-menu"),p=document.body;c&&l&&(c.addEventListener("click",function(u){u.stopPropagation(),l.style.display==="flex"?(l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open")):(l.style.display="flex",c.classList.add("menu-open"),p.classList.add("menu-open"))}),l.querySelectorAll("a").forEach(u=>{u.addEventListener("click",function(){l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open")})}),document.addEventListener("click",function(u){!c.contains(u.target)&&!l.contains(u.target)&&(l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open"))}),document.addEventListener("keydown",function(u){u.key==="Escape"&&l.style.display==="flex"&&(l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open"))}))});
+`}]},{type:"T2",id:"footer-section",key:"0/1/1",children:[{type:"T2",id:"container_176",key:"0/1/1/0",children:[{type:"T2",id:"container_177",key:"0/1/1/0/0",children:[{type:"T2",id:"container_178",key:"0/1/1/0/0/0",children:[{type:"T4",id:"image_179",key:"0/1/1/0/0/0/0"},{type:"T2",id:"container_180",key:"0/1/1/0/0/0/1",children:[{type:"T5",id:"text_181",key:"0/1/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_182",key:"0/1/1/0/0/1",children:[{type:"T2",id:"container_183",key:"0/1/1/0/0/1/0",children:[{type:"T5",id:"text_184",key:"0/1/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_185",key:"0/1/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_186",key:"0/1/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_187",key:"0/1/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_188",key:"0/1/1/0/0/1/1",children:[{type:"T5",id:"text_189",key:"0/1/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_190",key:"0/1/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_191",key:"0/1/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_192",key:"0/1/1/0/0/1/2",children:[{type:"T5",id:"text_193",key:"0/1/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_194",key:"0/1/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_195",key:"0/1/1/0/0/2",children:[{type:"T2",id:"container_196",key:"0/1/1/0/0/2/0",children:[{type:"T5",id:"text_197",key:"0/1/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_198",key:"0/1/1/0/0/2/1",children:[{type:"T5",id:"text_199",key:"0/1/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_200",key:"0/1/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_201",key:"0/1/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_202",key:"0/1/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]},{type:"T10",id:"documentation-sidebar",key:"0/2"}]},function(){const c=new Map;let l=null,p=null;function u(){}function k(){}function w(n,t){if(!n)return;t(n);const e=n.children||[];for(let a=0;a<e.length;a++)w(e[a],t)}function _(n,t){if(!(!n||!t))for(const[e,a]of Object.entries(t))try{a===!1||a===null||typeof a>"u"?n.removeAttribute(e):n.setAttribute(e,String(a))}catch{}}function P(n,t={},e={}){for(const a in t)if(!(a in e))try{n.removeAttribute(a)}catch{}for(const a in e){const o=e[a];try{o===!1||o===null||typeof o>"u"?n.removeAttribute(a):n.setAttribute(a,String(o))}catch{}}}function F(n,t={},e={}){for(const a in t)if(!(a in e))try{n.style.removeProperty(a.replace(/_/g,"-"))}catch{}for(const a in e){const o=e[a];try{n.style.setProperty(a.replace(/_/g,"-"),String(o))}catch{}}}function M(n,t){(t||document).addEventListener(n,function(e){let a=e.target;const o=t||document;for(;a&&a!==o;){const m=a.id;if(m&&c.has(m)){const y=c.get(m);if(a&&a.__darsEv&&a.__darsEv[n])return;let d=y[n];if(!d&&(n==="keydown"||n==="keyup"||n==="keypress")){const i=e.key||e.code;if(i){const r=n+"."+i;d=y[r]}}if(typeof d=="function"){try{d.call(a,e)}catch(i){console.error("[Dars] handler error",i)}return}}a=a.parentNode}},!0)}function S(n,t){return n&&t?n.type!==t.type:n!==t}function x(n){if(!n)return;const t=n.children||[];for(let e=0;e<t.length;e++)x(t[e]);if(n.id&&c.delete(n.id),n.id){const e=document.getElementById(n.id);if(e&&e.parentNode)try{e.parentNode.removeChild(e)}catch{}}}function v(n,t){if(!t||!t.id)return{ok:!1,reason:"missing-new"};let e=document.getElementById(t.id);if(!e){const i=n&&n.id?document.getElementById(n.id):null;if(i)try{i.id=t.id,e=i}catch{}}if(!e)return{ok:!1,reason:"missing-el"};if(S(n,t))return{ok:!1,reason:"type-changed"};const a=!!t.isIsland;if(!a&&t.class&&(e.className=t.class),a||P(e,n&&n.props||{},t.props||{}),a||F(e,n&&n.style||{},t.style||{}),!a&&Object.prototype.hasOwnProperty.call(t,"text")&&e.textContent!==String(t.text||"")&&(e.textContent=String(t.text||"")),a)return{ok:!0};const o=n&&n.children?n.children:[],m=t.children?t.children:[],y=new Map;for(let i=0;i<o.length;i++){const r=o[i]&&(o[i].id||o[i].key)||null;r&&y.set(String(r),o[i])}const d=new Set;for(let i=0;i<m.length;i++){const r=m[i],h=r&&(r.id||r.key)||null;if(!h)if(i<o.length){const s=v(o[i],r);if(!s.ok)return s;d.add(o[i]);continue}else return{ok:!1,reason:"children-added"};const b=y.get(String(h));if(b){const s=v(b,r);if(!s.ok)return s;d.add(b)}else{if(i<o.length){const f=o[i];if(!S(f,r)){const g=v(f,r);if(!g.ok)return g;d.add(f);continue}}const s=createSubtree(r);if(s){const f=i<o.length?o[i]:null;if(f&&f.id){const g=document.getElementById(f.id);g&&g.parentNode?g.parentNode.insertBefore(s,g):e.appendChild(s)}else e.appendChild(s);continue}return{ok:!1,reason:"children-added"}}}for(let i=0;i<o.length;i++){const r=o[i];d.has(r)||x(r)}return{ok:!0}}function R(n){typeof requestAnimationFrame=="function"?requestAnimationFrame(n):setTimeout(n,16)}function V(n){const t=l;if(!t){l=n;try{window.__DARS_VDOM__=n}catch{}return}R(()=>{const e=v(t,n);if(!e.ok){console.warn("[Dars] Structural change detected (",e.reason,"), reloading...");try{location.reload()}catch{}return}l=n;try{window.__DARS_VDOM__=n}catch{}})}function B(n){l=n;try{window.__DARS_VDOM__=n}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(e=>M(e,document))}function N(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const n=window.__DARS_VERSION_URL||"version.txt";let t=null,e=!1,a=0;const o=10;let m=!1;function y(i,r,h,b){try{const s=new XMLHttpRequest;b&&(s.responseType=b),s.open("GET",i,!0),s.timeout=5e3,s.onreadystatechange=function(){s.readyState===4&&(s.status>=200&&s.status<300?r(s.response):h())},s.onerror=h,s.ontimeout=h,s.setRequestHeader("Cache-Control","no-store"),s.send()}catch{h()}}function d(){m||y(n,function(i){let r=(i||"").toString().trim();if(!r||r==="0"){if(a+=1,a>=o){console.warn("[Dars] version file not found after",o,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(d,600);return}if(a=0,e=!1,p||(p=r),r&&r!==p){p=r;try{location.reload()}catch{}return}t=setTimeout(d,600)},function(){if(a+=1,a>=o){console.warn("[Dars] version file not reachable after",o,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(d,600)},"text")}return d(),()=>{try{m=!0,t&&clearTimeout(t),window.__DARS_STOP_HOTRELOAD=null}catch{}}}document.addEventListener("DOMContentLoaded",function(){if(window.__DARS_VDOM__?B(window.__DARS_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=N()}catch{}}})}(),window.addEventListener("scroll",()=>{const c=document.getElementById("dars-navbar");window.scrollY>20?c.classList.add("scrolled"):c.classList.remove("scrolled");const l=document.getElementById("features-section");if(l&&!l.classList.contains("visible")){const p=l.getBoundingClientRect().top,u=window.innerHeight/1.5;p<u&&(l.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((w,_)=>{setTimeout(()=>{w.style.opacity="1",w.style.transform="translateY(0)"},_*100)}))}});const C=document.getElementById("hero-logo"),D=document.getElementById("hero-title"),T=document.getElementById("hero-description"),I=document.getElementById("pip-command"),A=document.getElementById("get-started-btn"),E=document.getElementById("scroll-text");C&&setTimeout(()=>C.classList.add("show"),5),D&&setTimeout(()=>D.classList.add("show"),350),T&&setTimeout(()=>T.classList.add("show"),650),I&&setTimeout(()=>I.classList.add("show"),950),A&&setTimeout(()=>A.classList.add("show"),1250),E&&setTimeout(()=>E.classList.add("show"),1500),document.addEventListener("DOMContentLoaded",function(){const c=document.getElementById("hamburger-btn"),l=document.getElementById("mobile-menu"),p=document.body;c&&l&&(c.addEventListener("click",function(u){u.stopPropagation(),l.style.display==="flex"?(l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open")):(l.style.display="flex",c.classList.add("menu-open"),p.classList.add("menu-open"))}),l.querySelectorAll("a").forEach(u=>{u.addEventListener("click",function(){l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open")})}),document.addEventListener("click",function(u){!c.contains(u.target)&&!l.contains(u.target)&&(l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open"))}),document.addEventListener("keydown",function(u){u.key==="Escape"&&l.style.display==="flex"&&(l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open"))}))});
