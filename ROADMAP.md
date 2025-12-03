@@ -8,8 +8,8 @@ This document outlines the development roadmap for Dars Framework, covering impl
 
 Based on the current analysis of the source code (Python, Markdown, JavaScript, CSS):
 
-*   **Total**: 1062458 lines
-*   **Docs**: 22753 lines
+*   **Total**: 22762 lines
+*   **Docs**:  7520 lines
 
 ## Development Roadmap
 
