@@ -37,54 +37,65 @@ from dars.all import *
 
 app = App(title="Hello World", theme="dark")
 
-index = Page(
-     Text(
-        text="Hello World",
-        style={
-            'font-size': '48px',
-            'color': '#2c3e50',
-            'margin-bottom': '20px',
-            'font-weight': 'bold',
-            'text-align': 'center'
-        }
-    ),
-    Text(
-        text="Hello World",
-        style={
-            'font-size': '20px',
-            'color': '#7f8c8d',
-            'margin-bottom': '40px',
-            'text-align': 'center'
-        }
-    ),
+# 1. Define State
+state = State("app", title="Hello Dars!", count=0)
 
-    Button(
-        text="Click Me!",
-        on_click= alert('Hello from DARS!'),
+# 2. Define Route
+@route("/")
+def index(): 
+    return Page(
+        Text( # 3. Use useDynamic for reactive updates
+            text=useDynamic("app.title"),
+            style={
+                'font-size': '48px',
+                'color': '#2c3e50',
+                'font-weight': 'bold',
+                'margin-bottom': '20px'
+            }
+        ),
+        
+        # 4. Interactive Button
+        Button(
+            text="Update Title & Count",
+            on_click=(
+                state.title.set("You clicked the button!")
+                .then(state.count.increment(1))
+            ),
+            style={
+                'background-color': '#3498db',
+                'color': 'white',
+                'padding': '15px 30px',
+                'border-radius': '8px',
+                'border': 'none',
+                'cursor': 'pointer',
+                'font-size': '18px'
+            }
+        ),
+
+        # 5. Display reactive count
+        Text(
+            text=useDynamic("app.count"),
+            style={'font-size': '24px', 'margin-top': '20px'}
+        ),
+
+        # 6. useValue for initial value (won't update)
+        Text(
+            text=useValue("app.title"),
+            style={'color': '#95a5a6', 'margin-top': '40px', 'font-style': 'italic'}
+        ),
+
         style={
-            'background-color': '#3498db',
-            'color': 'white',
-            'padding': '15px 30px',
-            'border': 'none',
-            'border-radius': '8px',
-            'font-size': '18px',
-            'cursor': 'pointer',
-            'transition': 'background-color 0.3s'
+            'display': 'flex', 'flex-direction': 'column', 
+            'align-items': 'center', 'justify-content': 'center', 
+            'height': '100vh', 'font-family': 'Arial, sans-serif',
+            'background-color': '#f0f2f5'
         }
-    ),
-    style={
-        'display': 'flex',
-        'flex-direction': 'column',
-        'align-items': 'center',
-        'justify-content': 'center',
-        'min-height': '100vh',
-        'background-color': '#f0f2f5',
-        'font-family': 'Arial, sans-serif'
-    }
-) 
+    ) 
 
-app.add_page("index", index, title="Hello World", index=True)
+# 7. Add page
+app.add_page("index", index(), title="index")
 
+# 8. Run app with preview
 if __name__ == "__main__":
     app.rTimeCompile()
 ```
@@ -146,63 +157,48 @@ For complete documentation, see the [Backend API Guide](https://ztamdev.github.i
 
 ---
 
-
 ## State Management System
 
-Dars Framework features **two powerful state management systems**, each designed for different use cases:
+Dars Framework features **powerful state management system**, designed for different use cases.
 
-### 1. State V2 (Dynamic)
-Modern, Pythonic state management for simple reactive updates. Best for counters, timers, and single-component interactions.
+### State V2
+Modern, Pythonic state management for reactive updates. Best for counters, timers, and component interactions using hooks.
+
+**Hooks System:**
+- `useDynamic()`: Reactive state binding for automatic UI updates.
+- `useValue()`: Set initial values from state (non-reactive).
+- `useWatch()`: Monitor state changes and trigger side effects.
+
+[Learn more about Hooks](https://ztamdev.github.io/Dars-Framework/docs.html#hooks-system)
 
 ```python
 from dars.all import *
 
-# Create state with component
-counter = State(Text("0", id="counter"), text=0)
+app = App("State Demo")
+state = State("counter", count=0)
 
-# Or use string ID for dynamic components
-dynamic_state = State("dynamic-counter", text=0)
+@route("/")
+def index():
+    return Page(
+        # Bind to state with useDynamic
+        Text(text=useDynamic("counter.count"), style={"font-size": "24px"}),
+        
+        # Update state on click
+        Button("Increment", on_click=state.count.increment(1)),
+        Button("Decrement", on_click=state.count.decrement(1)),
+        Button("Reset", on_click=state.count.set(0))
+    )
 
-# Reactive operations
-inc_btn = Button("+1", on_click=counter.text.increment(by=1))
-set_btn = Button("Reset", on_click=counter.reset())
+app.add_page("index", index())
 
-# Auto-increment
-start_btn = Button("Start", on_click=counter.text.auto_increment(by=1, interval=1000))
+if __name__ == "__main__":
+    app.rTimeCompile()
 ```
 
-**String ID Support:** State() can accept either a component object or a string ID, perfect for components created dynamically with `createComp()`.
+**String ID Support:** `State()` can accept a string ID (e.g., `State("my-state", ...)`). 
 
-
-### 2. dState & cState (Indexed)
-Powerful indexed state system for complex state machines, multi-step workflows, and cross-component coordination.
-
-```python
-from dars.core.state import dState, Mod
-
-# Define state with indices [0, 1, 2]
-toggle = dState("toggle", component=btn, states=[0, 1, 2])
-
-# Define rules for state 1
-toggle.cState(1, mods=[
-    Mod.set(btn, text="Active", style={'background': 'green'}),
-    Mod.set(status_text, text="System Online")
-])
-
-# Navigate by index
-btn.on_click = toggle.state(1)
-```
-
-### Comparison
-
-| Feature | State V2 (Dynamic) | dState/cState (Indexed) |
-|---------|-------------------|-------------------------|
-| **Best For** | Simple updates, counters, timers | Complex workflows, state machines |
-| **API Style** | Clean, Pythonic | Explicit, Indexed |
-| **State Tracking** | Dynamic values | Fixed Indices (0, 1, 2...) |
-| **Auto Ops** | Built-in (`auto_increment`) | Manual via Mod |
-| **Cross-State** | No | `Mod.call()` supported |
-| **Dynamic Components** | String ID support | Component required |
+> [!WARNING]
+> **Important:** When using hooks, the State ID is used for binding. **Do not use an ID that belongs to another unrelated component**, as hooks use this ID as the State ID. Using a conflicting ID may cause unexpected behavior or state collisions.
 
 For detailed documentation, visit the [State Management Guide](https://ztamdev.github.io/Dars-Framework/docs.html#state-management-in-dars).
 

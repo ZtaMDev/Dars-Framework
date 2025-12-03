@@ -1,14 +1,5 @@
 # Installation Guide - Dars Framework
 
-## System Requirements
-
-### Minimum Requirements
-
-- **Python**: 3.8 or higher
-- **Operating System**: Windows, macOS, Linux
-- **RAM**: 512 MB minimum (2 GB recommended)
-- **Disk Space**: 100 MB for the framework
-
 ## Quick Installation
 
 To install Dars, simply use pip:
@@ -84,6 +75,9 @@ text = Text(text="Hello Dars!", style={'font-size': '24px'}) # Use ' to escape q
 
 container.add_child(text)
 app.set_root(container)
+
+if __name__ == "__main__":
+    app.rTimeCompile()
 ```
 
 ### 2. Export the Application

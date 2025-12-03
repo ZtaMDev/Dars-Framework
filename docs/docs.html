@@ -254,12 +254,6 @@
      <a class="sidebar-link sidebar-level-1" href="#installation-guide-dars-framework" style="margin-left: 0px">
       Installation Guide - Dars Framework
      </a>
-     <a class="sidebar-link sidebar-level-2" href="#system-requirements" style="margin-left: 20px">
-      System Requirements
-     </a>
-     <a class="sidebar-link sidebar-level-3" href="#minimum-requirements" style="margin-left: 40px">
-      Minimum Requirements
-     </a>
      <a class="sidebar-link sidebar-level-2" href="#quick-installation" style="margin-left: 20px">
       Quick Installation
      </a>
@@ -2068,38 +2062,6 @@
       <h1 id="installation-guide-dars-framework">
        Installation Guide - Dars Framework
       </h1>
-      <h2 id="system-requirements">
-       System Requirements
-      </h2>
-      <h3 id="minimum-requirements">
-       Minimum Requirements
-      </h3>
-      <ul>
-       <li>
-        <strong>
-         Python
-        </strong>
-        : 3.8 or higher
-       </li>
-       <li>
-        <strong>
-         Operating System
-        </strong>
-        : Windows, macOS, Linux
-       </li>
-       <li>
-        <strong>
-         RAM
-        </strong>
-        : 512 MB minimum (2 GB recommended)
-       </li>
-       <li>
-        <strong>
-         Disk Space
-        </strong>
-        : 100 MB for the framework
-       </li>
-      </ul>
       <h2 id="quick-installation">
        Quick Installation
       </h2>
@@ -2203,6 +2165,9 @@ dars<span class="w"> </span>init<span class="w"> </span>my_project<span class="w
 
 <span class="n">container</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
 <span class="n">app</span><span class="o">.</span><span class="n">set_root</span><span class="p">(</span><span class="n">container</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">rTimeCompile</span><span class="p">()</span>
 </code></pre>
       </div>
       <h3 id="2-export-the-application">
@@ -2390,33 +2355,71 @@ dars<span class="w"> </span>build
        </li>
       </ol>
       <div class="codehilite">
-       <pre><span></span><code>   <span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
-   <span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"Search Demo"</span><span class="p">)</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"Hello World"</span><span class="p">,</span> <span class="n">theme</span><span class="o">=</span><span class="s2">"dark"</span><span class="p">)</span>
 
-   <span class="c1"># Create a page with nested components</span>
-   <span class="n">page</span> <span class="o">=</span> <span class="n">Page</span><span class="p">(</span>
-       <span class="n">Container</span><span class="p">(</span>
-           <span class="n">Text</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">"Welcome!"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"welcome-text"</span><span class="p">),</span>
-           <span class="n">Container</span><span class="p">(</span>
-               <span class="n">Button</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">"Click me"</span><span class="p">,</span> <span class="n">class_name</span><span class="o">=</span><span class="s2">"action-btn"</span><span class="p">),</span>
-               <span class="n">Button</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">"Cancel"</span><span class="p">,</span> <span class="n">class_name</span><span class="o">=</span><span class="s2">"action-btn"</span><span class="p">),</span>
-               <span class="nb">id</span><span class="o">=</span><span class="s2">"buttons-container"</span>
-           <span class="p">),</span>
-           <span class="nb">id</span><span class="o">=</span><span class="s2">"main-container"</span>
-       <span class="p">)</span>
-   <span class="p">)</span>
+<span class="c1"># 1. Define State</span>
+<span class="n">state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"app"</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"Hello Dars!"</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-   <span class="c1"># Find and modify components</span>
-   <span class="n">page</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"welcome-text"</span><span class="p">)</span>\
-       <span class="o">.</span><span class="n">attr</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">"Welcome to Dars!"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s2">"color"</span><span class="p">:</span> <span class="s2">"blue"</span><span class="p">})</span>
+<span class="c1"># 2. Define Route</span>
+<span class="nd">@route</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">():</span> 
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span>
+        <span class="n">Text</span><span class="p">(</span> <span class="c1"># 3. Use useDynamic for reactive updates</span>
+            <span class="n">text</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"app.title"</span><span class="p">),</span>
+            <span class="n">style</span><span class="o">=</span><span class="p">{</span>
+                <span class="s1">'font-size'</span><span class="p">:</span> <span class="s1">'48px'</span><span class="p">,</span>
+                <span class="s1">'color'</span><span class="p">:</span> <span class="s1">'#2c3e50'</span><span class="p">,</span>
+                <span class="s1">'font-weight'</span><span class="p">:</span> <span class="s1">'bold'</span><span class="p">,</span>
+                <span class="s1">'margin-bottom'</span><span class="p">:</span> <span class="s1">'20px'</span>
+            <span class="p">}</span>
+        <span class="p">),</span>
 
-   <span class="c1"># Chain searches to find nested components</span>
-   <span class="n">page</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"buttons-container"</span><span class="p">)</span>\
-       <span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">class_name</span><span class="o">=</span><span class="s2">"action-btn"</span><span class="p">)</span>\
-       <span class="o">.</span><span class="n">attr</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s2">"padding"</span><span class="p">:</span> <span class="s2">"10px"</span><span class="p">})</span>
+        <span class="c1"># 4. Interactive Button</span>
+        <span class="n">Button</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">"Update Title &amp; Count"</span><span class="p">,</span>
+            <span class="n">on_click</span><span class="o">=</span><span class="p">(</span>
+                <span class="n">state</span><span class="o">.</span><span class="n">title</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"You clicked the button!"</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">count</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+            <span class="p">),</span>
+            <span class="n">style</span><span class="o">=</span><span class="p">{</span>
+                <span class="s1">'background-color'</span><span class="p">:</span> <span class="s1">'#3498db'</span><span class="p">,</span>
+                <span class="s1">'color'</span><span class="p">:</span> <span class="s1">'white'</span><span class="p">,</span>
+                <span class="s1">'padding'</span><span class="p">:</span> <span class="s1">'15px 30px'</span><span class="p">,</span>
+                <span class="s1">'border-radius'</span><span class="p">:</span> <span class="s1">'8px'</span><span class="p">,</span>
+                <span class="s1">'border'</span><span class="p">:</span> <span class="s1">'none'</span><span class="p">,</span>
+                <span class="s1">'cursor'</span><span class="p">:</span> <span class="s1">'pointer'</span><span class="p">,</span>
+                <span class="s1">'font-size'</span><span class="p">:</span> <span class="s1">'18px'</span>
+            <span class="p">}</span>
+        <span class="p">),</span>
 
-   <span class="n">app</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"main"</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">page</span><span class="p">)</span>
+        <span class="c1"># 5. Display reactive count</span>
+        <span class="n">Text</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"app.count"</span><span class="p">),</span>
+            <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s1">'font-size'</span><span class="p">:</span> <span class="s1">'24px'</span><span class="p">,</span> <span class="s1">'margin-top'</span><span class="p">:</span> <span class="s1">'20px'</span><span class="p">}</span>
+        <span class="p">),</span>
+
+        <span class="c1"># 6. useValue for initial value (won't update)</span>
+        <span class="n">Text</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="n">useValue</span><span class="p">(</span><span class="s2">"app.title"</span><span class="p">),</span>
+            <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s1">'color'</span><span class="p">:</span> <span class="s1">'#95a5a6'</span><span class="p">,</span> <span class="s1">'margin-top'</span><span class="p">:</span> <span class="s1">'40px'</span><span class="p">,</span> <span class="s1">'font-style'</span><span class="p">:</span> <span class="s1">'italic'</span><span class="p">}</span>
+        <span class="p">),</span>
+
+        <span class="n">style</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">'display'</span><span class="p">:</span> <span class="s1">'flex'</span><span class="p">,</span> <span class="s1">'flex-direction'</span><span class="p">:</span> <span class="s1">'column'</span><span class="p">,</span> 
+            <span class="s1">'align-items'</span><span class="p">:</span> <span class="s1">'center'</span><span class="p">,</span> <span class="s1">'justify-content'</span><span class="p">:</span> <span class="s1">'center'</span><span class="p">,</span> 
+            <span class="s1">'height'</span><span class="p">:</span> <span class="s1">'100vh'</span><span class="p">,</span> <span class="s1">'font-family'</span><span class="p">:</span> <span class="s1">'Arial, sans-serif'</span><span class="p">,</span>
+            <span class="s1">'background-color'</span><span class="p">:</span> <span class="s1">'#f0f2f5'</span>
+        <span class="p">}</span>
+    <span class="p">)</span> 
+
+<span class="c1"># 7. Add page</span>
+<span class="n">app</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="s2">"index"</span><span class="p">,</span> <span class="n">index</span><span class="p">(),</span> <span class="n">title</span><span class="o">=</span><span class="s2">"index"</span><span class="p">)</span>
+
+<span class="c1"># 8. Run app with preview</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">rTimeCompile</span><span class="p">()</span>
 </code></pre>
       </div>
       <ol start="7">

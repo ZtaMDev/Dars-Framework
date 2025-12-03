@@ -1,13 +1,4 @@
-# Installation Guide - Dars Framework(OUT DATED visit Dars framework documentation web page)
-
-## System Requirements
-
-### Minimum Requirements
-
-- **Python**: 3.8 or higher
-- **Operating System**: Windows, macOS, Linux
-- **RAM**: 512 MB minimum (2 GB recommended)
-- **Disk Space**: 100 MB for the framework
+# Installation Guide - Dars Framework
 
 ## Quick Installation
 
@@ -21,7 +12,7 @@ This will install Dars and all its dependencies automatically.
 
 ## CLI Usage
 
-- [Dars CLI](dars/docs/cli.md)
+- [Dars CLI](#dars-cli-reference)
 
 Once installed, the `dars` command will be available in your terminal. You can use it to:
 
@@ -84,6 +75,9 @@ text = Text(text="Hello Dars!", style={'font-size': '24px'}) # Use ' to escape q
 
 container.add_child(text)
 app.set_root(container)
+
+if __name__ == "__main__":
+    app.rTimeCompile()
 ```
 
 ### 2. Export the Application
@@ -100,21 +94,6 @@ dars export my_first_app.py --format html --output ./my_app
 dars preview ./my_app
 ```
 
-## Additional Resources
-
-### Documentation
-
-- [Main README](README.md)
-- [Quick Start Guide](dars/docs/getting_started.md)
-- [Components Documentation](dars/docs/components.md)
-- [Script System](dars/docs/scripts.md)
-- [Exporters Guide](dars/docs/exporters.md)
-
-### Examples
-
-- [Basic Examples](dars/templates/examples/basic/)
-- [Advanced Examples](dars/templates/examples/advanced/)
-- [Demo Application](dars/templates/examples/demo/)
 
 ### Useful Commands
 
@@ -145,4 +124,34 @@ Congratulations! Dars is ready to use.
 
 ---
 
-**Next Step:** [Quick Start Guide](dars/docs/getting_started.md)
+## Desktop (BETA)
+
+You can build native desktop apps from Dars projects. This capability is in **BETA** and is not recommended for production yet, but it is usable for testing.
+
+### Quickstart
+
+```bash
+# Scaffold or update a desktop-capable project
+dars init --type desktop
+# or
+dars init --update
+
+# Verify optional tooling (Node/Bun and packager)
+dars doctor --all --yes
+
+# Ensure your config sets the desktop format and target
+# dars.config.json
+{
+  "entry": "main.py",
+  "format": "desktop",
+  "outdir": "dist",
+  "targetPlatform": "auto"
+}
+
+# Build desktop artifacts
+dars build
+```
+
+Notes:
+- Desktop support is under active development; configuration keys and defaults may change.
+- Some platform targets (like macOS) require building on that OS for signing.
