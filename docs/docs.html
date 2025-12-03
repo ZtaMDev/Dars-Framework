@@ -1276,8 +1276,8 @@
      <a class="sidebar-link sidebar-level-2" href="#usewatch-state-monitoring" style="margin-left: 20px">
       useWatch() - State Monitoring
      </a>
-     <a class="sidebar-link sidebar-level-3" href="#usage" style="margin-left: 40px">
-      Usage
+     <a class="sidebar-link sidebar-level-3" href="#basic-usage" style="margin-left: 40px">
+      Basic Usage
      </a>
      <a class="sidebar-link sidebar-level-3" href="#syntax" style="margin-left: 40px">
       Syntax
@@ -12580,10 +12580,10 @@ def hello():
        <code>
         useWatch()
        </code>
-       hook allows you to monitor state changes and execute callbacks (side effects).
+       hook allows you to monitor state changes and execute callbacks (side effects). It supports watching single or multiple state properties and executing one or more callbacks.
       </p>
-      <h3 id="usage">
-       Usage
+      <h3 id="basic-usage-2">
+       Basic Usage
       </h3>
       <p>
        The recommended way to use
@@ -12602,7 +12602,7 @@ def hello():
       </p>
       <p>
        <strong>
-        Global Watchers (app.useWatch)
+        Single State Property
        </strong>
       </p>
       <div class="codehilite">
@@ -12613,6 +12613,42 @@ def hello():
 <span class="c1"># Logs to console whenever cart.count changes</span>
 <span class="n">app</span><span class="o">.</span><span class="n">useWatch</span><span class="p">(</span><span class="s2">"cart.count"</span><span class="p">,</span> <span class="n">log</span><span class="p">(</span><span class="s2">"Cart updated!"</span><span class="p">))</span>
 <span class="n">app</span><span class="o">.</span><span class="n">useWatch</span><span class="p">(</span><span class="s2">"cart.total"</span><span class="p">,</span> <span class="n">log</span><span class="p">(</span><span class="s2">"Total changed"</span><span class="p">))</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Multiple State Properties (Array Syntax)
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">productState</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"product"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Widget"</span><span class="p">,</span> <span class="n">price</span><span class="o">=</span><span class="mf">19.99</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="s2">""</span><span class="p">)</span>
+
+<span class="c1"># Watch multiple properties - callback executes when ANY of them change</span>
+<span class="n">app</span><span class="o">.</span><span class="n">useWatch</span><span class="p">(</span>
+    <span class="p">[</span><span class="s2">"product.name"</span><span class="p">,</span> <span class="s2">"product.price"</span><span class="p">],</span>
+    <span class="n">productState</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"Product: "</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">"product.name"</span><span class="p">)</span> <span class="o">+</span> <span class="s2">" - $"</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">"product.price"</span><span class="p">))</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Multiple Callbacks
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Execute multiple callbacks when state changes</span>
+<span class="n">app</span><span class="o">.</span><span class="n">useWatch</span><span class="p">(</span>
+    <span class="s2">"cart.total"</span><span class="p">,</span>
+    <span class="n">log</span><span class="p">(</span><span class="s2">"Total changed!"</span><span class="p">),</span>
+    <span class="n">alert</span><span class="p">(</span><span class="s2">"Cart updated"</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># Combine array syntax with multiple callbacks</span>
+<span class="n">app</span><span class="o">.</span><span class="n">useWatch</span><span class="p">(</span>
+    <span class="p">[</span><span class="s2">"product.name"</span><span class="p">,</span> <span class="s2">"product.price"</span><span class="p">],</span>
+    <span class="n">productState</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"Product: "</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">"product.name"</span><span class="p">)</span> <span class="o">+</span> <span class="s2">" - $"</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">"product.price"</span><span class="p">)),</span>
+    <span class="n">log</span><span class="p">(</span><span class="s2">"Product info updated"</span><span class="p">)</span>
+<span class="p">)</span>
 </code></pre>
       </div>
       <p>
@@ -12651,7 +12687,10 @@ def hello():
        Syntax
       </h3>
       <div class="codehilite">
-       <pre><span></span><code><span class="n">useWatch</span><span class="p">(</span><span class="n">state_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">callback</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">dScript</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">dScript</span><span class="p">,</span> <span class="n">WatchMarker</span><span class="p">]</span>
+       <pre><span></span><code><span class="n">useWatch</span><span class="p">(</span>
+    <span class="n">state_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> 
+    <span class="o">*</span><span class="n">callbacks</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">dScript</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">dScript</span><span class="p">,</span> <span class="n">WatchMarker</span><span class="p">]</span>
 </code></pre>
       </div>
       <p>
@@ -12662,16 +12701,22 @@ def hello():
        <code>
         state_path
        </code>
-       : Dot-notation path to state property (e.g.,
+       : State property path(s) to watch. Can be:
+    - Single path string (e.g.,
        <code>
         "user.name"
        </code>
        )
+    - List of paths (e.g.,
+       <code>
+        ["product.name", "product.price"]
+       </code>
+       )
 -
        <code>
-        callback
+        *callbacks
        </code>
-       : The script or function to execute when the state changes. Can be:
+       : One or more callbacks to execute when state changes. Each can be:
     -
        <code>
         dScript
@@ -12685,11 +12730,32 @@ def hello():
         alert("Update")
        </code>
        )
+    - State setter (e.g.,
+       <code>
+        productState.info.set(...)
+       </code>
+       )
     - Inline JavaScript string
     - Python callable returning a
        <code>
         dScript
        </code>
+      </p>
+      <p>
+       <strong>
+        Behavior:
+       </strong>
+       - When using an array of state paths, the callback(s) execute when
+       <strong>
+        any
+       </strong>
+       of the watched properties change
+- Multiple callbacks execute in the order they are provided
+- Callbacks can access current state values using
+       <code>
+        V()
+       </code>
+       helper
       </p>
       <hr/>
       <h2 id="pythonic-value-helpers">

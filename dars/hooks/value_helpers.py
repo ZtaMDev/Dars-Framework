@@ -71,20 +71,28 @@ class ValueRef:
         
         # Check if this is a state path or CSS selector
         if self._is_state_path():
-            # State path: extract from reactive element created by useDynamic
-            # useDynamic creates elements with data-dynamic="stateName.property"
+            # State path: extract from state registry via window.Dars.getState
+            parts = self.selector.split('.')
+            state_id = parts[0]
+            prop_name = parts[1]
+            
             js_code = f"""
 (async () => {{
     try {{
-        // Get value from reactive element (created by useDynamic)
-        const el = document.querySelector('[data-dynamic="{self.selector}"]');
-        if (!el) {{
-            console.warn('ValueRef: No reactive element found for state path: {self.selector}');
-            return '';
+        // Get value directly from state registry
+        let value = '';
+        if (window.Dars && window.Dars.getState) {{
+            const st = window.Dars.getState('{state_id}');
+            if (st && st.values && st.values['{prop_name}'] !== undefined) {{
+                value = st.values['{prop_name}'];
+            }}
         }}
         
-        // Get the text content (which is the current state value)
-        let value = el.textContent || '';
+        // Fallback to DOM if state not found (legacy support)
+        if (value === '') {{
+            const el = document.querySelector('[data-dynamic="{self.selector}"]');
+            if (el) value = el.textContent || '';
+        }}
         
         // Apply transformation if any
         {f'return {self._transform("value")};' if self._transform else 'return value;'}

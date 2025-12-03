@@ -1,4 +1,91 @@
+# Release Notes v1.6.1
+
+> **Side Effects System Enhancement - useWatch Arrays & Multiple Callbacks**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Enhanced useWatch Hook - Array Syntax & Multiple Callbacks
+
+The `useWatch` hook now supports watching multiple state properties simultaneously and executing multiple callbacks, enabling powerful reactive patterns and side effects.
+
+**Watch Multiple State Properties:**
+```python
+# Watch multiple properties - callback executes when ANY of them change
+app.useWatch(
+    ["product.name", "product.price"],
+    productState.info.set("Product: " + V("product.name") + " - $" + V("product.price"))
+)
+```
+
+**Multiple Callbacks:**
+```python
+# Execute multiple callbacks when state changes
+app.useWatch(
+    "cart.total",
+    log("Total changed!"),
+    alert("Cart updated")
+)
+
+# Combine array syntax with multiple callbacks
+app.useWatch(
+    ["product.name", "product.price"],
+    productState.info.set("Product: " + V("product.name") + " - $" + V("product.price")),
+    log("Product info updated")
+)
+```
+
+**Key Features:**
+- **Array Syntax**: Watch multiple state paths with a single watcher
+- **Multiple Callbacks**: Execute multiple side effects in sequence
+- **Reactive Composition**: Automatically sync derived state when source properties change
+- **Clean API**: Simple comma-separated syntax for callbacks
+
+### Bug Fixes
+
+#### Fixed Custom State Property Handling
+
+Resolved an issue where custom state properties (properties other than `text`, `html`, `style`, `attrs`) were not correctly triggering watchers when updated via `change()`.
+
+**What was fixed:**
+- Custom properties like `info`, `count`, `status` now correctly update in `st.values`
+- Watchers for custom properties now trigger reliably
+- State registry properly maintains current values for all properties
+
+**Example that now works correctly:**
+```python
+productState = State("product", name="Milk", price=100, info="")
+
+# This now correctly updates product.info when name or price changes
+app.useWatch(
+    ["product.name", "product.price"],
+    productState.info.set("Product: " + V("product.name") + " - $" + V("product.price"))
+)
+```
+
+#### Improved V() Helper State Access
+
+The `V()` helper now correctly retrieves current state values from the state registry instead of reading stale values from the DOM.
+
+**Previous Behavior:**
+- `V("product.name")` would read the displayed text from the DOM
+- This could lead to recursive string concatenation issues
+- Values might not reflect the actual state
+
+**Fixed Behavior:**
+- `V("product.name")` now reads directly from `window.Dars.getState('product').values['name']`
+- Always returns the current, raw state value
+- Falls back to DOM reading for legacy support
+
+---
+
 # Release Notes v1.6.0
+
 
 > **Critical Bug Fixes & State Management Improvements**
 

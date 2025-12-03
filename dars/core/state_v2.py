@@ -141,9 +141,10 @@ class ReactiveProperty:
             elif k == 'classes' and isinstance(v, dict):
                 parts.append(f"classes: {json.dumps(v)}")
             else:
-                # Generic attribute
+                # For custom state properties, add directly to payload (not in attrs)
+                # This allows state properties like 'info', 'count', etc. to work correctly
                 try:
-                    parts.append(f"attrs: {{{json.dumps(k)}: {to_js_value(v)}}}")
+                    parts.append(f"{json.dumps(k)}: {to_js_value(v)}")
                 except (TypeError, ValueError):
                     # Skip non-JSON-serializable values
                     continue

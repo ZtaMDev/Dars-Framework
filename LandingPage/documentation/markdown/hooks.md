@@ -242,13 +242,13 @@ useDynamic(state_path: str) -> DynamicBinding
 
 ## useWatch() - State Monitoring
 
-The `useWatch()` hook allows you to monitor state changes and execute callbacks (side effects).
+The `useWatch()` hook allows you to monitor state changes and execute callbacks (side effects). It supports watching single or multiple state properties and executing one or more callbacks.
 
-### Usage
+### Basic Usage
 
 The recommended way to use `useWatch` is via the `app.useWatch()` or `page.useWatch()` methods:
 
-**Global Watchers (app.useWatch)**
+**Single State Property**
 ```python
 from dars.all import *
 
@@ -257,6 +257,34 @@ cartState = State("cart", count=0, total=0.0)
 # Logs to console whenever cart.count changes
 app.useWatch("cart.count", log("Cart updated!"))
 app.useWatch("cart.total", log("Total changed"))
+```
+
+**Multiple State Properties (Array Syntax)**
+```python
+productState = State("product", name="Widget", price=19.99, info="")
+
+# Watch multiple properties - callback executes when ANY of them change
+app.useWatch(
+    ["product.name", "product.price"],
+    productState.info.set("Product: " + V("product.name") + " - $" + V("product.price"))
+)
+```
+
+**Multiple Callbacks**
+```python
+# Execute multiple callbacks when state changes
+app.useWatch(
+    "cart.total",
+    log("Total changed!"),
+    alert("Cart updated")
+)
+
+# Combine array syntax with multiple callbacks
+app.useWatch(
+    ["product.name", "product.price"],
+    productState.info.set("Product: " + V("product.name") + " - $" + V("product.price")),
+    log("Product info updated")
+)
 ```
 
 **Page-Specific Watchers (page.useWatch)**
@@ -284,15 +312,26 @@ app.add_script(useWatch("state.prop", log("Changed!")))
 ### Syntax
 
 ```python
-useWatch(state_path: str, callback: Union[dScript, str, Callable]) -> Union[dScript, WatchMarker]
+useWatch(
+    state_path: Union[str, List[str]], 
+    *callbacks: Union[dScript, str, Callable]
+) -> Union[dScript, WatchMarker]
 ```
 
 **Parameters:**
-- `state_path`: Dot-notation path to state property (e.g., `"user.name"`)
-- `callback`: The script or function to execute when the state changes. Can be:
+- `state_path`: State property path(s) to watch. Can be:
+    - Single path string (e.g., `"user.name"`)
+    - List of paths (e.g., `["product.name", "product.price"]`)
+- `*callbacks`: One or more callbacks to execute when state changes. Each can be:
     - `dScript` object (e.g., `log("Changed")`, `alert("Update")`)
+    - State setter (e.g., `productState.info.set(...)`)
     - Inline JavaScript string
     - Python callable returning a `dScript`
+
+**Behavior:**
+- When using an array of state paths, the callback(s) execute when **any** of the watched properties change
+- Multiple callbacks execute in the order they are provided
+- Callbacks can access current state values using `V()` helper
 
 ---
 

@@ -626,15 +626,30 @@ function change(opt){{
                   }}
               }}
           }}
-      }} else {{
-          // Element not found, but we should still notify watchers!
-          if (opt.hasOwnProperty('text')) notifyWatchers('text', opt.text);
-          if (opt.hasOwnProperty('html')) notifyWatchers('html', opt.html);
-          if (opt.style) notifyWatchers('style', opt.style);
-          if (opt.attrs) {{
-              for (const k in opt.attrs) notifyWatchers(k, opt.attrs[k]);
-          }}
-      }}
+           
+           // Handle custom state properties (notify watchers for any property not in known list)
+           const knownProps = ['id', 'dynamic', 'text', 'html', 'style', 'attrs', 'classes', 'figure', 'useCustomRender'];
+           for (const k in opt) {{
+               if (!knownProps.includes(k) && !k.startsWith('on_')) {{
+                   notifyWatchers(k, opt[k]);
+               }}
+           }}
+       }} else {{
+           // Element not found, but we should still notify watchers!
+           if (opt.hasOwnProperty('text')) notifyWatchers('text', opt.text);
+           if (opt.hasOwnProperty('html')) notifyWatchers('html', opt.html);
+           if (opt.style) notifyWatchers('style', opt.style);
+           if (opt.attrs) {{
+               for (const k in opt.attrs) notifyWatchers(k, opt.attrs[k]);
+           }}
+           // Also notify for custom properties
+           const knownProps = ['id', 'dynamic', 'text', 'html', 'style', 'attrs', 'classes', 'figure', 'useCustomRender'];
+           for (const k in opt) {{
+               if (!knownProps.includes(k) && !k.startsWith('on_')) {{
+                   notifyWatchers(k, opt[k]);
+               }}
+           }}
+       }}
       
       return;
   }}
