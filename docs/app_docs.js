@@ -800,7 +800,9 @@ fetch_btn = Button(
 )
 
 app.set_root(Container(user_display, fetch_btn))
-app.rTimeCompile()
+
+if __name__ == "__main__":
+    app.rTimeCompile()
 \`\`\`
 
 ---
@@ -936,37 +938,6 @@ callback=(
     .then(name_state.text.set(useData('userData').name))
     .then(email_state.text.set(useData('userData').email))
     .then(status_state.text.set("\u2705 Loaded!"))
-)
-\`\`\`
-
-### Before vs After
-
-**Before (Raw JavaScript):**
-
-\`\`\`python
-callback=dScript("""
-    const user = window.userData;
-    if (user) {
-        window.Dars.change({
-            id: 'user-name',
-            dynamic: true,
-            text: user.name || 'Unknown'
-        });
-        window.Dars.change({
-            id: 'user-email',
-            dynamic: true,
-            text: user.email || 'N/A'
-        });
-    }
-""")
-\`\`\`
-
-**After (Pure Python):**
-
-\`\`\`python
-callback=(
-    name_state.text.set(useData('userData').name)
-    .then(email_state.text.set(useData('userData').email))
 )
 \`\`\`
 
@@ -1115,26 +1086,7 @@ delete_btn.on_click = deleteComp("component-id")
 For more examples, see the test files in \`tst/proj/test_http_demo.py\` and \`tst/proj/test_http_utils.py\`.
 `},{type:"T9",id:"markdown_118",key:"0/2/0/7",text:`# State Management in Dars
 
-Dars Framework features **two powerful state management systems**, each designed for different use cases:
-
-- **State V2** - Modern, dynamic state management for simple reactive updates
-- **dState & cState** - Indexed state system for complex state machines and workflows
-
-##Choose the Right System
-
-| Feature | State V2 | dState/cState |
-|---------|----------|---------------|
-| **API Style** | Clean Pythonic | Verbose but explicit |
-| **Setup** | Minimal | Requires registration |
-| **State Tracking** | Dynamic | Indexed (0, 1, 2...) |
-| **Auto Operations** | Built-in | Manual with Mod |
-| **Event Updates** | Supported | Supported |
-| **State Machines** | Limited |  Full support |
-| **Cross-State Calls** | No |  Mod.call() |
-| **Immutable Default** | No |  State 0 |
-| **Best For** | Counters, timers, simple updates | Workflows, toggles, complex UI transitions |
-
----
+Dars Framework features **powerful state management systems**, designed for different use cases:
 
 # State V2 - Dynamic State Management
 
@@ -1397,246 +1349,10 @@ reset_btn = Button("Reset",
 
 page = Page(Container(timer_display, status, start_btn, stop_btn, reset_btn))
 app.add_page("index", page, index=True)
-app.rTimeCompile()
+
+if __name__ == "__main__":
+    app.rTimeCompile()
 \`\`\`
-
-### When to Use State V2
-
-** Good for:**
-- Simple counters and timers
-- Dynamic text/style updates
-- Auto-incrementing values
-- Quick prototypes
-- Single-component state
-
-** Not ideal for:**
-- Complex state machines
-- Multi-step workflows
-- State history/undo
-- Cross-component state coordination
-
-For these cases, use **dState & cState** instead.
-
----
-
-# dState & cState - Indexed State Management
-
-Powerful indexed state system for complex UI transitions and state machines.
-
-## Quick Start with dState
-
-\`\`\`python
-from dars.all import *
-from dars.core.state import dState, Mod
-
-app = App(title="State Demo")
-label = Text("0", id="Counter")
-st = dState("counter", component=label, states=[0,1,2,3])
-
-# Rules on state entry
-st.cState(1, mods=[Mod.inc(label, prop='text', by=1)])
-st.cState(2, mods=[Mod.dec(label, prop='text', by=1)])
-st.cState(3, mods=[Mod.toggle_class(label, name='highlight', on=None)])
-
-# Buttons to navigate
-next_btn = Button("Next", on_click=st.state(goto='+1'))
-prev_btn = Button("Prev", on_click=st.state(goto='-1'))
-\`\`\`
-
-## Mod Operations
-
-- \`inc/dec(target, prop='text', by=1)\`: increments or decrements a numeric value (textContent by default).
-- \`set(target, **attrs)\`: sets attributes; \`text\` sets textContent; \`html\` sets innerHTML; other keys map to element attributes.
-- \`toggle_class(target, name, on=None)\`: toggles a class; when \`on\` is True/False, forces add/remove.
-- \`append_text / prepend_text\`: concatenates to textContent.
-
-## Cross-State Calls with Mod.call
-
-Use \`Mod.call(target, state=None, goto=None)\` inside a \`cState\` to trigger another \`dState\`.
-
-\`target\` can be the \`DarsState\` instance or its name (string). Example:
-
-\`\`\`python
-txt = dState("txt", id="txt1", states=[0,1])
-btn = dState("btn", id="btn1", states=[0,1])
-
-txt.cState(1, mods=[
-    Mod.set("txt1", text="Bye"),
-    Mod.call(btn, state=1)  # or Mod.call("btn", state=1)
-])
-\`\`\`
-
-## Immutable Default State (Index 0)
-
-- State \`0\` is the component's default configuration (as instantiated) and is **immutable**.
-- Authoring-time: \`cState(0, ...)\` is forbidden and raises an error.
-- Runtime: switching to state \`0\` restores the initial DOM snapshot (attributes except \`id\`, plus innerHTML) and ignores any rules for state \`0\`.
-- This guarantees that returning to \`0\` reverts the UI to its original state.
-
-## Mod.set with Multiple Attributes
-
-You can set multiple properties in one call:
-
-\`\`\`python
-Mod.set("btn1", text="Don't click it", class_name="warn")
-\`\`\`
-
-Event attributes accept a single script or an array of scripts (executed sequentially). Valid values are:
-- InlineScript, FileScript, dScript, or plain JS strings
-
-\`\`\`python
-Mod.set("btn1", on_click=[txt.state(0), dScript(code="console.log('clicked')")])
-\`\`\`
-
-The runtime ensures only one dynamic listener per event is active at a time and cleans it up when returning to state \`0\`.
-
-## Full HTML Replacement (Custom Components)
-
-If you need full HTML replacement on state change:
-\`\`\`python
-swap_btn = Button(
-    "Swap",
-    on_click=st.state(2, cComp=True, render=label.mod(text="SWAPPED"))
-)
-\`\`\`
-
-\`render\` accepts:
-- A DeferredAttr produced by \`component.mod(...)\` or \`component.attr(..., defer=True)\`.
-- A Component instance (will be rendered to HTML at event time).
-- A raw HTML string.
-
-## State Navigation Patterns
-
-There are two main ways to trigger state changes in Dars:
-
-### 1. Using \`state.state(idx)\` - Recommended
-
-The \`state.state(idx)\` method is the standard way to navigate to a specific state when you have a reference to the dState object:
-
-\`\`\`python
-from dars.all import *
-from dars.core.state import dState
-
-# Create a toggle button
-btn = Button("Off", id="ToggleBtn")
-
-# Define state with 2 options
-toggle = dState("toggle", component=btn, states=[0, 1])
-
-# Configure "On" state
-toggle.cState(1, mods=[
-    Mod.set(btn, 
-        text="On",
-        style={'background-color': 'green'},
-        on_click=toggle.state(0)  # Use state.state() to go back
-    )
-])
-
-# Initial click goes to state 1
-btn.on_click = toggle.state(1)
-\`\`\`
-
-**Advantages:**
-- Clean and straightforward syntax
-- Compile-time safety (if state object doesn't exist, Python will error)
-- No runtime lookups needed
-- Works in all contexts
-
-### 2. Multi-State Cycles
-
-\`\`\`python
-# Create a button that cycles through 4 states
-cycle_btn = Button("State 0", id="StatusBtn")
-status = dState("status", component=cycle_btn, states=[0, 1, 2, 3])
-
-# Define each state to navigate to the next
-status.cState(1, mods=[
-    Mod.set(cycle_btn, text="State 1 - Loading...", on_click=status.state(2))
-])
-status.cState(2, mods=[
-    Mod.set(cycle_btn, text="State 2 - Processing...", on_click=status.state(3))
-])
-status.cState(3, mods=[
-    Mod.set(cycle_btn, text="State 3 - Complete!", on_click=status.state(0))
-])
-
-# Start the cycle
-cycle_btn.on_click = status.state(1)
-\`\`\`
-
-## Complete Interactive Example
-
-\`\`\`python
-from dars.all import *
-from dars.core.state import dState
-
-app = App(title="Status Indicator")
-
-# Create button and status text
-status_btn = Button("Idle", id="StatusBtn", style={
-    'padding': '12px 24px',
-    'background': '#gray'
-})
-status_text = Text("Ready", id="StatusText")
-
-# Define 4-state workflow
-workflow = dState("workflow", component=status_btn, states=[0, 1, 2, 3])
-
-# State 1: Loading
-workflow.cState(1, mods=[
-    Mod.set(status_btn, 
-        text="Loading...",
-        style={'background': '#blue'},
-        on_click=workflow.state(2)
-    ),
-    Mod.set(status_text, text="Fetching data...")
-])
-
-# State 2: Processing
-workflow.cState(2, mods=[
-    Mod.set(status_btn,
-        text="Processing...",
-        style={'background': '#orange'},
-        on_click=workflow.state(3)
-    ),
-    Mod.set(status_text, text="Analyzing results...")
-])
-
-# State 3: Complete
-workflow.cState(3, mods=[
-    Mod.set(status_btn,
-        text="Complete!",
-        style={'background': '#green'},
-        on_click=workflow.state(0)  # Back to idle
-    ),
-    Mod.set(status_text, text="All done!")
-])
-
-# Start workflow on click
-status_btn.on_click = workflow.state(1)
-
-index = Page(Container(status_btn, status_text))
-app.add_page("index", index, index=True)
-\`\`\`
-
-### When to Use dState/cState
-
-**Good for:**
-- Complex state machines
-- Multi-step workflows (wizards, forms)
-- UI toggles with multiple states
-- State history and reversion
-- Cross-component state coordination
-
-**Overkill for:**
-- Simple counters
-- Single property updates
-- Quick prototypes
-- Auto operations
-
-For these cases, **State V2** is simpler.
-
----
 
 ## Dynamic State Updates & \`this()\`
 
@@ -6440,4 +6156,4 @@ dars init  -L
 - Applying minification (vite): Vite/esbuild minification is active (JS/CSS) and default is disabled.
 - Applying minification (default + vite): both are active.
 
-For more, see the [Getting Started](#getting-started-with-dars) guide and the main documentation index.`}]},{type:"T2",id:"footer-section",key:"0/2/1",children:[{type:"T2",id:"container_128",key:"0/2/1/0",children:[{type:"T2",id:"container_129",key:"0/2/1/0/0",children:[{type:"T2",id:"container_130",key:"0/2/1/0/0/0",children:[{type:"T4",id:"image_131",key:"0/2/1/0/0/0/0"},{type:"T2",id:"container_132",key:"0/2/1/0/0/0/1",children:[{type:"T5",id:"text_133",key:"0/2/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_134",key:"0/2/1/0/0/1",children:[{type:"T2",id:"container_135",key:"0/2/1/0/0/1/0",children:[{type:"T5",id:"text_136",key:"0/2/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_137",key:"0/2/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_138",key:"0/2/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_139",key:"0/2/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_140",key:"0/2/1/0/0/1/1",children:[{type:"T5",id:"text_141",key:"0/2/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_142",key:"0/2/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_143",key:"0/2/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_144",key:"0/2/1/0/0/1/2",children:[{type:"T5",id:"text_145",key:"0/2/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_146",key:"0/2/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_147",key:"0/2/1/0/0/2",children:[{type:"T2",id:"container_148",key:"0/2/1/0/0/2/0",children:[{type:"T5",id:"text_149",key:"0/2/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_150",key:"0/2/1/0/0/2/1",children:[{type:"T5",id:"text_151",key:"0/2/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_152",key:"0/2/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_153",key:"0/2/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_154",key:"0/2/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]}]},function(){const c=new Map;let l=null,p=null;function u(){}function S(){}function _(n,t){if(!n)return;t(n);const e=n.children||[];for(let o=0;o<e.length;o++)_(e[o],t)}function w(n,t){if(!(!n||!t))for(const[e,o]of Object.entries(t))try{o===!1||o===null||typeof o>"u"?n.removeAttribute(e):n.setAttribute(e,String(o))}catch{}}function E(n,t={},e={}){for(const o in t)if(!(o in e))try{n.removeAttribute(o)}catch{}for(const o in e){const i=e[o];try{i===!1||i===null||typeof i>"u"?n.removeAttribute(o):n.setAttribute(o,String(i))}catch{}}}function I(n,t={},e={}){for(const o in t)if(!(o in e))try{n.style.removeProperty(o.replace(/_/g,"-"))}catch{}for(const o in e){const i=e[o];try{n.style.setProperty(o.replace(/_/g,"-"),String(i))}catch{}}}function M(n,t){(t||document).addEventListener(n,function(e){let o=e.target;const i=t||document;for(;o&&o!==i;){const m=o.id;if(m&&c.has(m)){const y=c.get(m);if(o&&o.__darsEv&&o.__darsEv[n])return;let d=y[n];if(!d&&(n==="keydown"||n==="keyup"||n==="keypress")){const a=e.key||e.code;if(a){const r=n+"."+a;d=y[r]}}if(typeof d=="function"){try{d.call(o,e)}catch(a){console.error("[Dars] handler error",a)}return}}o=o.parentNode}},!0)}function k(n,t){return n&&t?n.type!==t.type:n!==t}function v(n){if(!n)return;const t=n.children||[];for(let e=0;e<t.length;e++)v(t[e]);if(n.id&&c.delete(n.id),n.id){const e=document.getElementById(n.id);if(e&&e.parentNode)try{e.parentNode.removeChild(e)}catch{}}}function x(n,t){if(!t||!t.id)return{ok:!1,reason:"missing-new"};let e=document.getElementById(t.id);if(!e){const a=n&&n.id?document.getElementById(n.id):null;if(a)try{a.id=t.id,e=a}catch{}}if(!e)return{ok:!1,reason:"missing-el"};if(k(n,t))return{ok:!1,reason:"type-changed"};const o=!!t.isIsland;if(!o&&t.class&&(e.className=t.class),o||E(e,n&&n.props||{},t.props||{}),o||I(e,n&&n.style||{},t.style||{}),!o&&Object.prototype.hasOwnProperty.call(t,"text")&&e.textContent!==String(t.text||"")&&(e.textContent=String(t.text||"")),o)return{ok:!0};const i=n&&n.children?n.children:[],m=t.children?t.children:[],y=new Map;for(let a=0;a<i.length;a++){const r=i[a]&&(i[a].id||i[a].key)||null;r&&y.set(String(r),i[a])}const d=new Set;for(let a=0;a<m.length;a++){const r=m[a],h=r&&(r.id||r.key)||null;if(!h)if(a<i.length){const s=x(i[a],r);if(!s.ok)return s;d.add(i[a]);continue}else return{ok:!1,reason:"children-added"};const b=y.get(String(h));if(b){const s=x(b,r);if(!s.ok)return s;d.add(b)}else{if(a<i.length){const f=i[a];if(!k(f,r)){const g=x(f,r);if(!g.ok)return g;d.add(f);continue}}const s=createSubtree(r);if(s){const f=a<i.length?i[a]:null;if(f&&f.id){const g=document.getElementById(f.id);g&&g.parentNode?g.parentNode.insertBefore(s,g):e.appendChild(s)}else e.appendChild(s);continue}return{ok:!1,reason:"children-added"}}}for(let a=0;a<i.length;a++){const r=i[a];d.has(r)||v(r)}return{ok:!0}}function L(n){typeof requestAnimationFrame=="function"?requestAnimationFrame(n):setTimeout(n,16)}function O(n){const t=l;if(!t){l=n;try{window.__DARS_VDOM__=n}catch{}return}L(()=>{const e=x(t,n);if(!e.ok){console.warn("[Dars] Structural change detected (",e.reason,"), reloading...");try{location.reload()}catch{}return}l=n;try{window.__DARS_VDOM__=n}catch{}})}function F(n){l=n;try{window.__DARS_VDOM__=n}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(e=>M(e,document))}function R(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const n=window.__DARS_VERSION_URL||"version.txt";let t=null,e=!1,o=0;const i=10;let m=!1;function y(a,r,h,b){try{const s=new XMLHttpRequest;b&&(s.responseType=b),s.open("GET",a,!0),s.timeout=5e3,s.onreadystatechange=function(){s.readyState===4&&(s.status>=200&&s.status<300?r(s.response):h())},s.onerror=h,s.ontimeout=h,s.setRequestHeader("Cache-Control","no-store"),s.send()}catch{h()}}function d(){m||y(n,function(a){let r=(a||"").toString().trim();if(!r||r==="0"){if(o+=1,o>=i){console.warn("[Dars] version file not found after",i,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(d,600);return}if(o=0,e=!1,p||(p=r),r&&r!==p){p=r;try{location.reload()}catch{}return}t=setTimeout(d,600)},function(){if(o+=1,o>=i){console.warn("[Dars] version file not reachable after",i,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(d,600)},"text")}return d(),()=>{try{m=!0,t&&clearTimeout(t),window.__DARS_STOP_HOTRELOAD=null}catch{}}}document.addEventListener("DOMContentLoaded",function(){if(window.__DARS_VDOM__?F(window.__DARS_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=R()}catch{}}})}(),window.addEventListener("scroll",()=>{const c=document.getElementById("dars-navbar");window.scrollY>20?c.classList.add("scrolled"):c.classList.remove("scrolled");const l=document.getElementById("features-section");if(l&&!l.classList.contains("visible")){const p=l.getBoundingClientRect().top,u=window.innerHeight/1.5;p<u&&(l.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((_,w)=>{setTimeout(()=>{_.style.opacity="1",_.style.transform="translateY(0)"},w*100)}))}});const T=document.getElementById("hero-logo"),C=document.getElementById("hero-title"),D=document.getElementById("hero-description"),P=document.getElementById("pip-command"),A=document.getElementById("get-started-btn"),B=document.getElementById("scroll-text");T&&setTimeout(()=>T.classList.add("show"),5),C&&setTimeout(()=>C.classList.add("show"),350),D&&setTimeout(()=>D.classList.add("show"),650),P&&setTimeout(()=>P.classList.add("show"),950),A&&setTimeout(()=>A.classList.add("show"),1250),B&&setTimeout(()=>B.classList.add("show"),1500),document.addEventListener("DOMContentLoaded",function(){const c=document.getElementById("hamburger-btn"),l=document.getElementById("mobile-menu"),p=document.body;c&&l&&(c.addEventListener("click",function(u){u.stopPropagation(),l.style.display==="flex"?(l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open")):(l.style.display="flex",c.classList.add("menu-open"),p.classList.add("menu-open"))}),l.querySelectorAll("a").forEach(u=>{u.addEventListener("click",function(){l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open")})}),document.addEventListener("click",function(u){!c.contains(u.target)&&!l.contains(u.target)&&(l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open"))}),document.addEventListener("keydown",function(u){u.key==="Escape"&&l.style.display==="flex"&&(l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open"))}))});
+For more, see the [Getting Started](#getting-started-with-dars) guide and the main documentation index.`}]},{type:"T2",id:"footer-section",key:"0/2/1",children:[{type:"T2",id:"container_128",key:"0/2/1/0",children:[{type:"T2",id:"container_129",key:"0/2/1/0/0",children:[{type:"T2",id:"container_130",key:"0/2/1/0/0/0",children:[{type:"T4",id:"image_131",key:"0/2/1/0/0/0/0"},{type:"T2",id:"container_132",key:"0/2/1/0/0/0/1",children:[{type:"T5",id:"text_133",key:"0/2/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_134",key:"0/2/1/0/0/1",children:[{type:"T2",id:"container_135",key:"0/2/1/0/0/1/0",children:[{type:"T5",id:"text_136",key:"0/2/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_137",key:"0/2/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_138",key:"0/2/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_139",key:"0/2/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_140",key:"0/2/1/0/0/1/1",children:[{type:"T5",id:"text_141",key:"0/2/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_142",key:"0/2/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_143",key:"0/2/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_144",key:"0/2/1/0/0/1/2",children:[{type:"T5",id:"text_145",key:"0/2/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_146",key:"0/2/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_147",key:"0/2/1/0/0/2",children:[{type:"T2",id:"container_148",key:"0/2/1/0/0/2/0",children:[{type:"T5",id:"text_149",key:"0/2/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_150",key:"0/2/1/0/0/2/1",children:[{type:"T5",id:"text_151",key:"0/2/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_152",key:"0/2/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_153",key:"0/2/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_154",key:"0/2/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]}]},function(){const c=new Map;let l=null,p=null;function u(){}function w(){}function _(n,t){if(!n)return;t(n);const e=n.children||[];for(let o=0;o<e.length;o++)_(e[o],t)}function S(n,t){if(!(!n||!t))for(const[e,o]of Object.entries(t))try{o===!1||o===null||typeof o>"u"?n.removeAttribute(e):n.setAttribute(e,String(o))}catch{}}function B(n,t={},e={}){for(const o in t)if(!(o in e))try{n.removeAttribute(o)}catch{}for(const o in e){const i=e[o];try{i===!1||i===null||typeof i>"u"?n.removeAttribute(o):n.setAttribute(o,String(i))}catch{}}}function I(n,t={},e={}){for(const o in t)if(!(o in e))try{n.style.removeProperty(o.replace(/_/g,"-"))}catch{}for(const o in e){const i=e[o];try{n.style.setProperty(o.replace(/_/g,"-"),String(i))}catch{}}}function M(n,t){(t||document).addEventListener(n,function(e){let o=e.target;const i=t||document;for(;o&&o!==i;){const m=o.id;if(m&&c.has(m)){const y=c.get(m);if(o&&o.__darsEv&&o.__darsEv[n])return;let d=y[n];if(!d&&(n==="keydown"||n==="keyup"||n==="keypress")){const a=e.key||e.code;if(a){const r=n+"."+a;d=y[r]}}if(typeof d=="function"){try{d.call(o,e)}catch(a){console.error("[Dars] handler error",a)}return}}o=o.parentNode}},!0)}function k(n,t){return n&&t?n.type!==t.type:n!==t}function v(n){if(!n)return;const t=n.children||[];for(let e=0;e<t.length;e++)v(t[e]);if(n.id&&c.delete(n.id),n.id){const e=document.getElementById(n.id);if(e&&e.parentNode)try{e.parentNode.removeChild(e)}catch{}}}function x(n,t){if(!t||!t.id)return{ok:!1,reason:"missing-new"};let e=document.getElementById(t.id);if(!e){const a=n&&n.id?document.getElementById(n.id):null;if(a)try{a.id=t.id,e=a}catch{}}if(!e)return{ok:!1,reason:"missing-el"};if(k(n,t))return{ok:!1,reason:"type-changed"};const o=!!t.isIsland;if(!o&&t.class&&(e.className=t.class),o||B(e,n&&n.props||{},t.props||{}),o||I(e,n&&n.style||{},t.style||{}),!o&&Object.prototype.hasOwnProperty.call(t,"text")&&e.textContent!==String(t.text||"")&&(e.textContent=String(t.text||"")),o)return{ok:!0};const i=n&&n.children?n.children:[],m=t.children?t.children:[],y=new Map;for(let a=0;a<i.length;a++){const r=i[a]&&(i[a].id||i[a].key)||null;r&&y.set(String(r),i[a])}const d=new Set;for(let a=0;a<m.length;a++){const r=m[a],h=r&&(r.id||r.key)||null;if(!h)if(a<i.length){const s=x(i[a],r);if(!s.ok)return s;d.add(i[a]);continue}else return{ok:!1,reason:"children-added"};const b=y.get(String(h));if(b){const s=x(b,r);if(!s.ok)return s;d.add(b)}else{if(a<i.length){const f=i[a];if(!k(f,r)){const g=x(f,r);if(!g.ok)return g;d.add(f);continue}}const s=createSubtree(r);if(s){const f=a<i.length?i[a]:null;if(f&&f.id){const g=document.getElementById(f.id);g&&g.parentNode?g.parentNode.insertBefore(s,g):e.appendChild(s)}else e.appendChild(s);continue}return{ok:!1,reason:"children-added"}}}for(let a=0;a<i.length;a++){const r=i[a];d.has(r)||v(r)}return{ok:!0}}function L(n){typeof requestAnimationFrame=="function"?requestAnimationFrame(n):setTimeout(n,16)}function O(n){const t=l;if(!t){l=n;try{window.__DARS_VDOM__=n}catch{}return}L(()=>{const e=x(t,n);if(!e.ok){console.warn("[Dars] Structural change detected (",e.reason,"), reloading...");try{location.reload()}catch{}return}l=n;try{window.__DARS_VDOM__=n}catch{}})}function F(n){l=n;try{window.__DARS_VDOM__=n}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(e=>M(e,document))}function R(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const n=window.__DARS_VERSION_URL||"version.txt";let t=null,e=!1,o=0;const i=10;let m=!1;function y(a,r,h,b){try{const s=new XMLHttpRequest;b&&(s.responseType=b),s.open("GET",a,!0),s.timeout=5e3,s.onreadystatechange=function(){s.readyState===4&&(s.status>=200&&s.status<300?r(s.response):h())},s.onerror=h,s.ontimeout=h,s.setRequestHeader("Cache-Control","no-store"),s.send()}catch{h()}}function d(){m||y(n,function(a){let r=(a||"").toString().trim();if(!r||r==="0"){if(o+=1,o>=i){console.warn("[Dars] version file not found after",i,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(d,600);return}if(o=0,e=!1,p||(p=r),r&&r!==p){p=r;try{location.reload()}catch{}return}t=setTimeout(d,600)},function(){if(o+=1,o>=i){console.warn("[Dars] version file not reachable after",i,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(d,600)},"text")}return d(),()=>{try{m=!0,t&&clearTimeout(t),window.__DARS_STOP_HOTRELOAD=null}catch{}}}document.addEventListener("DOMContentLoaded",function(){if(window.__DARS_VDOM__?F(window.__DARS_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=R()}catch{}}})}(),window.addEventListener("scroll",()=>{const c=document.getElementById("dars-navbar");window.scrollY>20?c.classList.add("scrolled"):c.classList.remove("scrolled");const l=document.getElementById("features-section");if(l&&!l.classList.contains("visible")){const p=l.getBoundingClientRect().top,u=window.innerHeight/1.5;p<u&&(l.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((_,S)=>{setTimeout(()=>{_.style.opacity="1",_.style.transform="translateY(0)"},S*100)}))}});const T=document.getElementById("hero-logo"),C=document.getElementById("hero-title"),D=document.getElementById("hero-description"),P=document.getElementById("pip-command"),A=document.getElementById("get-started-btn"),E=document.getElementById("scroll-text");T&&setTimeout(()=>T.classList.add("show"),5),C&&setTimeout(()=>C.classList.add("show"),350),D&&setTimeout(()=>D.classList.add("show"),650),P&&setTimeout(()=>P.classList.add("show"),950),A&&setTimeout(()=>A.classList.add("show"),1250),E&&setTimeout(()=>E.classList.add("show"),1500),document.addEventListener("DOMContentLoaded",function(){const c=document.getElementById("hamburger-btn"),l=document.getElementById("mobile-menu"),p=document.body;c&&l&&(c.addEventListener("click",function(u){u.stopPropagation(),l.style.display==="flex"?(l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open")):(l.style.display="flex",c.classList.add("menu-open"),p.classList.add("menu-open"))}),l.querySelectorAll("a").forEach(u=>{u.addEventListener("click",function(){l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open")})}),document.addEventListener("click",function(u){!c.contains(u.target)&&!l.contains(u.target)&&(l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open"))}),document.addEventListener("keydown",function(u){u.key==="Escape"&&l.style.display==="flex"&&(l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open"))}))});
