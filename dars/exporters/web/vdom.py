@@ -194,7 +194,67 @@ class VDomBuilder:
             for cand in ('text', 'content', 'value', 'label'):
                 if hasattr(component, cand):
                     v = getattr(component, cand)
+                    
+                    # Handle ValueMarker objects directly
+                    if hasattr(v, 'marker_id') and v.marker_id.startswith('__DARS_VALUE_'):
+                        try:
+                            from dars.hooks.use_value import get_value_registry
+                            registry = get_value_registry()
+                            if v.marker_id in registry:
+                                val = v.get_initial_value()
+                                return str(val)
+                        except Exception:
+                            pass
+                    
+                    # Handle DynamicBinding objects directly
+                    if hasattr(v, 'state_path') and hasattr(v, 'get_initial_value'):
+                        try:
+                            val = v.get_initial_value()
+                            if val is not None:
+                                return str(val)
+                        except Exception:
+                            pass
+
                     if isinstance(v, (str, int, float)):
+                        # Check if it's a DynamicBinding marker
+                        if isinstance(v, str) and v.startswith('__DARS_DYNAMIC_'):
+                            # Resolve the marker to the initial state value
+                            try:
+                                from dars.hooks.use_dynamic import get_bindings_registry
+                                from dars.core.state_v2 import STATE_V2_REGISTRY
+                                import re
+                                
+                                registry = get_bindings_registry()
+                                marker_pattern = r'__DARS_DYNAMIC_\d+_\d+__'
+                                match = re.match(marker_pattern, v)
+                                
+                                if match and v in registry:
+                                    state_path = registry[v]
+                                    parts = state_path.split('.')
+                                    if len(parts) >= 2:
+                                        state_id = parts[0]
+                                        prop_name = parts[1]
+                                        # Find state by ID (search in reverse to get the latest instance)
+                                        state = next((s for s in reversed(STATE_V2_REGISTRY) if s.component.id == state_id), None)
+                                        if state:
+                                            prop = getattr(state, prop_name, None)
+                                            if prop:
+                                                return str(prop.value)
+                            except Exception:
+                                pass
+                        
+                        # Check if it's a ValueMarker (useValue)
+                        if isinstance(v, str) and v.startswith('__DARS_VALUE_'):
+                            try:
+                                from dars.hooks.use_value import get_value_registry
+                                registry = get_value_registry()
+                                if v in registry:
+                                    marker = registry[v]
+                                    val = marker.get_initial_value()
+                                    return str(val)
+                            except Exception:
+                                pass
+                                
                         return str(v)
         except Exception:
             pass

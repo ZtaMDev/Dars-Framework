@@ -56,8 +56,8 @@ class DynamicBinding:
             state_id = parts[0]
             prop_name = parts[1]
             
-            # Find state by ID
-            state = next((s for s in STATE_V2_REGISTRY if s.component.id == state_id), None)
+            # Find state by ID (search in reverse to get the latest instance during hot reload)
+            state = next((s for s in reversed(STATE_V2_REGISTRY) if s.component.id == state_id), None)
             if state:
                 # Get property value
                 prop = getattr(state, prop_name, None)

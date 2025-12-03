@@ -1,3 +1,40 @@
+# Release Notes v1.6.2
+
+> **useValue Enhancements & Critical Hot Reload Fixes**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Enhanced `useValue` Hook - Simplified Usage
+
+The `useValue` hook has been improved to support direct usage in built-in components without requiring a selector. This makes it easier to set initial (non-reactive) values from state.
+
+**Simplified Syntax:**
+```python
+# Before (required selector)
+Text(text=useValue("user.name", ".my-text"))
+
+# Now (selector optional)
+Text(text=useValue("user.name"))
+```
+
+This is perfect for initializing components with state values that don't need to update reactively or be extracted back later.
+
+### Critical Bug Fixes
+
+#### `useDynamic` Numeric Value Display
+Fixed an issue where `useDynamic` would display internal marker strings (e.g., `__DARS_DYNAMIC_...`) instead of the actual value when the state property was a number (especially `0`). Numeric values are now correctly resolved and displayed in both initial render and reactive updates.
+
+#### State Hot Reloading Fix
+Resolved a critical issue where state changes were not reflected after a hot reload. The state registry now correctly deduplicates state objects, ensuring that the most recent version of the state is always used. This fixes cases where changing a default value in code (e.g., `count=0` to `count=2`) wouldn't update the UI.
+
+---
+
 # Release Notes v1.6.1
 
 > **Side Effects System Enhancement - useWatch Arrays & Multiple Callbacks**

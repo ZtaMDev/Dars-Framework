@@ -63,8 +63,8 @@ class ValueMarker:
             state_id = parts[0]
             prop_name = parts[1]
             
-            # Find state in registry
-            state = next((s for s in STATE_V2_REGISTRY if s.component.id == state_id), None)
+            # Find state in registry (search in reverse to get the latest instance)
+            state = next((s for s in reversed(STATE_V2_REGISTRY) if s.component.id == state_id), None)
             if not state:
                 return ""
             

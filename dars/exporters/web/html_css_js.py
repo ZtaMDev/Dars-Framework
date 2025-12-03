@@ -2549,7 +2549,17 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
 
             # 2. Generar estados V2 (STATE_V2_REGISTRY)
             if STATE_V2_REGISTRY:
+                # CRITICAL: Deduplicate states by ID, keeping only the most recent version
+                # During hot reload, the same state can be registered multiple times with different values
+                # We need to keep only the last one (most recent) for each unique state ID
+                seen_ids = {}
                 for state in STATE_V2_REGISTRY:
+                    state_id = state.component.id if hasattr(state.component, 'id') else str(state.component)
+                    # Always keep the latest version (overwrite if already seen)
+                    seen_ids[state_id] = state
+                
+                # Now generate JS for deduplicated states
+                for state_id, state in seen_ids.items():
                     # Crear objeto de configuración para V2
                     # Necesitamos serializar el snapshot por defecto
                     default_vals = {}
@@ -2562,9 +2572,6 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
                         js_defaults.append(f'"{k}": {self._value_to_js(v)}')
                     
                     defaults_str = '{ ' + ', '.join(js_defaults) + ' }'
-                    
-                    # ID del componente o nombre del estado
-                    state_id = state.component.id if hasattr(state.component, 'id') else str(state.component)
                     
                     state_config = f'''{{
                         "name": "{state_id}",
@@ -2690,6 +2697,14 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
             if isinstance(prop_value, DynamicBinding):
                 state_path = prop_value.state_path
                 initial_val = prop_value.get_initial_value()
+            
+            # Handle ValueMarker objects directly
+            elif hasattr(prop_value, 'marker_id') and prop_value.marker_id.startswith('__DARS_VALUE_'):
+                try:
+                    initial_val = prop_value.get_initial_value()
+                except Exception:
+                    pass
+            
             elif isinstance(prop_value, str):
                 # Check if it's a marker string
                 match = re.match(marker_pattern, prop_value)
@@ -2704,11 +2719,25 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
                         if len(parts) >= 2:
                             state_id = parts[0]
                             p_name = parts[1]
-                            state = next((s for s in STATE_V2_REGISTRY if s.component.id == state_id), None)
+                            # Find state by ID (search in reverse to get the latest instance)
+                            state = next((s for s in reversed(STATE_V2_REGISTRY) if s.component.id == state_id), None)
                             if state:
                                 prop = getattr(state, p_name, None)
                                 if prop:
                                     initial_val = prop.value
+                    except Exception:
+                        pass
+
+                # Check if it's a ValueMarker (useValue) - Non-reactive initial value
+                elif prop_value.startswith('__DARS_VALUE_'):
+                    try:
+                        from dars.hooks.use_value import get_value_registry
+                        val_registry = get_value_registry()
+                        if prop_value in val_registry:
+                            marker = val_registry[prop_value]
+                            val = marker.get_initial_value()
+                            if val is not None:
+                                setattr(component, prop_name, val)
                     except Exception:
                         pass
 
@@ -2771,14 +2800,15 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
                     selector = marker.selector
                     initial_val = marker.get_initial_value()
             
+            # CRITICAL: Update the component's property with the resolved initial value
+            # This ensures that when component.render() is called, it uses the actual value
+            # We do this even if selector is None (for built-in components using useValue just for initial value)
+            if initial_val is not None:
+                setattr(component, prop_name, initial_val)
+                initial_values[prop_name] = initial_val
+            
             if selector:
                 selectors[prop_name] = selector
-                initial_values[prop_name] = initial_val
-                
-                # CRITICAL: Update the component's property with the resolved initial value
-                # This ensures that when component.render() is called, it uses the actual value
-                if initial_val is not None:
-                    setattr(component, prop_name, initial_val)
                 
                 # Add selector as CSS class if it's a class selector
                 if selector.startswith('.'):
