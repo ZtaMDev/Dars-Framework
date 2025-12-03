@@ -1,3 +1,10 @@
+# Dars Framework - Core Source File
+#
+# This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+# If a copy of the MPL was not distributed with this file, You can obtain one at
+# https://mozilla.org/MPL/2.0/.
+#
+# Copyright (c) 2025 ZtaDev
 from dars.version import __version__, __release_url__
 
 DARS_MIN_JS = f"""/* Dars minimal runtime script */

@@ -8,9 +8,10 @@ This document outlines the development roadmap for Dars Framework, covering impl
 
 Based on the current analysis of the source code (Python, Markdown, JavaScript, CSS):
 
-*   **Total**: 18086 lines
+*   **Total**: 1062458 lines
+*   **Docs**: 22753 lines
 
-## Implemented (Version 1.0.8 and Earlier)
+## Development Roadmap
 
 The following features and components have been successfully implemented in Dars Framework:
 
@@ -37,21 +38,19 @@ The following features and components have been successfully implemented in Dars
 - [x] **Hot Reloading**: Implemented in development/beta for a smoother development experience.
 - [x] **Integrated Testing Framework**
 
-## Development Roadmap
-
 ### Phase 1: Consolidation and Optimization (Short-Term)
 
 This phase will focus on strengthening the framework's current foundation, improving performance and stability, and optimizing the developer experience.
 
-- [ ] **Framework Core Enhancements**
-    - [ ] **Rendering Optimization**: Research and apply techniques to improve the `render` method's performance, especially for applications with many elements or frequent updates. Consider implementing a Virtual DOM or an efficient reconciliation mechanism to minimize direct DOM manipulations.
+- [x] **Framework Core Enhancements**
+    - [x] **Rendering Optimization**: Research and apply techniques to improve the `render` method's performance, especially for applications with many elements or frequent updates. Consider implementing a Virtual DOM or an efficient reconciliation mechanism to minimize direct DOM manipulations.
     - [x] **Reactive State Management**: Develop a robust system for global and local application state management, enabling efficient reactive UI updates.
-    - [ ] **Improved Property Typing and Validation**: Extend the property system to include more complex validations and clear error messages at development time, facilitating debugging.
+    - [x] **Improved Property Typing and Validation**: Extend the property system to include more complex validations and clear error messages at development time, facilitating debugging.
     - [x] **Error Handling and Debugging**: Implement robust tools and mechanisms for runtime error handling and facilitate debugging of Dars applications, both in Python and in the generated JavaScript code.
 
 - [ ] **Component System Enhancements**
     - [ ] **Component Lifecycle**: Define and document a clear lifecycle for components (mounting, updating, unmounting) that allows developers to execute logic at specific times.
-    - [ ] **Hooks or Mixins**: Explore the implementation of patterns like Hooks or Mixins to reuse state and behavior logic between components more cleanly and modularly.
+    - [x] **Hooks or Mixins**: Explore the implementation of patterns like Hooks or Mixins to reuse state and behavior logic between components more cleanly and modularly.
     - [ ] **Higher-Order Components (HOCs)**: Facilitate the creation of HOCs for logic reuse and component composition.
 
 - [x] **HTML/CSS/JS Exporter Optimization**
@@ -59,10 +58,10 @@ This phase will focus on strengthening the framework's current foundation, impro
     - [x] **Asset Optimization**: Implement automatic optimization of images and other static assets during the export process.
     - [x] **Scoped CSS Generation**: Explore options for generating CSS with scope limited to components, avoiding style conflicts and facilitating the development of reusable components.
 
-- [ ] **CLI Enhancements**
+- [x] **CLI Enhancements**
     - [x] **Additional Commands**: Add commands for creating new projects (`dars init project`).
     - [ ] **Integration with Testing Tools**: Facilitate the execution of unit and integration tests directly from the CLI.
-    - [ ] **Detailed Feedback**: Improve CLI error messages and feedback to guide the developer more effectively.
+    - [x] **Detailed Feedback**: Improve CLI error messages and feedback to guide the developer more effectively.
 
 ### Phase 2: Ecosystem Expansion and Cross-Platform (Mid-Term)
 
@@ -74,9 +73,9 @@ This phase will focus on expanding Dars' capabilities to new platforms and build
     - [x] Tools and templates to facilitate the packaging and distribution of Electron applications.
 
 - [ ] **More Integrated Components**
-    - [ ] **Data Visualization Components**: `Chart` (integration with libraries like Chart.js or D3.js), `Table` (with pagination, sorting, and filtering).
+    - [x] **Data Visualization Components**: `Chart` (integration with libraries like Chart.js or D3.js), `Table` (with pagination, sorting, and filtering).
     - [ ] **Multimedia Components**: `Video`, `Audio`.
-    - [ ] **Advanced Navigation Components**: `Router` (for single-page application route management), `Tabs`, `Accordion`.
+    - [x] **Advanced Navigation Components**: `Router` (for single-page application route management), `Tabs`, `Accordion`.
     - [ ] **Advanced Form Components**: `Validation` (integration with form validation libraries), `FileUpload`.
 
 - [ ] **Plugin and Extension System**
@@ -84,7 +83,7 @@ This phase will focus on expanding Dars' capabilities to new platforms and build
 
 - [ ] **dScript Enhancements**
     - [x] **dScript Modules**: Allow importing and exporting modules within dScript to better organize JavaScript logic.
-    - [ ] **Integration with Popular JS Libraries**: Facilitate the integration of popular JavaScript libraries (e.g., for animations, DOM manipulation, etc.) within dScript.
+    - [x] **Integration with Popular JS Libraries**: Facilitate the integration of popular JavaScript libraries (e.g., for animations, DOM manipulation, etc.) within dScript.
 
 ### Phase 3: Maturity and Adoption (Long-Term)
 
