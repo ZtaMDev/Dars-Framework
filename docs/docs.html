@@ -1168,6 +1168,104 @@
      <div class="sidebar-divider">
      </div>
      <div class="sidebar-category">
+      Operations
+     </div>
+     <a class="sidebar-link sidebar-level-1" href="#operations-in-dars" style="margin-left: 0px">
+      Operations in Dars
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#overview" style="margin-left: 20px">
+      Overview
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#basic-operations" style="margin-left: 20px">
+      Basic Operations
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#string-concatenation" style="margin-left: 40px">
+      String Concatenation
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#arithmetic-operations" style="margin-left: 40px">
+      Arithmetic Operations
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#complex-expressions" style="margin-left: 20px">
+      Complex Expressions
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#operator-precedence" style="margin-left: 40px">
+      Operator Precedence
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#nested-expressions" style="margin-left: 40px">
+      Nested Expressions
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#dynamic-operators" style="margin-left: 20px">
+      Dynamic Operators
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#the-operator-method" style="margin-left: 40px">
+      The `.operator()` Method
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#how-it-works" style="margin-left: 40px">
+      How It Works
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#complete-calculator-example" style="margin-left: 40px">
+      Complete Calculator Example
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#supported-operators" style="margin-left: 40px">
+      Supported Operators
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#nan-validation" style="margin-left: 20px">
+      NaN Validation
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#automatic-validation" style="margin-left: 40px">
+      Automatic Validation
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#validation-points" style="margin-left: 40px">
+      Validation Points
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#example-scenarios" style="margin-left: 40px">
+      Example Scenarios
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#state-integration" style="margin-left: 20px">
+      State Integration
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#using-with-stateset" style="margin-left: 40px">
+      Using with State.set()
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#async-evaluation" style="margin-left: 40px">
+      Async Evaluation
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#advanced-examples" style="margin-left: 20px">
+      Advanced Examples
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#multi-step-calculation" style="margin-left: 40px">
+      Multi-Step Calculation
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#conditional-calculations" style="margin-left: 40px">
+      Conditional Calculations
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#scientific-calculator" style="margin-left: 40px">
+      Scientific Calculator
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#best-practices" style="margin-left: 20px">
+      Best Practices
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#do" style="margin-left: 40px">
+      Do
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#dont" style="margin-left: 40px">
+      Don't
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#type-reference" style="margin-left: 20px">
+      Type Reference
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#valueref" style="margin-left: 40px">
+      ValueRef
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#mathexpression" style="margin-left: 40px">
+      MathExpression
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#dynamicoperator" style="margin-left: 40px">
+      DynamicOperator
+     </a>
+     <div class="sidebar-divider">
+     </div>
+     <div class="sidebar-category">
       Hooks
      </div>
      <a class="sidebar-link sidebar-level-1" href="#hooks-system" style="margin-left: 0px">
@@ -2039,6 +2137,11 @@
        <li>
         <a href="#hooks-system">
          Hooks
+        </a>
+       </li>
+       <li>
+        <a href="#operations-in-dars">
+         Operations
         </a>
        </li>
        <li>
@@ -12515,159 +12618,77 @@ def hello():
       </h4>
       <p>
        <code>
-        ValueRef
+        V()
        </code>
-       objects support Python operators with
-       <strong>
-        important validation
-       </strong>
-       :
-      </p>
-      <p>
-       <strong>
-        String Concatenation (Always Allowed)
-       </strong>
+       now supports declarative mathematical expressions with operator overloading!
       </p>
       <div class="codehilite">
-       <pre><span></span><code><span class="c1"># Concatenation works without transformations</span>
-<span class="n">state</span><span class="o">.</span><span class="n">fullname</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#first"</span><span class="p">)</span> <span class="o">+</span> <span class="s2">" "</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#last"</span><span class="p">))</span>
-<span class="n">message</span> <span class="o">=</span> <span class="s2">"Total: $"</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">"cart.total"</span><span class="p">)</span>
-</code></pre>
-      </div>
-      <p>
-       <strong>
-        Arithmetic Operations (Require Numeric Transformations)
-       </strong>
-      </p>
-      <p>
-       <strong>
-        New in v1.5.8
-       </strong>
-       : Arithmetic operators (
-       <code>
-        *
-       </code>
-       ,
-       <code>
-        /
-       </code>
-       ,
-       <code>
-        -
-       </code>
-       ,
-       <code>
-        %
-       </code>
-       ,
-       <code>
-        **
-       </code>
-       ) now
-       <strong>
-        require
-       </strong>
-       <code>
-        .int()
-       </code>
-       or
-       <code>
-        .float()
-       </code>
-       transformations to prevent accidental string concatenation:
-      </p>
-      <div class="codehilite">
-       <pre><span></span><code><span class="c1"># CORRECT - With numeric transformations</span>
-<span class="n">state</span><span class="o">.</span><span class="n">total</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#price"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">*</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#qty"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">())</span>
-<span class="n">state</span><span class="o">.</span><span class="n">age</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#age"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">+</span> <span class="mi">10</span><span class="p">)</span>
-<span class="n">discount</span> <span class="o">=</span> <span class="n">V</span><span class="p">(</span><span class="s2">"product.price"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">*</span> <span class="mf">0.9</span>
+       <pre><span></span><code><span class="c1"># Simple arithmetic</span>
+<span class="n">calc</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">".a"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">".b"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">())</span>
 
-<span class="c1"># CORRECT - Combining DOM and state values</span>
-<span class="n">productState</span><span class="o">.</span><span class="n">total</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
-    <span class="n">V</span><span class="p">(</span><span class="s2">".qty-input"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">*</span> <span class="n">V</span><span class="p">(</span><span class="s2">"product.price"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+<span class="c1"># Complex expressions with automatic precedence</span>
+<span class="n">calc</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+    <span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">".a"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">".b"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">())</span> <span class="o">*</span> <span class="n">V</span><span class="p">(</span><span class="s2">".c"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
 <span class="p">)</span>
 
-<span class="c1"># ERROR - Without transformations</span>
-<span class="n">state</span><span class="o">.</span><span class="n">total</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#price"</span><span class="p">)</span> <span class="o">*</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#qty"</span><span class="p">))</span>
-<span class="c1"># TypeError: Multiplication requires numeric transformation.</span>
-<span class="c1">#            Use V('#price').int() or V('#price').float() before multiplying.</span>
+<span class="c1"># Dynamic operators from Select elements</span>
+<span class="n">calc</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+    <span class="n">V</span><span class="p">(</span><span class="s2">".num1"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">".operation"</span><span class="p">)</span><span class="o">.</span><span class="n">operator</span><span class="p">()</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">".num2"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+<span class="p">)</span>
 </code></pre>
       </div>
       <p>
        <strong>
-        Supported Operators:
+        Features:
        </strong>
-       -
+       - Operator overloading (
        <code>
         +
        </code>
-       - Addition/Concatenation (always allowed)
--
-       <code>
-        *
-       </code>
-       - Multiplication (requires
-       <code>
-        .int()
-       </code>
-       or
-       <code>
-        .float()
-       </code>
-       )
--
-       <code>
-        /
-       </code>
-       - Division (requires
-       <code>
-        .int()
-       </code>
-       or
-       <code>
-        .float()
-       </code>
-       )
--
+       ,
        <code>
         -
        </code>
-       - Subtraction (requires
+       ,
        <code>
-        .int()
+        *
        </code>
-       or
+       ,
        <code>
-        .float()
+        /
        </code>
-       )
--
+       ,
        <code>
         %
        </code>
-       - Modulo (requires
-       <code>
-        .int()
-       </code>
-       or
-       <code>
-        .float()
-       </code>
-       )
--
+       ,
        <code>
         **
        </code>
-       - Power (requires
-       <code>
-        .int()
-       </code>
-       or
+       )
+- Automatic operator precedence
+- Dynamic operators from Select/Input
+- NaN validation with console warnings
+- Type safety (numeric ops require
        <code>
         .float()
        </code>
+       or
+       <code>
+        .int()
+       </code>
        )
       </p>
+      <blockquote>
+       <p>
+        [!TIP]
+  For complete documentation on mathematical operations, operator precedence, dynamic operators, and advanced examples, see
+        <a href="operations.md">
+         Mathematical Operations
+        </a>
+        .
+       </p>
+      </blockquote>
       <h4 id="complete-example">
        Complete Example
       </h4>
@@ -12828,6 +12849,854 @@ def hello():
       <hr/>
      </div>
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_124">
+      <h1 id="operations-in-dars">
+       Operations in Dars
+      </h1>
+      <p>
+       Dars introduces a powerful, declarative system for mathematical expressions using operator overloading. Write complex calculations in pure Python without any inline JavaScript!
+      </p>
+      <h2 id="overview">
+       Overview
+      </h2>
+      <p>
+       The
+       <code>
+        V()
+       </code>
+       helper supports:
+-
+       <strong>
+        Operator overloading
+       </strong>
+       - Use Python operators (
+       <code>
+        +
+       </code>
+       ,
+       <code>
+        -
+       </code>
+       ,
+       <code>
+        *
+       </code>
+       ,
+       <code>
+        /
+       </code>
+       ,
+       <code>
+        %
+       </code>
+       ,
+       <code>
+        **
+       </code>
+       )
+-
+       <strong>
+        Dynamic operators
+       </strong>
+       - Operators from Select/Input elements
+-
+       <strong>
+        Automatic precedence
+       </strong>
+       - Parentheses handled automatically
+-
+       <strong>
+        NaN validation
+       </strong>
+       - Safe handling of empty/invalid inputs
+-
+       <strong>
+        Type safety
+       </strong>
+       - Numeric operations require
+       <code>
+        .float()
+       </code>
+       or
+       <code>
+        .int()
+       </code>
+      </p>
+      <hr/>
+      <h2 id="basic-operations">
+       Basic Operations
+      </h2>
+      <h3 id="string-concatenation">
+       String Concatenation
+      </h3>
+      <p>
+       String concatenation works without any transformations:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="c1"># Simple concatenation</span>
+<span class="n">state</span><span class="o">.</span><span class="n">fullname</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">".first"</span><span class="p">)</span> <span class="o">+</span> <span class="s2">" "</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">".last"</span><span class="p">))</span>
+
+<span class="c1"># With literals</span>
+<span class="n">state</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"Hello, "</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">".username"</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"!"</span><span class="p">)</span>
+
+<span class="c1"># Multiple values</span>
+<span class="n">state</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">".name"</span><span class="p">)</span> <span class="o">+</span> <span class="s2">" - "</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">".email"</span><span class="p">)</span> <span class="o">+</span> <span class="s2">" - "</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">".phone"</span><span class="p">))</span>
+</code></pre>
+      </div>
+      <h3 id="arithmetic-operations">
+       Arithmetic Operations
+      </h3>
+      <p>
+       <strong>
+        IMPORTANT
+       </strong>
+       : Arithmetic operations
+       <strong>
+        require
+       </strong>
+       <code>
+        .float()
+       </code>
+       or
+       <code>
+        .int()
+       </code>
+       transformations:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Addition</span>
+<span class="n">state</span><span class="o">.</span><span class="n">total</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">".price"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">".tax"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">())</span>
+
+<span class="c1"># Subtraction</span>
+<span class="n">state</span><span class="o">.</span><span class="n">change</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">".paid"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">-</span> <span class="n">V</span><span class="p">(</span><span class="s2">".total"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">())</span>
+
+<span class="c1"># Multiplication</span>
+<span class="n">state</span><span class="o">.</span><span class="n">total</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">".price"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">*</span> <span class="n">V</span><span class="p">(</span><span class="s2">".quantity"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">())</span>
+
+<span class="c1"># Division</span>
+<span class="n">state</span><span class="o">.</span><span class="n">average</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">".sum"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">/</span> <span class="n">V</span><span class="p">(</span><span class="s2">".count"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">())</span>
+
+<span class="c1"># Module</span>
+<span class="n">state</span><span class="o">.</span><span class="n">remainder</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">".number"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">%</span> <span class="n">V</span><span class="p">(</span><span class="s2">".divisor"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">())</span>
+
+<span class="c1"># Power</span>
+<span class="n">state</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">".base"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">**</span> <span class="n">V</span><span class="p">(</span><span class="s2">".exponent"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">())</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Why transformations are required:
+       </strong>
+       - Prevents accidental string concatenation (e.g.,
+       <code>
+        "5" * "3"
+       </code>
+       =
+       <code>
+        "555"
+       </code>
+       in JavaScript)
+- Ensures type safety
+- Makes intent explicit
+      </p>
+      <hr/>
+      <h2 id="complex-expressions">
+       Complex Expressions
+      </h2>
+      <h3 id="operator-precedence">
+       Operator Precedence
+      </h3>
+      <p>
+       Dars automatically handles operator precedence following standard mathematical rules:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># a + b * c  →  a + (b * c)  ✅ Automatic</span>
+<span class="n">state</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+    <span class="n">V</span><span class="p">(</span><span class="s2">".a"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">".b"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">*</span> <span class="n">V</span><span class="p">(</span><span class="s2">".c"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+<span class="p">)</span>
+
+<span class="c1"># (a + b) * c  →  (a + b) * c  ✅ Preserved</span>
+<span class="n">state</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+    <span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">".a"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">".b"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">())</span> <span class="o">*</span> <span class="n">V</span><span class="p">(</span><span class="s2">".c"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+<span class="p">)</span>
+
+<span class="c1"># a ** b ** c  →  a ** (b ** c)  ✅ Right-associative</span>
+<span class="n">state</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+    <span class="n">V</span><span class="p">(</span><span class="s2">".a"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">**</span> <span class="n">V</span><span class="p">(</span><span class="s2">".b"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">**</span> <span class="n">V</span><span class="p">(</span><span class="s2">".c"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Precedence Table:
+       </strong>
+      </p>
+      <table>
+       <thead>
+        <tr>
+         <th>
+          Operator
+         </th>
+         <th>
+          Precedence
+         </th>
+         <th>
+          Associativity
+         </th>
+        </tr>
+       </thead>
+       <tbody>
+        <tr>
+         <td>
+          <code>
+           **
+          </code>
+         </td>
+         <td>
+          3 (highest)
+         </td>
+         <td>
+          Right
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           *
+          </code>
+          ,
+          <code>
+           /
+          </code>
+          ,
+          <code>
+           %
+          </code>
+         </td>
+         <td>
+          2
+         </td>
+         <td>
+          Left
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           +
+          </code>
+          ,
+          <code>
+           -
+          </code>
+         </td>
+         <td>
+          1 (lowest)
+         </td>
+         <td>
+          Left
+         </td>
+        </tr>
+       </tbody>
+      </table>
+      <h3 id="nested-expressions">
+       Nested Expressions
+      </h3>
+      <p>
+       You can nest expressions infinitely:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Complex calculation</span>
+<span class="n">state</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+    <span class="p">((</span><span class="n">V</span><span class="p">(</span><span class="s2">".a"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">".b"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">())</span> <span class="o">*</span> <span class="n">V</span><span class="p">(</span><span class="s2">".c"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">())</span> <span class="o">/</span> 
+    <span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">".d"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">-</span> <span class="n">V</span><span class="p">(</span><span class="s2">".e"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">())</span>
+<span class="p">)</span>
+
+<span class="c1"># With mixed literals</span>
+<span class="n">state</span><span class="o">.</span><span class="n">total</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+    <span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">".price"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">*</span> <span class="n">V</span><span class="p">(</span><span class="s2">".qty"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">())</span> <span class="o">*</span> <span class="mf">1.15</span>  <span class="c1"># Add 15% tax</span>
+<span class="p">)</span>
+
+<span class="c1"># Combining multiple operations</span>
+<span class="n">state</span><span class="o">.</span><span class="n">score</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+    <span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">".math"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">".science"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">".english"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">())</span> <span class="o">/</span> <span class="mi">3</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <hr/>
+      <h2 id="dynamic-operators">
+       Dynamic Operators
+      </h2>
+      <p>
+       <strong>
+        New in v1.6.4
+       </strong>
+       : Use operators from Select or Input elements!
+      </p>
+      <h3 id="the-operator-method">
+       The
+       <code>
+        .operator()
+       </code>
+       Method
+      </h3>
+      <p>
+       Mark a
+       <code>
+        ValueRef
+       </code>
+       as a dynamic operator using
+       <code>
+        .operator()
+       </code>
+       :
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Select with operator options</span>
+<span class="n">Select</span><span class="p">(</span>
+    <span class="n">class_name</span><span class="o">=</span><span class="s2">"operation"</span><span class="p">,</span>
+    <span class="n">options</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">SelectOption</span><span class="p">(</span><span class="s2">"+"</span><span class="p">,</span> <span class="s2">"Add"</span><span class="p">),</span>
+        <span class="n">SelectOption</span><span class="p">(</span><span class="s2">"-"</span><span class="p">,</span> <span class="s2">"Subtract"</span><span class="p">),</span>
+        <span class="n">SelectOption</span><span class="p">(</span><span class="s2">"*"</span><span class="p">,</span> <span class="s2">"Multiply"</span><span class="p">),</span>
+        <span class="n">SelectOption</span><span class="p">(</span><span class="s2">"/"</span><span class="p">,</span> <span class="s2">"Divide"</span><span class="p">)</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+
+<span class="c1"># Use in calculation</span>
+<span class="n">Button</span><span class="p">(</span>
+    <span class="s2">"Calculate"</span><span class="p">,</span>
+    <span class="n">on_click</span><span class="o">=</span><span class="n">calc</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+        <span class="n">V</span><span class="p">(</span><span class="s2">".num1"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">".operation"</span><span class="p">)</span><span class="o">.</span><span class="n">operator</span><span class="p">()</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">".num2"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="how-it-works">
+       How It Works
+      </h3>
+      <ol>
+       <li>
+        <strong>
+         Operator Extraction
+        </strong>
+        :
+        <code>
+         V(".operation").operator()
+        </code>
+        extracts the operator value
+       </li>
+       <li>
+        <strong>
+         Validation
+        </strong>
+        : Checks if operator is valid (
+        <code>
+         +
+        </code>
+        ,
+        <code>
+         -
+        </code>
+        ,
+        <code>
+         *
+        </code>
+        ,
+        <code>
+         /
+        </code>
+        ,
+        <code>
+         %
+        </code>
+        ,
+        <code>
+         **
+        </code>
+        )
+       </li>
+       <li>
+        <strong>
+         Evaluation
+        </strong>
+        : Uses a switch statement to perform the operation
+       </li>
+       <li>
+        <strong>
+         Fallback
+        </strong>
+        : Defaults to
+        <code>
+         +
+        </code>
+        if operator is invalid
+       </li>
+      </ol>
+      <h3 id="complete-calculator-example">
+       Complete Calculator Example
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="s2">"Calculator"</span><span class="p">)</span>
+
+<span class="n">calc</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"calc"</span><span class="p">,</span> <span class="n">operation</span><span class="o">=</span><span class="s2">"+"</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="nd">@route</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span>
+        <span class="c1"># Operation selector</span>
+        <span class="n">Select</span><span class="p">(</span>
+            <span class="n">value</span><span class="o">=</span><span class="n">useValue</span><span class="p">(</span><span class="s2">"calc.operation"</span><span class="p">,</span> <span class="n">selector</span><span class="o">=</span><span class="s2">".operation"</span><span class="p">),</span>
+            <span class="n">class_name</span><span class="o">=</span><span class="s2">"operation"</span><span class="p">,</span>
+            <span class="n">options</span><span class="o">=</span><span class="p">[</span>
+                <span class="n">SelectOption</span><span class="p">(</span><span class="s2">"+"</span><span class="p">,</span> <span class="s2">"➕ Add"</span><span class="p">),</span>
+                <span class="n">SelectOption</span><span class="p">(</span><span class="s2">"-"</span><span class="p">,</span> <span class="s2">"➖ Subtract"</span><span class="p">),</span>
+                <span class="n">SelectOption</span><span class="p">(</span><span class="s2">"*"</span><span class="p">,</span> <span class="s2">"✖️ Multiply"</span><span class="p">),</span>
+                <span class="n">SelectOption</span><span class="p">(</span><span class="s2">"/"</span><span class="p">,</span> <span class="s2">"➗ Divide"</span><span class="p">)</span>
+            <span class="p">]</span>
+        <span class="p">),</span>
+
+        <span class="c1"># Number inputs</span>
+        <span class="n">Input</span><span class="p">(</span><span class="n">class_name</span><span class="o">=</span><span class="s2">"num1"</span><span class="p">,</span> <span class="n">input_type</span><span class="o">=</span><span class="s2">"number"</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">"First number"</span><span class="p">),</span>
+        <span class="n">Input</span><span class="p">(</span><span class="n">class_name</span><span class="o">=</span><span class="s2">"num2"</span><span class="p">,</span> <span class="n">input_type</span><span class="o">=</span><span class="s2">"number"</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">"Second number"</span><span class="p">),</span>
+
+        <span class="c1"># Calculate button - DECLARATIVE!</span>
+        <span class="n">Button</span><span class="p">(</span>
+            <span class="s2">"Calculate"</span><span class="p">,</span>
+            <span class="n">on_click</span><span class="o">=</span><span class="n">calc</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+                <span class="n">V</span><span class="p">(</span><span class="s2">".num1"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">".operation"</span><span class="p">)</span><span class="o">.</span><span class="n">operator</span><span class="p">()</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">".num2"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+            <span class="p">)</span>
+        <span class="p">),</span>
+
+        <span class="c1"># Result display</span>
+        <span class="n">Text</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"calc.result"</span><span class="p">))</span>
+    <span class="p">)</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="s2">"index"</span><span class="p">,</span> <span class="n">index</span><span class="p">())</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">rTimeCompile</span><span class="p">()</span>
+</code></pre>
+      </div>
+      <h3 id="supported-operators">
+       Supported Operators
+      </h3>
+      <p>
+       The
+       <code>
+        .operator()
+       </code>
+       method validates against this whitelist:
+      </p>
+      <ul>
+       <li>
+        <code>
+         +
+        </code>
+        - Addition
+       </li>
+       <li>
+        <code>
+         -
+        </code>
+        - Subtraction
+       </li>
+       <li>
+        <code>
+         *
+        </code>
+        - Multiplication
+       </li>
+       <li>
+        <code>
+         /
+        </code>
+        - Division
+       </li>
+       <li>
+        <code>
+         %
+        </code>
+        - Modulo
+       </li>
+       <li>
+        <code>
+         **
+        </code>
+        - Power
+       </li>
+      </ul>
+      <p>
+       <strong>
+        Invalid operators
+       </strong>
+       automatically fall back to
+       <code>
+        +
+       </code>
+       with a console warning.
+      </p>
+      <hr/>
+      <h2 id="nan-validation">
+       NaN Validation
+      </h2>
+      <p>
+       <strong>
+        New in v1.6.4
+       </strong>
+       : Automatic NaN handling prevents errors from empty or invalid inputs.
+      </p>
+      <h3 id="automatic-validation">
+       Automatic Validation
+      </h3>
+      <p>
+       All mathematical expressions include built-in NaN validation:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># If inputs are empty or invalid</span>
+<span class="n">Button</span><span class="p">(</span>
+    <span class="s2">"Calculate"</span><span class="p">,</span>
+    <span class="n">on_click</span><span class="o">=</span><span class="n">calc</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+        <span class="n">V</span><span class="p">(</span><span class="s2">".num1"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">".num2"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+<span class="c1"># Empty inputs → Returns 0</span>
+<span class="c1"># Console: "[Dars] Invalid input: one or more values are NaN. Returning 0."</span>
+</code></pre>
+      </div>
+      <h3 id="validation-points">
+       Validation Points
+      </h3>
+      <ol>
+       <li>
+        <strong>
+         Input Validation
+        </strong>
+        : Checks operands before calculation
+       </li>
+       <li>
+        <strong>
+         Result Validation
+        </strong>
+        : Checks result after calculation
+       </li>
+       <li>
+        <strong>
+         Console Logging
+        </strong>
+        : Warns when NaN is detected
+       </li>
+      </ol>
+      <h3 id="example-scenarios">
+       Example Scenarios
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Empty inputs</span>
+<span class="n">V</span><span class="p">(</span><span class="s2">".empty-input"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>  <span class="c1"># → 0 (with warning)</span>
+
+<span class="c1"># Invalid division</span>
+<span class="n">V</span><span class="p">(</span><span class="s2">".num"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">/</span> <span class="mi">0</span>  <span class="c1"># → 0 (with warning)</span>
+
+<span class="c1"># Invalid operation</span>
+<span class="n">V</span><span class="p">(</span><span class="s2">".text"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>  <span class="c1"># → 0 (with warning)</span>
+</code></pre>
+      </div>
+      <hr/>
+      <h2 id="state-integration">
+       State Integration
+      </h2>
+      <h3 id="using-with-stateset">
+       Using with State.set()
+      </h3>
+      <p>
+       <code>
+        MathExpression
+       </code>
+       objects work seamlessly with
+       <code>
+        State.set()
+       </code>
+       :
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Simple expression</span>
+<span class="n">calc</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">".a"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">".b"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">())</span>
+
+<span class="c1"># Complex expression</span>
+<span class="n">calc</span><span class="o">.</span><span class="n">total</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+    <span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">".price"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">*</span> <span class="n">V</span><span class="p">(</span><span class="s2">".qty"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">())</span> <span class="o">*</span> <span class="mf">1.15</span>
+<span class="p">)</span>
+
+<span class="c1"># With dynamic operator</span>
+<span class="n">calc</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+    <span class="n">V</span><span class="p">(</span><span class="s2">".num1"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">".op"</span><span class="p">)</span><span class="o">.</span><span class="n">operator</span><span class="p">()</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">".num2"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="async-evaluation">
+       Async Evaluation
+      </h3>
+      <p>
+       All expressions are automatically wrapped in async IIFEs:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Your code</span>
+<span class="n">calc</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">".a"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">".b"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">())</span>
+
+<span class="c1"># Generated JavaScript</span>
+<span class="p">(</span><span class="k">async</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="n">const</span> <span class="n">left</span> <span class="o">=</span> <span class="k">await</span> <span class="p">(</span><span class="o">/*</span> <span class="n">V</span><span class="p">(</span><span class="s2">".a"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">*/</span><span class="p">);</span>
+    <span class="n">const</span> <span class="n">right</span> <span class="o">=</span> <span class="k">await</span> <span class="p">(</span><span class="o">/*</span> <span class="n">V</span><span class="p">(</span><span class="s2">".b"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">*/</span><span class="p">);</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">isNaN</span><span class="p">(</span><span class="n">left</span><span class="p">)</span> <span class="o">||</span> <span class="n">isNaN</span><span class="p">(</span><span class="n">right</span><span class="p">))</span> <span class="p">{</span>
+        <span class="n">console</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">'[Dars] Invalid input: one or more values are NaN. Returning 0.'</span><span class="p">);</span>
+        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="n">const</span> <span class="n">result</span> <span class="o">=</span> <span class="n">left</span> <span class="o">+</span> <span class="n">right</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">isNaN</span><span class="p">(</span><span class="n">result</span><span class="p">))</span> <span class="p">{</span>
+        <span class="n">console</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">'[Dars] Operation resulted in NaN. Returning 0.'</span><span class="p">);</span>
+        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+<span class="p">})()</span>
+</code></pre>
+      </div>
+      <hr/>
+      <h2 id="advanced-examples">
+       Advanced Examples
+      </h2>
+      <h3 id="multi-step-calculation">
+       Multi-Step Calculation
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Calculate total with tax and discount</span>
+<span class="n">Button</span><span class="p">(</span>
+    <span class="s2">"Calculate Total"</span><span class="p">,</span>
+    <span class="n">on_click</span><span class="o">=</span><span class="n">cart</span><span class="o">.</span><span class="n">total</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+        <span class="p">((</span><span class="n">V</span><span class="p">(</span><span class="s2">".price"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">*</span> <span class="n">V</span><span class="p">(</span><span class="s2">".qty"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">())</span> <span class="o">*</span> <span class="mf">1.15</span><span class="p">)</span> <span class="o">-</span> <span class="n">V</span><span class="p">(</span><span class="s2">".discount"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="conditional-calculations">
+       Conditional Calculations
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Different calculations based on operator</span>
+<span class="n">Select</span><span class="p">(</span><span class="n">class_name</span><span class="o">=</span><span class="s2">"calc-type"</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="p">[</span>
+    <span class="n">SelectOption</span><span class="p">(</span><span class="s2">"area"</span><span class="p">,</span> <span class="s2">"Area"</span><span class="p">),</span>
+    <span class="n">SelectOption</span><span class="p">(</span><span class="s2">"perimeter"</span><span class="p">,</span> <span class="s2">"Perimeter"</span><span class="p">)</span>
+<span class="p">])</span>
+
+<span class="c1"># Area: length * width</span>
+<span class="c1"># Perimeter: 2 * (length + width)</span>
+<span class="n">Button</span><span class="p">(</span>
+    <span class="s2">"Calculate"</span><span class="p">,</span>
+    <span class="n">on_click</span><span class="o">=</span><span class="n">dScript</span><span class="p">(</span><span class="sa">f</span><span class="s2">"""</span>
+<span class="s2">        const type = </span><span class="si">{</span><span class="n">V</span><span class="p">(</span><span class="s2">".calc-type"</span><span class="p">)</span><span class="o">.</span><span class="n">get_code</span><span class="p">()</span><span class="si">}</span><span class="s2">;</span>
+<span class="s2">        const length = </span><span class="si">{</span><span class="n">V</span><span class="p">(</span><span class="s2">".length"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span><span class="o">.</span><span class="n">get_code</span><span class="p">()</span><span class="si">}</span><span class="s2">;</span>
+<span class="s2">        const width = </span><span class="si">{</span><span class="n">V</span><span class="p">(</span><span class="s2">".width"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span><span class="o">.</span><span class="n">get_code</span><span class="p">()</span><span class="si">}</span><span class="s2">;</span>
+
+<span class="s2">        let result;</span>
+<span class="s2">        if (type === 'area') </span><span class="se">{{</span>
+<span class="s2">            result = length * width;</span>
+<span class="s2">        </span><span class="se">}}</span><span class="s2"> else </span><span class="se">{{</span>
+<span class="s2">            result = 2 * (length + width);</span>
+<span class="s2">        </span><span class="se">}}</span>
+
+<span class="s2">        window.Dars.change(</span><span class="se">{{</span>
+<span class="s2">            id: 'calc',</span>
+<span class="s2">            dynamic: true,</span>
+<span class="s2">            result: result</span>
+<span class="s2">        </span><span class="se">}}</span><span class="s2">);</span>
+<span class="s2">    """</span><span class="p">)</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="scientific-calculator">
+       Scientific Calculator
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Power calculation</span>
+<span class="n">calc</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">".base"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">**</span> <span class="n">V</span><span class="p">(</span><span class="s2">".exponent"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">())</span>
+
+<span class="c1"># Modulo for remainders</span>
+<span class="n">calc</span><span class="o">.</span><span class="n">remainder</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">".dividend"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">%</span> <span class="n">V</span><span class="p">(</span><span class="s2">".divisor"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">())</span>
+
+<span class="c1"># Complex formula: (a² + b²)^0.5 (Pythagorean theorem)</span>
+<span class="n">calc</span><span class="o">.</span><span class="n">hypotenuse</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+    <span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">".a"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">".b"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <hr/>
+      <h2 id="best-practices">
+       Best Practices
+      </h2>
+      <h3 id="do">
+       Do
+      </h3>
+      <ol>
+       <li>
+        <p>
+         <strong>
+          Always use transformations for math
+         </strong>
+        </p>
+        <div class="codehilite">
+         <pre><span></span><code><span class="n">V</span><span class="p">(</span><span class="s2">".price"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">*</span> <span class="n">V</span><span class="p">(</span><span class="s2">".qty"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span>  <span class="c1"># ✅ Correct</span>
+</code></pre>
+        </div>
+       </li>
+       <li>
+        <p>
+         <strong>
+          Use descriptive class names
+         </strong>
+        </p>
+        <div class="codehilite">
+         <pre><span></span><code><span class="n">Input</span><span class="p">(</span><span class="n">class_name</span><span class="o">=</span><span class="s2">"price-input"</span><span class="p">)</span>  <span class="c1"># ✅ Clear</span>
+<span class="n">V</span><span class="p">(</span><span class="s2">".price-input"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+</code></pre>
+        </div>
+       </li>
+       <li>
+        <p>
+         <strong>
+          Leverage automatic precedence
+         </strong>
+        </p>
+        <div class="codehilite">
+         <pre><span></span><code><span class="n">V</span><span class="p">(</span><span class="s2">".a"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">".b"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">*</span> <span class="n">V</span><span class="p">(</span><span class="s2">".c"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>  <span class="c1"># ✅ Auto-parens</span>
+</code></pre>
+        </div>
+       </li>
+       <li>
+        <p>
+         <strong>
+          Use dynamic operators for flexibility
+         </strong>
+        </p>
+        <div class="codehilite">
+         <pre><span></span><code><span class="n">V</span><span class="p">(</span><span class="s2">".num1"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">".op"</span><span class="p">)</span><span class="o">.</span><span class="n">operator</span><span class="p">()</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">".num2"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>  <span class="c1"># ✅ Dynamic</span>
+</code></pre>
+        </div>
+       </li>
+      </ol>
+      <h3 id="dont">
+       Don't
+      </h3>
+      <ol>
+       <li>
+        <p>
+         <strong>
+          Don't use arithmetic without transformations
+         </strong>
+        </p>
+        <div class="codehilite">
+         <pre><span></span><code><span class="n">V</span><span class="p">(</span><span class="s2">".price"</span><span class="p">)</span> <span class="o">*</span> <span class="n">V</span><span class="p">(</span><span class="s2">".qty"</span><span class="p">)</span>  <span class="c1"># ❌ TypeError</span>
+</code></pre>
+        </div>
+       </li>
+       <li>
+        <p>
+         <strong>
+          Don't rely on implicit type coercion
+         </strong>
+        </p>
+        <div class="codehilite">
+         <pre><span></span><code><span class="n">V</span><span class="p">(</span><span class="s2">".number"</span><span class="p">)</span> <span class="o">+</span> <span class="mi">5</span>  <span class="c1"># ❌ String concatenation, not addition</span>
+</code></pre>
+        </div>
+       </li>
+       <li>
+        <p>
+         <strong>
+          Don't forget NaN is handled automatically
+         </strong>
+        </p>
+        <div class="codehilite">
+         <pre><span></span><code><span class="c1"># No need for manual checks</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">isNaN</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">".num"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()))</span> <span class="p">{</span> <span class="o">...</span> <span class="p">}</span>
+
+<span class="c1"># Automatic validation</span>
+<span class="n">calc</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">".num"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">+</span> <span class="mi">10</span><span class="p">)</span>
+</code></pre>
+        </div>
+       </li>
+      </ol>
+      <hr/>
+      <h2 id="type-reference">
+       Type Reference
+      </h2>
+      <h3 id="valueref">
+       ValueRef
+      </h3>
+      <p>
+       Created by
+       <code>
+        V(selector)
+       </code>
+       :
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ValueRef</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">int</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">ValueRef</span>          <span class="c1"># Convert to integer</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">float</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">ValueRef</span>        <span class="c1"># Convert to float</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">upper</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">ValueRef</span>        <span class="c1"># Convert to uppercase</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">lower</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">ValueRef</span>        <span class="c1"># Convert to lowercase</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">trim</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">ValueRef</span>         <span class="c1"># Remove whitespace</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">operator</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">DynamicOperator</span>  <span class="c1"># Mark as dynamic operator</span>
+
+    <span class="c1"># Operators</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__add__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MathExpression</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__sub__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MathExpression</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__mul__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MathExpression</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__truediv__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MathExpression</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__mod__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MathExpression</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__pow__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MathExpression</span>
+</code></pre>
+      </div>
+      <h3 id="mathexpression">
+       MathExpression
+      </h3>
+      <p>
+       Created by operator overloading:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MathExpression</span><span class="p">:</span>
+    <span class="c1"># Supports all arithmetic operators</span>
+    <span class="c1"># Automatically handles precedence</span>
+    <span class="c1"># Validates NaN</span>
+    <span class="c1"># Generates async JavaScript</span>
+</code></pre>
+      </div>
+      <h3 id="dynamicoperator">
+       DynamicOperator
+      </h3>
+      <p>
+       Created by
+       <code>
+        .operator()
+       </code>
+       :
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DynamicOperator</span><span class="p">:</span>
+    <span class="n">VALID_OPERATORS</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'+'</span><span class="p">,</span> <span class="s1">'-'</span><span class="p">,</span> <span class="s1">'*'</span><span class="p">,</span> <span class="s1">'/'</span><span class="p">,</span> <span class="s1">'%'</span><span class="p">,</span> <span class="s1">'**'</span><span class="p">]</span>
+    <span class="c1"># Validates operator at runtime</span>
+    <span class="c1"># Falls back to '+' if invalid</span>
+</code></pre>
+      </div>
+      <hr/>
+     </div>
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_125">
       <h1 id="backend-http-utilities">
        Backend HTTP Utilities
       </h1>
@@ -13576,7 +14445,7 @@ def hello():
        .
       </p>
      </div>
-     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_125">
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_126">
       <h1 id="events-in-dars">
        Events in Dars
       </h1>
@@ -13839,7 +14708,7 @@ def hello():
 </code></pre>
       </div>
      </div>
-     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_126">
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_127">
       <h1 id="keyboard-events-in-dars">
        Keyboard Events in Dars
       </h1>
@@ -14508,7 +15377,7 @@ def hello():
        </li>
       </ul>
      </div>
-     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_127">
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_128">
       <h1 id="dars-exporter-documentation">
        Dars - Exporter Documentation
       </h1>
@@ -15078,7 +15947,7 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
        </li>
       </ul>
      </div>
-     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_128">
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_129">
       <h1 id="dars-script-system">
        Dars - Script System
       </h1>
@@ -17004,19 +17873,19 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
     </div>
     <div class="dars-container" id="footer-section" style="background: linear-gradient(135deg, #0a1512 0%, #0f1e1a 100%);
     margin-top: auto;">
-     <div class="dars-container" id="container_129" style="background: rgba(10, 15, 13, 0.8);
+     <div class="dars-container" id="container_130" style="background: rgba(10, 15, 13, 0.8);
     backdrop-filter: blur(12px);
     border-top: 1px solid rgba(100,255,200,0.15);">
-      <div class="dars-container" id="container_130" style="max-width: 1200px;
+      <div class="dars-container" id="container_131" style="max-width: 1200px;
     margin: 0 auto;
     padding: 50px 20px;">
-       <div class="dars-container" id="container_131" style="display: flex;
+       <div class="dars-container" id="container_132" style="display: flex;
     align-items: center;
     margin-bottom: 30px;">
-        <img alt="Dars Framework" class="dars-image" height="50px" id="image_132" src="Dars-logo.png" style="margin-right: 15px;
+        <img alt="Dars Framework" class="dars-image" height="50px" id="image_133" src="Dars-logo.png" style="margin-right: 15px;
     filter: drop-shadow(0 0 10px rgba(162, 255, 226, 0.4));" width="50px"/>
-        <div class="dars-container" id="container_133" style="text-align: left;">
-         <span class="dars-text" id="text_134" style="font-size: 24px;
+        <div class="dars-container" id="container_134" style="text-align: left;">
+         <span class="dars-text" id="text_135" style="font-size: 24px;
     font-weight: 700;
     color: #a2ffe2;
     margin-bottom: 5px;">
@@ -17024,20 +17893,20 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
          </span>
         </div>
        </div>
-       <div class="dars-container" id="container_135" style="display: flex;
+       <div class="dars-container" id="container_136" style="display: flex;
     flex-wrap: wrap;
     gap: 40px;
     justify-content: space-between;
     margin-bottom: 30px;">
-        <div class="dars-container" id="container_136" style="flex: 1;
+        <div class="dars-container" id="container_137" style="flex: 1;
     min-width: 150px;">
-         <span class="dars-text" id="text_137" style="font-size: 18px;
+         <span class="dars-text" id="text_138" style="font-size: 18px;
     font-weight: 600;
     color: #a2ffe2;
     margin-bottom: 15px;">
           Quick Links
          </span>
-         <a class="dars-link" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_138" style="color: #a0cfc0;
+         <a class="dars-link" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_139" style="color: #a0cfc0;
     text-decoration: none;
     display: block;
     margin-bottom: 8px;
@@ -17045,7 +17914,7 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
     font-size: 14px;" target="_self">
           Documentation
          </a>
-         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework" id="link_139" style="color: #a0cfc0;
+         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework" id="link_140" style="color: #a0cfc0;
     text-decoration: none;
     display: block;
     margin-bottom: 8px;
@@ -17053,7 +17922,7 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
     font-size: 14px;" target="_self">
           GitHub
          </a>
-         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework/tree/CrystalMain/dars/templates/examples" id="link_140" style="color: #a0cfc0;
+         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework/tree/CrystalMain/dars/templates/examples" id="link_141" style="color: #a0cfc0;
     text-decoration: none;
     display: block;
     margin-bottom: 8px;
@@ -17062,15 +17931,15 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
           Examples
          </a>
         </div>
-        <div class="dars-container" id="container_141" style="flex: 1;
+        <div class="dars-container" id="container_142" style="flex: 1;
     min-width: 150px;">
-         <span class="dars-text" id="text_142" style="font-size: 18px;
+         <span class="dars-text" id="text_143" style="font-size: 18px;
     font-weight: 600;
     color: #a2ffe2;
     margin-bottom: 15px;">
           Resources
          </span>
-         <a class="dars-link" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_143" style="color: #a0cfc0;
+         <a class="dars-link" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_144" style="color: #a0cfc0;
     text-decoration: none;
     display: block;
     margin-bottom: 8px;
@@ -17078,7 +17947,7 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
     font-size: 14px;" target="_self">
           Getting Started
          </a>
-         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework/releases.html" id="link_144" style="color: #a0cfc0;
+         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework/releases.html" id="link_145" style="color: #a0cfc0;
     text-decoration: none;
     display: block;
     margin-bottom: 8px;
@@ -17087,15 +17956,15 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
           Releases
          </a>
         </div>
-        <div class="dars-container" id="container_145" style="flex: 2;
+        <div class="dars-container" id="container_146" style="flex: 2;
     min-width: 200px;">
-         <span class="dars-text" id="text_146" style="font-size: 18px;
+         <span class="dars-text" id="text_147" style="font-size: 18px;
     font-weight: 600;
     color: #a2ffe2;
     margin-bottom: 15px;">
           Info:
          </span>
-         <span class="dars-text" id="text_147" style="color: #a0cfc0;
+         <span class="dars-text" id="text_148" style="color: #a0cfc0;
     font-size: 14px;
     line-height: 1.5;
     margin-bottom: 15px;">
@@ -17103,41 +17972,41 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
          </span>
         </div>
        </div>
-       <div class="dars-container" id="container_148" style="display: flex;
+       <div class="dars-container" id="container_149" style="display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
     padding-top: 20px;
     border-top: 1px solid rgba(100,255,200,0.1);">
-        <div class="dars-container" id="container_149" style="flex: 1;">
-         <span class="dars-text" id="text_150" style="color: #a0cfc0;
+        <div class="dars-container" id="container_150" style="flex: 1;">
+         <span class="dars-text" id="text_151" style="color: #a0cfc0;
     font-size: 14px;
     opacity: 0.7;">
           © 2024 Dars Framework.
          </span>
         </div>
-        <div class="dars-container" id="container_151" style="flex: 1;
+        <div class="dars-container" id="container_152" style="flex: 1;
     text-align: right;">
-         <span class="dars-text" id="text_152" style="color: #a0cfc0;
+         <span class="dars-text" id="text_153" style="color: #a0cfc0;
     font-size: 14px;
     opacity: 0.7;
     display: inline;">
           Created with
          </span>
-         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework" id="link_153" style="color: #a2ffe2;
+         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework" id="link_154" style="color: #a2ffe2;
     text-decoration: none;
     font-weight: 600;
     display: inline;
     font-size: 14px;" target="_self">
           Dars Framework
          </a>
-         <span class="dars-text" id="text_154" style="color: #a0cfc0;
+         <span class="dars-text" id="text_155" style="color: #a0cfc0;
     font-size: 14px;
     opacity: 0.7;
     display: inline;">
           by
          </span>
-         <a class="dars-link" href="https://github.com/ZtaMDev" id="link_155" style="color: #a2ffe2;
+         <a class="dars-link" href="https://github.com/ZtaMDev" id="link_156" style="color: #a2ffe2;
     text-decoration: none;
     font-weight: 600;
     display: inline;

@@ -4116,6 +4116,13 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
         if hasattr(required_val, 'marker'): required_val = False
         required_attr = "required" if required_val else ""
         
+        # Handle value - check useValue first, then useDynamic, then default
+        current_value = value_info['initial_values'].get('value')
+        if current_value is None:
+            current_value = dynamic_info['initial_values'].get('value', select.value)
+        if hasattr(current_value, 'marker'):
+            current_value = select.value
+        
         multiple_attr = "multiple" if select.multiple else ""
         size_attr = f'size="{select.size}"' if select.size else ""
         
@@ -4125,11 +4132,11 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
         # Generar opciones
         options_html = ""
         if select.placeholder and not select.multiple:
-            selected = "selected" if not select.value else ""
+            selected = "selected" if not current_value else ""
             options_html += f'<option value="" disabled {selected}>{select.placeholder}</option>'
         
         for option in select.options:
-            selected = "selected" if option.value == select.value else ""
+            selected = "selected" if option.value == current_value else ""
             disabled = "disabled" if option.disabled else ""
             options_html += f'<option value="{option.value}" {selected} {disabled}>{option.label}</option>'
         

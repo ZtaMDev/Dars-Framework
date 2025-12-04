@@ -40,6 +40,7 @@ docs = Page(
             Markdown(file_path="./documentation/markdown/routing.md", class_name="markdown_docs", dark_theme=True),
             Markdown(file_path="./documentation/markdown/state_management.md", class_name="markdown_docs", dark_theme=True),
             Markdown(file_path="./documentation/markdown/hooks.md", class_name="markdown_docs", dark_theme=True),
+            Markdown(file_path="./documentation/markdown/operations.md", class_name="markdown_docs", dark_theme=True),
             Markdown(file_path="./documentation/markdown/backend_api.md", class_name="markdown_docs", dark_theme=True),
             Markdown(file_path="./documentation/markdown/events.md", class_name="markdown_docs", dark_theme=True),
             Markdown(file_path="./documentation/markdown/KeyEvents.md", class_name="markdown_docs", dark_theme=True),

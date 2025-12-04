@@ -259,16 +259,44 @@ class ReactiveProperty:
         Returns an event handler that sets this property to a specific value.
         
         Works with any property type: text, html, style, class_name, attrs, etc.
+        Also supports MathExpression for declarative mathematical operations.
         
         Args:
-            value: The value to set
+            value: The value to set (can be a primitive, dict, or MathExpression)
             
         Example:
             button.on_click = status_state.text.set("Loading...")
             button.on_click = state.class_name.set("active")
             button.on_click = state.style.set({"color": "red"})
+            
+            # With MathExpression (declarative math)
+            button.on_click = calc.result.set(
+                V(".num1").float() + V(".num2").float()
+            )
         """
         from dars.scripts.dscript import dScript
+        
+        # Check if value is a MathExpression
+        try:
+            from dars.hooks.value_helpers import MathExpression
+            if isinstance(value, MathExpression):
+                # Generate async code to evaluate the expression
+                expr_code = value._get_code()
+                code = f"""(async () => {{
+    try {{
+        const result = await ({expr_code});
+        window.Dars.change({{
+            id: '{self._state.component.id}',
+            dynamic: true,
+            {self._name}: result
+        }});
+    }} catch (e) {{
+        console.error('[Dars] MathExpression error:', e);
+    }}
+}})();"""
+                return dScript(code)
+        except ImportError:
+            pass
         
         # Use the change() function to properly handle different property types
         code = self._generate_change_call(**{self._name: value})

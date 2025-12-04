@@ -1,4 +1,221 @@
-window.__DARS_VDOM__={type:"T1",id:"page_156",key:"0",children:[{type:"T2",id:"container_157",key:"0/0",children:[{type:"T3",id:"dars-navbar",key:"0/0/0",children:[{type:"T2",id:"navbar-left",key:"0/0/0/0",children:[{type:"T4",id:"image_158",key:"0/0/0/0/0"},{type:"T5",id:"text_159",key:"0/0/0/0/1",text:"Dars Framework"}]},{type:"T2",id:"container_160",key:"0/0/0/1",children:[{type:"T2",id:"navbar-right",key:"0/0/0/1/0",children:[{type:"T6",id:"link_161",key:"0/0/0/1/0/0",text:"Home"},{type:"T6",id:"link_162",key:"0/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_163",key:"0/0/0/1/0/2",text:"Releases"},{type:"T6",id:"link_164",key:"0/0/0/1/0/3",text:"PlayGround"},{type:"T6",id:"link_165",key:"0/0/0/1/0/4",text:"GitHub"}]},{type:"T2",id:"hamburger-menu",key:"0/0/0/1/1",children:[{type:"T2",id:"hamburger-btn",key:"0/0/0/1/1/0",children:[{type:"T2",id:"container_166",key:"0/0/0/1/1/0/0",children:[{type:"T2",id:"container_167",key:"0/0/0/1/1/0/0/0"},{type:"T2",id:"container_168",key:"0/0/0/1/1/0/0/1"},{type:"T2",id:"container_169",key:"0/0/0/1/1/0/0/2"}]}]},{type:"T2",id:"mobile-menu",key:"0/0/0/1/1/1",children:[{type:"T6",id:"link_170",key:"0/0/0/1/1/1/0",text:"Home"},{type:"T6",id:"link_171",key:"0/0/0/1/1/1/1",text:"Documentation"},{type:"T6",id:"link_172",key:"0/0/0/1/1/1/2",text:"Releases"},{type:"T6",id:"link_173",key:"0/0/0/1/1/1/3",text:"PlayGround"},{type:"T6",id:"link_174",key:"0/0/0/1/1/1/4",text:"GitHub"}]}]}]}]}]},{type:"T2",id:"container_175",key:"0/1",children:[{type:"T2",id:"markdown-content-container",key:"0/1/0",children:[{type:"T9",id:"markdown_176",key:"0/1/0/0",text:`# Release Notes v1.6.3
+window.__DARS_VDOM__={type:"T1",id:"page_157",key:"0",children:[{type:"T2",id:"container_158",key:"0/0",children:[{type:"T3",id:"dars-navbar",key:"0/0/0",children:[{type:"T2",id:"navbar-left",key:"0/0/0/0",children:[{type:"T4",id:"image_159",key:"0/0/0/0/0"},{type:"T5",id:"text_160",key:"0/0/0/0/1",text:"Dars Framework"}]},{type:"T2",id:"container_161",key:"0/0/0/1",children:[{type:"T2",id:"navbar-right",key:"0/0/0/1/0",children:[{type:"T6",id:"link_162",key:"0/0/0/1/0/0",text:"Home"},{type:"T6",id:"link_163",key:"0/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_164",key:"0/0/0/1/0/2",text:"Releases"},{type:"T6",id:"link_165",key:"0/0/0/1/0/3",text:"PlayGround"},{type:"T6",id:"link_166",key:"0/0/0/1/0/4",text:"GitHub"}]},{type:"T2",id:"hamburger-menu",key:"0/0/0/1/1",children:[{type:"T2",id:"hamburger-btn",key:"0/0/0/1/1/0",children:[{type:"T2",id:"container_167",key:"0/0/0/1/1/0/0",children:[{type:"T2",id:"container_168",key:"0/0/0/1/1/0/0/0"},{type:"T2",id:"container_169",key:"0/0/0/1/1/0/0/1"},{type:"T2",id:"container_170",key:"0/0/0/1/1/0/0/2"}]}]},{type:"T2",id:"mobile-menu",key:"0/0/0/1/1/1",children:[{type:"T6",id:"link_171",key:"0/0/0/1/1/1/0",text:"Home"},{type:"T6",id:"link_172",key:"0/0/0/1/1/1/1",text:"Documentation"},{type:"T6",id:"link_173",key:"0/0/0/1/1/1/2",text:"Releases"},{type:"T6",id:"link_174",key:"0/0/0/1/1/1/3",text:"PlayGround"},{type:"T6",id:"link_175",key:"0/0/0/1/1/1/4",text:"GitHub"}]}]}]}]}]},{type:"T2",id:"container_176",key:"0/1",children:[{type:"T2",id:"markdown-content-container",key:"0/1/0",children:[{type:"T9",id:"markdown_177",key:"0/1/0/0",text:`# Release Notes v1.6.4
+
+> **Pythonic Mathematical Expressions - Declarative Calculations**
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+## What's New
+
+### Pythonic Expression System with V()
+
+Dars Framework v1.6.4 introduces a revolutionary declarative system for mathematical expressions. Write complex calculations in pure Python using operator overloading - **no inline JavaScript required!**
+
+**Key Features:**
+- **Operator Overloading** - Use Python operators (\`+\`, \`-\`, \`*\`, \`/\`, \`%\`, \`**\`)
+- **Automatic Precedence** - Parentheses handled automatically
+- **Dynamic Operators** - Operators from Select/Input elements
+- **NaN Validation** - Safe handling of empty/invalid inputs
+- **Type Safety** - Numeric operations require \`.float()\` or \`.int()\`
+
+#### Before (v1.6.3) - Verbose JavaScript
+
+\`\`\`python
+Button(
+    "Calculate",
+    on_click=dScript(f"""
+        const n1 = parseFloat(document.querySelector('.num1').value);
+        const n2 = parseFloat(document.querySelector('.num2').value);
+        const op = document.querySelector('.operation').value;
+        
+        let result = 0;
+        switch(op) {{
+            case '+': result = n1 + n2; break;
+            case '-': result = n1 - n2; break;
+            case '*': result = n1 * n2; break;
+            case '/': result = n1 / n2; break;
+        }}
+        
+        window.Dars.change({{
+            id: 'calc',
+            dynamic: true,
+            result: result
+        }});
+    """)
+)
+\`\`\`
+
+#### After (v1.6.4) - Declarative Python
+
+\`\`\`python
+Button(
+    "Calculate",
+    on_click=calc.result.set(
+        V(".num1").float() + V(".operation").operator() + V(".num2").float()
+    )
+)
+\`\`\`
+
+**Benefits:**
+- **less code**
+- **Type-safe** with explicit transformations
+- **NaN validation** with console warnings
+- **Pythonic syntax** - feels natural
+- **No inline JavaScript** - pure Python
+
+---
+
+### Mathematical Operations
+
+#### Simple Arithmetic
+
+\`\`\`python
+# Addition
+calc.total.set(V(".price").float() + V(".tax").float())
+
+# Subtraction
+calc.change.set(V(".paid").float() - V(".total").float())
+
+# Multiplication
+calc.total.set(V(".price").float() * V(".quantity").int())
+
+# Division
+calc.average.set(V(".sum").float() / V(".count").int())
+\`\`\`
+
+#### Complex Expressions with Automatic Precedence
+
+\`\`\`python
+# a + b * c  \u2192  a + (b * c)  \u2705 Automatic
+calc.result.set(
+    V(".a").float() + V(".b").float() * V(".c").float()
+)
+
+# (a + b) * c  \u2192  (a + b) * c  \u2705 Preserved
+calc.result.set(
+    (V(".a").float() + V(".b").float()) * V(".c").float()
+)
+
+# With literals
+calc.total.set(
+    (V(".price").float() * V(".qty").int()) * 1.15  # Add 15% tax
+)
+\`\`\`
+
+**Precedence Table:**
+
+| Operator | Precedence | Associativity |
+|----------|------------|---------------|
+| \`**\`     | 3 (highest)| Right         |
+| \`*\`, \`/\`, \`%\` | 2     | Left          |
+| \`+\`, \`-\` | 1 (lowest) | Left          |
+
+---
+
+### Dynamic Operators
+
+Use operators from Select or Input elements with the new \`.operator()\` method:
+
+\`\`\`python
+from dars.all import *
+
+calc = State("calc", operation="+", result=0)
+
+@route("/")
+def index():
+    return Page(
+        # Operation selector
+        Select(
+            value=useValue("calc.operation", selector=".operation"),
+            class_name="operation",
+            options=[
+                SelectOption("+", "\u2795 Add"),
+                SelectOption("-", "\u2796 Subtract"),
+                SelectOption("*", "\u2716\uFE0F Multiply"),
+                SelectOption("/", "\u2797 Divide")
+            ]
+        ),
+        
+        # Number inputs
+        Input(class_name="num1", input_type="number"),
+        Input(class_name="num2", input_type="number"),
+        
+        # Declarative calculation!
+        Button(
+            "Calculate",
+            on_click=calc.result.set(
+                V(".num1").float() + V(".operation").operator() + V(".num2").float()
+            )
+        ),
+        
+        # Result display
+        Text(text=useDynamic("calc.result"))
+    )
+\`\`\`
+
+**How it works:**
+1. \`V(".operation").operator()\` extracts the operator value
+2. Validates against whitelist: \`+\`, \`-\`, \`*\`, \`/\`, \`%\`, \`**\`
+3. Uses switch statement for safe evaluation
+4. Falls back to \`+\` if invalid (with console warning)
+
+---
+
+### NaN Validation
+
+All mathematical expressions include automatic NaN validation:
+
+\`\`\`python
+# Empty inputs automatically return 0
+Button(
+    "Calculate",
+    on_click=calc.result.set(
+        V(".num1").float() + V(".num2").float()
+    )
+)
+# Empty inputs \u2192 Returns 0
+# Console: "[Dars] Invalid input: one or more values are NaN. Returning 0."
+\`\`\`
+
+**Validation Points:**
+1. **Input Validation** - Checks operands before calculation
+2. **Result Validation** - Checks result after calculation
+3. **Console Logging** - Warns when NaN is detected
+
+---
+
+### Enhanced Select Component
+
+- **useValue Support** - Set initial value from state with selector
+- **Proper Value Handling** - Correctly selects option based on initial value
+- **Selector Integration** - Works seamlessly with \`V()\` for value extraction
+
+\`\`\`python
+Select(
+    value=useValue("calc.operation", selector=".operation"),
+    class_name="operation",
+    options=[...]
+)
+\`\`\`
+
+---
+
+## What's Next
+
+Future enhancements planned for 1.7.0:
+- Comparison operators (\`>\`, \`<\`, \`==\`, \`!=\`)
+- Logical operators (\`and\`, \`or\`, \`not\`)
+- Ternary operator support
+- Array/list operations
+- Math functions (\`.abs()\`, \`.round()\`, \`.sqrt()\`, etc.)
+
+---
+
+# Release Notes v1.6.3
+
 
 > **Tailwind-like Utility Class System**
 
@@ -3602,4 +3819,4 @@ Upgrade Recommendation: Recommended for all users; especially helpful for projec
 # Older release notes can be found
 
 In the github repository [Here](https://github.com/ZtaMDev/Dars-Framework/releases).
-`}]},{type:"T2",id:"footer-section",key:"0/1/1",children:[{type:"T2",id:"container_177",key:"0/1/1/0",children:[{type:"T2",id:"container_178",key:"0/1/1/0/0",children:[{type:"T2",id:"container_179",key:"0/1/1/0/0/0",children:[{type:"T4",id:"image_180",key:"0/1/1/0/0/0/0"},{type:"T2",id:"container_181",key:"0/1/1/0/0/0/1",children:[{type:"T5",id:"text_182",key:"0/1/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_183",key:"0/1/1/0/0/1",children:[{type:"T2",id:"container_184",key:"0/1/1/0/0/1/0",children:[{type:"T5",id:"text_185",key:"0/1/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_186",key:"0/1/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_187",key:"0/1/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_188",key:"0/1/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_189",key:"0/1/1/0/0/1/1",children:[{type:"T5",id:"text_190",key:"0/1/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_191",key:"0/1/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_192",key:"0/1/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_193",key:"0/1/1/0/0/1/2",children:[{type:"T5",id:"text_194",key:"0/1/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_195",key:"0/1/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_196",key:"0/1/1/0/0/2",children:[{type:"T2",id:"container_197",key:"0/1/1/0/0/2/0",children:[{type:"T5",id:"text_198",key:"0/1/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_199",key:"0/1/1/0/0/2/1",children:[{type:"T5",id:"text_200",key:"0/1/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_201",key:"0/1/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_202",key:"0/1/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_203",key:"0/1/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]},{type:"T10",id:"documentation-sidebar",key:"0/2"}]},function(){const c=new Map;let l=null,p=null;function u(){}function k(){}function b(n,t){if(!n)return;t(n);const e=n.children||[];for(let a=0;a<e.length;a++)b(e[a],t)}function S(n,t){if(!(!n||!t))for(const[e,a]of Object.entries(t))try{a===!1||a===null||typeof a>"u"?n.removeAttribute(e):n.setAttribute(e,String(a))}catch{}}function P(n,t={},e={}){for(const a in t)if(!(a in e))try{n.removeAttribute(a)}catch{}for(const a in e){const o=e[a];try{o===!1||o===null||typeof o>"u"?n.removeAttribute(a):n.setAttribute(a,String(o))}catch{}}}function F(n,t={},e={}){for(const a in t)if(!(a in e))try{n.style.removeProperty(a.replace(/_/g,"-"))}catch{}for(const a in e){const o=e[a];try{n.style.setProperty(a.replace(/_/g,"-"),String(o))}catch{}}}function M(n,t){(t||document).addEventListener(n,function(e){let a=e.target;const o=t||document;for(;a&&a!==o;){const m=a.id;if(m&&c.has(m)){const y=c.get(m);if(a&&a.__darsEv&&a.__darsEv[n])return;let d=y[n];if(!d&&(n==="keydown"||n==="keyup"||n==="keypress")){const i=e.key||e.code;if(i){const r=n+"."+i;d=y[r]}}if(typeof d=="function"){try{d.call(a,e)}catch(i){console.error("[Dars] handler error",i)}return}}a=a.parentNode}},!0)}function _(n,t){return n&&t?n.type!==t.type:n!==t}function x(n){if(!n)return;const t=n.children||[];for(let e=0;e<t.length;e++)x(t[e]);if(n.id&&c.delete(n.id),n.id){const e=document.getElementById(n.id);if(e&&e.parentNode)try{e.parentNode.removeChild(e)}catch{}}}function v(n,t){if(!t||!t.id)return{ok:!1,reason:"missing-new"};let e=document.getElementById(t.id);if(!e){const i=n&&n.id?document.getElementById(n.id):null;if(i)try{i.id=t.id,e=i}catch{}}if(!e)return{ok:!1,reason:"missing-el"};if(_(n,t))return{ok:!1,reason:"type-changed"};const a=!!t.isIsland;if(!a&&t.class&&(e.className=t.class),a||P(e,n&&n.props||{},t.props||{}),a||F(e,n&&n.style||{},t.style||{}),!a&&Object.prototype.hasOwnProperty.call(t,"text")&&e.textContent!==String(t.text||"")&&(e.textContent=String(t.text||"")),a)return{ok:!0};const o=n&&n.children?n.children:[],m=t.children?t.children:[],y=new Map;for(let i=0;i<o.length;i++){const r=o[i]&&(o[i].id||o[i].key)||null;r&&y.set(String(r),o[i])}const d=new Set;for(let i=0;i<m.length;i++){const r=m[i],h=r&&(r.id||r.key)||null;if(!h)if(i<o.length){const s=v(o[i],r);if(!s.ok)return s;d.add(o[i]);continue}else return{ok:!1,reason:"children-added"};const w=y.get(String(h));if(w){const s=v(w,r);if(!s.ok)return s;d.add(w)}else{if(i<o.length){const f=o[i];if(!_(f,r)){const g=v(f,r);if(!g.ok)return g;d.add(f);continue}}const s=createSubtree(r);if(s){const f=i<o.length?o[i]:null;if(f&&f.id){const g=document.getElementById(f.id);g&&g.parentNode?g.parentNode.insertBefore(s,g):e.appendChild(s)}else e.appendChild(s);continue}return{ok:!1,reason:"children-added"}}}for(let i=0;i<o.length;i++){const r=o[i];d.has(r)||x(r)}return{ok:!0}}function R(n){typeof requestAnimationFrame=="function"?requestAnimationFrame(n):setTimeout(n,16)}function V(n){const t=l;if(!t){l=n;try{window.__DARS_VDOM__=n}catch{}return}R(()=>{const e=v(t,n);if(!e.ok){console.warn("[Dars] Structural change detected (",e.reason,"), reloading...");try{location.reload()}catch{}return}l=n;try{window.__DARS_VDOM__=n}catch{}})}function N(n){l=n;try{window.__DARS_VDOM__=n}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(e=>M(e,document))}function B(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const n=window.__DARS_VERSION_URL||"version.txt";let t=null,e=!1,a=0;const o=10;let m=!1;function y(i,r,h,w){try{const s=new XMLHttpRequest;w&&(s.responseType=w),s.open("GET",i,!0),s.timeout=5e3,s.onreadystatechange=function(){s.readyState===4&&(s.status>=200&&s.status<300?r(s.response):h())},s.onerror=h,s.ontimeout=h,s.setRequestHeader("Cache-Control","no-store"),s.send()}catch{h()}}function d(){m||y(n,function(i){let r=(i||"").toString().trim();if(!r||r==="0"){if(a+=1,a>=o){console.warn("[Dars] version file not found after",o,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(d,600);return}if(a=0,e=!1,p||(p=r),r&&r!==p){p=r;try{location.reload()}catch{}return}t=setTimeout(d,600)},function(){if(a+=1,a>=o){console.warn("[Dars] version file not reachable after",o,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(d,600)},"text")}return d(),()=>{try{m=!0,t&&clearTimeout(t),window.__DARS_STOP_HOTRELOAD=null}catch{}}}document.addEventListener("DOMContentLoaded",function(){if(window.__DARS_VDOM__?N(window.__DARS_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=B()}catch{}}})}(),window.addEventListener("scroll",()=>{const c=document.getElementById("dars-navbar");window.scrollY>20?c.classList.add("scrolled"):c.classList.remove("scrolled");const l=document.getElementById("features-section");if(l&&!l.classList.contains("visible")){const p=l.getBoundingClientRect().top,u=window.innerHeight/1.5;p<u&&(l.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((b,S)=>{setTimeout(()=>{b.style.opacity="1",b.style.transform="translateY(0)"},S*100)}))}});const C=document.getElementById("hero-logo"),D=document.getElementById("hero-title"),T=document.getElementById("hero-description"),I=document.getElementById("pip-command"),A=document.getElementById("get-started-btn"),E=document.getElementById("scroll-text");C&&setTimeout(()=>C.classList.add("show"),5),D&&setTimeout(()=>D.classList.add("show"),350),T&&setTimeout(()=>T.classList.add("show"),650),I&&setTimeout(()=>I.classList.add("show"),950),A&&setTimeout(()=>A.classList.add("show"),1250),E&&setTimeout(()=>E.classList.add("show"),1500),document.addEventListener("DOMContentLoaded",function(){const c=document.getElementById("hamburger-btn"),l=document.getElementById("mobile-menu"),p=document.body;c&&l&&(c.addEventListener("click",function(u){u.stopPropagation(),l.style.display==="flex"?(l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open")):(l.style.display="flex",c.classList.add("menu-open"),p.classList.add("menu-open"))}),l.querySelectorAll("a").forEach(u=>{u.addEventListener("click",function(){l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open")})}),document.addEventListener("click",function(u){!c.contains(u.target)&&!l.contains(u.target)&&(l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open"))}),document.addEventListener("keydown",function(u){u.key==="Escape"&&l.style.display==="flex"&&(l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open"))}))});
+`}]},{type:"T2",id:"footer-section",key:"0/1/1",children:[{type:"T2",id:"container_178",key:"0/1/1/0",children:[{type:"T2",id:"container_179",key:"0/1/1/0/0",children:[{type:"T2",id:"container_180",key:"0/1/1/0/0/0",children:[{type:"T4",id:"image_181",key:"0/1/1/0/0/0/0"},{type:"T2",id:"container_182",key:"0/1/1/0/0/0/1",children:[{type:"T5",id:"text_183",key:"0/1/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_184",key:"0/1/1/0/0/1",children:[{type:"T2",id:"container_185",key:"0/1/1/0/0/1/0",children:[{type:"T5",id:"text_186",key:"0/1/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_187",key:"0/1/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_188",key:"0/1/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_189",key:"0/1/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_190",key:"0/1/1/0/0/1/1",children:[{type:"T5",id:"text_191",key:"0/1/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_192",key:"0/1/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_193",key:"0/1/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_194",key:"0/1/1/0/0/1/2",children:[{type:"T5",id:"text_195",key:"0/1/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_196",key:"0/1/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_197",key:"0/1/1/0/0/2",children:[{type:"T2",id:"container_198",key:"0/1/1/0/0/2/0",children:[{type:"T5",id:"text_199",key:"0/1/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_200",key:"0/1/1/0/0/2/1",children:[{type:"T5",id:"text_201",key:"0/1/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_202",key:"0/1/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_203",key:"0/1/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_204",key:"0/1/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]},{type:"T10",id:"documentation-sidebar",key:"0/2"}]},function(){const c=new Map;let l=null,p=null;function u(){}function k(){}function b(n,t){if(!n)return;t(n);const e=n.children||[];for(let a=0;a<e.length;a++)b(e[a],t)}function S(n,t){if(!(!n||!t))for(const[e,a]of Object.entries(t))try{a===!1||a===null||typeof a>"u"?n.removeAttribute(e):n.setAttribute(e,String(a))}catch{}}function P(n,t={},e={}){for(const a in t)if(!(a in e))try{n.removeAttribute(a)}catch{}for(const a in e){const o=e[a];try{o===!1||o===null||typeof o>"u"?n.removeAttribute(a):n.setAttribute(a,String(o))}catch{}}}function F(n,t={},e={}){for(const a in t)if(!(a in e))try{n.style.removeProperty(a.replace(/_/g,"-"))}catch{}for(const a in e){const o=e[a];try{n.style.setProperty(a.replace(/_/g,"-"),String(o))}catch{}}}function M(n,t){(t||document).addEventListener(n,function(e){let a=e.target;const o=t||document;for(;a&&a!==o;){const m=a.id;if(m&&c.has(m)){const y=c.get(m);if(a&&a.__darsEv&&a.__darsEv[n])return;let d=y[n];if(!d&&(n==="keydown"||n==="keyup"||n==="keypress")){const i=e.key||e.code;if(i){const r=n+"."+i;d=y[r]}}if(typeof d=="function"){try{d.call(a,e)}catch(i){console.error("[Dars] handler error",i)}return}}a=a.parentNode}},!0)}function _(n,t){return n&&t?n.type!==t.type:n!==t}function x(n){if(!n)return;const t=n.children||[];for(let e=0;e<t.length;e++)x(t[e]);if(n.id&&c.delete(n.id),n.id){const e=document.getElementById(n.id);if(e&&e.parentNode)try{e.parentNode.removeChild(e)}catch{}}}function v(n,t){if(!t||!t.id)return{ok:!1,reason:"missing-new"};let e=document.getElementById(t.id);if(!e){const i=n&&n.id?document.getElementById(n.id):null;if(i)try{i.id=t.id,e=i}catch{}}if(!e)return{ok:!1,reason:"missing-el"};if(_(n,t))return{ok:!1,reason:"type-changed"};const a=!!t.isIsland;if(!a&&t.class&&(e.className=t.class),a||P(e,n&&n.props||{},t.props||{}),a||F(e,n&&n.style||{},t.style||{}),!a&&Object.prototype.hasOwnProperty.call(t,"text")&&e.textContent!==String(t.text||"")&&(e.textContent=String(t.text||"")),a)return{ok:!0};const o=n&&n.children?n.children:[],m=t.children?t.children:[],y=new Map;for(let i=0;i<o.length;i++){const r=o[i]&&(o[i].id||o[i].key)||null;r&&y.set(String(r),o[i])}const d=new Set;for(let i=0;i<m.length;i++){const r=m[i],h=r&&(r.id||r.key)||null;if(!h)if(i<o.length){const s=v(o[i],r);if(!s.ok)return s;d.add(o[i]);continue}else return{ok:!1,reason:"children-added"};const w=y.get(String(h));if(w){const s=v(w,r);if(!s.ok)return s;d.add(w)}else{if(i<o.length){const f=o[i];if(!_(f,r)){const g=v(f,r);if(!g.ok)return g;d.add(f);continue}}const s=createSubtree(r);if(s){const f=i<o.length?o[i]:null;if(f&&f.id){const g=document.getElementById(f.id);g&&g.parentNode?g.parentNode.insertBefore(s,g):e.appendChild(s)}else e.appendChild(s);continue}return{ok:!1,reason:"children-added"}}}for(let i=0;i<o.length;i++){const r=o[i];d.has(r)||x(r)}return{ok:!0}}function N(n){typeof requestAnimationFrame=="function"?requestAnimationFrame(n):setTimeout(n,16)}function B(n){const t=l;if(!t){l=n;try{window.__DARS_VDOM__=n}catch{}return}N(()=>{const e=v(t,n);if(!e.ok){console.warn("[Dars] Structural change detected (",e.reason,"), reloading...");try{location.reload()}catch{}return}l=n;try{window.__DARS_VDOM__=n}catch{}})}function R(n){l=n;try{window.__DARS_VDOM__=n}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(e=>M(e,document))}function V(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const n=window.__DARS_VERSION_URL||"version.txt";let t=null,e=!1,a=0;const o=10;let m=!1;function y(i,r,h,w){try{const s=new XMLHttpRequest;w&&(s.responseType=w),s.open("GET",i,!0),s.timeout=5e3,s.onreadystatechange=function(){s.readyState===4&&(s.status>=200&&s.status<300?r(s.response):h())},s.onerror=h,s.ontimeout=h,s.setRequestHeader("Cache-Control","no-store"),s.send()}catch{h()}}function d(){m||y(n,function(i){let r=(i||"").toString().trim();if(!r||r==="0"){if(a+=1,a>=o){console.warn("[Dars] version file not found after",o,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(d,600);return}if(a=0,e=!1,p||(p=r),r&&r!==p){p=r;try{location.reload()}catch{}return}t=setTimeout(d,600)},function(){if(a+=1,a>=o){console.warn("[Dars] version file not reachable after",o,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(d,600)},"text")}return d(),()=>{try{m=!0,t&&clearTimeout(t),window.__DARS_STOP_HOTRELOAD=null}catch{}}}document.addEventListener("DOMContentLoaded",function(){if(window.__DARS_VDOM__?R(window.__DARS_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=V()}catch{}}})}(),window.addEventListener("scroll",()=>{const c=document.getElementById("dars-navbar");window.scrollY>20?c.classList.add("scrolled"):c.classList.remove("scrolled");const l=document.getElementById("features-section");if(l&&!l.classList.contains("visible")){const p=l.getBoundingClientRect().top,u=window.innerHeight/1.5;p<u&&(l.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((b,S)=>{setTimeout(()=>{b.style.opacity="1",b.style.transform="translateY(0)"},S*100)}))}});const C=document.getElementById("hero-logo"),D=document.getElementById("hero-title"),T=document.getElementById("hero-description"),I=document.getElementById("pip-command"),A=document.getElementById("get-started-btn"),E=document.getElementById("scroll-text");C&&setTimeout(()=>C.classList.add("show"),5),D&&setTimeout(()=>D.classList.add("show"),350),T&&setTimeout(()=>T.classList.add("show"),650),I&&setTimeout(()=>I.classList.add("show"),950),A&&setTimeout(()=>A.classList.add("show"),1250),E&&setTimeout(()=>E.classList.add("show"),1500),document.addEventListener("DOMContentLoaded",function(){const c=document.getElementById("hamburger-btn"),l=document.getElementById("mobile-menu"),p=document.body;c&&l&&(c.addEventListener("click",function(u){u.stopPropagation(),l.style.display==="flex"?(l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open")):(l.style.display="flex",c.classList.add("menu-open"),p.classList.add("menu-open"))}),l.querySelectorAll("a").forEach(u=>{u.addEventListener("click",function(){l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open")})}),document.addEventListener("click",function(u){!c.contains(u.target)&&!l.contains(u.target)&&(l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open"))}),document.addEventListener("keydown",function(u){u.key==="Escape"&&l.style.display==="flex"&&(l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open"))}))});

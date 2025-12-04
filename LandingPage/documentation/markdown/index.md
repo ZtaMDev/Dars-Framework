@@ -14,6 +14,7 @@ Welcome to the official Dars Framework documentation. Here you will find detaile
 - [Animation System](#dars-animation-system)
 - [Custom Components](#custom-components-in-dars-framework)
 - [Hooks](#hooks-system)
+- [Operations](#operations-in-dars)
 - [Key Events System](#keyboard-events-in-dars)
 - [Event Handling](#events-in-dars)
 - [Exporters](#dars-exporter-documentation)

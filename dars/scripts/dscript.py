@@ -105,7 +105,6 @@ class _ArgHelper:
         Arg -> RawJS("dScript.ARG")
     """
     def __getattr__(self, name: str):
-        from .rawjs import RawJS
         return RawJS(f"dScript.ARG.{name}")
     
     def __str__(self):

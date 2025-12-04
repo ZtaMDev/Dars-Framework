@@ -389,6 +389,7 @@ def create_sidebar():
         "./documentation/markdown/animations.md",
         "./documentation/markdown/routing.md",
         "./documentation/markdown/state_management.md",
+        "./documentation/markdown/operations.md",
         "./documentation/markdown/hooks.md",
         "./documentation/markdown/backend_api.md",
         "./documentation/markdown/events.md",

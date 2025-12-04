@@ -390,43 +390,32 @@ V("cart.total").float()  # Extract state value as float
 
 #### Operations
 
-`ValueRef` objects support Python operators with **important validation**:
-
-**String Concatenation (Always Allowed)**
-```python
-# Concatenation works without transformations
-state.fullname.set(V("#first") + " " + V("#last"))
-message = "Total: $" + V("cart.total")
-```
-
-**Arithmetic Operations (Require Numeric Transformations)**
-
-**New in v1.5.8**: Arithmetic operators (`*`, `/`, `-`, `%`, `**`) now **require** `.int()` or `.float()` transformations to prevent accidental string concatenation:
+`V()` now supports declarative mathematical expressions with operator overloading!
 
 ```python
-# CORRECT - With numeric transformations
-state.total.set(V("#price").float() * V("#qty").int())
-state.age.set(V("#age").int() + 10)
-discount = V("product.price").float() * 0.9
+# Simple arithmetic
+calc.result.set(V(".a").float() + V(".b").float())
 
-# CORRECT - Combining DOM and state values
-productState.total.set(
-    V(".qty-input").int() * V("product.price").float()
+# Complex expressions with automatic precedence
+calc.result.set(
+    (V(".a").float() + V(".b").float()) * V(".c").float()
 )
 
-# ERROR - Without transformations
-state.total.set(V("#price") * V("#qty"))
-# TypeError: Multiplication requires numeric transformation.
-#            Use V('#price').int() or V('#price').float() before multiplying.
+# Dynamic operators from Select elements
+calc.result.set(
+    V(".num1").float() + V(".operation").operator() + V(".num2").float()
+)
 ```
 
-**Supported Operators:**
-- `+` - Addition/Concatenation (always allowed)
-- `*` - Multiplication (requires `.int()` or `.float()`)
-- `/` - Division (requires `.int()` or `.float()`)
-- `-` - Subtraction (requires `.int()` or `.float()`)
-- `%` - Modulo (requires `.int()` or `.float()`)
-- `**` - Power (requires `.int()` or `.float()`)
+**Features:**
+- Operator overloading (`+`, `-`, `*`, `/`, `%`, `**`)
+- Automatic operator precedence
+- Dynamic operators from Select/Input
+- NaN validation with console warnings
+- Type safety (numeric ops require `.float()` or `.int()`)
+
+> [!TIP]
+> For complete documentation on mathematical operations, operator precedence, dynamic operators, and advanced examples, see [Mathematical Operations](operations.md).
 
 #### Complete Example
 

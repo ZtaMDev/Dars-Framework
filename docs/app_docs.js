@@ -14,6 +14,7 @@ Welcome to the official Dars Framework documentation. Here you will find detaile
 - [Animation System](#dars-animation-system)
 - [Custom Components](#custom-components-in-dars-framework)
 - [Hooks](#hooks-system)
+- [Operations](#operations-in-dars)
 - [Key Events System](#keyboard-events-in-dars)
 - [Event Handling](#events-in-dars)
 - [Exporters](#dars-exporter-documentation)
@@ -4000,43 +4001,32 @@ V("cart.total").float()  # Extract state value as float
 
 #### Operations
 
-\`ValueRef\` objects support Python operators with **important validation**:
-
-**String Concatenation (Always Allowed)**
-\`\`\`python
-# Concatenation works without transformations
-state.fullname.set(V("#first") + " " + V("#last"))
-message = "Total: $" + V("cart.total")
-\`\`\`
-
-**Arithmetic Operations (Require Numeric Transformations)**
-
-**New in v1.5.8**: Arithmetic operators (\`*\`, \`/\`, \`-\`, \`%\`, \`**\`) now **require** \`.int()\` or \`.float()\` transformations to prevent accidental string concatenation:
+\`V()\` now supports declarative mathematical expressions with operator overloading!
 
 \`\`\`python
-# CORRECT - With numeric transformations
-state.total.set(V("#price").float() * V("#qty").int())
-state.age.set(V("#age").int() + 10)
-discount = V("product.price").float() * 0.9
+# Simple arithmetic
+calc.result.set(V(".a").float() + V(".b").float())
 
-# CORRECT - Combining DOM and state values
-productState.total.set(
-    V(".qty-input").int() * V("product.price").float()
+# Complex expressions with automatic precedence
+calc.result.set(
+    (V(".a").float() + V(".b").float()) * V(".c").float()
 )
 
-# ERROR - Without transformations
-state.total.set(V("#price") * V("#qty"))
-# TypeError: Multiplication requires numeric transformation.
-#            Use V('#price').int() or V('#price').float() before multiplying.
+# Dynamic operators from Select elements
+calc.result.set(
+    V(".num1").float() + V(".operation").operator() + V(".num2").float()
+)
 \`\`\`
 
-**Supported Operators:**
-- \`+\` - Addition/Concatenation (always allowed)
-- \`*\` - Multiplication (requires \`.int()\` or \`.float()\`)
-- \`/\` - Division (requires \`.int()\` or \`.float()\`)
-- \`-\` - Subtraction (requires \`.int()\` or \`.float()\`)
-- \`%\` - Modulo (requires \`.int()\` or \`.float()\`)
-- \`**\` - Power (requires \`.int()\` or \`.float()\`)
+**Features:**
+- Operator overloading (\`+\`, \`-\`, \`*\`, \`/\`, \`%\`, \`**\`)
+- Automatic operator precedence
+- Dynamic operators from Select/Input
+- NaN validation with console warnings
+- Type safety (numeric ops require \`.float()\` or \`.int()\`)
+
+> [!TIP]
+> For complete documentation on mathematical operations, operator precedence, dynamic operators, and advanced examples, see [Mathematical Operations](operations.md).
 
 #### Complete Example
 
@@ -4134,7 +4124,478 @@ fetch(
 - Nest state paths more than 2 levels deep (currently supports \`stateName.property\`).
 - Use arithmetic operators without numeric transformations.
 
----`},{type:"T9",id:"markdown_124",key:"0/2/0/13",text:`# Backend HTTP Utilities 
+---`},{type:"T9",id:"markdown_124",key:"0/2/0/13",text:`# Operations in Dars
+
+Dars introduces a powerful, declarative system for mathematical expressions using operator overloading. Write complex calculations in pure Python without any inline JavaScript!
+
+## Overview
+
+The \`V()\` helper supports:
+-  **Operator overloading** - Use Python operators (\`+\`, \`-\`, \`*\`, \`/\`, \`%\`, \`**\`)
+-  **Dynamic operators** - Operators from Select/Input elements
+-  **Automatic precedence** - Parentheses handled automatically
+-  **NaN validation** - Safe handling of empty/invalid inputs
+-  **Type safety** - Numeric operations require \`.float()\` or \`.int()\`
+
+---
+
+## Basic Operations
+
+### String Concatenation
+
+String concatenation works without any transformations:
+
+\`\`\`python
+from dars.all import *
+
+# Simple concatenation
+state.fullname.set(V(".first") + " " + V(".last"))
+
+# With literals
+state.message.set("Hello, " + V(".username") + "!")
+
+# Multiple values
+state.info.set(V(".name") + " - " + V(".email") + " - " + V(".phone"))
+\`\`\`
+
+### Arithmetic Operations
+
+**IMPORTANT**: Arithmetic operations **require** \`.float()\` or \`.int()\` transformations:
+
+\`\`\`python
+# Addition
+state.total.set(V(".price").float() + V(".tax").float())
+
+# Subtraction
+state.change.set(V(".paid").float() - V(".total").float())
+
+# Multiplication
+state.total.set(V(".price").float() * V(".quantity").int())
+
+# Division
+state.average.set(V(".sum").float() / V(".count").int())
+
+# Module
+state.remainder.set(V(".number").int() % V(".divisor").int())
+
+# Power
+state.result.set(V(".base").float() ** V(".exponent").int())
+\`\`\`
+
+**Why transformations are required:**
+- Prevents accidental string concatenation (e.g., \`"5" * "3"\` = \`"555"\` in JavaScript)
+- Ensures type safety
+- Makes intent explicit
+
+---
+
+## Complex Expressions
+
+### Operator Precedence
+
+Dars automatically handles operator precedence following standard mathematical rules:
+
+\`\`\`python
+# a + b * c  \u2192  a + (b * c)  \u2705 Automatic
+state.result.set(
+    V(".a").float() + V(".b").float() * V(".c").float()
+)
+
+# (a + b) * c  \u2192  (a + b) * c  \u2705 Preserved
+state.result.set(
+    (V(".a").float() + V(".b").float()) * V(".c").float()
+)
+
+# a ** b ** c  \u2192  a ** (b ** c)  \u2705 Right-associative
+state.result.set(
+    V(".a").float() ** V(".b").float() ** V(".c").float()
+)
+\`\`\`
+
+**Precedence Table:**
+
+| Operator | Precedence | Associativity |
+|----------|------------|---------------|
+| \`**\`     | 3 (highest)| Right         |
+| \`*\`, \`/\`, \`%\` | 2     | Left          |
+| \`+\`, \`-\` | 1 (lowest) | Left          |
+
+### Nested Expressions
+
+You can nest expressions infinitely:
+
+\`\`\`python
+# Complex calculation
+state.result.set(
+    ((V(".a").float() + V(".b").float()) * V(".c").float()) / 
+    (V(".d").float() - V(".e").float())
+)
+
+# With mixed literals
+state.total.set(
+    (V(".price").float() * V(".qty").int()) * 1.15  # Add 15% tax
+)
+
+# Combining multiple operations
+state.score.set(
+    (V(".math").int() + V(".science").int() + V(".english").int()) / 3
+)
+\`\`\`
+
+---
+
+## Dynamic Operators
+
+**New in v1.6.4**: Use operators from Select or Input elements!
+
+### The \`.operator()\` Method
+
+Mark a \`ValueRef\` as a dynamic operator using \`.operator()\`:
+
+\`\`\`python
+# Select with operator options
+Select(
+    class_name="operation",
+    options=[
+        SelectOption("+", "Add"),
+        SelectOption("-", "Subtract"),
+        SelectOption("*", "Multiply"),
+        SelectOption("/", "Divide")
+    ]
+)
+
+# Use in calculation
+Button(
+    "Calculate",
+    on_click=calc.result.set(
+        V(".num1").float() + V(".operation").operator() + V(".num2").float()
+    )
+)
+\`\`\`
+
+### How It Works
+
+1. **Operator Extraction**: \`V(".operation").operator()\` extracts the operator value
+2. **Validation**: Checks if operator is valid (\`+\`, \`-\`, \`*\`, \`/\`, \`%\`, \`**\`)
+3. **Evaluation**: Uses a switch statement to perform the operation
+4. **Fallback**: Defaults to \`+\` if operator is invalid
+
+### Complete Calculator Example
+
+\`\`\`python
+from dars.all import *
+
+app = App("Calculator")
+
+calc = State("calc", operation="+", result=0)
+
+@route("/")
+def index():
+    return Page(
+        # Operation selector
+        Select(
+            value=useValue("calc.operation", selector=".operation"),
+            class_name="operation",
+            options=[
+                SelectOption("+", "\u2795 Add"),
+                SelectOption("-", "\u2796 Subtract"),
+                SelectOption("*", "\u2716\uFE0F Multiply"),
+                SelectOption("/", "\u2797 Divide")
+            ]
+        ),
+        
+        # Number inputs
+        Input(class_name="num1", input_type="number", placeholder="First number"),
+        Input(class_name="num2", input_type="number", placeholder="Second number"),
+        
+        # Calculate button - DECLARATIVE!
+        Button(
+            "Calculate",
+            on_click=calc.result.set(
+                V(".num1").float() + V(".operation").operator() + V(".num2").float()
+            )
+        ),
+        
+        # Result display
+        Text(text=useDynamic("calc.result"))
+    )
+
+app.add_page("index", index())
+
+if __name__ == "__main__":
+    app.rTimeCompile()
+\`\`\`
+
+### Supported Operators
+
+The \`.operator()\` method validates against this whitelist:
+
+- \`+\` - Addition
+- \`-\` - Subtraction
+- \`*\` - Multiplication
+- \`/\` - Division
+- \`%\` - Modulo
+- \`**\` - Power
+
+**Invalid operators** automatically fall back to \`+\` with a console warning.
+
+---
+
+## NaN Validation
+
+**New in v1.6.4**: Automatic NaN handling prevents errors from empty or invalid inputs.
+
+### Automatic Validation
+
+All mathematical expressions include built-in NaN validation:
+
+\`\`\`python
+# If inputs are empty or invalid
+Button(
+    "Calculate",
+    on_click=calc.result.set(
+        V(".num1").float() + V(".num2").float()
+    )
+)
+# Empty inputs \u2192 Returns 0
+# Console: "[Dars] Invalid input: one or more values are NaN. Returning 0."
+\`\`\`
+
+### Validation Points
+
+1. **Input Validation**: Checks operands before calculation
+2. **Result Validation**: Checks result after calculation
+3. **Console Logging**: Warns when NaN is detected
+
+### Example Scenarios
+
+\`\`\`python
+# Empty inputs
+V(".empty-input").float()  # \u2192 0 (with warning)
+
+# Invalid division
+V(".num").float() / 0  # \u2192 0 (with warning)
+
+# Invalid operation
+V(".text").float()  # \u2192 0 (with warning)
+\`\`\`
+
+---
+
+## State Integration
+
+### Using with State.set()
+
+\`MathExpression\` objects work seamlessly with \`State.set()\`:
+
+\`\`\`python
+# Simple expression
+calc.result.set(V(".a").float() + V(".b").float())
+
+# Complex expression
+calc.total.set(
+    (V(".price").float() * V(".qty").int()) * 1.15
+)
+
+# With dynamic operator
+calc.result.set(
+    V(".num1").float() + V(".op").operator() + V(".num2").float()
+)
+\`\`\`
+
+### Async Evaluation
+
+All expressions are automatically wrapped in async IIFEs:
+
+\`\`\`python
+# Your code
+calc.result.set(V(".a").float() + V(".b").float())
+
+# Generated JavaScript
+(async () => {
+    const left = await (/* V(".a").float() */);
+    const right = await (/* V(".b").float() */);
+    
+    if (isNaN(left) || isNaN(right)) {
+        console.warn('[Dars] Invalid input: one or more values are NaN. Returning 0.');
+        return 0;
+    }
+    
+    const result = left + right;
+    
+    if (isNaN(result)) {
+        console.warn('[Dars] Operation resulted in NaN. Returning 0.');
+        return 0;
+    }
+    
+    return result;
+})()
+\`\`\`
+
+---
+
+## Advanced Examples
+
+### Multi-Step Calculation
+
+\`\`\`python
+# Calculate total with tax and discount
+Button(
+    "Calculate Total",
+    on_click=cart.total.set(
+        ((V(".price").float() * V(".qty").int()) * 1.15) - V(".discount").float()
+    )
+)
+\`\`\`
+
+### Conditional Calculations
+
+\`\`\`python
+# Different calculations based on operator
+Select(class_name="calc-type", options=[
+    SelectOption("area", "Area"),
+    SelectOption("perimeter", "Perimeter")
+])
+
+# Area: length * width
+# Perimeter: 2 * (length + width)
+Button(
+    "Calculate",
+    on_click=dScript(f"""
+        const type = {V(".calc-type").get_code()};
+        const length = {V(".length").float().get_code()};
+        const width = {V(".width").float().get_code()};
+        
+        let result;
+        if (type === 'area') {{
+            result = length * width;
+        }} else {{
+            result = 2 * (length + width);
+        }}
+        
+        window.Dars.change({{
+            id: 'calc',
+            dynamic: true,
+            result: result
+        }});
+    """)
+)
+\`\`\`
+
+### Scientific Calculator
+
+\`\`\`python
+# Power calculation
+calc.result.set(V(".base").float() ** V(".exponent").float())
+
+# Modulo for remainders
+calc.remainder.set(V(".dividend").int() % V(".divisor").int())
+
+# Complex formula: (a\xB2 + b\xB2)^0.5 (Pythagorean theorem)
+calc.hypotenuse.set(
+    (V(".a").float() ** 2 + V(".b").float() ** 2) ** 0.5
+)
+\`\`\`
+
+---
+
+## Best Practices
+
+### Do
+
+1. **Always use transformations for math**
+   \`\`\`python
+   V(".price").float() * V(".qty").int()  # \u2705 Correct
+   \`\`\`
+
+2. **Use descriptive class names**
+   \`\`\`python
+   Input(class_name="price-input")  # \u2705 Clear
+   V(".price-input").float()
+   \`\`\`
+
+3. **Leverage automatic precedence**
+   \`\`\`python
+   V(".a").float() + V(".b").float() * V(".c").float()  # \u2705 Auto-parens
+   \`\`\`
+
+4. **Use dynamic operators for flexibility**
+   \`\`\`python
+   V(".num1").float() + V(".op").operator() + V(".num2").float()  # \u2705 Dynamic
+   \`\`\`
+
+### Don't
+
+1. **Don't use arithmetic without transformations**
+   \`\`\`python
+   V(".price") * V(".qty")  # \u274C TypeError
+   \`\`\`
+
+2. **Don't rely on implicit type coercion**
+   \`\`\`python
+   V(".number") + 5  # \u274C String concatenation, not addition
+   \`\`\`
+
+3. **Don't forget NaN is handled automatically**
+   \`\`\`python
+   # No need for manual checks
+   if (isNaN(V(".num").float())) { ... }
+   
+   # Automatic validation
+   calc.result.set(V(".num").float() + 10)
+   \`\`\`
+
+---
+
+## Type Reference
+
+### ValueRef
+
+Created by \`V(selector)\`:
+
+\`\`\`python
+class ValueRef:
+    def int() -> ValueRef          # Convert to integer
+    def float() -> ValueRef        # Convert to float
+    def upper() -> ValueRef        # Convert to uppercase
+    def lower() -> ValueRef        # Convert to lowercase
+    def trim() -> ValueRef         # Remove whitespace
+    def operator() -> DynamicOperator  # Mark as dynamic operator
+    
+    # Operators
+    def __add__(other) -> MathExpression
+    def __sub__(other) -> MathExpression
+    def __mul__(other) -> MathExpression
+    def __truediv__(other) -> MathExpression
+    def __mod__(other) -> MathExpression
+    def __pow__(other) -> MathExpression
+\`\`\`
+
+### MathExpression
+
+Created by operator overloading:
+
+\`\`\`python
+class MathExpression:
+    # Supports all arithmetic operators
+    # Automatically handles precedence
+    # Validates NaN
+    # Generates async JavaScript
+\`\`\`
+
+### DynamicOperator
+
+Created by \`.operator()\`:
+
+\`\`\`python
+class DynamicOperator:
+    VALID_OPERATORS = ['+', '-', '*', '/', '%', '**']
+    # Validates operator at runtime
+    # Falls back to '+' if invalid
+\`\`\`
+
+---
+`},{type:"T9",id:"markdown_125",key:"0/2/0/14",text:`# Backend HTTP Utilities 
 
 Dars Framework provides a powerful, **Pythonic system** for handling HTTP requests and API communication without writing any JavaScript. The \`dars.backend\` module enables you to fetch data, bind it to components, and create reactive UIs entirely in Python.
 
@@ -4455,7 +4916,7 @@ delete_btn.on_click = deleteComp("component-id")
 ---
 
 For more examples, see the test files in \`tst/proj/test_http_demo.py\` and \`tst/proj/test_http_utils.py\`.
-`},{type:"T9",id:"markdown_125",key:"0/2/0/14",text:`# Events in Dars
+`},{type:"T9",id:"markdown_126",key:"0/2/0/15",text:`# Events in Dars
 
 This is the documentation for the events in Dars.
 
@@ -4569,7 +5030,7 @@ button.on_click = [
     )
 ]
 \`\`\`
-`},{type:"T9",id:"markdown_126",key:"0/2/0/15",text:`# Keyboard Events in Dars
+`},{type:"T9",id:"markdown_127",key:"0/2/0/16",text:`# Keyboard Events in Dars
 
 Dars provides a powerful and intuitive system for handling keyboard events in your applications. This guide covers everything from basic key detection to advanced global shortcuts.
 
@@ -5061,7 +5522,7 @@ Input(
 - **Use \`switch()\`** for handling multiple different keys
 - **Use \`addGlobalKeys()\`** for app-wide shortcuts (always with modifiers!)
 - **Combine with State and V()** for dynamic, reactive keyboard interactions
-`},{type:"T9",id:"markdown_127",key:"0/2/0/16",text:`# Dars - Exporter Documentation
+`},{type:"T9",id:"markdown_128",key:"0/2/0/17",text:`# Dars - Exporter Documentation
 
 ## Introduction
 
@@ -5381,7 +5842,7 @@ All file paths are relative to the app's directory. See [State Management](state
 - Not yet recommended for production.
 - Some advanced packaging and signing options may require manual configuration.
 - Expect changes to configuration keys and defaults as the feature matures.
-`},{type:"T9",id:"markdown_128",key:"0/2/0/17",text:`# Dars - Script System
+`},{type:"T9",id:"markdown_129",key:"0/2/0/18",text:`# Dars - Script System
 
 ## Introduction to Scripts
 
@@ -6157,4 +6618,4 @@ app.add_page("index", page, index=True)
 | \`sequence\` | Chain animations | \`*animations\` |
 
 All animations return \`dScript\` objects and can be used with \`.then()\` for advanced chaining.
-`}]},{type:"T2",id:"footer-section",key:"0/2/1",children:[{type:"T2",id:"container_129",key:"0/2/1/0",children:[{type:"T2",id:"container_130",key:"0/2/1/0/0",children:[{type:"T2",id:"container_131",key:"0/2/1/0/0/0",children:[{type:"T4",id:"image_132",key:"0/2/1/0/0/0/0"},{type:"T2",id:"container_133",key:"0/2/1/0/0/0/1",children:[{type:"T5",id:"text_134",key:"0/2/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_135",key:"0/2/1/0/0/1",children:[{type:"T2",id:"container_136",key:"0/2/1/0/0/1/0",children:[{type:"T5",id:"text_137",key:"0/2/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_138",key:"0/2/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_139",key:"0/2/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_140",key:"0/2/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_141",key:"0/2/1/0/0/1/1",children:[{type:"T5",id:"text_142",key:"0/2/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_143",key:"0/2/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_144",key:"0/2/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_145",key:"0/2/1/0/0/1/2",children:[{type:"T5",id:"text_146",key:"0/2/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_147",key:"0/2/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_148",key:"0/2/1/0/0/2",children:[{type:"T2",id:"container_149",key:"0/2/1/0/0/2/0",children:[{type:"T5",id:"text_150",key:"0/2/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_151",key:"0/2/1/0/0/2/1",children:[{type:"T5",id:"text_152",key:"0/2/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_153",key:"0/2/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_154",key:"0/2/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_155",key:"0/2/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]}]},function(){const d=new Map;let l=null,p=null;function u(){}function w(){}function _(n,t){if(!n)return;t(n);const e=n.children||[];for(let o=0;o<e.length;o++)_(e[o],t)}function S(n,t){if(!(!n||!t))for(const[e,o]of Object.entries(t))try{o===!1||o===null||typeof o>"u"?n.removeAttribute(e):n.setAttribute(e,String(o))}catch{}}function B(n,t={},e={}){for(const o in t)if(!(o in e))try{n.removeAttribute(o)}catch{}for(const o in e){const i=e[o];try{i===!1||i===null||typeof i>"u"?n.removeAttribute(o):n.setAttribute(o,String(i))}catch{}}}function I(n,t={},e={}){for(const o in t)if(!(o in e))try{n.style.removeProperty(o.replace(/_/g,"-"))}catch{}for(const o in e){const i=e[o];try{n.style.setProperty(o.replace(/_/g,"-"),String(i))}catch{}}}function M(n,t){(t||document).addEventListener(n,function(e){let o=e.target;const i=t||document;for(;o&&o!==i;){const m=o.id;if(m&&d.has(m)){const y=d.get(m);if(o&&o.__darsEv&&o.__darsEv[n])return;let c=y[n];if(!c&&(n==="keydown"||n==="keyup"||n==="keypress")){const a=e.key||e.code;if(a){const r=n+"."+a;c=y[r]}}if(typeof c=="function"){try{c.call(o,e)}catch(a){console.error("[Dars] handler error",a)}return}}o=o.parentNode}},!0)}function k(n,t){return n&&t?n.type!==t.type:n!==t}function v(n){if(!n)return;const t=n.children||[];for(let e=0;e<t.length;e++)v(t[e]);if(n.id&&d.delete(n.id),n.id){const e=document.getElementById(n.id);if(e&&e.parentNode)try{e.parentNode.removeChild(e)}catch{}}}function x(n,t){if(!t||!t.id)return{ok:!1,reason:"missing-new"};let e=document.getElementById(t.id);if(!e){const a=n&&n.id?document.getElementById(n.id):null;if(a)try{a.id=t.id,e=a}catch{}}if(!e)return{ok:!1,reason:"missing-el"};if(k(n,t))return{ok:!1,reason:"type-changed"};const o=!!t.isIsland;if(!o&&t.class&&(e.className=t.class),o||B(e,n&&n.props||{},t.props||{}),o||I(e,n&&n.style||{},t.style||{}),!o&&Object.prototype.hasOwnProperty.call(t,"text")&&e.textContent!==String(t.text||"")&&(e.textContent=String(t.text||"")),o)return{ok:!0};const i=n&&n.children?n.children:[],m=t.children?t.children:[],y=new Map;for(let a=0;a<i.length;a++){const r=i[a]&&(i[a].id||i[a].key)||null;r&&y.set(String(r),i[a])}const c=new Set;for(let a=0;a<m.length;a++){const r=m[a],h=r&&(r.id||r.key)||null;if(!h)if(a<i.length){const s=x(i[a],r);if(!s.ok)return s;c.add(i[a]);continue}else return{ok:!1,reason:"children-added"};const b=y.get(String(h));if(b){const s=x(b,r);if(!s.ok)return s;c.add(b)}else{if(a<i.length){const f=i[a];if(!k(f,r)){const g=x(f,r);if(!g.ok)return g;c.add(f);continue}}const s=createSubtree(r);if(s){const f=a<i.length?i[a]:null;if(f&&f.id){const g=document.getElementById(f.id);g&&g.parentNode?g.parentNode.insertBefore(s,g):e.appendChild(s)}else e.appendChild(s);continue}return{ok:!1,reason:"children-added"}}}for(let a=0;a<i.length;a++){const r=i[a];c.has(r)||v(r)}return{ok:!0}}function L(n){typeof requestAnimationFrame=="function"?requestAnimationFrame(n):setTimeout(n,16)}function O(n){const t=l;if(!t){l=n;try{window.__DARS_VDOM__=n}catch{}return}L(()=>{const e=x(t,n);if(!e.ok){console.warn("[Dars] Structural change detected (",e.reason,"), reloading...");try{location.reload()}catch{}return}l=n;try{window.__DARS_VDOM__=n}catch{}})}function F(n){l=n;try{window.__DARS_VDOM__=n}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(e=>M(e,document))}function R(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const n=window.__DARS_VERSION_URL||"version.txt";let t=null,e=!1,o=0;const i=10;let m=!1;function y(a,r,h,b){try{const s=new XMLHttpRequest;b&&(s.responseType=b),s.open("GET",a,!0),s.timeout=5e3,s.onreadystatechange=function(){s.readyState===4&&(s.status>=200&&s.status<300?r(s.response):h())},s.onerror=h,s.ontimeout=h,s.setRequestHeader("Cache-Control","no-store"),s.send()}catch{h()}}function c(){m||y(n,function(a){let r=(a||"").toString().trim();if(!r||r==="0"){if(o+=1,o>=i){console.warn("[Dars] version file not found after",i,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(c,600);return}if(o=0,e=!1,p||(p=r),r&&r!==p){p=r;try{location.reload()}catch{}return}t=setTimeout(c,600)},function(){if(o+=1,o>=i){console.warn("[Dars] version file not reachable after",i,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(c,600)},"text")}return c(),()=>{try{m=!0,t&&clearTimeout(t),window.__DARS_STOP_HOTRELOAD=null}catch{}}}document.addEventListener("DOMContentLoaded",function(){if(window.__DARS_VDOM__?F(window.__DARS_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=R()}catch{}}})}(),window.addEventListener("scroll",()=>{const d=document.getElementById("dars-navbar");window.scrollY>20?d.classList.add("scrolled"):d.classList.remove("scrolled");const l=document.getElementById("features-section");if(l&&!l.classList.contains("visible")){const p=l.getBoundingClientRect().top,u=window.innerHeight/1.5;p<u&&(l.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((_,S)=>{setTimeout(()=>{_.style.opacity="1",_.style.transform="translateY(0)"},S*100)}))}});const T=document.getElementById("hero-logo"),C=document.getElementById("hero-title"),D=document.getElementById("hero-description"),P=document.getElementById("pip-command"),A=document.getElementById("get-started-btn"),E=document.getElementById("scroll-text");T&&setTimeout(()=>T.classList.add("show"),5),C&&setTimeout(()=>C.classList.add("show"),350),D&&setTimeout(()=>D.classList.add("show"),650),P&&setTimeout(()=>P.classList.add("show"),950),A&&setTimeout(()=>A.classList.add("show"),1250),E&&setTimeout(()=>E.classList.add("show"),1500),document.addEventListener("DOMContentLoaded",function(){const d=document.getElementById("hamburger-btn"),l=document.getElementById("mobile-menu"),p=document.body;d&&l&&(d.addEventListener("click",function(u){u.stopPropagation(),l.style.display==="flex"?(l.style.display="none",d.classList.remove("menu-open"),p.classList.remove("menu-open")):(l.style.display="flex",d.classList.add("menu-open"),p.classList.add("menu-open"))}),l.querySelectorAll("a").forEach(u=>{u.addEventListener("click",function(){l.style.display="none",d.classList.remove("menu-open"),p.classList.remove("menu-open")})}),document.addEventListener("click",function(u){!d.contains(u.target)&&!l.contains(u.target)&&(l.style.display="none",d.classList.remove("menu-open"),p.classList.remove("menu-open"))}),document.addEventListener("keydown",function(u){u.key==="Escape"&&l.style.display==="flex"&&(l.style.display="none",d.classList.remove("menu-open"),p.classList.remove("menu-open"))}))});
+`}]},{type:"T2",id:"footer-section",key:"0/2/1",children:[{type:"T2",id:"container_130",key:"0/2/1/0",children:[{type:"T2",id:"container_131",key:"0/2/1/0/0",children:[{type:"T2",id:"container_132",key:"0/2/1/0/0/0",children:[{type:"T4",id:"image_133",key:"0/2/1/0/0/0/0"},{type:"T2",id:"container_134",key:"0/2/1/0/0/0/1",children:[{type:"T5",id:"text_135",key:"0/2/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_136",key:"0/2/1/0/0/1",children:[{type:"T2",id:"container_137",key:"0/2/1/0/0/1/0",children:[{type:"T5",id:"text_138",key:"0/2/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_139",key:"0/2/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_140",key:"0/2/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_141",key:"0/2/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_142",key:"0/2/1/0/0/1/1",children:[{type:"T5",id:"text_143",key:"0/2/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_144",key:"0/2/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_145",key:"0/2/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_146",key:"0/2/1/0/0/1/2",children:[{type:"T5",id:"text_147",key:"0/2/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_148",key:"0/2/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_149",key:"0/2/1/0/0/2",children:[{type:"T2",id:"container_150",key:"0/2/1/0/0/2/0",children:[{type:"T5",id:"text_151",key:"0/2/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_152",key:"0/2/1/0/0/2/1",children:[{type:"T5",id:"text_153",key:"0/2/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_154",key:"0/2/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_155",key:"0/2/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_156",key:"0/2/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]}]},function(){const c=new Map;let l=null,p=null;function u(){}function w(){}function _(n,t){if(!n)return;t(n);const e=n.children||[];for(let o=0;o<e.length;o++)_(e[o],t)}function S(n,t){if(!(!n||!t))for(const[e,o]of Object.entries(t))try{o===!1||o===null||typeof o>"u"?n.removeAttribute(e):n.setAttribute(e,String(o))}catch{}}function B(n,t={},e={}){for(const o in t)if(!(o in e))try{n.removeAttribute(o)}catch{}for(const o in e){const i=e[o];try{i===!1||i===null||typeof i>"u"?n.removeAttribute(o):n.setAttribute(o,String(i))}catch{}}}function I(n,t={},e={}){for(const o in t)if(!(o in e))try{n.style.removeProperty(o.replace(/_/g,"-"))}catch{}for(const o in e){const i=e[o];try{n.style.setProperty(o.replace(/_/g,"-"),String(i))}catch{}}}function M(n,t){(t||document).addEventListener(n,function(e){let o=e.target;const i=t||document;for(;o&&o!==i;){const m=o.id;if(m&&c.has(m)){const y=c.get(m);if(o&&o.__darsEv&&o.__darsEv[n])return;let d=y[n];if(!d&&(n==="keydown"||n==="keyup"||n==="keypress")){const a=e.key||e.code;if(a){const r=n+"."+a;d=y[r]}}if(typeof d=="function"){try{d.call(o,e)}catch(a){console.error("[Dars] handler error",a)}return}}o=o.parentNode}},!0)}function v(n,t){return n&&t?n.type!==t.type:n!==t}function k(n){if(!n)return;const t=n.children||[];for(let e=0;e<t.length;e++)k(t[e]);if(n.id&&c.delete(n.id),n.id){const e=document.getElementById(n.id);if(e&&e.parentNode)try{e.parentNode.removeChild(e)}catch{}}}function x(n,t){if(!t||!t.id)return{ok:!1,reason:"missing-new"};let e=document.getElementById(t.id);if(!e){const a=n&&n.id?document.getElementById(n.id):null;if(a)try{a.id=t.id,e=a}catch{}}if(!e)return{ok:!1,reason:"missing-el"};if(v(n,t))return{ok:!1,reason:"type-changed"};const o=!!t.isIsland;if(!o&&t.class&&(e.className=t.class),o||B(e,n&&n.props||{},t.props||{}),o||I(e,n&&n.style||{},t.style||{}),!o&&Object.prototype.hasOwnProperty.call(t,"text")&&e.textContent!==String(t.text||"")&&(e.textContent=String(t.text||"")),o)return{ok:!0};const i=n&&n.children?n.children:[],m=t.children?t.children:[],y=new Map;for(let a=0;a<i.length;a++){const r=i[a]&&(i[a].id||i[a].key)||null;r&&y.set(String(r),i[a])}const d=new Set;for(let a=0;a<m.length;a++){const r=m[a],h=r&&(r.id||r.key)||null;if(!h)if(a<i.length){const s=x(i[a],r);if(!s.ok)return s;d.add(i[a]);continue}else return{ok:!1,reason:"children-added"};const b=y.get(String(h));if(b){const s=x(b,r);if(!s.ok)return s;d.add(b)}else{if(a<i.length){const f=i[a];if(!v(f,r)){const g=x(f,r);if(!g.ok)return g;d.add(f);continue}}const s=createSubtree(r);if(s){const f=a<i.length?i[a]:null;if(f&&f.id){const g=document.getElementById(f.id);g&&g.parentNode?g.parentNode.insertBefore(s,g):e.appendChild(s)}else e.appendChild(s);continue}return{ok:!1,reason:"children-added"}}}for(let a=0;a<i.length;a++){const r=i[a];d.has(r)||k(r)}return{ok:!0}}function O(n){typeof requestAnimationFrame=="function"?requestAnimationFrame(n):setTimeout(n,16)}function F(n){const t=l;if(!t){l=n;try{window.__DARS_VDOM__=n}catch{}return}O(()=>{const e=x(t,n);if(!e.ok){console.warn("[Dars] Structural change detected (",e.reason,"), reloading...");try{location.reload()}catch{}return}l=n;try{window.__DARS_VDOM__=n}catch{}})}function R(n){l=n;try{window.__DARS_VDOM__=n}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(e=>M(e,document))}function L(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const n=window.__DARS_VERSION_URL||"version.txt";let t=null,e=!1,o=0;const i=10;let m=!1;function y(a,r,h,b){try{const s=new XMLHttpRequest;b&&(s.responseType=b),s.open("GET",a,!0),s.timeout=5e3,s.onreadystatechange=function(){s.readyState===4&&(s.status>=200&&s.status<300?r(s.response):h())},s.onerror=h,s.ontimeout=h,s.setRequestHeader("Cache-Control","no-store"),s.send()}catch{h()}}function d(){m||y(n,function(a){let r=(a||"").toString().trim();if(!r||r==="0"){if(o+=1,o>=i){console.warn("[Dars] version file not found after",i,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(d,600);return}if(o=0,e=!1,p||(p=r),r&&r!==p){p=r;try{location.reload()}catch{}return}t=setTimeout(d,600)},function(){if(o+=1,o>=i){console.warn("[Dars] version file not reachable after",i,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(d,600)},"text")}return d(),()=>{try{m=!0,t&&clearTimeout(t),window.__DARS_STOP_HOTRELOAD=null}catch{}}}document.addEventListener("DOMContentLoaded",function(){if(window.__DARS_VDOM__?R(window.__DARS_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=L()}catch{}}})}(),window.addEventListener("scroll",()=>{const c=document.getElementById("dars-navbar");window.scrollY>20?c.classList.add("scrolled"):c.classList.remove("scrolled");const l=document.getElementById("features-section");if(l&&!l.classList.contains("visible")){const p=l.getBoundingClientRect().top,u=window.innerHeight/1.5;p<u&&(l.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((_,S)=>{setTimeout(()=>{_.style.opacity="1",_.style.transform="translateY(0)"},S*100)}))}});const T=document.getElementById("hero-logo"),C=document.getElementById("hero-title"),D=document.getElementById("hero-description"),P=document.getElementById("pip-command"),A=document.getElementById("get-started-btn"),E=document.getElementById("scroll-text");T&&setTimeout(()=>T.classList.add("show"),5),C&&setTimeout(()=>C.classList.add("show"),350),D&&setTimeout(()=>D.classList.add("show"),650),P&&setTimeout(()=>P.classList.add("show"),950),A&&setTimeout(()=>A.classList.add("show"),1250),E&&setTimeout(()=>E.classList.add("show"),1500),document.addEventListener("DOMContentLoaded",function(){const c=document.getElementById("hamburger-btn"),l=document.getElementById("mobile-menu"),p=document.body;c&&l&&(c.addEventListener("click",function(u){u.stopPropagation(),l.style.display==="flex"?(l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open")):(l.style.display="flex",c.classList.add("menu-open"),p.classList.add("menu-open"))}),l.querySelectorAll("a").forEach(u=>{u.addEventListener("click",function(){l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open")})}),document.addEventListener("click",function(u){!c.contains(u.target)&&!l.contains(u.target)&&(l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open"))}),document.addEventListener("keydown",function(u){u.key==="Escape"&&l.style.display==="flex"&&(l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open"))}))});

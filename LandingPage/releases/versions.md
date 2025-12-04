@@ -1,4 +1,221 @@
+# Release Notes v1.6.4
+
+> **Pythonic Mathematical Expressions - Declarative Calculations**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Pythonic Expression System with V()
+
+Dars Framework v1.6.4 introduces a revolutionary declarative system for mathematical expressions. Write complex calculations in pure Python using operator overloading - **no inline JavaScript required!**
+
+**Key Features:**
+- **Operator Overloading** - Use Python operators (`+`, `-`, `*`, `/`, `%`, `**`)
+- **Automatic Precedence** - Parentheses handled automatically
+- **Dynamic Operators** - Operators from Select/Input elements
+- **NaN Validation** - Safe handling of empty/invalid inputs
+- **Type Safety** - Numeric operations require `.float()` or `.int()`
+
+#### Before (v1.6.3) - Verbose JavaScript
+
+```python
+Button(
+    "Calculate",
+    on_click=dScript(f"""
+        const n1 = parseFloat(document.querySelector('.num1').value);
+        const n2 = parseFloat(document.querySelector('.num2').value);
+        const op = document.querySelector('.operation').value;
+        
+        let result = 0;
+        switch(op) {{
+            case '+': result = n1 + n2; break;
+            case '-': result = n1 - n2; break;
+            case '*': result = n1 * n2; break;
+            case '/': result = n1 / n2; break;
+        }}
+        
+        window.Dars.change({{
+            id: 'calc',
+            dynamic: true,
+            result: result
+        }});
+    """)
+)
+```
+
+#### After (v1.6.4) - Declarative Python
+
+```python
+Button(
+    "Calculate",
+    on_click=calc.result.set(
+        V(".num1").float() + V(".operation").operator() + V(".num2").float()
+    )
+)
+```
+
+**Benefits:**
+- **less code**
+- **Type-safe** with explicit transformations
+- **NaN validation** with console warnings
+- **Pythonic syntax** - feels natural
+- **No inline JavaScript** - pure Python
+
+---
+
+### Mathematical Operations
+
+#### Simple Arithmetic
+
+```python
+# Addition
+calc.total.set(V(".price").float() + V(".tax").float())
+
+# Subtraction
+calc.change.set(V(".paid").float() - V(".total").float())
+
+# Multiplication
+calc.total.set(V(".price").float() * V(".quantity").int())
+
+# Division
+calc.average.set(V(".sum").float() / V(".count").int())
+```
+
+#### Complex Expressions with Automatic Precedence
+
+```python
+# a + b * c  →  a + (b * c)  ✅ Automatic
+calc.result.set(
+    V(".a").float() + V(".b").float() * V(".c").float()
+)
+
+# (a + b) * c  →  (a + b) * c  ✅ Preserved
+calc.result.set(
+    (V(".a").float() + V(".b").float()) * V(".c").float()
+)
+
+# With literals
+calc.total.set(
+    (V(".price").float() * V(".qty").int()) * 1.15  # Add 15% tax
+)
+```
+
+**Precedence Table:**
+
+| Operator | Precedence | Associativity |
+|----------|------------|---------------|
+| `**`     | 3 (highest)| Right         |
+| `*`, `/`, `%` | 2     | Left          |
+| `+`, `-` | 1 (lowest) | Left          |
+
+---
+
+### Dynamic Operators
+
+Use operators from Select or Input elements with the new `.operator()` method:
+
+```python
+from dars.all import *
+
+calc = State("calc", operation="+", result=0)
+
+@route("/")
+def index():
+    return Page(
+        # Operation selector
+        Select(
+            value=useValue("calc.operation", selector=".operation"),
+            class_name="operation",
+            options=[
+                SelectOption("+", "➕ Add"),
+                SelectOption("-", "➖ Subtract"),
+                SelectOption("*", "✖️ Multiply"),
+                SelectOption("/", "➗ Divide")
+            ]
+        ),
+        
+        # Number inputs
+        Input(class_name="num1", input_type="number"),
+        Input(class_name="num2", input_type="number"),
+        
+        # Declarative calculation!
+        Button(
+            "Calculate",
+            on_click=calc.result.set(
+                V(".num1").float() + V(".operation").operator() + V(".num2").float()
+            )
+        ),
+        
+        # Result display
+        Text(text=useDynamic("calc.result"))
+    )
+```
+
+**How it works:**
+1. `V(".operation").operator()` extracts the operator value
+2. Validates against whitelist: `+`, `-`, `*`, `/`, `%`, `**`
+3. Uses switch statement for safe evaluation
+4. Falls back to `+` if invalid (with console warning)
+
+---
+
+### NaN Validation
+
+All mathematical expressions include automatic NaN validation:
+
+```python
+# Empty inputs automatically return 0
+Button(
+    "Calculate",
+    on_click=calc.result.set(
+        V(".num1").float() + V(".num2").float()
+    )
+)
+# Empty inputs → Returns 0
+# Console: "[Dars] Invalid input: one or more values are NaN. Returning 0."
+```
+
+**Validation Points:**
+1. **Input Validation** - Checks operands before calculation
+2. **Result Validation** - Checks result after calculation
+3. **Console Logging** - Warns when NaN is detected
+
+---
+
+### Enhanced Select Component
+
+- **useValue Support** - Set initial value from state with selector
+- **Proper Value Handling** - Correctly selects option based on initial value
+- **Selector Integration** - Works seamlessly with `V()` for value extraction
+
+```python
+Select(
+    value=useValue("calc.operation", selector=".operation"),
+    class_name="operation",
+    options=[...]
+)
+```
+
+---
+
+## What's Next
+
+Future enhancements planned for 1.7.0:
+- Comparison operators (`>`, `<`, `==`, `!=`)
+- Logical operators (`and`, `or`, `not`)
+- Ternary operator support
+- Array/list operations
+- Math functions (`.abs()`, `.round()`, `.sqrt()`, etc.)
+
+---
+
 # Release Notes v1.6.3
+
 
 > **Tailwind-like Utility Class System**
 
