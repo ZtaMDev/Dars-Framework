@@ -1,3 +1,41 @@
+# Release Notes v1.6.5
+
+> **Massive Styling Expansion & SPA Fixes**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Massive Styling System Expansion
+
+Dars v1.6.5 brings a colossal update to the utility styling system, making it nearly feature-complete with modern utility-first CSS frameworks like Tailwind.
+
+**New Features:**
+- **Complete Color Palette**: Added full ranges (50-950) for `cyan`, `teal`, `lime`, `amber`, `emerald`, `fuchsia`, `rose`, `zinc`, `neutral`, and `stone`.
+- **Direct Font Size**: New `fs-[value]` utility for setting exact font sizes (e.g., `fs-[14px]`).
+- **Transforms & Filters**: Full support for `scale`, `rotate`, `translate`, `skew`, `blur`, `brightness`, `contrast`, etc.
+- **Backdrop Filters**: Added `backdrop-blur`, `backdrop-brightness`, etc.
+- **Expanded Layout**: Added `table`, `contents`, `flow-root`, `object-fit`, `z-index`, and more.
+
+### Critical Fixes for SPA Styling
+
+Resolved a critical issue where `hover_style` and `active_style` were not being generated for Single Page Applications (SPA) using the `@route` decorator.
+
+- **SPA Routes Support**: The CSS generator now correctly processes all SPA routes to generate state-based styles.
+- **Multi-line CSS Fix**: Fixed an issue where multi-line CSS strings in utilities were not correctly parsed into valid CSS rules.
+
+### Documentation Updates
+
+- **New Styling Guide**: Complete reference for the new utility system in `styling.md`.
+- **Operations Guide**: Detailed documentation for the Pythonic math expression system in `operations.md`.
+- **Contributing Guide**: Added `CONTRIBUTING.md` for community guidelines.
+
+---
+
 # Release Notes v1.6.4
 
 > **Pythonic Mathematical Expressions - Declarative Calculations**

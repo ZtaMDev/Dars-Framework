@@ -905,8 +905,11 @@
      <a class="sidebar-link sidebar-level-2" href="#supported-utilities" style="margin-left: 20px">
       Supported Utilities
      </a>
-     <a class="sidebar-link sidebar-level-3" href="#layout-flexbox" style="margin-left: 40px">
-      Layout &amp; Flexbox
+     <a class="sidebar-link sidebar-level-3" href="#layout-display" style="margin-left: 40px">
+      Layout &amp; Display
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#grid" style="margin-left: 40px">
+      Grid
      </a>
      <a class="sidebar-link sidebar-level-3" href="#spacing-padding-margin" style="margin-left: 40px">
       Spacing (Padding &amp; Margin)
@@ -917,6 +920,9 @@
      <a class="sidebar-link sidebar-level-3" href="#typography" style="margin-left: 40px">
       Typography
      </a>
+     <a class="sidebar-link sidebar-level-3" href="#colors" style="margin-left: 40px">
+      Colors
+     </a>
      <a class="sidebar-link sidebar-level-3" href="#backgrounds" style="margin-left: 40px">
       Backgrounds
      </a>
@@ -926,14 +932,89 @@
      <a class="sidebar-link sidebar-level-3" href="#effects" style="margin-left: 40px">
       Effects
      </a>
+     <a class="sidebar-link sidebar-level-3" href="#filters" style="margin-left: 40px">
+      Filters
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#backdrop-filters" style="margin-left: 40px">
+      Backdrop Filters
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#transforms" style="margin-left: 40px">
+      Transforms
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#transitions" style="margin-left: 40px">
+      Transitions
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#positioning" style="margin-left: 40px">
+      Positioning
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#overflow" style="margin-left: 40px">
+      Overflow
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#visibility" style="margin-left: 40px">
+      Visibility
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#cursor" style="margin-left: 40px">
+      Cursor
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#pointer-events-user-select" style="margin-left: 40px">
+      Pointer Events &amp; User Select
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#object-fit-position" style="margin-left: 40px">
+      Object Fit &amp; Position
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#aspect-ratio" style="margin-left: 40px">
+      Aspect Ratio
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#float-clear" style="margin-left: 40px">
+      Float &amp; Clear
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#box-sizing" style="margin-left: 40px">
+      Box Sizing
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#isolation" style="margin-left: 40px">
+      Isolation
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#list-styles" style="margin-left: 40px">
+      List Styles
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#appearance" style="margin-left: 40px">
+      Appearance
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#resize" style="margin-left: 40px">
+      Resize
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#scroll-behavior" style="margin-left: 40px">
+      Scroll Behavior
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#scroll-margin-padding" style="margin-left: 40px">
+      Scroll Margin &amp; Padding
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#touch-action" style="margin-left: 40px">
+      Touch Action
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#will-change" style="margin-left: 40px">
+      Will Change
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#columns" style="margin-left: 40px">
+      Columns
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#break-afterbeforeinside" style="margin-left: 40px">
+      Break After/Before/Inside
+     </a>
      <a class="sidebar-link sidebar-level-2" href="#arbitrary-values" style="margin-left: 20px">
       Arbitrary Values
      </a>
      <a class="sidebar-link sidebar-level-2" href="#state-variants" style="margin-left: 20px">
       State Variants
      </a>
+     <a class="sidebar-link sidebar-level-2" href="#complete-example-styling" style="margin-left: 20px">
+      Complete Example Styling
+     </a>
      <a class="sidebar-link sidebar-level-2" href="#performance" style="margin-left: 20px">
       Performance
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#best-practices" style="margin-left: 20px">
+      Best Practices
      </a>
      <div class="sidebar-divider">
      </div>
@@ -9346,8 +9427,8 @@ def hello():
 <span class="k">def</span><span class="w"> </span><span class="nf">MyComponent</span><span class="p">():</span>
     <span class="k">return</span> <span class="n">Container</span><span class="p">(</span>
         <span class="n">Text</span><span class="p">(</span><span class="s2">"Hello, Dars!"</span><span class="p">),</span>
-        <span class="n">style</span><span class="o">=</span><span class="s2">"bg-blue-500 p-4 rounded-lg shadow-md hover:bg-blue-600 transition-all"</span><span class="p">,</span>
-        <span class="n">hover_style</span><span class="o">=</span><span class="s2">"scale-105"</span><span class="p">,</span>
+        <span class="n">style</span><span class="o">=</span><span class="s2">"bg-blue-500 p-4 rounded-lg shadow-md"</span><span class="p">,</span>
+        <span class="n">hover_style</span><span class="o">=</span><span class="s2">"bg-blue-600 scale-105"</span><span class="p">,</span>
         <span class="n">active_style</span><span class="o">=</span><span class="s2">"scale-95"</span>
     <span class="p">)</span>
 </code></pre>
@@ -9356,10 +9437,10 @@ def hello():
        Supported Utilities
       </h2>
       <p>
-       The system supports a wide range of utilities covering layout, spacing, typography, colors, borders, and effects.
+       The system supports a comprehensive range of utilities covering layout, spacing, typography, colors, borders, effects, transforms, and more.
       </p>
-      <h3 id="layout-flexbox">
-       Layout &amp; Flexbox
+      <h3 id="layout-display">
+       Layout &amp; Display
       </h3>
       <ul>
        <li>
@@ -9372,7 +9453,15 @@ def hello():
         </code>
         ,
         <code>
+         inline-flex
+        </code>
+        ,
+        <code>
          grid
+        </code>
+        ,
+        <code>
+         inline-grid
         </code>
         ,
         <code>
@@ -9384,7 +9473,31 @@ def hello():
         </code>
         ,
         <code>
+         inline
+        </code>
+        ,
+        <code>
+         table
+        </code>
+        ,
+        <code>
+         table-row
+        </code>
+        ,
+        <code>
+         table-cell
+        </code>
+        ,
+        <code>
          hidden
+        </code>
+        ,
+        <code>
+         contents
+        </code>
+        ,
+        <code>
+         flow-root
         </code>
        </li>
        <li>
@@ -9397,15 +9510,32 @@ def hello():
         </code>
         ,
         <code>
-         flex-col
-        </code>
-        ,
-        <code>
          flex-row-reverse
         </code>
         ,
         <code>
+         flex-col
+        </code>
+        ,
+        <code>
          flex-col-reverse
+        </code>
+       </li>
+       <li>
+        <strong>
+         Flex Wrap
+        </strong>
+        :
+        <code>
+         flex-wrap
+        </code>
+        ,
+        <code>
+         flex-wrap-reverse
+        </code>
+        ,
+        <code>
+         flex-nowrap
         </code>
        </li>
        <li>
@@ -9418,11 +9548,11 @@ def hello():
         </code>
         ,
         <code>
-         justify-center
+         justify-end
         </code>
         ,
         <code>
-         justify-end
+         justify-center
         </code>
         ,
         <code>
@@ -9431,6 +9561,31 @@ def hello():
         ,
         <code>
          justify-around
+        </code>
+        ,
+        <code>
+         justify-evenly
+        </code>
+       </li>
+       <li>
+        <strong>
+         Justify Items
+        </strong>
+        :
+        <code>
+         justify-items-start
+        </code>
+        ,
+        <code>
+         justify-items-end
+        </code>
+        ,
+        <code>
+         justify-items-center
+        </code>
+        ,
+        <code>
+         justify-items-stretch
         </code>
        </li>
        <li>
@@ -9443,11 +9598,15 @@ def hello():
         </code>
         ,
         <code>
+         items-end
+        </code>
+        ,
+        <code>
          items-center
         </code>
         ,
         <code>
-         items-end
+         items-baseline
         </code>
         ,
         <code>
@@ -9456,19 +9615,270 @@ def hello():
        </li>
        <li>
         <strong>
+         Align Content
+        </strong>
+        :
+        <code>
+         content-start
+        </code>
+        ,
+        <code>
+         content-end
+        </code>
+        ,
+        <code>
+         content-center
+        </code>
+        ,
+        <code>
+         content-between
+        </code>
+        ,
+        <code>
+         content-around
+        </code>
+        ,
+        <code>
+         content-evenly
+        </code>
+       </li>
+       <li>
+        <strong>
+         Align Self
+        </strong>
+        :
+        <code>
+         self-auto
+        </code>
+        ,
+        <code>
+         self-start
+        </code>
+        ,
+        <code>
+         self-end
+        </code>
+        ,
+        <code>
+         self-center
+        </code>
+        ,
+        <code>
+         self-stretch
+        </code>
+        ,
+        <code>
+         self-baseline
+        </code>
+       </li>
+       <li>
+        <strong>
+         Flex Grow/Shrink
+        </strong>
+        :
+        <code>
+         grow
+        </code>
+        ,
+        <code>
+         grow-0
+        </code>
+        ,
+        <code>
+         shrink
+        </code>
+        ,
+        <code>
+         shrink-0
+        </code>
+       </li>
+       <li>
+        <strong>
+         Flex
+        </strong>
+        :
+        <code>
+         flex-1
+        </code>
+        ,
+        <code>
+         flex-auto
+        </code>
+        ,
+        <code>
+         flex-initial
+        </code>
+        ,
+        <code>
+         flex-none
+        </code>
+       </li>
+       <li>
+        <strong>
+         Order
+        </strong>
+        :
+        <code>
+         order-{n}
+        </code>
+       </li>
+       <li>
+        <strong>
+         Basis
+        </strong>
+        :
+        <code>
+         basis-{value}
+        </code>
+       </li>
+      </ul>
+      <h3 id="grid">
+       Grid
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Grid Template Columns
+        </strong>
+        :
+        <code>
+         grid-cols-{n}
+        </code>
+        (e.g.,
+        <code>
+         grid-cols-3
+        </code>
+        ,
+        <code>
+         grid-cols-12
+        </code>
+        )
+       </li>
+       <li>
+        <strong>
+         Grid Template Rows
+        </strong>
+        :
+        <code>
+         grid-rows-{n}
+        </code>
+       </li>
+       <li>
+        <strong>
+         Grid Column Span
+        </strong>
+        :
+        <code>
+         col-span-{n}
+        </code>
+        ,
+        <code>
+         col-start-{n}
+        </code>
+        ,
+        <code>
+         col-end-{n}
+        </code>
+       </li>
+       <li>
+        <strong>
+         Grid Row Span
+        </strong>
+        :
+        <code>
+         row-span-{n}
+        </code>
+        ,
+        <code>
+         row-start-{n}
+        </code>
+        ,
+        <code>
+         row-end-{n}
+        </code>
+       </li>
+       <li>
+        <strong>
+         Grid Auto Flow
+        </strong>
+        :
+        <code>
+         grid-flow-row
+        </code>
+        ,
+        <code>
+         grid-flow-col
+        </code>
+        ,
+        <code>
+         grid-flow-dense
+        </code>
+        ,
+        <code>
+         grid-flow-row-dense
+        </code>
+        ,
+        <code>
+         grid-flow-col-dense
+        </code>
+       </li>
+       <li>
+        <strong>
+         Grid Auto Columns
+        </strong>
+        :
+        <code>
+         auto-cols-auto
+        </code>
+        ,
+        <code>
+         auto-cols-min
+        </code>
+        ,
+        <code>
+         auto-cols-max
+        </code>
+        ,
+        <code>
+         auto-cols-fr
+        </code>
+       </li>
+       <li>
+        <strong>
+         Grid Auto Rows
+        </strong>
+        :
+        <code>
+         auto-rows-auto
+        </code>
+        ,
+        <code>
+         auto-rows-min
+        </code>
+        ,
+        <code>
+         auto-rows-max
+        </code>
+        ,
+        <code>
+         auto-rows-fr
+        </code>
+       </li>
+       <li>
+        <strong>
          Gap
         </strong>
         :
         <code>
-         gap-4
+         gap-{n}
         </code>
         ,
         <code>
-         gap-x-2
+         gap-x-{n}
         </code>
         ,
         <code>
-         gap-y-4
+         gap-y-{n}
         </code>
        </li>
       </ul>
@@ -9482,33 +9892,41 @@ def hello():
         </strong>
         :
         <code>
-         p-4
+         p-{n}
         </code>
         (all sides),
         <code>
-         px-4
+         px-{n}
         </code>
         (horizontal),
         <code>
-         py-4
+         py-{n}
         </code>
         (vertical),
         <code>
-         pt-4
+         pt-{n}
         </code>
         (top),
         <code>
-         pr-4
+         pr-{n}
         </code>
         (right),
         <code>
-         pb-4
+         pb-{n}
         </code>
         (bottom),
         <code>
-         pl-4
+         pl-{n}
         </code>
-        (left)
+        (left),
+        <code>
+         ps-{n}
+        </code>
+        (inline-start),
+        <code>
+         pe-{n}
+        </code>
+        (inline-end)
        </li>
        <li>
         <strong>
@@ -9516,31 +9934,52 @@ def hello():
         </strong>
         :
         <code>
-         m-4
+         m-{n}
         </code>
         ,
         <code>
-         mx-4
+         mx-{n}
         </code>
         ,
         <code>
-         my-4
+         my-{n}
         </code>
         ,
         <code>
-         mt-4
+         mt-{n}
         </code>
         ,
         <code>
-         mr-4
+         mr-{n}
         </code>
         ,
         <code>
-         mb-4
+         mb-{n}
         </code>
         ,
         <code>
-         ml-4
+         ml-{n}
+        </code>
+        ,
+        <code>
+         ms-{n}
+        </code>
+        ,
+        <code>
+         me-{n}
+        </code>
+       </li>
+       <li>
+        <strong>
+         Margin Auto
+        </strong>
+        :
+        <code>
+         mx-auto
+        </code>
+        ,
+        <code>
+         my-auto
         </code>
        </li>
        <li>
@@ -9570,7 +10009,7 @@ def hello():
           <code>
            2rem
           </code>
-          ).
+          )
          </li>
          <li>
           Arbitrary values:
@@ -9581,7 +10020,6 @@ def hello():
           <code>
            m-[5%]
           </code>
-          .
          </li>
         </ul>
        </li>
@@ -9596,6 +10034,10 @@ def hello():
         </strong>
         :
         <code>
+         w-{n}
+        </code>
+        ,
+        <code>
          w-full
         </code>
         ,
@@ -9604,11 +10046,27 @@ def hello():
         </code>
         ,
         <code>
+         w-auto
+        </code>
+        ,
+        <code>
+         w-min
+        </code>
+        ,
+        <code>
+         w-max
+        </code>
+        ,
+        <code>
+         w-fit
+        </code>
+        ,
+        <code>
          w-1/2
         </code>
         ,
         <code>
-         w-10
+         w-1/3
         </code>
         ,
         <code>
@@ -9621,6 +10079,10 @@ def hello():
         </strong>
         :
         <code>
+         h-{n}
+        </code>
+        ,
+        <code>
          h-full
         </code>
         ,
@@ -9629,7 +10091,19 @@ def hello():
         </code>
         ,
         <code>
-         h-10
+         h-auto
+        </code>
+        ,
+        <code>
+         h-min
+        </code>
+        ,
+        <code>
+         h-max
+        </code>
+        ,
+        <code>
+         h-fit
         </code>
         ,
         <code>
@@ -9638,16 +10112,110 @@ def hello():
        </li>
        <li>
         <strong>
-         Max/Min
+         Min Width
         </strong>
         :
         <code>
-         max-w-md
+         min-w-{n}
+        </code>
+        ,
+        <code>
+         min-w-full
+        </code>
+        ,
+        <code>
+         min-w-min
+        </code>
+        ,
+        <code>
+         min-w-max
+        </code>
+        ,
+        <code>
+         min-w-fit
+        </code>
+       </li>
+       <li>
+        <strong>
+         Min Height
+        </strong>
+        :
+        <code>
+         min-h-{n}
+        </code>
+        ,
+        <code>
+         min-h-full
         </code>
         ,
         <code>
          min-h-screen
         </code>
+        ,
+        <code>
+         min-h-min
+        </code>
+        ,
+        <code>
+         min-h-max
+        </code>
+        ,
+        <code>
+         min-h-fit
+        </code>
+       </li>
+       <li>
+        <strong>
+         Max Width
+        </strong>
+        :
+        <code>
+         max-w-{size}
+        </code>
+        (xs, sm, md, lg, xl, 2xl-7xl, full, min, max, fit, prose, screen-{size})
+       </li>
+       <li>
+        <strong>
+         Max Height
+        </strong>
+        :
+        <code>
+         max-h-{n}
+        </code>
+        ,
+        <code>
+         max-h-full
+        </code>
+        ,
+        <code>
+         max-h-screen
+        </code>
+        ,
+        <code>
+         max-h-min
+        </code>
+        ,
+        <code>
+         max-h-max
+        </code>
+        ,
+        <code>
+         max-h-fit
+        </code>
+        ,
+        <code>
+         max-h-none
+        </code>
+       </li>
+       <li>
+        <strong>
+         Size
+        </strong>
+        :
+        <code>
+         size-{n}
+        </code>
+        (sets both width and height)
        </li>
       </ul>
       <h3 id="typography">
@@ -9684,8 +10252,46 @@ def hello():
         </code>
         ,
         <code>
-         text-[14px]
+         text-3xl
         </code>
+        ,
+        <code>
+         text-4xl
+        </code>
+        ,
+        <code>
+         text-5xl
+        </code>
+        ,
+        <code>
+         text-6xl
+        </code>
+        ,
+        <code>
+         text-7xl
+        </code>
+        ,
+        <code>
+         text-8xl
+        </code>
+        ,
+        <code>
+         text-9xl
+        </code>
+       </li>
+       <li>
+        <strong>
+         Font Size (Direct)
+        </strong>
+        :
+        <code>
+         fs-[32px]
+        </code>
+        ,
+        <code>
+         fs-[2rem]
+        </code>
+        Direct font-size specification
        </li>
        <li>
         <strong>
@@ -9697,7 +10303,23 @@ def hello():
         </code>
         ,
         <code>
+         font-extralight
+        </code>
+        ,
+        <code>
+         font-light
+        </code>
+        ,
+        <code>
          font-normal
+        </code>
+        ,
+        <code>
+         font-medium
+        </code>
+        ,
+        <code>
+         font-semibold
         </code>
         ,
         <code>
@@ -9705,7 +10327,24 @@ def hello():
         </code>
         ,
         <code>
+         font-extrabold
+        </code>
+        ,
+        <code>
          font-black
+        </code>
+       </li>
+       <li>
+        <strong>
+         Font Style
+        </strong>
+        :
+        <code>
+         italic
+        </code>
+        ,
+        <code>
+         not-italic
         </code>
        </li>
        <li>
@@ -9728,6 +10367,14 @@ def hello():
         <code>
          text-justify
         </code>
+        ,
+        <code>
+         text-start
+        </code>
+        ,
+        <code>
+         text-end
+        </code>
        </li>
        <li>
         <strong>
@@ -9735,33 +10382,414 @@ def hello():
         </strong>
         :
         <code>
-         text-blue-500
-        </code>
-        ,
-        <code>
-         text-white
+         text-{color}-{shade}
         </code>
         ,
         <code>
          text-[#123456]
         </code>
        </li>
+       <li>
+        <strong>
+         Text Decoration
+        </strong>
+        :
+        <code>
+         underline
+        </code>
+        ,
+        <code>
+         overline
+        </code>
+        ,
+        <code>
+         line-through
+        </code>
+        ,
+        <code>
+         no-underline
+        </code>
+       </li>
+       <li>
+        <strong>
+         Text Transform
+        </strong>
+        :
+        <code>
+         uppercase
+        </code>
+        ,
+        <code>
+         lowercase
+        </code>
+        ,
+        <code>
+         capitalize
+        </code>
+        ,
+        <code>
+         normal-case
+        </code>
+       </li>
+       <li>
+        <strong>
+         Text Overflow
+        </strong>
+        :
+        <code>
+         truncate
+        </code>
+        ,
+        <code>
+         text-ellipsis
+        </code>
+        ,
+        <code>
+         text-clip
+        </code>
+       </li>
+       <li>
+        <strong>
+         Vertical Align
+        </strong>
+        :
+        <code>
+         align-baseline
+        </code>
+        ,
+        <code>
+         align-top
+        </code>
+        ,
+        <code>
+         align-middle
+        </code>
+        ,
+        <code>
+         align-bottom
+        </code>
+        ,
+        <code>
+         align-text-top
+        </code>
+        ,
+        <code>
+         align-text-bottom
+        </code>
+        ,
+        <code>
+         align-sub
+        </code>
+        ,
+        <code>
+         align-super
+        </code>
+       </li>
+       <li>
+        <strong>
+         Whitespace
+        </strong>
+        :
+        <code>
+         whitespace-normal
+        </code>
+        ,
+        <code>
+         whitespace-nowrap
+        </code>
+        ,
+        <code>
+         whitespace-pre
+        </code>
+        ,
+        <code>
+         whitespace-pre-line
+        </code>
+        ,
+        <code>
+         whitespace-pre-wrap
+        </code>
+        ,
+        <code>
+         whitespace-break-spaces
+        </code>
+       </li>
+       <li>
+        <strong>
+         Word Break
+        </strong>
+        :
+        <code>
+         break-normal
+        </code>
+        ,
+        <code>
+         break-words
+        </code>
+        ,
+        <code>
+         break-all
+        </code>
+        ,
+        <code>
+         break-keep
+        </code>
+       </li>
+       <li>
+        <strong>
+         Line Height
+        </strong>
+        :
+        <code>
+         leading-none
+        </code>
+        ,
+        <code>
+         leading-tight
+        </code>
+        ,
+        <code>
+         leading-snug
+        </code>
+        ,
+        <code>
+         leading-normal
+        </code>
+        ,
+        <code>
+         leading-relaxed
+        </code>
+        ,
+        <code>
+         leading-loose
+        </code>
+        ,
+        <code>
+         leading-{n}
+        </code>
+       </li>
+       <li>
+        <strong>
+         Letter Spacing
+        </strong>
+        :
+        <code>
+         tracking-tighter
+        </code>
+        ,
+        <code>
+         tracking-tight
+        </code>
+        ,
+        <code>
+         tracking-normal
+        </code>
+        ,
+        <code>
+         tracking-wide
+        </code>
+        ,
+        <code>
+         tracking-wider
+        </code>
+        ,
+        <code>
+         tracking-widest
+        </code>
+       </li>
+       <li>
+        <strong>
+         Text Indent
+        </strong>
+        :
+        <code>
+         indent-{n}
+        </code>
+       </li>
       </ul>
+      <h3 id="colors">
+       Colors
+      </h3>
+      <p>
+       <strong>
+        Complete Palette
+       </strong>
+       (50-950 shades for each):
+      </p>
+      <ul>
+       <li>
+        <strong>
+         Neutrals
+        </strong>
+        :
+        <code>
+         slate
+        </code>
+        ,
+        <code>
+         gray
+        </code>
+        ,
+        <code>
+         zinc
+        </code>
+        ,
+        <code>
+         neutral
+        </code>
+        ,
+        <code>
+         stone
+        </code>
+       </li>
+       <li>
+        <strong>
+         Reds
+        </strong>
+        :
+        <code>
+         red
+        </code>
+        ,
+        <code>
+         rose
+        </code>
+       </li>
+       <li>
+        <strong>
+         Oranges
+        </strong>
+        :
+        <code>
+         orange
+        </code>
+        ,
+        <code>
+         amber
+        </code>
+       </li>
+       <li>
+        <strong>
+         Yellows
+        </strong>
+        :
+        <code>
+         yellow
+        </code>
+        ,
+        <code>
+         lime
+        </code>
+       </li>
+       <li>
+        <strong>
+         Greens
+        </strong>
+        :
+        <code>
+         green
+        </code>
+        ,
+        <code>
+         emerald
+        </code>
+        ,
+        <code>
+         teal
+        </code>
+       </li>
+       <li>
+        <strong>
+         Blues
+        </strong>
+        :
+        <code>
+         cyan
+        </code>
+        ,
+        <code>
+         sky
+        </code>
+        ,
+        <code>
+         blue
+        </code>
+        ,
+        <code>
+         indigo
+        </code>
+       </li>
+       <li>
+        <strong>
+         Purples
+        </strong>
+        :
+        <code>
+         violet
+        </code>
+        ,
+        <code>
+         purple
+        </code>
+        ,
+        <code>
+         fuchsia
+        </code>
+       </li>
+       <li>
+        <strong>
+         Pinks
+        </strong>
+        :
+        <code>
+         pink
+        </code>
+       </li>
+       <li>
+        <strong>
+         Special
+        </strong>
+        :
+        <code>
+         black
+        </code>
+        ,
+        <code>
+         white
+        </code>
+        ,
+        <code>
+         transparent
+        </code>
+        ,
+        <code>
+         current
+        </code>
+       </li>
+      </ul>
+      <p>
+       <strong>
+        Usage Examples:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">style</span><span class="o">=</span><span class="s2">"bg-cyan-500 text-white"</span>        <span class="c1"># Cyan background</span>
+<span class="n">style</span><span class="o">=</span><span class="s2">"bg-emerald-600 text-slate-50"</span>  <span class="c1"># Emerald background with light slate text</span>
+<span class="n">style</span><span class="o">=</span><span class="s2">"bg-fuchsia-500 text-rose-100"</span>  <span class="c1"># Fuchsia background with light rose text</span>
+<span class="n">style</span><span class="o">=</span><span class="s2">"bg-amber-400 text-zinc-900"</span>    <span class="c1"># Amber background with dark zinc text</span>
+</code></pre>
+      </div>
       <h3 id="backgrounds">
        Backgrounds
       </h3>
       <ul>
        <li>
         <strong>
-         Color
+         Background Color
         </strong>
         :
         <code>
-         bg-red-500
-        </code>
-        ,
-        <code>
-         bg-gray-100
+         bg-{color}-{shade}
         </code>
         ,
         <code>
@@ -9770,13 +10798,214 @@ def hello():
        </li>
        <li>
         <strong>
-         Opacity
+         Background Position
         </strong>
         :
         <code>
-         bg-opacity-50
+         bg-bottom
         </code>
-        (requires separate utility or arbitrary value)
+        ,
+        <code>
+         bg-center
+        </code>
+        ,
+        <code>
+         bg-left
+        </code>
+        ,
+        <code>
+         bg-left-bottom
+        </code>
+        ,
+        <code>
+         bg-left-top
+        </code>
+        ,
+        <code>
+         bg-right
+        </code>
+        ,
+        <code>
+         bg-right-bottom
+        </code>
+        ,
+        <code>
+         bg-right-top
+        </code>
+        ,
+        <code>
+         bg-top
+        </code>
+       </li>
+       <li>
+        <strong>
+         Background Repeat
+        </strong>
+        :
+        <code>
+         bg-repeat
+        </code>
+        ,
+        <code>
+         bg-no-repeat
+        </code>
+        ,
+        <code>
+         bg-repeat-x
+        </code>
+        ,
+        <code>
+         bg-repeat-y
+        </code>
+        ,
+        <code>
+         bg-repeat-round
+        </code>
+        ,
+        <code>
+         bg-repeat-space
+        </code>
+       </li>
+       <li>
+        <strong>
+         Background Size
+        </strong>
+        :
+        <code>
+         bg-auto
+        </code>
+        ,
+        <code>
+         bg-cover
+        </code>
+        ,
+        <code>
+         bg-contain
+        </code>
+       </li>
+       <li>
+        <strong>
+         Background Attachment
+        </strong>
+        :
+        <code>
+         bg-fixed
+        </code>
+        ,
+        <code>
+         bg-local
+        </code>
+        ,
+        <code>
+         bg-scroll
+        </code>
+       </li>
+       <li>
+        <strong>
+         Background Clip
+        </strong>
+        :
+        <code>
+         bg-clip-border
+        </code>
+        ,
+        <code>
+         bg-clip-padding
+        </code>
+        ,
+        <code>
+         bg-clip-content
+        </code>
+        ,
+        <code>
+         bg-clip-text
+        </code>
+       </li>
+       <li>
+        <strong>
+         Background Origin
+        </strong>
+        :
+        <code>
+         bg-origin-border
+        </code>
+        ,
+        <code>
+         bg-origin-padding
+        </code>
+        ,
+        <code>
+         bg-origin-content
+        </code>
+       </li>
+       <li>
+        <strong>
+         Background Blend Mode
+        </strong>
+        :
+        <code>
+         bg-blend-normal
+        </code>
+        ,
+        <code>
+         bg-blend-multiply
+        </code>
+        ,
+        <code>
+         bg-blend-screen
+        </code>
+        ,
+        <code>
+         bg-blend-overlay
+        </code>
+        ,
+        <code>
+         bg-blend-darken
+        </code>
+        ,
+        <code>
+         bg-blend-lighten
+        </code>
+        ,
+        <code>
+         bg-blend-color-dodge
+        </code>
+        ,
+        <code>
+         bg-blend-color-burn
+        </code>
+        ,
+        <code>
+         bg-blend-hard-light
+        </code>
+        ,
+        <code>
+         bg-blend-soft-light
+        </code>
+        ,
+        <code>
+         bg-blend-difference
+        </code>
+        ,
+        <code>
+         bg-blend-exclusion
+        </code>
+        ,
+        <code>
+         bg-blend-hue
+        </code>
+        ,
+        <code>
+         bg-blend-saturation
+        </code>
+        ,
+        <code>
+         bg-blend-color
+        </code>
+        ,
+        <code>
+         bg-blend-luminosity
+        </code>
        </li>
       </ul>
       <h3 id="borders-radius">
@@ -9793,11 +11022,48 @@ def hello():
         </code>
         ,
         <code>
+         border-0
+        </code>
+        ,
+        <code>
          border-2
         </code>
         ,
         <code>
          border-4
+        </code>
+        ,
+        <code>
+         border-8
+        </code>
+       </li>
+       <li>
+        <strong>
+         Border Width (Sides)
+        </strong>
+        :
+        <code>
+         border-t-{n}
+        </code>
+        ,
+        <code>
+         border-r-{n}
+        </code>
+        ,
+        <code>
+         border-b-{n}
+        </code>
+        ,
+        <code>
+         border-l-{n}
+        </code>
+        ,
+        <code>
+         border-x-{n}
+        </code>
+        ,
+        <code>
+         border-y-{n}
         </code>
        </li>
        <li>
@@ -9806,11 +11072,69 @@ def hello():
         </strong>
         :
         <code>
-         border-gray-300
+         border-{color}-{shade}
         </code>
         ,
         <code>
-         border-red-500
+         border-[#123456]
+        </code>
+       </li>
+       <li>
+        <strong>
+         Border Color (Sides)
+        </strong>
+        :
+        <code>
+         border-t-{color}
+        </code>
+        ,
+        <code>
+         border-r-{color}
+        </code>
+        ,
+        <code>
+         border-b-{color}
+        </code>
+        ,
+        <code>
+         border-l-{color}
+        </code>
+        ,
+        <code>
+         border-x-{color}
+        </code>
+        ,
+        <code>
+         border-y-{color}
+        </code>
+       </li>
+       <li>
+        <strong>
+         Border Style
+        </strong>
+        :
+        <code>
+         border-solid
+        </code>
+        ,
+        <code>
+         border-dashed
+        </code>
+        ,
+        <code>
+         border-dotted
+        </code>
+        ,
+        <code>
+         border-double
+        </code>
+        ,
+        <code>
+         border-hidden
+        </code>
+        ,
+        <code>
+         border-none
         </code>
        </li>
        <li>
@@ -9823,11 +11147,31 @@ def hello():
         </code>
         ,
         <code>
+         rounded-none
+        </code>
+        ,
+        <code>
+         rounded-sm
+        </code>
+        ,
+        <code>
          rounded-md
         </code>
         ,
         <code>
          rounded-lg
+        </code>
+        ,
+        <code>
+         rounded-xl
+        </code>
+        ,
+        <code>
+         rounded-2xl
+        </code>
+        ,
+        <code>
+         rounded-3xl
         </code>
         ,
         <code>
@@ -9838,6 +11182,43 @@ def hello():
          rounded-[10px]
         </code>
        </li>
+       <li>
+        <strong>
+         Border Radius (Corners)
+        </strong>
+        :
+        <code>
+         rounded-t-{size}
+        </code>
+        ,
+        <code>
+         rounded-r-{size}
+        </code>
+        ,
+        <code>
+         rounded-b-{size}
+        </code>
+        ,
+        <code>
+         rounded-l-{size}
+        </code>
+        ,
+        <code>
+         rounded-tl-{size}
+        </code>
+        ,
+        <code>
+         rounded-tr-{size}
+        </code>
+        ,
+        <code>
+         rounded-br-{size}
+        </code>
+        ,
+        <code>
+         rounded-bl-{size}
+        </code>
+       </li>
       </ul>
       <h3 id="effects">
        Effects
@@ -9845,9 +11226,13 @@ def hello():
       <ul>
        <li>
         <strong>
-         Shadow
+         Box Shadow
         </strong>
         :
+        <code>
+         shadow-sm
+        </code>
+        ,
         <code>
          shadow
         </code>
@@ -9865,6 +11250,14 @@ def hello():
         </code>
         ,
         <code>
+         shadow-2xl
+        </code>
+        ,
+        <code>
+         shadow-inner
+        </code>
+        ,
+        <code>
          shadow-none
         </code>
        </li>
@@ -9878,7 +11271,15 @@ def hello():
         </code>
         ,
         <code>
+         opacity-25
+        </code>
+        ,
+        <code>
          opacity-50
+        </code>
+        ,
+        <code>
+         opacity-75
         </code>
         ,
         <code>
@@ -9887,15 +11288,1404 @@ def hello():
        </li>
        <li>
         <strong>
-         Cursor
+         Mix Blend Mode
         </strong>
         :
+        <code>
+         mix-blend-normal
+        </code>
+        ,
+        <code>
+         mix-blend-multiply
+        </code>
+        ,
+        <code>
+         mix-blend-screen
+        </code>
+        ,
+        <code>
+         mix-blend-overlay
+        </code>
+        ,
+        <code>
+         mix-blend-darken
+        </code>
+        ,
+        <code>
+         mix-blend-lighten
+        </code>
+        ,
+        <code>
+         mix-blend-color-dodge
+        </code>
+        ,
+        <code>
+         mix-blend-color-burn
+        </code>
+        ,
+        <code>
+         mix-blend-hard-light
+        </code>
+        ,
+        <code>
+         mix-blend-soft-light
+        </code>
+        ,
+        <code>
+         mix-blend-difference
+        </code>
+        ,
+        <code>
+         mix-blend-exclusion
+        </code>
+        ,
+        <code>
+         mix-blend-hue
+        </code>
+        ,
+        <code>
+         mix-blend-saturation
+        </code>
+        ,
+        <code>
+         mix-blend-color
+        </code>
+        ,
+        <code>
+         mix-blend-luminosity
+        </code>
+       </li>
+      </ul>
+      <h3 id="filters">
+       Filters
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Blur
+        </strong>
+        :
+        <code>
+         blur-none
+        </code>
+        ,
+        <code>
+         blur-sm
+        </code>
+        ,
+        <code>
+         blur
+        </code>
+        ,
+        <code>
+         blur-md
+        </code>
+        ,
+        <code>
+         blur-lg
+        </code>
+        ,
+        <code>
+         blur-xl
+        </code>
+        ,
+        <code>
+         blur-2xl
+        </code>
+        ,
+        <code>
+         blur-3xl
+        </code>
+       </li>
+       <li>
+        <strong>
+         Brightness
+        </strong>
+        :
+        <code>
+         brightness-{n}
+        </code>
+        (0-200)
+       </li>
+       <li>
+        <strong>
+         Contrast
+        </strong>
+        :
+        <code>
+         contrast-{n}
+        </code>
+        (0-200)
+       </li>
+       <li>
+        <strong>
+         Grayscale
+        </strong>
+        :
+        <code>
+         grayscale-{n}
+        </code>
+        (0-100)
+       </li>
+       <li>
+        <strong>
+         Hue Rotate
+        </strong>
+        :
+        <code>
+         hue-rotate-{n}
+        </code>
+        (degrees)
+       </li>
+       <li>
+        <strong>
+         Invert
+        </strong>
+        :
+        <code>
+         invert-{n}
+        </code>
+        (0-100)
+       </li>
+       <li>
+        <strong>
+         Saturate
+        </strong>
+        :
+        <code>
+         saturate-{n}
+        </code>
+        (0-200)
+       </li>
+       <li>
+        <strong>
+         Sepia
+        </strong>
+        :
+        <code>
+         sepia-{n}
+        </code>
+        (0-100)
+       </li>
+       <li>
+        <strong>
+         Drop Shadow
+        </strong>
+        :
+        <code>
+         drop-shadow-sm
+        </code>
+        ,
+        <code>
+         drop-shadow
+        </code>
+        ,
+        <code>
+         drop-shadow-md
+        </code>
+        ,
+        <code>
+         drop-shadow-lg
+        </code>
+        ,
+        <code>
+         drop-shadow-xl
+        </code>
+        ,
+        <code>
+         drop-shadow-2xl
+        </code>
+        ,
+        <code>
+         drop-shadow-none
+        </code>
+       </li>
+      </ul>
+      <h3 id="backdrop-filters">
+       Backdrop Filters
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Backdrop Blur
+        </strong>
+        :
+        <code>
+         backdrop-blur-{size}
+        </code>
+       </li>
+       <li>
+        <strong>
+         Backdrop Brightness
+        </strong>
+        :
+        <code>
+         backdrop-brightness-{n}
+        </code>
+       </li>
+       <li>
+        <strong>
+         Backdrop Contrast
+        </strong>
+        :
+        <code>
+         backdrop-contrast-{n}
+        </code>
+       </li>
+       <li>
+        <strong>
+         Backdrop Grayscale
+        </strong>
+        :
+        <code>
+         backdrop-grayscale-{n}
+        </code>
+       </li>
+       <li>
+        <strong>
+         Backdrop Hue Rotate
+        </strong>
+        :
+        <code>
+         backdrop-hue-rotate-{n}
+        </code>
+       </li>
+       <li>
+        <strong>
+         Backdrop Invert
+        </strong>
+        :
+        <code>
+         backdrop-invert-{n}
+        </code>
+       </li>
+       <li>
+        <strong>
+         Backdrop Opacity
+        </strong>
+        :
+        <code>
+         backdrop-opacity-{n}
+        </code>
+       </li>
+       <li>
+        <strong>
+         Backdrop Saturate
+        </strong>
+        :
+        <code>
+         backdrop-saturate-{n}
+        </code>
+       </li>
+       <li>
+        <strong>
+         Backdrop Sepia
+        </strong>
+        :
+        <code>
+         backdrop-sepia-{n}
+        </code>
+       </li>
+      </ul>
+      <h3 id="transforms">
+       Transforms
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Scale
+        </strong>
+        :
+        <code>
+         scale-{n}
+        </code>
+        ,
+        <code>
+         scale-x-{n}
+        </code>
+        ,
+        <code>
+         scale-y-{n}
+        </code>
+        (e.g.,
+        <code>
+         scale-110
+        </code>
+        = 110%)
+       </li>
+       <li>
+        <strong>
+         Rotate
+        </strong>
+        :
+        <code>
+         rotate-{n}
+        </code>
+        (degrees)
+       </li>
+       <li>
+        <strong>
+         Translate
+        </strong>
+        :
+        <code>
+         translate-x-{n}
+        </code>
+        ,
+        <code>
+         translate-y-{n}
+        </code>
+       </li>
+       <li>
+        <strong>
+         Skew
+        </strong>
+        :
+        <code>
+         skew-x-{n}
+        </code>
+        ,
+        <code>
+         skew-y-{n}
+        </code>
+        (degrees)
+       </li>
+       <li>
+        <strong>
+         Transform Origin
+        </strong>
+        :
+        <code>
+         origin-center
+        </code>
+        ,
+        <code>
+         origin-top
+        </code>
+        ,
+        <code>
+         origin-top-right
+        </code>
+        ,
+        <code>
+         origin-right
+        </code>
+        ,
+        <code>
+         origin-bottom-right
+        </code>
+        ,
+        <code>
+         origin-bottom
+        </code>
+        ,
+        <code>
+         origin-bottom-left
+        </code>
+        ,
+        <code>
+         origin-left
+        </code>
+        ,
+        <code>
+         origin-top-left
+        </code>
+       </li>
+      </ul>
+      <h3 id="transitions">
+       Transitions
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Transition Property
+        </strong>
+        :
+        <code>
+         transition-none
+        </code>
+        ,
+        <code>
+         transition-all
+        </code>
+        ,
+        <code>
+         transition-colors
+        </code>
+        ,
+        <code>
+         transition-opacity
+        </code>
+        ,
+        <code>
+         transition-shadow
+        </code>
+        ,
+        <code>
+         transition-transform
+        </code>
+       </li>
+       <li>
+        <strong>
+         Transition Duration
+        </strong>
+        :
+        <code>
+         duration-{ms}
+        </code>
+        (e.g.,
+        <code>
+         duration-300
+        </code>
+        ,
+        <code>
+         duration-500
+        </code>
+        )
+       </li>
+       <li>
+        <strong>
+         Transition Delay
+        </strong>
+        :
+        <code>
+         delay-{ms}
+        </code>
+       </li>
+       <li>
+        <strong>
+         Transition Timing
+        </strong>
+        :
+        <code>
+         ease-linear
+        </code>
+        ,
+        <code>
+         ease-in
+        </code>
+        ,
+        <code>
+         ease-out
+        </code>
+        ,
+        <code>
+         ease-in-out
+        </code>
+       </li>
+      </ul>
+      <h3 id="positioning">
+       Positioning
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Position
+        </strong>
+        :
+        <code>
+         static
+        </code>
+        ,
+        <code>
+         fixed
+        </code>
+        ,
+        <code>
+         absolute
+        </code>
+        ,
+        <code>
+         relative
+        </code>
+        ,
+        <code>
+         sticky
+        </code>
+       </li>
+       <li>
+        <strong>
+         Top/Right/Bottom/Left
+        </strong>
+        :
+        <code>
+         top-{n}
+        </code>
+        ,
+        <code>
+         right-{n}
+        </code>
+        ,
+        <code>
+         bottom-{n}
+        </code>
+        ,
+        <code>
+         left-{n}
+        </code>
+       </li>
+       <li>
+        <strong>
+         Inset
+        </strong>
+        :
+        <code>
+         inset-{n}
+        </code>
+        ,
+        <code>
+         inset-x-{n}
+        </code>
+        ,
+        <code>
+         inset-y-{n}
+        </code>
+       </li>
+       <li>
+        <strong>
+         Z-Index
+        </strong>
+        :
+        <code>
+         z-{n}
+        </code>
+        (e.g.,
+        <code>
+         z-10
+        </code>
+        ,
+        <code>
+         z-50
+        </code>
+        )
+       </li>
+      </ul>
+      <h3 id="overflow">
+       Overflow
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Overflow
+        </strong>
+        :
+        <code>
+         overflow-auto
+        </code>
+        ,
+        <code>
+         overflow-hidden
+        </code>
+        ,
+        <code>
+         overflow-clip
+        </code>
+        ,
+        <code>
+         overflow-visible
+        </code>
+        ,
+        <code>
+         overflow-scroll
+        </code>
+       </li>
+       <li>
+        <strong>
+         Overflow X
+        </strong>
+        :
+        <code>
+         overflow-x-auto
+        </code>
+        ,
+        <code>
+         overflow-x-hidden
+        </code>
+        ,
+        <code>
+         overflow-x-clip
+        </code>
+        ,
+        <code>
+         overflow-x-visible
+        </code>
+        ,
+        <code>
+         overflow-x-scroll
+        </code>
+       </li>
+       <li>
+        <strong>
+         Overflow Y
+        </strong>
+        :
+        <code>
+         overflow-y-auto
+        </code>
+        ,
+        <code>
+         overflow-y-hidden
+        </code>
+        ,
+        <code>
+         overflow-y-clip
+        </code>
+        ,
+        <code>
+         overflow-y-visible
+        </code>
+        ,
+        <code>
+         overflow-y-scroll
+        </code>
+       </li>
+      </ul>
+      <h3 id="visibility">
+       Visibility
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Visibility
+        </strong>
+        :
+        <code>
+         visible
+        </code>
+        ,
+        <code>
+         invisible
+        </code>
+        ,
+        <code>
+         collapse
+        </code>
+       </li>
+      </ul>
+      <h3 id="cursor">
+       Cursor
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Cursor Types
+        </strong>
+        :
+        <code>
+         cursor-auto
+        </code>
+        ,
+        <code>
+         cursor-default
+        </code>
+        ,
         <code>
          cursor-pointer
         </code>
         ,
         <code>
+         cursor-wait
+        </code>
+        ,
+        <code>
+         cursor-text
+        </code>
+        ,
+        <code>
+         cursor-move
+        </code>
+        ,
+        <code>
+         cursor-help
+        </code>
+        ,
+        <code>
          cursor-not-allowed
+        </code>
+        ,
+        <code>
+         cursor-none
+        </code>
+        ,
+        <code>
+         cursor-context-menu
+        </code>
+        ,
+        <code>
+         cursor-progress
+        </code>
+        ,
+        <code>
+         cursor-cell
+        </code>
+        ,
+        <code>
+         cursor-crosshair
+        </code>
+        ,
+        <code>
+         cursor-vertical-text
+        </code>
+        ,
+        <code>
+         cursor-alias
+        </code>
+        ,
+        <code>
+         cursor-copy
+        </code>
+        ,
+        <code>
+         cursor-no-drop
+        </code>
+        ,
+        <code>
+         cursor-grab
+        </code>
+        ,
+        <code>
+         cursor-grabbing
+        </code>
+        ,
+        <code>
+         cursor-all-scroll
+        </code>
+        ,
+        <code>
+         cursor-col-resize
+        </code>
+        ,
+        <code>
+         cursor-row-resize
+        </code>
+        ,
+        <code>
+         cursor-n-resize
+        </code>
+        ,
+        <code>
+         cursor-e-resize
+        </code>
+        ,
+        <code>
+         cursor-s-resize
+        </code>
+        ,
+        <code>
+         cursor-w-resize
+        </code>
+        ,
+        <code>
+         cursor-ne-resize
+        </code>
+        ,
+        <code>
+         cursor-nw-resize
+        </code>
+        ,
+        <code>
+         cursor-se-resize
+        </code>
+        ,
+        <code>
+         cursor-sw-resize
+        </code>
+        ,
+        <code>
+         cursor-ew-resize
+        </code>
+        ,
+        <code>
+         cursor-ns-resize
+        </code>
+        ,
+        <code>
+         cursor-nesw-resize
+        </code>
+        ,
+        <code>
+         cursor-nwse-resize
+        </code>
+        ,
+        <code>
+         cursor-zoom-in
+        </code>
+        ,
+        <code>
+         cursor-zoom-out
+        </code>
+       </li>
+      </ul>
+      <h3 id="pointer-events-user-select">
+       Pointer Events &amp; User Select
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Pointer Events
+        </strong>
+        :
+        <code>
+         pointer-events-none
+        </code>
+        ,
+        <code>
+         pointer-events-auto
+        </code>
+       </li>
+       <li>
+        <strong>
+         User Select
+        </strong>
+        :
+        <code>
+         select-none
+        </code>
+        ,
+        <code>
+         select-text
+        </code>
+        ,
+        <code>
+         select-all
+        </code>
+        ,
+        <code>
+         select-auto
+        </code>
+       </li>
+      </ul>
+      <h3 id="object-fit-position">
+       Object Fit &amp; Position
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Object Fit
+        </strong>
+        :
+        <code>
+         object-contain
+        </code>
+        ,
+        <code>
+         object-cover
+        </code>
+        ,
+        <code>
+         object-fill
+        </code>
+        ,
+        <code>
+         object-none
+        </code>
+        ,
+        <code>
+         object-scale-down
+        </code>
+       </li>
+       <li>
+        <strong>
+         Object Position
+        </strong>
+        :
+        <code>
+         object-bottom
+        </code>
+        ,
+        <code>
+         object-center
+        </code>
+        ,
+        <code>
+         object-left
+        </code>
+        ,
+        <code>
+         object-left-bottom
+        </code>
+        ,
+        <code>
+         object-left-top
+        </code>
+        ,
+        <code>
+         object-right
+        </code>
+        ,
+        <code>
+         object-right-bottom
+        </code>
+        ,
+        <code>
+         object-right-top
+        </code>
+        ,
+        <code>
+         object-top
+        </code>
+       </li>
+      </ul>
+      <h3 id="aspect-ratio">
+       Aspect Ratio
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Aspect Ratio
+        </strong>
+        :
+        <code>
+         aspect-auto
+        </code>
+        ,
+        <code>
+         aspect-square
+        </code>
+        ,
+        <code>
+         aspect-video
+        </code>
+        ,
+        <code>
+         aspect-{w}-{h}
+        </code>
+        (e.g.,
+        <code>
+         aspect-16-9
+        </code>
+        )
+       </li>
+      </ul>
+      <h3 id="float-clear">
+       Float &amp; Clear
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Float
+        </strong>
+        :
+        <code>
+         float-right
+        </code>
+        ,
+        <code>
+         float-left
+        </code>
+        ,
+        <code>
+         float-none
+        </code>
+       </li>
+       <li>
+        <strong>
+         Clear
+        </strong>
+        :
+        <code>
+         clear-left
+        </code>
+        ,
+        <code>
+         clear-right
+        </code>
+        ,
+        <code>
+         clear-both
+        </code>
+        ,
+        <code>
+         clear-none
+        </code>
+       </li>
+      </ul>
+      <h3 id="box-sizing">
+       Box Sizing
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Box Sizing
+        </strong>
+        :
+        <code>
+         box-border
+        </code>
+        ,
+        <code>
+         box-content
+        </code>
+       </li>
+      </ul>
+      <h3 id="isolation">
+       Isolation
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Isolation
+        </strong>
+        :
+        <code>
+         isolate
+        </code>
+        ,
+        <code>
+         isolation-auto
+        </code>
+       </li>
+      </ul>
+      <h3 id="list-styles">
+       List Styles
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         List Style Type
+        </strong>
+        :
+        <code>
+         list-none
+        </code>
+        ,
+        <code>
+         list-disc
+        </code>
+        ,
+        <code>
+         list-decimal
+        </code>
+       </li>
+       <li>
+        <strong>
+         List Style Position
+        </strong>
+        :
+        <code>
+         list-inside
+        </code>
+        ,
+        <code>
+         list-outside
+        </code>
+       </li>
+      </ul>
+      <h3 id="appearance">
+       Appearance
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Appearance
+        </strong>
+        :
+        <code>
+         appearance-none
+        </code>
+        ,
+        <code>
+         appearance-auto
+        </code>
+       </li>
+      </ul>
+      <h3 id="resize">
+       Resize
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Resize
+        </strong>
+        :
+        <code>
+         resize-none
+        </code>
+        ,
+        <code>
+         resize-y
+        </code>
+        ,
+        <code>
+         resize-x
+        </code>
+        ,
+        <code>
+         resize
+        </code>
+       </li>
+      </ul>
+      <h3 id="scroll-behavior">
+       Scroll Behavior
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Scroll Behavior
+        </strong>
+        :
+        <code>
+         scroll-auto
+        </code>
+        ,
+        <code>
+         scroll-smooth
+        </code>
+       </li>
+       <li>
+        <strong>
+         Scroll Snap Align
+        </strong>
+        :
+        <code>
+         snap-start
+        </code>
+        ,
+        <code>
+         snap-end
+        </code>
+        ,
+        <code>
+         snap-center
+        </code>
+        ,
+        <code>
+         snap-align-none
+        </code>
+       </li>
+       <li>
+        <strong>
+         Scroll Snap Stop
+        </strong>
+        :
+        <code>
+         snap-normal
+        </code>
+        ,
+        <code>
+         snap-always
+        </code>
+       </li>
+       <li>
+        <strong>
+         Scroll Snap Type
+        </strong>
+        :
+        <code>
+         snap-none
+        </code>
+        ,
+        <code>
+         snap-x
+        </code>
+        ,
+        <code>
+         snap-y
+        </code>
+        ,
+        <code>
+         snap-both
+        </code>
+        ,
+        <code>
+         snap-mandatory
+        </code>
+        ,
+        <code>
+         snap-proximity
+        </code>
+       </li>
+      </ul>
+      <h3 id="scroll-margin-padding">
+       Scroll Margin &amp; Padding
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Scroll Margin
+        </strong>
+        :
+        <code>
+         scroll-m-{n}
+        </code>
+        ,
+        <code>
+         scroll-mx-{n}
+        </code>
+        ,
+        <code>
+         scroll-my-{n}
+        </code>
+        ,
+        <code>
+         scroll-mt-{n}
+        </code>
+        ,
+        <code>
+         scroll-mr-{n}
+        </code>
+        ,
+        <code>
+         scroll-mb-{n}
+        </code>
+        ,
+        <code>
+         scroll-ml-{n}
+        </code>
+       </li>
+       <li>
+        <strong>
+         Scroll Padding
+        </strong>
+        :
+        <code>
+         scroll-p-{n}
+        </code>
+        ,
+        <code>
+         scroll-px-{n}
+        </code>
+        ,
+        <code>
+         scroll-py-{n}
+        </code>
+        ,
+        <code>
+         scroll-pt-{n}
+        </code>
+        ,
+        <code>
+         scroll-pr-{n}
+        </code>
+        ,
+        <code>
+         scroll-pb-{n}
+        </code>
+        ,
+        <code>
+         scroll-pl-{n}
+        </code>
+       </li>
+      </ul>
+      <h3 id="touch-action">
+       Touch Action
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Touch Action
+        </strong>
+        :
+        <code>
+         touch-auto
+        </code>
+        ,
+        <code>
+         touch-none
+        </code>
+        ,
+        <code>
+         touch-pan-x
+        </code>
+        ,
+        <code>
+         touch-pan-left
+        </code>
+        ,
+        <code>
+         touch-pan-right
+        </code>
+        ,
+        <code>
+         touch-pan-y
+        </code>
+        ,
+        <code>
+         touch-pan-up
+        </code>
+        ,
+        <code>
+         touch-pan-down
+        </code>
+        ,
+        <code>
+         touch-pinch-zoom
+        </code>
+        ,
+        <code>
+         touch-manipulation
+        </code>
+       </li>
+      </ul>
+      <h3 id="will-change">
+       Will Change
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Will Change
+        </strong>
+        :
+        <code>
+         will-change-auto
+        </code>
+        ,
+        <code>
+         will-change-scroll
+        </code>
+        ,
+        <code>
+         will-change-contents
+        </code>
+        ,
+        <code>
+         will-change-transform
+        </code>
+       </li>
+      </ul>
+      <h3 id="columns">
+       Columns
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Columns
+        </strong>
+        :
+        <code>
+         columns-{n}
+        </code>
+       </li>
+      </ul>
+      <h3 id="break-afterbeforeinside">
+       Break After/Before/Inside
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Break After
+        </strong>
+        :
+        <code>
+         break-after-{value}
+        </code>
+       </li>
+       <li>
+        <strong>
+         Break Before
+        </strong>
+        :
+        <code>
+         break-before-{value}
+        </code>
+       </li>
+       <li>
+        <strong>
+         Break Inside
+        </strong>
+        :
+        <code>
+         break-inside-{value}
         </code>
        </li>
       </ul>
@@ -9911,10 +12701,35 @@ def hello():
       </p>
       <div class="codehilite">
        <pre><span></span><code><span class="n">Container</span><span class="p">(</span>
-    <span class="n">style</span><span class="o">=</span><span class="s2">"w-[350px] bg-[#1a2b3c] z-[100] top-[50px]"</span>
+    <span class="n">style</span><span class="o">=</span><span class="s2">"w-[350px] bg-[#1a2b3c] z-[100] top-[50px] fs-[24px]"</span>
 <span class="p">)</span>
 </code></pre>
       </div>
+      <p>
+       <strong>
+        Arbitrary value features:
+       </strong>
+       - Use underscores for spaces:
+       <code>
+        bg-[url('image.jpg')]
+       </code>
+       →
+       <code>
+        bg-[url('image.jpg')]
+       </code>
+       - Works with any property:
+       <code>
+        p-[20px]
+       </code>
+       ,
+       <code>
+        m-[5%]
+       </code>
+       ,
+       <code>
+        w-[calc(100%-50px)]
+       </code>
+      </p>
       <h2 id="state-variants">
        State Variants
       </h2>
@@ -9932,32 +12747,152 @@ def hello():
       <div class="codehilite">
        <pre><span></span><code><span class="n">Button</span><span class="p">(</span>
     <span class="s2">"Click Me"</span><span class="p">,</span>
-    <span class="n">style</span><span class="o">=</span><span class="s2">"bg-blue-500 text-white px-4 py-2 rounded"</span><span class="p">,</span>
-    <span class="n">hover_style</span><span class="o">=</span><span class="s2">"bg-blue-600 shadow-lg"</span><span class="p">,</span>
-    <span class="n">active_style</span><span class="o">=</span><span class="s2">"bg-blue-700 transform scale-95"</span>
+    <span class="n">style</span><span class="o">=</span><span class="s2">"bg-blue-500 text-white px-4 py-2 rounded transition-all duration-300"</span><span class="p">,</span>
+    <span class="n">hover_style</span><span class="o">=</span><span class="s2">"bg-blue-600 shadow-lg scale-105"</span><span class="p">,</span>
+    <span class="n">active_style</span><span class="o">=</span><span class="s2">"bg-blue-700 scale-95"</span>
 <span class="p">)</span>
+</code></pre>
+      </div>
+      <h2 id="complete-example-styling">
+       Complete Example Styling
+      </h2>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="s2">"Styling Demo"</span><span class="p">)</span>
+
+<span class="nd">@route</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span>
+        <span class="n">Container</span><span class="p">(</span>
+            <span class="c1"># Header with gradient text</span>
+            <span class="n">Text</span><span class="p">(</span>
+                <span class="s2">"Welcome to Dars"</span><span class="p">,</span>
+                <span class="n">style</span><span class="o">=</span><span class="s2">"fs-[48px] font-black text-center mb-8"</span>
+            <span class="p">),</span>
+
+            <span class="c1"># Card with new colors</span>
+            <span class="n">Container</span><span class="p">(</span>
+                <span class="n">Text</span><span class="p">(</span><span class="s2">"Cyan Card"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">"text-xl font-bold mb-2"</span><span class="p">),</span>
+                <span class="n">Text</span><span class="p">(</span><span class="s2">"Using the new cyan color palette"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">"text-cyan-100"</span><span class="p">),</span>
+                <span class="n">style</span><span class="o">=</span><span class="s2">"bg-cyan-600 p-6 rounded-xl shadow-xl mb-4"</span>
+            <span class="p">),</span>
+
+            <span class="n">Container</span><span class="p">(</span>
+                <span class="n">Text</span><span class="p">(</span><span class="s2">"Emerald Card"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">"text-xl font-bold mb-2"</span><span class="p">),</span>
+                <span class="n">Text</span><span class="p">(</span><span class="s2">"With emerald green background"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">"text-emerald-100"</span><span class="p">),</span>
+                <span class="n">style</span><span class="o">=</span><span class="s2">"bg-emerald-600 p-6 rounded-xl shadow-xl mb-4"</span>
+            <span class="p">),</span>
+
+            <span class="c1"># Interactive button</span>
+            <span class="n">Button</span><span class="p">(</span>
+                <span class="s2">"Hover Me"</span><span class="p">,</span>
+                <span class="n">style</span><span class="o">=</span><span class="s2">"bg-fuchsia-500 text-white px-6 py-3 rounded-lg transition-all duration-300"</span><span class="p">,</span>
+                <span class="n">hover_style</span><span class="o">=</span><span class="s2">"bg-fuchsia-600 scale-110 shadow-2xl"</span><span class="p">,</span>
+                <span class="n">active_style</span><span class="o">=</span><span class="s2">"scale-95"</span>
+            <span class="p">),</span>
+
+            <span class="n">style</span><span class="o">=</span><span class="s2">"max-w-4xl mx-auto p-8"</span>
+        <span class="p">),</span>
+        <span class="n">style</span><span class="o">=</span><span class="s2">"min-h-screen bg-gradient-to-br from-slate-50 to-zinc-100"</span>
+    <span class="p">)</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="s2">"index"</span><span class="p">,</span> <span class="n">index</span><span class="p">())</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">rTimeCompile</span><span class="p">()</span>
 </code></pre>
       </div>
       <h2 id="performance">
        Performance
       </h2>
       <p>
-       The parsing happens in Python before the HTML/CSS is generated. This means
-1.
-       <strong>
-        Zero Runtime Overhead
-       </strong>
-       : The browser receives standard CSS.
-2.
-       <strong>
-        No JavaScript Dependency
-       </strong>
-       : No need to load a large utility CSS library or run JS parsers in the browser.
-3.
-       <strong>
-        Optimized Output
-       </strong>
-       : Only the styles you use are generated (as inline styles or extracted CSS).
+       The parsing happens in Python before the HTML/CSS is generated. This means:
+      </p>
+      <ol>
+       <li>
+        <strong>
+         Zero Runtime Overhead
+        </strong>
+        : The browser receives standard CSS
+       </li>
+       <li>
+        <strong>
+         No JavaScript Dependency
+        </strong>
+        : No need to load a large utility CSS library or run JS parsers in the browser
+       </li>
+       <li>
+        <strong>
+         Optimized Output
+        </strong>
+        : Only the styles you use are generated (as inline styles or extracted CSS)
+       </li>
+       <li>
+        <strong>
+         Python-Native
+        </strong>
+        : No Node.js, PostCSS, or build tools required
+       </li>
+      </ol>
+      <h2 id="best-practices">
+       Best Practices
+      </h2>
+      <ol>
+       <li>
+        <strong>
+         Use semantic spacing
+        </strong>
+        : Stick to the
+        <code>
+         0.25rem
+        </code>
+        scale (4, 8, 12, 16, etc.) for consistency
+       </li>
+       <li>
+        <strong>
+         Leverage the color palette
+        </strong>
+        : Use the predefined color shades for a cohesive design
+       </li>
+       <li>
+        <strong>
+         Combine with transitions
+        </strong>
+        : Add
+        <code>
+         transition-all duration-300
+        </code>
+        for smooth hover effects
+       </li>
+       <li>
+        <strong>
+         Use arbitrary values sparingly
+        </strong>
+        : Prefer standard utilities when possible
+       </li>
+       <li>
+        <strong>
+         Keep it readable
+        </strong>
+        : Break long utility strings into multiple lines if needed
+       </li>
+      </ol>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">style</span><span class="o">=</span><span class="s2">"""</span>
+<span class="s2">    bg-gradient-to-r from-purple-600 to-pink-600</span>
+<span class="s2">    text-white px-8 py-4 rounded-xl shadow-2xl</span>
+<span class="s2">    transition-all duration-300</span>
+<span class="s2">"""</span>
+</code></pre>
+      </div>
+      <hr/>
+      <p>
+       For animations, see the
+       <a href="animations.md">
+        Animation System
+       </a>
+       documentation.
       </p>
      </div>
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_119">

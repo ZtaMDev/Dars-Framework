@@ -1023,17 +1023,22 @@ self.addEventListener('fetch', event => {
                 if comp_id and component.hover_style:
                     styles_str = self.render_styles(component.hover_style)
                     if styles_str and styles_str.strip():
-                        # Aumentar la especificidad usando !important
+                        # render_styles returns lines separated by \n with indentation
+                        # Split by newline and clean each line
+                        style_lines = [line.strip() for line in styles_str.split('\n') if line.strip()]
+                        
+                        # Add !important to each line
                         important_styles = []
-                        for style_line in styles_str.split(';'):
-                            if style_line.strip():
-                                important_styles.append(f"{style_line.strip()} !important")
+                        for line in style_lines:
+                            # Remove trailing semicolon if present
+                            line = line.rstrip(';').strip()
+                            if line:
+                                important_styles.append(f"{line} !important")
                         
-                        important_styles_str = ";\n    ".join(important_styles)
-                        
-                        hover_css += f"#{comp_id}:hover {{\n"
-                        hover_css += f"    {important_styles_str};\n"
-                        hover_css += "}\n\n"
+                        if important_styles:
+                            hover_css += f"#{comp_id}:hover {{\n"
+                            hover_css += "    " + ";\n    ".join(important_styles) + ";\n"
+                            hover_css += "}\n\n"
             
             # Procesar hijos recursivamente
             for child in getattr(component, 'children', []):
@@ -1044,7 +1049,15 @@ self.addEventListener('fetch', event => {
             for page in app.pages.values():
                 if page.root:
                     process_component(page.root)
-        elif app.root:
+        
+        # Procesar rutas SPA
+        if hasattr(app, '_spa_routes') and app._spa_routes:
+            for route in app._spa_routes.values():
+                if hasattr(route, 'root') and route.root:
+                    process_component(route.root)
+                    
+        # Procesar root simple
+        if app.root:
             process_component(app.root)
         
         return hover_css
@@ -1061,17 +1074,22 @@ self.addEventListener('fetch', event => {
                 if comp_id and component.active_style:
                     styles_str = self.render_styles(component.active_style)
                     if styles_str and styles_str.strip():
-                        # Aumentar la especificidad usando !important
+                        # render_styles returns lines separated by \n with indentation
+                        # Split by newline and clean each line
+                        style_lines = [line.strip() for line in styles_str.split('\n') if line.strip()]
+                        
+                        # Add !important to each line
                         important_styles = []
-                        for style_line in styles_str.split(';'):
-                            if style_line.strip():
-                                important_styles.append(f"{style_line.strip()} !important")
+                        for line in style_lines:
+                            # Remove trailing semicolon if present
+                            line = line.rstrip(';').strip()
+                            if line:
+                                important_styles.append(f"{line} !important")
                         
-                        important_styles_str = ";\n    ".join(important_styles)
-                        
-                        active_css += f"#{comp_id}:active {{\n"
-                        active_css += f"    {important_styles_str};\n"
-                        active_css += "}\n\n"
+                        if important_styles:
+                            active_css += f"#{comp_id}:active {{\n"
+                            active_css += "    " + ";\n    ".join(important_styles) + ";\n"
+                            active_css += "}\n\n"
             
             # Procesar hijos recursivamente
             for child in getattr(component, 'children', []):
@@ -1082,7 +1100,15 @@ self.addEventListener('fetch', event => {
             for page in app.pages.values():
                 if page.root:
                     process_component(page.root)
-        elif app.root:
+        
+        # Procesar rutas SPA
+        if hasattr(app, '_spa_routes') and app._spa_routes:
+            for route in app._spa_routes.values():
+                if hasattr(route, 'root') and route.root:
+                    process_component(route.root)
+
+        # Procesar root simple
+        if app.root:
             process_component(app.root)
         
         return active_css
