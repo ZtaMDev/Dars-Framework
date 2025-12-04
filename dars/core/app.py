@@ -512,6 +512,13 @@ class App:
                             sys.modules.pop(name, None)
                         sys.modules.pop("dars_app", None)
 
+                        # Clear state registry to prevent duplicates
+                        try:
+                            from dars.core.state_v2 import clear_state_registry
+                            clear_state_registry()
+                        except ImportError:
+                            pass
+
                         unique_name = f"dars_app_reload_{int(time.time()*1000)}"
                         spec = importlib.util.spec_from_file_location(unique_name, app_file)
                         module = importlib.util.module_from_spec(spec)
@@ -1137,6 +1144,34 @@ class App:
         
         # Desktop configuration
         self.devtools = devtools  # Control DevTools auto-open in dev mode
+        
+        # Load project configuration and register custom utilities
+        try:
+            from dars.config import load_config
+            from dars.core.utilities import register_custom_utilities
+            
+            # Detect project root (similar to rTimeCompile)
+            import inspect
+            import sys
+            import os
+            
+            app_file = None
+            for frame in inspect.stack():
+                if frame.function == "<module>":
+                    app_file = frame.filename
+                    break
+            if not app_file:
+                app_file = sys.argv[0]
+            
+            project_root = os.path.dirname(os.path.abspath(app_file))
+            cfg, cfg_found = load_config(project_root)
+            
+            if cfg_found and 'utility_styles' in cfg:
+                register_custom_utilities(cfg['utility_styles'])
+                
+        except Exception:
+            # Fail silently if config loading fails during init
+            pass
         
         # Propiedades Open Graph (para redes sociales)
 

@@ -305,6 +305,20 @@
      <div class="sidebar-divider">
      </div>
      <div class="sidebar-category">
+      Getting Started
+     </div>
+     <a class="sidebar-link sidebar-level-1" href="#getting-started-with-dars" style="margin-left: 0px">
+      Getting Started with Dars
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#quick-start" style="margin-left: 20px">
+      Quick Start
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#need-more-help" style="margin-left: 20px">
+      Need More Help?
+     </a>
+     <div class="sidebar-divider">
+     </div>
+     <div class="sidebar-category">
       Cli
      </div>
      <a class="sidebar-link sidebar-level-1" href="#dars-cli-reference" style="margin-left: 0px">
@@ -330,20 +344,6 @@
      </a>
      <a class="sidebar-link sidebar-level-3" href="#minification-labels-in-output" style="margin-left: 40px">
       Minification labels in output
-     </a>
-     <div class="sidebar-divider">
-     </div>
-     <div class="sidebar-category">
-      Getting Started
-     </div>
-     <a class="sidebar-link sidebar-level-1" href="#getting-started-with-dars" style="margin-left: 0px">
-      Getting Started with Dars
-     </a>
-     <a class="sidebar-link sidebar-level-2" href="#quick-start" style="margin-left: 20px">
-      Quick Start
-     </a>
-     <a class="sidebar-link sidebar-level-2" href="#need-more-help" style="margin-left: 20px">
-      Need More Help?
      </a>
      <div class="sidebar-divider">
      </div>
@@ -1015,6 +1015,9 @@
      </a>
      <a class="sidebar-link sidebar-level-2" href="#best-practices" style="margin-left: 20px">
       Best Practices
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#custom-utilities" style="margin-left: 20px">
+      Custom Utilities
      </a>
      <div class="sidebar-divider">
      </div>
@@ -2171,8 +2174,18 @@
       </h2>
       <ul>
        <li>
+        <a href="#installation-guide-dars-framework">
+         Installing Dars
+        </a>
+       </li>
+       <li>
         <a href="#getting-started-with-dars">
          Getting Started with Dars
+        </a>
+       </li>
+       <li>
+        <a href="#dars-project-configuration">
+         Dars Project Configuration
         </a>
        </li>
        <li>
@@ -3126,6 +3139,22 @@ Toggle the advanced JS minifier.
           : skip the advanced minifier and use the secondary minifier directly; fall back to the conservative built-in if not available.
          </li>
         </ul>
+       </li>
+       <li>
+        <p>
+         utility_styles
+Dictionary defining custom utility classes. Keys are class names, values are lists of utility strings or raw CSS properties.
+Example:
+         <code>
+          "btn-primary": ["bg-blue-500", "text-white"]
+         </code>
+        </p>
+       </li>
+       <li>
+        <p>
+         icons
+List of icon paths or configurations for PWA/meta tags.
+        </p>
        </li>
        <li>
         <p>
@@ -12914,10 +12943,92 @@ def hello():
       <hr/>
       <p>
        For animations, see the
-       <a href="animations.md">
+       <a href="https://ztamdev.github.io/Dars-Framework/docs.html#dars-animation-system">
         Animation System
        </a>
        documentation.
+      </p>
+      <h2 id="custom-utilities">
+       Custom Utilities
+      </h2>
+      <p>
+       You can define your own utility classes in
+       <code>
+        dars.config.json
+       </code>
+       under the
+       <code>
+        utility_styles
+       </code>
+       key. This allows you to create reusable style combinations, use raw CSS properties, and even compose other custom utilities.
+      </p>
+      <p>
+       <strong>
+        Configuration (
+        <code>
+         dars.config.json
+        </code>
+        ):
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"utility_styles"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"btn-primary"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">"bg-blue-600"</span><span class="p">,</span><span class="w"> </span>
+<span class="w">      </span><span class="s2">"text-white"</span><span class="p">,</span><span class="w"> </span>
+<span class="w">      </span><span class="s2">"p-3"</span><span class="p">,</span><span class="w"> </span>
+<span class="w">      </span><span class="s2">"rounded-lg"</span><span class="p">,</span><span class="w"> </span>
+<span class="w">      </span><span class="s2">"hover:bg-blue-700"</span><span class="p">,</span><span class="w"> </span>
+<span class="w">      </span><span class="s2">"transition-all"</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">"card-fancy"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">"bg-white"</span><span class="p">,</span><span class="w"> </span>
+<span class="w">      </span><span class="s2">"p-8"</span><span class="p">,</span><span class="w"> </span>
+<span class="w">      </span><span class="s2">"rounded-xl"</span><span class="p">,</span><span class="w"> </span>
+<span class="w">      </span><span class="s2">"shadow-lg"</span><span class="p">,</span><span class="w"> </span>
+<span class="w">      </span><span class="s2">"border: 1px solid #e5e7eb"</span><span class="w">  </span><span class="c1">// Raw CSS property</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">"text-gradient"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">"font-bold"</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">"text-4xl"</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">"background: linear-gradient(to right, #4f46e5, #ec4899)"</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">"-webkit-background-clip: text"</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">"-webkit-text-fill-color: transparent"</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">"display: inline-block"</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Usage in Python:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">Button</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">"Click Me"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">"btn-primary"</span><span class="p">)</span>
+<span class="n">Container</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="s2">"card-fancy text-gradient"</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Features:
+       </strong>
+       -
+       <strong>
+        Composition
+       </strong>
+       : Combine multiple existing utilities into one class.
+-
+       <strong>
+        Raw CSS
+       </strong>
+       : Use standard CSS syntax (e.g.,
+       <code>
+        border: 1px solid red
+       </code>
+       ) directly in the list.
       </p>
      </div>
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_119">

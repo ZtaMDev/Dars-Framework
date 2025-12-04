@@ -28,6 +28,7 @@ docs = Page(
             ),
             Markdown(file_path="./documentation/markdown/cli.md", class_name="markdown_docs", dark_theme=True),
             Markdown(file_path="./documentation/markdown/config.md", class_name="markdown_docs", dark_theme=True),
+            
             Markdown(
                 file_path="./documentation/markdown/app.md",
                 class_name="markdown_docs",

@@ -9,6 +9,19 @@
 from typing import Dict, Any, List, Optional
 import re
 
+# Custom utilities registered via dars.config.json
+CUSTOM_UTILITY_MAP: Dict[str, List[str]] = {}
+
+def register_custom_utilities(styles: Dict[str, List[str]]):
+    """
+    Register custom utility classes from configuration.
+    
+    Args:
+        styles: Dictionary mapping class names to lists of utility strings or CSS declarations.
+    """
+    global CUSTOM_UTILITY_MAP
+    CUSTOM_UTILITY_MAP.update(styles)
+
 def _fmt_rem(v: str) -> str:
     try:
         # Check if it's a number
@@ -944,6 +957,20 @@ def parse_utility_string(utility_string: str) -> Dict[str, Any]:
     classes = utility_string.split()
     
     for cls in classes:
+        # 0. Custom Utility Check
+        if cls in CUSTOM_UTILITY_MAP:
+            custom_styles_list = CUSTOM_UTILITY_MAP[cls]
+            for item in custom_styles_list:
+                # Check for raw CSS "prop: value"
+                if ':' in item:
+                    prop, val = item.split(':', 1)
+                    styles[prop.strip()] = val.strip()
+                else:
+                    # Recursive parse for composed utilities
+                    composed_styles = parse_utility_string(item)
+                    styles.update(composed_styles)
+            continue
+
         # 1. Exact match (e.g., "flex", "hidden")
         if cls in UTILITY_PROPERTY_MAP:
             prop_val = UTILITY_PROPERTY_MAP[cls]
@@ -989,7 +1016,7 @@ def parse_utility_string(utility_string: str) -> Dict[str, Any]:
             # Fallback: maybe it's a border-radius shorthand "rounded"
             if cls == "rounded":
                 styles["border-radius"] = "0.25rem"
-            elif cls.startswith("border") and cls != "border":
+            elif cls.startswith("border-"):
                 # border-red-500 -> border-color
                 # border-2 -> border-width
                 suffix = cls[7:] # remove "border-"

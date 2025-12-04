@@ -370,4 +370,51 @@ style="""
 
 ---
 
-For animations, see the [Animation System](animations.md) documentation.
+For animations, see the [Animation System](https://ztamdev.github.io/Dars-Framework/docs.html#dars-animation-system) documentation.
+
+## Custom Utilities
+
+You can define your own utility classes in `dars.config.json` under the `utility_styles` key. This allows you to create reusable style combinations, use raw CSS properties, and even compose other custom utilities.
+
+**Configuration (`dars.config.json`):**
+
+```json
+{
+  "utility_styles": {
+    "btn-primary": [
+      "bg-blue-600", 
+      "text-white", 
+      "p-3", 
+      "rounded-lg", 
+      "hover:bg-blue-700", 
+      "transition-all"
+    ],
+    "card-fancy": [
+      "bg-white", 
+      "p-8", 
+      "rounded-xl", 
+      "shadow-lg", 
+      "border: 1px solid #e5e7eb"  // Raw CSS property
+    ],
+    "text-gradient": [
+      "font-bold",
+      "text-4xl",
+      "background: linear-gradient(to right, #4f46e5, #ec4899)",
+      "-webkit-background-clip: text",
+      "-webkit-text-fill-color: transparent",
+      "display: inline-block"
+    ]
+  }
+}
+```
+
+**Usage in Python:**
+
+```python
+Button(text="Click Me", style="btn-primary")
+Container(style="card-fancy text-gradient")
+```
+
+**Features:**
+- **Composition**: Combine multiple existing utilities into one class.
+- **Raw CSS**: Use standard CSS syntax (e.g., `border: 1px solid red`) directly in the list.

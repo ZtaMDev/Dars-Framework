@@ -1,3 +1,45 @@
+# Release Notes v1.6.6
+
+> **Custom Utility Styles & State Hot Reload Fix**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Custom Utility Styles
+
+You can now define your own utility classes in `dars.config.json` under the `utility_styles` key. This powerful feature allows you to:
+
+- **Compose Utilities**: Combine multiple existing Dars utilities into a single class (e.g., `btn-primary`).
+- **Use Raw CSS**: Mix standard CSS properties (e.g., `border: 1px solid red`) directly within your utility definitions.
+- **Recursive Composition**: Build complex utilities by referencing other custom utilities.
+
+**Example `dars.config.json`:**
+```json
+{
+  "utility_styles": {
+    "btn-primary": ["bg-blue-600", "text-white", "p-3", "rounded-lg"],
+    "card-fancy": ["bg-white", "shadow-lg", "border: 1px solid #e5e7eb"]
+  }
+}
+```
+
+### Critical Fixes
+
+- **State Hot Reload**: Fixed a critical issue where `State` objects were duplicated during hot reloads, leading to stale data and unpredictable behavior. The state registry is now properly cleared on every reload.
+- **Border Utility Fallback**: Improved the parsing logic for `border-` utilities to correctly distinguish between Tailwind-like classes and raw CSS `border:` properties.
+
+### Documentation
+
+- **New Custom Utilities Guide**: Added comprehensive documentation for the new custom styling system in `styling`.
+- **Configuration Reference**: Updated `config` with details on `utility_styles` and other configuration options.
+
+---
+
 # Release Notes v1.6.5
 
 > **Massive Styling Expansion & SPA Fixes**

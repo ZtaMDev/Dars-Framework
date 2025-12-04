@@ -379,8 +379,8 @@ def create_sidebar():
     markdown_files = [
         "./documentation/markdown/index.md",
         "./documentation/markdown/install.md",
-        "./documentation/markdown/cli.md",
         "./documentation/markdown/getting_started.md",
+        "./documentation/markdown/cli.md",
         "./documentation/markdown/config.md",
         "./documentation/markdown/app.md",
         "./documentation/markdown/components.md",

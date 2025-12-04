@@ -27,6 +27,11 @@ import json
 # Global registry for V2 states (similar to STATE_BOOTSTRAP in state.py)
 STATE_V2_REGISTRY: List['State'] = []
 
+def clear_state_registry():
+    """Clear the global state registry. Used during hot reload."""
+    global STATE_V2_REGISTRY
+    STATE_V2_REGISTRY.clear()
+
 
 class ReactiveProperty:
     """

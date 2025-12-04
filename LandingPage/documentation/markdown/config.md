@@ -49,6 +49,13 @@ The file (dars.config.json) configures how Dars exports and builds your project.
   - `true` (default): prefer the advanced minifier; fall back to the secondary minifier; if neither is available, a conservative built-in fallback is used.
   - `false`: skip the advanced minifier and use the secondary minifier directly; fall back to the conservative built-in if not available.
 
+- utility_styles
+  Dictionary defining custom utility classes. Keys are class names, values are lists of utility strings or raw CSS properties.
+  Example: `"btn-primary": ["bg-blue-500", "text-white"]`
+
+- icons
+  List of icon paths or configurations for PWA/meta tags.
+
 - markdownHighlight
   Auto-inject a client-side syntax highlighter for fenced code blocks in Markdown.
   - `true` (default): injects Prism.js assets once per page and highlights `pre code` blocks.

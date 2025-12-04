@@ -34,7 +34,7 @@ index = Page(
     create_hero(),
     create_features(),
     create_howitworks(),
-    create_footer()
+    create_footer(),
 )
 app.set_theme("dark")
 app.add_global_style(file_path="index.css")
