@@ -94,15 +94,6 @@ if __name__ == "__main__":
 
 ---
 
-### Key Features
-
-1.  **Automatic Property Injection**: The framework automatically injects the correct HTML attributes for `{id}`, `{class_name}`, and `{style}`.
-2.  **State V2 Compatible**: Function components work seamlessly with `State()` and reactive updates.
-3.  **Event Handling**: Events like `on_click` are handled automatically by the framework (passed via `**props`).
-4.  **Children Support**: Use `{Props.children}` or `{children}` to render nested content.
-
----
-
 ## State Management System
 
 Dars Framework features **powerful state management system**, designed for different use cases.
@@ -346,6 +337,13 @@ def UserCard(name, email, id, class_name, style, children, **props):
     """
 ```
 
+### Key Features
+
+1.  **Automatic Property Injection**: The framework automatically injects the correct HTML attributes for `{id}`, `{class_name}`, and `{style}`.
+2.  **State V2 Compatible**: Function components work seamlessly with `State()` and reactive updates.
+3.  **Event Handling**: Events like `on_click` are handled automatically by the framework (passed via `**props`).
+4.  **Children Support**: Use `{Props.children}` or `{children}` to render nested content.
+
 ---
 
 ## Backend HTTP Utilities & API Communication
@@ -476,7 +474,9 @@ Example default:
   "exclude": ["**/__pycache__", ".git", ".venv", "node_modules"],
   "bundle": true,
   "defaultMinify": true,
-  "viteMinify": true
+  "viteMinify": true,
+  "utility_styles": {},
+  "markdownHighlight": true
 }
 ```
 
@@ -488,6 +488,8 @@ Example default:
 - `bundle`: Reserved for future use. CLI exports and build already bundle appropriately.
 - `defaultMinify`: Toggle the built-in Python minifier (safe, conservatively preserves `<pre>`, `<code>`, `script`, `style`, `textarea`). Controls HTML minification and provides JS/CSS fallback when advanced tools are unavailable. Default `true`.
 - `viteMinify`: Toggle the Vite/esbuild minifier for JS/CSS. Default `true`.
+- `utility_styles`: Dictionary defining custom utility classes. Keys are class names, values are lists of utility strings or raw CSS properties.
+- `markdownHighlight`: Auto-inject a client-side syntax highlighter for fenced code blocks in Markdown. Default `true`.
 
 Validate your config:
 

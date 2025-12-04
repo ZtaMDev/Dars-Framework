@@ -53,9 +53,6 @@ The file (dars.config.json) configures how Dars exports and builds your project.
   Dictionary defining custom utility classes. Keys are class names, values are lists of utility strings or raw CSS properties.
   Example: `"btn-primary": ["bg-blue-500", "text-white"]`
 
-- icons
-  List of icon paths or configurations for PWA/meta tags.
-
 - markdownHighlight
   Auto-inject a client-side syntax highlighter for fenced code blocks in Markdown.
   - `true` (default): injects Prism.js assets once per page and highlights `pre code` blocks.
