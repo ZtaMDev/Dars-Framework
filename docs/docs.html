@@ -932,9 +932,6 @@
      <a class="sidebar-link sidebar-level-2" href="#state-variants" style="margin-left: 20px">
       State Variants
      </a>
-     <a class="sidebar-link sidebar-level-2" href="#dynamic-styles-with-state" style="margin-left: 20px">
-      Dynamic Styles with State
-     </a>
      <a class="sidebar-link sidebar-level-2" href="#performance" style="margin-left: 20px">
       Performance
      </a>
@@ -9245,7 +9242,7 @@ def hello():
 
 <span class="k">def</span><span class="w"> </span><span class="nf">MyComponent</span><span class="p">():</span>
     <span class="k">return</span> <span class="n">Container</span><span class="p">(</span>
-        <span class="n">Text</span><span class="p">(</span><span class="s2">"Hello, Dars!"</span><span class="p">,</span> <span class="n">class_name</span><span class="o">=</span><span class="s2">"text-white text-xl font-bold"</span><span class="p">),</span>
+        <span class="n">Text</span><span class="p">(</span><span class="s2">"Hello, Dars!"</span><span class="p">),</span>
         <span class="n">style</span><span class="o">=</span><span class="s2">"bg-blue-500 p-4 rounded-lg shadow-md hover:bg-blue-600 transition-all"</span><span class="p">,</span>
         <span class="n">hover_style</span><span class="o">=</span><span class="s2">"scale-105"</span><span class="p">,</span>
         <span class="n">active_style</span><span class="o">=</span><span class="s2">"scale-95"</span>
@@ -9838,38 +9835,11 @@ def hello():
 <span class="p">)</span>
 </code></pre>
       </div>
-      <h2 id="dynamic-styles-with-state">
-       Dynamic Styles with State
-      </h2>
-      <p>
-       Utility strings work seamlessly with Dars State management.
-      </p>
-      <div class="codehilite">
-       <pre><span></span><code><span class="n">state</span> <span class="o">=</span> <span class="n">State</span><span class="p">({</span>
-    <span class="s2">"theme"</span><span class="p">:</span> <span class="s2">"light"</span><span class="p">,</span>
-    <span class="s2">"box_style"</span><span class="p">:</span> <span class="s2">"bg-gray-100 p-4"</span>
-<span class="p">})</span>
-
-<span class="k">def</span><span class="w"> </span><span class="nf">toggle_theme</span><span class="p">():</span>
-    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">theme</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s2">"light"</span><span class="p">:</span>
-        <span class="n">state</span><span class="o">.</span><span class="n">box_style</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s2">"bg-gray-900 text-white p-4"</span>
-        <span class="n">state</span><span class="o">.</span><span class="n">theme</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s2">"dark"</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">state</span><span class="o">.</span><span class="n">box_style</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s2">"bg-gray-100 text-black p-4"</span>
-        <span class="n">state</span><span class="o">.</span><span class="n">theme</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s2">"light"</span>
-
-<span class="n">Container</span><span class="p">(</span>
-    <span class="s2">"Content"</span><span class="p">,</span>
-    <span class="n">style</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">box_style</span><span class="p">,</span>  <span class="c1"># Binds directly to the utility string</span>
-    <span class="n">on_click</span><span class="o">=</span><span class="n">toggle_theme</span>
-<span class="p">)</span>
-</code></pre>
-      </div>
       <h2 id="performance">
        Performance
       </h2>
       <p>
-       The parsing happens in Python before the HTML/CSS is generated. This means:
+       The parsing happens in Python before the HTML/CSS is generated. This means
 1.
        <strong>
         Zero Runtime Overhead

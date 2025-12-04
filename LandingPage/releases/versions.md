@@ -57,11 +57,11 @@ style="w-[350px] bg-[#1a2b3c] z-[100] top-[50px]"
 Utility strings work seamlessly with Dars State management for dynamic styling:
 
 ```python
-state = State("theme", box_style="bg-gray-100 p-4")
+state = State("theme", style="bg-gray-100 p-4")
 
 Container(
     "Content",
-    style=useDynamic("theme.box_style"),  # Binds directly to the utility string
+    style=useDynamic("theme.style"),  # Binds directly to the utility string
 )
 ```
 
