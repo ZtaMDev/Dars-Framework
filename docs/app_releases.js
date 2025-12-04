@@ -17,6 +17,7 @@ Dars v1.6.5 brings a colossal update to the utility styling system, making it ne
 **New Features:**
 - **Complete Color Palette**: Added full ranges (50-950) for \`cyan\`, \`teal\`, \`lime\`, \`amber\`, \`emerald\`, \`fuchsia\`, \`rose\`, \`zinc\`, \`neutral\`, and \`stone\`.
 - **Direct Font Size**: New \`fs-[value]\` utility for setting exact font sizes (e.g., \`fs-[14px]\`).
+- **Font Family**: New \`ffam-[value]\` utility for setting font families (e.g., \`ffam-sans\`, \`ffam-[Open_Sans]\`).
 - **Transforms & Filters**: Full support for \`scale\`, \`rotate\`, \`translate\`, \`skew\`, \`blur\`, \`brightness\`, \`contrast\`, etc.
 - **Backdrop Filters**: Added \`backdrop-blur\`, \`backdrop-brightness\`, etc.
 - **Expanded Layout**: Added \`table\`, \`contents\`, \`flow-root\`, \`object-fit\`, \`z-index\`, and more.

@@ -73,6 +73,7 @@ The system supports a comprehensive range of utilities covering layout, spacing,
 
 - **Font Size**: `text-xs`, `text-sm`, `text-base`, `text-lg`, `text-xl`, `text-2xl`, `text-3xl`, `text-4xl`, `text-5xl`, `text-6xl`, `text-7xl`, `text-8xl`, `text-9xl`
 - **Font Size (Direct)**: `fs-[32px]`, `fs-[2rem]` Direct font-size specification
+- **Font Family**: `ffam-sans`, `ffam-serif`, `ffam-mono`, `ffam-[Open_Sans]`, `ffam-[Times+New+Roman]`
 - **Font Weight**: `font-thin`, `font-extralight`, `font-light`, `font-normal`, `font-medium`, `font-semibold`, `font-bold`, `font-extrabold`, `font-black`
 - **Font Style**: `italic`, `not-italic`
 - **Text Align**: `text-left`, `text-center`, `text-right`, `text-justify`, `text-start`, `text-end`

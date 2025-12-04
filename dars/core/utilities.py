@@ -429,6 +429,7 @@ UTILITY_PREFIX_MAP = {
     "text-": ("font-size", lambda v: _get_font_size(v)), # Special handler for text-
     "font-": ("font-weight", lambda v: _get_font_weight(v)), # Special handler for font-
     "fs-": ("font-size", lambda v: v),  # Direct font-size: fs-[32px]
+    "ffam-": ("font-family", lambda v: _get_font_family(v)), # Font family: ffam-sans, ffam-[Open_Sans]
     "leading-": ("line-height", lambda v: _get_line_height(v)),
     "tracking-": ("letter-spacing", lambda v: _get_letter_spacing(v)),
     "indent-": ("text-indent", _fmt_rem),
@@ -606,6 +607,15 @@ def _get_font_size(v: str) -> str:
     if v in _COLORS or any(v.startswith(c) for c in _COLORS.keys()) or v.startswith('[') or v.startswith('#'):
         return "color" # Special signal to change property to 'color'
     return v
+
+def _get_font_family(v: str) -> str:
+    fonts = {
+        "sans": 'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"',
+        "serif": 'ui-serif, Georgia, Cambria, "Times New Roman", Times, serif',
+        "mono": 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+    }
+    # Replace underscores/plus with spaces for custom fonts not in map
+    return fonts.get(v, v.replace('_', ' ').replace('+', ' '))
 
 def _get_font_weight(v: str) -> str:
     weights = {
