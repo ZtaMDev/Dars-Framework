@@ -38,6 +38,26 @@ import os
 from bs4 import BeautifulSoup
 from dars.exporters.web.vdom import VDomBuilder
 from dars.config import load_config, resolve_paths, copy_public_dir
+import json
+
+class DarsJSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        # Handle DynamicBinding objects by resolving to their initial value
+        if hasattr(obj, 'is_dynamic') or type(obj).__name__ == 'DynamicBinding':
+            if hasattr(obj, 'get_initial_value'):
+                return obj.get_initial_value()
+            return None
+            
+        # Handle sets by converting to list
+        if isinstance(obj, set):
+            return list(obj)
+            
+        # Handle other types that might have a to_dict method
+        if hasattr(obj, 'to_dict'):
+            return obj.to_dict()
+            
+        return super().default(obj)
+
 
 class HTMLCSSJSExporter(Exporter):
     """Exportador para HTML, CSS y JavaScript"""
@@ -203,7 +223,7 @@ class HTMLCSSJSExporter(Exporter):
                         if bundle:
                             vdom_dict = self._obfuscate_vdom(vdom_dict)
                         import json
-                        vdom_js = "window.__DARS_VDOM__ = " + json.dumps(vdom_dict, ensure_ascii=False, separators=(",", ":")) + ";\n"
+                        vdom_js = "window.__DARS_VDOM__ = " + json.dumps(vdom_dict, ensure_ascii=False, separators=(",", ":"), cls=DarsJSONEncoder) + ";\n"
                     except Exception:
                         vdom_js = "window.__DARS_VDOM__ = { };\n"
                         page_events_map = {}
@@ -349,7 +369,7 @@ class HTMLCSSJSExporter(Exporter):
                     if bundle:
                         vdom_dict = self._obfuscate_vdom(vdom_dict)
                     import json
-                    vdom_js = "window.__DARS_VDOM__ = " + json.dumps(vdom_dict, ensure_ascii=False, separators=(",", ":")) + ";\n"
+                    vdom_js = "window.__DARS_VDOM__ = " + json.dumps(vdom_dict, ensure_ascii=False, separators=(",", ":"), cls=DarsJSONEncoder) + ";\n"
                 except Exception:
                     vdom_js = "window.__DARS_VDOM__ = { };\n"
                     page_events_map = {}
@@ -819,7 +839,7 @@ self.addEventListener('fetch', event => {
                         return v
 
                 _clean = _ser(_deepcopy(STATE_BOOTSTRAP))
-                bootstrap_json = _json.dumps(_clean, ensure_ascii=False)
+                bootstrap_json = _json.dumps(_clean, ensure_ascii=False, cls=DarsJSONEncoder)
                 if bundle:
                     # Obfuscate: base64-encode the bootstrap JSON
                     import base64 as _b64
@@ -1073,6 +1093,27 @@ self.addEventListener('fetch', event => {
             return ""
         
         css_lines = []
+        if isinstance(styles, str):
+            from dars.core.utilities import parse_utility_string
+            styles = parse_utility_string(styles)
+            
+        # If styles is a DynamicBinding (from useDynamic), resolve initial value
+        if hasattr(styles, 'is_dynamic') or type(styles).__name__ == 'DynamicBinding':
+            if hasattr(styles, 'get_initial_value'):
+                initial = styles.get_initial_value()
+                if initial:
+                    if isinstance(initial, str):
+                        from dars.core.utilities import parse_utility_string
+                        styles = parse_utility_string(initial)
+                    elif isinstance(initial, dict):
+                        styles = initial
+                    else:
+                        return ""
+                else:
+                    return ""
+            else:
+                return ""
+            
         for prop, value in styles.items():
             # Convertir nombres de propiedades de Python a CSS
             css_prop = prop.replace('_', '-')
@@ -2104,7 +2145,7 @@ body {
             vdom_dict = VDomBuilder(id_provider=self.get_component_id).build(root_component)
         except Exception:
             vdom_dict = {'type': 'Root', 'id': None, 'children': []}
-        return json.dumps(vdom_dict, ensure_ascii=False)
+        return json.dumps(vdom_dict, ensure_ascii=False, cls=DarsJSONEncoder)
 
     def _collect_component_types(self, component: Component, types_set: set):
         """Recursively collect all component types used in the tree"""
@@ -2952,6 +2993,14 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
                                 lines.append(f"                                {var_name}.value = String(val_{state_prop});")
                             elif target_prop == 'placeholder':
                                 lines.append(f"                                {var_name}.setAttribute('placeholder', String(val_{state_prop}));")
+                            elif target_prop == 'style':
+                                lines.append(f"                                if (typeof val_{state_prop} === 'object') {{")
+                                lines.append(f"                                    for (let k in val_{state_prop}) {{")
+                                lines.append(f"                                        try {{ {var_name}.style[k] = val_{state_prop}[k]; }} catch(e) {{}}")
+                                lines.append(f"                                    }}")
+                                lines.append(f"                                }} else {{")
+                                lines.append(f"                                    {var_name}.setAttribute('style', String(val_{state_prop}));")
+                                lines.append(f"                                }}")
                             else:
                                 # Check if this is a boolean attribute or has is_ prefix
                                 boolean_attrs = ['checked', 'disabled', 'readonly', 'required', 'selected', 'autofocus', 'autoplay', 'controls', 'loop', 'muted']
@@ -3467,6 +3516,18 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
     def render_grid(self, grid):
         """Renderiza un GridLayout como un div con CSS grid."""
         component_id = self.get_component_id(grid, prefix="grid")
+        
+        # Process useValue props FIRST (non-reactive initial values)
+        self._process_value_props(grid)
+        
+        # Process dynamic props (reactive bindings)
+        dynamic_info = self._process_dynamic_props(grid)
+        
+        if dynamic_info['bindings']:
+            if not hasattr(self, '_built_in_bindings'):
+                self._built_in_bindings = []
+            self._built_in_bindings.extend(dynamic_info['bindings'])
+
         class_attr = f'class="dars-grid {grid.class_name or ""}"'
         style = f'display: grid; grid-template-rows: repeat({grid.rows}, 1fr); grid-template-columns: repeat({grid.cols}, 1fr); gap: {getattr(grid, "gap", "16px")};'
         # Render anchors/positions
@@ -3513,6 +3574,18 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
     def render_flex(self, flex):
         """Renderiza un FlexLayout como un div con CSS flexbox."""
         component_id = self.get_component_id(flex, prefix="flex")
+        
+        # Process useValue props FIRST (non-reactive initial values)
+        self._process_value_props(flex)
+        
+        # Process dynamic props (reactive bindings)
+        dynamic_info = self._process_dynamic_props(flex)
+        
+        if dynamic_info['bindings']:
+            if not hasattr(self, '_built_in_bindings'):
+                self._built_in_bindings = []
+            self._built_in_bindings.extend(dynamic_info['bindings'])
+
         class_attr = f'class="dars-flex {flex.class_name or ""}"'
         style = f'display: flex; flex-direction: {getattr(flex, "direction", "row")}; flex-wrap: {getattr(flex, "wrap", "wrap")}; justify-content: {getattr(flex, "justify", "flex-start")}; align-items: {getattr(flex, "align", "stretch")}; gap: {getattr(flex, "gap", "16px")};'
         children_html = ""
@@ -3681,6 +3754,18 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
     def render_container(self, container: Container) -> str:
         """Renderiza un componente Container"""
         component_id = self.get_component_id(container, prefix="container")
+        
+        # Process useValue props FIRST (non-reactive initial values)
+        self._process_value_props(container)
+        
+        # Process dynamic props (reactive bindings)
+        dynamic_info = self._process_dynamic_props(container)
+        
+        if dynamic_info['bindings']:
+            if not hasattr(self, '_built_in_bindings'):
+                self._built_in_bindings = []
+            self._built_in_bindings.extend(dynamic_info['bindings'])
+            
         class_attr = f'class="dars-container {container.class_name or ""}"'
         style_attr = f'style="{self.render_styles(container.style)}"' if container.style else ""
 
@@ -3713,6 +3798,18 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
     def render_section(self, section: Section):
         """Renderiza un componente Section"""
         component_id = self.get_component_id(section, prefix="section")
+        
+        # Process useValue props FIRST (non-reactive initial values)
+        self._process_value_props(section)
+        
+        # Process dynamic props (reactive bindings)
+        dynamic_info = self._process_dynamic_props(section)
+        
+        if dynamic_info['bindings']:
+            if not hasattr(self, '_built_in_bindings'):
+                self._built_in_bindings = []
+            self._built_in_bindings.extend(dynamic_info['bindings'])
+
         class_attr = f'class="dars-section {section.class_name or ""}"'
         style_attr = f'style="{self.render_styles(section.style)}"' if section.style else ""
 
@@ -4296,7 +4393,7 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
             self.write_file(os.path.join(output_path, runtime_filename), runtime_js)
             
             # Write VDOM file for this route  
-            vdom_json = json.dumps(route_vdom, ensure_ascii=False, separators=(",", ":"))
+            vdom_json = json.dumps(route_vdom, ensure_ascii=False, separators=(",", ":"), cls=DarsJSONEncoder)
             vdom_filename = f"vdom_tree_{route_name}.js"
             vdom_js_content = f"window.__DARS_VDOM__ = {vdom_json};\n"
             self.write_file(os.path.join(output_path, vdom_filename), vdom_js_content)
@@ -4419,12 +4516,11 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
 })();
 </script>"""
         
-        spa_html = f'''<!DOCTYPE html><html lang="{getattr(app, "language", "en")}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>{app.title}</title><link rel="stylesheet" href="/runtime_css.css"><link rel="stylesheet" href="/styles.css"></head><body><div id="__dars_spa_root__"></div><script type="module" src="/lib/dars.min.js"></script><script>const __DARS_SPA_CONFIG__ = {json.dumps(spa_config, ensure_ascii=False, separators=(",", ":"))};window.addEventListener("DOMContentLoaded", function() {{ if (window.Dars && window.Dars.router) window.Dars.router.registerConfig(__DARS_SPA_CONFIG__);else console.error("[Dars SPA] Router not available");}});\u003c/script\u003e{hot_reload_script}</body></html>'''
+        spa_html = f'''<!DOCTYPE html><html lang="{getattr(app, "language", "en")}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>{app.title}</title><link rel="stylesheet" href="/runtime_css.css"><link rel="stylesheet" href="/styles.css"></head><body><div id="__dars_spa_root__"></div><script type="module" src="/lib/dars.min.js"></script><script>const __DARS_SPA_CONFIG__ = {json.dumps(spa_config, ensure_ascii=False, separators=(",", ":"), cls=DarsJSONEncoder)};window.addEventListener("DOMContentLoaded", function() {{ if (window.Dars && window.Dars.router) window.Dars.router.registerConfig(__DARS_SPA_CONFIG__);else console.error("[Dars SPA] Router not available");}});\u003c/script\u003e{hot_reload_script}</body></html>'''
         try:
             soup = BeautifulSoup(spa_html, "html.parser")
             spa_html = soup.prettify()
         except: pass
         self.write_file(os.path.join(output_path, "index.html"), spa_html)
-        return True
 
 

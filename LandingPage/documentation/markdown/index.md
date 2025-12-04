@@ -10,6 +10,7 @@ Welcome to the official Dars Framework documentation. Here you will find detaile
 - [Backend HTTP Utilities & API Communication](#backend-http-utilities)
 - [State Management](#state-management-in-dars)
 - [Components](#dars-components-documentation)
+- [Styling System](#styling-system-in-dars)
 - [Animation System](#dars-animation-system)
 - [Custom Components](#custom-components-in-dars-framework)
 - [Hooks](#hooks-system)

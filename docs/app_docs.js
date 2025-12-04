@@ -10,6 +10,7 @@ Welcome to the official Dars Framework documentation. Here you will find detaile
 - [Backend HTTP Utilities & API Communication](#backend-http-utilities)
 - [State Management](#state-management-in-dars)
 - [Components](#dars-components-documentation)
+- [Styling System](#styling-system-in-dars)
 - [Animation System](#dars-animation-system)
 - [Custom Components](#custom-components-in-dars-framework)
 - [Hooks](#hooks-system)
@@ -283,7 +284,112 @@ app.rTimeCompile().add_file_types = ".js,.css"
 - If you have questions or need support, check the official repository or community channels.
 
 Start building with Dars...
-`},{type:"T9",id:"markdown_114",key:"0/2/0/3",text:'# Dars Project Configuration\n\nThe file (dars.config.json) configures how Dars exports and builds your project. It is created by `dars init <name>` for new projects and can be merged/updated in existing projects with `dars init --update`.\n\n## Example\n\n```json\n{\n  "entry": "main.py",\n  "format": "html",\n  "outdir": "dist",\n  "publicDir": null,\n  "include": [],\n  "exclude": ["**/__pycache__", ".git", ".venv", "node_modules"],\n  "bundle": false,\n  "defaultMinify": true,\n  "viteMinify": true,\n  "markdownHighlight": true\n}\n```\n\n## Fields\n\n- entry\n  Python entry file for your app. Used by `dars build` and by `dars export config`.\n\n- format\n  Export format. Supported: `html` and `desktop` (BETA). When set to `desktop`, the build command will produce native desktop artifacts.\n\n- outdir\n  Directory where the exported files are written.\n\n- publicDir\n  Directory whose contents are copied as-is into the output (e.g. `public/` or `assets/`). If `null`, Dars will try to autodetect common locations.\n\n- include / exclude\n  Simple filters (by substring) applied when copying from `publicDir`.\n\n- bundle\n  Reserved for future use. Current exporters already produce a bundled output.\n\n- defaultMinify\n  Toggle the built-in Python minifier (safe and conservative). Controls HTML minification and provides JS/CSS fallback when advanced tools are unavailable.\n  - `true` (default): run the default Python-side minifier.\n  - `false`: skip the default minifier. You can still use Vite/esbuild via `viteMinify`.\n\n- viteMinify\n  Toggle the advanced JS minifier.\n  - `true` (default): prefer the advanced minifier; fall back to the secondary minifier; if neither is available, a conservative built-in fallback is used.\n  - `false`: skip the advanced minifier and use the secondary minifier directly; fall back to the conservative built-in if not available.\n\n- markdownHighlight\n  Auto-inject a client-side syntax highlighter for fenced code blocks in Markdown.\n  - `true` (default): injects Prism.js assets once per page and highlights `pre code` blocks.\n  - `false`: no assets injected; you can include your own highlighter or none at all.\n\n## Desktop-specific (BETA)\n\n- targetPlatform\n  Desktop build target. Only effective when `format` is `desktop`.\n  - Values: `auto` (default), `windows`, `linux`, `macos`.\n  - Note: macOS targets must be built on macOS for signing.\n\n> Desktop export is BETA: suitable for testing, not recommended for production yet. Configuration keys and defaults may change.\n\n## Behavior and defaults\n\n- `dars init --update` merges your existing config with Dars defaults and writes the result back, adding any new keys (like `defaultMinify`, `viteMinify`) without removing your current settings.\n- During `dars export` and `dars build`, Dars reads this file and configures the minification pipeline accordingly.\n- If advanced minifiers are not available, builds still complete with a conservative fallback. On `dars build`, a small notice may appear indicating that a less powerful minifier was used.\n- You can force-skip the default Python minifier per run with `--no-minify` (does not affect `viteMinify`).\n\n## Tips\n\n- To add or refresh the config in an existing project:\n  ```bash\n  dars init --update\n  ```\n- To review optional tooling that can enhance bundling/minification, run:\n  ```bash\n  dars doctor\n  ```\n- If you want to force using only the secondary minifier, set `"viteMinify": false`.\n - To disable the default minifier by config, set `"defaultMinify": false`; to disable it per-run use `--no-minify`.\n'},{type:"T9",id:"markdown_115",key:"0/2/0/4",text:`# App Class and PWA Features in Dars Framework
+`},{type:"T9",id:"markdown_114",key:"0/2/0/3",text:`# Dars CLI Reference
+
+The Dars Command Line Interface (CLI) lets you manage your projects, export apps, and preview results quickly from the terminal.
+
+## How to Use the CLI
+
+Open your terminal in your project directory and use any of the following commands:
+
+\`\`\`bash
+# Show information about your app
+ dars info my_app.py
+
+# Export to different formats (web)
+ dars export my_app.py --format html --output ./output
+ # Skip default Python minifier for this run (does not affect viteMinify)
+ dars export my_app.py --format html --output ./output --no-minify
+
+# List supported export formats
+ dars formats
+
+# Initialize a new project
+ dars init my_new_project
+
+# Initialize a project with a specific template
+ dars init my_new_project -t demo/complete_app
+
+# Preview an exported app
+ dars preview ./output_directory
+
+# Build using project config (dars.config.json)
+ dars build
+ # Build desktop (BETA) when format is desktop in config
+ dars build
+ # Build without the default Python minifier
+ dars build --no-minify
+
+# Help
+ dars --help
+
+# Version
+ dars -v
+\`\`\`
+
+## Main Commands Table
+| Command                                 | What it does                               |
+|-----------------------------------------|--------------------------------------------|
+| \`dars export my_app.py --format html\`   | Export app to HTML/CSS/JS in \`./my_app_web\` |
+| \`dars export my_app.py --format html --no-minify\` | Export skipping default Python minifier |
+| \`dars preview ./my_app_web\`             | Preview exported app locally                |
+| \`dars build\`                            | Build using dars.config.json                |
+| \`dars init --type desktop\`              | Scaffold desktop-capable project (BETA)     |
+| \`dars build\` (desktop config)           | Build desktop app artifacts (BETA)          |
+| \`dars build --no-minify\`                | Build skipping default Python minifier      |
+| \`dars init my_project\`                  | Create a new Dars project                   |
+| \`dars info my_app.py\`                   | Show info about your app                    |
+| \`dars formats\`                          | List supported export formats               |
+| \`dars --help\`                           | Show help and all CLI options               |
+
+## Using Official Templates
+
+Dars provides official templates to help you start new projects quickly. Templates include ready-to-use apps for forms, layouts, dashboards, multipage, and more.
+
+### How to Use a Template
+
+1. **Initialize a new project with a template:**
+   \`\`\`bash
+   dars init my_new_project -t basic/HelloWorld
+   # ...and more (see below)
+   \`\`\`
+
+You can see the templates available with
+
+\`\`\`bash
+dars init --list-templates
+dars init  -L
+\`\`\`
+
+2. **Export the template to HTML/CSS/JS:**
+   \`\`\`bash
+   dars export main.py --format html --output ./hello_output
+   dars export main.py --format html --output ./dashboard_output
+   # ...etc
+   \`\`\`
+3. **Preview the exported app:**
+   \`\`\`bash
+   dars preview ./hello_output
+   \`\`\`
+
+## Tips CLI
+- Use \`dars --help\` for a full list of commands and options.
+- You can preview apps either live (with \`app.rTimeCompile()\`) or from exported files with \`dars preview\`.
+- Templates are available for quick project setup: use \`dars init my_project -t <template>\`.
+
+### Desktop (BETA) CLI
+
+- Mark your project with \`"format": "desktop"\` in \`dars.config.json\`.
+- Use \`dars init --type desktop\` (or \`--update\`) to scaffold backend files.
+- Run \`dars doctor --all --yes\` to set up optional tooling.
+- Build with \`dars build\`. This feature is in BETA: suitable for testing, not yet for production.
+
+### Minification labels in output
+- Applying minification (default): default Python-side minifier is active.
+- Applying minification (vite): Vite/esbuild minification is active (JS/CSS) and default is disabled.
+- Applying minification (default + vite): both are active.
+
+For more, see the [Getting Started](#getting-started-with-dars) guide and the main documentation index.`},{type:"T9",id:"markdown_115",key:"0/2/0/4",text:'# Dars Project Configuration\n\nThe file (dars.config.json) configures how Dars exports and builds your project. It is created by `dars init <name>` for new projects and can be merged/updated in existing projects with `dars init --update`.\n\n## Example\n\n```json\n{\n  "entry": "main.py",\n  "format": "html",\n  "outdir": "dist",\n  "publicDir": null,\n  "include": [],\n  "exclude": ["**/__pycache__", ".git", ".venv", "node_modules"],\n  "bundle": false,\n  "defaultMinify": true,\n  "viteMinify": true,\n  "markdownHighlight": true\n}\n```\n\n## Fields\n\n- entry\n  Python entry file for your app. Used by `dars build` and by `dars export config`.\n\n- format\n  Export format. Supported: `html` and `desktop` (BETA). When set to `desktop`, the build command will produce native desktop artifacts.\n\n- outdir\n  Directory where the exported files are written.\n\n- publicDir\n  Directory whose contents are copied as-is into the output (e.g. `public/` or `assets/`). If `null`, Dars will try to autodetect common locations.\n\n- include / exclude\n  Simple filters (by substring) applied when copying from `publicDir`.\n\n- bundle\n  Reserved for future use. Current exporters already produce a bundled output.\n\n- defaultMinify\n  Toggle the built-in Python minifier (safe and conservative). Controls HTML minification and provides JS/CSS fallback when advanced tools are unavailable.\n  - `true` (default): run the default Python-side minifier.\n  - `false`: skip the default minifier. You can still use Vite/esbuild via `viteMinify`.\n\n- viteMinify\n  Toggle the advanced JS minifier.\n  - `true` (default): prefer the advanced minifier; fall back to the secondary minifier; if neither is available, a conservative built-in fallback is used.\n  - `false`: skip the advanced minifier and use the secondary minifier directly; fall back to the conservative built-in if not available.\n\n- markdownHighlight\n  Auto-inject a client-side syntax highlighter for fenced code blocks in Markdown.\n  - `true` (default): injects Prism.js assets once per page and highlights `pre code` blocks.\n  - `false`: no assets injected; you can include your own highlighter or none at all.\n\n## Desktop-specific (BETA)\n\n- targetPlatform\n  Desktop build target. Only effective when `format` is `desktop`.\n  - Values: `auto` (default), `windows`, `linux`, `macos`.\n  - Note: macOS targets must be built on macOS for signing.\n\n> Desktop export is BETA: suitable for testing, not recommended for production yet. Configuration keys and defaults may change.\n\n## Behavior and defaults\n\n- `dars init --update` merges your existing config with Dars defaults and writes the result back, adding any new keys (like `defaultMinify`, `viteMinify`) without removing your current settings.\n- During `dars export` and `dars build`, Dars reads this file and configures the minification pipeline accordingly.\n- If advanced minifiers are not available, builds still complete with a conservative fallback. On `dars build`, a small notice may appear indicating that a less powerful minifier was used.\n- You can force-skip the default Python minifier per run with `--no-minify` (does not affect `viteMinify`).\n\n## Tips\n\n- To add or refresh the config in an existing project:\n  ```bash\n  dars init --update\n  ```\n- To review optional tooling that can enhance bundling/minification, run:\n  ```bash\n  dars doctor\n  ```\n- If you want to force using only the secondary minifier, set `"viteMinify": false`.\n - To disable the default minifier by config, set `"defaultMinify": false`; to disable it per-run use `--no-minify`.\n'},{type:"T9",id:"markdown_116",key:"0/2/0/5",text:`# App Class and PWA Features in Dars Framework
 
 ## Overview
 
@@ -626,801 +732,7 @@ Dars Framework's PWA implementation is compatible with:
 - Chrome/Chromium (full support)
 - Firefox (basic support)
 - Safari (limited support on iOS)
-- Edge (full support)`},{type:"T9",id:"markdown_116",key:"0/2/0/5",text:`# SPA Routing in Dars Framework
-
-Dars Framework 1.4.5 introduces a powerful SPA (Single Page Application) routing system that supports nested routes, layouts, and automatic 404 handling.
-
-## Basic Routing
-
-To create a basic SPA, you define pages and add them to your app. One page must be designated as the index.
-
-\`\`\`python
-from dars.all import *
-
-app = App(title="My SPA App")
-
-# Create pages
-home = Page(Container(Text("Home Page")))
-about = Page(Container(Text("About Us")))
-
-# Add pages to app
-app.add_page(name="home", root=home, route="/", title="Home", index=True)
-app.add_page(name="about", root=about, route="/about", title="About")
-\`\`\`
-
-you can also use the \`@route\` decorator to add pages to your app.
-
-\`\`\`python
-from dars.all import *
-
-app = App(title="My SPA App")
-
-# Create pages
-home = Page(Container(Text("Home Page")))
-about = Page(Container(Text("About Us")))
-
-# Add pages to app
-@app.route("/")
-def home():
-    return Page(Container(Text("Home Page")))
-
-@app.route("/about")
-def about():
-    return Page(Container(Text("About Us")))
-
-app.add_page("home", home, title="Home", index=True)
-app.add_page("about", about, title="About")
-\`\`\`
-
-> Note: If you use the \`@route\` decorator, you can't add the route of the page in \`app.add_page()\`.
-
-## Nested Routes & Layouts
-
-Nested routes allow you to create layouts that persist while child content changes. This is achieved using the \`parent\` parameter and the \`Outlet\` component.
-
-### The Outlet Component
-
-The \`Outlet\` component serves as a placeholder where child routes will be rendered within a parent layout.
-
-\`\`\`python
-from dars.components.advanced.outlet import Outlet
-
-# Parent Layout (Dashboard)
-dashboard_layout = Page(
-    Container(
-        Text("Dashboard Header"),
-        # Child routes will render here:
-        Outlet(),
-        Text("Dashboard Footer")
-    )
-)
-
-# Child Page (Settings)
-settings_page = Page(
-    Container(Text("Settings Content"))
-)
-\`\`\`
-
-### Configuring Nested Routes
-
-Use the \`parent\` parameter in \`add_page\` to define the hierarchy.
-
-\`\`\`python
-# 1. Add the parent route
-app.add_page(
-    name="dashboard", 
-    root=dashboard_layout, 
-    route="/dashboard", 
-    title="Dashboard"
-)
-
-# 2. Add the child route, specifying the parent's name
-app.add_page(
-    name="settings", 
-    root=settings_page, 
-    route="/dashboard/settings", 
-    title="Settings",
-    parent="dashboard"  # This links it to the dashboard layout
-)
-\`\`\`
-
-When you navigate to \`/dashboard/settings\`, Dars will render the \`dashboard\` layout and place the \`settings\` content inside the \`Outlet\`.
-
-## 404 Handling
-
-Dars provides robust handling for non-existent routes.
-
-### Default 404 Page
-
-If a user navigates to a route that doesn't exist, Dars automatically:
-1. Redirects the user to \`/404\`.
-2. Displays a built-in, clean "404 Page Not Found" error page.
-
-### Custom 404 Page
-
-You can customize the 404 page using \`app.set_404_page()\`.
-
-\`\`\`python
-# Create your custom 404 page
-not_found_page = Page(
-    Container(
-        Text("Oops! Page not found \u{1F622}", style={"fontSize": "32px"}),
-        Link("Go Home", href="/")
-    )
-)
-
-# Register it
-app.set_404_page(not_found_page)
-\`\`\`
-
-Now, when a 404 occurs, users will be redirected to \`/404\` but will see your custom design.
-
-## Hot Reload
-
-The development server (\`dars dev\`) includes an intelligent hot reload system for SPAs:
-
-- **Automatic Detection**: The browser automatically detects changes to your Python code.
-- **Smart Polling**: It checks for updates every 500ms without spamming your console logs.
-- **Retry Limit**: If the server goes down, the client stops polling after 10 consecutive errors to prevent browser lag.
-- **State Preservation**: When possible, navigation state is preserved across reloads.
-`},{type:"T9",id:"markdown_117",key:"0/2/0/6",text:`# Backend HTTP Utilities 
-
-Dars Framework provides a powerful, **Pythonic system** for handling HTTP requests and API communication without writing any JavaScript. The \`dars.backend\` module enables you to fetch data, bind it to components, and create reactive UIs entirely in Python.
-
-## Table of Contents
-
-- [Quick Start with HTTP UTILS](#quick-start-with-http-utils)
-- [HTTP Functions](#http-functions)
-- [Data Binding with useData()](#data-binding-with-usedata)
-- [JSON Utilities](#json-utilities)
-- [Component Management](#component-management)
-
----
-
-## Quick Start with HTTP UTILS
-
-\`\`\`python
-from dars.all import *
-from dars.backend import get, useData
-
-app = App(title="API Demo")
-
-# Create display component
-user_display = Text("No data", id="user-name")
-user_state = State(user_display, text="No data")
-
-# Fetch and bind data - pure Python!
-fetch_btn = Button(
-    "Fetch User",
-    on_click=get(
-        id="userData",
-        url="https://api.example.com/user/1",
-        callback=user_state.text.set(useData('userData').name)
-    )
-)
-
-app.set_root(Container(user_display, fetch_btn))
-
-if __name__ == "__main__":
-    app.rTimeCompile()
-\`\`\`
-
----
-
-## HTTP Functions
-
-The \`dars.backend\` module provides standard HTTP methods that return \`dScript\` objects:
-
-### \`get(id, url, **options)\`
-
-Performs a GET request.
-
-\`\`\`python
-from dars.backend import get
-
-# Basic GET
-get_user = get(
-    id="userData",
-    url="https://jsonplaceholder.typicode.com/users/1"
-)
-
-# With callback
-get_user = get(
-    id="userData",
-    url="https://api.example.com/user/1",
-    callback=status_state.text.set("\u2705 Loaded!"),
-    on_error=status_state.text.set("\u274C Error!")
-)
-\`\`\`
-
-### \`post(id, url, body, **options)\`
-
-Performs a POST request.
-
-\`\`\`python
-from dars.backend import post
-
-# POST with JSON body
-create_user = post(
-    id="createResult",
-    url="https://api.example.com/users",
-    body={"name": "John", "email": "john@example.com"},
-    callback=status_state.text.set("User created!")
-)
-\`\`\`
-
-### Other Methods
-
-- **\`put(id, url, body, **options)\`** - Update resource
-- **\`delete(id, url, **options)\`** - Delete resource
-- **\`patch(id, url, body, **options)\`** - Partial update
-- **\`fetch(id, url, method, **options)\`** - Generic fetch
-
-### Common Options
-
-All HTTP functions accept these options:
-
-| Option | Type | Description |
-|--------|------|-------------|
-| \`id\` | \`str\` | **Required**. Operation ID (NOT HTML ID) for accessing data |
-| \`url\` | \`str\` | **Required**. API endpoint URL |
-| \`headers\` | \`dict\` | Custom HTTP headers |
-| \`callback\` | \`dScript\` | Executed on success |
-| \`on_error\` | \`dScript\` | Executed on error |
-| \`parse_json\` | \`bool\` | Auto-parse JSON response (default: \`True\`) |
-| \`timeout\` | \`int\` | Request timeout in milliseconds |
-
----
-
-## Data Binding with useData()
-
-The \`useData()\` function provides **Pythonic access** to fetched data using dot notation:
-
-### Basic Usage
-
-\`\`\`python
-from dars.backend import useData
-
-# Access fetched data by operation ID
-user_data = useData('userData')
-
-# Access nested properties with dot notation
-user_name = useData('userData').name
-user_email = useData('userData').email
-user_address_city = useData('userData').address.city
-\`\`\`
-
-### How It Works
-
-1. **Operation ID**: When you call \`get(id="userData", ...)\`, the response is stored in \`window.userData\`
-2. **DataAccessor**: \`useData('userData')\` creates a \`DataAccessor\` object
-3. **Dot Notation**: \`.name\` uses \`__getattr__\` to create \`window.userData?.name\`
-4. **RawJS Generation**: The \`.code\` property generates the JavaScript expression
-
-### Binding to StateV2
-
-The most powerful feature is binding API data directly to component states:
-
-\`\`\`python
-from dars.all import *
-from dars.backend import get, useData
-
-# Create components and states
-name_display = Text("", id="user-name")
-email_display = Text("", id="user-email")
-
-name_state = State(name_display, text="")
-email_state = State(email_display, text="")
-
-# Fetch and bind - pure Python!
-fetch_button = Button(
-    "Fetch User",
-    on_click=get(
-        id="userData",
-        url="https://jsonplaceholder.typicode.com/users/1",
-        # Chain multiple state updates with .then()
-        callback=(
-            name_state.text.set(useData('userData').name)
-            .then(email_state.text.set(useData('userData').email))
-        )
-    )
-)
-\`\`\`
-
-### Chaining with \`.then()\`
-
-Chain multiple operations sequentially:
-
-\`\`\`python
-# Update multiple components
-callback=(
-    status_state.text.set("Loading...")
-    .then(name_state.text.set(useData('userData').name))
-    .then(email_state.text.set(useData('userData').email))
-    .then(status_state.text.set("\u2705 Loaded!"))
-)
-\`\`\`
-
----
-
-## JSON Utilities
-
-Helper functions for working with JSON data:
-
-### \`stringify(data, pretty=False)\`
-
-Convert data to JSON string:
-
-\`\`\`python
-from dars.backend import stringify, useData
-
-# Stringify fetched data
-display_state.text.set(stringify(useData('userData'), pretty=True))
-
-# Stringify Python objects
-json_str = stringify({"name": "John", "age": 30})
-\`\`\`
-
-### \`parse(json_string)\`
-
-Parse JSON string:
-
-\`\`\`python
-from dars.backend import parse
-
-# Parse JSON string
-data = parse('{"name": "John"}')
-\`\`\`
-
-### \`get_value(obj, path, default=None)\`
-
-Safely access nested values:
-
-\`\`\`python
-from dars.backend import get_value, useData
-
-# Safe nested access with default
-city = get_value(useData('userData'), 'address.city', default='Unknown')
-\`\`\`
-
----
-
-## Component Management
-
-Create, update, and delete components dynamically at runtime:
-
-### \`createComp(target, root, position="append")\`
-
-Create a new component in the DOM:
-
-\`\`\`python
-from dars.backend import createComp
-
-# Create new component
-new_text = Text("Hello!", id="new-item")
-create_btn.on_click = createComp(
-    target=new_text,
-    root="container-id",
-    position="append"  # or "prepend", "before:id", "after:id"
-)
-\`\`\`
-
-**Tip:** You can create a \`State()\` for a component before it exists using a string ID:
-
-\`\`\`python
-# Create state with string ID
-item_state = State("new-item", text="Hello!")
-
-# Create component later
-create_btn.on_click = createComp(
-    target=Text("Hello!", id="new-item"),
-    root="container-id"
-)
-
-# State works immediately!
-update_btn.on_click = item_state.text.set("Updated!")
-\`\`\`
-
-
-### \`updateComp(target, **props)\`
-
-Update component properties:
-
-\`\`\`python
-from dars.backend import updateComp
-
-# Update component
-update_btn.on_click = updateComp(
-    "my-component-id",
-    text="Updated!",
-    style={"color": "red"}
-)
-\`\`\`
-
-### \`deleteComp(id)\`
-
-Remove a component from the DOM:
-
-\`\`\`python
-from dars.backend import deleteComp
-
-# Delete component
-delete_btn.on_click = deleteComp("component-id")
-\`\`\`
-
----
-
-## Best Practices
-
-1. **Use Unique Operation IDs**: Each HTTP operation should have a unique \`id\` to avoid conflicts
-2. **Chain Updates**: Use \`.then()\` to chain multiple state updates sequentially
-3. **Handle Errors**: Always provide \`on_error\` callbacks for better UX
-4. **Leverage useData()**: Use dot notation for clean, readable data access
-5. **Combine with StateV2**: Bind API data directly to component states for reactive UIs
-
----
-
-## API Reference Summary
-
-### HTTP Functions
-- \`get(id, url, **options)\` - GET request
-- \`post(id, url, body, **options)\` - POST request
-- \`put(id, url, body, **options)\` - PUT request
-- \`delete(id, url, **options)\` - DELETE request
-- \`patch(id, url, body, **options)\` - PATCH request
-- \`fetch(id, url, method, **options)\` - Generic fetch
-
-### Data Access
-- \`useData(operation_id)\` - Access fetched data with dot notation
-- \`stringify(data, pretty=False)\` - Convert to JSON string
-- \`parse(json_string)\` - Parse JSON
-- \`get_value(obj, path, default=None)\` - Safe nested access
-
-### Component Management
-- \`createComp(target, root, position)\` - Create component
-- \`updateComp(target, **props)\` - Update component
-- \`deleteComp(id)\` - Delete component
-
----
-
-For more examples, see the test files in \`tst/proj/test_http_demo.py\` and \`tst/proj/test_http_utils.py\`.
-`},{type:"T9",id:"markdown_118",key:"0/2/0/7",text:`# State Management in Dars
-
-Dars Framework features **powerful state management systems**, designed for different use cases:
-
-# State V2 - Dynamic State Management
-
-Modern, Pythonic state management for reactive UIs.
-
-## Quick Start
-
-\`\`\`python
-from dars.all import *
-
-# Create a component
-display = Text("0", id="counter")
-
-# Create state
-counter = State(display, text=0)
-
-# Use reactive properties
-increment_btn = Button("Increment", on_click=counter.text.increment(by=1))
-decrement_btn = Button("Decrement", on_click=counter.text.decrement(by=1))
-reset_btn = Button("Reset", on_click=counter.reset())
-\`\`\`
-
-## Core Concepts
-
-### State Class
-
-The \`State\` class wraps a component and provides reactive property access.
-
-\`\`\`python
-from dars.all import State
-
-display = Text("0", id="counter")
-counter_state = State(display, text=0)
-\`\`\`
-
-**Constructor Parameters:**
-- \`component\`: The component to manage (can be a component object or string ID)
-- \`**default_props\`: Default property values (e.g., \`text=0\`, \`style={...}\`)
-
-### State with String IDs (for Dynamic Components)
-
-\`State()\` can accept either a component object or a string ID. This is useful for components created dynamically:
-
-\`\`\`python
-from dars.all import *
-from dars.backend import createComp
-
-# Traditional: State with component object
-existing_text = Text("0", id="counter")
-existing_state = State(existing_text, text=0)
-
-# New: State with string ID (for components created later)
-dynamic_state = State("dynamic-counter", text=0)
-
-# Create the component later
-create_btn.on_click = createComp(
-    target=Text("0", id="dynamic-counter"),
-    root="container-id"
-)
-
-# State works even though component was created after state!
-increment_btn.on_click = dynamic_state.text.increment(by=1)
-\`\`\`
-
-**Use Cases:**
-- Components created with \`createComp()\`
-- Dynamically generated UIs
-- Conditional component rendering
-- Server-side rendered components
-
-
-### Reactive Properties
-
-Access component properties through the state object to get reactive operations:
-
-\`\`\`python
-# Increment/decrement numeric properties
-counter.text.increment(by=1)
-counter.text.decrement(by=2)
-
-# Set property values
-counter.text.set(value=100)
-
-# Auto operations (continuous)
-counter.text.auto_increment(by=1, interval=1000)  # +1 every second
-counter.text.auto_decrement(by=1, interval=500)   # -1 every 500ms
-counter.text.stop_auto()  # Stop auto operations
-\`\`\`
-
-### Reset to Defaults
-
-The \`reset()\` method restores all properties to their initial values:
-
-\`\`\`python
-state = State(display, text=0, style={"color": "blue"})
-
-# ... user modifies the component ...
-
-# Reset everything back to initial state
-reset_btn.on_click = state.reset()
-\`\`\`
-
-## Reactive Operations
-
-### Increment and Decrement
-
-\`\`\`python
-# Increment by 1 (default)
-button.on_click = counter.text.increment()
-
-# Increment by custom amount
-button.on_click = counter.text.increment(by=5)
-
-# Decrement (negative increment)
-button.on_click = counter.text.decrement(by=1)
-# OR
-button.on_click = counter.text.increment(by=-1)
-\`\`\`
-
-\`\`\`python
-button.on_click = counter.text.set(value=0)
-\`\`\`
-
-### All Property Types Supported
-
-State V2 supports updating **all component properties**, not just text:
-
-**Text Content:**
-\`\`\`python
-state.text.set("New text")
-\`\`\`
-
-**HTML Content:**
-\`\`\`python
-state.html.set("<strong>Bold text</strong>")
-\`\`\`
-
-**CSS Styles:**
-\`\`\`python
-state.style.set({"color": "red", "fontSize": "24px"})
-\`\`\`
-
-**CSS Classes:**
-\`\`\`python
-# Set class name
-state.class_name.set("active")
-\`\`\`
-
-**Event Handlers:**
-\`\`\`python
-# Update event handler dynamically
-state.update(on_click=alert("New handler!"))
-
-# Or with dScript
-from dars.scripts.dscript import dScript
-state.update(on_click=dScript("console.log('clicked')"))
-\`\`\`
-
-**Multiple Properties at Once:**
-\`\`\`python
-state.update(
-    text="Updated!",
-    class_name="success",
-    style={"color": "green"},
-    on_click=alert("Done!")
-)
-\`\`\`
-
-### Auto Operations
-
-
-Auto operations create continuous reactive updates:
-
-\`\`\`python
-# Auto-increment timer
-timer = State(display, text=0)
-
-start_btn.on_click = timer.text.auto_increment(by=1, interval=1000)
-stop_btn.on_click = timer.text.stop_auto()
-\`\`\`
-
-**With Limits:**
-\`\`\`python
-# Auto-increment up to 100
-timer.text.auto_increment(by=1, interval=1000, max=100)
-
-# Auto-decrement down to 0
-countdown.text.auto_decrement(by=1, interval=1000, min=0)
-\`\`\`
-
-## Backend Integration with useData()
-
-State V2 integrates seamlessly with Dars backend HTTP utilities for reactive API-driven UIs:
-
-\`\`\`python
-from dars.all import *
-from dars.backend import get, useData
-
-# Create components
-user_name = Text("", id="user-name")
-user_email = Text("", id="user-email")
-
-# Create states
-name_state = State(user_name, text="")
-email_state = State(user_email, text="")
-
-# Fetch and bind API data - pure Python!
-fetch_btn = Button(
-    "Load User",
-    on_click=get(
-        id="userData",
-        url="https://api.example.com/users/1",
-        # Access nested data with dot notation
-        callback=(
-            name_state.text.set(useData('userData').name)
-            .then(email_state.text.set(useData('userData').email))
-        )
-    )
-)
-\`\`\`
-
-**Key Features:**
-- **\`useData('id')\`** - Access fetched data by operation ID
-- **Dot notation** - \`useData('userData').name\` accesses nested properties
-- **\`.then()\` chaining** - Chain multiple state updates sequentially
-- **No JavaScript** - Everything is pure Python
-
-## Complete Example
-
-\`\`\`python
-from dars.all import *
-
-app = App("State V2 Demo")
-
-# Timer display
-timer_display = Text("0", id="timer", style={"font-size": "36px"})
-timer = State(timer_display, text=0)
-
-# Status display
-status = Text("Paused", id="status")
-status_state = State(status, text="Paused", class_name="paused")
-
-# Control buttons
-start_btn = Button("Start",
-    on_click=timer.text.auto_increment(by=1, interval=1000)
-)
-stop_btn = Button("Stop", 
-    on_click=[
-        timer.text.stop_auto(),
-        status_state.update(text="Paused", class_name="paused")
-    ]
-)
-reset_btn = Button("Reset",
-    on_click=[
-        timer.text.stop_auto(),
-        timer.reset(),
-        status_state.reset()
-    ]
-)
-
-page = Page(Container(timer_display, status, start_btn, stop_btn, reset_btn))
-app.add_page("index", page, index=True)
-
-if __name__ == "__main__":
-    app.rTimeCompile()
-\`\`\`
-
-## Dynamic State Updates & \`this()\`
-
-Dars introduces dynamic state updates, allowing you to modify component properties directly without pre-registering state indices.
-
-### \`this()\` helper
-
-The \`this()\` helper allows a component to refer to itself in an event handler and apply updates dynamically.
-
-\`\`\`python
-from dars.core.state import this
-
-btn = Button("Click me", on_click=this().state(text="Clicked!", style={"color": "red"}))
-\`\`\`
-
-Supported dynamic properties:
-- \`text\`: Update text content.
-- \`html\`: Update inner HTML.
-- \`style\`: Dictionary of CSS styles.
-- \`attrs\`: Dictionary of attributes.
-- \`classes\`: Dictionary with \`add\`, \`remove\`, or \`toggle\` (single string or list of strings).
-
-\`\`\`python
-this().state(
-    text="Updated",
-    style={"backgroundColor": "#f0f0f0"},
-    classes={"add": ["active"], "remove": ["inactive"]}
-)
-\`\`\`
-
-### Using Raw JavaScript Values (\`RawJS\`)
-
-You can pass raw JavaScript variables to dynamic updates using \`RawJS\`. This is particularly useful when:
-- Chaining scripts where a previous script returns a value
-- Working with async operations like file reading
-- Using \`dScript.ARG\` to reference values from previous scripts
-
-\`\`\`python
-from dars.scripts.dscript import RawJS, dScript
-
-# Using dScript.ARG placeholder for chained values
-this().state(text=RawJS(dScript.ARG))
-
-# Using custom JavaScript expressions
-this().state(text=RawJS("someVar + ' processed'"))
-\`\`\`
-
----
-
-## Best Practices
-
-### Choose State V2 When:
-- Building simple counters or timers
-- Need auto-increment/decrement
-- Want quick reactive updates
-- Working with single components
-
-### Choose dState/cState When:
-- Building complex state machines
-- Need immutable default state (state 0)
-- Require cross-state calls
-- Managing multi-step workflows
-
-### Use \`this()\` When:
-- Don't need state tracking
-- Making one-off updates
-- Working with async operations
-- Targeting the clicked element`},{type:"T9",id:"markdown_119",key:"0/2/0/8",text:`# Dars - Components Documentation
+- Edge (full support)`},{type:"T9",id:"markdown_117",key:"0/2/0/6",text:`# Dars - Components Documentation
 
 ---
 
@@ -3336,206 +2648,7 @@ cancel_button = Button("Cancelar", style=SECONDARY_BUTTON_STYLES)
 save_button = Button("Guardar", style=PRIMARY_BUTTON_STYLES)
 \`\`\`
 
-Components provide a solid foundation for creating modern and responsive user interfaces that can be exported to multiple platforms while maintaining consistency and functionality.`},{type:"T9",id:"markdown_120",key:"0/2/0/9",text:`# Dars Animation System
-
-Dars provides a powerful and easy-to-use animation system built on top of the Web Animations API. It allows you to add professional-grade animations to your components with simple Python function calls.
-
-## Animation Overview
-
-All animations in Dars are **dScript** objects. This means they:
-- Run entirely on the client side (zero latency)
-- Can be assigned to any event handler (\`on_click\`, \`on_mouseover\`, etc.)
-- Can be chained together using \`.then()\` or the \`sequence()\` helper
-- Return Promises, allowing for complex orchestration
-
-## Animation Quick Start
-
-\`\`\`python
-from dars.all import *
-
-# Simple fade in
-button.on_click = fadeIn(id="my-element")
-
-# Chain animations
-button.on_click = sequence(
-    fadeOut(id="old-panel"),
-    fadeIn(id="new-panel")
-)
-\`\`\`
-
-## Animation Reference
-
-### Fade Animations
-
-Control visibility with opacity transitions.
-
-#### \`fadeIn(id, duration=300, easing="ease")\`
-Fades an element in from opacity 0 to 1. Sets \`display: block\` automatically.
-
-\`\`\`python
-fadeIn(id="modal", duration=500)
-\`\`\`
-
-#### \`fadeOut(id, duration=300, easing="ease", hide=True)\`
-Fades an element out from current opacity to 0.
-- \`hide\`: If \`True\` (default), sets \`display: none\` after animation completes.
-
-\`\`\`python
-fadeOut(id="notification", duration=2000, hide=True)
-\`\`\`
-
-### Slide Animations
-
-Move elements into or out of view.
-
-#### \`slideIn(id, direction="down", duration=300, easing="ease")\`
-Slides an element into its final position.
-- \`direction\`: \`"up"\`, \`"down"\`, \`"left"\`, \`"right"\` (from where it enters)
-
-\`\`\`python
-slideIn(id="sidebar", direction="left", duration=400)
-\`\`\`
-
-#### \`slideOut(id, direction="up", duration=300, easing="ease", hide=True)\`
-Slides an element out of view.
-- \`direction\`: \`"up"\`, \`"down"\`, \`"left"\`, \`"right"\` (to where it exits)
-
-\`\`\`python
-slideOut(id="sidebar", direction="left", duration=400)
-\`\`\`
-
-### Scale Animations
-
-Zoom elements in and out.
-
-#### \`scaleIn(id, duration=300, easing="ease", from_scale=0.0)\`
-Scales an element up to its natural size (scale 1).
-- \`from_scale\`: Starting scale factor (0.0 to 1.0)
-
-\`\`\`python
-scaleIn(id="popup", from_scale=0.5)
-\`\`\`
-
-#### \`scaleOut(id, duration=300, easing="ease", to_scale=0.0, hide=True)\`
-Scales an element down.
-- \`to_scale\`: Ending scale factor (0.0 to 1.0)
-
-\`\`\`python
-scaleOut(id="popup", to_scale=0.0)
-\`\`\`
-
-### Attention Seekers
-
-Draw user attention to elements.
-
-#### \`shake(id, intensity=5, duration=500)\`
-Shakes an element horizontally. Great for error feedback.
-- \`intensity\`: Shake distance in pixels.
-
-\`\`\`python
-shake(id="login-form", intensity=10)
-\`\`\`
-
-#### \`bounce(id, distance=20, duration=600)\`
-Bounces an element vertically.
-- \`distance\`: Bounce height in pixels.
-
-\`\`\`python
-bounce(id="notification-icon", distance=15)
-\`\`\`
-
-#### \`pulse(id, scale=1.1, duration=400, iterations=1)\`
-Pulses an element (scales up and down).
-- \`scale\`: Max scale during pulse.
-- \`iterations\`: Number of pulses. Use \`"infinite"\` for continuous pulsing.
-
-\`\`\`python
-# Single pulse
-pulse(id="heart-icon")
-
-# Continuous heartbeat
-pulse(id="status-dot", iterations="infinite", duration=1000)
-\`\`\`
-
-### Transformations
-
-Rotate and flip elements.
-
-#### \`rotate(id, degrees=360, duration=500, easing="ease")\`
-Rotates an element.
-
-\`\`\`python
-rotate(id="refresh-icon", degrees=180)
-\`\`\`
-
-#### \`flip(id, axis="y", duration=600)\`
-Flips an element 180 degrees around an axis.
-- \`axis\`: \`"x"\` (horizontal flip) or \`"y"\` (vertical flip).
-
-\`\`\`python
-flip(id="card", axis="y")
-\`\`\`
-
-### Property Transitions
-
-Animate specific CSS properties.
-
-#### \`colorChange(id, from_color, to_color, duration=500, property="background-color")\`
-Smoothly transitions a color property.
-
-\`\`\`python
-colorChange(id="btn", from_color="#fff", to_color="#f00", property="background-color")
-\`\`\`
-
-#### \`morphSize(id, to_width, to_height, duration=500, easing="ease")\`
-Changes the dimensions of an element.
-
-\`\`\`python
-morphSize(id="panel", to_width="100%", to_height="500px")
-\`\`\`
-
-## Chaining & Sequencing
-
-You can run animations in sequence using the \`sequence()\` helper or the \`.then()\` method.
-
-### Using \`sequence()\`
-
-The easiest way to run animations one after another.
-
-\`\`\`python
-from dars.all import sequence, fadeIn, slideIn
-
-button.on_click = sequence(
-    fadeIn(id="header"),
-    slideIn(id="content", direction="up"),
-    fadeIn(id="footer")
-)
-\`\`\`
-
-### Using \`.then()\`
-
-For more granular control or branching logic.
-
-\`\`\`python
-anim1 = fadeIn(id="box1")
-anim2 = slideIn(id="box2")
-
-# Run anim1, then anim2
-button.on_click = anim1.then(anim2)
-\`\`\`
-
-### Parallel Animations
-
-To run animations simultaneously, simply trigger them in the same event handler (or use a list of handlers).
-
-\`\`\`python
-# Both start at the same time
-button.on_click = [
-    fadeIn(id="box1"),
-    slideIn(id="box2")
-]
-\`\`\`
-`},{type:"T9",id:"markdown_121",key:"0/2/0/10",text:`# Custom Components in Dars Framework
+Components provide a solid foundation for creating modern and responsive user interfaces that can be exported to multiple platforms while maintaining consistency and functionality.`},{type:"T9",id:"markdown_118",key:"0/2/0/7",text:'# Styling System in Dars\n\nDars Framework introduces a powerful, Python-native utility class system inspired by Tailwind CSS. This system allows you to style your components using concise string utilities directly in your Python code, without needing Node.js, PostCSS, or any external build tools.\n\n## Overview\n\nInstead of writing raw CSS dictionaries or separate CSS files, you can now use the `style`, `hover_style`, and `active_style` arguments with utility strings. These strings are parsed at runtime (and export time) into standard CSS dictionaries.\n\n### Example\n\n```python\nfrom dars.all import *\n\ndef MyComponent():\n    return Container(\n        Text("Hello, Dars!", class_name="text-white text-xl font-bold"),\n        style="bg-blue-500 p-4 rounded-lg shadow-md hover:bg-blue-600 transition-all",\n        hover_style="scale-105",\n        active_style="scale-95"\n    )\n```\n\n## Supported Utilities\n\nThe system supports a wide range of utilities covering layout, spacing, typography, colors, borders, and effects.\n\n### Layout & Flexbox\n- **Display**: `flex`, `grid`, `block`, `inline-block`, `hidden`\n- **Flex Direction**: `flex-row`, `flex-col`, `flex-row-reverse`, `flex-col-reverse`\n- **Justify Content**: `justify-start`, `justify-center`, `justify-end`, `justify-between`, `justify-around`\n- **Align Items**: `items-start`, `items-center`, `items-end`, `items-stretch`\n- **Gap**: `gap-4`, `gap-x-2`, `gap-y-4`\n\n### Spacing (Padding & Margin)\n- **Padding**: `p-4` (all sides), `px-4` (horizontal), `py-4` (vertical), `pt-4` (top), `pr-4` (right), `pb-4` (bottom), `pl-4` (left)\n- **Margin**: `m-4`, `mx-4`, `my-4`, `mt-4`, `mr-4`, `mb-4`, `ml-4`\n- **Values**: \n  - Numbers correspond to `0.25rem` units (e.g., `4` = `1rem`, `8` = `2rem`).\n  - Arbitrary values: `p-[20px]`, `m-[5%]`.\n\n### Sizing\n- **Width**: `w-full`, `w-screen`, `w-1/2`, `w-10`, `w-[300px]`\n- **Height**: `h-full`, `h-screen`, `h-10`, `h-[50vh]`\n- **Max/Min**: `max-w-md`, `min-h-screen`\n\n### Typography\n- **Font Size**: `text-xs`, `text-sm`, `text-base`, `text-lg`, `text-xl`, `text-2xl`, `text-[14px]`\n- **Font Weight**: `font-thin`, `font-normal`, `font-bold`, `font-black`\n- **Text Align**: `text-left`, `text-center`, `text-right`, `text-justify`\n- **Text Color**: `text-blue-500`, `text-white`, `text-[#123456]`\n\n### Backgrounds\n- **Color**: `bg-red-500`, `bg-gray-100`, `bg-[#f0f0f0]`\n- **Opacity**: `bg-opacity-50` (requires separate utility or arbitrary value)\n\n### Borders & Radius\n- **Border Width**: `border`, `border-2`, `border-4`\n- **Border Color**: `border-gray-300`, `border-red-500`\n- **Border Radius**: `rounded`, `rounded-md`, `rounded-lg`, `rounded-full`, `rounded-[10px]`\n\n### Effects\n- **Shadow**: `shadow`, `shadow-md`, `shadow-lg`, `shadow-xl`, `shadow-none`\n- **Opacity**: `opacity-0`, `opacity-50`, `opacity-100`\n- **Cursor**: `cursor-pointer`, `cursor-not-allowed`\n\n## Arbitrary Values\n\nFor values not covered by the standard scale, use square brackets `[]`:\n\n```python\nContainer(\n    style="w-[350px] bg-[#1a2b3c] z-[100] top-[50px]"\n)\n```\n\n## State Variants\n\nYou can define styles for specific states using `hover_style` and `active_style` arguments.\n\n```python\nButton(\n    "Click Me",\n    style="bg-blue-500 text-white px-4 py-2 rounded",\n    hover_style="bg-blue-600 shadow-lg",\n    active_style="bg-blue-700 transform scale-95"\n)\n```\n\n## Dynamic Styles with State\n\nUtility strings work seamlessly with Dars State management.\n\n```python\nstate = State({\n    "theme": "light",\n    "box_style": "bg-gray-100 p-4"\n})\n\ndef toggle_theme():\n    if state.theme.value == "light":\n        state.box_style.value = "bg-gray-900 text-white p-4"\n        state.theme.value = "dark"\n    else:\n        state.box_style.value = "bg-gray-100 text-black p-4"\n        state.theme.value = "light"\n\nContainer(\n    "Content",\n    style=state.box_style,  # Binds directly to the utility string\n    on_click=toggle_theme\n)\n```\n\n## Performance\n\nThe parsing happens in Python before the HTML/CSS is generated. This means:\n1.  **Zero Runtime Overhead**: The browser receives standard CSS.\n2.  **No JavaScript Dependency**: No need to load a large utility CSS library or run JS parsers in the browser.\n3.  **Optimized Output**: Only the styles you use are generated (as inline styles or extracted CSS).\n'},{type:"T9",id:"markdown_119",key:"0/2/0/8",text:`# Custom Components in Dars Framework
 
 Dars offers two ways to create custom components: **Function Components** (Recommended) and **Class Components** (Legacy).
 
@@ -3823,7 +2936,679 @@ class CustomComponent(Component):
 \`\`\`
 
 ---
-`},{type:"T9",id:"markdown_122",key:"0/2/0/11",text:`# Hooks System
+`},{type:"T9",id:"markdown_120",key:"0/2/0/9",text:`# Dars Animation System
+
+Dars provides a powerful and easy-to-use animation system built on top of the Web Animations API. It allows you to add professional-grade animations to your components with simple Python function calls.
+
+## Animation Overview
+
+All animations in Dars are **dScript** objects. This means they:
+- Run entirely on the client side (zero latency)
+- Can be assigned to any event handler (\`on_click\`, \`on_mouseover\`, etc.)
+- Can be chained together using \`.then()\` or the \`sequence()\` helper
+- Return Promises, allowing for complex orchestration
+
+## Animation Quick Start
+
+\`\`\`python
+from dars.all import *
+
+# Simple fade in
+button.on_click = fadeIn(id="my-element")
+
+# Chain animations
+button.on_click = sequence(
+    fadeOut(id="old-panel"),
+    fadeIn(id="new-panel")
+)
+\`\`\`
+
+## Animation Reference
+
+### Fade Animations
+
+Control visibility with opacity transitions.
+
+#### \`fadeIn(id, duration=300, easing="ease")\`
+Fades an element in from opacity 0 to 1. Sets \`display: block\` automatically.
+
+\`\`\`python
+fadeIn(id="modal", duration=500)
+\`\`\`
+
+#### \`fadeOut(id, duration=300, easing="ease", hide=True)\`
+Fades an element out from current opacity to 0.
+- \`hide\`: If \`True\` (default), sets \`display: none\` after animation completes.
+
+\`\`\`python
+fadeOut(id="notification", duration=2000, hide=True)
+\`\`\`
+
+### Slide Animations
+
+Move elements into or out of view.
+
+#### \`slideIn(id, direction="down", duration=300, easing="ease")\`
+Slides an element into its final position.
+- \`direction\`: \`"up"\`, \`"down"\`, \`"left"\`, \`"right"\` (from where it enters)
+
+\`\`\`python
+slideIn(id="sidebar", direction="left", duration=400)
+\`\`\`
+
+#### \`slideOut(id, direction="up", duration=300, easing="ease", hide=True)\`
+Slides an element out of view.
+- \`direction\`: \`"up"\`, \`"down"\`, \`"left"\`, \`"right"\` (to where it exits)
+
+\`\`\`python
+slideOut(id="sidebar", direction="left", duration=400)
+\`\`\`
+
+### Scale Animations
+
+Zoom elements in and out.
+
+#### \`scaleIn(id, duration=300, easing="ease", from_scale=0.0)\`
+Scales an element up to its natural size (scale 1).
+- \`from_scale\`: Starting scale factor (0.0 to 1.0)
+
+\`\`\`python
+scaleIn(id="popup", from_scale=0.5)
+\`\`\`
+
+#### \`scaleOut(id, duration=300, easing="ease", to_scale=0.0, hide=True)\`
+Scales an element down.
+- \`to_scale\`: Ending scale factor (0.0 to 1.0)
+
+\`\`\`python
+scaleOut(id="popup", to_scale=0.0)
+\`\`\`
+
+### Attention Seekers
+
+Draw user attention to elements.
+
+#### \`shake(id, intensity=5, duration=500)\`
+Shakes an element horizontally. Great for error feedback.
+- \`intensity\`: Shake distance in pixels.
+
+\`\`\`python
+shake(id="login-form", intensity=10)
+\`\`\`
+
+#### \`bounce(id, distance=20, duration=600)\`
+Bounces an element vertically.
+- \`distance\`: Bounce height in pixels.
+
+\`\`\`python
+bounce(id="notification-icon", distance=15)
+\`\`\`
+
+#### \`pulse(id, scale=1.1, duration=400, iterations=1)\`
+Pulses an element (scales up and down).
+- \`scale\`: Max scale during pulse.
+- \`iterations\`: Number of pulses. Use \`"infinite"\` for continuous pulsing.
+
+\`\`\`python
+# Single pulse
+pulse(id="heart-icon")
+
+# Continuous heartbeat
+pulse(id="status-dot", iterations="infinite", duration=1000)
+\`\`\`
+
+### Transformations
+
+Rotate and flip elements.
+
+#### \`rotate(id, degrees=360, duration=500, easing="ease")\`
+Rotates an element.
+
+\`\`\`python
+rotate(id="refresh-icon", degrees=180)
+\`\`\`
+
+#### \`flip(id, axis="y", duration=600)\`
+Flips an element 180 degrees around an axis.
+- \`axis\`: \`"x"\` (horizontal flip) or \`"y"\` (vertical flip).
+
+\`\`\`python
+flip(id="card", axis="y")
+\`\`\`
+
+### Property Transitions
+
+Animate specific CSS properties.
+
+#### \`colorChange(id, from_color, to_color, duration=500, property="background-color")\`
+Smoothly transitions a color property.
+
+\`\`\`python
+colorChange(id="btn", from_color="#fff", to_color="#f00", property="background-color")
+\`\`\`
+
+#### \`morphSize(id, to_width, to_height, duration=500, easing="ease")\`
+Changes the dimensions of an element.
+
+\`\`\`python
+morphSize(id="panel", to_width="100%", to_height="500px")
+\`\`\`
+
+## Chaining & Sequencing
+
+You can run animations in sequence using the \`sequence()\` helper or the \`.then()\` method.
+
+### Using \`sequence()\`
+
+The easiest way to run animations one after another.
+
+\`\`\`python
+from dars.all import sequence, fadeIn, slideIn
+
+button.on_click = sequence(
+    fadeIn(id="header"),
+    slideIn(id="content", direction="up"),
+    fadeIn(id="footer")
+)
+\`\`\`
+
+### Using \`.then()\`
+
+For more granular control or branching logic.
+
+\`\`\`python
+anim1 = fadeIn(id="box1")
+anim2 = slideIn(id="box2")
+
+# Run anim1, then anim2
+button.on_click = anim1.then(anim2)
+\`\`\`
+
+### Parallel Animations
+
+To run animations simultaneously, simply trigger them in the same event handler (or use a list of handlers).
+
+\`\`\`python
+# Both start at the same time
+button.on_click = [
+    fadeIn(id="box1"),
+    slideIn(id="box2")
+]
+\`\`\`
+`},{type:"T9",id:"markdown_121",key:"0/2/0/10",text:`# SPA Routing in Dars Framework
+
+Dars Framework 1.4.5 introduces a powerful SPA (Single Page Application) routing system that supports nested routes, layouts, and automatic 404 handling.
+
+## Basic Routing
+
+To create a basic SPA, you define pages and add them to your app. One page must be designated as the index.
+
+\`\`\`python
+from dars.all import *
+
+app = App(title="My SPA App")
+
+# Create pages
+home = Page(Container(Text("Home Page")))
+about = Page(Container(Text("About Us")))
+
+# Add pages to app
+app.add_page(name="home", root=home, route="/", title="Home", index=True)
+app.add_page(name="about", root=about, route="/about", title="About")
+\`\`\`
+
+you can also use the \`@route\` decorator to add pages to your app.
+
+\`\`\`python
+from dars.all import *
+
+app = App(title="My SPA App")
+
+# Create pages
+home = Page(Container(Text("Home Page")))
+about = Page(Container(Text("About Us")))
+
+# Add pages to app
+@app.route("/")
+def home():
+    return Page(Container(Text("Home Page")))
+
+@app.route("/about")
+def about():
+    return Page(Container(Text("About Us")))
+
+app.add_page("home", home, title="Home", index=True)
+app.add_page("about", about, title="About")
+\`\`\`
+
+> Note: If you use the \`@route\` decorator, you can't add the route of the page in \`app.add_page()\`.
+
+## Nested Routes & Layouts
+
+Nested routes allow you to create layouts that persist while child content changes. This is achieved using the \`parent\` parameter and the \`Outlet\` component.
+
+### The Outlet Component
+
+The \`Outlet\` component serves as a placeholder where child routes will be rendered within a parent layout.
+
+\`\`\`python
+from dars.components.advanced.outlet import Outlet
+
+# Parent Layout (Dashboard)
+dashboard_layout = Page(
+    Container(
+        Text("Dashboard Header"),
+        # Child routes will render here:
+        Outlet(),
+        Text("Dashboard Footer")
+    )
+)
+
+# Child Page (Settings)
+settings_page = Page(
+    Container(Text("Settings Content"))
+)
+\`\`\`
+
+### Configuring Nested Routes
+
+Use the \`parent\` parameter in \`add_page\` to define the hierarchy.
+
+\`\`\`python
+# 1. Add the parent route
+app.add_page(
+    name="dashboard", 
+    root=dashboard_layout, 
+    route="/dashboard", 
+    title="Dashboard"
+)
+
+# 2. Add the child route, specifying the parent's name
+app.add_page(
+    name="settings", 
+    root=settings_page, 
+    route="/dashboard/settings", 
+    title="Settings",
+    parent="dashboard"  # This links it to the dashboard layout
+)
+\`\`\`
+
+When you navigate to \`/dashboard/settings\`, Dars will render the \`dashboard\` layout and place the \`settings\` content inside the \`Outlet\`.
+
+## 404 Handling
+
+Dars provides robust handling for non-existent routes.
+
+### Default 404 Page
+
+If a user navigates to a route that doesn't exist, Dars automatically:
+1. Redirects the user to \`/404\`.
+2. Displays a built-in, clean "404 Page Not Found" error page.
+
+### Custom 404 Page
+
+You can customize the 404 page using \`app.set_404_page()\`.
+
+\`\`\`python
+# Create your custom 404 page
+not_found_page = Page(
+    Container(
+        Text("Oops! Page not found \u{1F622}", style={"fontSize": "32px"}),
+        Link("Go Home", href="/")
+    )
+)
+
+# Register it
+app.set_404_page(not_found_page)
+\`\`\`
+
+Now, when a 404 occurs, users will be redirected to \`/404\` but will see your custom design.
+
+## Hot Reload
+
+The development server (\`dars dev\`) includes an intelligent hot reload system for SPAs:
+
+- **Automatic Detection**: The browser automatically detects changes to your Python code.
+- **Smart Polling**: It checks for updates every 500ms without spamming your console logs.
+- **Retry Limit**: If the server goes down, the client stops polling after 10 consecutive errors to prevent browser lag.
+- **State Preservation**: When possible, navigation state is preserved across reloads.
+`},{type:"T9",id:"markdown_122",key:"0/2/0/11",text:`# State Management in Dars
+
+Dars Framework features **powerful state management systems**, designed for different use cases:
+
+# State V2 - Dynamic State Management
+
+Modern, Pythonic state management for reactive UIs.
+
+## Quick Start
+
+\`\`\`python
+from dars.all import *
+
+# Create a component
+display = Text("0", id="counter")
+
+# Create state
+counter = State(display, text=0)
+
+# Use reactive properties
+increment_btn = Button("Increment", on_click=counter.text.increment(by=1))
+decrement_btn = Button("Decrement", on_click=counter.text.decrement(by=1))
+reset_btn = Button("Reset", on_click=counter.reset())
+\`\`\`
+
+## Core Concepts
+
+### State Class
+
+The \`State\` class wraps a component and provides reactive property access.
+
+\`\`\`python
+from dars.all import State
+
+display = Text("0", id="counter")
+counter_state = State(display, text=0)
+\`\`\`
+
+**Constructor Parameters:**
+- \`component\`: The component to manage (can be a component object or string ID)
+- \`**default_props\`: Default property values (e.g., \`text=0\`, \`style={...}\`)
+
+### State with String IDs (for Dynamic Components)
+
+\`State()\` can accept either a component object or a string ID. This is useful for components created dynamically:
+
+\`\`\`python
+from dars.all import *
+from dars.backend import createComp
+
+# Traditional: State with component object
+existing_text = Text("0", id="counter")
+existing_state = State(existing_text, text=0)
+
+# New: State with string ID (for components created later)
+dynamic_state = State("dynamic-counter", text=0)
+
+# Create the component later
+create_btn.on_click = createComp(
+    target=Text("0", id="dynamic-counter"),
+    root="container-id"
+)
+
+# State works even though component was created after state!
+increment_btn.on_click = dynamic_state.text.increment(by=1)
+\`\`\`
+
+**Use Cases:**
+- Components created with \`createComp()\`
+- Dynamically generated UIs
+- Conditional component rendering
+- Server-side rendered components
+
+
+### Reactive Properties
+
+Access component properties through the state object to get reactive operations:
+
+\`\`\`python
+# Increment/decrement numeric properties
+counter.text.increment(by=1)
+counter.text.decrement(by=2)
+
+# Set property values
+counter.text.set(value=100)
+
+# Auto operations (continuous)
+counter.text.auto_increment(by=1, interval=1000)  # +1 every second
+counter.text.auto_decrement(by=1, interval=500)   # -1 every 500ms
+counter.text.stop_auto()  # Stop auto operations
+\`\`\`
+
+### Reset to Defaults
+
+The \`reset()\` method restores all properties to their initial values:
+
+\`\`\`python
+state = State(display, text=0, style={"color": "blue"})
+
+# ... user modifies the component ...
+
+# Reset everything back to initial state
+reset_btn.on_click = state.reset()
+\`\`\`
+
+## Reactive Operations
+
+### Increment and Decrement
+
+\`\`\`python
+# Increment by 1 (default)
+button.on_click = counter.text.increment()
+
+# Increment by custom amount
+button.on_click = counter.text.increment(by=5)
+
+# Decrement (negative increment)
+button.on_click = counter.text.decrement(by=1)
+# OR
+button.on_click = counter.text.increment(by=-1)
+\`\`\`
+
+\`\`\`python
+button.on_click = counter.text.set(value=0)
+\`\`\`
+
+### All Property Types Supported
+
+State V2 supports updating **all component properties**, not just text:
+
+**Text Content:**
+\`\`\`python
+state.text.set("New text")
+\`\`\`
+
+**HTML Content:**
+\`\`\`python
+state.html.set("<strong>Bold text</strong>")
+\`\`\`
+
+**CSS Styles:**
+\`\`\`python
+state.style.set({"color": "red", "fontSize": "24px"})
+\`\`\`
+
+**CSS Classes:**
+\`\`\`python
+# Set class name
+state.class_name.set("active")
+\`\`\`
+
+**Event Handlers:**
+\`\`\`python
+# Update event handler dynamically
+state.update(on_click=alert("New handler!"))
+
+# Or with dScript
+from dars.scripts.dscript import dScript
+state.update(on_click=dScript("console.log('clicked')"))
+\`\`\`
+
+**Multiple Properties at Once:**
+\`\`\`python
+state.update(
+    text="Updated!",
+    class_name="success",
+    style={"color": "green"},
+    on_click=alert("Done!")
+)
+\`\`\`
+
+### Auto Operations
+
+
+Auto operations create continuous reactive updates:
+
+\`\`\`python
+# Auto-increment timer
+timer = State(display, text=0)
+
+start_btn.on_click = timer.text.auto_increment(by=1, interval=1000)
+stop_btn.on_click = timer.text.stop_auto()
+\`\`\`
+
+**With Limits:**
+\`\`\`python
+# Auto-increment up to 100
+timer.text.auto_increment(by=1, interval=1000, max=100)
+
+# Auto-decrement down to 0
+countdown.text.auto_decrement(by=1, interval=1000, min=0)
+\`\`\`
+
+## Backend Integration with useData()
+
+State V2 integrates seamlessly with Dars backend HTTP utilities for reactive API-driven UIs:
+
+\`\`\`python
+from dars.all import *
+from dars.backend import get, useData
+
+# Create components
+user_name = Text("", id="user-name")
+user_email = Text("", id="user-email")
+
+# Create states
+name_state = State(user_name, text="")
+email_state = State(user_email, text="")
+
+# Fetch and bind API data - pure Python!
+fetch_btn = Button(
+    "Load User",
+    on_click=get(
+        id="userData",
+        url="https://api.example.com/users/1",
+        # Access nested data with dot notation
+        callback=(
+            name_state.text.set(useData('userData').name)
+            .then(email_state.text.set(useData('userData').email))
+        )
+    )
+)
+\`\`\`
+
+**Key Features:**
+- **\`useData('id')\`** - Access fetched data by operation ID
+- **Dot notation** - \`useData('userData').name\` accesses nested properties
+- **\`.then()\` chaining** - Chain multiple state updates sequentially
+- **No JavaScript** - Everything is pure Python
+
+## Complete Example
+
+\`\`\`python
+from dars.all import *
+
+app = App("State V2 Demo")
+
+# Timer display
+timer_display = Text("0", id="timer", style={"font-size": "36px"})
+timer = State(timer_display, text=0)
+
+# Status display
+status = Text("Paused", id="status")
+status_state = State(status, text="Paused", class_name="paused")
+
+# Control buttons
+start_btn = Button("Start",
+    on_click=timer.text.auto_increment(by=1, interval=1000)
+)
+stop_btn = Button("Stop", 
+    on_click=[
+        timer.text.stop_auto(),
+        status_state.update(text="Paused", class_name="paused")
+    ]
+)
+reset_btn = Button("Reset",
+    on_click=[
+        timer.text.stop_auto(),
+        timer.reset(),
+        status_state.reset()
+    ]
+)
+
+page = Page(Container(timer_display, status, start_btn, stop_btn, reset_btn))
+app.add_page("index", page, index=True)
+
+if __name__ == "__main__":
+    app.rTimeCompile()
+\`\`\`
+
+## Dynamic State Updates & \`this()\`
+
+Dars introduces dynamic state updates, allowing you to modify component properties directly without pre-registering state indices.
+
+### \`this()\` helper
+
+The \`this()\` helper allows a component to refer to itself in an event handler and apply updates dynamically.
+
+\`\`\`python
+from dars.core.state import this
+
+btn = Button("Click me", on_click=this().state(text="Clicked!", style={"color": "red"}))
+\`\`\`
+
+Supported dynamic properties:
+- \`text\`: Update text content.
+- \`html\`: Update inner HTML.
+- \`style\`: Dictionary of CSS styles.
+- \`attrs\`: Dictionary of attributes.
+- \`classes\`: Dictionary with \`add\`, \`remove\`, or \`toggle\` (single string or list of strings).
+
+\`\`\`python
+this().state(
+    text="Updated",
+    style={"backgroundColor": "#f0f0f0"},
+    classes={"add": ["active"], "remove": ["inactive"]}
+)
+\`\`\`
+
+### Using Raw JavaScript Values (\`RawJS\`)
+
+You can pass raw JavaScript variables to dynamic updates using \`RawJS\`. This is particularly useful when:
+- Chaining scripts where a previous script returns a value
+- Working with async operations like file reading
+- Using \`dScript.ARG\` to reference values from previous scripts
+
+\`\`\`python
+from dars.scripts.dscript import RawJS, dScript
+
+# Using dScript.ARG placeholder for chained values
+this().state(text=RawJS(dScript.ARG))
+
+# Using custom JavaScript expressions
+this().state(text=RawJS("someVar + ' processed'"))
+\`\`\`
+
+---
+
+## Best Practices
+
+### Choose State V2 When:
+- Building simple counters or timers
+- Need auto-increment/decrement
+- Want quick reactive updates
+- Working with single components
+
+### Choose dState/cState When:
+- Building complex state machines
+- Need immutable default state (state 0)
+- Require cross-state calls
+- Managing multi-step workflows
+
+### Use \`this()\` When:
+- Don't need state tracking
+- Making one-off updates
+- Working with async operations
+- Targeting the clicked element`},{type:"T9",id:"markdown_123",key:"0/2/0/12",text:`# Hooks System
 
 Dars Framework introduces a **Hooks system** inspired by React, enabling reactive and stateful behavior in both FunctionComponents and built-in components.
 
@@ -4349,7 +4134,442 @@ fetch(
 - Nest state paths more than 2 levels deep (currently supports \`stateName.property\`).
 - Use arithmetic operators without numeric transformations.
 
----`},{type:"T9",id:"markdown_123",key:"0/2/0/12",text:`# Keyboard Events in Dars
+---`},{type:"T9",id:"markdown_124",key:"0/2/0/13",text:`# Backend HTTP Utilities 
+
+Dars Framework provides a powerful, **Pythonic system** for handling HTTP requests and API communication without writing any JavaScript. The \`dars.backend\` module enables you to fetch data, bind it to components, and create reactive UIs entirely in Python.
+
+## Table of Contents
+
+- [Quick Start with HTTP UTILS](#quick-start-with-http-utils)
+- [HTTP Functions](#http-functions)
+- [Data Binding with useData()](#data-binding-with-usedata)
+- [JSON Utilities](#json-utilities)
+- [Component Management](#component-management)
+
+---
+
+## Quick Start with HTTP UTILS
+
+\`\`\`python
+from dars.all import *
+from dars.backend import get, useData
+
+app = App(title="API Demo")
+
+# Create display component
+user_display = Text("No data", id="user-name")
+user_state = State(user_display, text="No data")
+
+# Fetch and bind data - pure Python!
+fetch_btn = Button(
+    "Fetch User",
+    on_click=get(
+        id="userData",
+        url="https://api.example.com/user/1",
+        callback=user_state.text.set(useData('userData').name)
+    )
+)
+
+app.set_root(Container(user_display, fetch_btn))
+
+if __name__ == "__main__":
+    app.rTimeCompile()
+\`\`\`
+
+---
+
+## HTTP Functions
+
+The \`dars.backend\` module provides standard HTTP methods that return \`dScript\` objects:
+
+### \`get(id, url, **options)\`
+
+Performs a GET request.
+
+\`\`\`python
+from dars.backend import get
+
+# Basic GET
+get_user = get(
+    id="userData",
+    url="https://jsonplaceholder.typicode.com/users/1"
+)
+
+# With callback
+get_user = get(
+    id="userData",
+    url="https://api.example.com/user/1",
+    callback=status_state.text.set("\u2705 Loaded!"),
+    on_error=status_state.text.set("\u274C Error!")
+)
+\`\`\`
+
+### \`post(id, url, body, **options)\`
+
+Performs a POST request.
+
+\`\`\`python
+from dars.backend import post
+
+# POST with JSON body
+create_user = post(
+    id="createResult",
+    url="https://api.example.com/users",
+    body={"name": "John", "email": "john@example.com"},
+    callback=status_state.text.set("User created!")
+)
+\`\`\`
+
+### Other Methods
+
+- **\`put(id, url, body, **options)\`** - Update resource
+- **\`delete(id, url, **options)\`** - Delete resource
+- **\`patch(id, url, body, **options)\`** - Partial update
+- **\`fetch(id, url, method, **options)\`** - Generic fetch
+
+### Common Options
+
+All HTTP functions accept these options:
+
+| Option | Type | Description |
+|--------|------|-------------|
+| \`id\` | \`str\` | **Required**. Operation ID (NOT HTML ID) for accessing data |
+| \`url\` | \`str\` | **Required**. API endpoint URL |
+| \`headers\` | \`dict\` | Custom HTTP headers |
+| \`callback\` | \`dScript\` | Executed on success |
+| \`on_error\` | \`dScript\` | Executed on error |
+| \`parse_json\` | \`bool\` | Auto-parse JSON response (default: \`True\`) |
+| \`timeout\` | \`int\` | Request timeout in milliseconds |
+
+---
+
+## Data Binding with useData()
+
+The \`useData()\` function provides **Pythonic access** to fetched data using dot notation:
+
+### Basic Usage
+
+\`\`\`python
+from dars.backend import useData
+
+# Access fetched data by operation ID
+user_data = useData('userData')
+
+# Access nested properties with dot notation
+user_name = useData('userData').name
+user_email = useData('userData').email
+user_address_city = useData('userData').address.city
+\`\`\`
+
+### How It Works
+
+1. **Operation ID**: When you call \`get(id="userData", ...)\`, the response is stored in \`window.userData\`
+2. **DataAccessor**: \`useData('userData')\` creates a \`DataAccessor\` object
+3. **Dot Notation**: \`.name\` uses \`__getattr__\` to create \`window.userData?.name\`
+4. **RawJS Generation**: The \`.code\` property generates the JavaScript expression
+
+### Binding to StateV2
+
+The most powerful feature is binding API data directly to component states:
+
+\`\`\`python
+from dars.all import *
+from dars.backend import get, useData
+
+# Create components and states
+name_display = Text("", id="user-name")
+email_display = Text("", id="user-email")
+
+name_state = State(name_display, text="")
+email_state = State(email_display, text="")
+
+# Fetch and bind - pure Python!
+fetch_button = Button(
+    "Fetch User",
+    on_click=get(
+        id="userData",
+        url="https://jsonplaceholder.typicode.com/users/1",
+        # Chain multiple state updates with .then()
+        callback=(
+            name_state.text.set(useData('userData').name)
+            .then(email_state.text.set(useData('userData').email))
+        )
+    )
+)
+\`\`\`
+
+### Chaining with \`.then()\`
+
+Chain multiple operations sequentially:
+
+\`\`\`python
+# Update multiple components
+callback=(
+    status_state.text.set("Loading...")
+    .then(name_state.text.set(useData('userData').name))
+    .then(email_state.text.set(useData('userData').email))
+    .then(status_state.text.set("\u2705 Loaded!"))
+)
+\`\`\`
+
+---
+
+## JSON Utilities
+
+Helper functions for working with JSON data:
+
+### \`stringify(data, pretty=False)\`
+
+Convert data to JSON string:
+
+\`\`\`python
+from dars.backend import stringify, useData
+
+# Stringify fetched data
+display_state.text.set(stringify(useData('userData'), pretty=True))
+
+# Stringify Python objects
+json_str = stringify({"name": "John", "age": 30})
+\`\`\`
+
+### \`parse(json_string)\`
+
+Parse JSON string:
+
+\`\`\`python
+from dars.backend import parse
+
+# Parse JSON string
+data = parse('{"name": "John"}')
+\`\`\`
+
+### \`get_value(obj, path, default=None)\`
+
+Safely access nested values:
+
+\`\`\`python
+from dars.backend import get_value, useData
+
+# Safe nested access with default
+city = get_value(useData('userData'), 'address.city', default='Unknown')
+\`\`\`
+
+---
+
+## Component Management
+
+Create, update, and delete components dynamically at runtime:
+
+### \`createComp(target, root, position="append")\`
+
+Create a new component in the DOM:
+
+\`\`\`python
+from dars.backend import createComp
+
+# Create new component
+new_text = Text("Hello!", id="new-item")
+create_btn.on_click = createComp(
+    target=new_text,
+    root="container-id",
+    position="append"  # or "prepend", "before:id", "after:id"
+)
+\`\`\`
+
+**Tip:** You can create a \`State()\` for a component before it exists using a string ID:
+
+\`\`\`python
+# Create state with string ID
+item_state = State("new-item", text="Hello!")
+
+# Create component later
+create_btn.on_click = createComp(
+    target=Text("Hello!", id="new-item"),
+    root="container-id"
+)
+
+# State works immediately!
+update_btn.on_click = item_state.text.set("Updated!")
+\`\`\`
+
+
+### \`updateComp(target, **props)\`
+
+Update component properties:
+
+\`\`\`python
+from dars.backend import updateComp
+
+# Update component
+update_btn.on_click = updateComp(
+    "my-component-id",
+    text="Updated!",
+    style={"color": "red"}
+)
+\`\`\`
+
+### \`deleteComp(id)\`
+
+Remove a component from the DOM:
+
+\`\`\`python
+from dars.backend import deleteComp
+
+# Delete component
+delete_btn.on_click = deleteComp("component-id")
+\`\`\`
+
+---
+
+## Best Practices
+
+1. **Use Unique Operation IDs**: Each HTTP operation should have a unique \`id\` to avoid conflicts
+2. **Chain Updates**: Use \`.then()\` to chain multiple state updates sequentially
+3. **Handle Errors**: Always provide \`on_error\` callbacks for better UX
+4. **Leverage useData()**: Use dot notation for clean, readable data access
+5. **Combine with StateV2**: Bind API data directly to component states for reactive UIs
+
+---
+
+## API Reference Summary
+
+### HTTP Functions
+- \`get(id, url, **options)\` - GET request
+- \`post(id, url, body, **options)\` - POST request
+- \`put(id, url, body, **options)\` - PUT request
+- \`delete(id, url, **options)\` - DELETE request
+- \`patch(id, url, body, **options)\` - PATCH request
+- \`fetch(id, url, method, **options)\` - Generic fetch
+
+### Data Access
+- \`useData(operation_id)\` - Access fetched data with dot notation
+- \`stringify(data, pretty=False)\` - Convert to JSON string
+- \`parse(json_string)\` - Parse JSON
+- \`get_value(obj, path, default=None)\` - Safe nested access
+
+### Component Management
+- \`createComp(target, root, position)\` - Create component
+- \`updateComp(target, **props)\` - Update component
+- \`deleteComp(id)\` - Delete component
+
+---
+
+For more examples, see the test files in \`tst/proj/test_http_demo.py\` and \`tst/proj/test_http_utils.py\`.
+`},{type:"T9",id:"markdown_125",key:"0/2/0/14",text:`# Events in Dars
+
+This is the documentation for the events in Dars.
+
+## Event Calling System
+
+Custom components in Dars can have events associated with them. You can set an event on a custom component using the \`set_event\` method.
+
+\`\`\`python
+self.set_event(EventTypes.CLICK, dScript("console.log('click')"))
+\`\`\`
+
+### Available Event Types
+
+To use the event types, you need to import them from \`dars.core.events\`:
+
+\`\`\`python
+from dars.core.events import EventTypes
+\`\`\`
+
+Here are the different event types available:
+
+- **Mouse Events:**
+    - \`CLICK = "click"\`
+    - \`DOUBLE_CLICK = "dblclick"\`
+    - \`MOUSE_DOWN = "mousedown"\`
+    - \`MOUSE_UP = "mouseup"\`
+    - \`MOUSE_ENTER = "mouseenter"\`
+    - \`MOUSE_LEAVE = "mouseleave"\`
+    - \`MOUSE_MOVE = "mousemove"\`
+
+- **Keyboard Events:**
+    - \`KEY_DOWN = "keydown"\`
+    - \`KEY_UP = "keyup"\`
+    - \`KEY_PRESS = "keypress"\`
+
+- **Form Events:**
+    - \`CHANGE = "change"\`
+    - \`INPUT = "input"\`
+    - \`SUBMIT = "submit"\`
+    - \`FOCUS = "focus"\`
+    - \`BLUR = "blur"\`
+
+- **Load Events:**
+    - \`LOAD = "load"\`
+    - \`ERROR = "error"\`
+    - \`RESIZE = "resize"\`
+
+
+---
+
+## New in v1.2.2: Event arrays and dynamic handlers
+
+- Any \`on_*\` attribute can now accept:
+  - A single script (InlineScript, FileScript, dScript) or plain JS string
+  - An array mixing any of the above (executed sequentially)
+
+Example using \`Mod.set\`:
+
+\`\`\`python
+Mod.set("btn1", on_click=[st1.state(0), dScript(code="console.log('clicked')")])
+\`\`\`
+
+Runtime behavior:
+
+- Only one dynamic listener per event is active at a time; subsequent \`Mod.set\` replaces the previous one.
+- Dynamic handlers run in capture phase and stop propagation for the same event.
+- Returning to the default state (index 0) removes any dynamic listeners from that element and restores its initial DOM.
+
+
+---
+
+## Backend HTTP Integration
+
+Dars provides HTTP utilities that can be used directly in event handlers:
+
+\`\`\`python
+from dars.all import *
+from dars.backend import get, post, useData
+
+# GET request on button click
+fetch_btn = Button(
+    "Fetch Data",
+    on_click=get(
+        id="apiData",
+        url="https://api.example.com/data",
+        callback=status_state.text.set("\u2705 Loaded!")
+    )
+)
+
+# POST request with data binding
+submit_btn = Button(
+    "Submit",
+    on_click=post(
+        id="submitResult",
+        url="https://api.example.com/submit",
+        body={"name": "John", "email": "john@example.com"},
+        callback=result_state.text.set(useData('submitResult').message)
+    )
+)
+
+# Chain HTTP request with state updates
+button.on_click = [
+    status_state.text.set("Loading..."),
+    get(
+        id="userData",
+        url="https://api.example.com/user/1",
+        callback=(
+            name_state.text.set(useData('userData').name)
+            .then(status_state.text.set("Done!"))
+        )
+    )
+]
+\`\`\`
+`},{type:"T9",id:"markdown_126",key:"0/2/0/15",text:`# Keyboard Events in Dars
 
 Dars provides a powerful and intuitive system for handling keyboard events in your applications. This guide covers everything from basic key detection to advanced global shortcuts.
 
@@ -4841,121 +5061,7 @@ Input(
 - **Use \`switch()\`** for handling multiple different keys
 - **Use \`addGlobalKeys()\`** for app-wide shortcuts (always with modifiers!)
 - **Combine with State and V()** for dynamic, reactive keyboard interactions
-`},{type:"T9",id:"markdown_124",key:"0/2/0/13",text:`# Events in Dars
-
-This is the documentation for the events in Dars.
-
-## Event Calling System
-
-Custom components in Dars can have events associated with them. You can set an event on a custom component using the \`set_event\` method.
-
-\`\`\`python
-self.set_event(EventTypes.CLICK, dScript("console.log('click')"))
-\`\`\`
-
-### Available Event Types
-
-To use the event types, you need to import them from \`dars.core.events\`:
-
-\`\`\`python
-from dars.core.events import EventTypes
-\`\`\`
-
-Here are the different event types available:
-
-- **Mouse Events:**
-    - \`CLICK = "click"\`
-    - \`DOUBLE_CLICK = "dblclick"\`
-    - \`MOUSE_DOWN = "mousedown"\`
-    - \`MOUSE_UP = "mouseup"\`
-    - \`MOUSE_ENTER = "mouseenter"\`
-    - \`MOUSE_LEAVE = "mouseleave"\`
-    - \`MOUSE_MOVE = "mousemove"\`
-
-- **Keyboard Events:**
-    - \`KEY_DOWN = "keydown"\`
-    - \`KEY_UP = "keyup"\`
-    - \`KEY_PRESS = "keypress"\`
-
-- **Form Events:**
-    - \`CHANGE = "change"\`
-    - \`INPUT = "input"\`
-    - \`SUBMIT = "submit"\`
-    - \`FOCUS = "focus"\`
-    - \`BLUR = "blur"\`
-
-- **Load Events:**
-    - \`LOAD = "load"\`
-    - \`ERROR = "error"\`
-    - \`RESIZE = "resize"\`
-
-
----
-
-## New in v1.2.2: Event arrays and dynamic handlers
-
-- Any \`on_*\` attribute can now accept:
-  - A single script (InlineScript, FileScript, dScript) or plain JS string
-  - An array mixing any of the above (executed sequentially)
-
-Example using \`Mod.set\`:
-
-\`\`\`python
-Mod.set("btn1", on_click=[st1.state(0), dScript(code="console.log('clicked')")])
-\`\`\`
-
-Runtime behavior:
-
-- Only one dynamic listener per event is active at a time; subsequent \`Mod.set\` replaces the previous one.
-- Dynamic handlers run in capture phase and stop propagation for the same event.
-- Returning to the default state (index 0) removes any dynamic listeners from that element and restores its initial DOM.
-
-
----
-
-## Backend HTTP Integration
-
-Dars provides HTTP utilities that can be used directly in event handlers:
-
-\`\`\`python
-from dars.all import *
-from dars.backend import get, post, useData
-
-# GET request on button click
-fetch_btn = Button(
-    "Fetch Data",
-    on_click=get(
-        id="apiData",
-        url="https://api.example.com/data",
-        callback=status_state.text.set("\u2705 Loaded!")
-    )
-)
-
-# POST request with data binding
-submit_btn = Button(
-    "Submit",
-    on_click=post(
-        id="submitResult",
-        url="https://api.example.com/submit",
-        body={"name": "John", "email": "john@example.com"},
-        callback=result_state.text.set(useData('submitResult').message)
-    )
-)
-
-# Chain HTTP request with state updates
-button.on_click = [
-    status_state.text.set("Loading..."),
-    get(
-        id="userData",
-        url="https://api.example.com/user/1",
-        callback=(
-            name_state.text.set(useData('userData').name)
-            .then(status_state.text.set("Done!"))
-        )
-    )
-]
-\`\`\`
-`},{type:"T9",id:"markdown_125",key:"0/2/0/14",text:`# Dars - Exporter Documentation
+`},{type:"T9",id:"markdown_127",key:"0/2/0/16",text:`# Dars - Exporter Documentation
 
 ## Introduction
 
@@ -5275,7 +5381,7 @@ All file paths are relative to the app's directory. See [State Management](state
 - Not yet recommended for production.
 - Some advanced packaging and signing options may require manual configuration.
 - Expect changes to configuration keys and defaults as the feature matures.
-`},{type:"T9",id:"markdown_126",key:"0/2/0/15",text:`# Dars - Script System
+`},{type:"T9",id:"markdown_128",key:"0/2/0/17",text:`# Dars - Script System
 
 ## Introduction to Scripts
 
@@ -6051,109 +6157,4 @@ app.add_page("index", page, index=True)
 | \`sequence\` | Chain animations | \`*animations\` |
 
 All animations return \`dScript\` objects and can be used with \`.then()\` for advanced chaining.
-`},{type:"T9",id:"markdown_127",key:"0/2/0/16",text:`# Dars CLI Reference
-
-The Dars Command Line Interface (CLI) lets you manage your projects, export apps, and preview results quickly from the terminal.
-
-## How to Use the CLI
-
-Open your terminal in your project directory and use any of the following commands:
-
-\`\`\`bash
-# Show information about your app
- dars info my_app.py
-
-# Export to different formats (web)
- dars export my_app.py --format html --output ./output
- # Skip default Python minifier for this run (does not affect viteMinify)
- dars export my_app.py --format html --output ./output --no-minify
-
-# List supported export formats
- dars formats
-
-# Initialize a new project
- dars init my_new_project
-
-# Initialize a project with a specific template
- dars init my_new_project -t demo/complete_app
-
-# Preview an exported app
- dars preview ./output_directory
-
-# Build using project config (dars.config.json)
- dars build
- # Build desktop (BETA) when format is desktop in config
- dars build
- # Build without the default Python minifier
- dars build --no-minify
-
-# Help
- dars --help
-
-# Version
- dars -v
-\`\`\`
-
-## Main Commands Table
-| Command                                 | What it does                               |
-|-----------------------------------------|--------------------------------------------|
-| \`dars export my_app.py --format html\`   | Export app to HTML/CSS/JS in \`./my_app_web\` |
-| \`dars export my_app.py --format html --no-minify\` | Export skipping default Python minifier |
-| \`dars preview ./my_app_web\`             | Preview exported app locally                |
-| \`dars build\`                            | Build using dars.config.json                |
-| \`dars init --type desktop\`              | Scaffold desktop-capable project (BETA)     |
-| \`dars build\` (desktop config)           | Build desktop app artifacts (BETA)          |
-| \`dars build --no-minify\`                | Build skipping default Python minifier      |
-| \`dars init my_project\`                  | Create a new Dars project                   |
-| \`dars info my_app.py\`                   | Show info about your app                    |
-| \`dars formats\`                          | List supported export formats               |
-| \`dars --help\`                           | Show help and all CLI options               |
-
-## Using Official Templates
-
-Dars provides official templates to help you start new projects quickly. Templates include ready-to-use apps for forms, layouts, dashboards, multipage, and more.
-
-### How to Use a Template
-
-1. **Initialize a new project with a template:**
-   \`\`\`bash
-   dars init my_new_project -t basic/HelloWorld
-   # ...and more (see below)
-   \`\`\`
-
-You can see the templates available with
-
-\`\`\`bash
-dars init --list-templates
-dars init  -L
-\`\`\`
-
-2. **Export the template to HTML/CSS/JS:**
-   \`\`\`bash
-   dars export main.py --format html --output ./hello_output
-   dars export main.py --format html --output ./dashboard_output
-   # ...etc
-   \`\`\`
-3. **Preview the exported app:**
-   \`\`\`bash
-   dars preview ./hello_output
-   \`\`\`
-
-## Tips CLI
-- Use \`dars --help\` for a full list of commands and options.
-- You can preview apps either live (with \`app.rTimeCompile()\`) or from exported files with \`dars preview\`.
-- Templates are available for quick project setup: use \`dars init my_project -t <template>\`.
-
-### Desktop (BETA) CLI
-
-- Mark your project with \`"format": "desktop"\` in \`dars.config.json\`.
-- Use \`dars init --type desktop\` (or \`--update\`) to scaffold backend files.
-- Run \`dars doctor --all --yes\` to set up optional tooling.
-- Build with \`dars build\`. This feature is in BETA: suitable for testing, not yet for production.
-
-### Minification labels in output
-- Applying minification (default): default Python-side minifier is active.
-- Applying minification (vite): Vite/esbuild minification is active (JS/CSS) and default is disabled.
-- Applying minification (default + vite): both are active.
-
-For more, see the [Getting Started](#getting-started-with-dars) guide and the main documentation index.`}]},{type:"T2",id:"footer-section",key:"0/2/1",children:[{type:"T2",id:"container_128",key:"0/2/1/0",children:[{type:"T2",id:"container_129",key:"0/2/1/0/0",children:[{type:"T2",id:"container_130",key:"0/2/1/0/0/0",children:[{type:"T4",id:"image_131",key:"0/2/1/0/0/0/0"},{type:"T2",id:"container_132",key:"0/2/1/0/0/0/1",children:[{type:"T5",id:"text_133",key:"0/2/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_134",key:"0/2/1/0/0/1",children:[{type:"T2",id:"container_135",key:"0/2/1/0/0/1/0",children:[{type:"T5",id:"text_136",key:"0/2/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_137",key:"0/2/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_138",key:"0/2/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_139",key:"0/2/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_140",key:"0/2/1/0/0/1/1",children:[{type:"T5",id:"text_141",key:"0/2/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_142",key:"0/2/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_143",key:"0/2/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_144",key:"0/2/1/0/0/1/2",children:[{type:"T5",id:"text_145",key:"0/2/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_146",key:"0/2/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_147",key:"0/2/1/0/0/2",children:[{type:"T2",id:"container_148",key:"0/2/1/0/0/2/0",children:[{type:"T5",id:"text_149",key:"0/2/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_150",key:"0/2/1/0/0/2/1",children:[{type:"T5",id:"text_151",key:"0/2/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_152",key:"0/2/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_153",key:"0/2/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_154",key:"0/2/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]}]},function(){const c=new Map;let l=null,p=null;function u(){}function w(){}function _(n,t){if(!n)return;t(n);const e=n.children||[];for(let o=0;o<e.length;o++)_(e[o],t)}function S(n,t){if(!(!n||!t))for(const[e,o]of Object.entries(t))try{o===!1||o===null||typeof o>"u"?n.removeAttribute(e):n.setAttribute(e,String(o))}catch{}}function B(n,t={},e={}){for(const o in t)if(!(o in e))try{n.removeAttribute(o)}catch{}for(const o in e){const i=e[o];try{i===!1||i===null||typeof i>"u"?n.removeAttribute(o):n.setAttribute(o,String(i))}catch{}}}function I(n,t={},e={}){for(const o in t)if(!(o in e))try{n.style.removeProperty(o.replace(/_/g,"-"))}catch{}for(const o in e){const i=e[o];try{n.style.setProperty(o.replace(/_/g,"-"),String(i))}catch{}}}function M(n,t){(t||document).addEventListener(n,function(e){let o=e.target;const i=t||document;for(;o&&o!==i;){const m=o.id;if(m&&c.has(m)){const y=c.get(m);if(o&&o.__darsEv&&o.__darsEv[n])return;let d=y[n];if(!d&&(n==="keydown"||n==="keyup"||n==="keypress")){const a=e.key||e.code;if(a){const r=n+"."+a;d=y[r]}}if(typeof d=="function"){try{d.call(o,e)}catch(a){console.error("[Dars] handler error",a)}return}}o=o.parentNode}},!0)}function k(n,t){return n&&t?n.type!==t.type:n!==t}function v(n){if(!n)return;const t=n.children||[];for(let e=0;e<t.length;e++)v(t[e]);if(n.id&&c.delete(n.id),n.id){const e=document.getElementById(n.id);if(e&&e.parentNode)try{e.parentNode.removeChild(e)}catch{}}}function x(n,t){if(!t||!t.id)return{ok:!1,reason:"missing-new"};let e=document.getElementById(t.id);if(!e){const a=n&&n.id?document.getElementById(n.id):null;if(a)try{a.id=t.id,e=a}catch{}}if(!e)return{ok:!1,reason:"missing-el"};if(k(n,t))return{ok:!1,reason:"type-changed"};const o=!!t.isIsland;if(!o&&t.class&&(e.className=t.class),o||B(e,n&&n.props||{},t.props||{}),o||I(e,n&&n.style||{},t.style||{}),!o&&Object.prototype.hasOwnProperty.call(t,"text")&&e.textContent!==String(t.text||"")&&(e.textContent=String(t.text||"")),o)return{ok:!0};const i=n&&n.children?n.children:[],m=t.children?t.children:[],y=new Map;for(let a=0;a<i.length;a++){const r=i[a]&&(i[a].id||i[a].key)||null;r&&y.set(String(r),i[a])}const d=new Set;for(let a=0;a<m.length;a++){const r=m[a],h=r&&(r.id||r.key)||null;if(!h)if(a<i.length){const s=x(i[a],r);if(!s.ok)return s;d.add(i[a]);continue}else return{ok:!1,reason:"children-added"};const b=y.get(String(h));if(b){const s=x(b,r);if(!s.ok)return s;d.add(b)}else{if(a<i.length){const f=i[a];if(!k(f,r)){const g=x(f,r);if(!g.ok)return g;d.add(f);continue}}const s=createSubtree(r);if(s){const f=a<i.length?i[a]:null;if(f&&f.id){const g=document.getElementById(f.id);g&&g.parentNode?g.parentNode.insertBefore(s,g):e.appendChild(s)}else e.appendChild(s);continue}return{ok:!1,reason:"children-added"}}}for(let a=0;a<i.length;a++){const r=i[a];d.has(r)||v(r)}return{ok:!0}}function L(n){typeof requestAnimationFrame=="function"?requestAnimationFrame(n):setTimeout(n,16)}function O(n){const t=l;if(!t){l=n;try{window.__DARS_VDOM__=n}catch{}return}L(()=>{const e=x(t,n);if(!e.ok){console.warn("[Dars] Structural change detected (",e.reason,"), reloading...");try{location.reload()}catch{}return}l=n;try{window.__DARS_VDOM__=n}catch{}})}function F(n){l=n;try{window.__DARS_VDOM__=n}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(e=>M(e,document))}function R(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const n=window.__DARS_VERSION_URL||"version.txt";let t=null,e=!1,o=0;const i=10;let m=!1;function y(a,r,h,b){try{const s=new XMLHttpRequest;b&&(s.responseType=b),s.open("GET",a,!0),s.timeout=5e3,s.onreadystatechange=function(){s.readyState===4&&(s.status>=200&&s.status<300?r(s.response):h())},s.onerror=h,s.ontimeout=h,s.setRequestHeader("Cache-Control","no-store"),s.send()}catch{h()}}function d(){m||y(n,function(a){let r=(a||"").toString().trim();if(!r||r==="0"){if(o+=1,o>=i){console.warn("[Dars] version file not found after",i,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(d,600);return}if(o=0,e=!1,p||(p=r),r&&r!==p){p=r;try{location.reload()}catch{}return}t=setTimeout(d,600)},function(){if(o+=1,o>=i){console.warn("[Dars] version file not reachable after",i,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(d,600)},"text")}return d(),()=>{try{m=!0,t&&clearTimeout(t),window.__DARS_STOP_HOTRELOAD=null}catch{}}}document.addEventListener("DOMContentLoaded",function(){if(window.__DARS_VDOM__?F(window.__DARS_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=R()}catch{}}})}(),window.addEventListener("scroll",()=>{const c=document.getElementById("dars-navbar");window.scrollY>20?c.classList.add("scrolled"):c.classList.remove("scrolled");const l=document.getElementById("features-section");if(l&&!l.classList.contains("visible")){const p=l.getBoundingClientRect().top,u=window.innerHeight/1.5;p<u&&(l.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((_,S)=>{setTimeout(()=>{_.style.opacity="1",_.style.transform="translateY(0)"},S*100)}))}});const T=document.getElementById("hero-logo"),C=document.getElementById("hero-title"),D=document.getElementById("hero-description"),P=document.getElementById("pip-command"),A=document.getElementById("get-started-btn"),E=document.getElementById("scroll-text");T&&setTimeout(()=>T.classList.add("show"),5),C&&setTimeout(()=>C.classList.add("show"),350),D&&setTimeout(()=>D.classList.add("show"),650),P&&setTimeout(()=>P.classList.add("show"),950),A&&setTimeout(()=>A.classList.add("show"),1250),E&&setTimeout(()=>E.classList.add("show"),1500),document.addEventListener("DOMContentLoaded",function(){const c=document.getElementById("hamburger-btn"),l=document.getElementById("mobile-menu"),p=document.body;c&&l&&(c.addEventListener("click",function(u){u.stopPropagation(),l.style.display==="flex"?(l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open")):(l.style.display="flex",c.classList.add("menu-open"),p.classList.add("menu-open"))}),l.querySelectorAll("a").forEach(u=>{u.addEventListener("click",function(){l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open")})}),document.addEventListener("click",function(u){!c.contains(u.target)&&!l.contains(u.target)&&(l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open"))}),document.addEventListener("keydown",function(u){u.key==="Escape"&&l.style.display==="flex"&&(l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open"))}))});
+`}]},{type:"T2",id:"footer-section",key:"0/2/1",children:[{type:"T2",id:"container_129",key:"0/2/1/0",children:[{type:"T2",id:"container_130",key:"0/2/1/0/0",children:[{type:"T2",id:"container_131",key:"0/2/1/0/0/0",children:[{type:"T4",id:"image_132",key:"0/2/1/0/0/0/0"},{type:"T2",id:"container_133",key:"0/2/1/0/0/0/1",children:[{type:"T5",id:"text_134",key:"0/2/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_135",key:"0/2/1/0/0/1",children:[{type:"T2",id:"container_136",key:"0/2/1/0/0/1/0",children:[{type:"T5",id:"text_137",key:"0/2/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_138",key:"0/2/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_139",key:"0/2/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_140",key:"0/2/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_141",key:"0/2/1/0/0/1/1",children:[{type:"T5",id:"text_142",key:"0/2/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_143",key:"0/2/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_144",key:"0/2/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_145",key:"0/2/1/0/0/1/2",children:[{type:"T5",id:"text_146",key:"0/2/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_147",key:"0/2/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_148",key:"0/2/1/0/0/2",children:[{type:"T2",id:"container_149",key:"0/2/1/0/0/2/0",children:[{type:"T5",id:"text_150",key:"0/2/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_151",key:"0/2/1/0/0/2/1",children:[{type:"T5",id:"text_152",key:"0/2/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_153",key:"0/2/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_154",key:"0/2/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_155",key:"0/2/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]}]},function(){const d=new Map;let l=null,p=null;function u(){}function w(){}function _(n,t){if(!n)return;t(n);const e=n.children||[];for(let o=0;o<e.length;o++)_(e[o],t)}function S(n,t){if(!(!n||!t))for(const[e,o]of Object.entries(t))try{o===!1||o===null||typeof o>"u"?n.removeAttribute(e):n.setAttribute(e,String(o))}catch{}}function B(n,t={},e={}){for(const o in t)if(!(o in e))try{n.removeAttribute(o)}catch{}for(const o in e){const i=e[o];try{i===!1||i===null||typeof i>"u"?n.removeAttribute(o):n.setAttribute(o,String(i))}catch{}}}function I(n,t={},e={}){for(const o in t)if(!(o in e))try{n.style.removeProperty(o.replace(/_/g,"-"))}catch{}for(const o in e){const i=e[o];try{n.style.setProperty(o.replace(/_/g,"-"),String(i))}catch{}}}function M(n,t){(t||document).addEventListener(n,function(e){let o=e.target;const i=t||document;for(;o&&o!==i;){const m=o.id;if(m&&d.has(m)){const y=d.get(m);if(o&&o.__darsEv&&o.__darsEv[n])return;let c=y[n];if(!c&&(n==="keydown"||n==="keyup"||n==="keypress")){const a=e.key||e.code;if(a){const r=n+"."+a;c=y[r]}}if(typeof c=="function"){try{c.call(o,e)}catch(a){console.error("[Dars] handler error",a)}return}}o=o.parentNode}},!0)}function k(n,t){return n&&t?n.type!==t.type:n!==t}function v(n){if(!n)return;const t=n.children||[];for(let e=0;e<t.length;e++)v(t[e]);if(n.id&&d.delete(n.id),n.id){const e=document.getElementById(n.id);if(e&&e.parentNode)try{e.parentNode.removeChild(e)}catch{}}}function x(n,t){if(!t||!t.id)return{ok:!1,reason:"missing-new"};let e=document.getElementById(t.id);if(!e){const a=n&&n.id?document.getElementById(n.id):null;if(a)try{a.id=t.id,e=a}catch{}}if(!e)return{ok:!1,reason:"missing-el"};if(k(n,t))return{ok:!1,reason:"type-changed"};const o=!!t.isIsland;if(!o&&t.class&&(e.className=t.class),o||B(e,n&&n.props||{},t.props||{}),o||I(e,n&&n.style||{},t.style||{}),!o&&Object.prototype.hasOwnProperty.call(t,"text")&&e.textContent!==String(t.text||"")&&(e.textContent=String(t.text||"")),o)return{ok:!0};const i=n&&n.children?n.children:[],m=t.children?t.children:[],y=new Map;for(let a=0;a<i.length;a++){const r=i[a]&&(i[a].id||i[a].key)||null;r&&y.set(String(r),i[a])}const c=new Set;for(let a=0;a<m.length;a++){const r=m[a],h=r&&(r.id||r.key)||null;if(!h)if(a<i.length){const s=x(i[a],r);if(!s.ok)return s;c.add(i[a]);continue}else return{ok:!1,reason:"children-added"};const b=y.get(String(h));if(b){const s=x(b,r);if(!s.ok)return s;c.add(b)}else{if(a<i.length){const f=i[a];if(!k(f,r)){const g=x(f,r);if(!g.ok)return g;c.add(f);continue}}const s=createSubtree(r);if(s){const f=a<i.length?i[a]:null;if(f&&f.id){const g=document.getElementById(f.id);g&&g.parentNode?g.parentNode.insertBefore(s,g):e.appendChild(s)}else e.appendChild(s);continue}return{ok:!1,reason:"children-added"}}}for(let a=0;a<i.length;a++){const r=i[a];c.has(r)||v(r)}return{ok:!0}}function L(n){typeof requestAnimationFrame=="function"?requestAnimationFrame(n):setTimeout(n,16)}function O(n){const t=l;if(!t){l=n;try{window.__DARS_VDOM__=n}catch{}return}L(()=>{const e=x(t,n);if(!e.ok){console.warn("[Dars] Structural change detected (",e.reason,"), reloading...");try{location.reload()}catch{}return}l=n;try{window.__DARS_VDOM__=n}catch{}})}function F(n){l=n;try{window.__DARS_VDOM__=n}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(e=>M(e,document))}function R(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const n=window.__DARS_VERSION_URL||"version.txt";let t=null,e=!1,o=0;const i=10;let m=!1;function y(a,r,h,b){try{const s=new XMLHttpRequest;b&&(s.responseType=b),s.open("GET",a,!0),s.timeout=5e3,s.onreadystatechange=function(){s.readyState===4&&(s.status>=200&&s.status<300?r(s.response):h())},s.onerror=h,s.ontimeout=h,s.setRequestHeader("Cache-Control","no-store"),s.send()}catch{h()}}function c(){m||y(n,function(a){let r=(a||"").toString().trim();if(!r||r==="0"){if(o+=1,o>=i){console.warn("[Dars] version file not found after",i,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(c,600);return}if(o=0,e=!1,p||(p=r),r&&r!==p){p=r;try{location.reload()}catch{}return}t=setTimeout(c,600)},function(){if(o+=1,o>=i){console.warn("[Dars] version file not reachable after",i,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(c,600)},"text")}return c(),()=>{try{m=!0,t&&clearTimeout(t),window.__DARS_STOP_HOTRELOAD=null}catch{}}}document.addEventListener("DOMContentLoaded",function(){if(window.__DARS_VDOM__?F(window.__DARS_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=R()}catch{}}})}(),window.addEventListener("scroll",()=>{const d=document.getElementById("dars-navbar");window.scrollY>20?d.classList.add("scrolled"):d.classList.remove("scrolled");const l=document.getElementById("features-section");if(l&&!l.classList.contains("visible")){const p=l.getBoundingClientRect().top,u=window.innerHeight/1.5;p<u&&(l.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((_,S)=>{setTimeout(()=>{_.style.opacity="1",_.style.transform="translateY(0)"},S*100)}))}});const T=document.getElementById("hero-logo"),C=document.getElementById("hero-title"),D=document.getElementById("hero-description"),P=document.getElementById("pip-command"),A=document.getElementById("get-started-btn"),E=document.getElementById("scroll-text");T&&setTimeout(()=>T.classList.add("show"),5),C&&setTimeout(()=>C.classList.add("show"),350),D&&setTimeout(()=>D.classList.add("show"),650),P&&setTimeout(()=>P.classList.add("show"),950),A&&setTimeout(()=>A.classList.add("show"),1250),E&&setTimeout(()=>E.classList.add("show"),1500),document.addEventListener("DOMContentLoaded",function(){const d=document.getElementById("hamburger-btn"),l=document.getElementById("mobile-menu"),p=document.body;d&&l&&(d.addEventListener("click",function(u){u.stopPropagation(),l.style.display==="flex"?(l.style.display="none",d.classList.remove("menu-open"),p.classList.remove("menu-open")):(l.style.display="flex",d.classList.add("menu-open"),p.classList.add("menu-open"))}),l.querySelectorAll("a").forEach(u=>{u.addEventListener("click",function(){l.style.display="none",d.classList.remove("menu-open"),p.classList.remove("menu-open")})}),document.addEventListener("click",function(u){!d.contains(u.target)&&!l.contains(u.target)&&(l.style.display="none",d.classList.remove("menu-open"),p.classList.remove("menu-open"))}),document.addEventListener("keydown",function(u){u.key==="Escape"&&l.style.display==="flex"&&(l.style.display="none",d.classList.remove("menu-open"),p.classList.remove("menu-open"))}))});

@@ -21,6 +21,7 @@ Key Features:
 
 from typing import Any, Dict, List, Optional, Callable, Union
 from copy import deepcopy
+from dars.core.utilities import parse_utility_string
 import json
 
 # Global registry for V2 states (similar to STATE_BOOTSTRAP in state.py)
@@ -124,12 +125,16 @@ class ReactiveProperty:
                 parts.append(f"text: {to_js_value(v)}")
             elif k == 'html':
                 parts.append(f"html: {to_js_value(v)}")
-            elif k == 'style' and isinstance(v, dict):
-                # Handle style dict where values might be RawJS
-                style_parts = []
-                for sk, sv in v.items():
-                    style_parts.append(f"{json.dumps(sk)}: {to_js_value(sv)}")
-                parts.append(f"style: {{{', '.join(style_parts)}}}")
+            elif k == 'style':
+                val = v
+                if isinstance(val, str):
+                    val = parse_utility_string(val)
+                if isinstance(val, dict):
+                    # Handle style dict where values might be RawJS
+                    style_parts = []
+                    for sk, sv in val.items():
+                        style_parts.append(f"{json.dumps(sk)}: {to_js_value(sv)}")
+                    parts.append(f"style: {{{', '.join(style_parts)}}}")
             elif k == 'class_name':
                 # Map class_name to classes object
                 if isinstance(v, str):
@@ -541,8 +546,12 @@ class State:
                 parts.append(f"text: {json.dumps(v)}")
             elif k == 'html':
                 parts.append(f"html: {json.dumps(v)}")
-            elif k == 'style' and isinstance(v, dict):
-                parts.append(f"style: {json.dumps(v)}")
+            elif k == 'style':
+                val = v
+                if isinstance(val, str):
+                    val = parse_utility_string(val)
+                if isinstance(val, dict):
+                    parts.append(f"style: {json.dumps(val)}")
             elif k == 'class_name':
                 if isinstance(v, str):
                     attrs_dict['class'] = v
@@ -630,8 +639,12 @@ class State:
                 parts.append(f"text: {json.dumps(v)}")
             elif k == 'html':
                 parts.append(f"html: {json.dumps(v)}")
-            elif k == 'style' and isinstance(v, dict):
-                parts.append(f"style: {json.dumps(v)}")
+            elif k == 'style':
+                val = v
+                if isinstance(val, str):
+                    val = parse_utility_string(val)
+                if isinstance(val, dict):
+                    parts.append(f"style: {json.dumps(val)}")
             elif k == 'class_name':
                 if isinstance(v, str):
                     parts.append(f"attrs: {{class: {json.dumps(v)}}}")

@@ -26,24 +26,26 @@ docs = Page(
                 class_name="markdown_docs",
                 dark_theme=True
             ),
+            Markdown(file_path="./documentation/markdown/cli.md", class_name="markdown_docs", dark_theme=True),
             Markdown(file_path="./documentation/markdown/config.md", class_name="markdown_docs", dark_theme=True),
             Markdown(
                 file_path="./documentation/markdown/app.md",
                 class_name="markdown_docs",
                 dark_theme=True
             ),
-            Markdown(file_path="./documentation/markdown/routing.md", class_name="markdown_docs", dark_theme=True),
-            Markdown(file_path="./documentation/markdown/backend_api.md", class_name="markdown_docs", dark_theme=True),
-            Markdown(file_path="./documentation/markdown/state_management.md", class_name="markdown_docs", dark_theme=True),
             Markdown(file_path="./documentation/markdown/components.md", class_name="markdown_docs", dark_theme=True),
-            Markdown(file_path="./documentation/markdown/animations.md", class_name="markdown_docs", dark_theme=True),
+            Markdown(file_path="./documentation/markdown/styling.md", class_name="markdown_docs", dark_theme=True),
             Markdown(file_path="./documentation/markdown/custom_components.md", class_name="markdown_docs", dark_theme=True),
+            Markdown(file_path="./documentation/markdown/animations.md", class_name="markdown_docs", dark_theme=True),
+            Markdown(file_path="./documentation/markdown/routing.md", class_name="markdown_docs", dark_theme=True),
+            Markdown(file_path="./documentation/markdown/state_management.md", class_name="markdown_docs", dark_theme=True),
             Markdown(file_path="./documentation/markdown/hooks.md", class_name="markdown_docs", dark_theme=True),
-            Markdown(file_path="./documentation/markdown/KeyEvents.md", class_name="markdown_docs", dark_theme=True),
+            Markdown(file_path="./documentation/markdown/backend_api.md", class_name="markdown_docs", dark_theme=True),
             Markdown(file_path="./documentation/markdown/events.md", class_name="markdown_docs", dark_theme=True),
+            Markdown(file_path="./documentation/markdown/KeyEvents.md", class_name="markdown_docs", dark_theme=True),
             Markdown(file_path="./documentation/markdown/exporters.md", class_name="markdown_docs", dark_theme=True),
             Markdown(file_path="./documentation/markdown/scripts.md", class_name="markdown_docs", dark_theme=True),
-            Markdown(file_path="./documentation/markdown/cli.md", class_name="markdown_docs", dark_theme=True),
+
             id="markdown-content-container",
             style={
                 "max-width": "800px",

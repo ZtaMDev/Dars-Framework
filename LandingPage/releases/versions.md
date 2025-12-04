@@ -1,3 +1,72 @@
+# Release Notes v1.6.3
+
+> **Tailwind-like Utility Class System**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Tailwind-like Utility Class System
+
+Dars Framework now includes a powerful, Python-native utility class system inspired by Tailwind CSS. You can style your components using concise utility strings directly in your Python code, without any external build tools or Node.js dependencies.
+
+**Key Features:**
+- **Zero Configuration**: Works out of the box.
+- **Python-Native**: Parsed at runtime/export time into standard CSS.
+- **No Node.js**: No need for npm, PostCSS, or Tailwind CLI.
+- **Type-Safe**: Integrated directly into `Component` props.
+
+**Example:**
+
+```python
+from dars.all import *
+
+def MyComponent():
+    return Container(
+        Text("Hello, Dars!"),
+        style="bg-blue-500 p-4 rounded-lg shadow-md hover:bg-blue-600 transition-all",
+        hover_style="scale-105",
+        active_style="scale-95"
+    )
+```
+
+### Supported Utilities
+
+The system supports a wide range of utilities including:
+- **Layout**: `flex`, `grid`, `block`, `hidden`, `flex-row`, `justify-center`, `items-center`, `gap-4`
+- **Spacing**: `p-4`, `m-4`, `px-2`, `py-2` (using rem units)
+- **Sizing**: `w-full`, `h-screen`, `w-1/2`, `max-w-md`
+- **Typography**: `text-xl`, `font-bold`, `text-center`, `text-blue-500`
+- **Backgrounds**: `bg-red-500`, `bg-gray-100`
+- **Borders**: `border`, `border-2`, `rounded-lg`, `rounded-full`
+- **Effects**: `shadow-md`, `opacity-50`, `cursor-pointer`
+
+### Arbitrary Values
+
+For values not in the standard scale, use square brackets:
+```python
+style="w-[350px] bg-[#1a2b3c] z-[100] top-[50px]"
+```
+
+### State Integration
+
+Utility strings work seamlessly with Dars State management for dynamic styling:
+
+```python
+state = State("theme", box_style="bg-gray-100 p-4")
+
+Container(
+    "Content",
+    style=useDynamic("theme.box_style"),  # Binds directly to the utility string
+)
+```
+
+---
+
 # Release Notes v1.6.2
 
 > **useValue Enhancements & Critical Hot Reload Fixes**

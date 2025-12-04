@@ -9,6 +9,7 @@ from typing import Dict, Any, List, Optional, Callable, Union, Type
 from abc import ABC, abstractmethod
 from dars.core.events import EventTypes
 from dars.exporters.base import Exporter
+from dars.core.utilities import parse_utility_string
 
 class ComponentQuery:
     def __init__(self, components: List['Component']):
@@ -56,7 +57,10 @@ class ComponentQuery:
             for key, value in attrs.items():
                 # Manejo especial para atributos comunes
                 if key == 'style':
-                    component.style.update(value)
+                    if isinstance(value, str):
+                        component.style.update(parse_utility_string(value))
+                    else:
+                        component.style.update(value)
                     continue
                 elif key == 'class_name':
                     component.class_name = value
@@ -88,9 +92,17 @@ class Component(ABC):
         self.parent: Optional[Component] = None
         self.id: Optional[str] = props.get('id')
         self.class_name: str = props.get("class_name", self.__class__.__name__)
-        self.style: Dict[str, Any] = props.get('style', {})
-        self.hover_style: Dict[str, Any] = props.get('hover_style', {})
-        self.active_style: Dict[str, Any] = props.get('active_style', {})
+        
+        # Handle style parsing (str -> dict)
+        _style = props.get('style', {})
+        self.style: Dict[str, Any] = parse_utility_string(_style) if isinstance(_style, str) else _style
+        
+        _hover = props.get('hover_style', {})
+        self.hover_style: Dict[str, Any] = parse_utility_string(_hover) if isinstance(_hover, str) else _hover
+        
+        _active = props.get('active_style', {})
+        self.active_style: Dict[str, Any] = parse_utility_string(_active) if isinstance(_active, str) else _active
+
         self.events: Dict[str, Callable] = {}
         self.key: Optional[str] = props.get('key')
         
@@ -327,13 +339,22 @@ class Component(ABC):
                     pass
             for key, value in attrs.items():
                 if key == 'style':
-                    self.style.update(value)
+                    if isinstance(value, str):
+                        self.style.update(parse_utility_string(value))
+                    else:
+                        self.style.update(value)
                     continue
                 elif key == 'hover_style':
-                    self.hover_style.update(value)
+                    if isinstance(value, str):
+                        self.hover_style.update(parse_utility_string(value))
+                    else:
+                        self.hover_style.update(value)
                     continue
                 elif key == 'active_style':
-                    self.active_style.update(value)
+                    if isinstance(value, str):
+                        self.active_style.update(parse_utility_string(value))
+                    else:
+                        self.active_style.update(value)
                     continue
                 elif key == 'class_name':
                     self.class_name = value

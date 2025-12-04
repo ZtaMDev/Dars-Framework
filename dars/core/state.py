@@ -7,6 +7,7 @@
 # Copyright (c) 2025 ZtaDev
 from typing import Any, Dict, List, Optional
 from dars.scripts.dscript import dScript, RawJS
+from dars.core.utilities import parse_utility_string
 import json
 import warnings
 
@@ -100,8 +101,12 @@ class DarsState:
             for k, v in kwargs.items():
                 if isinstance(v, RawJS):
                     parts.append(f"{k}: {v.code}")
-                elif k == 'style' and isinstance(v, dict):
-                    parts.append(f"style: {json.dumps(v)}")
+                elif k == 'style':
+                    val = v
+                    if isinstance(val, str):
+                        val = parse_utility_string(val)
+                    if isinstance(val, dict):
+                        parts.append(f"style: {json.dumps(val)}")
                 elif k == 'attrs' and isinstance(v, dict):
                     parts.append(f"attrs: {json.dumps(v)}")
                 elif k == 'classes' and isinstance(v, dict):
@@ -180,6 +185,8 @@ class Mod:
     @staticmethod
     def set(target: Any, **attrs) -> Dict[str, Any]:
         tid = getattr(target, 'id', None) or str(target)
+        if 'style' in attrs and isinstance(attrs['style'], str):
+            attrs['style'] = parse_utility_string(attrs['style'])
         return {"op": "set", "target": tid, "attrs": attrs}
 
     @staticmethod
@@ -361,8 +368,12 @@ class ThisProxy:
         for k, v in kwargs.items():
             if isinstance(v, RawJS):
                 parts.append(f"{k}: {v.code}")
-            elif k == 'style' and isinstance(v, dict):
-                parts.append(f"style: {json.dumps(v)}")
+            elif k == 'style':
+                val = v
+                if isinstance(val, str):
+                    val = parse_utility_string(val)
+                if isinstance(val, dict):
+                    parts.append(f"style: {json.dumps(val)}")
             elif k == 'attrs' and isinstance(v, dict):
                 parts.append(f"attrs: {json.dumps(v)}")
             elif k == 'classes' and isinstance(v, dict):
