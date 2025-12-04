@@ -489,7 +489,7 @@ Example default:
 ```
 
 - `entry`: Python entry file. Used by `dars build` and `dars export config`.
-- `format`: Export format. Currently only `html` is supported.
+- `format`: Export format. Currently `html` and `desktop` are supported.
 - `outdir`: Output directory. Used by `dars build` and default for `dars export` when not overridden.
 - `publicDir`: Folder (e.g., `public/` or `assets/`) copied into the output. If null, it is autodetected.
 - `include`/`exclude`: Basic filters for copying from `publicDir`.
