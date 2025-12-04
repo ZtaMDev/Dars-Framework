@@ -109,52 +109,6 @@ if __name__ == "__main__":
 3.  **Event Handling**: Events like `on_click` are handled automatically by the framework (passed via `**props`).
 4.  **Children Support**: Use `{Props.children}` or `{children}` to render nested content.
 
-## Backend HTTP Utilities & API Communication
-
-Dars provides a system for HTTP requests and API communication without writing JavaScript. Use `useData()` for clean data binding:
-
-```python
-from dars.all import *
-from dars.backend import get, useData
-
-# Create components
-user_display = Text("", id="user-name")
-user_state = State(user_display, text="")
-
-# Fetch and bind data - pure Python!
-fetch_btn = Button(
-    "Fetch User",
-    on_click=get(
-        id="userData",
-        url="https://api.example.com/users/1",
-        # Access nested data with dot notation
-        callback=user_state.text.set(useData('userData').name)
-    )
-)
-```
-
-### Chain Multiple Updates
-
-Use `.then()` to chain state updates sequentially:
-
-```python
-# Update multiple components from API response
-callback=(
-    name_state.text.set(useData('userData').name)
-    .then(email_state.text.set(useData('userData').email))
-    .then(website_state.text.set(useData('userData').website))
-)
-```
-
-### Available HTTP Methods
-
-- **`get(id, url, **options)`** - GET request
-- **`post(id, url, body, **options)`** - POST request  
-- **`put(id, url, body, **options)`** - PUT request
-- **`delete(id, url, **options)`** - DELETE request
-
-For complete documentation, see the [Backend API Guide](https://ztamdev.github.io/Dars-Framework/docs.html#backend-http-utilities).
-
 ---
 
 ## State Management System
@@ -274,7 +228,7 @@ button.on_click = sequence(
 
 ## SPA Routing System
 
-Dars 1.4.6 introduces a powerful client-side routing system for Single Page Applications:
+Dars introduces a powerful client-side routing system for Single Page Applications:
 
 ### Basic Routing
 
@@ -399,6 +353,54 @@ def UserCard(name, email, id, class_name, style, children, **props):
     </div>
     """
 ```
+
+---
+
+## Backend HTTP Utilities & API Communication
+
+Dars provides a system for HTTP requests and API communication without writing JavaScript. Use `useData()` for clean data binding:
+
+```python
+from dars.all import *
+from dars.backend import get, useData
+
+# Create components
+user_display = Text("", id="user-name")
+user_state = State(user_display, text="")
+
+# Fetch and bind data - pure Python!
+fetch_btn = Button(
+    "Fetch User",
+    on_click=get(
+        id="userData",
+        url="https://api.example.com/users/1",
+        # Access nested data with dot notation
+        callback=user_state.text.set(useData('userData').name)
+    )
+)
+```
+
+### Chain Multiple Updates
+
+Use `.then()` to chain state updates sequentially:
+
+```python
+# Update multiple components from API response
+callback=(
+    name_state.text.set(useData('userData').name)
+    .then(email_state.text.set(useData('userData').email))
+    .then(website_state.text.set(useData('userData').website))
+)
+```
+
+### Available HTTP Methods
+
+- **`get(id, url, **options)`** - GET request
+- **`post(id, url, body, **options)`** - POST request  
+- **`put(id, url, body, **options)`** - PUT request
+- **`delete(id, url, **options)`** - DELETE request
+
+For complete documentation, see the [Backend API Guide](https://ztamdev.github.io/Dars-Framework/docs.html#backend-http-utilities).
 
 ---
 
