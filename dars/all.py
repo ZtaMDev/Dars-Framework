@@ -49,6 +49,7 @@ from dars.core.events import EventHandler, EventEmitter, EventManager
 from dars.core.events import EventManager
 from dars.core.events import EventTypes
 from dars.core.routing import route, SPARoute, RouteNode  # SPA Routing
+from dars.core.route_types import RouteType, RouteMetadata  # Secure Routing
 # CLI (optional, for advanced usage)
 # from dars.cli.main import main as dars_cli_main
 # State Management
@@ -142,4 +143,6 @@ __all__ = [
     'KeyCode', 'onKey', 'addGlobalKeys', 'switch',
     # Form utilities
     'FormData', 'collect_form',
+    # Secure Routing
+    'RouteType', 'RouteMetadata',
 ]

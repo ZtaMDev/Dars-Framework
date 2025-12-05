@@ -106,7 +106,100 @@ This phase will focus on mass adoption, long-term stability, and community growt
 
 - [ ] **Continuous Performance and Scalability**
     - [x] **Benchmarking and Constant Optimization**: Conduct continuous performance testing and optimizations to ensure Dars remains competitive as applications grow in complexity.
-    - [ ] **Server-Side Rendering (SSR) and Hydration Support**: Research and implement SSR support to improve SEO and initial performance of web applications.
 
-This roadmap is a living document and will be updated as Dars Framework evolves and the community grows. The ultimate goal is to provide Python developers with a powerful and enjoyable tool for building modern, cross-platform user interfaces.
+### Phase 2.5: Fullstack Framework & Security Architecture (v1.6.9 - v1.8.0)
 
+This phase transforms Dars into a complete fullstack Python framework with enterprise-grade security and automatic backend integration.
+
+#### Security & Routing (v1.6.9 - v1.7.5)
+
+- [ ] **Secure Router Foundation (v1.6.9)**
+    - [ ] Lazy loading for private routes
+    - [ ] Route obfuscation (hide sensitive routes from client)
+    - [ ] Route types: `public`, `private`, `protected`
+    - [ ] Backend route loader endpoints
+
+- [ ] **VRef Hooks + Middleware (v1.7.0)**
+    - [ ] Complete `useVRef()` and `setVRef()` exporter integration
+    - [ ] Middleware system (AuthMiddleware, RateLimitMiddleware, CORSMiddleware)
+    - [ ] Middleware chain execution
+    - [ ] Route-specific and global middleware
+
+- [ ] **FastAPI Backend Plugin (v1.7.1)**
+    - [ ] `DarsBackend` class for FastAPI integration
+    - [ ] Route loading endpoints
+    - [ ] Middleware execution in backend
+    - [ ] Request/response serialization
+
+- [ ] **Authentication System (v1.7.2)**
+    - [ ] JWT token generation and verification
+    - [ ] Session management
+    - [ ] Frontend auth helpers (`login()`, `logout()`, `isAuthenticated()`)
+    - [ ] Auth endpoints (`/api/auth/login`, `/api/auth/logout`, `/api/auth/refresh`)
+
+- [ ] **SSR Implementation (v1.7.3)**
+    - [ ] Server-side rendering without middleware
+    - [ ] Direct backend integration for SSR
+    - [ ] Context injection
+    - [ ] Client-side hydration
+
+- [ ] **Route Guards & Permissions (v1.7.4)**
+    - [ ] Role-based access control (RBAC)
+    - [ ] Permission system with custom checks
+    - [ ] Route guard decorators
+
+- [ ] **Production Hardening (v1.7.5)**
+    - [ ] HTTPS enforcement
+    - [ ] CSRF protection
+    - [ ] XSS prevention
+    - [ ] Security headers
+    - [ ] Audit logging
+
+#### Fullstack Integration (v1.7.6 - v1.8.0)
+
+- [ ] **Backend Auto-Detection (v1.7.6)**
+    - [ ] Automatic detection of `/backend` or `/darsBackend` directories
+    - [ ] Detection of `api.py` and `apiConfig.py`
+    - [ ] Desktop mode support (Electron with `/darsBackend`)
+
+- [ ] **apiConfig.py System (v1.7.7)**
+    - [ ] Centralized URL configuration
+    - [ ] `DEV_FRONTEND_URL` and `DEV_BACKEND_URL` constants
+    - [ ] `BUILD_FRONTEND_URL` and `BUILD_BACKEND_URL` constants
+    - [ ] `get_frontend_url()` and `get_backend_url()` helpers
+    - [ ] Environment-aware URL switching (`DARS_ENV=dev` or `DARS_ENV=build`)
+    - [ ] Accessible from both frontend and backend
+
+- [ ] **Dev Server Orchestration (v1.7.8)**
+    - [ ] `dars dev` starts both frontend and backend concurrently
+    - [ ] Frontend on `localhost:8000` (rTimeCompile)
+    - [ ] Backend on `localhost:3000` (uvicorn)
+    - [ ] Hot reload for both servers
+    - [ ] Clear console output with URLs
+    - [ ] Graceful shutdown
+
+- [ ] **Smart Build System (v1.7.9)**
+    - [ ] `dars build` detects backend presence
+    - [ ] Frontend build to `dist/` (or custom output from `dars.config.json`)
+    - [ ] Backend build to `{output}_backend/`
+    - [ ] Copy all backend files
+    - [ ] Auto-generate `requirements.txt`
+    - [ ] Auto-generate deployment README
+    - [ ] Environment variable replacement
+
+- [ ] **Fullstack Polish & Documentation (v1.8.0)**
+    - [ ] Unified CLI experience
+    - [ ] Fullstack tutorial
+    - [ ] Backend integration guide
+    - [ ] Deployment guide
+    - [ ] Best practices documentation
+    - [ ] Example fullstack apps (Todo, Blog, E-commerce)
+
+**Timeline**: 12 weeks total
+- Security features: 5 weeks (v1.6.9-1.7.5)
+- Fullstack integration: 5 weeks (v1.7.6-1.8.0)
+- Polish & documentation: 2 weeks
+
+**Target**: v1.8.0 - Complete Fullstack Python Framework
+
+### Phase 3: Maturity and Adoption (Long-Term)

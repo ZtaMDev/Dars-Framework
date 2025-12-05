@@ -4451,12 +4451,47 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
             if combined_js:
                 scripts_array.append(f"/{script_filename}")
             
-            route_config = {
-                'name': route_name, 'path': spa_route.route, 'title': spa_route.title or app.title,
-                'html': route_html, 'styles': '',
-                'scripts': scripts_array, 'events': route_events_map, 'vdom': route_vdom, 'states': [], 'preload': spa_route.preload or [],
-                'parent': spa_route.parent
-            }
+            # Check route metadata for security settings
+            route_metadata = None
+            if hasattr(spa_route.root, '__dars_route_metadata__'):
+                route_metadata = spa_route.root.__dars_route_metadata__
+            
+            # Determine route type
+            from dars.core.route_types import RouteType
+            route_type = route_metadata.route_type if route_metadata else RouteType.PUBLIC
+            
+            # Build route config based on type
+            if route_type == RouteType.PUBLIC:
+                # PUBLIC routes: include full data in initial bundle
+                route_config = {
+                    'name': route_name, 
+                    'path': spa_route.route, 
+                    'title': spa_route.title or app.title,
+                    'type': 'public',
+                    'html': route_html, 
+                    'styles': '',
+                    'scripts': scripts_array, 
+                    'events': route_events_map, 
+                    'vdom': route_vdom, 
+                    'states': [], 
+                    'preload': spa_route.preload or [],
+                    'parent': spa_route.parent
+                }
+            else:
+                # PRIVATE/PROTECTED routes: only metadata, lazy load from backend
+                route_config = {
+                    'name': route_name,
+                    'path': spa_route.route,
+                    'title': spa_route.title or app.title,
+                    'type': route_type.value,  # 'private' or 'protected'
+                    'requires_auth': route_metadata.requires_auth if route_metadata else False,
+                    'loader': route_metadata.loader_endpoint if route_metadata else f"/api/routes/{route_name}",
+                    'parent': spa_route.parent
+                }
+                
+                # Still write the route files for backend to serve
+                # but don't include them in initial __DARS_SPA_CONFIG__
+            
             spa_config['routes'].append(route_config)
             if spa_route.index: spa_config['index'] = route_name
         if app._spa_404_page:

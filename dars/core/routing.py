@@ -24,28 +24,62 @@ if TYPE_CHECKING:
 _ROUTE_REGISTRY: Dict[int, str] = {}
 
 
-def route(path: str):
+def route(
+    path: str,
+    route_type: 'RouteType' = None,
+    requires_auth: bool = False,
+    middleware: Optional[List] = None,
+    loader_endpoint: Optional[str] = None
+):
     """
-    Decorator to define a route for a page function.
+    Decorator to define a route for a page function with security options.
     
     Usage:
+        # Public route (default)
         @route("/home")
         def homepage():
             return Page(...)
         
-        @route("/user/:id")
-        def user_profile():
+        # Private route (requires authentication)
+        @route("/admin", route_type=RouteType.PRIVATE, requires_auth=True)
+        def admin():
+            return Page(...)
+        
+        # Protected route (custom middleware)
+        @route("/dashboard", route_type=RouteType.PROTECTED, middleware=[AuthMiddleware()])
+        def dashboard():
             return Page(...)
     
     Args:
         path: Route path (e.g., "/home", "/user/:id")
+        route_type: Type of route (PUBLIC, PRIVATE, PROTECTED)
+        requires_auth: Whether route requires authentication
+        middleware: List of middleware to apply
+        loader_endpoint: Custom backend loader endpoint
     
     Returns:
         Decorator function
     """
+    # Import here to avoid circular imports
+    from dars.core.route_types import RouteType, RouteMetadata
+    
+    # Default to PUBLIC if not specified
+    if route_type is None:
+        route_type = RouteType.PUBLIC
+    
+    # Create route metadata
+    metadata = RouteMetadata(
+        path=path,
+        route_type=route_type,
+        requires_auth=requires_auth,
+        middleware=middleware,
+        loader_endpoint=loader_endpoint
+    )
+    
     def decorator(func):
-        # Store route on the function
+        # Store route metadata on the function
         func.__dars_route__ = path
+        func.__dars_route_metadata__ = metadata
         _ROUTE_REGISTRY[id(func)] = path
         
         # Create wrapper that also adds route to returned Page
@@ -54,11 +88,13 @@ def route(path: str):
             # If result is a Page, attach route info
             if result is not None:
                 result.__dars_route__ = path
+                result.__dars_route_metadata__ = metadata
                 result.__source_func__ = func
             return result
         
         # Preserve function metadata
         wrapper.__dars_route__ = path
+        wrapper.__dars_route_metadata__ = metadata
         wrapper.__name__ = func.__name__
         wrapper.__doc__ = func.__doc__
         
