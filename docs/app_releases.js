@@ -1,446 +1,4349 @@
-// Combined JavaScript for releases
-    // VDOM
-    window.__DARS_VDOM__ = {"type":"T1","id":"page_157","key":"0","children":[{"type":"T2","id":"container_158","key":"0/0","children":[{"type":"T3","id":"dars-navbar","key":"0/0/0","children":[{"type":"T2","id":"navbar-left","key":"0/0/0/0","children":[{"type":"T4","id":"image_159","key":"0/0/0/0/0"},{"type":"T5","id":"text_160","key":"0/0/0/0/1","text":"Dars Framework"}]},{"type":"T2","id":"container_161","key":"0/0/0/1","children":[{"type":"T2","id":"navbar-right","key":"0/0/0/1/0","children":[{"type":"T6","id":"link_162","key":"0/0/0/1/0/0","text":"Home"},{"type":"T6","id":"link_163","key":"0/0/0/1/0/1","text":"Documentation"},{"type":"T6","id":"link_164","key":"0/0/0/1/0/2","text":"Releases"},{"type":"T6","id":"link_165","key":"0/0/0/1/0/3","text":"PlayGround"},{"type":"T6","id":"link_166","key":"0/0/0/1/0/4","text":"GitHub"}]},{"type":"T2","id":"hamburger-menu","key":"0/0/0/1/1","children":[{"type":"T2","id":"hamburger-btn","key":"0/0/0/1/1/0","children":[{"type":"T2","id":"container_167","key":"0/0/0/1/1/0/0","children":[{"type":"T2","id":"container_168","key":"0/0/0/1/1/0/0/0"},{"type":"T2","id":"container_169","key":"0/0/0/1/1/0/0/1"},{"type":"T2","id":"container_170","key":"0/0/0/1/1/0/0/2"}]}]},{"type":"T2","id":"mobile-menu","key":"0/0/0/1/1/1","children":[{"type":"T6","id":"link_171","key":"0/0/0/1/1/1/0","text":"Home"},{"type":"T6","id":"link_172","key":"0/0/0/1/1/1/1","text":"Documentation"},{"type":"T6","id":"link_173","key":"0/0/0/1/1/1/2","text":"Releases"},{"type":"T6","id":"link_174","key":"0/0/0/1/1/1/3","text":"PlayGround"},{"type":"T6","id":"link_175","key":"0/0/0/1/1/1/4","text":"GitHub"}]}]}]}]}]},{"type":"T2","id":"container_176","key":"0/1","children":[{"type":"T2","id":"markdown-content-container","key":"0/1/0","children":[{"type":"T9","id":"markdown_177","key":"0/1/0/0","text":"# Release Notes v1.6.6\n\n> **Custom Utility Styles & State Hot Reload Fix**\n\n## Installation\n\n```bash\npip install --upgrade dars-framework\n```\n\n## What's New\n\n### Custom Utility Styles\n\nYou can now define your own utility classes in `dars.config.json` under the `utility_styles` key. This powerful feature allows you to:\n\n- **Compose Utilities**: Combine multiple existing Dars utilities into a single class (e.g., `btn-primary`).\n- **Use Raw CSS**: Mix standard CSS properties (e.g., `border: 1px solid red`) directly within your utility definitions.\n- **Recursive Composition**: Build complex utilities by referencing other custom utilities.\n\n**Example `dars.config.json`:**\n```json\n{\n  \"utility_styles\": {\n    \"btn-primary\": [\"bg-blue-600\", \"text-white\", \"p-3\", \"rounded-lg\"],\n    \"card-fancy\": [\"bg-white\", \"shadow-lg\", \"border: 1px solid #e5e7eb\"]\n  }\n}\n```\n\n### Critical Fixes\n\n- **State Hot Reload**: Fixed a critical issue where `State` objects were duplicated during hot reloads, leading to stale data and unpredictable behavior. The state registry is now properly cleared on every reload.\n- **Border Utility Fallback**: Improved the parsing logic for `border-` utilities to correctly distinguish between Tailwind-like classes and raw CSS `border:` properties.\n\n### Documentation\n\n- **New Custom Utilities Guide**: Added comprehensive documentation for the new custom styling system in `styling`.\n- **Configuration Reference**: Updated `config` with details on `utility_styles` and other configuration options.\n\n---\n\n# Release Notes v1.6.5\n\n> **Massive Styling Expansion & SPA Fixes**\n\n## Installation\n\n```bash\npip install --upgrade dars-framework\n```\n\n## What's New\n\n### Massive Styling System Expansion\n\nDars v1.6.5 brings a colossal update to the utility styling system, making it nearly feature-complete with modern utility-first CSS frameworks like Tailwind.\n\n**New Features:**\n- **Complete Color Palette**: Added full ranges (50-950) for `cyan`, `teal`, `lime`, `amber`, `emerald`, `fuchsia`, `rose`, `zinc`, `neutral`, and `stone`.\n- **Direct Font Size**: New `fs-[value]` utility for setting exact font sizes (e.g., `fs-[14px]`).\n- **Font Family**: New `ffam-[value]` utility for setting font families (e.g., `ffam-sans`, `ffam-[Open_Sans]`).\n- **Transforms & Filters**: Full support for `scale`, `rotate`, `translate`, `skew`, `blur`, `brightness`, `contrast`, etc.\n- **Backdrop Filters**: Added `backdrop-blur`, `backdrop-brightness`, etc.\n- **Expanded Layout**: Added `table`, `contents`, `flow-root`, `object-fit`, `z-index`, and more.\n\n### Critical Fixes for SPA Styling\n\nResolved a critical issue where `hover_style` and `active_style` were not being generated for Single Page Applications (SPA) using the `@route` decorator.\n\n- **SPA Routes Support**: The CSS generator now correctly processes all SPA routes to generate state-based styles.\n- **Multi-line CSS Fix**: Fixed an issue where multi-line CSS strings in utilities were not correctly parsed into valid CSS rules.\n\n### Documentation Updates\n\n- **New Styling Guide**: Complete reference for the new utility system in `styling.md`.\n- **Operations Guide**: Detailed documentation for the Pythonic math expression system in `operations.md`.\n- **Contributing Guide**: Added `CONTRIBUTING.md` for community guidelines.\n\n---\n\n# Release Notes v1.6.4\n\n> **Pythonic Mathematical Expressions - Declarative Calculations**\n\n## Installation\n\n```bash\npip install --upgrade dars-framework\n```\n\n## What's New\n\n### Pythonic Expression System with V()\n\nDars Framework v1.6.4 introduces a revolutionary declarative system for mathematical expressions. Write complex calculations in pure Python using operator overloading - **no inline JavaScript required!**\n\n**Key Features:**\n- **Operator Overloading** - Use Python operators (`+`, `-`, `*`, `/`, `%`, `**`)\n- **Automatic Precedence** - Parentheses handled automatically\n- **Dynamic Operators** - Operators from Select/Input elements\n- **NaN Validation** - Safe handling of empty/invalid inputs\n- **Type Safety** - Numeric operations require `.float()` or `.int()`\n\n#### Before (v1.6.3) - Verbose JavaScript\n\n```python\nButton(\n    \"Calculate\",\n    on_click=dScript(f\"\"\"\n        const n1 = parseFloat(document.querySelector('.num1').value);\n        const n2 = parseFloat(document.querySelector('.num2').value);\n        const op = document.querySelector('.operation').value;\n        \n        let result = 0;\n        switch(op) {{\n            case '+': result = n1 + n2; break;\n            case '-': result = n1 - n2; break;\n            case '*': result = n1 * n2; break;\n            case '/': result = n1 / n2; break;\n        }}\n        \n        window.Dars.change({{\n            id: 'calc',\n            dynamic: true,\n            result: result\n        }});\n    \"\"\")\n)\n```\n\n#### After (v1.6.4) - Declarative Python\n\n```python\nButton(\n    \"Calculate\",\n    on_click=calc.result.set(\n        V(\".num1\").float() + V(\".operation\").operator() + V(\".num2\").float()\n    )\n)\n```\n\n**Benefits:**\n- **less code**\n- **Type-safe** with explicit transformations\n- **NaN validation** with console warnings\n- **Pythonic syntax** - feels natural\n- **No inline JavaScript** - pure Python\n\n---\n\n### Mathematical Operations\n\n#### Simple Arithmetic\n\n```python\n# Addition\ncalc.total.set(V(\".price\").float() + V(\".tax\").float())\n\n# Subtraction\ncalc.change.set(V(\".paid\").float() - V(\".total\").float())\n\n# Multiplication\ncalc.total.set(V(\".price\").float() * V(\".quantity\").int())\n\n# Division\ncalc.average.set(V(\".sum\").float() / V(\".count\").int())\n```\n\n#### Complex Expressions with Automatic Precedence\n\n```python\n# a + b * c  →  a + (b * c)  ✅ Automatic\ncalc.result.set(\n    V(\".a\").float() + V(\".b\").float() * V(\".c\").float()\n)\n\n# (a + b) * c  →  (a + b) * c  ✅ Preserved\ncalc.result.set(\n    (V(\".a\").float() + V(\".b\").float()) * V(\".c\").float()\n)\n\n# With literals\ncalc.total.set(\n    (V(\".price\").float() * V(\".qty\").int()) * 1.15  # Add 15% tax\n)\n```\n\n**Precedence Table:**\n\n| Operator | Precedence | Associativity |\n|----------|------------|---------------|\n| `**`     | 3 (highest)| Right         |\n| `*`, `/`, `%` | 2     | Left          |\n| `+`, `-` | 1 (lowest) | Left          |\n\n---\n\n### Dynamic Operators\n\nUse operators from Select or Input elements with the new `.operator()` method:\n\n```python\nfrom dars.all import *\n\ncalc = State(\"calc\", operation=\"+\", result=0)\n\n@route(\"/\")\ndef index():\n    return Page(\n        # Operation selector\n        Select(\n            value=useValue(\"calc.operation\", selector=\".operation\"),\n            class_name=\"operation\",\n            options=[\n                SelectOption(\"+\", \"➕ Add\"),\n                SelectOption(\"-\", \"➖ Subtract\"),\n                SelectOption(\"*\", \"✖️ Multiply\"),\n                SelectOption(\"/\", \"➗ Divide\")\n            ]\n        ),\n        \n        # Number inputs\n        Input(class_name=\"num1\", input_type=\"number\"),\n        Input(class_name=\"num2\", input_type=\"number\"),\n        \n        # Declarative calculation!\n        Button(\n            \"Calculate\",\n            on_click=calc.result.set(\n                V(\".num1\").float() + V(\".operation\").operator() + V(\".num2\").float()\n            )\n        ),\n        \n        # Result display\n        Text(text=useDynamic(\"calc.result\"))\n    )\n```\n\n**How it works:**\n1. `V(\".operation\").operator()` extracts the operator value\n2. Validates against whitelist: `+`, `-`, `*`, `/`, `%`, `**`\n3. Uses switch statement for safe evaluation\n4. Falls back to `+` if invalid (with console warning)\n\n---\n\n### NaN Validation\n\nAll mathematical expressions include automatic NaN validation:\n\n```python\n# Empty inputs automatically return 0\nButton(\n    \"Calculate\",\n    on_click=calc.result.set(\n        V(\".num1\").float() + V(\".num2\").float()\n    )\n)\n# Empty inputs → Returns 0\n# Console: \"[Dars] Invalid input: one or more values are NaN. Returning 0.\"\n```\n\n**Validation Points:**\n1. **Input Validation** - Checks operands before calculation\n2. **Result Validation** - Checks result after calculation\n3. **Console Logging** - Warns when NaN is detected\n\n---\n\n### Enhanced Select Component\n\n- **useValue Support** - Set initial value from state with selector\n- **Proper Value Handling** - Correctly selects option based on initial value\n- **Selector Integration** - Works seamlessly with `V()` for value extraction\n\n```python\nSelect(\n    value=useValue(\"calc.operation\", selector=\".operation\"),\n    class_name=\"operation\",\n    options=[...]\n)\n```\n\n---\n\n## What's Next\n\nFuture enhancements planned for 1.7.0:\n- Comparison operators (`>`, `<`, `==`, `!=`)\n- Logical operators (`and`, `or`, `not`)\n- Ternary operator support\n- Array/list operations\n- Math functions (`.abs()`, `.round()`, `.sqrt()`, etc.)\n\n---\n\n# Release Notes v1.6.3\n\n\n> **Tailwind-like Utility Class System**\n\n## Installation\n\n```bash\npip install --upgrade dars-framework\n```\n\n## What's New\n\n### Tailwind-like Utility Class System\n\nDars Framework now includes a powerful, Python-native utility class system inspired by Tailwind CSS. You can style your components using concise utility strings directly in your Python code, without any external build tools or Node.js dependencies.\n\n**Key Features:**\n- **Zero Configuration**: Works out of the box.\n- **Python-Native**: Parsed at runtime/export time into standard CSS.\n- **No Node.js**: No need for npm, PostCSS, or Tailwind CLI.\n- **Type-Safe**: Integrated directly into `Component` props.\n\n**Example:**\n\n```python\nfrom dars.all import *\n\ndef MyComponent():\n    return Container(\n        Text(\"Hello, Dars!\"),\n        style=\"bg-blue-500 p-4 rounded-lg shadow-md hover:bg-blue-600 transition-all\",\n        hover_style=\"scale-105\",\n        active_style=\"scale-95\"\n    )\n```\n\n### Supported Utilities\n\nThe system supports a wide range of utilities including:\n- **Layout**: `flex`, `grid`, `block`, `hidden`, `flex-row`, `justify-center`, `items-center`, `gap-4`\n- **Spacing**: `p-4`, `m-4`, `px-2`, `py-2` (using rem units)\n- **Sizing**: `w-full`, `h-screen`, `w-1/2`, `max-w-md`\n- **Typography**: `text-xl`, `font-bold`, `text-center`, `text-blue-500`\n- **Backgrounds**: `bg-red-500`, `bg-gray-100`\n- **Borders**: `border`, `border-2`, `rounded-lg`, `rounded-full`\n- **Effects**: `shadow-md`, `opacity-50`, `cursor-pointer`\n\n### Arbitrary Values\n\nFor values not in the standard scale, use square brackets:\n```python\nstyle=\"w-[350px] bg-[#1a2b3c] z-[100] top-[50px]\"\n```\n\n### State Integration\n\nUtility strings work seamlessly with Dars State management for dynamic styling:\n\n```python\nstate = State(\"theme\", style=\"bg-gray-100 p-4\")\n\nContainer(\n    \"Content\",\n    style=useDynamic(\"theme.style\"),  # Binds directly to the utility string\n)\n```\n\n---\n\n# Release Notes v1.6.2\n\n> **useValue Enhancements & Critical Hot Reload Fixes**\n\n## Installation\n\n```bash\npip install --upgrade dars-framework\n```\n\n## What's New\n\n### Enhanced `useValue` Hook - Simplified Usage\n\nThe `useValue` hook has been improved to support direct usage in built-in components without requiring a selector. This makes it easier to set initial (non-reactive) values from state.\n\n**Simplified Syntax:**\n```python\n# Before (required selector)\nText(text=useValue(\"user.name\", \".my-text\"))\n\n# Now (selector optional)\nText(text=useValue(\"user.name\"))\n```\n\nThis is perfect for initializing components with state values that don't need to update reactively or be extracted back later.\n\n### Critical Bug Fixes\n\n#### `useDynamic` Numeric Value Display\nFixed an issue where `useDynamic` would display internal marker strings (e.g., `__DARS_DYNAMIC_...`) instead of the actual value when the state property was a number (especially `0`). Numeric values are now correctly resolved and displayed in both initial render and reactive updates.\n\n#### State Hot Reloading Fix\nResolved a critical issue where state changes were not reflected after a hot reload. The state registry now correctly deduplicates state objects, ensuring that the most recent version of the state is always used. This fixes cases where changing a default value in code (e.g., `count=0` to `count=2`) wouldn't update the UI.\n\n---\n\n# Release Notes v1.6.1\n\n> **Side Effects System Enhancement - useWatch Arrays & Multiple Callbacks**\n\n## Installation\n\n```bash\npip install --upgrade dars-framework\n```\n\n## What's New\n\n### Enhanced useWatch Hook - Array Syntax & Multiple Callbacks\n\nThe `useWatch` hook now supports watching multiple state properties simultaneously and executing multiple callbacks, enabling powerful reactive patterns and side effects.\n\n**Watch Multiple State Properties:**\n```python\n# Watch multiple properties - callback executes when ANY of them change\napp.useWatch(\n    [\"product.name\", \"product.price\"],\n    productState.info.set(\"Product: \" + V(\"product.name\") + \" - $\" + V(\"product.price\"))\n)\n```\n\n**Multiple Callbacks:**\n```python\n# Execute multiple callbacks when state changes\napp.useWatch(\n    \"cart.total\",\n    log(\"Total changed!\"),\n    alert(\"Cart updated\")\n)\n\n# Combine array syntax with multiple callbacks\napp.useWatch(\n    [\"product.name\", \"product.price\"],\n    productState.info.set(\"Product: \" + V(\"product.name\") + \" - $\" + V(\"product.price\")),\n    log(\"Product info updated\")\n)\n```\n\n**Key Features:**\n- **Array Syntax**: Watch multiple state paths with a single watcher\n- **Multiple Callbacks**: Execute multiple side effects in sequence\n- **Reactive Composition**: Automatically sync derived state when source properties change\n- **Clean API**: Simple comma-separated syntax for callbacks\n\n### Bug Fixes\n\n#### Fixed Custom State Property Handling\n\nResolved an issue where custom state properties (properties other than `text`, `html`, `style`, `attrs`) were not correctly triggering watchers when updated via `change()`.\n\n**What was fixed:**\n- Custom properties like `info`, `count`, `status` now correctly update in `st.values`\n- Watchers for custom properties now trigger reliably\n- State registry properly maintains current values for all properties\n\n**Example that now works correctly:**\n```python\nproductState = State(\"product\", name=\"Milk\", price=100, info=\"\")\n\n# This now correctly updates product.info when name or price changes\napp.useWatch(\n    [\"product.name\", \"product.price\"],\n    productState.info.set(\"Product: \" + V(\"product.name\") + \" - $\" + V(\"product.price\"))\n)\n```\n\n#### Improved V() Helper State Access\n\nThe `V()` helper now correctly retrieves current state values from the state registry instead of reading stale values from the DOM.\n\n**Previous Behavior:**\n- `V(\"product.name\")` would read the displayed text from the DOM\n- This could lead to recursive string concatenation issues\n- Values might not reflect the actual state\n\n**Fixed Behavior:**\n- `V(\"product.name\")` now reads directly from `window.Dars.getState('product').values['name']`\n- Always returns the current, raw state value\n- Falls back to DOM reading for legacy support\n\n---\n\n# Release Notes v1.6.0\n\n\n> **Critical Bug Fixes & State Management Improvements**\n\n## Installation\n\n```bash\npip install --upgrade dars-framework\n```\n\n## What's Fixed\n\n### 1. Hook Initialization Fixes\n\nFixed critical bugs where `useDynamic` and `useValue` hooks were not properly displaying default values from `State` objects when used in `FunctionComponent`s.\n\n**Issues Resolved:**\n- `useDynamic` now correctly retrieves default values from the state registry even when props are not explicitly passed to the component\n- `useValue` now works correctly without requiring a selector parameter\n- Both hooks properly display initial state values on first render\n\n**Example:**\n```python\n# This now works correctly!\nstate = State(\"ui\", count=0, disabled=False)\n\n@FunctionComponent\ndef Counter(**props):\n    return f'''\n        <div>\n            <p>Count: {useDynamic(\"ui.count\")}</p>\n            <button disabled=\"{useDynamic(\"ui.disabled\")}\">Click</button>\n        </div>\n    '''\n```\n\n### 2. State Reset Functionality Enhancement\n\nCompletely rewrote the `reset()` function to correctly handle **all** component properties, including boolean attributes like `checked`, `disabled`, `readonly`, and `required`.\n\n**Previous Behavior:**\n- Boolean attributes were incorrectly set to `\"false\"` string instead of being removed\n- Properties like `disabled=\"false\"` would still disable elements (incorrect HTML behavior)\n\n**Fixed Behavior:**\n- Boolean attributes are now properly removed when `False`\n- Both HTML attributes AND DOM properties are synchronized correctly\n- Works for: `checked`, `disabled`, `readonly`, `required`, `selected`, `autofocus`, `autoplay`, `controls`, `loop`, `muted`\n\n**Example:**\n```python\nstate = State(\"ui\", is_disabled=False, is_checked=True)\n\nButton(disabled=useDynamic(\"ui.is_disabled\"))\nCheckbox(checked=useDynamic(\"ui.is_checked\"))\n\n# Reset now works perfectly\nButton(\"Reset All\", on_click=state.reset())\n```\n\n### 3. JavaScript Variable Name Sanitization\n\nFixed `SyntaxError` in generated JavaScript caused by HTML IDs containing hyphens being used as variable names.\n\n**Issue:**\n```javascript\n// Generated invalid JS\nconst el_control-panel = ...  // SyntaxError!\n```\n\n**Fixed:**\n```javascript\n// Now generates valid JS\nconst el_control_panel = ...  // ✓ Valid\n```\n\n### 4. Boolean Attribute Handling Improvements\n\nEnhanced the reactive binding system to properly handle boolean attributes with the `is_` prefix.\n\n**Supported Patterns:**\n```python\n# All of these now work correctly\nstate = State(\"ui\", is_disabled=False, disabled=False)\n\n# Automatic mapping: is_disabled -> disabled attribute\nButton(disabled=useDynamic(\"ui.is_disabled\"))\n\n# State changes properly update the DOM\nstate.is_disabled.set(True)   # Adds disabled attribute\nstate.is_disabled.set(False)  # Removes disabled attribute completely\n```\n\n## Important Notes\n\n### State ID Best Practices\n\n> **[!IMPORTANT] When using `State` objects with hooks like `useDynamic` and `useValue`, the state ID should **NOT** match any component ID in your DOM. The state ID is a unique identifier for the state object itself, not a component.**\n\n**X Incorrect:**\n```python\n# DON'T do this - state ID matches button ID\nstate = State(\"my-button\", count=0)\nButton(id=\"my-button\", text=useDynamic(\"my-button.count\"))\n```\n\n**✓ Correct:**\n```python\n# DO this - state has unique ID\nstate = State(\"counter-state\", count=0)\nButton(id=\"my-button\", text=useDynamic(\"counter-state.count\"))\n```\n\nThe reactive system uses watchers to update components when state changes, so the state ID doesn't need to (and shouldn't) match any specific component ID.\n\n## Technical Details\n\n### Changes to `js_lib.py`\n\n1. **`change()` function**: Added intelligent boolean attribute detection with `is_` prefix support\n2. **`_applyMods()` function**: Enhanced to handle boolean attributes in state modifications\n3. **`_restoreDefault()` function**: Improved to correctly restore boolean attributes to their initial state\n\n### Changes to `html_css_js.py`\n\n1. **`_generate_reactive_bindings_js()`**: Added boolean attribute handling in watcher code generation\n2. **Variable name sanitization**: Replaces hyphens with underscores in generated JS variable names\n3. **`_process_function_component()`**: Added fallback to `STATE_V2_REGISTRY` for missing prop values\n\n### Changes to `use_value.py`\n\n1. **`ValueMarker.__init__()`**: Now always registers markers, even without a selector\n\n---\n\n# Release Notes v1.5.9\n\n> **Unified Keyboard Events & KeyCode System**\n\n## Installation\n\n```bash\npip install --upgrade dars-framework\n```\n\n## What's New\n\n### 1. Unified Keyboard Events (`on_key_press`)\n\nSimplified keyboard event handling by consolidating `on_key_down` and `on_key_up` into a single, robust **`on_key_press`** event. This ensures consistent behavior across all components and browsers.\n\n**Deprecated:**\n- `on_key_down`\n- `on_key_up`\n\n**New Standard:**\n```python\nInput(on_key_press=log(\"Key pressed!\"))\n```\n\n### 2. The `KeyCode` System\n\nNo more magic strings or numbers! The new `KeyCode` class provides constants for all keyboard keys, making your code readable and maintainable.\n\n```python\nfrom dars.all import KeyCode\n\n# Use constants\nKeyCode.ENTER\nKeyCode.ESCAPE\nKeyCode.TAB\nKeyCode.SPACE\nKeyCode.A\nKeyCode.F1\n```\n\n### 3. Powerful Helpers: `onKey`, `switch`, `addGlobalKeys`\n\nIntroduced three powerful helpers to make keyboard handling elegant and Pythonic.\n\n#### `onKey()` - Single Key Handler\nHandle specific keys with optional modifiers easily:\n\n```python\n# Simple\nInput(on_key_press=onKey(KeyCode.ENTER, submit_form()))\n\n# With Modifiers\nContainer(on_key_press=onKey(KeyCode.S, save(), ctrl=True))\n```\n\n#### `switch()` - Multiple Key Handler\nHandle multiple keys in a single component without messy if-statements:\n\n```python\nInput(on_key_press=switch({\n    KeyCode.ENTER: submit_form(),\n    KeyCode.ESCAPE: clear_form(),\n    KeyCode.TAB: focus_next()\n}))\n```\n\n#### `addGlobalKeys()` - App-wide Shortcuts\nRegister global keyboard shortcuts that work anywhere in your app:\n\n```python\naddGlobalKeys(app, {\n    (KeyCode.S, 'ctrl'): save_document(),\n    (KeyCode.Z, 'ctrl'): undo(),\n    (KeyCode.Z, 'ctrl', 'shift'): redo()\n})\n```\n\n### 4. Documentation\n\nA comprehensive guide to the new system is available in `KeyEvents.md`, covering everything from basic usage to advanced global shortcuts and best practices.\n\n## Migration Guide\n\n**From `on_key_down` / `on_key_up`:**\nSimply rename your event handlers to `on_key_press`. The underlying behavior uses `keydown` for maximum reliability.\n\n```python\n# Before\nInput(on_key_down=dScript(\"...\"))\n\n# After\nInput(on_key_press=dScript(\"...\"))\n```\n\n---\n\n# Release Notes v1.5.8\n\n> **Enhanced V() Helper & useValue Selector Support**\n\n## Installation\n\n```bash\npip install --upgrade dars-framework\n```\n\n## What's New\n\n### 1. V() Helper - State Path Support\n\nThe `V()` helper now supports extracting values from **reactive state** in addition to DOM elements!\n\n#### State Path Extraction\n\n```python\n# Extract from reactive state created by useDynamic()\nV(\"cart.total\")      # Gets current value of cart.total\nV(\"user.name\")       # Gets current value of user.name\nV(\"product.price\")   # Gets current value of product.price\n```\n\n**How it works:**\n- `V(\"cart.total\")` finds the reactive element created by `useDynamic(\"cart.total\")`\n- Reads its current `textContent` value\n- Perfect for combining reactive state with calculations\n\n#### Complete Integration Example\n\n```python\nfrom dars.all import *\n\nproductState = State(\"product\", price=19.99, quantity=1, total=19.99)\n\n@FunctionComponent\ndef ProductCard(**props):\n    return f'''\n    <div {Props.id}>\n        <p>Price: ${useDynamic(\"product.price\")}</p>\n        <input type=\"number\" value=\"{useValue(\"product.quantity\", \".qty-input\")}\" />\n        <p>Total: ${useDynamic(\"product.total\")}</p>\n    </div>\n    '''\n\n# Calculate total: DOM input × State value\nButton(\"Calculate\", on_click=productState.total.set(\n    V(\".qty-input\").int() * V(\"product.price\").float()\n))\n```\n\n### 2. V() Helper - Arithmetic Operator Validation\n\n**Breaking Change (Validation)**: Arithmetic operators now **require** numeric transformations to prevent bugs.\n\n#### The Problem\n\nPreviously, you could accidentally multiply strings:\n```python\n# Before: This would concatenate strings, not multiply!\nV(\"#price\") * V(\"#qty\")  # \"19.99\" * \"5\" = NaN or unexpected behavior\n```\n\n#### The Solution\n\nArithmetic operators (`*`, `/`, `-`, `%`, `**`) now require `.int()` or `.float()`:\n\n```python\n# CORRECT - With transformations\nV(\"#price\").float() * V(\"#qty\").int()  # 19.99 * 5 = 99.95\n\n# ERROR - Without transformations\nV(\"#price\") * V(\"#qty\")\n# TypeError: Multiplication requires numeric transformation.\n#            Use V('#price').int() or V('#price').float() before multiplying.\n```\n\n**String concatenation (`+`) still works without transformations:**\n```python\n# Always allowed\nV(\"#first\") + \" \" + V(\"#last\")  # String concatenation\n\"Total: $\" + V(\"cart.total\")    # String concatenation\n```\n\n**Supported Operators:**\n- `+` - Addition/Concatenation (always allowed)\n- `*` - Multiplication (requires `.int()` or `.float()`)\n- `/` - Division (requires `.int()` or `.float()`)\n- `-` - Subtraction (requires `.int()` or `.float()`)\n- `%` - Modulo (requires `.int()` or `.float()`)\n- `**` - Power (requires `.int()` or `.float()`)\n\n### 3. useValue() - Selector Support in FunctionComponents\n\n`useValue()` now supports automatic selector application in FunctionComponents!\n\n#### Automatic Selector Application\n\n```python\n@FunctionComponent\ndef UserForm(**props):\n    return f'''\n    <div {Props.id}>\n        <input value=\"{useValue(\"user.name\", \".name-input\")}\" />\n        <input value=\"{useValue(\"user.email\", \"#email-field\")}\" />\n    </div>\n    '''\n\n# Extract values using the selectors\nButton(\"Save\", on_click=userState.name.set(V(\".name-input\")))\n```\n\n**How it works:**\n1. `useValue(\"user.name\", \".name-input\")` sets initial value AND applies class `name-input`\n2. `V(\".name-input\")` extracts the current value (even if modified by user)\n3. Perfect for forms with initial values and value extraction\n\n**Supported selectors:**\n- **Class selectors** (`.foo`) → Added to element's `class` attribute\n- **ID selectors** (`#bar`) → Set as element's `id` attribute\n\n---\n\n## Migration Guide\n\n### V() Arithmetic Operations\n\nIf you were using arithmetic operators without transformations, add `.int()` or `.float()`:\n\n**Before:**\n```python\nstate.total.set(V(\"#price\") * V(\"#qty\"))\n```\n\n**After:**\n```python\nstate.total.set(V(\"#price\").float() * V(\"#qty\").int())\n```\n\n**String concatenation is unchanged:**\n```python\n# Still works the same\nstate.fullname.set(V(\"#first\") + \" \" + V(\"#last\"))\n```\n\n---\n\n## Complete Example\n\n```python\nfrom dars.all import *\n\napp = App(\"Shopping Cart\")\n\n# Reactive state\ncartState = State(\"cart\", total=0.0)\nproductState = State(\"product\", name=\"Widget\", price=19.99, quantity=1)\n\n@FunctionComponent\ndef ProductCard(**props):\n    return f'''\n    <div {Props.id} {Props.class_name} {Props.style}>\n        <!-- Reactive display -->\n        <h3>{useDynamic(\"product.name\")}</h3>\n        <p>Price: ${useDynamic(\"product.price\")}</p>\n        \n        <!-- Editable quantity with selector -->\n        <input type=\"number\" \n               value=\"{useValue(\"product.quantity\", \".qty-input\")}\"\n               min=\"1\" />\n        \n        <!-- Reactive total -->\n        <p>Total: ${useDynamic(\"cart.total\")}</p>\n    </div>\n    '''\n\n@route(\"/\")\ndef index():\n    return Page(\n        ProductCard(id=\"product-card\", name=\"Milk\", price=100, quantity=2, total=0),\n        \n        # Calculate: DOM input × State value\n        Button(\"Calculate Total\", on_click=cartState.total.set(\n            V(\".qty-input\").int() * V(\"product.price\").float()\n        )),\n        \n        # String concatenation (no transformation needed)\n        Button(\"Show Info\", on_click=productState.name.set(\n            \"Product: \" + V(\"product.name\") + \" - $\" + V(\"product.price\")\n            )\n        )\n    )\n\napp.add_page(\"index\", index(), title=\"Product\", index=True)\n\n# Watch for changes\napp.useWatch(\"cart.total\", log(\"Cart total changed!\"))\n\nif __name__ == \"__main__\":\n    app.rTimeCompile()\n```\n\n---\n\n## Bug Fixes\n\n### useValue Selector Application\n- **Issue**: Selectors in `useValue()` were not being applied to FunctionComponent elements\n- **Fix**: Implemented BeautifulSoup-based HTML parsing to detect and apply selectors\n- **Impact**: `useValue()` now works identically in FunctionComponents and built-in components\n\n### V() State Path Detection\n- **Issue**: No way to extract values from reactive state without DOM elements\n- **Fix**: Added intelligent state path detection (e.g., `\"cart.total\"` vs `\".cart-total\"`)\n- **Impact**: Seamless integration between `useDynamic()`, `useValue()`, and `V()`\n\n---\n\n## Breaking Changes\n\n### Arithmetic Operator Validation\n\n**Change**: Arithmetic operators (`*`, `/`, `-`, `%`, `**`) now require `.int()` or `.float()` transformations.\n\n**Reason**: Prevents accidental string operations that cause bugs.\n\n**Migration**: Add `.int()` or `.float()` before arithmetic operations:\n```python\nV(\"#price\").float() * V(\"#qty\").int()\n```\n\n**Note**: String concatenation (`+`) is unchanged and still works without transformations.\n\n---\n\n## Documentation Updates\n\n- **hooks.md**: Comprehensive V() documentation with state path examples\n- **custom_components.md**: Updated examples showing V() with state paths\n- **New examples**: Complete integration patterns for `useValue()`, `useDynamic()`, and `V()`\n\n---\n\n## What's Next\n\nThe enhanced V() helper and complete hooks integration pave the way for more advanced reactive patterns and seamless state management in future releases.\n\n---\n\n# Release Notes v1.5.7\n\n> **useValue hook & Value Access Helpers**\n\n## Installation\n\n```bash\npip install --upgrade dars-framework\n```\n\n## What's New\n\n### 1. `useValue` Hook\n\nThe new `useValue` hook allows you to access the **initial value** of a state property without creating a reactive binding. This is perfect for form inputs where you want to set a default value but allow the user to edit it freely.\n\n```python\n# Initial value from state, but editable by user\nInput(value=useValue(\"user.name\"))\n\n# In FunctionComponent templates (resolves to initial value string)\n@FunctionComponent\ndef Profile(**props):\n    return f\"<div>{useValue('user.name')}</div>\"\n```\n\n### 2. Pythonic Helpers (`V`, `url`, `transform`)\n\nIntroducing a set of helpers to make working with DOM values completely Pythonic, eliminating the need for `RawJS`.\n\n#### V() - Value Reference\nSelect DOM elements and perform operations directly in Python:\n\n```python\n# Concatenation\nButton(\"Combine\", on_click=state.fullname.set(\n    V(\"#first\") + \" \" + V(\"#last\")\n))\n\n# Transformations\nButton(\"Upper\", on_click=state.name.set(V(\"#name\").upper()))\nButton(\"Add\", on_click=state.count.set(V(\"#num1\").int() + 10))\n```\n\n#### url() - URL Builder\nConstruct dynamic URLs easily with proper interpolation:\n\n```python\nButton(\"Fetch\", on_click=fetch(\n    url(\"https://api.example.com/users/{id}\", id=V(\"#userId\"))\n))\n```\n\n### Stability\n- **Fix**: Resolved an issue where reactive bindings could generate duplicate JavaScript variables, causing \"Identifier has already been declared\" errors during hot reloads or complex state updates.\n\n# Release Notes v1.5.6\n\n> **Enhanced `useDynamic` Support & StateV2 Fixes**\n\n## Installation\n\n```bash\npip install --upgrade dars-framework\n```\n\n## What's New\n\n### 1. Expanded `useDynamic` Support for Built-in Components\n\n`useDynamic` now works with **all properties** of built-in components, including:\n\n#### Image & Link Components\n```python\n# Dynamic image source and alt text\nImage(\n    src=useDynamic(\"product.imageUrl\"),\n    alt=useDynamic(\"product.name\")\n)\n\n# Dynamic link href and text\nLink(\n    href=useDynamic(\"navigation.url\"),\n    text=useDynamic(\"navigation.label\")\n)\n```\n\n#### Boolean Attributes\nAll boolean attributes now support dynamic binding:\n```python\n# Dynamic disabled state\nButton(\n    text=\"Submit\",\n    disabled=useDynamic(\"form.isSubmitting\")\n)\n\n# Dynamic checked state\nCheckbox(\n    checked=useDynamic(\"settings.notifications\"),\n    label=\"Enable Notifications\"\n)\n\n# Dynamic readonly and required\nInput(\n    value=useDynamic(\"user.email\"),\n    readonly=useDynamic(\"form.isLocked\"),\n    required=useDynamic(\"form.emailRequired\")\n)\n```\n\n**Supported Boolean Properties:**\n- `disabled` - Button, Input, Textarea, Checkbox, RadioButton, Select, Slider\n- `checked` - Checkbox, RadioButton\n- `readonly` - Input, Textarea\n- `required` - Input, Textarea, Checkbox, RadioButton, Select\n\n### 2. StateV2 `increment()` & `decrement()` Fixes\n\nFixed critical issues with `StateV2` reactive operations:\n\n#### Fixed Validation Error\nPreviously, `increment()` and `decrement()` only worked on properties named `text`. Now they work on **any numeric property**:\n\n```python\n# Before: This would error\nstate = State(\"counter\", count=0)\nButton(\"Increment\", on_click=state.count.increment(by=1))  # ❌ ValueError\n\n# After: Works perfectly!\nstate = State(\"counter\", count=0)\nButton(\"Increment\", on_click=state.count.increment(by=1))  # ✅ Works!\n```\n\n#### Fixed Persistence Issue\nIncrement/decrement operations now correctly persist across multiple clicks:\n\n```python\nstate = State(\"counter\", count=0)\n\n# Before: Would increment 0→1, then stay at 1 forever\n# After: Correctly increments 0→1→2→3→...\nButton(\"Increment\", on_click=state.count.increment(by=1))\nButton(\"Decrement\", on_click=state.count.decrement(by=1))\n```\n\n**Technical Details:**\n- Implemented client-side state value tracking in `window.Dars.getState()`\n- State registry now maintains current values for all properties\n- `increment()`/`decrement()` use `window.Dars.change()` for proper state updates\n- Watchers and UI updates now trigger correctly on every operation\n\n### 3. Documentation Updates\n\n#### Enhanced Hooks Documentation\n- Added comprehensive \"Supported Properties\" table showing which properties work with `useDynamic` for each component type\n- Documented boolean attribute support\n\n#### New Component Documentation\nAdded documentation for visualization components in `components.md`:\n\n**Chart Component:**\n```python\nimport plotly.graph_objects as go\n\nfig = go.Figure(data=[go.Bar(x=['A', 'B', 'C'], y=[1, 3, 2])])\nChart(figure=fig, width=\"100%\", height=\"400px\")\n```\n\n**DataTable Component:**\n```python\nimport pandas as pd\n\ndf = pd.DataFrame({\n    'Name': ['Alice', 'Bob'],\n    'Age': [25, 30]\n})\nDataTable(data=df, theme=\"striped\", page_size=10)\n```\n\n## Bug Fixes\n\n### StateV2 Increment/Decrement\n- **Issue**: `increment()` raised `ValueError` for non-`text` properties\n- **Fix**: Validation now checks if value is numeric (`int` or `float`) instead of checking property name\n- **Impact**: All numeric state properties can now use `increment()` and `decrement()`\n\n### StateV2 State Persistence\n- **Issue**: Increment operations stuck at first value (0→1, then stayed at 1)\n- **Fix**: Implemented proper client-side state tracking and payload structuring\n- **Impact**: Reactive operations now work correctly across multiple invocations\n\n## Breaking Changes\n\nNone.\n\n---\n\n\n## What's Next\n\nThe enhanced `useDynamic` system and robust StateV2 operations pave the way for more advanced reactive patterns and state management features in future releases.\n\n---\n\n# Release Notes v1.5.5\n\n\n> **Hooks System Enhanced**: `useDynamic` for built-in components and new `useWatch` hook.\n\n## Installation\n\n```bash\npip install --upgrade dars-framework\n```\n\n## What's New\n\n### 1. `useDynamic` for Built-in Components\n\nYou can now use `useDynamic` directly in properties of built-in components!\n\n```python\n# Bind directly to component props\nText(text=useDynamic(\"user.name\"))\nInput(value=useDynamic(\"user.name\"))\nButton(text=useDynamic(\"user.status\"))\n```\n\nThis works for `Text`, `Button`, `Input`, `Textarea`, and more.\n\n### 2. New `useWatch` Hook\nMonitor state changes and execute side effects with `useWatch`.\n\n```python\n# Global watcher\napp.useWatch(\"cart.total\", log(\"Cart updated!\"))\n\n# Page-specific watcher\n@route(\"/cart\")\ndef cart_page():\n    page = Page()\n    page.useWatch(\"cart.total\", log(\"Total changed!\"))\n    return page\n```\n\nNew methods `app.useWatch()` and `page.useWatch()` make integration seamless.\n\n### 3. Fixes\n\n- Fixed execution order in exporter to ensure reactive bindings are generated correctly.\n- Improved state initialization for dynamic props.\n\n---\n\n# Release Notes v1.5.4 (Relaunch from 1.5.3)\n\n> **Hooks System & Reactive Bindings** relaunch with correct license.\n\n## Installation\n\n```bash\npip install --upgrade dars-framework\n```\n\n## What's New\n\n### Hooks System - `useDynamic()`\n\nDars Framework introduces its **first hook** - `useDynamic()` - enabling reactive state bindings in FunctionComponents!\n\n#### Reactive State Bindings\n\nCreate components that automatically update when state changes:\n\n```python\nfrom dars.all import *\n\n# Create state\nuserState = State(\"user\", name=\"John Doe\", email=\"john@example.com\")\n\n# Use useDynamic in FunctionComponent\n@FunctionComponent\ndef UserCard(**props):\n    return f'''\n    <div {Props.id} {Props.class_name} {Props.style}>\n        <h3>{useDynamic(\"user.name\")}</h3>\n        <p>{useDynamic(\"user.email\")}</p>\n    </div>\n    '''\n\n# Render\ncard = UserCard(id=\"userCard\")\n\n# Update - DOM automatically reacts!\napp.add_script(userState.name.set(\"Jane Doe\"))  # UI updates instantly\n```\n\n#### How It Works\n\n1. **Initial Render**: `useDynamic()` inserts reactive spans with initial prop values\n2. **State Changes**: When you call `.set()`, the hook intercepts the change\n3. **Auto Updates**: All matching reactive spans update automatically\n\n#### Key Features\n\n- **Zero boilerplate** - Just use `useDynamic(\"state.property\")  in templates\n- **Automatic updates** - No manual DOM manipulation needed\n- **Multiple bindings** - Multiple components can bind to the same state\n- **State V2 integration** - Works seamlessly with dynamic state system\n\n---\n\n### `getInputValue()` Utility\n\nNew utility function specifically designed for State V2 integration:\n\n```python\nstate = State(\"product\", title=\"\", price=0)\n\nButton(\"Save\", on_click=[\n    state.title.set(getInputValue(\"titleInput\")),\n    state.price.set(getInputValue(\"priceInput\"))\n])\n```\n\n**Features:**\n- Returns input value as JavaScript expression\n- Works with `State.set()` and other dynamic operations\n- Optional `parent_id` parameter for scoped searches\n- Complements existing `getValue()` for assignments\n\n**Difference from `getValue()`:**\n- `getValue(input_id, target_id)` - Performs assignment (sets textContent)\n- `getInputValue(input_id)` - Returns value expression (for State.set())\n\n---\n\n### CSS Improvements\n\n#### Modern Default Styles\n\n- Updated all component CSS to use CSS variables for easy theming\n- Removed opinionated sizing - better CSS flow and overridability\n- Added `accent-color` support for form controls\n- Improved transitions and hover effects\n- Better disabled states across all components\n\n#### CSS Variables\n\nComponents now respect theme colors:\n\n```css\n--dars-primary: #007bff;\n--dars-spacing-md: 12px;\n/* ... and more */\n```\n\n#### Better Customization\n\n```python\n# Inline styles work better now\nButton(\"Click\", style={\"width\": \"200px\", \"padding\": \"16px\"})\n\n# Global styles via app.add_global_styles()\napp.add_global_styles(\"\"\"\n    .dars-button {\n        border-radius: 8px;\n    }\n\"\"\")\n```\n\n---\n\n### Bug Fixes\n\n#### Fixed Markdown Syntax Highlighting in Multipage Apps\n\n- **Issue**: Prism.js scripts were only injected on first page with Markdown\n- **Fix**: Per-page script injection tracking ensures all pages get highlighting(Markdown Component)\n- **Impact**: Multipage apps now correctly highlight code on all routes\n\n```python\n# Now works correctly across all pages\n@route(\"/docs\")\ndef docs():\n    return Page(Markdown(content=code_example))\n\n@route(\"/tutorial\")\ndef tutorial():\n    return Page(Markdown(content=tutorial_code))  # Also highlighted now!\n```\n\n---\n\n## Breaking Changes\n\nNone! This release is 100% backwards compatible.\n\n---\n\n## Complete Example\n\n**User Profile with Reactive Updates:**\n\n```python\nfrom dars.all import *\n\napp = App(\"Reactive Profile\")\n\n# State for user data\nuserState = State(\"user\", \n    name=\"John Doe\",\n    email=\"john@example.com\"\n)\n\n# Reactive display component\n@FunctionComponent\ndef ProfileDisplay(**props):\n    return f'''\n    <div {Props.id} {Props.class_name} {Props.style}>\n        <h2>{useDynamic(\"user.name\")}</h2>\n        <p>Email: {useDynamic(\"user.email\")}</p>\n    </div>\n    '''\n\n# Edit form\ndef ProfileEditor():\n    return Container(\n        Input(id=\"nameInput\", value=\"John Doe\"),\n        Input(id=\"emailInput\", value=\"john@example.com\"),\n        Button(\"Save\", on_click=[\n            userState.name.set(getInputValue(\"nameInput\")),\n            userState.email.set(getInputValue(\"emailInput\"))\n        ])\n    )\n\n# Page\n@route(\"/\")\ndef index():\n    return Page(\n        ProfileDisplay(id=\"profile\"),\n        ProfileEditor()\n    )\n\napp.add_page(\"index\", index())\n\nif __name__ == \"__main__\":\n    app.rTimeCompile()\n```\n\n**Result**: Edit the inputs and click Save - the profile display updates instantly!\n\n---\n\n## Migration Guide\n\nNo migration needed! Add `useDynamic()` to new or existing FunctionComponents:\n\n**Before (static):**\n```python\n@FunctionComponent\ndef UserCard(name, email, **props):\n    return f'<div {Props.id}><h3>{name}</h3><p>{email}</p></div>'\n```\n\n**After (reactive):**\n```python\n@FunctionComponent\ndef UserCard(**props):\n    return f'''\n    <div {Props.id}>\n        <h3>{useDynamic(\"user.name\")}</h3>\n        <p>{useDynamic(\"user.email\")}</p>\n    </div>\n    '''\n```\n\n---\n\n## Documentation\n\nNew documentation added:\n\n- **Hooks System** - Complete guide to `useDynamic()` and future hooks\n- **`getInputValue()`** - Usage guide in Scripts documentation\n- **Updated Examples** - Reactive patterns and best practices\n\nVisit the [Dars Documentation](https://ztamdev.github.io/Dars-Framework/docs.html) for more details.\n\n---\n\n## What's Next\n\nThe hooks system opens the door for more reactive features...\n\n\n# Release Notes v1.5.3\n\n> **Hooks System & Reactive Bindings**\n\n## Installation\n\n```bash\npip install --upgrade dars-framework\n```\n\n## What's New\n\n### Hooks System - `useDynamic()`\n\nDars Framework introduces its **first hook** - `useDynamic()` - enabling reactive state bindings in FunctionComponents!\n\n#### Reactive State Bindings\n\nCreate components that automatically update when state changes:\n\n```python\nfrom dars.all import *\n\n# Create state\nuserState = State(\"user\", name=\"John Doe\", email=\"john@example.com\")\n\n# Use useDynamic in FunctionComponent\n@FunctionComponent\ndef UserCard(**props):\n    return f'''\n    <div {Props.id} {Props.class_name} {Props.style}>\n        <h3>{useDynamic(\"user.name\")}</h3>\n        <p>{useDynamic(\"user.email\")}</p>\n    </div>\n    '''\n\n# Render\ncard = UserCard(id=\"userCard\")\n\n# Update - DOM automatically reacts!\napp.add_script(userState.name.set(\"Jane Doe\"))  # UI updates instantly\n```\n\n#### How It Works\n\n1. **Initial Render**: `useDynamic()` inserts reactive spans with initial prop values\n2. **State Changes**: When you call `.set()`, the hook intercepts the change\n3. **Auto Updates**: All matching reactive spans update automatically\n\n#### Key Features\n\n- **Zero boilerplate** - Just use `useDynamic(\"state.property\")  in templates\n- **Automatic updates** - No manual DOM manipulation needed\n- **Multiple bindings** - Multiple components can bind to the same state\n- **State V2 integration** - Works seamlessly with dynamic state system\n\n---\n\n### `getInputValue()` Utility\n\nNew utility function specifically designed for State V2 integration:\n\n```python\nstate = State(\"product\", title=\"\", price=0)\n\nButton(\"Save\", on_click=[\n    state.title.set(getInputValue(\"titleInput\")),\n    state.price.set(getInputValue(\"priceInput\"))\n])\n```\n\n**Features:**\n- Returns input value as JavaScript expression\n- Works with `State.set()` and other dynamic operations\n- Optional `parent_id` parameter for scoped searches\n- Complements existing `getValue()` for assignments\n\n**Difference from `getValue()`:**\n- `getValue(input_id, target_id)` - Performs assignment (sets textContent)\n- `getInputValue(input_id)` - Returns value expression (for State.set())\n\n---\n\n### CSS Improvements\n\n#### Modern Default Styles\n\n- Updated all component CSS to use CSS variables for easy theming\n- Removed opinionated sizing - better CSS flow and overridability\n- Added `accent-color` support for form controls\n- Improved transitions and hover effects\n- Better disabled states across all components\n\n#### CSS Variables\n\nComponents now respect theme colors:\n\n```css\n--dars-primary: #007bff;\n--dars-spacing-md: 12px;\n/* ... and more */\n```\n\n#### Better Customization\n\n```python\n# Inline styles work better now\nButton(\"Click\", style={\"width\": \"200px\", \"padding\": \"16px\"})\n\n# Global styles via app.add_global_styles()\napp.add_global_styles(\"\"\"\n    .dars-button {\n        border-radius: 8px;\n    }\n\"\"\")\n```\n\n---\n\n### Bug Fixes\n\n#### Fixed Markdown Syntax Highlighting in Multipage Apps\n\n- **Issue**: Prism.js scripts were only injected on first page with Markdown\n- **Fix**: Per-page script injection tracking ensures all pages get highlighting(Markdown Component)\n- **Impact**: Multipage apps now correctly highlight code on all routes\n\n```python\n# Now works correctly across all pages\n@route(\"/docs\")\ndef docs():\n    return Page(Markdown(content=code_example))\n\n@route(\"/tutorial\")\ndef tutorial():\n    return Page(Markdown(content=tutorial_code))  # Also highlighted now!\n```\n\n---\n\n## Breaking Changes\n\nNone! This release is 100% backwards compatible.\n\n---\n\n## Complete Example\n\n**User Profile with Reactive Updates:**\n\n```python\nfrom dars.all import *\n\napp = App(\"Reactive Profile\")\n\n# State for user data\nuserState = State(\"user\", \n    name=\"John Doe\",\n    email=\"john@example.com\"\n)\n\n# Reactive display component\n@FunctionComponent\ndef ProfileDisplay(**props):\n    return f'''\n    <div {Props.id} {Props.class_name} {Props.style}>\n        <h2>{useDynamic(\"user.name\")}</h2>\n        <p>Email: {useDynamic(\"user.email\")}</p>\n    </div>\n    '''\n\n# Edit form\ndef ProfileEditor():\n    return Container(\n        Input(id=\"nameInput\", value=\"John Doe\"),\n        Input(id=\"emailInput\", value=\"john@example.com\"),\n        Button(\"Save\", on_click=[\n            userState.name.set(getInputValue(\"nameInput\")),\n            userState.email.set(getInputValue(\"emailInput\"))\n        ])\n    )\n\n# Page\n@route(\"/\")\ndef index():\n    return Page(\n        ProfileDisplay(id=\"profile\"),\n        ProfileEditor()\n    )\n\napp.add_page(\"index\", index())\n\nif __name__ == \"__main__\":\n    app.rTimeCompile()\n```\n\n**Result**: Edit the inputs and click Save - the profile display updates instantly!\n\n---\n\n## Migration Guide\n\nNo migration needed! Add `useDynamic()` to new or existing FunctionComponents:\n\n**Before (static):**\n```python\n@FunctionComponent\ndef UserCard(name, email, **props):\n    return f'<div {Props.id}><h3>{name}</h3><p>{email}</p></div>'\n```\n\n**After (reactive):**\n```python\n@FunctionComponent\ndef UserCard(**props):\n    return f'''\n    <div {Props.id}>\n        <h3>{useDynamic(\"user.name\")}</h3>\n        <p>{useDynamic(\"user.email\")}</p>\n    </div>\n    '''\n```\n\n---\n\n## Documentation\n\nNew documentation added:\n\n- **Hooks System** - Complete guide to `useDynamic()` and future hooks\n- **`getInputValue()`** - Usage guide in Scripts documentation\n- **Updated Examples** - Reactive patterns and best practices\n\nVisit the [Dars Documentation](https://ztamdev.github.io/Dars-Framework/docs.html) for more details.\n\n---\n\n## What's Next\n\nThe hooks system opens the door for more reactive features...\n\n# Release Notes v1.5.2\n\n> **Function Components**\n\n## Installation\n\n```bash\npip install --upgrade dars-framework\n```\n\n## What's New\n\n### Function Components System\n\nDars Framework now features **Function Components** as the primary and recommended way to create custom UI components. This new system provides a clean, Pythonic approach to component creation without the complexity of class inheritance.\n\n#### What are Function Components?\n\nFunction Components allow you to create reusable UI elements using simple Python functions with f-string templates. The framework automatically handles IDs, styling, events, and other properties.\n\n**Key Benefits:**\n- **Simple & Pythonic**: Just write a function that returns an HTML string\n- **No Boilerplate**: No need to inherit from Component class or implement render methods\n- **Automatic Property Injection**: Framework handles `id`, `class_name`, `style`, and `children` automatically\n- **Linter-Friendly**: Two patterns available to avoid linter warnings\n- **State Compatible**: Works seamlessly with State V2 for reactive UIs\n\n#### Basic Usage\n\n```python\nfrom dars.all import FunctionComponent, Props\n\n@FunctionComponent\ndef UserCard(name, email, **props):\n    return f\"\"\"\n    <div {Props.id} {Props.class_name} {Props.style}>\n        <h3>{name}</h3>\n        <p>{email}</p>\n        <div class=\"card-body\">\n            {Props.children}\n        </div>\n    </div>\n    \"\"\"\n\n# Usage\ncard = UserCard(\"John Doe\", \"john@example.com\", id=\"user-1\", style={\"padding\": \"20px\"})\n```\n\n#### Two Supported Patterns\n\n**Option 1: Using Props Helper (Recommended)**\n```python\n@FunctionComponent\ndef MyComponent(**props):\n    return f\"\"\"\n    <div {Props.id} {Props.class_name} {Props.style}>\n        {Props.children}\n    </div>\n    \"\"\"\n```\n\n**Option 2: Explicit Arguments**\n```python\n@FunctionComponent\ndef MyComponent(id, class_name, style, children, **props):\n    return f\"\"\"\n    <div {id} {class_name} {style}>\n        {children}\n    </div>\n    \"\"\"\n```\n\nBoth patterns are fully supported and avoid linter warnings about undefined variables.\n\n#### Props Helper Class\n\nThe new `Props` class provides static constants for framework properties:\n\n```python\nProps.id          # \"{id}\"\nProps.class_name  # \"{class_name}\"\nProps.style       # \"{style}\"\nProps.children    # \"{children}\"\n```\n\nThese resolve to the correct placeholders that the framework replaces during rendering.\n\n#### State V2 Integration Clarification\n\n**Important Concept:** State V2 updates DOM properties, not arbitrary component arguments.\n\n**Correct Usage:**\n```python\n@FunctionComponent\ndef Counter(**props):\n    return f\"\"\"\n    <div {Props.id}>\n        Current count: {Props.children}\n    </div>\n    \"\"\"\n\ncounter = Counter(id=\"my-counter\", children=\"0\")\nstate = State(counter, text=\"Current count: 0\")\n\n# Updates textContent of the div\nButton(\"Increment\", on_click=state.text.set(\"Current count: 5\"))\n```\n\n**Why:** Dars exports to static HTML/JS. The JavaScript runtime can only manipulate DOM properties (`textContent`, `style`, `innerHTML`), not re-execute Python functions with new arguments.\n\n# Release Notes v1.5.1\n\n> **Backend HTTP Utilities & Pythonic API Communication**\n\n## Installation\n\n```bash\npip install --upgrade dars-framework\n```\n\n## What's New\n\n### Backend HTTP Utilities System\n\nDars now includes a comprehensive **Pythonic system** for HTTP requests and API communication without writing any JavaScript. The new `dars.backend` module enables you to fetch data, bind it to components, and create reactive UIs entirely in Python.\n\n**Key Features:**\n- HTTP functions (get, post, put, delete, patch, fetch)\n- `useData()` with dot notation for nested data access\n- Seamless StateV2 integration\n- `.then()` chaining for sequential operations\n- Component management (createComp, updateComp, deleteComp)\n- JSON utilities (stringify, parse, get_value)\n- **State() string ID support** - Create states for dynamic components\n\n### HTTP Functions\n\n```python\nfrom dars.all import *\nfrom dars.backend import get, post, useData\n\n# GET request with data binding\nfetch_btn = Button(\n    \"Fetch User\",\n    on_click=get(\n        id=\"userData\",\n        url=\"https://api.example.com/users/1\",\n        callback=name_state.text.set(useData('userData').name)\n    )\n)\n\n# POST request\nsubmit_btn = Button(\n    \"Submit\",\n    on_click=post(\n        id=\"result\",\n        url=\"https://api.example.com/submit\",\n        body={\"name\": \"John\", \"email\": \"john@example.com\"},\n        callback=status_state.text.set(\"✅ Submitted!\")\n    )\n)\n```\n\n### useData() with Dot Notation\n\nAccess fetched data using Pythonic dot notation:\n\n```python\n# Access nested properties\nuseData('userData').name           # → window.userData?.name\nuseData('user').address.city       # → window.user?.address?.city\nuseData('posts').items[0].title    # → window.posts?.items?.[0]?.title\n```\n\n### Chaining with .then()\n\nChain multiple state updates sequentially:\n\n```python\ncallback=(\n    status_state.text.set(\"Loading...\")\n    .then(name_state.text.set(useData('userData').name))\n    .then(email_state.text.set(useData('userData').email))\n    .then(status_state.text.set(\"✅ Loaded!\"))\n)\n```\n\n### Component Management\n\nCreate, update, and delete components dynamically at runtime:\n\n```python\nfrom dars.backend import createComp, updateComp, deleteComp\n\n# Create new component\ncreate_btn.on_click = createComp(\n    target=Text(\"Hello!\", id=\"new-item\"),\n    root=\"container-id\",\n    position=\"append\"\n)\n\n# Update component\nupdate_btn.on_click = updateComp(\n    \"my-component-id\",\n    text=\"Updated!\",\n    style={\"color\": \"red\"}\n)\n\n# Delete component\ndelete_btn.on_click = deleteComp(\"component-id\")\n```\n\n### JSON Utilities\n\nHelper functions for working with JSON data:\n\n```python\nfrom dars.backend import stringify, parse, get_value\n\n# Stringify with pretty printing\ndisplay_state.text.set(stringify(useData('userData'), pretty=True))\n\n# Parse JSON string\ndata = parse('{\"name\": \"John\"}')\n\n# Safe nested access\ncity = get_value(useData('userData'), 'address.city', default='Unknown')\n```\n\n### State() String ID Support\n\n`State()` now accepts both component objects and string IDs, enabling state management for dynamically created components:\n\n```python\nfrom dars.all import *\nfrom dars.backend import createComp\n\n# Traditional: State with component object\nexisting_text = Text(\"0\", id=\"counter\")\nexisting_state = State(existing_text, text=0)\n\n# New: State with string ID (for components created later)\ndynamic_state = State(\"dynamic-counter\", text=0)\n\n# Create the component later\ncreate_btn.on_click = createComp(\n    target=Text(\"0\", id=\"dynamic-counter\"),\n    root=\"container-id\"\n)\n\n# State works even though component was created after state!\nincrement_btn.on_click = dynamic_state.text.increment(by=1)\n```\n\n**Use Cases:**\n- Components created with `createComp()`\n- Dynamically generated UIs\n- Conditional component rendering\n- Server-side rendered components\n\n## Technical Implementation\n\n### DataAccessor Class\n\nNew `DataAccessor` class with:\n- `__getattr__` for dot notation support\n- `.code` property for RawJS generation\n- `.bind()` method for StateV2 integration\n- `.get()` method for safe property access\n\n### StateV2 Enhancements\n\nUpdated `StateV2._generate_change_call()` to handle `DataAccessor` objects:\n- Automatically detects `DataAccessor` instances\n- Extracts `.code` property for JavaScript generation\n- Seamless integration with existing state management\n\n## Documentation\n\n### New Documentation\n\n**`backend_api.md`** - Comprehensive guide (500+ lines) covering:\n- Quick Start examples\n- HTTP Functions reference\n- Data Binding with useData()\n- JSON Utilities\n- Component Management\n- 3 Advanced Examples\n- Best Practices\n- Complete API Reference\n\n**Documentation URL:** https://ztamdev.github.io/Dars-Framework/docs.html#backend-http-utilities\n\n## Breaking Changes\n\n**None** - This is a fully backward-compatible release. All existing code continues to work.\n\n## Bug Fixes\n\n- **Fixed**: `StateV2` now correctly handles `DataAccessor` objects in `to_js_value()`\n- **Fixed**: `RawJS` objects are properly serialized in state updates\n- **Fixed**: `dScript.then()` chaining works correctly with backend operations\n\n## Performance & Compatibility\n\n- **Zero Overhead**: Backend utilities only activate when imported\n- **Backward Compatible**: All existing code works without changes\n- **Bundle Size**: Minimal impact (+~10KB for backend module)\n- **Desktop Support**: Full Electron compatibility maintained\n\n## Migration Guide\n\nNo migration needed - this is an additive release. To start using the new features:\n\n```python\n# Add to your imports\nfrom dars.backend import get, post, useData\n\n# Start using Pythonic HTTP\nbutton.on_click = get(\n    id=\"data\",\n    url=\"https://api.example.com/data\",\n    callback=state.text.set(useData('data').message)\n)\n```\n\n---\n\n**This release makes Dars fully self-contained for building reactive, API-driven UIs without writing any JavaScript!**\n\n---\n\n# Release Notes v1.5.0\n\n> **Animation System Stability & Runtime Improvements**\n\n## Installation\n\n```bash\npip install --upgrade dars-framework\n```\n\n## What's New\n\n### Animation System Stability\n\nSignificant improvements to the animation system's reliability and ease of use:\n\n- **Fixed Infinite Pulse**: `pulse(iterations=\"infinite\")` now works correctly (fixed `TypeError`).\n- **Chaining Support**: State updates like `increment()` can now be chained with animations using `.then()` or `sequence()`.\n- **Documentation**: Added comprehensive [Animation Guide](https://ztamdev.github.io/Dars-Framework/docs.html#dars-animation-system) to the documentation.\n\n### Dynamic Event Updates\n\nThe client-side runtime has been upgraded to fully support dynamic event handler updates:\n\n```python\n# This now works perfectly in real-time\nbutton.on_click = state.update(\n    text=\"Clicked!\",\n    on_click=alert(\"New handler attached!\")\n)\n```\n\n## Bug Fixes\n\n- **Fixed**: `pulse` animation now correctly handles `iterations=\"infinite\"` (mapped to `Infinity`).\n- **Fixed**: `SyntaxError` when chaining state updates (wrapped in async IIFE).\n\n---\n\n# Release Notes v1.4.9\n\n> **Event Handler Support & Dual State System Documentation**\n\n## Installation\n\n```bash\npip install --upgrade dars-framework\n```\n\n## What's New\n\n### State V2: Event Handler Support\n\nState V2 now supports updating event handlers:\n\n```python\nfrom dars.all import *\n\n# Update events in State V2\nstate.update(\n    text=\"Click me\",\n    on_click=alert(\"Success!\"),\n    on_mouseover=dScript(\"showTooltip()\")\n)\n\n# Works with dScript objects\nbutton_state.update(on_click=dScript(\"console.log('clicked')\"))\n```\n\n**Implementation:**\n- Automatic detection of `on_*` properties\n- Extracts `.code` from dScript objects  \n- Handles arrays of event handlers\n- Gracefully skips non-serializable values\n\n### Dual State System Documentation\n\nDocumentation now presents **two coexisting state management systems**:\n\n**State V2 (Dynamic)**\n- Auto-increment/decrement built-in\n- Best for: counters, timers, simple updates\n\n**dState/cState (Indexed)**\n- Full state machine support\n- Immutable state 0\n- Cross-state calls with `Mod.call()`\n- Best for: workflows, complex UI transitions\n\nComprehensive comparison table and use case guidance added to state management documentation.\n\n## Bug Fixes\n\n- **Fixed**: State V2 can now handle dScript event handlers without errors\n- **Fixed**: `_generate_change_call()` properly handles non-JSON-serializable values\n\n## Documentation\n\n- Complete restructure of `state_management.md` to include both systems\n- Added comparison table for State V2 vs dState/cState\n- Restored all original dState/cState documentation\n- Added use case recommendations for choosing the right system\n\n---\n\n# Release Notes v1.4.8\n\n\n> **Critical Fix**: State V2 now properly supports all component properties including `class_name`, `style`, `attrs`, and more.\n\n## Installation\n\n```bash\npip install --upgrade dars-framework\n```\n\nor\n\n```bash\npip install dars-framework==1.4.8\n```\n\n## What's Fixed\n\n### State V2 Complete Property Support\n\n**Previously (v1.4.7):** State V2 only updated `text` content, incorrectly setting textContent for all properties.\n\n```python\n# This didn't work correctly in v1.4.7\ncounter.class_name.set(\"active\")\n```\n\n**Now (v1.4.8):** State V2 properly handles **all component properties** using the `change()` client function.\n\n```python\n# All properties now work correctly!\nstate.text.set(\"New text\")\nstate.class_name.set(\"active\")\nstate.style.set({\"color\": \"red\"})\nstate.attrs.set({\"title\": \"Tooltip\"})\nstate.html.set(\"<strong>Bold</strong>\") \n```\n\n### Unified Property Handling\n\nAll State V2 methods now use the same `change()` function as `this()` and `dState`, ensuring consistent behavior across the framework:\n\n- `ReactiveProperty.set()` - Works with any property type\n- `State.update()` - Updates multiple properties correctly\n- `State.reset()` - Resets all property types to defaults\n\n### Validation Improvements\n\n**Increment/Decrement Validation:**\nNow properly validates that `increment()` and `decrement()` are only used on numeric properties:\n\n```python\n# Correct usage\ncounter.text.increment(by=1)\n\n# Now throws helpful error\ncounter.class_name.increment(by=1)\n```\n\n## Bug Fixes\n\n### Fixed: Property Type Handling\n\n- **Fixed**: `class_name.set()` now correctly updates element's `className`\n- **Fixed**: `style.set()` now correctly updates inline styles\n- **Fixed**: `attrs.set()` now correctly updates HTML attributes\n- **Fixed**: `html.set()` now correctly updates `innerHTML`\n- **Fixed**: `update()` now correctly handles multiple properties simultaneously\n- **Fixed**: `reset()` now correctly restores all property types\n\n### Technical Details\n\n**Root Cause:** \nState V2 methods were directly manipulating `el.textContent` instead of using the framework's `change()` function, which properly routes updates based on property type.\n\n**Solution:**\nCreated `_generate_change_call()` helper that generates proper `change()` payloads:\n- `text` → `{text: value}`\n- `html` → `{html: value}`\n- `style` → `{style: object}`\n- `class_name` → `{attrs: {class: value}}` or `{classes: object}`\n- `attrs` → `{attrs: object}`\n\nAll reactive methods now use this helper for consistent, correct property updates.\n\n## Complete Property Examples\n\n### Setting Different Property Types\n\n```python\nfrom dars.all import *\n\ndisplay = Container(Text(\"Example\"), id=\"demo\")\n\n# Create state with multiple properties\nstate = State(display, \n    text=\"Hello\",\n    class_name=\"\",\n    style={\"background\": \"#333\"}\n)\n\n# Update text\ntext_btn.on_click = state.text.set(\"Updated!\")\n\n# Update CSS class\nclass_btn.on_click = state.class_name.set(\"active highlight\")\n\n# Update styles\nstyle_btn.on_click = state.style.set({\n    \"background\": \"linear-gradient(135deg, #667eea, #764ba2)\",\n    \"color\": \"white\",\n    \"padding\": \"20px\"\n})\n\n# Update HTML attributes\nattr_btn.on_click = state.attrs.set({\n    \"data-status\": \"complete\",\n    \"title\": \"Completed task\"\n})\n```\n\n### Advanced Class Manipulation\n\n```python\n# Add/remove specific classes\nstate.classes.set({\n    \"add\": [\"active\", \"highlight\"],\n    \"remove\": [\"disabled\", \"hidden\"]\n})\n\n# Toggle classes\nstate.classes.set({\n    \"toggle\": [\"expanded\"]\n})\n```\n\n### Update Multiple Properties\n\n```python\n# Update several properties at once\nsuccess_btn.on_click = state.update(\n    text=\"Success!\",\n    class_name=\"success\",\n    style={\"color\": \"green\", \"fontSize\": \"18px\"},\n    attrs={\"data-result\": \"ok\"}\n)\n```\n\n## Migration from v1.4.7\n\n**No breaking changes** - all existing code continues to work. However, if you tried using non-`text` properties in v1.4.7 and they didn't work, they will now work correctly in v1.4.8.\n\n**If you worked around the limitation:**\n```python\n# Old workaround (v1.4.7)\nfrom dars.core.state import this\nbutton.on_click = this().state(class_name=\"active\")  # Had to use this()\n\n# Now works directly with State V2 (v1.4.8)\nbutton.on_click = state.class_name.set(\"active\")  # ✅ Works!\n```\n\n## Dependency Cleanup\n\n- **Removed**: `rjsmin` dependency (Apache license, replaced with regex fallback)\n- **Removed**: `fastapi` dependency (not used in framework)\n\nJS/CSS minification now uses:\n1. Vite (if available)\n2. esbuild (if available)\n3. Regex fallback (always available, no external dependencies)\n\n## Performance & Compatibility\n\n- **Zero overhead**: Property handling uses existing `change()` infrastructure\n- **Backward compatible**: All v1.4.7 code works in v1.4.8\n- **Consistent behavior**: State V2, `this()`, and dState now all use same property system\n- **Desktop support**: Full Electron compatibility maintained\n\n---\n\n**Upgrade highly recommended** for all projects using State V2, especially if you need to update component properties beyond just `text`.\n\n---\n\n# Release Notes v1.4.7\n\n\n> Introducing State V2 and comprehensive animation system. This is the biggest update to Dars state management, bringing a pure Pythonic API and 15+ built-in animations.\n\n## Installation\n\n```bash\npip install --upgrade dars-framework\n```\n\nor\n\n```bash\npip install dars-framework==1.4.7\n```\n\n## What's New\n\n### State V2 - Pure Pythonic State Management\n\n**New `State` Class:**\n- Pure Python API - no more verbose dState syntax\n- Direct property access with reactive operations\n- Built-in auto-increment/auto-decrement operations\n- Clean reset functionality\n- Seamless animation integration\n\n**Before (dState - deprecated):**\n```python\nfrom dars.core.state import dState, Mod\n\ndisplay = Text(\"0\", id=\"counter\")\nst = dState(\"counter\", component=display, states=[0, 1, 2])\nst.cState(1, mods=[Mod.inc(display, prop='text', by=1)])\nbutton.on_click = st.state(1)\n```\n\n**After (State V2 - recommended):**\n```python\nfrom dars.all import State\n\ndisplay = Text(\"0\", id=\"counter\")\ncounter = State(display, text=0)\nbutton.on_click = counter.text.increment(by=1)\n```\n\n**Key Features:**\n- **Reactive Properties**: Direct access with `state.property.operation()`\n- **Auto Operations**: Continuous operations with `auto_increment()`, `auto_decrement()`\n- **Reset**: Simple `state.reset()` to restore initial values\n- **Intuitive**: Pythonic API that feels natural\n\n**Usage:**\n```python\nfrom dars.all import *\n\n# Create component and state\ntimer_display = Text(\"0\", id=\"timer\", style={\"font-size\": \"36px\"})\ntimer = State(timer_display, text=0)\n\n# Auto-incrementing timer\nstart_btn.on_click = timer.text.auto_increment(by=1, interval=1000)\nstop_btn.on_click = timer.text.stop_auto()\nreset_btn.on_click = timer.reset()\n```\n\n### Comprehensive Animation System\n\n**15+ Built-in Animations:**\n- `fadeIn` / `fadeOut` - Opacity transitions\n- `slideIn` / `slideOut` - Position-based slides (8 directions)\n- `scaleIn` / `scaleOut` - Size transformations\n- `shake` - Shake effect for alerts\n- `bounce` - Bounce effect\n- `pulse` - Heartbeat/pulse effect\n- `rotate` - Rotation animations\n- `flip` - Flip on X/Y axis\n- `colorChange` - Color transitions\n- `morphSize` - Size morphing\n- `sequence` - Chain multiple animations\n\n**Animation Chaining:**\n```python\nfrom dars.all import *\n\nbutton.on_click = sequence(\n    fadeIn(id=\"box\", duration=400),\n    pulse(id=\"box\", scale=1.2, iterations=2),\n    shake(id=\"box\", intensity=5)\n)\n```\n\n**Integration with State V2:**\n```python\nbutton.on_click = sequence(\n    counter.text.increment(by=1),\n    pulse(id=\"counter\", scale=1.2),\n    fadeOut(id=\"counter\", duration=200),\n    counter.text.set(value=0),\n    fadeIn(id=\"counter\", duration=200)\n)\n```\n\n**All Animations:**\n- Return `dScript` objects for chaining\n- Customizable duration, easing, and parameters\n- Proper async completion handling\n- Work seamlessly with event handlers\n\n### Professional State V2 Template\n\n**New Example Template:**\n- Located in `dars/templates/examples/advanced/StateV2/`\n- Professional, production-ready demonstration\n- Function component pattern (LandingPage style)\n- Comprehensive showcases:\n  - Interactive counter with increment/decrement\n  - Auto-incrementing timer\n  - Animation showcase with 15+ animations\n  - State management best practices\n- Responsive design with modern styling\n- Complete documentation and code examples\n\n**Template Structure:**\n```\ndars/templates/examples/advanced/StateV2/\n├── index.py                 # Main application\n├── hero_component.py        # Hero section\n├── counter_component.py     # Counter demo\n├── timer_component.py       # Timer demo\n├── animation_component.py   # Animation showcase\n├── styles.css              # Global styles\n└── README.md               # Documentation\n```\n\n## Breaking Changes\n\n**dState/cState Deprecation:**\n- `dState` and `cState` are now deprecated\n- All functionality replaced by State V2\n- Legacy code still works for backward compatibility\n- Migration path provided in updated documentation\n- New projects should use State V2 exclusively\n\n## Documentation Updates\n\n**Updated Files:**\n- `state_management.md` - Completely rewritten for State V2\n- `scripts.md` - Added comprehensive animation system documentation\n- All dState/cState references removed from active docs\n- Migration guides included for existing projects\n\n## Bug Fixes\n\n**Animation System:**\n- Fixed animation chaining with proper Promise handling\n- Fixed initial state rendering with `transition='none'` pattern\n- Fixed `sequence()` function trailing semicolon issue\n- All animations now properly await completion\n- Animations use `setTimeout(20ms)` for reliable state application\n\n**State Operations:**\n- `auto_increment` and `auto_decrement` now return proper `dScript` objects\n- Client-side loop management with `startLoop` and `stopLoop`\n- Proper cleanup of active loops\n\n## Technical Improvements\n\n### Animation Implementation\n\n- All animations wrapped in async IIFEs\n- Proper transition timing with `setTimeout`\n- Force reflow with `void el.offsetWidth`\n- Set `transition='none'` before initial styles\n- `animation.finished` for Web Animations API\n- Proper Promise chaining in `sequence()`\n\n## Migration Guide\n\n### From dState to State V2\n\n**1. Import Changes:**\n```python\n# Old\nfrom dars.core.state import dState, Mod\n\n# New\nfrom dars.all import State\n```\n\n**2. State Creation:**\n```python\n# Old\ncounter_state = dState(\"counter\", component=display, states=[0, 1, 2])\ncounter_state.cState(1, mods=[Mod.inc(display, prop='text', by=1)])\n\n# New\ncounter = State(display, text=0)\n```\n\n**3. Event Handlers:**\n```python\n#Old\nbutton.on_click = counter_state.state(1)\n\n# New\nbutton.on_click = counter.text.increment(by=1)\n```\n\n**4.Auto Operations (New Feature):**\n```python\n# Only available in State V2\nstart_btn.on_click = timer.text.auto_increment(by=1, interval=1000)\nstop_btn.on_click = timer.text.stop_auto()\n```\n\n### Adding Animations\n\n```python\nfrom dars.all import fadeIn, pulse, sequence\n\n# Simple animation\nbutton.on_click = fadeIn(id=\"element\", duration=500)\n\n# Chained animations\nbutton.on_click = sequence(\n    fadeIn(id=\"box\"),\n    pulse(id=\"box\", scale=1.1)\n)\n```\n\n## Performance & Compatibility\n\n- **Zero Overhead**: State V2 only activates when used\n- **Backward Compatible**: dState still works for existing code\n- **Bundle Size**: Minimal impact (+~15KB for animations)\n- **Desktop Support**: Full Electron compatibility\n\n## Examples\n\n### Complete Counter App\n\n```python\nfrom dars.all import *\n\napp = App(\"Counter Demo\")\n\n# Create display with state\ncounter_display = Text(\"0\", id=\"counter\", style={\n    \"font-size\": \"48px\", \n    \"color\": \"#2563eb\"\n})\ncounter = State(counter_display, text=0)\n\n# Buttons with operations\ninc_btn = Button(\"+1\", on_click=counter.text.increment(by=1))\ndec_btn = Button(\"-1\", on_click=counter.text.decrement(by=1))\nreset_btn = Button(\"Reset\", on_click=counter.reset())\npulse_btn = Button(\"Pulse\", on_click=pulse(id=\"counter\", scale=1.2))\n\npage = Page(Container(counter_display, inc_btn, dec_btn, reset_btn, pulse_btn))\napp.add_page(\"index\", page, index=True)\napp.rTimeCompile()\n```\n\n### Auto-Incrementing Timer\n\n```python\nfrom dars.all import *\n\napp = App(\"Timer Demo\")\n\ntimer_display = Text(\"0\", id=\"timer\")\ntimer = State(timer_display, text=0)\n\nstart_btn = Button(\"Start\", on_click=timer.text.auto_increment(by=1, interval=1000))\nstop_btn = Button(\"Stop\", on_click=timer.text.stop_auto())\nreset_btn = Button(\"Reset\", on_click=timer.reset())\n\npage = Page(Container(timer_display, start_btn, stop_btn, reset_btn))\napp.add_page(\"index\", page, index=True)\napp.rTimeCompile()\n```\n\n## Desktop Exporter Status\n\n**Still in BETA** - State V2 and animations fully supported in both web and desktop exports.\n\n---\n\n**This is a landmark release** - State V2 represents the future of Dars state management. Upgrade highly recommended for all projects.\n\n---\n\n# Release Notes v1.4.6\n\n\n> **Major Feature Release**: Introduces Single Page Application (SPA) support and a powerful client-side routing system.\n\n## Installation\n\n```bash\npip install --upgrade dars-framework\n```\n\nor\n\n```bash\npip install dars-framework==1.4.5\n```\n\n## What's New\n\n### Single Page Application (SPA) Support\n\n**New Routing System:**\n- **Client-Side Routing**: Build fast, responsive SPAs with Python.\n- **Nested Routes & Layouts**: Create complex UI hierarchies using the `parent` parameter and the new `Outlet` component.\n- **Persistent Layouts**: Keep headers, sidebars, and navigation bars active while content changes dynamically.\n\n**Robust Error Handling:**\n- **Automatic 404 Handling**: Dars now automatically redirects invalid routes to a 404 page.\n- **Default & Custom 404**: Includes a built-in clean 404 page, or define your own with `app.set_404_page()`.\n\n### Developer Experience\n\n**Hot Reload Stability:**\n- **Intelligent Polling**: New hot reload system for SPAs that detects changes without spamming logs.\n- **Auto-Stop**: Prevents browser lag by stopping polling after 10 consecutive connection failures.\n\n### Fixes & Improvements\n\n- **SPA Export**: Fixed issues where SPA child routes were conflicting with multipage exports.\n- **Preview Server**: Improved handling of SPA routes and query parameters.\n- **Assets**: Enforced absolute paths for SPA assets to ensure correct loading from any depth.\n\n---\n\n\n# Release Notes v1.4.4\n\n> Critical bug fix release. Removes non-functional features, fixes style merge, and improves state restoration.\n\n## Installation\n\n```bash\npip install --upgrade dars-framework\n```\n\nor\n\n```bash\npip install dars-framework==1.4.4\n```\n\n## What's Fixed\n\n- **Style Merge Fix (CRITICAL)** - `Mod.set()` now correctly merges style properties\n- **Removed `this().goto()`** - Non-functional feature removed; use `state.state()` instead\n- **Fixed Syntax Warning** - Corrected invalid escape sequence in `js_lib.py`\n- **Improved State 0 Restoration** - Event handlers now re-attach when returning to default state\n\n---\n\n# Release Notes v1.4.3 (DEPRECATED)\n\n> State management enhancements with compile-time validation, component self-navigation, and critical style merge fix. Improves developer experience and fixes property replacement bug.\n\n## Installation\n\n```bash\npip install --upgrade dars-framework\n```\n\nor\n\n```bash\npip install dars-framework==1.4.3\n```\n\n## What's New\n\n- **`this().goto(idx)`** - Component self-navigation for state transitions\n- **`this_for(id)`** - Compile-time validation helper for state navigation\n- **Style Merge Fix** - Critical fix: `Mod.set()` now merges style properties instead of replacing them\n- **Enhanced Documentation** - Guides for state management patterns\n\n---\n\n# Release Notes v1.4.2\n\n> New utility dScript functions added to `utils_ds` for enhanced client-side interactions.\n\n## Installation\n\n```bash\npip install --upgrade dars-framework\n```\n\nor\n\n```bash\npip install dars-framework==1.4.2\n```\n\n## What's New\n\n### Utility Functions (`utils_ds`)\n\n- `setTimeout(delay: int, code: dScript)`: Execute a dScript after a delay (ms).\n- `setText(id: str, text: str)`: Set the text content of an element.\n- `showModal(id: str)`, `hideModal(id: str)`: Modal visibility helpers.\n- `goTo(href: str)`, `goToNew(href: str)`, `reload()`, `goBack()`, `goForward()`: Navigation utilities.\n- `alert(message: str)`, `confirm(message: str, on_ok: str = \"\", on_cancel: str = \"\")`, `log(message: str)`: Alert & console utilities.\n- `show(id: str)`, `hide(id: str)`, `toggle(id: str)`, `addClass(id: str, class_name: str)`, `removeClass(id: str, class_name: str)`, `toggleClass(id: str, class_name: str)`: DOM manipulation utilities.\n- `scrollTo(x: int = 0, y: int = 0)`, `scrollToTop()`, `scrollToBottom()`, `scrollToElement(id: str)`: Scroll utilities.\n- `submitForm(form_id: str)`, `resetForm(form_id: str)`, `getValue(input_id: str, target_id: str)`, `clearInput(input_id: str)`: Form utilities.\n- `saveToLocal(key: str, value: str)`, `loadFromLocal(key: str, target_id: str)`, `removeFromLocal(key: str)`, `clearLocalStorage()`: Storage utilities.\n- `copyToClipboard(text: str)`, `copyElementText(id: str)`: Clipboard utilities.\n- `focus(id: str)`, `blur(id: str)`: Focus utilities.\n\nThese functions are documented in `https://ztamdev.github.io/Dars-Framework/docs.html#dars-script-system` and for states in `https://ztamdev.github.io/Dars-Framework/docs.html#state-management-in-dars-dstate-cstate-goto-mods`.\n\n---\n\n# Release Notes v1.4.1\n\n> SEO and Apple device optimizations. Enhanced metadata generation with automatic MIME type detection for favicons and comprehensive iOS/Safari support.\n\n## Installation\n\n```bash\npip install --upgrade dars-framework\n```\n\nor\n\n```bash\npip install dars-framework==1.4.1\n```\n\n## What's New\n\n### Automatic Favicon MIME Type Detection\n\n**Smart Icon Type Recognition:**\n- Favicon links now automatically detect and use the correct MIME type based on file extension\n- Supports PNG, ICO, SVG, JPG/JPEG, WebP, and GIF formats\n- No manual type specification needed\n- Eliminates incorrect `image/x-icon` type for PNG files\n\n**Before (v1.4.0):**\n```html\n<link rel=\"icon\" href=\"logo.png\" type=\"image/x-icon\">  <!-- Incorrect! -->\n```\n\n**After (v1.4.1):**\n```html\n<link rel=\"icon\" href=\"logo.png\" type=\"image/png\">  <!-- Correct! -->\n```\n\n### Enhanced Apple Device Support\n\n**New App Properties:**\n- `apple_mobile_web_app_capable` - Enable fullscreen mode when added to home screen\n- `apple_mobile_web_app_status_bar_style` - Control status bar appearance:\n  - `\"default\"` - Standard iOS status bar\n  - `\"black\"` - Black status bar\n  - `\"black-translucent\"` - **Transparent status bar** (solves Safari iOS 16+ solid color issue)\n- `apple_mobile_web_app_title` - Custom title for home screen icon\n\n**Usage:**\n```python\napp = App(\n    title=\"My App\",\n    favicon=\"logo.png\",\n    apple_touch_icon=\"logo.png\",\n    apple_mobile_web_app_capable=True,\n    apple_mobile_web_app_status_bar_style=\"black-translucent\",  # Enables transparency!\n    apple_mobile_web_app_title=\"MyApp\"\n)\n```\n\n### Safari 15+ Theme Color Enhancements\n\n**Adaptive Theme Colors:**\n- Theme color now includes media query variants for light/dark mode\n- Proper integration with iOS system appearance settings\n- **Fixes Safari iOS 16+ transparency issues** where solid colors blocked background visibility\n\n**Generated Meta Tags:**\n```html\n<meta name=\"theme-color\" content=\"#0d1513\">\n<meta name=\"theme-color\" media=\"(prefers-color-scheme: light)\" content=\"#0d1513\">\n<meta name=\"theme-color\" media=\"(prefers-color-scheme: dark)\" content=\"#0d1513\">\n```\n\n### Improved Apple Touch Icon\n\n**Multiple Size Specifications:**\n- Apple touch icon now includes size attribute for better iOS home screen quality\n- Generates both standard and 180x180 sized icon links\n\n**Generated Links:**\n```html\n<link rel=\"apple-touch-icon\" href=\"logo.png\">\n<link rel=\"apple-touch-icon\" sizes=\"180x180\" href=\"logo.png\">\n```\n\n### Modern Mobile Web App Meta Tag\n\n**Standards Compliance:**\n- Added `mobile-web-app-capable` meta tag alongside `apple-mobile-web-app-capable`\n- Eliminates deprecation warnings in modern browsers\n- Maintains backward compatibility with older iOS versions\n\n**Generated Meta Tags:**\n```html\n<meta name=\"mobile-web-app-capable\" content=\"yes\">\n<meta name=\"apple-mobile-web-app-capable\" content=\"yes\">\n```\n\n## Technical Improvements\n\n### Exporter Enhancements (`dars/exporters/web/html_css_js.py`)\n\n- **New `_detect_icon_mime_type()` Helper**: Automatically detects MIME types from file extensions\n- **Enhanced `_generate_meta_tags()`**: Adds Apple-specific meta tags and theme-color variants\n- **Updated `_generate_links()`**: Applies automatic MIME detection and sizes attribute\n\n### App Class Updates (`dars/core/app.py`)\n\n- Added 3 new initialization parameters for Apple mobile web app support\n- Properties auto-initialize with sensible defaults (`apple_mobile_web_app_title` defaults to app title)\n- All new properties are **optional** and **backward compatible**\n\n## Migration Notes\n\n### For Existing Projects\n\n**Automatic Upgrade:**\n- No configuration changes required\n- Favicons automatically get correct MIME types\n- Theme colors automatically include light/dark variants\n- All new features are opt-in\n\n**Optional iOS Enhancement:**\n```python\n# Add to your App initialization\napp = App(\n    # ... existing params ...\n    apple_mobile_web_app_capable=True,\n    apple_mobile_web_app_status_bar_style=\"black-translucent\",\n    apple_mobile_web_app_title=\"MyApp\"\n)\n```\n\n## SEO & Performance Impact\n\n- **Improved SEO**: Correct MIME types and proper meta tags\n- **Better Mobile Indexing**: Enhanced metadata for mobile search results\n- **iOS User Retention**: Superior home screen experience encourages app-like usage\n\n## Desktop Exporter Status\n\n**Still in BETA** - No changes from v1.4.0\n\n---\n\n**Upgrade Highly Recommended** for all projects, especially those targeting iOS/Safari users or requiring proper favicon MIME types.\n\n# Release Notes v1.4.0\n\n> Simple Template update.\n\n## Installation\n\n```bash\npip install --upgrade dars-framework\n```\n\nor\n\n```bash\npip install dars-framework==1.4.0\n```\n\n## Notes:\n\nAll advanced and basic templates are now updated using the new features.\n\n# Release Notes v1.3.9\n\n> Desktop File System API, Pythonic Arg helper, keyboard event filtering, and comprehensive template synchronization. Major enhancements to desktop capabilities with improved developer experience.\n\n## Installation\n\n```bash\npip install --upgrade dars-framework\n```\n\nor\n\n```bash\npip install dars-framework==1.3.9\n```\n\n## What's New\n\n### Desktop File System API - `list_directory`\n\n**Comprehensive Directory Listing:**\n- New `list_directory()` function for browsing files and folders\n- Optional glob pattern filtering (e.g., `\"*.py\"` for Python files only)\n- Optional `include_size` parameter (default: False) to show/hide file sizes\n- Full integration with `get_value()` for dynamic paths from inputs\n- Seamless chaining with `dScript.then()` for UI updates\n- Returns array of `{name, isDirectory, size?}` objects\n\n**Usage:**\n```python\nfrom dars.desktop import list_directory, get_value\nfrom dars.core.state import this\n\n# Simple directory listing\nButton(\"List\", \n    on_click=list_directory(get_value(\"path\")).then(\n        this().state(id=\"output\", html=RawJS(\"value.map(f => f.name).join('<br>')\"))\n    )\n)\n\n# Filter by pattern\nButton(\"Python Files\",\n    on_click=list_directory(\".\", \"*.py\").then(\n        this().state(id=\"count\", text=RawJS(\"`Found ${value.length} files`\"))\n    )\n)\n\n# Include file sizes\nlist_directory(\".\", \"*\", include_size=True)\n```\n\n### Pythonic `Arg` Helper\n\n**Cleaner dScript.ARG Access:**\n- New `Arg` singleton for Pythonic access to `dScript.ARG`\n- More readable than `RawJS(\"dScript.ARG\")`\n- Provides helper methods like `.map()`, `.join()`, `.length`, etc.\n- Auto-generates proper JavaScript code\n- Exported in `dars.all` for easy access\n\n**Usage:**\n```python\nfrom dars.scripts.dscript import Arg\n\n# Old way (still works)\nthis().state(text=RawJS(\"dScript.ARG.map(f => f.name).join('\\\\n')\"))\n\n# New Pythonic way\nthis().state(text=Arg.map(\"f => f.name\").join(\"\\\\n\"))\n\n# Properties\nArg.length  # -> \"dScript.ARG.length\"\nArg.value   # -> \"dScript.ARG.value\"\n\n# Methods\nArg.map(\"f => f.name\")  # -> \"dScript.ARG.map(f => f.name)\"\nArg.filter(\"x => x > 0\")  # -> \"dScript.ARG.filter(x => x > 0)\"\n```\n\n### Enhanced Keyboard Event Filtering\n\n**Specific Key Event Handlers:**\n- New keyboard event constants for specific keys (e.g., `KEY_DOWN_ENTER`, `KEY_DOWN_ESCAPE`)\n- Event type parsing with `.` delimiter for key filtering (e.g., `\"keydown.Enter\"`)\n- Proper event delegation with key matching\n- Works across all event attachment mechanisms\n- Backward compatible with existing keyboard events\n\n**New Event Constants:**\n```python\nfrom dars.core.events import EventTypes\n\n# Specific Enter key events\non_keydown_enter    # Triggered only when Enter is pressed\non_keyup_enter      # Triggered only when Enter is released\n\n# Specific Escape key events  \non_keydown_escape   # Triggered only when Escape is pressed\non_keyup_escape     # Triggered only when Escape is released\n\n# Usage\nInput(\n    id=\"search\",\n    on_keydown_enter=search_action,  # Only fires on Enter\n    on_keydown_escape=clear_action   # Only fires on Escape\n)\n```\n\n### Configurable DevTools\n\n**Electron DevTools Control:**\n- New `devtools` parameter in `App` class (default: `True`)\n- Respects `DARS_DEV` and `DARS_DEVTOOLS` environment variables\n- DevTools only open when both conditions met: dev mode + devtools enabled\n- Better control over development environment\n- Applies to all Electron generation methods\n\n**Usage:**\n```python\n# Disable DevTools even in dev mode\napp = App(\n    title=\"My App\",\n    desktop=True,\n    devtools=False  # Won't open DevTools\n)\n\n# Default behavior (DevTools enabled)\napp = App(\n    title=\"My App\",\n    desktop=True\n)\n```\n\n### Dynamic Form Element Updates\n\n**Fixed `change` Function:**\n- Corrected dynamic text updates for form elements\n- Uses `.value` for `Input`, `Textarea`, `Select`\n- Uses `.textContent` for other elements (Text, Button, etc.)\n- Ensures UI updates properly reflect state changes\n- Fixed issue where form input values weren't updating\n\n### Improved Event Delegation\n\n**Keyboard Event Fix:**\n- Fixed event delegation for key-filtered keyboard events\n- Properly checks both base event name and filtered event name in eventMap\n- Ensures `keydown.Enter` and similar events work correctly\n- Maintains backward compatibility with non-filtered events\n\n## Bug Fixes\n\n- Fixed `change` function to use `.value` for form elements instead of `.textContent`\n- Fixed event delegation to properly handle key-filtered keyboard events like `keydown.Enter`\n- Fixed ElectronExporter default templates to include latest IPC handlers\n- Fixed CLI template generation to include all current File System API functions\n\n## Improved\n\n- Enhanced developer experience with configurable DevTools\n- Cleaner syntax with `Arg` helper for dScript.ARG access\n- More powerful keyboard event handling with key-specific filtering\n\n## Migration Guide\n\n### From v1.3.8 to v1.3.9\n\nNo breaking changes. You can upgrade safely:\n\n```bash\npip install --upgrade dars-framework\n```\n\n**Optional: Use new features**\n\n1. **Use `list_directory` for file browsing:**\n```python\nfrom dars.desktop import list_directory, get_value\n\nButton(\"Browse\", \n    on_click=list_directory(get_value(\"dir\")).then(...)\n)\n```\n\n2. **Use `Arg` helper for cleaner code:**\n```python\nfrom dars.scripts.dscript import Arg\n\n# Instead of RawJS(\"dScript.ARG.map(...)\") \ntext=Arg.map(\"x => x.name\").join(\"\\\\n\")\n```\n\n3. **Use specific keyboard events:**\n```python\nInput(\n    on_keydown_enter=submit_action,\n    on_keydown_escape=cancel_action\n)\n```\n\n## Documentation\n\n- Updated Desktop exporter documentation with File System API examples\n- Added `Arg` helper documentation in scripts section\n- Enhanced keyboard events documentation with key-specific examples\n\n# Release Notes v1.3.8\n\n> Dynamic state updates, improved event handling, and enhanced Electron dev experience. Introduces `this()` for event-time component updates, `RawJS` for JavaScript injection, and `dScript.then()` for async chaining.\n\n## Installation\n\n```bash\npip install --upgrade dars-framework\n```\n\nor\n\n```bash\npip install dars-framework==1.3.8\n```\n\n## What's New\n\n### Dynamic State Updates with `this()`\n\n**Effortless Component Updates:**\n- New `this()` helper for direct, event-time component updates without pre-registering states\n- Update any component property: `text`, `html`, `style`, `attrs`, `classes`\n- Works in both desktop and web exports\n- Perfect for async operations and file I/O\n\n**Usage:**\n```python\nfrom dars.core.state import this\n\n# Button that updates itself\nbtn = Button(\"Click me\", on_click=this().state(\n    text=\"Clicked!\",\n    style={\"color\": \"red\"}\n))\n\n# Counter with Mod helpers\ncounter = Text(\"0\", id=\"count\")\ninc_btn = Button(\"+1\", on_click=this().state(text=Mod.inc(\"count\")))\n```\n\n### Raw JavaScript Injection with `RawJS`\n\n**Dynamic Value Passing:**\n- New `RawJS` class for injecting raw JavaScript variables into state updates\n- Essential for passing values from async operations\n- Use `dScript.ARG` as a placeholder for chained script results\n\n**Usage:**\n```python\nfrom dars.scripts.dscript import RawJS, dScript\nfrom dars.desktop import read_text\n\n# File content becomes button text\nread_btn = Button(\"Load\",\n    on_click=read_text(\"data.txt\").then(\n        this().state(text=RawJS(dScript.ARG))\n    )\n)\n```\n\n### Script Chaining with `dScript.then()`\n\n**Sequential Async Operations:**\n- New `.then()` method for chaining `dScript` objects\n- Pass results between scripts using `dScript.ARG` (resolves to `value`)\n- Built-in error handling and logging for debugging\n- Enables complex workflows like read → process → update → write\n\n**Usage:**\n```python\n# Chain file operations\nButton(\"Process\",\n    on_click=read_text(\"input.txt\")\n        .then(dScript(code=\"return value.toUpperCase()\"))\n        .then(write_text(\"output.txt\", RawJS(\"value\")))\n        .then(this().state(text=\"Done!\"))\n)\n```\n\n### Event Handler Assignment Fix\n\n**Fixed Critical Bug:**\n- Event handlers can now be assigned via attribute assignment: `btn.on_click = handler`\n- Previously only constructor assignment worked: `Button(on_click=handler)`\n- Added `__setattr__` override to properly register events in all cases\n- Maintains backward compatibility with existing code\n\n### Enhanced Electron Dev Mode\n\n**Improved Development Experience:**\n- Filtered harmless Chrome DevTools warnings (Autofill.enable, etc.)\n- Fixed double Electron window bug on file save/reload\n- Added debounce logic to prevent concurrent restarts\n- Cleaner console output with better error formatting\n- Chrome DevTools auto-open in dev mode for easier debugging\n\n**Better Logging:**\n- Error-only stderr filtering (no more noise)\n- Color-coded messages for different log levels\n- Stack traces properly displayed for JavaScript errors\n\n## Technical Improvements\n\n### State System Enhancements\n- **Dynamic Updates**: New `change({dynamic: true, ...})` path in `dars/js_lib.py`\n- **RawJS Support**: State methods now detect and preserve `RawJS` values\n- **this() Proxy**: Clean API for self-referential component updates\n\n### Script System Improvements\n- **Chaining Infrastructure**: Robust async IIFE wrapping for sequential execution\n- **Value Passing**: Standardized `value` variable for inter-script communication\n- **Debug Logging**: Verbose console output for troubleshooting chains\n\n### Component System Fixes\n- **Event Collection**: `VDomBuilder` now correctly serializes all event handlers\n- **Attribute Interception**: `__setattr__` catches `on_*` assignments\n- **Backward Compatible**: All existing event patterns continue working\n\n### Dev Mode Stability\n- **Debounce**: 300ms consolidation window for file change events\n- **State Management**: Proper `restart_triggered` flag handling\n- **Process Cleanup**: Reliable Electron termination before restart\n\n## Documentation Updates\n\n**Comprehensive Coverage:**\n- New `this()` section in README with quick examples\n- Expanded `state_management.md` with complete file operations guide\n- Enhanced `exporters.md` with desktop API examples and chaining patterns\n- Updated `scripts.md` with `.then()` method documentation\n\n## Migration Notes\n\n### For Existing Projects\n\n**Seamless Upgrade:**\n- No breaking changes - all existing code remains compatible\n- New features are opt-in and additive\n- Event handlers work with both constructor and attribute assignment\n\n## Desktop Exporter Status\n\n**Still in BETA:**\n- File operations (`read_text`, `write_text`, `read_file`, `write_file`) are stable\n- Dev mode with hot reload is fully functional\n- Production packaging continues in experimental status\n- Native API surface expanding with each release\n\n## Performance & Compatibility\n\n- **Zero Overhead**: Dynamic updates only activate when used\n- **Bundle Size**: Minimal impact from new features\n- **Browser Support**: Maintains full cross-browser compatibility\n- **Desktop Integration**: Enhanced with improved error handling\n\n---\n\n**Upgrade Highly Recommended** for all desktop projects and applications requiring dynamic, event-driven UI updates.\n\n\n# Release Notes v1.3.6\n\n> Compile-time and runtime component manipulation. Introduces `app.create()` / `app.delete()` for pre-export tree editing, and `createComp()` / `deleteComp()` for dynamic DOM operations with safe event hydration.\n\n## Installation\n\n```bash\npip install --upgrade dars-framework\n```\n\nor\n\n```bash\npip install dars-framework==1.3.6\n```\n\n## What's New\n\n### Compile-Time Component Manipulation\n\n- `app.create(target, root=None, on_top_of=None, on_bottom_of=None)`\n  - Inserts components before/after a reference child or at the end of the `root`.\n  - Accepts `target` as an instance, a callable, or a `str` (id to move an existing component).\n  - Multipage support: `root` can be a component id, a component instance, or a page name.\n- `app.delete(id)`\n  - Removes a component by id from the tree before export (no-op if not found).\n\n### Runtime Component Manipulation\n\n- `createComp(target, root, position='append')`\n  - Generates a `dScript` that calls `Dars.runtime.createComponent(root_id, vdom_data, position)`.\n  - Serializes the Python component to VDOM and rehydrates events for the subtree.\n  - Positions: `append`, `prepend`, `before:<id>`, `after:<id>`.\n- `deleteComp(id)`\n  - Generates `dScript` that calls `Dars.runtime.deleteComponent(id)`.\n\n### Event Hydration for Dynamic Content\n\n- Event rehydration for the newly created subtree (supports arrays of handlers).\n- Every dynamic node with an `id` also gets `class=\"dars-id-<id>\"` for reliable selection when multiple instances exist.\n\n### Barrel Import\n\n- `from dars.all import *` now includes `createComp` and `deleteComp` from `dars.backend`.\n\n\n# Release Notes v1.3.5\n\n> Enhanced styling and development experience update featuring active styles, improved preview system, and advanced file monitoring. Delivers better visual feedback and faster development workflow.\n\n## Installation\n\n```bash\npip install --upgrade dars-framework\n```\n\nor\n\n```bash\npip install dars-framework==1.3.5\n```\n\n## What's New\n\n### Active Styles Support\n\n**Complete Component Styling System:**\n- New `active_style` attribute for all components, providing visual feedback during user interaction\n- Completes the styling triad: `style`, `hover_style`, and `active_style`\n- Works seamlessly with existing hover styles introduced in v1.3.4\n\n**Usage:**\n```python\nButton(\"Click it\",\n        id=\"btn1\",\n        on_click=[dScript('console.log(`HI`)'), txtstate.state(1)],\n        style={\"color\": \"green\"},\n        hover_style={\"color\": \"red\"},      # from v1.3.4\n        active_style={\"color\": \"purple\"},  # new in v1.3.5\n)\n```\n\n### Enhanced Preview System\n\n**Optimized Development Server:**\n- Completely redesigned preview system with faster load times\n- Improved hot reload support for instant code changes\n- Better error handling and cleanup processes\n- Enhanced Ctrl+C handling for smooth server shutdown\n\n### Advanced File Watcher\n\n**Comprehensive Project Monitoring:**\n- New file watching system monitors file creation, deletion, and modification\n- Automatic detection of new files in the project directory\n- Supports multiple file extensions (.py, .js, .css, etc.)\n- Real-time updates without manual intervention\n\n## Fixed Issues\n\n### Responsiveness Improvements\n- **Landing Page**: Fixed responsiveness issues on smaller screens\n- **Mobile Compatibility**: Enhanced display and interaction on mobile devices\n\n## Technical Improvements\n\n### Development Experience\n- **Faster Hot Reload**: Reduced reload intervals and improved change detection\n- **Better Error Recovery**: Enhanced error handling during file changes\n- **Clean Shutdown**: Improved server termination and resource cleanup\n\n## Migration Notes\n\n### For Existing Projects\n\n**Seamless Upgrade:**\n- No breaking changes - all existing code remains compatible\n- Active styles can be added incrementally to enhance user interaction\n\n## Desktop Exporter Status\n\n**Still in BETA**\n\n# Release Notes v1.3.4\n\n> Enhanced interactivity update featuring hover styles, multi-handler events, and runtime versioning. Improves component styling and event handling flexibility.\n\n## Installation\n\n```bash\npip install --upgrade dars-framework\n```\n\nor\n\n```bash\npip install dars-framework==1.3.4\n```\n\n## What's New\n\n### Hover Styles Support\n\n**Enhanced Component Interactivity:**\n- New `hover_style` attribute for all components, allowing dynamic styling on mouse hover\n- Styles are automatically generated with higher specificity to ensure proper application\n\n### Multi-Handler Event System\n\n**Flexible Event Management:**\n- Components now support arrays of event handlers for the same event type\n- Multiple `dScript`, inline JavaScript, or mixed handlers can be assigned to single events\n- Handlers execute in sequence with individual error handling\n- Full backward compatibility with existing single-handler syntax\n\n### Runtime Versioning\n\n**Enhanced Debugging & Tracking:**\n- JavaScript runtime now includes version information accessible via `Dars.version`\n- Release URL exposed through `Dars.releaseUrl` for quick reference\n- Better debugging and environment identification\n- Framework version tracking in deployed applications\n\n**Usage:**\n```javascript\n// Access version information\nconsole.log(`Using Dars v${Dars.version}`);\nconsole.log(`Release: ${Dars.releaseUrl}`);\n```\n\n## Technical Improvements\n\n### Web Exporter Enhancements\n- **Improved Style Application**: Fixed CSS generation to ensure all component styles render correctly\n- **Robust Event Serialization**: Enhanced handler extraction and code generation for reliable event execution\n- **Better Error Handling**: Individual error catching for multi-handler events prevents cascade failures\n\n### Component System\n- **Backward Compatibility**: All existing single-handler events continue working unchanged\n- **Enhanced Flexibility**: Mix and match handler types (dScript, strings, arrays) with consistent behavior\n- **Cleaner Code Generation**: Improved JavaScript output with proper handler separation and error boundaries\n\n## Migration Notes\n\n### For Existing Projects\n\n**Automatic Upgrade:**\n- No breaking changes - existing code works identically\n- Hover styles can be incrementally added to enhance existing components\n- Multi-handler events are optional - single handlers remain fully supported\n\n## Desktop Exporter Status\n\n**Still in BETA** - No changes from v1.3.3\n\n## Performance & Compatibility\n\n- **Zero Overhead**: New features only activate when used\n- **Bundle Size**: Minimal impact on final application size\n- **Browser Support**: Maintains full cross-browser compatibility\n- **Framework Integration**: Seamless with existing Dars ecosystem\n\n---\n\n**Upgrade Recommended** for all projects requiring enhanced interactivity and better development tooling.\n\n# Release Notes v1.3.3\n\n> Minor update featuring new semantic Section component and enhanced state serialization. Continues JavaScript migration improvements from v1.3.2.\n\n## Installation\n\n```bash\npip install --upgrade dars-framework\n```\n\nor\n\n```bash\npip install dars-framework==1.3.3\n```\n\n## What's New\n\n### Section Component\n\n**Semantic HTML Container:**\n- New `Section` component that renders as `<section></section>` instead of generic `<div>`\n- Maintains all functionality of Container component (children, styles, etc.)\n- Improves HTML readability and semantic structure for debugging\n- Better accessibility and SEO through proper sectioning elements\n\n**Usage:**\n```python\n# Creates <section> with all container capabilities\nSection(Button(\"HI\"), styles={...})\n```\n\n### Enhanced State & Event Serialization\n\n**Complete JavaScript Migration:**\n- States are now fully serialized in JavaScript and no longer exposed in HTML\n- Final migration of both state and event systems to pure JavaScript\n- Eliminates need for state/event data in VDOM structure\n- Improved security and cleaner HTML output\n\n**Benefits:**\n- More secure: State data hidden from direct HTML inspection\n- Cleaner markup: Reduced data attributes in rendered HTML\n- Better performance: Streamlined state management\n- Enhanced minification: Better compatibility with Vite optimization\n\n### Documentation Updates\n\n- Updated documentation to reflect new Section component usage\n- Enhanced examples and best practices for semantic HTML\n- Migration guides for state serialization changes\n\n## Technical Improvements\n\n- **Backward Compatible**: No breaking changes to existing components\n- **Progressive Enhancement**: Existing containers continue working as before\n- **Performance**: Maintains all optimizations from v1.3.2\n\n## Migration Notes\n\n### For Existing Projects\n\n**Automatic Upgrade:**\n- No configuration changes required\n- Existing container components remain unchanged\n- State management automatically uses new serialization\n\n**Optional Section Component Adoption:**\n```python\n# Old way (still works)\nContainer(children=[...])\n\n# New semantic way\nSection(children=[...])\n```\n\n## Desktop Exporter Status\n\n**Still in BETA** - No changes from v1.3.2\n\n## Known Issues\n\n- None introduced in this release\n- Continuing to monitor Electron desktop exporter stability\n\n---\n\n# Release Notes v1.3.2\n\n> Major minification improvements with combined JS files and optimized event handling. Electron desktop exporter remains in beta.\n\n## Installation\n\n```bash\npip install --upgrade dars-framework\n```\n\nor\n\n```bash\npip install dars-framework==1.3.2\n```\n\n## Highlights\n\n### Enhanced Minification System\n\n**Combined JavaScript Bundles:**\n- When `viteMinify: true` and `bundle: true` are enabled, the exporter now combines all JavaScript files into single optimized bundles\n- Single-page apps: All JS combined into `app.js`\n- Multi-page apps: Each page gets its own `app_{slug}.js` bundle\n- Eliminates reference issues between separate files during minification\n\n**Optimized Event Handling:**\n- Events are no longer stored in VDOM tree\n- Event handlers are now generated as valid JavaScript directly in runtime\n- Improved compatibility with Vite minification and obfuscation\n- Better performance and smaller bundle sizes\n\n**Smart File Management:**\n- When using combined bundles, individual files (`runtime_dars.js`, `script.js`, `vdom_tree.js`) are not generated\n- HTML files are updated to reference only the combined bundle\n- Backward compatible - falls back to separate files when `viteMinify: false`\n\n### Vite Minification Perfection\n\n- Vite can now minify the entire application as a single cohesive unit\n- Resolves function reference issues that previously broke minification\n- Proper obfuscation of all JavaScript code, including event handlers\n- Maintains full functionality while significantly reducing bundle size\n\n### Configuration-Driven Behavior\n\n```json\n{\n  \"viteMinify\": true,\n  \"bundle\": true,\n  \"defaultMinify\": true\n}\n```\n\n- **viteMinify**: Enables advanced Vite-based minification with combined bundles\n- **bundle**: Required for production-optimized builds\n- **defaultMinify**: Fallback minification when Vite is unavailable\n\n## Bug Fixes\n\n- **Fixed**: Vite minification breaking function references between separate JS files\n- **Fixed**: Event handlers not being properly minified and obfuscated\n- **Improved**: Multi-page application build performance\n\n## Desktop Exporter Status\n\n**Desktop Exporter remains in BETA**\n\nWhile the web exporter is now stable and production-ready, the Electron desktop exporter continues in beta due to:\n\n- Ongoing refinement of native API integrations\n- Cross-platform packaging and signing requirements\n- Advanced IPC and system integration features still in development\n\n**Current Desktop Capabilities:**\n- Basic file system operations (`read_text`, `write_text`)\n- Development mode with hot reload\n- Production packaging still experimental\n\n## Migration Notes\n\n### For Existing Projects\n\n**No breaking changes** - existing configurations continue to work. To benefit from the new minification:\n\n1. Update your `dars.config.json`:\n```json\n{\n  \"viteMinify\": true,\n  \"bundle\": true\n}\n```\n\n2. Run `dars build` or `dars export` as usual\n\n### Performance Improvements\n\n- **Bundle Size**: Up to 40% reduction in minified JavaScript\n- **Load Time**: Faster initial page loads with combined bundles\n- **Runtime Performance**: Better optimized event handling\n- **Build Time**: More efficient minification process\n\n## Known Issues\n\n- Electron desktop apps may require additional configuration for native module support\n- Some edge cases in complex component trees being investigated\n\n## Next Steps\n\nWe're working on:\n- **v1.4.0**: Production-ready Electron desktop exporter\n- **v1.5.0**: Advanced native desktop APIs and system integrations\n- **Future**: Plugin system and extended component library\n\n---\n\n# Release Notes v1.3.1 BETA\n\n> Native desktop functions and DX improved with dev mode and file system integration.\n\n## Installation\n\n```bash\npip install --upgrade dars-framework\n```\n\nor\n\n```bash\npip install dars-framework==1.3.1\n```\n\n## Highlights\n\n### Native Functions\n\nYou can acces native functions via `dars.desktop` module:\n\n```python\nfrom dars.desktop import *\n```\n\nWith this module you can acces for now 2 main functions:\n\n```python \nwrite_text(\"./app/lib/hello.txt\", \"Hello Text\")\n```\nand\n\n```python\nread_text(\"./app/lib/hello.txt\")\n```\n\nThis two functions allows you to read and write text files in your desktop application filesystem, both returns an dScript() with the code to be executed in the desktop app, and also the 2 functions can be used in events of any component.\n\nAlso you can use dScripts to run custom javascript code in the desktop app. and for now 'dars dev' is supported but python main.py with rTimeCompile() is not supported because it have issues with relative paths.\n\n## Bug Fixes\n\n- Fixed dev failures with hot reload using desktop format.\n\n## Notes(Warning)\n\n- This feature set is **BETA**. Many options (signing, advanced IPC, updates, and deeper configuration) are still evolving.\n- Usable for internal tools and early testing. Not recommended for production deployment yet.\n- Expect changes to configuration keys and defaults in future versions.\n\n\n# Release Notes v1.3.0 BETA\n\n> Native desktop export (BETA), improved CLI and doctor integration, and metadata fixes for packaging. This is a BETA release: usable for testing, not recommended for production.\n\n## Installation\n\n```bash\npip install --upgrade dars-framework\n```\n\nor\n\n```bash\npip install dars-framework==1.3.0\n```\n\n## Highlights\n\n- **New: Native Desktop Export (BETA)**\n  - Build desktop apps directly from Dars projects.\n  - Project config supports `format: \"desktop\"` and `targetPlatform` (`auto|windows|linux|macos`).\n  - Backend scaffold via `dars init --type desktop` (or `--update`), generating minimal main process files and preload bridge.\n  - IPC bridge includes basic FS read/write for quick experiments.\n  - Source emitted to `dist/source-electron/`; packaged artifacts in `dist/`.\n  - Note: This capability is BETA and not recommended for production yet.\n\n- **New: Desktop Build Flow in CLI**\n  - `dars build` respects `format: \"desktop\"` in `dars.config.json`.\n  - Platform flags are selected automatically or via `targetPlatform`.\n  - Robust error output: full stdout/stderr on packaging failure.\n\n- **New: Doctor Integration for Desktop Tooling**\n  - `dars doctor --all --yes` checks and installs optional desktop tooling.\n  - Pins the desktop runtime to a compatible version automatically when needed.\n\n- **Packaging Reliability Improvements**\n  - Project metadata auto-filled from `App` (name/title, description, author, version) with sensible defaults.\n  - Version defaulted to `0.1.0` when absent (warning emitted).\n  - Package manager forced to a stable toolchain to avoid ENOENT errors during packaging.\n  - Runtime version pinned explicitly in both dev deps and build config to ensure predictable builds.\n\n## Quickstart (Desktop BETA)\n\n```bash\n# Initialize or update a project with desktop scaffolding\ndars init --type desktop\n# or\ndars init --update\n\n# Verify optional tooling\ndars doctor --all --yes\n\n# Build using project config (format: \"desktop\")\ndars build\n```\n\nMinimal `dars.config.json` for desktop:\n\n```json\n{\n  \"entry\": \"main.py\",\n  \"format\": \"desktop\",\n  \"outdir\": \"dist\",\n  \"targetPlatform\": \"auto\"\n}\n```\n\n## Bug Fixes\n\n- Fixed packaging failures caused by missing metadata in project manifests by auto-populating:\n  - `description` from `App.description` (fallback to a default)\n  - `author` from `App.author` (fallback to a default)\n  - `version` from `App.version` (fallback `0.1.0` with warning)\n- Stabilized packaging by pinning desktop runtime version in both dev dependencies and build configuration.\n- Avoided package-manager ENOENT errors in packaging by forcing a stable manager and resolving runners reliably on Windows.\n- Correct platform flags for packaging: `--win`, `--linux`, `--mac`.\n- Improved error reporting to include stdout and stderr from the packaging tool.\n\n## Notes\n\n- This feature set is **BETA**. Many options (signing, advanced IPC, updates, and deeper configuration) are still evolving.\n- Usable for internal tools and early testing. Not recommended for production deployment yet.\n- Expect changes to configuration keys and defaults in future versions.\n\nI spent ~1 month iterating on this capability and consolidated changes into this single BETA release once it reached a usable threshold. Feedback is welcome to help stabilize and expand the desktop feature set.\n\n# Release Notes v1.2.9\n\n> Optional default minification, precise CLI control, faster builds, and clearer minification status.\n\n## Installation\n\n```bash\npip install --upgrade dars-framework\n```\n\nor\n\n```bash\npip install dars-framework==1.2.8\n```\n\n## Highlights\n\n- **New: Configurable Default Minifier**\n  - `defaultMinify` (default: true) controls the built‑in Python minifier.\n  - Preserves `pre`, `code`, `textarea`, `script`, `style`.\n  - Only removes non‑conditional HTML comments and collapses spaces between tags.\n  - Does not collapse text-node spaces (Markdown and `<pre><code>` remain intact).\n\n- **New: CLI Flag `--no-minify`**\n  - Available in `dars build` and `dars export`.\n  - Disables only the default Python minifier for that run.\n  - Independent from `viteMinify`.\n\n- **Minification Modes Work Together**\n  - When `defaultMinify` and `viteMinify` are both true:\n    - Default minifier applies (safe HTML and fallback for JS/CSS).\n    - Vite/esbuild minify JS/CSS where available.\n  - Status line now reflects the active mode:\n    - “Applying minification (default)”\n    - “Applying minification (vite)”\n    - “Applying minification (default + vite)”\n\n- **Faster Default Minifier**\n  - Default minifier uses fast Python fallback (rjsmin/rcssmin/regex) and never shells out to Vite/esbuild.\n  - Results in near‑instant minification step.\n\n## Bug Fixes\n\n- Default minifier no longer ignores config; `defaultMinify` and `--no-minify` are strictly honored.\n- Eliminated unintended use of esbuild/Vite inside the default minifier.\n- Improved label accuracy to match the actual minification pipeline (default, vite, or both).\n\n## Notes\n\n- Relevant configuration:\n  - `defaultMinify`: true/false. Controls the Python-side minification (HTML + JS/CSS fallback).\n  - `viteMinify`: true/false. Controls Vite/esbuild for JS/CSS when available.\n- Backward compatibility:\n  - Defaults maintain previous behavior, now safer for Markdown/code blocks.\n  - You can disable default minification per-run with `--no-minify` without affecting `viteMinify`.\n\nUpgrade Recommendation: Recommended for all users; especially helpful for projects with Markdown/code samples and those wanting faster, more controllable minification.\n\n# Older release notes can be found\n\nIn the github repository [Here](https://github.com/ZtaMDev/Dars-Framework/releases).\n"}]},{"type":"T2","id":"footer-section","key":"0/1/1","children":[{"type":"T2","id":"container_178","key":"0/1/1/0","children":[{"type":"T2","id":"container_179","key":"0/1/1/0/0","children":[{"type":"T2","id":"container_180","key":"0/1/1/0/0/0","children":[{"type":"T4","id":"image_181","key":"0/1/1/0/0/0/0"},{"type":"T2","id":"container_182","key":"0/1/1/0/0/0/1","children":[{"type":"T5","id":"text_183","key":"0/1/1/0/0/0/1/0","text":"Dars Framework"}]}]},{"type":"T2","id":"container_184","key":"0/1/1/0/0/1","children":[{"type":"T2","id":"container_185","key":"0/1/1/0/0/1/0","children":[{"type":"T5","id":"text_186","key":"0/1/1/0/0/1/0/0","text":"Quick Links"},{"type":"T6","id":"link_187","key":"0/1/1/0/0/1/0/1","text":"Documentation"},{"type":"T6","id":"link_188","key":"0/1/1/0/0/1/0/2","text":"GitHub"},{"type":"T6","id":"link_189","key":"0/1/1/0/0/1/0/3","text":"Examples"}]},{"type":"T2","id":"container_190","key":"0/1/1/0/0/1/1","children":[{"type":"T5","id":"text_191","key":"0/1/1/0/0/1/1/0","text":"Resources"},{"type":"T6","id":"link_192","key":"0/1/1/0/0/1/1/1","text":"Getting Started"},{"type":"T6","id":"link_193","key":"0/1/1/0/0/1/1/2","text":"Releases"}]},{"type":"T2","id":"container_194","key":"0/1/1/0/0/1/2","children":[{"type":"T5","id":"text_195","key":"0/1/1/0/0/1/2/0","text":"Info: "},{"type":"T5","id":"text_196","key":"0/1/1/0/0/1/2/1","text":"A modern Python framework for web and desktop applications"}]}]},{"type":"T2","id":"container_197","key":"0/1/1/0/0/2","children":[{"type":"T2","id":"container_198","key":"0/1/1/0/0/2/0","children":[{"type":"T5","id":"text_199","key":"0/1/1/0/0/2/0/0","text":"© 2024 Dars Framework."}]},{"type":"T2","id":"container_200","key":"0/1/1/0/0/2/1","children":[{"type":"T5","id":"text_201","key":"0/1/1/0/0/2/1/0","text":"Created with "},{"type":"T6","id":"link_202","key":"0/1/1/0/0/2/1/1","text":"Dars Framework"},{"type":"T5","id":"text_203","key":"0/1/1/0/0/2/1/2","text":" by "},{"type":"T6","id":"link_204","key":"0/1/1/0/0/2/1/3","text":"ZtaDev"}]}]}]}]}]}]},{"type":"T10","id":"documentation-sidebar","key":"0/2"}]};
+window.__DARS_VDOM__={type:"T1",id:"page_157",key:"0",children:[{type:"T2",id:"container_158",key:"0/0",children:[{type:"T3",id:"dars-navbar",key:"0/0/0",children:[{type:"T2",id:"navbar-left",key:"0/0/0/0",children:[{type:"T4",id:"image_159",key:"0/0/0/0/0"},{type:"T5",id:"text_160",key:"0/0/0/0/1",text:"Dars Framework"}]},{type:"T2",id:"container_161",key:"0/0/0/1",children:[{type:"T2",id:"navbar-right",key:"0/0/0/1/0",children:[{type:"T6",id:"link_162",key:"0/0/0/1/0/0",text:"Home"},{type:"T6",id:"link_163",key:"0/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_164",key:"0/0/0/1/0/2",text:"Releases"},{type:"T6",id:"link_165",key:"0/0/0/1/0/3",text:"PlayGround"},{type:"T6",id:"link_166",key:"0/0/0/1/0/4",text:"GitHub"}]},{type:"T2",id:"hamburger-menu",key:"0/0/0/1/1",children:[{type:"T2",id:"hamburger-btn",key:"0/0/0/1/1/0",children:[{type:"T2",id:"container_167",key:"0/0/0/1/1/0/0",children:[{type:"T2",id:"container_168",key:"0/0/0/1/1/0/0/0"},{type:"T2",id:"container_169",key:"0/0/0/1/1/0/0/1"},{type:"T2",id:"container_170",key:"0/0/0/1/1/0/0/2"}]}]},{type:"T2",id:"mobile-menu",key:"0/0/0/1/1/1",children:[{type:"T6",id:"link_171",key:"0/0/0/1/1/1/0",text:"Home"},{type:"T6",id:"link_172",key:"0/0/0/1/1/1/1",text:"Documentation"},{type:"T6",id:"link_173",key:"0/0/0/1/1/1/2",text:"Releases"},{type:"T6",id:"link_174",key:"0/0/0/1/1/1/3",text:"PlayGround"},{type:"T6",id:"link_175",key:"0/0/0/1/1/1/4",text:"GitHub"}]}]}]}]}]},{type:"T2",id:"container_176",key:"0/1",children:[{type:"T2",id:"markdown-content-container",key:"0/1/0",children:[{type:"T9",id:"markdown_177",key:"0/1/0/0",text:`# Release Notes v1.6.7
 
+> **Boolean Operators, Form Collection & Backend Integration**
 
-    // Runtime
-    // Dars Runtime
-    (function(){
-    const eventMap = new Map();
-    let currentSnapshot = null;
-    let currentVersion = null;
+## Installation
 
-    function initializeEvents() {
-    
-    
-    // --- Default Logic for Advanced Components ---
-    
-    }
-    
-    function initializeStates() {
-        // No hay estados para inicializar
-    }
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
 
-    function walk(v, fn){
-        if(!v) return;
-        fn(v);
-        const ch = v.children || [];
-        for(let i=0;i<ch.length;i++){ walk(ch[i], fn); }
-    }
+## What's New
 
-    // Utilities
-    function setProps(el, props){
-        if(!el || !props) return;
-        for(const [k,v] of Object.entries(props)){
-        try {
-            if(v === false || v === null || typeof v === 'undefined'){
-            el.removeAttribute(k);
-            } else {
-            el.setAttribute(k, String(v));
-            }
-        } catch(err) { /* ignore */ }
-        }
-    }
-    function diffProps(el, oldP={}, newP={}){
-        // remove
-        for(const k in oldP){ if(!(k in newP)){ try{ el.removeAttribute(k); }catch{} } }
-        // add/update
-        for(const k in newP){ const v=newP[k]; try{ if(v===false||v===null||typeof v==='undefined'){ el.removeAttribute(k);} else { el.setAttribute(k, String(v)); } }catch{} }
-    }
-    function diffStyles(el, oldS={}, newS={}){
-        for(const k in oldS){ if(!(k in newS)){ try{ el.style.removeProperty(k.replace(/_/g,'-')); }catch{} } }
-        for(const k in newS){ const v=newS[k]; try{ el.style.setProperty(k.replace(/_/g,'-'), String(v)); }catch{} }
-    }
+### Boolean & Comparison Operators for V()
 
-    function delegate(eventName, root){
-        (root||document).addEventListener(eventName, function(e){
-        let node = e.target;
-        const boundary = root||document;
-        while(node && node !== boundary){
-            const id = node.id;
-            if(id && eventMap.has(id)){
-            const handlers = eventMap.get(id);
-            
-            // Check __darsEv first (these are from js_lib.py event attachment)
-            if(node && node.__darsEv && node.__darsEv[eventName]){
-                return;
-            }
-            
-            // Try exact match first
-            let h = handlers[eventName];
-            
-            // For keyboard events, also check for key-filtered version
-            if(!h && (eventName === 'keydown' || eventName === 'keyup' || eventName === 'keypress')){
-                // Check if there's a filtered handler for this specific key
-                const key = e.key || e.code;
-                if(key){
-                const filteredEvent = eventName + '.' + key;
-                h = handlers[filteredEvent];
-                }
-            }
-            
-            if(typeof h === 'function'){
-                try { h.call(node, e); } catch(err){ console.error('[Dars] handler error', err); }
-                return;
-            }
-            }
-            node = node.parentNode;
-        }
-        }, true);
-    }
+Dars Framework v1.6.7 introduces a revolutionary declarative system for boolean logic and validation. Write complex conditionals in pure Python using comparison operators - **no inline JavaScript required!**
 
-    function typesDiffer(a,b){ return (a && b) ? a.type !== b.type : a!==b; }
+**Key Features:**
+- **Comparison Operators** - Use Python operators (\`==\`, \`!=\`, \`>\`, \`<\`, \`>=\`, \`<=\`)
+- **String Methods** - \`.includes()\`, \`.startswith()\`, \`.endswith()\`, \`.length()\`, \`.bool()\`
+- **Logical Operators** - \`.and_()\` and \`.or_()\` for combining conditions
+- **Conditional Expressions** - \`.then()\` for ternary operations
+- **Type Safety** - Numeric comparisons require \`.int()\` or \`.float()\`
 
-    function removeSubtree(v){
-        if(!v) return;
-        // eliminar hijos primero (postorden)
-        const ch = (v.children||[]);
-        for(let i=0;i<ch.length;i++){ removeSubtree(ch[i]); }
-        // limpiar handlers
-        if(v.id){ eventMap.delete(v.id); }
-        // quitar elemento del DOM
-        if(v.id){ const el = document.getElementById(v.id); if(el && el.parentNode){ try{ el.parentNode.removeChild(el); }catch(_){} } }
-    }
+#### Before (v1.6.6) - Raw JavaScript
 
-    function updateNode(oldV, newV){
-        if(!newV || !newV.id){ return { ok:false, reason:'missing-new' }; }
-        let el = document.getElementById(newV.id);
-        if(!el){
-        const oldEl = (oldV && oldV.id) ? document.getElementById(oldV.id) : null;
-        if(oldEl){ try { oldEl.id = newV.id; el = oldEl; } catch(_){} }
-        }
-        if(!el){ return { ok:false, reason:'missing-el' }; }
-
-        if(typesDiffer(oldV, newV)){
-        return { ok:false, reason:'type-changed' };
-        }
-
-        const isIsland = !!newV.isIsland;
-
-        // class -> atributo className
-        if(!isIsland && newV.class){ el.className = newV.class; }
-
-        // props
-        if(!isIsland){ diffProps(el, (oldV&&oldV.props)||{}, newV.props||{}); }
-
-        // styles
-        if(!isIsland){ diffStyles(el, (oldV&&oldV.style)||{}, newV.style||{}); }
-
-        // text
-        if(!isIsland && Object.prototype.hasOwnProperty.call(newV, 'text')){
-        if(el.textContent !== String(newV.text||'')){
-            el.textContent = String(newV.text||'');
-        }
-        }
-
-        if(isIsland){ return { ok:true }; }
-
-        const oldC = (oldV && oldV.children) ? oldV.children : [];
-        const newC = (newV.children) ? newV.children : [];
-
-        const oldIndex = new Map(); // clave -> vnode viejo
-        for(let i=0;i<oldC.length;i++){
-        const k = (oldC[i] && (oldC[i].id || oldC[i].key)) || null;
-        if(k){ oldIndex.set(String(k), oldC[i]); }
-        }
-
-        const seenOld = new Set();
-
-        for(let i=0;i<newC.length;i++){
-        const newChild = newC[i];
-        const k = (newChild && (newChild.id || newChild.key)) || null;
-        if(!k){
-            if(i < oldC.length){
-            const r = updateNode(oldC[i], newChild);
-            if(!r.ok){ return r; }
-            seenOld.add(oldC[i]);
-            continue;
-            } else {
-            return { ok:false, reason:'children-added' };
-            }
-        }
-        const oldChild = oldIndex.get(String(k));
-        if(oldChild){
-            const r = updateNode(oldChild, newChild);
-            if(!r.ok){ return r; }
-            seenOld.add(oldChild);
-        } else {
-            if(i < oldC.length){
-            const candidate = oldC[i];
-            if(!typesDiffer(candidate, newChild)){
-                const r = updateNode(candidate, newChild);
-                if(!r.ok){ return r; }
-                seenOld.add(candidate);
-                continue;
-            }
-            }
-            const subtree = createSubtree(newChild);
-            if(subtree){
-            const refChildVNode = (i < oldC.length) ? oldC[i] : null;
-            if(refChildVNode && refChildVNode.id){
-                const refEl = document.getElementById(refChildVNode.id);
-                if(refEl && refEl.parentNode){ refEl.parentNode.insertBefore(subtree, refEl); }
-                else { el.appendChild(subtree); }
-            } else {
-                el.appendChild(subtree);
-            }
-            continue;
-            }
-            return { ok:false, reason:'children-added' };
-        }
-        }
-
-        for(let i=0;i<oldC.length;i++){
-        const v = oldC[i];
-        if(!seenOld.has(v)){
-            removeSubtree(v);
-        }
-        }
-        return { ok:true };
-    }
-
-    function schedule(fn){
-        if(typeof requestAnimationFrame === 'function'){
-        requestAnimationFrame(fn);
-        } else { setTimeout(fn, 16); }
-    }
-
-    function update(newSnapshot){
-        const old = currentSnapshot;
-        if(!old){
-        currentSnapshot = newSnapshot;
-        try{ window.__DARS_VDOM__ = newSnapshot; }catch(_){ /* ignore */ }
-        return;
-        }
-        schedule(()=>{
-        const res = updateNode(old, newSnapshot);
-        if(!res.ok){
-            console.warn('[Dars] Structural change detected (', res.reason, '), reloading...');
-            try { location.reload(); } catch(e) { /* ignore */ }
-            return;
-        }
-        currentSnapshot = newSnapshot;
-        try{ window.__DARS_VDOM__ = newSnapshot; }catch(_){ /* ignore */ }
-        });
-    }
-
-    function hydrate(snapshot){
-        currentSnapshot = snapshot;
-        try{ window.__DARS_VDOM__ = snapshot; }catch(_){ /* ignore */ }
-        const delegated = [
-        'click','dblclick',
-        'mousedown','mouseup','mouseenter','mouseleave','mousemove',
-        'keydown','keyup','keypress',
-        'change','input','submit',
-        'focus','blur'
-        ];
-        delegated.forEach(ev => delegate(ev, document));
-    }
-
-    function startHotReload(){
-        try{ if (window.__DARS_HOTRELOAD_DISABLED__) return ()=>{}; }catch(_ ){ }
-        const vurl = (window.__DARS_VERSION_URL || 'version.txt');
-        let timer = null;
-        let warnedVersionMissing = false;
-        let failCount = 0;
-        const maxFails = 10;
-        let stopped = false;
-
-        function httpGet(url, onSuccess, onError, responseType){
-        try{
-            const xhr = new XMLHttpRequest();
-            if(responseType){ xhr.responseType = responseType; }
-            xhr.open('GET', url, true);
-            xhr.timeout = 5000;
-            xhr.onreadystatechange = function(){
-            if(xhr.readyState === 4){
-                if(xhr.status >= 200 && xhr.status < 300){
-                onSuccess(xhr.response);
-                } else {
-                onError();
-                }
-            }
-            };
-            xhr.onerror = onError;
-            xhr.ontimeout = onError;
-            xhr.setRequestHeader('Cache-Control', 'no-store');
-            xhr.send();
-        }catch(e){ onError(); }
-        }
-
-        function tick(){
-        if(stopped) return;
-        httpGet(vurl, function(text){
-            let ver = (text || '').toString().trim();
-            // Treat '0' or empty as missing
-            if(!ver || ver === '0'){
-            failCount += 1;
-            if(failCount >= maxFails){
-                console.warn('[Dars] version file not found after', maxFails, 'attempts. Hot reload disabled for this session.');
-                stopped = true;
-                try{ window.__DARS_HOTRELOAD_DISABLED__ = true; window.__DARS_STOP_HOTRELOAD = null; }catch(_ ){ }
-                if(timer) try{ clearTimeout(timer); }catch(_ ){ }
-                return;
-            }
-            if(!warnedVersionMissing){ console.warn('[Dars] waiting for version file...'); warnedVersionMissing = true; }
-            timer = setTimeout(tick, 600);
-            return;
-            }
-            // Reset fail counter on valid version
-            failCount = 0;
-            warnedVersionMissing = false;
-            if(!currentVersion){ currentVersion = ver; }
-            if(ver && ver !== currentVersion){
-            currentVersion = ver;
-            try { location.reload(); } catch(_) {}
-            return;
-            }
-            timer = setTimeout(tick, 600);
-        }, function(){
-            failCount += 1;
-            if(failCount >= maxFails){
-            console.warn('[Dars] version file not reachable after', maxFails, 'attempts. Hot reload disabled for this session.');
-            stopped = true;
-            try{ window.__DARS_HOTRELOAD_DISABLED__ = true; window.__DARS_STOP_HOTRELOAD = null; }catch(_ ){ }
-            if(timer) try{ clearTimeout(timer); }catch(_ ){ }
-            return;
-            }
-            if(!warnedVersionMissing){ console.warn('[Dars] waiting for version file...'); warnedVersionMissing = true; }
-            timer = setTimeout(tick, 600);
-        }, 'text');
-        }
-        tick();
-        return ()=>{ try{ stopped = true; if(timer) clearTimeout(timer); window.__DARS_STOP_HOTRELOAD = null; }catch(_ ){ } };
-    }
-
-document.addEventListener('DOMContentLoaded', function(){
-initializeStates();
-//Inicializar eventos antes de la hidratación
-initializeEvents();
+\`\`\`python
+Button(
+    "Validate",
+    on_click=dScript("""
+        const email = document.querySelector('#email').value;
+        const age = parseInt(document.querySelector('#age').value);
         
-if(window.__DARS_VDOM__){
-hydrate(window.__DARS_VDOM__);
-} else {
-console.warn('[Dars] No VDOM snapshot found for hydration');
-}
-// Activar hot-reload incremental en dev si hay URLs definidas (evitar múltiples pollers)
-if(window.__DARS_VERSION_URL && window.__DARS_SNAPSHOT_URL){
-try{ if (typeof window.__DARS_STOP_HOTRELOAD === 'function') { window.__DARS_STOP_HOTRELOAD(); } }catch(_){ }
-try{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }catch(_){ }
-}
+        let valid = false;
+        if (email.includes('@') && email.includes('.') && age >= 18 && age <= 120) {
+            valid = true;
+        }
+        
+        const message = valid ? '\u2713 Valid' : '\u2717 Invalid';
+        
+        window.Dars.change({
+            id: 'form',
+            dynamic: true,
+            validation: message
+        });
+    """)
+)
+\`\`\`
 
-// Initialize reactive bindings for useDynamic
-    // No reactive bindings
-});
-})();
+#### After (v1.6.7) - Declarative Python
 
+\`\`\`python
+Button(
+    "Validate",
+    on_click=form.validation.set(
+        (V("#email").includes("@")).and_(
+            V("#email").includes(".")
+        ).and_(
+            V("#age").int() >= 18
+        ).and_(
+            V("#age").int() <= 120
+        ).then("\u2713 Valid", "\u2717 Invalid")
+    )
+)
+\`\`\`
 
-    // Page Scripts
-    // Scripts específicos de esta página (combinados)
-// Script: dScript
-window.addEventListener("scroll", () => {
-  const navbar = document.getElementById("dars-navbar");
-  if (window.scrollY > 20) {
-    navbar.classList.add("scrolled");
-  } else {
-    navbar.classList.remove("scrolled");
-  }
+**Benefits:**
+- **90% less code**
+- **Type-safe** with explicit transformations
+- **Readable** - Python syntax
+- **No inline JavaScript** - pure Python
+- **Chainable** - combine multiple conditions
 
-  const featuresSection = document.getElementById("features-section");
-  if (featuresSection && !featuresSection.classList.contains("visible")) {
-    const sectionPosition = featuresSection.getBoundingClientRect().top;
-    const screenPosition = window.innerHeight / 1.5;
+---
 
-    if (sectionPosition < screenPosition) {
-      featuresSection.classList.add("visible");
+### Comparison Operators
 
-      const featureCards = document.querySelectorAll('[id^="feature-card-"]');
-      featureCards.forEach((card, index) => {
-        setTimeout(() => {
-          card.style.opacity = "1";
-          card.style.transform = "translateY(0)";
-        }, index * 100);
-      });
-    }
-  }
-});
+\`\`\`python
+# Numeric comparisons (require .int() or .float())
+V("#age").int() >= 18
+V("#price").float() < 100.0
+V("#quantity").int() == 5
 
-const logo = document.getElementById("hero-logo");
-const title = document.getElementById("hero-title");
-const desc = document.getElementById("hero-description");
-const pipCommand = document.getElementById("pip-command");
-const btn = document.getElementById("get-started-btn");
-const scrollText = document.getElementById("scroll-text");
+# String equality
+V("#password") == V("#confirm-password")
+V("#email") != ""
 
-if (logo) {
-  setTimeout(() => logo.classList.add("show"), 5);
-}
-if (title) {
-  setTimeout(() => title.classList.add("show"), 350);
-}
-if (desc) {
-  setTimeout(() => desc.classList.add("show"), 650);
-}
-if (pipCommand) {
-  setTimeout(() => pipCommand.classList.add("show"), 950);
-}
-if (btn) {
-  setTimeout(() => btn.classList.add("show"), 1250);
-}
-if (scrollText) {
-  setTimeout(() => scrollText.classList.add("show"), 1500);
-}
+# All operators: ==, !=, >, <, >=, <=
+\`\`\`
 
-document.addEventListener('DOMContentLoaded', function () {
-  const hamburgerBtn = document.getElementById('hamburger-btn');
-  const mobileMenu = document.getElementById('mobile-menu');
-  const body = document.body;
+### String Methods
 
-  if (hamburgerBtn && mobileMenu) {
-    hamburgerBtn.addEventListener('click', function (e) {
-      e.stopPropagation();
-      const isOpen = mobileMenu.style.display === 'flex';
+\`\`\`python
+# Check if string contains substring
+V("#email").includes("@")
 
-      if (isOpen) {
-        // Cerrar menÃº
-        mobileMenu.style.display = 'none';
-        hamburgerBtn.classList.remove('menu-open');
-        body.classList.remove('menu-open');
-      } else {
-        // Abrir menÃº
-        mobileMenu.style.display = 'flex';
-        hamburgerBtn.classList.add('menu-open');
-        body.classList.add('menu-open');
-      }
-    });
+# Check string start/end
+V("#filename").startswith("report_")
+V("#filename").endswith(".pdf")
 
-    // Cerrar menÃº al hacer clic en un enlace
-    mobileMenu.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', function () {
-        mobileMenu.style.display = 'none';
-        hamburgerBtn.classList.remove('menu-open');
-        body.classList.remove('menu-open');
-      });
-    });
+# Get string length (returns ValueRef with .int())
+V("#password").length() >= 8
 
-    // Cerrar menÃº al hacer clic fuera
-    document.addEventListener('click', function (event) {
-      if (!hamburgerBtn.contains(event.target) && !mobileMenu.contains(event.target)) {
-        mobileMenu.style.display = 'none';
-        hamburgerBtn.classList.remove('menu-open');
-        body.classList.remove('menu-open');
-      }
-    });
+# Convert to boolean
+V("#checkbox").bool()
+\`\`\`
 
-    // Cerrar menÃº con tecla Escape
-    document.addEventListener('keydown', function (event) {
-      if (event.key === 'Escape' && mobileMenu.style.display === 'flex') {
-        mobileMenu.style.display = 'none';
-        hamburgerBtn.classList.remove('menu-open');
-        body.classList.remove('menu-open');
-      }
-    });
-  }
-});
+### Logical Operators
 
+\`\`\`python
+# AND operator
+(V("#age").int() >= 18).and_(V("#age").int() <= 65)
+
+# OR operator
+(V("#email").includes("@")).or_(V("#phone").length() >= 10)
+
+# Complex combinations
+(V("#name").length() >= 3).and_(
+    (V("#email").includes("@")).and_(
+        V("#email").includes(".")
+    )
+)
+\`\`\`
+
+### Conditional Expressions
+
+\`\`\`python
+# Simple conditional
+(V("#age").int() >= 18).then("Adult", "Minor")
+
+# With state updates
+state.message.set(
+    (V("#score").int() >= 60).then("Pass", "Fail")
+)
+
+# Complex validation
+state.validation.set(
+    (V("#password").length() >= 8).and_(
+        V("#password") == V("#confirm")
+    ).then("\u2713 Valid", "\u2717 Invalid")
+)
+\`\`\`
+
+---
+
+### Pythonic Form Collection System
+
+**New in v1.6.7**: Collect and submit form data without writing a single line of JavaScript!
+
+The new \`FormData\` class and \`collect_form()\` helper provide a completely declarative way to handle forms using \`V()\` expressions.
+
+#### Basic Usage
+
+\`\`\`python
+from dars.all import *
+
+# Collect form data with kwargs syntax
+form_data = collect_form(
+    name=V("#name-input"),
+    email=V("#email-input"),
+    age=V("#age-input").int(),
+    is_premium=V("#premium-checkbox")
+)
+
+# Show in alert
+Button("Submit", on_click=form_data.alert())
+
+# Log to console
+Button("Log", on_click=form_data.log())
+
+# Save to state
+Button("Save", on_click=form_data.to_state(state.data))
+\`\`\`
+
+#### Advanced Features
+
+**Nested Dictionaries & Lists:**
+
+\`\`\`python
+form_data = collect_form(
+    name=V("#name"),
+    email=V("#email"),
     
+    # Nested validation results
+    validation={
+        "email_valid": V("#email").includes("@"),
+        "age_ok": (V("#age").int() >= 18).and_(
+                   V("#age").int() <= 120)
+    },
+    
+    # Conditional values
+    discount=(V("#premium").bool()).then("10%", "0%"),
+    
+    # Timestamp
+    submitted_at=getDateTime()
+)
+\`\`\`
+
+#### FormData Methods
+
+**\`.alert(title)\`** - Show form data in alert dialog
+
+**\`.log(message)\`** - Log form data to console
+
+**\`.to_state(property)\`** - Save form data to state
+
+**\`.submit(url, state_property, on_success, on_error)\`** - Submit to backend via POST
+
+**\`.submit_and_alert(state_property, title)\`** - Submit with alert
+
+---
+
+### Backend Integration
+
+Submit forms to backend APIs with a single method call:
+
+\`\`\`python
+from dars.all import *
+
+app = App("Form with Backend")
+form = State("form", response="")
+
+# Collect form data
+form_data = collect_form(
+    name=V("#name"),
+    email=V("#email"),
+    age=V("#age").int(),
+    submitted_at=getDateTime()
+)
+
+@route("/")
+def index():
+    return Page(
+        Container(
+            Input(id="name", placeholder="Name"),
+            Input(id="email", placeholder="Email"),
+            Input(id="age", input_type="number", placeholder="Age"),
+            
+            # Submit to backend - NO RAW JAVASCRIPT!
+            Button(
+                "Submit to Backend",
+                on_click=form_data.submit(
+                    url="http://localhost:3000/submit",
+                    state_property=form.response,
+                    on_success=alert("Form submitted successfully!")
+                )
+            ),
+            
+            # Display backend response
+            Container(
+                Text("Backend Response:", style="font-bold"),
+                Text(text=useDynamic("form.response"))
+            )
+        )
+    )
+
+app.add_page("index", index())
+\`\`\`
+
+**Features:**
+- **Automatic JSON serialization**
+- **State integration** - save response to state
+- **Success/error callbacks**
+- **CORS support**
+- **Nested data structures**
+
+---
+
+### getDateTime() - Timestamp Helper
+
+Generate client-side timestamps in multiple formats:
+
+\`\`\`python
+# Default ISO format
+getDateTime()  # "2025-12-04T22:04:09.123Z"
+
+# Different formats
+getDateTime("iso")        # "2025-12-04T22:04:09.123Z"
+getDateTime("locale")     # "12/4/2025, 10:04:09 PM"
+getDateTime("date")       # "12/4/2025"
+getDateTime("time")       # "10:04:09 PM"
+getDateTime("timestamp")  # 1733362449123
+\`\`\`
+
+**Usage in Forms:**
+
+\`\`\`python
+form_data = collect_form(
+    name=V("#name"),
+    email=V("#email"),
+    submitted_at=getDateTime()  # Automatic timestamp
+)
+\`\`\`
+
+**Usage with State:**
+
+\`\`\`python
+Button("Save", on_click=state.last_updated.set(getDateTime()))
+\`\`\`
+
+---
+
+## Complete Example
+
+Here's a complete form validation and submission example using all new features:
+
+\`\`\`python
+from dars.all import *
+
+app = App("Complete Form Demo")
+
+form = State("form", 
+    email_valid="",
+    age_valid="",
+    password_valid="",
+    backend_response=""
+)
+
+# Collect form data
+form_data = collect_form(
+    name=V("#name"),
+    email=V("#email"),
+    age=V("#age").int(),
+    password=V("#password"),
+    confirm_password=V("#confirm"),
+    
+    # Nested validation
+    validation={
+        "email_valid": V("#email").includes("@"),
+        "age_ok": (V("#age").int() >= 18).and_(
+                   V("#age").int() <= 120),
+        "password_strong": V("#password").length() >= 8,
+        "passwords_match": V("#password") == V("#confirm")
+    },
+    
+    # Timestamp
+    submitted_at=getDateTime()
+)
+
+@route("/")
+def index():
+    return Page(
+        Container(
+            # Email validation
+            Input(id="email", placeholder="Email"),
+            Button(
+                "Validate Email",
+                on_click=form.email_valid.set(
+                    (V("#email").includes("@")).and_(
+                        V("#email").includes(".")
+                    ).then("\u2713 Valid", "\u2717 Invalid")
+                )
+            ),
+            Text(text=useDynamic("form.email_valid")),
+            
+            # Age validation
+            Input(id="age", input_type="number", placeholder="Age"),
+            Button(
+                "Validate Age",
+                on_click=form.age_valid.set(
+                    (V("#age").int() >= 18).and_(
+                        V("#age").int() <= 120
+                    ).then("\u2713 Valid", "\u2717 Must be 18-120")
+                )
+            ),
+            Text(text=useDynamic("form.age_valid")),
+            
+            # Password match
+            Input(id="password", input_type="password", placeholder="Password"),
+            Input(id="confirm", input_type="password", placeholder="Confirm"),
+            Button(
+                "Check Match",
+                on_click=form.password_valid.set(
+                    (V("#password") == V("#confirm")).and_(
+                        V("#password").length() >= 8
+                    ).then("\u2713 Match", "\u2717 No match")
+                )
+            ),
+            Text(text=useDynamic("form.password_valid")),
+            
+            # Submit to backend
+            Button(
+                "Submit to Backend",
+                on_click=form_data.submit(
+                    url="http://localhost:3000/submit",
+                    state_property=form.backend_response,
+                    on_success=alert("Success!")
+                )
+            ),
+            
+            # Display response
+            Text(text=useDynamic("form.backend_response"))
+        )
+    )
+
+app.add_page("index", index())
+
+if __name__ == "__main__":
+    app.rTimeCompile()
+\`\`\`
+
+---
+
+## Bug Fixes
+
+### Fixed Transformation Chaining
+
+Fixed a critical bug where \`.int()\` and \`.float()\` transformations were overwriting previous transformations instead of chaining them.
+
+**Issue:**
+\`\`\`python
+# This was failing
+V("#name").length() >= 4  # .length() was being overwritten
+\`\`\`
+
+**Fixed:**
+\`\`\`python
+# Now works correctly
+V("#name").length() >= 4  # .length() chains with .int()
+\`\`\`
+
+### State.set() Expression Compatibility
+
+Added \`to_dscript()\` method to \`BooleanExpression\`, \`ConditionalExpression\`, and \`LogicalExpression\` classes to make them compatible with \`State.set()\` calls.
+
+---
+
+## What's Next
+
+Future enhancements planned for 1.7.0:
+- \`useVRef()\` hook for reactive value references
+- \`setVRef()\` hook for setting values
+- \`updateVRef()\` helper for value updates
+- Enhanced exporter integration
+- More string methods (\`.replace()\`, \`.split()\`, \`.join()\`)
+- Array operations
+
+---
+
+## Documentation
+
+- **Hooks Guide**: Updated with boolean operators, form collection, and getDateTime
+- **Operations Guide**: Enhanced with comparison and logical operators
+- **Backend Integration**: New guide for form submission and API integration
+
+---
+
+# Release Notes v1.6.6
+
+> **Custom Utility Styles & State Hot Reload Fix**
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+## What's New
+
+### Custom Utility Styles
+
+You can now define your own utility classes in \`dars.config.json\` under the \`utility_styles\` key. This powerful feature allows you to:
+
+- **Compose Utilities**: Combine multiple existing Dars utilities into a single class (e.g., \`btn-primary\`).
+- **Use Raw CSS**: Mix standard CSS properties (e.g., \`border: 1px solid red\`) directly within your utility definitions.
+- **Recursive Composition**: Build complex utilities by referencing other custom utilities.
+
+**Example \`dars.config.json\`:**
+\`\`\`json
+{
+  "utility_styles": {
+    "btn-primary": ["bg-blue-600", "text-white", "p-3", "rounded-lg"],
+    "card-fancy": ["bg-white", "shadow-lg", "border: 1px solid #e5e7eb"]
+  }
+}
+\`\`\`
+
+### Critical Fixes
+
+- **State Hot Reload**: Fixed a critical issue where \`State\` objects were duplicated during hot reloads, leading to stale data and unpredictable behavior. The state registry is now properly cleared on every reload.
+- **Border Utility Fallback**: Improved the parsing logic for \`border-\` utilities to correctly distinguish between Tailwind-like classes and raw CSS \`border:\` properties.
+
+### Documentation
+
+- **New Custom Utilities Guide**: Added comprehensive documentation for the new custom styling system in \`styling\`.
+- **Configuration Reference**: Updated \`config\` with details on \`utility_styles\` and other configuration options.
+
+---
+
+# Release Notes v1.6.5
+
+> **Massive Styling Expansion & SPA Fixes**
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+## What's New
+
+### Massive Styling System Expansion
+
+Dars v1.6.5 brings a colossal update to the utility styling system, making it nearly feature-complete with modern utility-first CSS frameworks like Tailwind.
+
+**New Features:**
+- **Complete Color Palette**: Added full ranges (50-950) for \`cyan\`, \`teal\`, \`lime\`, \`amber\`, \`emerald\`, \`fuchsia\`, \`rose\`, \`zinc\`, \`neutral\`, and \`stone\`.
+- **Direct Font Size**: New \`fs-[value]\` utility for setting exact font sizes (e.g., \`fs-[14px]\`).
+- **Font Family**: New \`ffam-[value]\` utility for setting font families (e.g., \`ffam-sans\`, \`ffam-[Open_Sans]\`).
+- **Transforms & Filters**: Full support for \`scale\`, \`rotate\`, \`translate\`, \`skew\`, \`blur\`, \`brightness\`, \`contrast\`, etc.
+- **Backdrop Filters**: Added \`backdrop-blur\`, \`backdrop-brightness\`, etc.
+- **Expanded Layout**: Added \`table\`, \`contents\`, \`flow-root\`, \`object-fit\`, \`z-index\`, and more.
+
+### Critical Fixes for SPA Styling
+
+Resolved a critical issue where \`hover_style\` and \`active_style\` were not being generated for Single Page Applications (SPA) using the \`@route\` decorator.
+
+- **SPA Routes Support**: The CSS generator now correctly processes all SPA routes to generate state-based styles.
+- **Multi-line CSS Fix**: Fixed an issue where multi-line CSS strings in utilities were not correctly parsed into valid CSS rules.
+
+### Documentation Updates
+
+- **New Styling Guide**: Complete reference for the new utility system in \`styling.md\`.
+- **Operations Guide**: Detailed documentation for the Pythonic math expression system in \`operations.md\`.
+- **Contributing Guide**: Added \`CONTRIBUTING.md\` for community guidelines.
+
+---
+
+# Release Notes v1.6.4
+
+> **Pythonic Mathematical Expressions - Declarative Calculations**
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+## What's New
+
+### Pythonic Expression System with V()
+
+Dars Framework v1.6.4 introduces a revolutionary declarative system for mathematical expressions. Write complex calculations in pure Python using operator overloading - **no inline JavaScript required!**
+
+**Key Features:**
+- **Operator Overloading** - Use Python operators (\`+\`, \`-\`, \`*\`, \`/\`, \`%\`, \`**\`)
+- **Automatic Precedence** - Parentheses handled automatically
+- **Dynamic Operators** - Operators from Select/Input elements
+- **NaN Validation** - Safe handling of empty/invalid inputs
+- **Type Safety** - Numeric operations require \`.float()\` or \`.int()\`
+
+#### Before (v1.6.3) - Verbose JavaScript
+
+\`\`\`python
+Button(
+    "Calculate",
+    on_click=dScript(f"""
+        const n1 = parseFloat(document.querySelector('.num1').value);
+        const n2 = parseFloat(document.querySelector('.num2').value);
+        const op = document.querySelector('.operation').value;
+        
+        let result = 0;
+        switch(op) {{
+            case '+': result = n1 + n2; break;
+            case '-': result = n1 - n2; break;
+            case '*': result = n1 * n2; break;
+            case '/': result = n1 / n2; break;
+        }}
+        
+        window.Dars.change({{
+            id: 'calc',
+            dynamic: true,
+            result: result
+        }});
+    """)
+)
+\`\`\`
+
+#### After (v1.6.4) - Declarative Python
+
+\`\`\`python
+Button(
+    "Calculate",
+    on_click=calc.result.set(
+        V(".num1").float() + V(".operation").operator() + V(".num2").float()
+    )
+)
+\`\`\`
+
+**Benefits:**
+- **less code**
+- **Type-safe** with explicit transformations
+- **NaN validation** with console warnings
+- **Pythonic syntax** - feels natural
+- **No inline JavaScript** - pure Python
+
+---
+
+### Mathematical Operations
+
+#### Simple Arithmetic
+
+\`\`\`python
+# Addition
+calc.total.set(V(".price").float() + V(".tax").float())
+
+# Subtraction
+calc.change.set(V(".paid").float() - V(".total").float())
+
+# Multiplication
+calc.total.set(V(".price").float() * V(".quantity").int())
+
+# Division
+calc.average.set(V(".sum").float() / V(".count").int())
+\`\`\`
+
+#### Complex Expressions with Automatic Precedence
+
+\`\`\`python
+# a + b * c  \u2192  a + (b * c)  \u2705 Automatic
+calc.result.set(
+    V(".a").float() + V(".b").float() * V(".c").float()
+)
+
+# (a + b) * c  \u2192  (a + b) * c  \u2705 Preserved
+calc.result.set(
+    (V(".a").float() + V(".b").float()) * V(".c").float()
+)
+
+# With literals
+calc.total.set(
+    (V(".price").float() * V(".qty").int()) * 1.15  # Add 15% tax
+)
+\`\`\`
+
+**Precedence Table:**
+
+| Operator | Precedence | Associativity |
+|----------|------------|---------------|
+| \`**\`     | 3 (highest)| Right         |
+| \`*\`, \`/\`, \`%\` | 2     | Left          |
+| \`+\`, \`-\` | 1 (lowest) | Left          |
+
+---
+
+### Dynamic Operators
+
+Use operators from Select or Input elements with the new \`.operator()\` method:
+
+\`\`\`python
+from dars.all import *
+
+calc = State("calc", operation="+", result=0)
+
+@route("/")
+def index():
+    return Page(
+        # Operation selector
+        Select(
+            value=useValue("calc.operation", selector=".operation"),
+            class_name="operation",
+            options=[
+                SelectOption("+", "\u2795 Add"),
+                SelectOption("-", "\u2796 Subtract"),
+                SelectOption("*", "\u2716\uFE0F Multiply"),
+                SelectOption("/", "\u2797 Divide")
+            ]
+        ),
+        
+        # Number inputs
+        Input(class_name="num1", input_type="number"),
+        Input(class_name="num2", input_type="number"),
+        
+        # Declarative calculation!
+        Button(
+            "Calculate",
+            on_click=calc.result.set(
+                V(".num1").float() + V(".operation").operator() + V(".num2").float()
+            )
+        ),
+        
+        # Result display
+        Text(text=useDynamic("calc.result"))
+    )
+\`\`\`
+
+**How it works:**
+1. \`V(".operation").operator()\` extracts the operator value
+2. Validates against whitelist: \`+\`, \`-\`, \`*\`, \`/\`, \`%\`, \`**\`
+3. Uses switch statement for safe evaluation
+4. Falls back to \`+\` if invalid (with console warning)
+
+---
+
+### NaN Validation
+
+All mathematical expressions include automatic NaN validation:
+
+\`\`\`python
+# Empty inputs automatically return 0
+Button(
+    "Calculate",
+    on_click=calc.result.set(
+        V(".num1").float() + V(".num2").float()
+    )
+)
+# Empty inputs \u2192 Returns 0
+# Console: "[Dars] Invalid input: one or more values are NaN. Returning 0."
+\`\`\`
+
+**Validation Points:**
+1. **Input Validation** - Checks operands before calculation
+2. **Result Validation** - Checks result after calculation
+3. **Console Logging** - Warns when NaN is detected
+
+---
+
+### Enhanced Select Component
+
+- **useValue Support** - Set initial value from state with selector
+- **Proper Value Handling** - Correctly selects option based on initial value
+- **Selector Integration** - Works seamlessly with \`V()\` for value extraction
+
+\`\`\`python
+Select(
+    value=useValue("calc.operation", selector=".operation"),
+    class_name="operation",
+    options=[...]
+)
+\`\`\`
+
+---
+
+## What's Next
+
+Future enhancements planned for 1.7.0:
+- Comparison operators (\`>\`, \`<\`, \`==\`, \`!=\`)
+- Logical operators (\`and\`, \`or\`, \`not\`)
+- Ternary operator support
+- Array/list operations
+- Math functions (\`.abs()\`, \`.round()\`, \`.sqrt()\`, etc.)
+
+---
+
+# Release Notes v1.6.3
+
+
+> **Tailwind-like Utility Class System**
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+## What's New
+
+### Tailwind-like Utility Class System
+
+Dars Framework now includes a powerful, Python-native utility class system inspired by Tailwind CSS. You can style your components using concise utility strings directly in your Python code, without any external build tools or Node.js dependencies.
+
+**Key Features:**
+- **Zero Configuration**: Works out of the box.
+- **Python-Native**: Parsed at runtime/export time into standard CSS.
+- **No Node.js**: No need for npm, PostCSS, or Tailwind CLI.
+- **Type-Safe**: Integrated directly into \`Component\` props.
+
+**Example:**
+
+\`\`\`python
+from dars.all import *
+
+def MyComponent():
+    return Container(
+        Text("Hello, Dars!"),
+        style="bg-blue-500 p-4 rounded-lg shadow-md hover:bg-blue-600 transition-all",
+        hover_style="scale-105",
+        active_style="scale-95"
+    )
+\`\`\`
+
+### Supported Utilities
+
+The system supports a wide range of utilities including:
+- **Layout**: \`flex\`, \`grid\`, \`block\`, \`hidden\`, \`flex-row\`, \`justify-center\`, \`items-center\`, \`gap-4\`
+- **Spacing**: \`p-4\`, \`m-4\`, \`px-2\`, \`py-2\` (using rem units)
+- **Sizing**: \`w-full\`, \`h-screen\`, \`w-1/2\`, \`max-w-md\`
+- **Typography**: \`text-xl\`, \`font-bold\`, \`text-center\`, \`text-blue-500\`
+- **Backgrounds**: \`bg-red-500\`, \`bg-gray-100\`
+- **Borders**: \`border\`, \`border-2\`, \`rounded-lg\`, \`rounded-full\`
+- **Effects**: \`shadow-md\`, \`opacity-50\`, \`cursor-pointer\`
+
+### Arbitrary Values
+
+For values not in the standard scale, use square brackets:
+\`\`\`python
+style="w-[350px] bg-[#1a2b3c] z-[100] top-[50px]"
+\`\`\`
+
+### State Integration
+
+Utility strings work seamlessly with Dars State management for dynamic styling:
+
+\`\`\`python
+state = State("theme", style="bg-gray-100 p-4")
+
+Container(
+    "Content",
+    style=useDynamic("theme.style"),  # Binds directly to the utility string
+)
+\`\`\`
+
+---
+
+# Release Notes v1.6.2
+
+> **useValue Enhancements & Critical Hot Reload Fixes**
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+## What's New
+
+### Enhanced \`useValue\` Hook - Simplified Usage
+
+The \`useValue\` hook has been improved to support direct usage in built-in components without requiring a selector. This makes it easier to set initial (non-reactive) values from state.
+
+**Simplified Syntax:**
+\`\`\`python
+# Before (required selector)
+Text(text=useValue("user.name", ".my-text"))
+
+# Now (selector optional)
+Text(text=useValue("user.name"))
+\`\`\`
+
+This is perfect for initializing components with state values that don't need to update reactively or be extracted back later.
+
+### Critical Bug Fixes
+
+#### \`useDynamic\` Numeric Value Display
+Fixed an issue where \`useDynamic\` would display internal marker strings (e.g., \`__DARS_DYNAMIC_...\`) instead of the actual value when the state property was a number (especially \`0\`). Numeric values are now correctly resolved and displayed in both initial render and reactive updates.
+
+#### State Hot Reloading Fix
+Resolved a critical issue where state changes were not reflected after a hot reload. The state registry now correctly deduplicates state objects, ensuring that the most recent version of the state is always used. This fixes cases where changing a default value in code (e.g., \`count=0\` to \`count=2\`) wouldn't update the UI.
+
+---
+
+# Release Notes v1.6.1
+
+> **Side Effects System Enhancement - useWatch Arrays & Multiple Callbacks**
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+## What's New
+
+### Enhanced useWatch Hook - Array Syntax & Multiple Callbacks
+
+The \`useWatch\` hook now supports watching multiple state properties simultaneously and executing multiple callbacks, enabling powerful reactive patterns and side effects.
+
+**Watch Multiple State Properties:**
+\`\`\`python
+# Watch multiple properties - callback executes when ANY of them change
+app.useWatch(
+    ["product.name", "product.price"],
+    productState.info.set("Product: " + V("product.name") + " - $" + V("product.price"))
+)
+\`\`\`
+
+**Multiple Callbacks:**
+\`\`\`python
+# Execute multiple callbacks when state changes
+app.useWatch(
+    "cart.total",
+    log("Total changed!"),
+    alert("Cart updated")
+)
+
+# Combine array syntax with multiple callbacks
+app.useWatch(
+    ["product.name", "product.price"],
+    productState.info.set("Product: " + V("product.name") + " - $" + V("product.price")),
+    log("Product info updated")
+)
+\`\`\`
+
+**Key Features:**
+- **Array Syntax**: Watch multiple state paths with a single watcher
+- **Multiple Callbacks**: Execute multiple side effects in sequence
+- **Reactive Composition**: Automatically sync derived state when source properties change
+- **Clean API**: Simple comma-separated syntax for callbacks
+
+### Bug Fixes
+
+#### Fixed Custom State Property Handling
+
+Resolved an issue where custom state properties (properties other than \`text\`, \`html\`, \`style\`, \`attrs\`) were not correctly triggering watchers when updated via \`change()\`.
+
+**What was fixed:**
+- Custom properties like \`info\`, \`count\`, \`status\` now correctly update in \`st.values\`
+- Watchers for custom properties now trigger reliably
+- State registry properly maintains current values for all properties
+
+**Example that now works correctly:**
+\`\`\`python
+productState = State("product", name="Milk", price=100, info="")
+
+# This now correctly updates product.info when name or price changes
+app.useWatch(
+    ["product.name", "product.price"],
+    productState.info.set("Product: " + V("product.name") + " - $" + V("product.price"))
+)
+\`\`\`
+
+#### Improved V() Helper State Access
+
+The \`V()\` helper now correctly retrieves current state values from the state registry instead of reading stale values from the DOM.
+
+**Previous Behavior:**
+- \`V("product.name")\` would read the displayed text from the DOM
+- This could lead to recursive string concatenation issues
+- Values might not reflect the actual state
+
+**Fixed Behavior:**
+- \`V("product.name")\` now reads directly from \`window.Dars.getState('product').values['name']\`
+- Always returns the current, raw state value
+- Falls back to DOM reading for legacy support
+
+---
+
+# Release Notes v1.6.0
+
+
+> **Critical Bug Fixes & State Management Improvements**
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+## What's Fixed
+
+### 1. Hook Initialization Fixes
+
+Fixed critical bugs where \`useDynamic\` and \`useValue\` hooks were not properly displaying default values from \`State\` objects when used in \`FunctionComponent\`s.
+
+**Issues Resolved:**
+- \`useDynamic\` now correctly retrieves default values from the state registry even when props are not explicitly passed to the component
+- \`useValue\` now works correctly without requiring a selector parameter
+- Both hooks properly display initial state values on first render
+
+**Example:**
+\`\`\`python
+# This now works correctly!
+state = State("ui", count=0, disabled=False)
+
+@FunctionComponent
+def Counter(**props):
+    return f'''
+        <div>
+            <p>Count: {useDynamic("ui.count")}</p>
+            <button disabled="{useDynamic("ui.disabled")}">Click</button>
+        </div>
+    '''
+\`\`\`
+
+### 2. State Reset Functionality Enhancement
+
+Completely rewrote the \`reset()\` function to correctly handle **all** component properties, including boolean attributes like \`checked\`, \`disabled\`, \`readonly\`, and \`required\`.
+
+**Previous Behavior:**
+- Boolean attributes were incorrectly set to \`"false"\` string instead of being removed
+- Properties like \`disabled="false"\` would still disable elements (incorrect HTML behavior)
+
+**Fixed Behavior:**
+- Boolean attributes are now properly removed when \`False\`
+- Both HTML attributes AND DOM properties are synchronized correctly
+- Works for: \`checked\`, \`disabled\`, \`readonly\`, \`required\`, \`selected\`, \`autofocus\`, \`autoplay\`, \`controls\`, \`loop\`, \`muted\`
+
+**Example:**
+\`\`\`python
+state = State("ui", is_disabled=False, is_checked=True)
+
+Button(disabled=useDynamic("ui.is_disabled"))
+Checkbox(checked=useDynamic("ui.is_checked"))
+
+# Reset now works perfectly
+Button("Reset All", on_click=state.reset())
+\`\`\`
+
+### 3. JavaScript Variable Name Sanitization
+
+Fixed \`SyntaxError\` in generated JavaScript caused by HTML IDs containing hyphens being used as variable names.
+
+**Issue:**
+\`\`\`javascript
+// Generated invalid JS
+const el_control-panel = ...  // SyntaxError!
+\`\`\`
+
+**Fixed:**
+\`\`\`javascript
+// Now generates valid JS
+const el_control_panel = ...  // \u2713 Valid
+\`\`\`
+
+### 4. Boolean Attribute Handling Improvements
+
+Enhanced the reactive binding system to properly handle boolean attributes with the \`is_\` prefix.
+
+**Supported Patterns:**
+\`\`\`python
+# All of these now work correctly
+state = State("ui", is_disabled=False, disabled=False)
+
+# Automatic mapping: is_disabled -> disabled attribute
+Button(disabled=useDynamic("ui.is_disabled"))
+
+# State changes properly update the DOM
+state.is_disabled.set(True)   # Adds disabled attribute
+state.is_disabled.set(False)  # Removes disabled attribute completely
+\`\`\`
+
+## Important Notes
+
+### State ID Best Practices
+
+> **[!IMPORTANT] When using \`State\` objects with hooks like \`useDynamic\` and \`useValue\`, the state ID should **NOT** match any component ID in your DOM. The state ID is a unique identifier for the state object itself, not a component.**
+
+**X Incorrect:**
+\`\`\`python
+# DON'T do this - state ID matches button ID
+state = State("my-button", count=0)
+Button(id="my-button", text=useDynamic("my-button.count"))
+\`\`\`
+
+**\u2713 Correct:**
+\`\`\`python
+# DO this - state has unique ID
+state = State("counter-state", count=0)
+Button(id="my-button", text=useDynamic("counter-state.count"))
+\`\`\`
+
+The reactive system uses watchers to update components when state changes, so the state ID doesn't need to (and shouldn't) match any specific component ID.
+
+## Technical Details
+
+### Changes to \`js_lib.py\`
+
+1. **\`change()\` function**: Added intelligent boolean attribute detection with \`is_\` prefix support
+2. **\`_applyMods()\` function**: Enhanced to handle boolean attributes in state modifications
+3. **\`_restoreDefault()\` function**: Improved to correctly restore boolean attributes to their initial state
+
+### Changes to \`html_css_js.py\`
+
+1. **\`_generate_reactive_bindings_js()\`**: Added boolean attribute handling in watcher code generation
+2. **Variable name sanitization**: Replaces hyphens with underscores in generated JS variable names
+3. **\`_process_function_component()\`**: Added fallback to \`STATE_V2_REGISTRY\` for missing prop values
+
+### Changes to \`use_value.py\`
+
+1. **\`ValueMarker.__init__()\`**: Now always registers markers, even without a selector
+
+---
+
+# Release Notes v1.5.9
+
+> **Unified Keyboard Events & KeyCode System**
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+## What's New
+
+### 1. Unified Keyboard Events (\`on_key_press\`)
+
+Simplified keyboard event handling by consolidating \`on_key_down\` and \`on_key_up\` into a single, robust **\`on_key_press\`** event. This ensures consistent behavior across all components and browsers.
+
+**Deprecated:**
+- \`on_key_down\`
+- \`on_key_up\`
+
+**New Standard:**
+\`\`\`python
+Input(on_key_press=log("Key pressed!"))
+\`\`\`
+
+### 2. The \`KeyCode\` System
+
+No more magic strings or numbers! The new \`KeyCode\` class provides constants for all keyboard keys, making your code readable and maintainable.
+
+\`\`\`python
+from dars.all import KeyCode
+
+# Use constants
+KeyCode.ENTER
+KeyCode.ESCAPE
+KeyCode.TAB
+KeyCode.SPACE
+KeyCode.A
+KeyCode.F1
+\`\`\`
+
+### 3. Powerful Helpers: \`onKey\`, \`switch\`, \`addGlobalKeys\`
+
+Introduced three powerful helpers to make keyboard handling elegant and Pythonic.
+
+#### \`onKey()\` - Single Key Handler
+Handle specific keys with optional modifiers easily:
+
+\`\`\`python
+# Simple
+Input(on_key_press=onKey(KeyCode.ENTER, submit_form()))
+
+# With Modifiers
+Container(on_key_press=onKey(KeyCode.S, save(), ctrl=True))
+\`\`\`
+
+#### \`switch()\` - Multiple Key Handler
+Handle multiple keys in a single component without messy if-statements:
+
+\`\`\`python
+Input(on_key_press=switch({
+    KeyCode.ENTER: submit_form(),
+    KeyCode.ESCAPE: clear_form(),
+    KeyCode.TAB: focus_next()
+}))
+\`\`\`
+
+#### \`addGlobalKeys()\` - App-wide Shortcuts
+Register global keyboard shortcuts that work anywhere in your app:
+
+\`\`\`python
+addGlobalKeys(app, {
+    (KeyCode.S, 'ctrl'): save_document(),
+    (KeyCode.Z, 'ctrl'): undo(),
+    (KeyCode.Z, 'ctrl', 'shift'): redo()
+})
+\`\`\`
+
+### 4. Documentation
+
+A comprehensive guide to the new system is available in \`KeyEvents.md\`, covering everything from basic usage to advanced global shortcuts and best practices.
+
+## Migration Guide
+
+**From \`on_key_down\` / \`on_key_up\`:**
+Simply rename your event handlers to \`on_key_press\`. The underlying behavior uses \`keydown\` for maximum reliability.
+
+\`\`\`python
+# Before
+Input(on_key_down=dScript("..."))
+
+# After
+Input(on_key_press=dScript("..."))
+\`\`\`
+
+---
+
+# Release Notes v1.5.8
+
+> **Enhanced V() Helper & useValue Selector Support**
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+## What's New
+
+### 1. V() Helper - State Path Support
+
+The \`V()\` helper now supports extracting values from **reactive state** in addition to DOM elements!
+
+#### State Path Extraction
+
+\`\`\`python
+# Extract from reactive state created by useDynamic()
+V("cart.total")      # Gets current value of cart.total
+V("user.name")       # Gets current value of user.name
+V("product.price")   # Gets current value of product.price
+\`\`\`
+
+**How it works:**
+- \`V("cart.total")\` finds the reactive element created by \`useDynamic("cart.total")\`
+- Reads its current \`textContent\` value
+- Perfect for combining reactive state with calculations
+
+#### Complete Integration Example
+
+\`\`\`python
+from dars.all import *
+
+productState = State("product", price=19.99, quantity=1, total=19.99)
+
+@FunctionComponent
+def ProductCard(**props):
+    return f'''
+    <div {Props.id}>
+        <p>Price: \${useDynamic("product.price")}</p>
+        <input type="number" value="{useValue("product.quantity", ".qty-input")}" />
+        <p>Total: \${useDynamic("product.total")}</p>
+    </div>
+    '''
+
+# Calculate total: DOM input \xD7 State value
+Button("Calculate", on_click=productState.total.set(
+    V(".qty-input").int() * V("product.price").float()
+))
+\`\`\`
+
+### 2. V() Helper - Arithmetic Operator Validation
+
+**Breaking Change (Validation)**: Arithmetic operators now **require** numeric transformations to prevent bugs.
+
+#### The Problem
+
+Previously, you could accidentally multiply strings:
+\`\`\`python
+# Before: This would concatenate strings, not multiply!
+V("#price") * V("#qty")  # "19.99" * "5" = NaN or unexpected behavior
+\`\`\`
+
+#### The Solution
+
+Arithmetic operators (\`*\`, \`/\`, \`-\`, \`%\`, \`**\`) now require \`.int()\` or \`.float()\`:
+
+\`\`\`python
+# CORRECT - With transformations
+V("#price").float() * V("#qty").int()  # 19.99 * 5 = 99.95
+
+# ERROR - Without transformations
+V("#price") * V("#qty")
+# TypeError: Multiplication requires numeric transformation.
+#            Use V('#price').int() or V('#price').float() before multiplying.
+\`\`\`
+
+**String concatenation (\`+\`) still works without transformations:**
+\`\`\`python
+# Always allowed
+V("#first") + " " + V("#last")  # String concatenation
+"Total: $" + V("cart.total")    # String concatenation
+\`\`\`
+
+**Supported Operators:**
+- \`+\` - Addition/Concatenation (always allowed)
+- \`*\` - Multiplication (requires \`.int()\` or \`.float()\`)
+- \`/\` - Division (requires \`.int()\` or \`.float()\`)
+- \`-\` - Subtraction (requires \`.int()\` or \`.float()\`)
+- \`%\` - Modulo (requires \`.int()\` or \`.float()\`)
+- \`**\` - Power (requires \`.int()\` or \`.float()\`)
+
+### 3. useValue() - Selector Support in FunctionComponents
+
+\`useValue()\` now supports automatic selector application in FunctionComponents!
+
+#### Automatic Selector Application
+
+\`\`\`python
+@FunctionComponent
+def UserForm(**props):
+    return f'''
+    <div {Props.id}>
+        <input value="{useValue("user.name", ".name-input")}" />
+        <input value="{useValue("user.email", "#email-field")}" />
+    </div>
+    '''
+
+# Extract values using the selectors
+Button("Save", on_click=userState.name.set(V(".name-input")))
+\`\`\`
+
+**How it works:**
+1. \`useValue("user.name", ".name-input")\` sets initial value AND applies class \`name-input\`
+2. \`V(".name-input")\` extracts the current value (even if modified by user)
+3. Perfect for forms with initial values and value extraction
+
+**Supported selectors:**
+- **Class selectors** (\`.foo\`) \u2192 Added to element's \`class\` attribute
+- **ID selectors** (\`#bar\`) \u2192 Set as element's \`id\` attribute
+
+---
+
+## Migration Guide
+
+### V() Arithmetic Operations
+
+If you were using arithmetic operators without transformations, add \`.int()\` or \`.float()\`:
+
+**Before:**
+\`\`\`python
+state.total.set(V("#price") * V("#qty"))
+\`\`\`
+
+**After:**
+\`\`\`python
+state.total.set(V("#price").float() * V("#qty").int())
+\`\`\`
+
+**String concatenation is unchanged:**
+\`\`\`python
+# Still works the same
+state.fullname.set(V("#first") + " " + V("#last"))
+\`\`\`
+
+---
+
+## Complete Example
+
+\`\`\`python
+from dars.all import *
+
+app = App("Shopping Cart")
+
+# Reactive state
+cartState = State("cart", total=0.0)
+productState = State("product", name="Widget", price=19.99, quantity=1)
+
+@FunctionComponent
+def ProductCard(**props):
+    return f'''
+    <div {Props.id} {Props.class_name} {Props.style}>
+        <!-- Reactive display -->
+        <h3>{useDynamic("product.name")}</h3>
+        <p>Price: \${useDynamic("product.price")}</p>
+        
+        <!-- Editable quantity with selector -->
+        <input type="number" 
+               value="{useValue("product.quantity", ".qty-input")}"
+               min="1" />
+        
+        <!-- Reactive total -->
+        <p>Total: \${useDynamic("cart.total")}</p>
+    </div>
+    '''
+
+@route("/")
+def index():
+    return Page(
+        ProductCard(id="product-card", name="Milk", price=100, quantity=2, total=0),
+        
+        # Calculate: DOM input \xD7 State value
+        Button("Calculate Total", on_click=cartState.total.set(
+            V(".qty-input").int() * V("product.price").float()
+        )),
+        
+        # String concatenation (no transformation needed)
+        Button("Show Info", on_click=productState.name.set(
+            "Product: " + V("product.name") + " - $" + V("product.price")
+            )
+        )
+    )
+
+app.add_page("index", index(), title="Product", index=True)
+
+# Watch for changes
+app.useWatch("cart.total", log("Cart total changed!"))
+
+if __name__ == "__main__":
+    app.rTimeCompile()
+\`\`\`
+
+---
+
+## Bug Fixes
+
+### useValue Selector Application
+- **Issue**: Selectors in \`useValue()\` were not being applied to FunctionComponent elements
+- **Fix**: Implemented BeautifulSoup-based HTML parsing to detect and apply selectors
+- **Impact**: \`useValue()\` now works identically in FunctionComponents and built-in components
+
+### V() State Path Detection
+- **Issue**: No way to extract values from reactive state without DOM elements
+- **Fix**: Added intelligent state path detection (e.g., \`"cart.total"\` vs \`".cart-total"\`)
+- **Impact**: Seamless integration between \`useDynamic()\`, \`useValue()\`, and \`V()\`
+
+---
+
+## Breaking Changes
+
+### Arithmetic Operator Validation
+
+**Change**: Arithmetic operators (\`*\`, \`/\`, \`-\`, \`%\`, \`**\`) now require \`.int()\` or \`.float()\` transformations.
+
+**Reason**: Prevents accidental string operations that cause bugs.
+
+**Migration**: Add \`.int()\` or \`.float()\` before arithmetic operations:
+\`\`\`python
+V("#price").float() * V("#qty").int()
+\`\`\`
+
+**Note**: String concatenation (\`+\`) is unchanged and still works without transformations.
+
+---
+
+## Documentation Updates
+
+- **hooks.md**: Comprehensive V() documentation with state path examples
+- **custom_components.md**: Updated examples showing V() with state paths
+- **New examples**: Complete integration patterns for \`useValue()\`, \`useDynamic()\`, and \`V()\`
+
+---
+
+## What's Next
+
+The enhanced V() helper and complete hooks integration pave the way for more advanced reactive patterns and seamless state management in future releases.
+
+---
+
+# Release Notes v1.5.7
+
+> **useValue hook & Value Access Helpers**
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+## What's New
+
+### 1. \`useValue\` Hook
+
+The new \`useValue\` hook allows you to access the **initial value** of a state property without creating a reactive binding. This is perfect for form inputs where you want to set a default value but allow the user to edit it freely.
+
+\`\`\`python
+# Initial value from state, but editable by user
+Input(value=useValue("user.name"))
+
+# In FunctionComponent templates (resolves to initial value string)
+@FunctionComponent
+def Profile(**props):
+    return f"<div>{useValue('user.name')}</div>"
+\`\`\`
+
+### 2. Pythonic Helpers (\`V\`, \`url\`, \`transform\`)
+
+Introducing a set of helpers to make working with DOM values completely Pythonic, eliminating the need for \`RawJS\`.
+
+#### V() - Value Reference
+Select DOM elements and perform operations directly in Python:
+
+\`\`\`python
+# Concatenation
+Button("Combine", on_click=state.fullname.set(
+    V("#first") + " " + V("#last")
+))
+
+# Transformations
+Button("Upper", on_click=state.name.set(V("#name").upper()))
+Button("Add", on_click=state.count.set(V("#num1").int() + 10))
+\`\`\`
+
+#### url() - URL Builder
+Construct dynamic URLs easily with proper interpolation:
+
+\`\`\`python
+Button("Fetch", on_click=fetch(
+    url("https://api.example.com/users/{id}", id=V("#userId"))
+))
+\`\`\`
+
+### Stability
+- **Fix**: Resolved an issue where reactive bindings could generate duplicate JavaScript variables, causing "Identifier has already been declared" errors during hot reloads or complex state updates.
+
+# Release Notes v1.5.6
+
+> **Enhanced \`useDynamic\` Support & StateV2 Fixes**
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+## What's New
+
+### 1. Expanded \`useDynamic\` Support for Built-in Components
+
+\`useDynamic\` now works with **all properties** of built-in components, including:
+
+#### Image & Link Components
+\`\`\`python
+# Dynamic image source and alt text
+Image(
+    src=useDynamic("product.imageUrl"),
+    alt=useDynamic("product.name")
+)
+
+# Dynamic link href and text
+Link(
+    href=useDynamic("navigation.url"),
+    text=useDynamic("navigation.label")
+)
+\`\`\`
+
+#### Boolean Attributes
+All boolean attributes now support dynamic binding:
+\`\`\`python
+# Dynamic disabled state
+Button(
+    text="Submit",
+    disabled=useDynamic("form.isSubmitting")
+)
+
+# Dynamic checked state
+Checkbox(
+    checked=useDynamic("settings.notifications"),
+    label="Enable Notifications"
+)
+
+# Dynamic readonly and required
+Input(
+    value=useDynamic("user.email"),
+    readonly=useDynamic("form.isLocked"),
+    required=useDynamic("form.emailRequired")
+)
+\`\`\`
+
+**Supported Boolean Properties:**
+- \`disabled\` - Button, Input, Textarea, Checkbox, RadioButton, Select, Slider
+- \`checked\` - Checkbox, RadioButton
+- \`readonly\` - Input, Textarea
+- \`required\` - Input, Textarea, Checkbox, RadioButton, Select
+
+### 2. StateV2 \`increment()\` & \`decrement()\` Fixes
+
+Fixed critical issues with \`StateV2\` reactive operations:
+
+#### Fixed Validation Error
+Previously, \`increment()\` and \`decrement()\` only worked on properties named \`text\`. Now they work on **any numeric property**:
+
+\`\`\`python
+# Before: This would error
+state = State("counter", count=0)
+Button("Increment", on_click=state.count.increment(by=1))  # \u274C ValueError
+
+# After: Works perfectly!
+state = State("counter", count=0)
+Button("Increment", on_click=state.count.increment(by=1))  # \u2705 Works!
+\`\`\`
+
+#### Fixed Persistence Issue
+Increment/decrement operations now correctly persist across multiple clicks:
+
+\`\`\`python
+state = State("counter", count=0)
+
+# Before: Would increment 0\u21921, then stay at 1 forever
+# After: Correctly increments 0\u21921\u21922\u21923\u2192...
+Button("Increment", on_click=state.count.increment(by=1))
+Button("Decrement", on_click=state.count.decrement(by=1))
+\`\`\`
+
+**Technical Details:**
+- Implemented client-side state value tracking in \`window.Dars.getState()\`
+- State registry now maintains current values for all properties
+- \`increment()\`/\`decrement()\` use \`window.Dars.change()\` for proper state updates
+- Watchers and UI updates now trigger correctly on every operation
+
+### 3. Documentation Updates
+
+#### Enhanced Hooks Documentation
+- Added comprehensive "Supported Properties" table showing which properties work with \`useDynamic\` for each component type
+- Documented boolean attribute support
+
+#### New Component Documentation
+Added documentation for visualization components in \`components.md\`:
+
+**Chart Component:**
+\`\`\`python
+import plotly.graph_objects as go
+
+fig = go.Figure(data=[go.Bar(x=['A', 'B', 'C'], y=[1, 3, 2])])
+Chart(figure=fig, width="100%", height="400px")
+\`\`\`
+
+**DataTable Component:**
+\`\`\`python
+import pandas as pd
+
+df = pd.DataFrame({
+    'Name': ['Alice', 'Bob'],
+    'Age': [25, 30]
+})
+DataTable(data=df, theme="striped", page_size=10)
+\`\`\`
+
+## Bug Fixes
+
+### StateV2 Increment/Decrement
+- **Issue**: \`increment()\` raised \`ValueError\` for non-\`text\` properties
+- **Fix**: Validation now checks if value is numeric (\`int\` or \`float\`) instead of checking property name
+- **Impact**: All numeric state properties can now use \`increment()\` and \`decrement()\`
+
+### StateV2 State Persistence
+- **Issue**: Increment operations stuck at first value (0\u21921, then stayed at 1)
+- **Fix**: Implemented proper client-side state tracking and payload structuring
+- **Impact**: Reactive operations now work correctly across multiple invocations
+
+## Breaking Changes
+
+None.
+
+---
+
+
+## What's Next
+
+The enhanced \`useDynamic\` system and robust StateV2 operations pave the way for more advanced reactive patterns and state management features in future releases.
+
+---
+
+# Release Notes v1.5.5
+
+
+> **Hooks System Enhanced**: \`useDynamic\` for built-in components and new \`useWatch\` hook.
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+## What's New
+
+### 1. \`useDynamic\` for Built-in Components
+
+You can now use \`useDynamic\` directly in properties of built-in components!
+
+\`\`\`python
+# Bind directly to component props
+Text(text=useDynamic("user.name"))
+Input(value=useDynamic("user.name"))
+Button(text=useDynamic("user.status"))
+\`\`\`
+
+This works for \`Text\`, \`Button\`, \`Input\`, \`Textarea\`, and more.
+
+### 2. New \`useWatch\` Hook
+Monitor state changes and execute side effects with \`useWatch\`.
+
+\`\`\`python
+# Global watcher
+app.useWatch("cart.total", log("Cart updated!"))
+
+# Page-specific watcher
+@route("/cart")
+def cart_page():
+    page = Page()
+    page.useWatch("cart.total", log("Total changed!"))
+    return page
+\`\`\`
+
+New methods \`app.useWatch()\` and \`page.useWatch()\` make integration seamless.
+
+### 3. Fixes
+
+- Fixed execution order in exporter to ensure reactive bindings are generated correctly.
+- Improved state initialization for dynamic props.
+
+---
+
+# Release Notes v1.5.4 (Relaunch from 1.5.3)
+
+> **Hooks System & Reactive Bindings** relaunch with correct license.
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+## What's New
+
+### Hooks System - \`useDynamic()\`
+
+Dars Framework introduces its **first hook** - \`useDynamic()\` - enabling reactive state bindings in FunctionComponents!
+
+#### Reactive State Bindings
+
+Create components that automatically update when state changes:
+
+\`\`\`python
+from dars.all import *
+
+# Create state
+userState = State("user", name="John Doe", email="john@example.com")
+
+# Use useDynamic in FunctionComponent
+@FunctionComponent
+def UserCard(**props):
+    return f'''
+    <div {Props.id} {Props.class_name} {Props.style}>
+        <h3>{useDynamic("user.name")}</h3>
+        <p>{useDynamic("user.email")}</p>
+    </div>
+    '''
+
+# Render
+card = UserCard(id="userCard")
+
+# Update - DOM automatically reacts!
+app.add_script(userState.name.set("Jane Doe"))  # UI updates instantly
+\`\`\`
+
+#### How It Works
+
+1. **Initial Render**: \`useDynamic()\` inserts reactive spans with initial prop values
+2. **State Changes**: When you call \`.set()\`, the hook intercepts the change
+3. **Auto Updates**: All matching reactive spans update automatically
+
+#### Key Features
+
+- **Zero boilerplate** - Just use \`useDynamic("state.property")  in templates
+- **Automatic updates** - No manual DOM manipulation needed
+- **Multiple bindings** - Multiple components can bind to the same state
+- **State V2 integration** - Works seamlessly with dynamic state system
+
+---
+
+### \`getInputValue()\` Utility
+
+New utility function specifically designed for State V2 integration:
+
+\`\`\`python
+state = State("product", title="", price=0)
+
+Button("Save", on_click=[
+    state.title.set(getInputValue("titleInput")),
+    state.price.set(getInputValue("priceInput"))
+])
+\`\`\`
+
+**Features:**
+- Returns input value as JavaScript expression
+- Works with \`State.set()\` and other dynamic operations
+- Optional \`parent_id\` parameter for scoped searches
+- Complements existing \`getValue()\` for assignments
+
+**Difference from \`getValue()\`:**
+- \`getValue(input_id, target_id)\` - Performs assignment (sets textContent)
+- \`getInputValue(input_id)\` - Returns value expression (for State.set())
+
+---
+
+### CSS Improvements
+
+#### Modern Default Styles
+
+- Updated all component CSS to use CSS variables for easy theming
+- Removed opinionated sizing - better CSS flow and overridability
+- Added \`accent-color\` support for form controls
+- Improved transitions and hover effects
+- Better disabled states across all components
+
+#### CSS Variables
+
+Components now respect theme colors:
+
+\`\`\`css
+--dars-primary: #007bff;
+--dars-spacing-md: 12px;
+/* ... and more */
+\`\`\`
+
+#### Better Customization
+
+\`\`\`python
+# Inline styles work better now
+Button("Click", style={"width": "200px", "padding": "16px"})
+
+# Global styles via app.add_global_styles()
+app.add_global_styles("""
+    .dars-button {
+        border-radius: 8px;
+    }
+""")
+\`\`\`
+
+---
+
+### Bug Fixes
+
+#### Fixed Markdown Syntax Highlighting in Multipage Apps
+
+- **Issue**: Prism.js scripts were only injected on first page with Markdown
+- **Fix**: Per-page script injection tracking ensures all pages get highlighting(Markdown Component)
+- **Impact**: Multipage apps now correctly highlight code on all routes
+
+\`\`\`python
+# Now works correctly across all pages
+@route("/docs")
+def docs():
+    return Page(Markdown(content=code_example))
+
+@route("/tutorial")
+def tutorial():
+    return Page(Markdown(content=tutorial_code))  # Also highlighted now!
+\`\`\`
+
+---
+
+## Breaking Changes
+
+None! This release is 100% backwards compatible.
+
+---
+
+## Complete Example
+
+**User Profile with Reactive Updates:**
+
+\`\`\`python
+from dars.all import *
+
+app = App("Reactive Profile")
+
+# State for user data
+userState = State("user", 
+    name="John Doe",
+    email="john@example.com"
+)
+
+# Reactive display component
+@FunctionComponent
+def ProfileDisplay(**props):
+    return f'''
+    <div {Props.id} {Props.class_name} {Props.style}>
+        <h2>{useDynamic("user.name")}</h2>
+        <p>Email: {useDynamic("user.email")}</p>
+    </div>
+    '''
+
+# Edit form
+def ProfileEditor():
+    return Container(
+        Input(id="nameInput", value="John Doe"),
+        Input(id="emailInput", value="john@example.com"),
+        Button("Save", on_click=[
+            userState.name.set(getInputValue("nameInput")),
+            userState.email.set(getInputValue("emailInput"))
+        ])
+    )
+
+# Page
+@route("/")
+def index():
+    return Page(
+        ProfileDisplay(id="profile"),
+        ProfileEditor()
+    )
+
+app.add_page("index", index())
+
+if __name__ == "__main__":
+    app.rTimeCompile()
+\`\`\`
+
+**Result**: Edit the inputs and click Save - the profile display updates instantly!
+
+---
+
+## Migration Guide
+
+No migration needed! Add \`useDynamic()\` to new or existing FunctionComponents:
+
+**Before (static):**
+\`\`\`python
+@FunctionComponent
+def UserCard(name, email, **props):
+    return f'<div {Props.id}><h3>{name}</h3><p>{email}</p></div>'
+\`\`\`
+
+**After (reactive):**
+\`\`\`python
+@FunctionComponent
+def UserCard(**props):
+    return f'''
+    <div {Props.id}>
+        <h3>{useDynamic("user.name")}</h3>
+        <p>{useDynamic("user.email")}</p>
+    </div>
+    '''
+\`\`\`
+
+---
+
+## Documentation
+
+New documentation added:
+
+- **Hooks System** - Complete guide to \`useDynamic()\` and future hooks
+- **\`getInputValue()\`** - Usage guide in Scripts documentation
+- **Updated Examples** - Reactive patterns and best practices
+
+Visit the [Dars Documentation](https://ztamdev.github.io/Dars-Framework/docs.html) for more details.
+
+---
+
+## What's Next
+
+The hooks system opens the door for more reactive features...
+
+
+# Release Notes v1.5.3
+
+> **Hooks System & Reactive Bindings**
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+## What's New
+
+### Hooks System - \`useDynamic()\`
+
+Dars Framework introduces its **first hook** - \`useDynamic()\` - enabling reactive state bindings in FunctionComponents!
+
+#### Reactive State Bindings
+
+Create components that automatically update when state changes:
+
+\`\`\`python
+from dars.all import *
+
+# Create state
+userState = State("user", name="John Doe", email="john@example.com")
+
+# Use useDynamic in FunctionComponent
+@FunctionComponent
+def UserCard(**props):
+    return f'''
+    <div {Props.id} {Props.class_name} {Props.style}>
+        <h3>{useDynamic("user.name")}</h3>
+        <p>{useDynamic("user.email")}</p>
+    </div>
+    '''
+
+# Render
+card = UserCard(id="userCard")
+
+# Update - DOM automatically reacts!
+app.add_script(userState.name.set("Jane Doe"))  # UI updates instantly
+\`\`\`
+
+#### How It Works
+
+1. **Initial Render**: \`useDynamic()\` inserts reactive spans with initial prop values
+2. **State Changes**: When you call \`.set()\`, the hook intercepts the change
+3. **Auto Updates**: All matching reactive spans update automatically
+
+#### Key Features
+
+- **Zero boilerplate** - Just use \`useDynamic("state.property")  in templates
+- **Automatic updates** - No manual DOM manipulation needed
+- **Multiple bindings** - Multiple components can bind to the same state
+- **State V2 integration** - Works seamlessly with dynamic state system
+
+---
+
+### \`getInputValue()\` Utility
+
+New utility function specifically designed for State V2 integration:
+
+\`\`\`python
+state = State("product", title="", price=0)
+
+Button("Save", on_click=[
+    state.title.set(getInputValue("titleInput")),
+    state.price.set(getInputValue("priceInput"))
+])
+\`\`\`
+
+**Features:**
+- Returns input value as JavaScript expression
+- Works with \`State.set()\` and other dynamic operations
+- Optional \`parent_id\` parameter for scoped searches
+- Complements existing \`getValue()\` for assignments
+
+**Difference from \`getValue()\`:**
+- \`getValue(input_id, target_id)\` - Performs assignment (sets textContent)
+- \`getInputValue(input_id)\` - Returns value expression (for State.set())
+
+---
+
+### CSS Improvements
+
+#### Modern Default Styles
+
+- Updated all component CSS to use CSS variables for easy theming
+- Removed opinionated sizing - better CSS flow and overridability
+- Added \`accent-color\` support for form controls
+- Improved transitions and hover effects
+- Better disabled states across all components
+
+#### CSS Variables
+
+Components now respect theme colors:
+
+\`\`\`css
+--dars-primary: #007bff;
+--dars-spacing-md: 12px;
+/* ... and more */
+\`\`\`
+
+#### Better Customization
+
+\`\`\`python
+# Inline styles work better now
+Button("Click", style={"width": "200px", "padding": "16px"})
+
+# Global styles via app.add_global_styles()
+app.add_global_styles("""
+    .dars-button {
+        border-radius: 8px;
+    }
+""")
+\`\`\`
+
+---
+
+### Bug Fixes
+
+#### Fixed Markdown Syntax Highlighting in Multipage Apps
+
+- **Issue**: Prism.js scripts were only injected on first page with Markdown
+- **Fix**: Per-page script injection tracking ensures all pages get highlighting(Markdown Component)
+- **Impact**: Multipage apps now correctly highlight code on all routes
+
+\`\`\`python
+# Now works correctly across all pages
+@route("/docs")
+def docs():
+    return Page(Markdown(content=code_example))
+
+@route("/tutorial")
+def tutorial():
+    return Page(Markdown(content=tutorial_code))  # Also highlighted now!
+\`\`\`
+
+---
+
+## Breaking Changes
+
+None! This release is 100% backwards compatible.
+
+---
+
+## Complete Example
+
+**User Profile with Reactive Updates:**
+
+\`\`\`python
+from dars.all import *
+
+app = App("Reactive Profile")
+
+# State for user data
+userState = State("user", 
+    name="John Doe",
+    email="john@example.com"
+)
+
+# Reactive display component
+@FunctionComponent
+def ProfileDisplay(**props):
+    return f'''
+    <div {Props.id} {Props.class_name} {Props.style}>
+        <h2>{useDynamic("user.name")}</h2>
+        <p>Email: {useDynamic("user.email")}</p>
+    </div>
+    '''
+
+# Edit form
+def ProfileEditor():
+    return Container(
+        Input(id="nameInput", value="John Doe"),
+        Input(id="emailInput", value="john@example.com"),
+        Button("Save", on_click=[
+            userState.name.set(getInputValue("nameInput")),
+            userState.email.set(getInputValue("emailInput"))
+        ])
+    )
+
+# Page
+@route("/")
+def index():
+    return Page(
+        ProfileDisplay(id="profile"),
+        ProfileEditor()
+    )
+
+app.add_page("index", index())
+
+if __name__ == "__main__":
+    app.rTimeCompile()
+\`\`\`
+
+**Result**: Edit the inputs and click Save - the profile display updates instantly!
+
+---
+
+## Migration Guide
+
+No migration needed! Add \`useDynamic()\` to new or existing FunctionComponents:
+
+**Before (static):**
+\`\`\`python
+@FunctionComponent
+def UserCard(name, email, **props):
+    return f'<div {Props.id}><h3>{name}</h3><p>{email}</p></div>'
+\`\`\`
+
+**After (reactive):**
+\`\`\`python
+@FunctionComponent
+def UserCard(**props):
+    return f'''
+    <div {Props.id}>
+        <h3>{useDynamic("user.name")}</h3>
+        <p>{useDynamic("user.email")}</p>
+    </div>
+    '''
+\`\`\`
+
+---
+
+## Documentation
+
+New documentation added:
+
+- **Hooks System** - Complete guide to \`useDynamic()\` and future hooks
+- **\`getInputValue()\`** - Usage guide in Scripts documentation
+- **Updated Examples** - Reactive patterns and best practices
+
+Visit the [Dars Documentation](https://ztamdev.github.io/Dars-Framework/docs.html) for more details.
+
+---
+
+## What's Next
+
+The hooks system opens the door for more reactive features...
+
+# Release Notes v1.5.2
+
+> **Function Components**
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+## What's New
+
+### Function Components System
+
+Dars Framework now features **Function Components** as the primary and recommended way to create custom UI components. This new system provides a clean, Pythonic approach to component creation without the complexity of class inheritance.
+
+#### What are Function Components?
+
+Function Components allow you to create reusable UI elements using simple Python functions with f-string templates. The framework automatically handles IDs, styling, events, and other properties.
+
+**Key Benefits:**
+- **Simple & Pythonic**: Just write a function that returns an HTML string
+- **No Boilerplate**: No need to inherit from Component class or implement render methods
+- **Automatic Property Injection**: Framework handles \`id\`, \`class_name\`, \`style\`, and \`children\` automatically
+- **Linter-Friendly**: Two patterns available to avoid linter warnings
+- **State Compatible**: Works seamlessly with State V2 for reactive UIs
+
+#### Basic Usage
+
+\`\`\`python
+from dars.all import FunctionComponent, Props
+
+@FunctionComponent
+def UserCard(name, email, **props):
+    return f"""
+    <div {Props.id} {Props.class_name} {Props.style}>
+        <h3>{name}</h3>
+        <p>{email}</p>
+        <div class="card-body">
+            {Props.children}
+        </div>
+    </div>
+    """
+
+# Usage
+card = UserCard("John Doe", "john@example.com", id="user-1", style={"padding": "20px"})
+\`\`\`
+
+#### Two Supported Patterns
+
+**Option 1: Using Props Helper (Recommended)**
+\`\`\`python
+@FunctionComponent
+def MyComponent(**props):
+    return f"""
+    <div {Props.id} {Props.class_name} {Props.style}>
+        {Props.children}
+    </div>
+    """
+\`\`\`
+
+**Option 2: Explicit Arguments**
+\`\`\`python
+@FunctionComponent
+def MyComponent(id, class_name, style, children, **props):
+    return f"""
+    <div {id} {class_name} {style}>
+        {children}
+    </div>
+    """
+\`\`\`
+
+Both patterns are fully supported and avoid linter warnings about undefined variables.
+
+#### Props Helper Class
+
+The new \`Props\` class provides static constants for framework properties:
+
+\`\`\`python
+Props.id          # "{id}"
+Props.class_name  # "{class_name}"
+Props.style       # "{style}"
+Props.children    # "{children}"
+\`\`\`
+
+These resolve to the correct placeholders that the framework replaces during rendering.
+
+#### State V2 Integration Clarification
+
+**Important Concept:** State V2 updates DOM properties, not arbitrary component arguments.
+
+**Correct Usage:**
+\`\`\`python
+@FunctionComponent
+def Counter(**props):
+    return f"""
+    <div {Props.id}>
+        Current count: {Props.children}
+    </div>
+    """
+
+counter = Counter(id="my-counter", children="0")
+state = State(counter, text="Current count: 0")
+
+# Updates textContent of the div
+Button("Increment", on_click=state.text.set("Current count: 5"))
+\`\`\`
+
+**Why:** Dars exports to static HTML/JS. The JavaScript runtime can only manipulate DOM properties (\`textContent\`, \`style\`, \`innerHTML\`), not re-execute Python functions with new arguments.
+
+# Release Notes v1.5.1
+
+> **Backend HTTP Utilities & Pythonic API Communication**
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+## What's New
+
+### Backend HTTP Utilities System
+
+Dars now includes a comprehensive **Pythonic system** for HTTP requests and API communication without writing any JavaScript. The new \`dars.backend\` module enables you to fetch data, bind it to components, and create reactive UIs entirely in Python.
+
+**Key Features:**
+- HTTP functions (get, post, put, delete, patch, fetch)
+- \`useData()\` with dot notation for nested data access
+- Seamless StateV2 integration
+- \`.then()\` chaining for sequential operations
+- Component management (createComp, updateComp, deleteComp)
+- JSON utilities (stringify, parse, get_value)
+- **State() string ID support** - Create states for dynamic components
+
+### HTTP Functions
+
+\`\`\`python
+from dars.all import *
+from dars.backend import get, post, useData
+
+# GET request with data binding
+fetch_btn = Button(
+    "Fetch User",
+    on_click=get(
+        id="userData",
+        url="https://api.example.com/users/1",
+        callback=name_state.text.set(useData('userData').name)
+    )
+)
+
+# POST request
+submit_btn = Button(
+    "Submit",
+    on_click=post(
+        id="result",
+        url="https://api.example.com/submit",
+        body={"name": "John", "email": "john@example.com"},
+        callback=status_state.text.set("\u2705 Submitted!")
+    )
+)
+\`\`\`
+
+### useData() with Dot Notation
+
+Access fetched data using Pythonic dot notation:
+
+\`\`\`python
+# Access nested properties
+useData('userData').name           # \u2192 window.userData?.name
+useData('user').address.city       # \u2192 window.user?.address?.city
+useData('posts').items[0].title    # \u2192 window.posts?.items?.[0]?.title
+\`\`\`
+
+### Chaining with .then()
+
+Chain multiple state updates sequentially:
+
+\`\`\`python
+callback=(
+    status_state.text.set("Loading...")
+    .then(name_state.text.set(useData('userData').name))
+    .then(email_state.text.set(useData('userData').email))
+    .then(status_state.text.set("\u2705 Loaded!"))
+)
+\`\`\`
+
+### Component Management
+
+Create, update, and delete components dynamically at runtime:
+
+\`\`\`python
+from dars.backend import createComp, updateComp, deleteComp
+
+# Create new component
+create_btn.on_click = createComp(
+    target=Text("Hello!", id="new-item"),
+    root="container-id",
+    position="append"
+)
+
+# Update component
+update_btn.on_click = updateComp(
+    "my-component-id",
+    text="Updated!",
+    style={"color": "red"}
+)
+
+# Delete component
+delete_btn.on_click = deleteComp("component-id")
+\`\`\`
+
+### JSON Utilities
+
+Helper functions for working with JSON data:
+
+\`\`\`python
+from dars.backend import stringify, parse, get_value
+
+# Stringify with pretty printing
+display_state.text.set(stringify(useData('userData'), pretty=True))
+
+# Parse JSON string
+data = parse('{"name": "John"}')
+
+# Safe nested access
+city = get_value(useData('userData'), 'address.city', default='Unknown')
+\`\`\`
+
+### State() String ID Support
+
+\`State()\` now accepts both component objects and string IDs, enabling state management for dynamically created components:
+
+\`\`\`python
+from dars.all import *
+from dars.backend import createComp
+
+# Traditional: State with component object
+existing_text = Text("0", id="counter")
+existing_state = State(existing_text, text=0)
+
+# New: State with string ID (for components created later)
+dynamic_state = State("dynamic-counter", text=0)
+
+# Create the component later
+create_btn.on_click = createComp(
+    target=Text("0", id="dynamic-counter"),
+    root="container-id"
+)
+
+# State works even though component was created after state!
+increment_btn.on_click = dynamic_state.text.increment(by=1)
+\`\`\`
+
+**Use Cases:**
+- Components created with \`createComp()\`
+- Dynamically generated UIs
+- Conditional component rendering
+- Server-side rendered components
+
+## Technical Implementation
+
+### DataAccessor Class
+
+New \`DataAccessor\` class with:
+- \`__getattr__\` for dot notation support
+- \`.code\` property for RawJS generation
+- \`.bind()\` method for StateV2 integration
+- \`.get()\` method for safe property access
+
+### StateV2 Enhancements
+
+Updated \`StateV2._generate_change_call()\` to handle \`DataAccessor\` objects:
+- Automatically detects \`DataAccessor\` instances
+- Extracts \`.code\` property for JavaScript generation
+- Seamless integration with existing state management
+
+## Documentation
+
+### New Documentation
+
+**\`backend_api.md\`** - Comprehensive guide (500+ lines) covering:
+- Quick Start examples
+- HTTP Functions reference
+- Data Binding with useData()
+- JSON Utilities
+- Component Management
+- 3 Advanced Examples
+- Best Practices
+- Complete API Reference
+
+**Documentation URL:** https://ztamdev.github.io/Dars-Framework/docs.html#backend-http-utilities
+
+## Breaking Changes
+
+**None** - This is a fully backward-compatible release. All existing code continues to work.
+
+## Bug Fixes
+
+- **Fixed**: \`StateV2\` now correctly handles \`DataAccessor\` objects in \`to_js_value()\`
+- **Fixed**: \`RawJS\` objects are properly serialized in state updates
+- **Fixed**: \`dScript.then()\` chaining works correctly with backend operations
+
+## Performance & Compatibility
+
+- **Zero Overhead**: Backend utilities only activate when imported
+- **Backward Compatible**: All existing code works without changes
+- **Bundle Size**: Minimal impact (+~10KB for backend module)
+- **Desktop Support**: Full Electron compatibility maintained
+
+## Migration Guide
+
+No migration needed - this is an additive release. To start using the new features:
+
+\`\`\`python
+# Add to your imports
+from dars.backend import get, post, useData
+
+# Start using Pythonic HTTP
+button.on_click = get(
+    id="data",
+    url="https://api.example.com/data",
+    callback=state.text.set(useData('data').message)
+)
+\`\`\`
+
+---
+
+**This release makes Dars fully self-contained for building reactive, API-driven UIs without writing any JavaScript!**
+
+---
+
+# Release Notes v1.5.0
+
+> **Animation System Stability & Runtime Improvements**
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+## What's New
+
+### Animation System Stability
+
+Significant improvements to the animation system's reliability and ease of use:
+
+- **Fixed Infinite Pulse**: \`pulse(iterations="infinite")\` now works correctly (fixed \`TypeError\`).
+- **Chaining Support**: State updates like \`increment()\` can now be chained with animations using \`.then()\` or \`sequence()\`.
+- **Documentation**: Added comprehensive [Animation Guide](https://ztamdev.github.io/Dars-Framework/docs.html#dars-animation-system) to the documentation.
+
+### Dynamic Event Updates
+
+The client-side runtime has been upgraded to fully support dynamic event handler updates:
+
+\`\`\`python
+# This now works perfectly in real-time
+button.on_click = state.update(
+    text="Clicked!",
+    on_click=alert("New handler attached!")
+)
+\`\`\`
+
+## Bug Fixes
+
+- **Fixed**: \`pulse\` animation now correctly handles \`iterations="infinite"\` (mapped to \`Infinity\`).
+- **Fixed**: \`SyntaxError\` when chaining state updates (wrapped in async IIFE).
+
+---
+
+# Release Notes v1.4.9
+
+> **Event Handler Support & Dual State System Documentation**
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+## What's New
+
+### State V2: Event Handler Support
+
+State V2 now supports updating event handlers:
+
+\`\`\`python
+from dars.all import *
+
+# Update events in State V2
+state.update(
+    text="Click me",
+    on_click=alert("Success!"),
+    on_mouseover=dScript("showTooltip()")
+)
+
+# Works with dScript objects
+button_state.update(on_click=dScript("console.log('clicked')"))
+\`\`\`
+
+**Implementation:**
+- Automatic detection of \`on_*\` properties
+- Extracts \`.code\` from dScript objects  
+- Handles arrays of event handlers
+- Gracefully skips non-serializable values
+
+### Dual State System Documentation
+
+Documentation now presents **two coexisting state management systems**:
+
+**State V2 (Dynamic)**
+- Auto-increment/decrement built-in
+- Best for: counters, timers, simple updates
+
+**dState/cState (Indexed)**
+- Full state machine support
+- Immutable state 0
+- Cross-state calls with \`Mod.call()\`
+- Best for: workflows, complex UI transitions
+
+Comprehensive comparison table and use case guidance added to state management documentation.
+
+## Bug Fixes
+
+- **Fixed**: State V2 can now handle dScript event handlers without errors
+- **Fixed**: \`_generate_change_call()\` properly handles non-JSON-serializable values
+
+## Documentation
+
+- Complete restructure of \`state_management.md\` to include both systems
+- Added comparison table for State V2 vs dState/cState
+- Restored all original dState/cState documentation
+- Added use case recommendations for choosing the right system
+
+---
+
+# Release Notes v1.4.8
+
+
+> **Critical Fix**: State V2 now properly supports all component properties including \`class_name\`, \`style\`, \`attrs\`, and more.
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+or
+
+\`\`\`bash
+pip install dars-framework==1.4.8
+\`\`\`
+
+## What's Fixed
+
+### State V2 Complete Property Support
+
+**Previously (v1.4.7):** State V2 only updated \`text\` content, incorrectly setting textContent for all properties.
+
+\`\`\`python
+# This didn't work correctly in v1.4.7
+counter.class_name.set("active")
+\`\`\`
+
+**Now (v1.4.8):** State V2 properly handles **all component properties** using the \`change()\` client function.
+
+\`\`\`python
+# All properties now work correctly!
+state.text.set("New text")
+state.class_name.set("active")
+state.style.set({"color": "red"})
+state.attrs.set({"title": "Tooltip"})
+state.html.set("<strong>Bold</strong>") 
+\`\`\`
+
+### Unified Property Handling
+
+All State V2 methods now use the same \`change()\` function as \`this()\` and \`dState\`, ensuring consistent behavior across the framework:
+
+- \`ReactiveProperty.set()\` - Works with any property type
+- \`State.update()\` - Updates multiple properties correctly
+- \`State.reset()\` - Resets all property types to defaults
+
+### Validation Improvements
+
+**Increment/Decrement Validation:**
+Now properly validates that \`increment()\` and \`decrement()\` are only used on numeric properties:
+
+\`\`\`python
+# Correct usage
+counter.text.increment(by=1)
+
+# Now throws helpful error
+counter.class_name.increment(by=1)
+\`\`\`
+
+## Bug Fixes
+
+### Fixed: Property Type Handling
+
+- **Fixed**: \`class_name.set()\` now correctly updates element's \`className\`
+- **Fixed**: \`style.set()\` now correctly updates inline styles
+- **Fixed**: \`attrs.set()\` now correctly updates HTML attributes
+- **Fixed**: \`html.set()\` now correctly updates \`innerHTML\`
+- **Fixed**: \`update()\` now correctly handles multiple properties simultaneously
+- **Fixed**: \`reset()\` now correctly restores all property types
+
+### Technical Details
+
+**Root Cause:** 
+State V2 methods were directly manipulating \`el.textContent\` instead of using the framework's \`change()\` function, which properly routes updates based on property type.
+
+**Solution:**
+Created \`_generate_change_call()\` helper that generates proper \`change()\` payloads:
+- \`text\` \u2192 \`{text: value}\`
+- \`html\` \u2192 \`{html: value}\`
+- \`style\` \u2192 \`{style: object}\`
+- \`class_name\` \u2192 \`{attrs: {class: value}}\` or \`{classes: object}\`
+- \`attrs\` \u2192 \`{attrs: object}\`
+
+All reactive methods now use this helper for consistent, correct property updates.
+
+## Complete Property Examples
+
+### Setting Different Property Types
+
+\`\`\`python
+from dars.all import *
+
+display = Container(Text("Example"), id="demo")
+
+# Create state with multiple properties
+state = State(display, 
+    text="Hello",
+    class_name="",
+    style={"background": "#333"}
+)
+
+# Update text
+text_btn.on_click = state.text.set("Updated!")
+
+# Update CSS class
+class_btn.on_click = state.class_name.set("active highlight")
+
+# Update styles
+style_btn.on_click = state.style.set({
+    "background": "linear-gradient(135deg, #667eea, #764ba2)",
+    "color": "white",
+    "padding": "20px"
+})
+
+# Update HTML attributes
+attr_btn.on_click = state.attrs.set({
+    "data-status": "complete",
+    "title": "Completed task"
+})
+\`\`\`
+
+### Advanced Class Manipulation
+
+\`\`\`python
+# Add/remove specific classes
+state.classes.set({
+    "add": ["active", "highlight"],
+    "remove": ["disabled", "hidden"]
+})
+
+# Toggle classes
+state.classes.set({
+    "toggle": ["expanded"]
+})
+\`\`\`
+
+### Update Multiple Properties
+
+\`\`\`python
+# Update several properties at once
+success_btn.on_click = state.update(
+    text="Success!",
+    class_name="success",
+    style={"color": "green", "fontSize": "18px"},
+    attrs={"data-result": "ok"}
+)
+\`\`\`
+
+## Migration from v1.4.7
+
+**No breaking changes** - all existing code continues to work. However, if you tried using non-\`text\` properties in v1.4.7 and they didn't work, they will now work correctly in v1.4.8.
+
+**If you worked around the limitation:**
+\`\`\`python
+# Old workaround (v1.4.7)
+from dars.core.state import this
+button.on_click = this().state(class_name="active")  # Had to use this()
+
+# Now works directly with State V2 (v1.4.8)
+button.on_click = state.class_name.set("active")  # \u2705 Works!
+\`\`\`
+
+## Dependency Cleanup
+
+- **Removed**: \`rjsmin\` dependency (Apache license, replaced with regex fallback)
+- **Removed**: \`fastapi\` dependency (not used in framework)
+
+JS/CSS minification now uses:
+1. Vite (if available)
+2. esbuild (if available)
+3. Regex fallback (always available, no external dependencies)
+
+## Performance & Compatibility
+
+- **Zero overhead**: Property handling uses existing \`change()\` infrastructure
+- **Backward compatible**: All v1.4.7 code works in v1.4.8
+- **Consistent behavior**: State V2, \`this()\`, and dState now all use same property system
+- **Desktop support**: Full Electron compatibility maintained
+
+---
+
+**Upgrade highly recommended** for all projects using State V2, especially if you need to update component properties beyond just \`text\`.
+
+---
+
+# Release Notes v1.4.7
+
+
+> Introducing State V2 and comprehensive animation system. This is the biggest update to Dars state management, bringing a pure Pythonic API and 15+ built-in animations.
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+or
+
+\`\`\`bash
+pip install dars-framework==1.4.7
+\`\`\`
+
+## What's New
+
+### State V2 - Pure Pythonic State Management
+
+**New \`State\` Class:**
+- Pure Python API - no more verbose dState syntax
+- Direct property access with reactive operations
+- Built-in auto-increment/auto-decrement operations
+- Clean reset functionality
+- Seamless animation integration
+
+**Before (dState - deprecated):**
+\`\`\`python
+from dars.core.state import dState, Mod
+
+display = Text("0", id="counter")
+st = dState("counter", component=display, states=[0, 1, 2])
+st.cState(1, mods=[Mod.inc(display, prop='text', by=1)])
+button.on_click = st.state(1)
+\`\`\`
+
+**After (State V2 - recommended):**
+\`\`\`python
+from dars.all import State
+
+display = Text("0", id="counter")
+counter = State(display, text=0)
+button.on_click = counter.text.increment(by=1)
+\`\`\`
+
+**Key Features:**
+- **Reactive Properties**: Direct access with \`state.property.operation()\`
+- **Auto Operations**: Continuous operations with \`auto_increment()\`, \`auto_decrement()\`
+- **Reset**: Simple \`state.reset()\` to restore initial values
+- **Intuitive**: Pythonic API that feels natural
+
+**Usage:**
+\`\`\`python
+from dars.all import *
+
+# Create component and state
+timer_display = Text("0", id="timer", style={"font-size": "36px"})
+timer = State(timer_display, text=0)
+
+# Auto-incrementing timer
+start_btn.on_click = timer.text.auto_increment(by=1, interval=1000)
+stop_btn.on_click = timer.text.stop_auto()
+reset_btn.on_click = timer.reset()
+\`\`\`
+
+### Comprehensive Animation System
+
+**15+ Built-in Animations:**
+- \`fadeIn\` / \`fadeOut\` - Opacity transitions
+- \`slideIn\` / \`slideOut\` - Position-based slides (8 directions)
+- \`scaleIn\` / \`scaleOut\` - Size transformations
+- \`shake\` - Shake effect for alerts
+- \`bounce\` - Bounce effect
+- \`pulse\` - Heartbeat/pulse effect
+- \`rotate\` - Rotation animations
+- \`flip\` - Flip on X/Y axis
+- \`colorChange\` - Color transitions
+- \`morphSize\` - Size morphing
+- \`sequence\` - Chain multiple animations
+
+**Animation Chaining:**
+\`\`\`python
+from dars.all import *
+
+button.on_click = sequence(
+    fadeIn(id="box", duration=400),
+    pulse(id="box", scale=1.2, iterations=2),
+    shake(id="box", intensity=5)
+)
+\`\`\`
+
+**Integration with State V2:**
+\`\`\`python
+button.on_click = sequence(
+    counter.text.increment(by=1),
+    pulse(id="counter", scale=1.2),
+    fadeOut(id="counter", duration=200),
+    counter.text.set(value=0),
+    fadeIn(id="counter", duration=200)
+)
+\`\`\`
+
+**All Animations:**
+- Return \`dScript\` objects for chaining
+- Customizable duration, easing, and parameters
+- Proper async completion handling
+- Work seamlessly with event handlers
+
+### Professional State V2 Template
+
+**New Example Template:**
+- Located in \`dars/templates/examples/advanced/StateV2/\`
+- Professional, production-ready demonstration
+- Function component pattern (LandingPage style)
+- Comprehensive showcases:
+  - Interactive counter with increment/decrement
+  - Auto-incrementing timer
+  - Animation showcase with 15+ animations
+  - State management best practices
+- Responsive design with modern styling
+- Complete documentation and code examples
+
+**Template Structure:**
+\`\`\`
+dars/templates/examples/advanced/StateV2/
+\u251C\u2500\u2500 index.py                 # Main application
+\u251C\u2500\u2500 hero_component.py        # Hero section
+\u251C\u2500\u2500 counter_component.py     # Counter demo
+\u251C\u2500\u2500 timer_component.py       # Timer demo
+\u251C\u2500\u2500 animation_component.py   # Animation showcase
+\u251C\u2500\u2500 styles.css              # Global styles
+\u2514\u2500\u2500 README.md               # Documentation
+\`\`\`
+
+## Breaking Changes
+
+**dState/cState Deprecation:**
+- \`dState\` and \`cState\` are now deprecated
+- All functionality replaced by State V2
+- Legacy code still works for backward compatibility
+- Migration path provided in updated documentation
+- New projects should use State V2 exclusively
+
+## Documentation Updates
+
+**Updated Files:**
+- \`state_management.md\` - Completely rewritten for State V2
+- \`scripts.md\` - Added comprehensive animation system documentation
+- All dState/cState references removed from active docs
+- Migration guides included for existing projects
+
+## Bug Fixes
+
+**Animation System:**
+- Fixed animation chaining with proper Promise handling
+- Fixed initial state rendering with \`transition='none'\` pattern
+- Fixed \`sequence()\` function trailing semicolon issue
+- All animations now properly await completion
+- Animations use \`setTimeout(20ms)\` for reliable state application
+
+**State Operations:**
+- \`auto_increment\` and \`auto_decrement\` now return proper \`dScript\` objects
+- Client-side loop management with \`startLoop\` and \`stopLoop\`
+- Proper cleanup of active loops
+
+## Technical Improvements
+
+### Animation Implementation
+
+- All animations wrapped in async IIFEs
+- Proper transition timing with \`setTimeout\`
+- Force reflow with \`void el.offsetWidth\`
+- Set \`transition='none'\` before initial styles
+- \`animation.finished\` for Web Animations API
+- Proper Promise chaining in \`sequence()\`
+
+## Migration Guide
+
+### From dState to State V2
+
+**1. Import Changes:**
+\`\`\`python
+# Old
+from dars.core.state import dState, Mod
+
+# New
+from dars.all import State
+\`\`\`
+
+**2. State Creation:**
+\`\`\`python
+# Old
+counter_state = dState("counter", component=display, states=[0, 1, 2])
+counter_state.cState(1, mods=[Mod.inc(display, prop='text', by=1)])
+
+# New
+counter = State(display, text=0)
+\`\`\`
+
+**3. Event Handlers:**
+\`\`\`python
+#Old
+button.on_click = counter_state.state(1)
+
+# New
+button.on_click = counter.text.increment(by=1)
+\`\`\`
+
+**4.Auto Operations (New Feature):**
+\`\`\`python
+# Only available in State V2
+start_btn.on_click = timer.text.auto_increment(by=1, interval=1000)
+stop_btn.on_click = timer.text.stop_auto()
+\`\`\`
+
+### Adding Animations
+
+\`\`\`python
+from dars.all import fadeIn, pulse, sequence
+
+# Simple animation
+button.on_click = fadeIn(id="element", duration=500)
+
+# Chained animations
+button.on_click = sequence(
+    fadeIn(id="box"),
+    pulse(id="box", scale=1.1)
+)
+\`\`\`
+
+## Performance & Compatibility
+
+- **Zero Overhead**: State V2 only activates when used
+- **Backward Compatible**: dState still works for existing code
+- **Bundle Size**: Minimal impact (+~15KB for animations)
+- **Desktop Support**: Full Electron compatibility
+
+## Examples
+
+### Complete Counter App
+
+\`\`\`python
+from dars.all import *
+
+app = App("Counter Demo")
+
+# Create display with state
+counter_display = Text("0", id="counter", style={
+    "font-size": "48px", 
+    "color": "#2563eb"
+})
+counter = State(counter_display, text=0)
+
+# Buttons with operations
+inc_btn = Button("+1", on_click=counter.text.increment(by=1))
+dec_btn = Button("-1", on_click=counter.text.decrement(by=1))
+reset_btn = Button("Reset", on_click=counter.reset())
+pulse_btn = Button("Pulse", on_click=pulse(id="counter", scale=1.2))
+
+page = Page(Container(counter_display, inc_btn, dec_btn, reset_btn, pulse_btn))
+app.add_page("index", page, index=True)
+app.rTimeCompile()
+\`\`\`
+
+### Auto-Incrementing Timer
+
+\`\`\`python
+from dars.all import *
+
+app = App("Timer Demo")
+
+timer_display = Text("0", id="timer")
+timer = State(timer_display, text=0)
+
+start_btn = Button("Start", on_click=timer.text.auto_increment(by=1, interval=1000))
+stop_btn = Button("Stop", on_click=timer.text.stop_auto())
+reset_btn = Button("Reset", on_click=timer.reset())
+
+page = Page(Container(timer_display, start_btn, stop_btn, reset_btn))
+app.add_page("index", page, index=True)
+app.rTimeCompile()
+\`\`\`
+
+## Desktop Exporter Status
+
+**Still in BETA** - State V2 and animations fully supported in both web and desktop exports.
+
+---
+
+**This is a landmark release** - State V2 represents the future of Dars state management. Upgrade highly recommended for all projects.
+
+---
+
+# Release Notes v1.4.6
+
+
+> **Major Feature Release**: Introduces Single Page Application (SPA) support and a powerful client-side routing system.
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+or
+
+\`\`\`bash
+pip install dars-framework==1.4.5
+\`\`\`
+
+## What's New
+
+### Single Page Application (SPA) Support
+
+**New Routing System:**
+- **Client-Side Routing**: Build fast, responsive SPAs with Python.
+- **Nested Routes & Layouts**: Create complex UI hierarchies using the \`parent\` parameter and the new \`Outlet\` component.
+- **Persistent Layouts**: Keep headers, sidebars, and navigation bars active while content changes dynamically.
+
+**Robust Error Handling:**
+- **Automatic 404 Handling**: Dars now automatically redirects invalid routes to a 404 page.
+- **Default & Custom 404**: Includes a built-in clean 404 page, or define your own with \`app.set_404_page()\`.
+
+### Developer Experience
+
+**Hot Reload Stability:**
+- **Intelligent Polling**: New hot reload system for SPAs that detects changes without spamming logs.
+- **Auto-Stop**: Prevents browser lag by stopping polling after 10 consecutive connection failures.
+
+### Fixes & Improvements
+
+- **SPA Export**: Fixed issues where SPA child routes were conflicting with multipage exports.
+- **Preview Server**: Improved handling of SPA routes and query parameters.
+- **Assets**: Enforced absolute paths for SPA assets to ensure correct loading from any depth.
+
+---
+
+
+# Release Notes v1.4.4
+
+> Critical bug fix release. Removes non-functional features, fixes style merge, and improves state restoration.
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+or
+
+\`\`\`bash
+pip install dars-framework==1.4.4
+\`\`\`
+
+## What's Fixed
+
+- **Style Merge Fix (CRITICAL)** - \`Mod.set()\` now correctly merges style properties
+- **Removed \`this().goto()\`** - Non-functional feature removed; use \`state.state()\` instead
+- **Fixed Syntax Warning** - Corrected invalid escape sequence in \`js_lib.py\`
+- **Improved State 0 Restoration** - Event handlers now re-attach when returning to default state
+
+---
+
+# Release Notes v1.4.3 (DEPRECATED)
+
+> State management enhancements with compile-time validation, component self-navigation, and critical style merge fix. Improves developer experience and fixes property replacement bug.
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+or
+
+\`\`\`bash
+pip install dars-framework==1.4.3
+\`\`\`
+
+## What's New
+
+- **\`this().goto(idx)\`** - Component self-navigation for state transitions
+- **\`this_for(id)\`** - Compile-time validation helper for state navigation
+- **Style Merge Fix** - Critical fix: \`Mod.set()\` now merges style properties instead of replacing them
+- **Enhanced Documentation** - Guides for state management patterns
+
+---
+
+# Release Notes v1.4.2
+
+> New utility dScript functions added to \`utils_ds\` for enhanced client-side interactions.
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+or
+
+\`\`\`bash
+pip install dars-framework==1.4.2
+\`\`\`
+
+## What's New
+
+### Utility Functions (\`utils_ds\`)
+
+- \`setTimeout(delay: int, code: dScript)\`: Execute a dScript after a delay (ms).
+- \`setText(id: str, text: str)\`: Set the text content of an element.
+- \`showModal(id: str)\`, \`hideModal(id: str)\`: Modal visibility helpers.
+- \`goTo(href: str)\`, \`goToNew(href: str)\`, \`reload()\`, \`goBack()\`, \`goForward()\`: Navigation utilities.
+- \`alert(message: str)\`, \`confirm(message: str, on_ok: str = "", on_cancel: str = "")\`, \`log(message: str)\`: Alert & console utilities.
+- \`show(id: str)\`, \`hide(id: str)\`, \`toggle(id: str)\`, \`addClass(id: str, class_name: str)\`, \`removeClass(id: str, class_name: str)\`, \`toggleClass(id: str, class_name: str)\`: DOM manipulation utilities.
+- \`scrollTo(x: int = 0, y: int = 0)\`, \`scrollToTop()\`, \`scrollToBottom()\`, \`scrollToElement(id: str)\`: Scroll utilities.
+- \`submitForm(form_id: str)\`, \`resetForm(form_id: str)\`, \`getValue(input_id: str, target_id: str)\`, \`clearInput(input_id: str)\`: Form utilities.
+- \`saveToLocal(key: str, value: str)\`, \`loadFromLocal(key: str, target_id: str)\`, \`removeFromLocal(key: str)\`, \`clearLocalStorage()\`: Storage utilities.
+- \`copyToClipboard(text: str)\`, \`copyElementText(id: str)\`: Clipboard utilities.
+- \`focus(id: str)\`, \`blur(id: str)\`: Focus utilities.
+
+These functions are documented in \`https://ztamdev.github.io/Dars-Framework/docs.html#dars-script-system\` and for states in \`https://ztamdev.github.io/Dars-Framework/docs.html#state-management-in-dars-dstate-cstate-goto-mods\`.
+
+---
+
+# Release Notes v1.4.1
+
+> SEO and Apple device optimizations. Enhanced metadata generation with automatic MIME type detection for favicons and comprehensive iOS/Safari support.
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+or
+
+\`\`\`bash
+pip install dars-framework==1.4.1
+\`\`\`
+
+## What's New
+
+### Automatic Favicon MIME Type Detection
+
+**Smart Icon Type Recognition:**
+- Favicon links now automatically detect and use the correct MIME type based on file extension
+- Supports PNG, ICO, SVG, JPG/JPEG, WebP, and GIF formats
+- No manual type specification needed
+- Eliminates incorrect \`image/x-icon\` type for PNG files
+
+**Before (v1.4.0):**
+\`\`\`html
+<link rel="icon" href="logo.png" type="image/x-icon">  <!-- Incorrect! -->
+\`\`\`
+
+**After (v1.4.1):**
+\`\`\`html
+<link rel="icon" href="logo.png" type="image/png">  <!-- Correct! -->
+\`\`\`
+
+### Enhanced Apple Device Support
+
+**New App Properties:**
+- \`apple_mobile_web_app_capable\` - Enable fullscreen mode when added to home screen
+- \`apple_mobile_web_app_status_bar_style\` - Control status bar appearance:
+  - \`"default"\` - Standard iOS status bar
+  - \`"black"\` - Black status bar
+  - \`"black-translucent"\` - **Transparent status bar** (solves Safari iOS 16+ solid color issue)
+- \`apple_mobile_web_app_title\` - Custom title for home screen icon
+
+**Usage:**
+\`\`\`python
+app = App(
+    title="My App",
+    favicon="logo.png",
+    apple_touch_icon="logo.png",
+    apple_mobile_web_app_capable=True,
+    apple_mobile_web_app_status_bar_style="black-translucent",  # Enables transparency!
+    apple_mobile_web_app_title="MyApp"
+)
+\`\`\`
+
+### Safari 15+ Theme Color Enhancements
+
+**Adaptive Theme Colors:**
+- Theme color now includes media query variants for light/dark mode
+- Proper integration with iOS system appearance settings
+- **Fixes Safari iOS 16+ transparency issues** where solid colors blocked background visibility
+
+**Generated Meta Tags:**
+\`\`\`html
+<meta name="theme-color" content="#0d1513">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#0d1513">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0d1513">
+\`\`\`
+
+### Improved Apple Touch Icon
+
+**Multiple Size Specifications:**
+- Apple touch icon now includes size attribute for better iOS home screen quality
+- Generates both standard and 180x180 sized icon links
+
+**Generated Links:**
+\`\`\`html
+<link rel="apple-touch-icon" href="logo.png">
+<link rel="apple-touch-icon" sizes="180x180" href="logo.png">
+\`\`\`
+
+### Modern Mobile Web App Meta Tag
+
+**Standards Compliance:**
+- Added \`mobile-web-app-capable\` meta tag alongside \`apple-mobile-web-app-capable\`
+- Eliminates deprecation warnings in modern browsers
+- Maintains backward compatibility with older iOS versions
+
+**Generated Meta Tags:**
+\`\`\`html
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+\`\`\`
+
+## Technical Improvements
+
+### Exporter Enhancements (\`dars/exporters/web/html_css_js.py\`)
+
+- **New \`_detect_icon_mime_type()\` Helper**: Automatically detects MIME types from file extensions
+- **Enhanced \`_generate_meta_tags()\`**: Adds Apple-specific meta tags and theme-color variants
+- **Updated \`_generate_links()\`**: Applies automatic MIME detection and sizes attribute
+
+### App Class Updates (\`dars/core/app.py\`)
+
+- Added 3 new initialization parameters for Apple mobile web app support
+- Properties auto-initialize with sensible defaults (\`apple_mobile_web_app_title\` defaults to app title)
+- All new properties are **optional** and **backward compatible**
+
+## Migration Notes
+
+### For Existing Projects
+
+**Automatic Upgrade:**
+- No configuration changes required
+- Favicons automatically get correct MIME types
+- Theme colors automatically include light/dark variants
+- All new features are opt-in
+
+**Optional iOS Enhancement:**
+\`\`\`python
+# Add to your App initialization
+app = App(
+    # ... existing params ...
+    apple_mobile_web_app_capable=True,
+    apple_mobile_web_app_status_bar_style="black-translucent",
+    apple_mobile_web_app_title="MyApp"
+)
+\`\`\`
+
+## SEO & Performance Impact
+
+- **Improved SEO**: Correct MIME types and proper meta tags
+- **Better Mobile Indexing**: Enhanced metadata for mobile search results
+- **iOS User Retention**: Superior home screen experience encourages app-like usage
+
+## Desktop Exporter Status
+
+**Still in BETA** - No changes from v1.4.0
+
+---
+
+**Upgrade Highly Recommended** for all projects, especially those targeting iOS/Safari users or requiring proper favicon MIME types.
+
+# Release Notes v1.4.0
+
+> Simple Template update.
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+or
+
+\`\`\`bash
+pip install dars-framework==1.4.0
+\`\`\`
+
+## Notes:
+
+All advanced and basic templates are now updated using the new features.
+
+# Release Notes v1.3.9
+
+> Desktop File System API, Pythonic Arg helper, keyboard event filtering, and comprehensive template synchronization. Major enhancements to desktop capabilities with improved developer experience.
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+or
+
+\`\`\`bash
+pip install dars-framework==1.3.9
+\`\`\`
+
+## What's New
+
+### Desktop File System API - \`list_directory\`
+
+**Comprehensive Directory Listing:**
+- New \`list_directory()\` function for browsing files and folders
+- Optional glob pattern filtering (e.g., \`"*.py"\` for Python files only)
+- Optional \`include_size\` parameter (default: False) to show/hide file sizes
+- Full integration with \`get_value()\` for dynamic paths from inputs
+- Seamless chaining with \`dScript.then()\` for UI updates
+- Returns array of \`{name, isDirectory, size?}\` objects
+
+**Usage:**
+\`\`\`python
+from dars.desktop import list_directory, get_value
+from dars.core.state import this
+
+# Simple directory listing
+Button("List", 
+    on_click=list_directory(get_value("path")).then(
+        this().state(id="output", html=RawJS("value.map(f => f.name).join('<br>')"))
+    )
+)
+
+# Filter by pattern
+Button("Python Files",
+    on_click=list_directory(".", "*.py").then(
+        this().state(id="count", text=RawJS("\`Found \${value.length} files\`"))
+    )
+)
+
+# Include file sizes
+list_directory(".", "*", include_size=True)
+\`\`\`
+
+### Pythonic \`Arg\` Helper
+
+**Cleaner dScript.ARG Access:**
+- New \`Arg\` singleton for Pythonic access to \`dScript.ARG\`
+- More readable than \`RawJS("dScript.ARG")\`
+- Provides helper methods like \`.map()\`, \`.join()\`, \`.length\`, etc.
+- Auto-generates proper JavaScript code
+- Exported in \`dars.all\` for easy access
+
+**Usage:**
+\`\`\`python
+from dars.scripts.dscript import Arg
+
+# Old way (still works)
+this().state(text=RawJS("dScript.ARG.map(f => f.name).join('\\\\n')"))
+
+# New Pythonic way
+this().state(text=Arg.map("f => f.name").join("\\\\n"))
+
+# Properties
+Arg.length  # -> "dScript.ARG.length"
+Arg.value   # -> "dScript.ARG.value"
+
+# Methods
+Arg.map("f => f.name")  # -> "dScript.ARG.map(f => f.name)"
+Arg.filter("x => x > 0")  # -> "dScript.ARG.filter(x => x > 0)"
+\`\`\`
+
+### Enhanced Keyboard Event Filtering
+
+**Specific Key Event Handlers:**
+- New keyboard event constants for specific keys (e.g., \`KEY_DOWN_ENTER\`, \`KEY_DOWN_ESCAPE\`)
+- Event type parsing with \`.\` delimiter for key filtering (e.g., \`"keydown.Enter"\`)
+- Proper event delegation with key matching
+- Works across all event attachment mechanisms
+- Backward compatible with existing keyboard events
+
+**New Event Constants:**
+\`\`\`python
+from dars.core.events import EventTypes
+
+# Specific Enter key events
+on_keydown_enter    # Triggered only when Enter is pressed
+on_keyup_enter      # Triggered only when Enter is released
+
+# Specific Escape key events  
+on_keydown_escape   # Triggered only when Escape is pressed
+on_keyup_escape     # Triggered only when Escape is released
+
+# Usage
+Input(
+    id="search",
+    on_keydown_enter=search_action,  # Only fires on Enter
+    on_keydown_escape=clear_action   # Only fires on Escape
+)
+\`\`\`
+
+### Configurable DevTools
+
+**Electron DevTools Control:**
+- New \`devtools\` parameter in \`App\` class (default: \`True\`)
+- Respects \`DARS_DEV\` and \`DARS_DEVTOOLS\` environment variables
+- DevTools only open when both conditions met: dev mode + devtools enabled
+- Better control over development environment
+- Applies to all Electron generation methods
+
+**Usage:**
+\`\`\`python
+# Disable DevTools even in dev mode
+app = App(
+    title="My App",
+    desktop=True,
+    devtools=False  # Won't open DevTools
+)
+
+# Default behavior (DevTools enabled)
+app = App(
+    title="My App",
+    desktop=True
+)
+\`\`\`
+
+### Dynamic Form Element Updates
+
+**Fixed \`change\` Function:**
+- Corrected dynamic text updates for form elements
+- Uses \`.value\` for \`Input\`, \`Textarea\`, \`Select\`
+- Uses \`.textContent\` for other elements (Text, Button, etc.)
+- Ensures UI updates properly reflect state changes
+- Fixed issue where form input values weren't updating
+
+### Improved Event Delegation
+
+**Keyboard Event Fix:**
+- Fixed event delegation for key-filtered keyboard events
+- Properly checks both base event name and filtered event name in eventMap
+- Ensures \`keydown.Enter\` and similar events work correctly
+- Maintains backward compatibility with non-filtered events
+
+## Bug Fixes
+
+- Fixed \`change\` function to use \`.value\` for form elements instead of \`.textContent\`
+- Fixed event delegation to properly handle key-filtered keyboard events like \`keydown.Enter\`
+- Fixed ElectronExporter default templates to include latest IPC handlers
+- Fixed CLI template generation to include all current File System API functions
+
+## Improved
+
+- Enhanced developer experience with configurable DevTools
+- Cleaner syntax with \`Arg\` helper for dScript.ARG access
+- More powerful keyboard event handling with key-specific filtering
+
+## Migration Guide
+
+### From v1.3.8 to v1.3.9
+
+No breaking changes. You can upgrade safely:
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+**Optional: Use new features**
+
+1. **Use \`list_directory\` for file browsing:**
+\`\`\`python
+from dars.desktop import list_directory, get_value
+
+Button("Browse", 
+    on_click=list_directory(get_value("dir")).then(...)
+)
+\`\`\`
+
+2. **Use \`Arg\` helper for cleaner code:**
+\`\`\`python
+from dars.scripts.dscript import Arg
+
+# Instead of RawJS("dScript.ARG.map(...)") 
+text=Arg.map("x => x.name").join("\\\\n")
+\`\`\`
+
+3. **Use specific keyboard events:**
+\`\`\`python
+Input(
+    on_keydown_enter=submit_action,
+    on_keydown_escape=cancel_action
+)
+\`\`\`
+
+## Documentation
+
+- Updated Desktop exporter documentation with File System API examples
+- Added \`Arg\` helper documentation in scripts section
+- Enhanced keyboard events documentation with key-specific examples
+
+# Release Notes v1.3.8
+
+> Dynamic state updates, improved event handling, and enhanced Electron dev experience. Introduces \`this()\` for event-time component updates, \`RawJS\` for JavaScript injection, and \`dScript.then()\` for async chaining.
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+or
+
+\`\`\`bash
+pip install dars-framework==1.3.8
+\`\`\`
+
+## What's New
+
+### Dynamic State Updates with \`this()\`
+
+**Effortless Component Updates:**
+- New \`this()\` helper for direct, event-time component updates without pre-registering states
+- Update any component property: \`text\`, \`html\`, \`style\`, \`attrs\`, \`classes\`
+- Works in both desktop and web exports
+- Perfect for async operations and file I/O
+
+**Usage:**
+\`\`\`python
+from dars.core.state import this
+
+# Button that updates itself
+btn = Button("Click me", on_click=this().state(
+    text="Clicked!",
+    style={"color": "red"}
+))
+
+# Counter with Mod helpers
+counter = Text("0", id="count")
+inc_btn = Button("+1", on_click=this().state(text=Mod.inc("count")))
+\`\`\`
+
+### Raw JavaScript Injection with \`RawJS\`
+
+**Dynamic Value Passing:**
+- New \`RawJS\` class for injecting raw JavaScript variables into state updates
+- Essential for passing values from async operations
+- Use \`dScript.ARG\` as a placeholder for chained script results
+
+**Usage:**
+\`\`\`python
+from dars.scripts.dscript import RawJS, dScript
+from dars.desktop import read_text
+
+# File content becomes button text
+read_btn = Button("Load",
+    on_click=read_text("data.txt").then(
+        this().state(text=RawJS(dScript.ARG))
+    )
+)
+\`\`\`
+
+### Script Chaining with \`dScript.then()\`
+
+**Sequential Async Operations:**
+- New \`.then()\` method for chaining \`dScript\` objects
+- Pass results between scripts using \`dScript.ARG\` (resolves to \`value\`)
+- Built-in error handling and logging for debugging
+- Enables complex workflows like read \u2192 process \u2192 update \u2192 write
+
+**Usage:**
+\`\`\`python
+# Chain file operations
+Button("Process",
+    on_click=read_text("input.txt")
+        .then(dScript(code="return value.toUpperCase()"))
+        .then(write_text("output.txt", RawJS("value")))
+        .then(this().state(text="Done!"))
+)
+\`\`\`
+
+### Event Handler Assignment Fix
+
+**Fixed Critical Bug:**
+- Event handlers can now be assigned via attribute assignment: \`btn.on_click = handler\`
+- Previously only constructor assignment worked: \`Button(on_click=handler)\`
+- Added \`__setattr__\` override to properly register events in all cases
+- Maintains backward compatibility with existing code
+
+### Enhanced Electron Dev Mode
+
+**Improved Development Experience:**
+- Filtered harmless Chrome DevTools warnings (Autofill.enable, etc.)
+- Fixed double Electron window bug on file save/reload
+- Added debounce logic to prevent concurrent restarts
+- Cleaner console output with better error formatting
+- Chrome DevTools auto-open in dev mode for easier debugging
+
+**Better Logging:**
+- Error-only stderr filtering (no more noise)
+- Color-coded messages for different log levels
+- Stack traces properly displayed for JavaScript errors
+
+## Technical Improvements
+
+### State System Enhancements
+- **Dynamic Updates**: New \`change({dynamic: true, ...})\` path in \`dars/js_lib.py\`
+- **RawJS Support**: State methods now detect and preserve \`RawJS\` values
+- **this() Proxy**: Clean API for self-referential component updates
+
+### Script System Improvements
+- **Chaining Infrastructure**: Robust async IIFE wrapping for sequential execution
+- **Value Passing**: Standardized \`value\` variable for inter-script communication
+- **Debug Logging**: Verbose console output for troubleshooting chains
+
+### Component System Fixes
+- **Event Collection**: \`VDomBuilder\` now correctly serializes all event handlers
+- **Attribute Interception**: \`__setattr__\` catches \`on_*\` assignments
+- **Backward Compatible**: All existing event patterns continue working
+
+### Dev Mode Stability
+- **Debounce**: 300ms consolidation window for file change events
+- **State Management**: Proper \`restart_triggered\` flag handling
+- **Process Cleanup**: Reliable Electron termination before restart
+
+## Documentation Updates
+
+**Comprehensive Coverage:**
+- New \`this()\` section in README with quick examples
+- Expanded \`state_management.md\` with complete file operations guide
+- Enhanced \`exporters.md\` with desktop API examples and chaining patterns
+- Updated \`scripts.md\` with \`.then()\` method documentation
+
+## Migration Notes
+
+### For Existing Projects
+
+**Seamless Upgrade:**
+- No breaking changes - all existing code remains compatible
+- New features are opt-in and additive
+- Event handlers work with both constructor and attribute assignment
+
+## Desktop Exporter Status
+
+**Still in BETA:**
+- File operations (\`read_text\`, \`write_text\`, \`read_file\`, \`write_file\`) are stable
+- Dev mode with hot reload is fully functional
+- Production packaging continues in experimental status
+- Native API surface expanding with each release
+
+## Performance & Compatibility
+
+- **Zero Overhead**: Dynamic updates only activate when used
+- **Bundle Size**: Minimal impact from new features
+- **Browser Support**: Maintains full cross-browser compatibility
+- **Desktop Integration**: Enhanced with improved error handling
+
+---
+
+**Upgrade Highly Recommended** for all desktop projects and applications requiring dynamic, event-driven UI updates.
+
+
+# Release Notes v1.3.6
+
+> Compile-time and runtime component manipulation. Introduces \`app.create()\` / \`app.delete()\` for pre-export tree editing, and \`createComp()\` / \`deleteComp()\` for dynamic DOM operations with safe event hydration.
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+or
+
+\`\`\`bash
+pip install dars-framework==1.3.6
+\`\`\`
+
+## What's New
+
+### Compile-Time Component Manipulation
+
+- \`app.create(target, root=None, on_top_of=None, on_bottom_of=None)\`
+  - Inserts components before/after a reference child or at the end of the \`root\`.
+  - Accepts \`target\` as an instance, a callable, or a \`str\` (id to move an existing component).
+  - Multipage support: \`root\` can be a component id, a component instance, or a page name.
+- \`app.delete(id)\`
+  - Removes a component by id from the tree before export (no-op if not found).
+
+### Runtime Component Manipulation
+
+- \`createComp(target, root, position='append')\`
+  - Generates a \`dScript\` that calls \`Dars.runtime.createComponent(root_id, vdom_data, position)\`.
+  - Serializes the Python component to VDOM and rehydrates events for the subtree.
+  - Positions: \`append\`, \`prepend\`, \`before:<id>\`, \`after:<id>\`.
+- \`deleteComp(id)\`
+  - Generates \`dScript\` that calls \`Dars.runtime.deleteComponent(id)\`.
+
+### Event Hydration for Dynamic Content
+
+- Event rehydration for the newly created subtree (supports arrays of handlers).
+- Every dynamic node with an \`id\` also gets \`class="dars-id-<id>"\` for reliable selection when multiple instances exist.
+
+### Barrel Import
+
+- \`from dars.all import *\` now includes \`createComp\` and \`deleteComp\` from \`dars.backend\`.
+
+
+# Release Notes v1.3.5
+
+> Enhanced styling and development experience update featuring active styles, improved preview system, and advanced file monitoring. Delivers better visual feedback and faster development workflow.
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+or
+
+\`\`\`bash
+pip install dars-framework==1.3.5
+\`\`\`
+
+## What's New
+
+### Active Styles Support
+
+**Complete Component Styling System:**
+- New \`active_style\` attribute for all components, providing visual feedback during user interaction
+- Completes the styling triad: \`style\`, \`hover_style\`, and \`active_style\`
+- Works seamlessly with existing hover styles introduced in v1.3.4
+
+**Usage:**
+\`\`\`python
+Button("Click it",
+        id="btn1",
+        on_click=[dScript('console.log(\`HI\`)'), txtstate.state(1)],
+        style={"color": "green"},
+        hover_style={"color": "red"},      # from v1.3.4
+        active_style={"color": "purple"},  # new in v1.3.5
+)
+\`\`\`
+
+### Enhanced Preview System
+
+**Optimized Development Server:**
+- Completely redesigned preview system with faster load times
+- Improved hot reload support for instant code changes
+- Better error handling and cleanup processes
+- Enhanced Ctrl+C handling for smooth server shutdown
+
+### Advanced File Watcher
+
+**Comprehensive Project Monitoring:**
+- New file watching system monitors file creation, deletion, and modification
+- Automatic detection of new files in the project directory
+- Supports multiple file extensions (.py, .js, .css, etc.)
+- Real-time updates without manual intervention
+
+## Fixed Issues
+
+### Responsiveness Improvements
+- **Landing Page**: Fixed responsiveness issues on smaller screens
+- **Mobile Compatibility**: Enhanced display and interaction on mobile devices
+
+## Technical Improvements
+
+### Development Experience
+- **Faster Hot Reload**: Reduced reload intervals and improved change detection
+- **Better Error Recovery**: Enhanced error handling during file changes
+- **Clean Shutdown**: Improved server termination and resource cleanup
+
+## Migration Notes
+
+### For Existing Projects
+
+**Seamless Upgrade:**
+- No breaking changes - all existing code remains compatible
+- Active styles can be added incrementally to enhance user interaction
+
+## Desktop Exporter Status
+
+**Still in BETA**
+
+# Release Notes v1.3.4
+
+> Enhanced interactivity update featuring hover styles, multi-handler events, and runtime versioning. Improves component styling and event handling flexibility.
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+or
+
+\`\`\`bash
+pip install dars-framework==1.3.4
+\`\`\`
+
+## What's New
+
+### Hover Styles Support
+
+**Enhanced Component Interactivity:**
+- New \`hover_style\` attribute for all components, allowing dynamic styling on mouse hover
+- Styles are automatically generated with higher specificity to ensure proper application
+
+### Multi-Handler Event System
+
+**Flexible Event Management:**
+- Components now support arrays of event handlers for the same event type
+- Multiple \`dScript\`, inline JavaScript, or mixed handlers can be assigned to single events
+- Handlers execute in sequence with individual error handling
+- Full backward compatibility with existing single-handler syntax
+
+### Runtime Versioning
+
+**Enhanced Debugging & Tracking:**
+- JavaScript runtime now includes version information accessible via \`Dars.version\`
+- Release URL exposed through \`Dars.releaseUrl\` for quick reference
+- Better debugging and environment identification
+- Framework version tracking in deployed applications
+
+**Usage:**
+\`\`\`javascript
+// Access version information
+console.log(\`Using Dars v\${Dars.version}\`);
+console.log(\`Release: \${Dars.releaseUrl}\`);
+\`\`\`
+
+## Technical Improvements
+
+### Web Exporter Enhancements
+- **Improved Style Application**: Fixed CSS generation to ensure all component styles render correctly
+- **Robust Event Serialization**: Enhanced handler extraction and code generation for reliable event execution
+- **Better Error Handling**: Individual error catching for multi-handler events prevents cascade failures
+
+### Component System
+- **Backward Compatibility**: All existing single-handler events continue working unchanged
+- **Enhanced Flexibility**: Mix and match handler types (dScript, strings, arrays) with consistent behavior
+- **Cleaner Code Generation**: Improved JavaScript output with proper handler separation and error boundaries
+
+## Migration Notes
+
+### For Existing Projects
+
+**Automatic Upgrade:**
+- No breaking changes - existing code works identically
+- Hover styles can be incrementally added to enhance existing components
+- Multi-handler events are optional - single handlers remain fully supported
+
+## Desktop Exporter Status
+
+**Still in BETA** - No changes from v1.3.3
+
+## Performance & Compatibility
+
+- **Zero Overhead**: New features only activate when used
+- **Bundle Size**: Minimal impact on final application size
+- **Browser Support**: Maintains full cross-browser compatibility
+- **Framework Integration**: Seamless with existing Dars ecosystem
+
+---
+
+**Upgrade Recommended** for all projects requiring enhanced interactivity and better development tooling.
+
+# Release Notes v1.3.3
+
+> Minor update featuring new semantic Section component and enhanced state serialization. Continues JavaScript migration improvements from v1.3.2.
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+or
+
+\`\`\`bash
+pip install dars-framework==1.3.3
+\`\`\`
+
+## What's New
+
+### Section Component
+
+**Semantic HTML Container:**
+- New \`Section\` component that renders as \`<section></section>\` instead of generic \`<div>\`
+- Maintains all functionality of Container component (children, styles, etc.)
+- Improves HTML readability and semantic structure for debugging
+- Better accessibility and SEO through proper sectioning elements
+
+**Usage:**
+\`\`\`python
+# Creates <section> with all container capabilities
+Section(Button("HI"), styles={...})
+\`\`\`
+
+### Enhanced State & Event Serialization
+
+**Complete JavaScript Migration:**
+- States are now fully serialized in JavaScript and no longer exposed in HTML
+- Final migration of both state and event systems to pure JavaScript
+- Eliminates need for state/event data in VDOM structure
+- Improved security and cleaner HTML output
+
+**Benefits:**
+- More secure: State data hidden from direct HTML inspection
+- Cleaner markup: Reduced data attributes in rendered HTML
+- Better performance: Streamlined state management
+- Enhanced minification: Better compatibility with Vite optimization
+
+### Documentation Updates
+
+- Updated documentation to reflect new Section component usage
+- Enhanced examples and best practices for semantic HTML
+- Migration guides for state serialization changes
+
+## Technical Improvements
+
+- **Backward Compatible**: No breaking changes to existing components
+- **Progressive Enhancement**: Existing containers continue working as before
+- **Performance**: Maintains all optimizations from v1.3.2
+
+## Migration Notes
+
+### For Existing Projects
+
+**Automatic Upgrade:**
+- No configuration changes required
+- Existing container components remain unchanged
+- State management automatically uses new serialization
+
+**Optional Section Component Adoption:**
+\`\`\`python
+# Old way (still works)
+Container(children=[...])
+
+# New semantic way
+Section(children=[...])
+\`\`\`
+
+## Desktop Exporter Status
+
+**Still in BETA** - No changes from v1.3.2
+
+## Known Issues
+
+- None introduced in this release
+- Continuing to monitor Electron desktop exporter stability
+
+---
+
+# Release Notes v1.3.2
+
+> Major minification improvements with combined JS files and optimized event handling. Electron desktop exporter remains in beta.
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+or
+
+\`\`\`bash
+pip install dars-framework==1.3.2
+\`\`\`
+
+## Highlights
+
+### Enhanced Minification System
+
+**Combined JavaScript Bundles:**
+- When \`viteMinify: true\` and \`bundle: true\` are enabled, the exporter now combines all JavaScript files into single optimized bundles
+- Single-page apps: All JS combined into \`app.js\`
+- Multi-page apps: Each page gets its own \`app_{slug}.js\` bundle
+- Eliminates reference issues between separate files during minification
+
+**Optimized Event Handling:**
+- Events are no longer stored in VDOM tree
+- Event handlers are now generated as valid JavaScript directly in runtime
+- Improved compatibility with Vite minification and obfuscation
+- Better performance and smaller bundle sizes
+
+**Smart File Management:**
+- When using combined bundles, individual files (\`runtime_dars.js\`, \`script.js\`, \`vdom_tree.js\`) are not generated
+- HTML files are updated to reference only the combined bundle
+- Backward compatible - falls back to separate files when \`viteMinify: false\`
+
+### Vite Minification Perfection
+
+- Vite can now minify the entire application as a single cohesive unit
+- Resolves function reference issues that previously broke minification
+- Proper obfuscation of all JavaScript code, including event handlers
+- Maintains full functionality while significantly reducing bundle size
+
+### Configuration-Driven Behavior
+
+\`\`\`json
+{
+  "viteMinify": true,
+  "bundle": true,
+  "defaultMinify": true
+}
+\`\`\`
+
+- **viteMinify**: Enables advanced Vite-based minification with combined bundles
+- **bundle**: Required for production-optimized builds
+- **defaultMinify**: Fallback minification when Vite is unavailable
+
+## Bug Fixes
+
+- **Fixed**: Vite minification breaking function references between separate JS files
+- **Fixed**: Event handlers not being properly minified and obfuscated
+- **Improved**: Multi-page application build performance
+
+## Desktop Exporter Status
+
+**Desktop Exporter remains in BETA**
+
+While the web exporter is now stable and production-ready, the Electron desktop exporter continues in beta due to:
+
+- Ongoing refinement of native API integrations
+- Cross-platform packaging and signing requirements
+- Advanced IPC and system integration features still in development
+
+**Current Desktop Capabilities:**
+- Basic file system operations (\`read_text\`, \`write_text\`)
+- Development mode with hot reload
+- Production packaging still experimental
+
+## Migration Notes
+
+### For Existing Projects
+
+**No breaking changes** - existing configurations continue to work. To benefit from the new minification:
+
+1. Update your \`dars.config.json\`:
+\`\`\`json
+{
+  "viteMinify": true,
+  "bundle": true
+}
+\`\`\`
+
+2. Run \`dars build\` or \`dars export\` as usual
+
+### Performance Improvements
+
+- **Bundle Size**: Up to 40% reduction in minified JavaScript
+- **Load Time**: Faster initial page loads with combined bundles
+- **Runtime Performance**: Better optimized event handling
+- **Build Time**: More efficient minification process
+
+## Known Issues
+
+- Electron desktop apps may require additional configuration for native module support
+- Some edge cases in complex component trees being investigated
+
+## Next Steps
+
+We're working on:
+- **v1.4.0**: Production-ready Electron desktop exporter
+- **v1.5.0**: Advanced native desktop APIs and system integrations
+- **Future**: Plugin system and extended component library
+
+---
+
+# Release Notes v1.3.1 BETA
+
+> Native desktop functions and DX improved with dev mode and file system integration.
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+or
+
+\`\`\`bash
+pip install dars-framework==1.3.1
+\`\`\`
+
+## Highlights
+
+### Native Functions
+
+You can acces native functions via \`dars.desktop\` module:
+
+\`\`\`python
+from dars.desktop import *
+\`\`\`
+
+With this module you can acces for now 2 main functions:
+
+\`\`\`python 
+write_text("./app/lib/hello.txt", "Hello Text")
+\`\`\`
+and
+
+\`\`\`python
+read_text("./app/lib/hello.txt")
+\`\`\`
+
+This two functions allows you to read and write text files in your desktop application filesystem, both returns an dScript() with the code to be executed in the desktop app, and also the 2 functions can be used in events of any component.
+
+Also you can use dScripts to run custom javascript code in the desktop app. and for now 'dars dev' is supported but python main.py with rTimeCompile() is not supported because it have issues with relative paths.
+
+## Bug Fixes
+
+- Fixed dev failures with hot reload using desktop format.
+
+## Notes(Warning)
+
+- This feature set is **BETA**. Many options (signing, advanced IPC, updates, and deeper configuration) are still evolving.
+- Usable for internal tools and early testing. Not recommended for production deployment yet.
+- Expect changes to configuration keys and defaults in future versions.
+
+
+# Release Notes v1.3.0 BETA
+
+> Native desktop export (BETA), improved CLI and doctor integration, and metadata fixes for packaging. This is a BETA release: usable for testing, not recommended for production.
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+or
+
+\`\`\`bash
+pip install dars-framework==1.3.0
+\`\`\`
+
+## Highlights
+
+- **New: Native Desktop Export (BETA)**
+  - Build desktop apps directly from Dars projects.
+  - Project config supports \`format: "desktop"\` and \`targetPlatform\` (\`auto|windows|linux|macos\`).
+  - Backend scaffold via \`dars init --type desktop\` (or \`--update\`), generating minimal main process files and preload bridge.
+  - IPC bridge includes basic FS read/write for quick experiments.
+  - Source emitted to \`dist/source-electron/\`; packaged artifacts in \`dist/\`.
+  - Note: This capability is BETA and not recommended for production yet.
+
+- **New: Desktop Build Flow in CLI**
+  - \`dars build\` respects \`format: "desktop"\` in \`dars.config.json\`.
+  - Platform flags are selected automatically or via \`targetPlatform\`.
+  - Robust error output: full stdout/stderr on packaging failure.
+
+- **New: Doctor Integration for Desktop Tooling**
+  - \`dars doctor --all --yes\` checks and installs optional desktop tooling.
+  - Pins the desktop runtime to a compatible version automatically when needed.
+
+- **Packaging Reliability Improvements**
+  - Project metadata auto-filled from \`App\` (name/title, description, author, version) with sensible defaults.
+  - Version defaulted to \`0.1.0\` when absent (warning emitted).
+  - Package manager forced to a stable toolchain to avoid ENOENT errors during packaging.
+  - Runtime version pinned explicitly in both dev deps and build config to ensure predictable builds.
+
+## Quickstart (Desktop BETA)
+
+\`\`\`bash
+# Initialize or update a project with desktop scaffolding
+dars init --type desktop
+# or
+dars init --update
+
+# Verify optional tooling
+dars doctor --all --yes
+
+# Build using project config (format: "desktop")
+dars build
+\`\`\`
+
+Minimal \`dars.config.json\` for desktop:
+
+\`\`\`json
+{
+  "entry": "main.py",
+  "format": "desktop",
+  "outdir": "dist",
+  "targetPlatform": "auto"
+}
+\`\`\`
+
+## Bug Fixes
+
+- Fixed packaging failures caused by missing metadata in project manifests by auto-populating:
+  - \`description\` from \`App.description\` (fallback to a default)
+  - \`author\` from \`App.author\` (fallback to a default)
+  - \`version\` from \`App.version\` (fallback \`0.1.0\` with warning)
+- Stabilized packaging by pinning desktop runtime version in both dev dependencies and build configuration.
+- Avoided package-manager ENOENT errors in packaging by forcing a stable manager and resolving runners reliably on Windows.
+- Correct platform flags for packaging: \`--win\`, \`--linux\`, \`--mac\`.
+- Improved error reporting to include stdout and stderr from the packaging tool.
+
+## Notes
+
+- This feature set is **BETA**. Many options (signing, advanced IPC, updates, and deeper configuration) are still evolving.
+- Usable for internal tools and early testing. Not recommended for production deployment yet.
+- Expect changes to configuration keys and defaults in future versions.
+
+I spent ~1 month iterating on this capability and consolidated changes into this single BETA release once it reached a usable threshold. Feedback is welcome to help stabilize and expand the desktop feature set.
+
+# Release Notes v1.2.9
+
+> Optional default minification, precise CLI control, faster builds, and clearer minification status.
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+or
+
+\`\`\`bash
+pip install dars-framework==1.2.8
+\`\`\`
+
+## Highlights
+
+- **New: Configurable Default Minifier**
+  - \`defaultMinify\` (default: true) controls the built\u2011in Python minifier.
+  - Preserves \`pre\`, \`code\`, \`textarea\`, \`script\`, \`style\`.
+  - Only removes non\u2011conditional HTML comments and collapses spaces between tags.
+  - Does not collapse text-node spaces (Markdown and \`<pre><code>\` remain intact).
+
+- **New: CLI Flag \`--no-minify\`**
+  - Available in \`dars build\` and \`dars export\`.
+  - Disables only the default Python minifier for that run.
+  - Independent from \`viteMinify\`.
+
+- **Minification Modes Work Together**
+  - When \`defaultMinify\` and \`viteMinify\` are both true:
+    - Default minifier applies (safe HTML and fallback for JS/CSS).
+    - Vite/esbuild minify JS/CSS where available.
+  - Status line now reflects the active mode:
+    - \u201CApplying minification (default)\u201D
+    - \u201CApplying minification (vite)\u201D
+    - \u201CApplying minification (default + vite)\u201D
+
+- **Faster Default Minifier**
+  - Default minifier uses fast Python fallback (rjsmin/rcssmin/regex) and never shells out to Vite/esbuild.
+  - Results in near\u2011instant minification step.
+
+## Bug Fixes
+
+- Default minifier no longer ignores config; \`defaultMinify\` and \`--no-minify\` are strictly honored.
+- Eliminated unintended use of esbuild/Vite inside the default minifier.
+- Improved label accuracy to match the actual minification pipeline (default, vite, or both).
+
+## Notes
+
+- Relevant configuration:
+  - \`defaultMinify\`: true/false. Controls the Python-side minification (HTML + JS/CSS fallback).
+  - \`viteMinify\`: true/false. Controls Vite/esbuild for JS/CSS when available.
+- Backward compatibility:
+  - Defaults maintain previous behavior, now safer for Markdown/code blocks.
+  - You can disable default minification per-run with \`--no-minify\` without affecting \`viteMinify\`.
+
+Upgrade Recommendation: Recommended for all users; especially helpful for projects with Markdown/code samples and those wanting faster, more controllable minification.
+
+# Older release notes can be found
+
+In the github repository [Here](https://github.com/ZtaMDev/Dars-Framework/releases).
+`}]},{type:"T2",id:"footer-section",key:"0/1/1",children:[{type:"T2",id:"container_178",key:"0/1/1/0",children:[{type:"T2",id:"container_179",key:"0/1/1/0/0",children:[{type:"T2",id:"container_180",key:"0/1/1/0/0/0",children:[{type:"T4",id:"image_181",key:"0/1/1/0/0/0/0"},{type:"T2",id:"container_182",key:"0/1/1/0/0/0/1",children:[{type:"T5",id:"text_183",key:"0/1/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_184",key:"0/1/1/0/0/1",children:[{type:"T2",id:"container_185",key:"0/1/1/0/0/1/0",children:[{type:"T5",id:"text_186",key:"0/1/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_187",key:"0/1/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_188",key:"0/1/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_189",key:"0/1/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_190",key:"0/1/1/0/0/1/1",children:[{type:"T5",id:"text_191",key:"0/1/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_192",key:"0/1/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_193",key:"0/1/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_194",key:"0/1/1/0/0/1/2",children:[{type:"T5",id:"text_195",key:"0/1/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_196",key:"0/1/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_197",key:"0/1/1/0/0/2",children:[{type:"T2",id:"container_198",key:"0/1/1/0/0/2/0",children:[{type:"T5",id:"text_199",key:"0/1/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_200",key:"0/1/1/0/0/2/1",children:[{type:"T5",id:"text_201",key:"0/1/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_202",key:"0/1/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_203",key:"0/1/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_204",key:"0/1/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]},{type:"T10",id:"documentation-sidebar",key:"0/2"}]},function(){const c=new Map;let l=null,p=null;function u(){}function k(){}function b(n,t){if(!n)return;t(n);const e=n.children||[];for(let a=0;a<e.length;a++)b(e[a],t)}function S(n,t){if(!(!n||!t))for(const[e,a]of Object.entries(t))try{a===!1||a===null||typeof a>"u"?n.removeAttribute(e):n.setAttribute(e,String(a))}catch{}}function P(n,t={},e={}){for(const a in t)if(!(a in e))try{n.removeAttribute(a)}catch{}for(const a in e){const o=e[a];try{o===!1||o===null||typeof o>"u"?n.removeAttribute(a):n.setAttribute(a,String(o))}catch{}}}function V(n,t={},e={}){for(const a in t)if(!(a in e))try{n.style.removeProperty(a.replace(/_/g,"-"))}catch{}for(const a in e){const o=e[a];try{n.style.setProperty(a.replace(/_/g,"-"),String(o))}catch{}}}function F(n,t){(t||document).addEventListener(n,function(e){let a=e.target;const o=t||document;for(;a&&a!==o;){const m=a.id;if(m&&c.has(m)){const y=c.get(m);if(a&&a.__darsEv&&a.__darsEv[n])return;let d=y[n];if(!d&&(n==="keydown"||n==="keyup"||n==="keypress")){const i=e.key||e.code;if(i){const r=n+"."+i;d=y[r]}}if(typeof d=="function"){try{d.call(a,e)}catch(i){console.error("[Dars] handler error",i)}return}}a=a.parentNode}},!0)}function _(n,t){return n&&t?n.type!==t.type:n!==t}function x(n){if(!n)return;const t=n.children||[];for(let e=0;e<t.length;e++)x(t[e]);if(n.id&&c.delete(n.id),n.id){const e=document.getElementById(n.id);if(e&&e.parentNode)try{e.parentNode.removeChild(e)}catch{}}}function v(n,t){if(!t||!t.id)return{ok:!1,reason:"missing-new"};let e=document.getElementById(t.id);if(!e){const i=n&&n.id?document.getElementById(n.id):null;if(i)try{i.id=t.id,e=i}catch{}}if(!e)return{ok:!1,reason:"missing-el"};if(_(n,t))return{ok:!1,reason:"type-changed"};const a=!!t.isIsland;if(!a&&t.class&&(e.className=t.class),a||P(e,n&&n.props||{},t.props||{}),a||V(e,n&&n.style||{},t.style||{}),!a&&Object.prototype.hasOwnProperty.call(t,"text")&&e.textContent!==String(t.text||"")&&(e.textContent=String(t.text||"")),a)return{ok:!0};const o=n&&n.children?n.children:[],m=t.children?t.children:[],y=new Map;for(let i=0;i<o.length;i++){const r=o[i]&&(o[i].id||o[i].key)||null;r&&y.set(String(r),o[i])}const d=new Set;for(let i=0;i<m.length;i++){const r=m[i],h=r&&(r.id||r.key)||null;if(!h)if(i<o.length){const s=v(o[i],r);if(!s.ok)return s;d.add(o[i]);continue}else return{ok:!1,reason:"children-added"};const w=y.get(String(h));if(w){const s=v(w,r);if(!s.ok)return s;d.add(w)}else{if(i<o.length){const f=o[i];if(!_(f,r)){const g=v(f,r);if(!g.ok)return g;d.add(f);continue}}const s=createSubtree(r);if(s){const f=i<o.length?o[i]:null;if(f&&f.id){const g=document.getElementById(f.id);g&&g.parentNode?g.parentNode.insertBefore(s,g):e.appendChild(s)}else e.appendChild(s);continue}return{ok:!1,reason:"children-added"}}}for(let i=0;i<o.length;i++){const r=o[i];d.has(r)||x(r)}return{ok:!0}}function N(n){typeof requestAnimationFrame=="function"?requestAnimationFrame(n):setTimeout(n,16)}function M(n){const t=l;if(!t){l=n;try{window.__DARS_VDOM__=n}catch{}return}N(()=>{const e=v(t,n);if(!e.ok){console.warn("[Dars] Structural change detected (",e.reason,"), reloading...");try{location.reload()}catch{}return}l=n;try{window.__DARS_VDOM__=n}catch{}})}function R(n){l=n;try{window.__DARS_VDOM__=n}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(e=>F(e,document))}function B(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const n=window.__DARS_VERSION_URL||"version.txt";let t=null,e=!1,a=0;const o=10;let m=!1;function y(i,r,h,w){try{const s=new XMLHttpRequest;w&&(s.responseType=w),s.open("GET",i,!0),s.timeout=5e3,s.onreadystatechange=function(){s.readyState===4&&(s.status>=200&&s.status<300?r(s.response):h())},s.onerror=h,s.ontimeout=h,s.setRequestHeader("Cache-Control","no-store"),s.send()}catch{h()}}function d(){m||y(n,function(i){let r=(i||"").toString().trim();if(!r||r==="0"){if(a+=1,a>=o){console.warn("[Dars] version file not found after",o,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(d,600);return}if(a=0,e=!1,p||(p=r),r&&r!==p){p=r;try{location.reload()}catch{}return}t=setTimeout(d,600)},function(){if(a+=1,a>=o){console.warn("[Dars] version file not reachable after",o,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(d,600)},"text")}return d(),()=>{try{m=!0,t&&clearTimeout(t),window.__DARS_STOP_HOTRELOAD=null}catch{}}}document.addEventListener("DOMContentLoaded",function(){if(window.__DARS_VDOM__?R(window.__DARS_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=B()}catch{}}})}(),window.addEventListener("scroll",()=>{const c=document.getElementById("dars-navbar");window.scrollY>20?c.classList.add("scrolled"):c.classList.remove("scrolled");const l=document.getElementById("features-section");if(l&&!l.classList.contains("visible")){const p=l.getBoundingClientRect().top,u=window.innerHeight/1.5;p<u&&(l.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((b,S)=>{setTimeout(()=>{b.style.opacity="1",b.style.transform="translateY(0)"},S*100)}))}});const C=document.getElementById("hero-logo"),D=document.getElementById("hero-title"),T=document.getElementById("hero-description"),A=document.getElementById("pip-command"),I=document.getElementById("get-started-btn"),E=document.getElementById("scroll-text");C&&setTimeout(()=>C.classList.add("show"),5),D&&setTimeout(()=>D.classList.add("show"),350),T&&setTimeout(()=>T.classList.add("show"),650),A&&setTimeout(()=>A.classList.add("show"),950),I&&setTimeout(()=>I.classList.add("show"),1250),E&&setTimeout(()=>E.classList.add("show"),1500),document.addEventListener("DOMContentLoaded",function(){const c=document.getElementById("hamburger-btn"),l=document.getElementById("mobile-menu"),p=document.body;c&&l&&(c.addEventListener("click",function(u){u.stopPropagation(),l.style.display==="flex"?(l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open")):(l.style.display="flex",c.classList.add("menu-open"),p.classList.add("menu-open"))}),l.querySelectorAll("a").forEach(u=>{u.addEventListener("click",function(){l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open")})}),document.addEventListener("click",function(u){!c.contains(u.target)&&!l.contains(u.target)&&(l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open"))}),document.addEventListener("keydown",function(u){u.key==="Escape"&&l.style.display==="flex"&&(l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open"))}))});

@@ -1433,6 +1433,57 @@
      <a class="sidebar-link sidebar-level-3" href="#url-url-builder" style="margin-left: 40px">
       url() - URL Builder
      </a>
+     <a class="sidebar-link sidebar-level-2" href="#boolean-comparison-operators" style="margin-left: 20px">
+      Boolean &amp; Comparison Operators
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#comparison-operators" style="margin-left: 40px">
+      Comparison Operators
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#string-methods" style="margin-left: 40px">
+      String Methods
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#logical-operators" style="margin-left: 40px">
+      Logical Operators
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#conditional-expressions" style="margin-left: 40px">
+      Conditional Expressions
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#complete-validation-example" style="margin-left: 40px">
+      Complete Validation Example
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#form-collection-system" style="margin-left: 20px">
+      Form Collection System
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#formdata-collectform" style="margin-left: 40px">
+      FormData &amp; collect_form()
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#basic-usage" style="margin-left: 60px">
+      Basic Usage
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#advanced-features" style="margin-left: 60px">
+      Advanced Features
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#formdata-methods" style="margin-left: 60px">
+      FormData Methods
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#backend-integration-example" style="margin-left: 40px">
+      Backend Integration Example
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#getdatetime-timestamp-helper" style="margin-left: 20px">
+      getDateTime() - Timestamp Helper
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#basic-usage" style="margin-left: 40px">
+      Basic Usage
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#usage-in-forms" style="margin-left: 40px">
+      Usage in Forms
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#usage-with-state" style="margin-left: 40px">
+      Usage with State
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#complete-example" style="margin-left: 40px">
+      Complete Example
+     </a>
      <a class="sidebar-link sidebar-level-2" href="#best-practices" style="margin-left: 20px">
       Best Practices
      </a>
@@ -15853,6 +15904,497 @@ def hello():
        </code>
        for placeholders.
       </p>
+      <h2 id="boolean-comparison-operators">
+       Boolean &amp; Comparison Operators
+      </h2>
+      <p>
+       <code>
+        V()
+       </code>
+       supports boolean and comparison operations, enabling declarative validation and conditional logic without raw JavaScript!
+      </p>
+      <h3 id="comparison-operators">
+       Comparison Operators
+      </h3>
+      <p>
+       Compare values using Python-style operators:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="c1"># Numeric comparisons (require .int() or .float())</span>
+<span class="n">V</span><span class="p">(</span><span class="s2">"#age"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">18</span>
+<span class="n">V</span><span class="p">(</span><span class="s2">"#price"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mf">100.0</span>
+<span class="n">V</span><span class="p">(</span><span class="s2">"#quantity"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">==</span> <span class="mi">5</span>
+
+<span class="c1"># String equality</span>
+<span class="n">V</span><span class="p">(</span><span class="s2">"#password"</span><span class="p">)</span> <span class="o">==</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#confirm-password"</span><span class="p">)</span>
+<span class="n">V</span><span class="p">(</span><span class="s2">"#email"</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">""</span>
+
+<span class="c1"># All operators: ==, !=, &gt;, &lt;, &gt;=, &lt;=</span>
+</code></pre>
+      </div>
+      <h3 id="string-methods">
+       String Methods
+      </h3>
+      <p>
+       Check string properties with built-in methods:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Check if string contains substring</span>
+<span class="n">V</span><span class="p">(</span><span class="s2">"#email"</span><span class="p">)</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="s2">"@"</span><span class="p">)</span>
+
+<span class="c1"># Check string start/end</span>
+<span class="n">V</span><span class="p">(</span><span class="s2">"#filename"</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"report_"</span><span class="p">)</span>
+<span class="n">V</span><span class="p">(</span><span class="s2">"#filename"</span><span class="p">)</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">".pdf"</span><span class="p">)</span>
+
+<span class="c1"># Get string length (returns ValueRef with .int())</span>
+<span class="n">V</span><span class="p">(</span><span class="s2">"#password"</span><span class="p">)</span><span class="o">.</span><span class="n">length</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">8</span>
+
+<span class="c1"># Convert to boolean</span>
+<span class="n">V</span><span class="p">(</span><span class="s2">"#checkbox"</span><span class="p">)</span><span class="o">.</span><span class="n">bool</span><span class="p">()</span>
+</code></pre>
+      </div>
+      <h3 id="logical-operators">
+       Logical Operators
+      </h3>
+      <p>
+       Combine boolean expressions with
+       <code>
+        .and_()
+       </code>
+       and
+       <code>
+        .or_()
+       </code>
+       :
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># AND operator</span>
+<span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#age"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">18</span><span class="p">)</span><span class="o">.</span><span class="n">and_</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#age"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mi">65</span><span class="p">)</span>
+
+<span class="c1"># OR operator</span>
+<span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#email"</span><span class="p">)</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="s2">"@"</span><span class="p">))</span><span class="o">.</span><span class="n">or_</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#phone"</span><span class="p">)</span><span class="o">.</span><span class="n">length</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">10</span><span class="p">)</span>
+
+<span class="c1"># Complex combinations</span>
+<span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#name"</span><span class="p">)</span><span class="o">.</span><span class="n">length</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">and_</span><span class="p">(</span>
+    <span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#email"</span><span class="p">)</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="s2">"@"</span><span class="p">))</span><span class="o">.</span><span class="n">and_</span><span class="p">(</span>
+        <span class="n">V</span><span class="p">(</span><span class="s2">"#email"</span><span class="p">)</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="s2">"."</span><span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="conditional-expressions">
+       Conditional Expressions
+      </h3>
+      <p>
+       Use
+       <code>
+        .then()
+       </code>
+       for ternary operations (condition ? trueVal : falseVal):
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Simple conditional</span>
+<span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#age"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">18</span><span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="s2">"Adult"</span><span class="p">,</span> <span class="s2">"Minor"</span><span class="p">)</span>
+
+<span class="c1"># With state updates</span>
+<span class="n">state</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+    <span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#score"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">60</span><span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="s2">"Pass"</span><span class="p">,</span> <span class="s2">"Fail"</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># Nested conditionals</span>
+<span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#premium"</span><span class="p">)</span><span class="o">.</span><span class="n">bool</span><span class="p">())</span><span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="s2">"10</span><span class="si">% d</span><span class="s2">iscount"</span><span class="p">,</span> <span class="s2">"No discount"</span><span class="p">)</span>
+
+<span class="c1"># Complex validation</span>
+<span class="n">state</span><span class="o">.</span><span class="n">validation</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+    <span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#password"</span><span class="p">)</span><span class="o">.</span><span class="n">length</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">8</span><span class="p">)</span><span class="o">.</span><span class="n">and_</span><span class="p">(</span>
+        <span class="n">V</span><span class="p">(</span><span class="s2">"#password"</span><span class="p">)</span> <span class="o">==</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#confirm"</span><span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="s2">"✓ Valid"</span><span class="p">,</span> <span class="s2">"✗ Invalid"</span><span class="p">)</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="complete-validation-example">
+       Complete Validation Example
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="s2">"Form Validation"</span><span class="p">)</span>
+<span class="n">form</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"form"</span><span class="p">,</span> 
+    <span class="n">email_valid</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span>
+    <span class="n">age_valid</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span>
+    <span class="n">password_valid</span><span class="o">=</span><span class="s2">""</span>
+<span class="p">)</span>
+
+<span class="nd">@route</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span>
+        <span class="n">Container</span><span class="p">(</span>
+            <span class="c1"># Email validation</span>
+            <span class="n">Input</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"email"</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">"Email"</span><span class="p">),</span>
+            <span class="n">Button</span><span class="p">(</span>
+                <span class="s2">"Validate Email"</span><span class="p">,</span>
+                <span class="n">on_click</span><span class="o">=</span><span class="n">form</span><span class="o">.</span><span class="n">email_valid</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#email"</span><span class="p">)</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="s2">"@"</span><span class="p">))</span><span class="o">.</span><span class="n">and_</span><span class="p">(</span>
+                        <span class="n">V</span><span class="p">(</span><span class="s2">"#email"</span><span class="p">)</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="s2">"."</span><span class="p">)</span>
+                    <span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="s2">"✓ Valid email"</span><span class="p">,</span> <span class="s2">"✗ Invalid email"</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">),</span>
+            <span class="n">Text</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"form.email_valid"</span><span class="p">)),</span>
+
+            <span class="c1"># Age validation</span>
+            <span class="n">Input</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"age"</span><span class="p">,</span> <span class="n">input_type</span><span class="o">=</span><span class="s2">"number"</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">"Age"</span><span class="p">),</span>
+            <span class="n">Button</span><span class="p">(</span>
+                <span class="s2">"Validate Age"</span><span class="p">,</span>
+                <span class="n">on_click</span><span class="o">=</span><span class="n">form</span><span class="o">.</span><span class="n">age_valid</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#age"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">18</span><span class="p">)</span><span class="o">.</span><span class="n">and_</span><span class="p">(</span>
+                        <span class="n">V</span><span class="p">(</span><span class="s2">"#age"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mi">120</span>
+                    <span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="s2">"✓ Valid age"</span><span class="p">,</span> <span class="s2">"✗ Must be 18-120"</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">),</span>
+            <span class="n">Text</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"form.age_valid"</span><span class="p">)),</span>
+
+            <span class="c1"># Password match validation</span>
+            <span class="n">Input</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"password"</span><span class="p">,</span> <span class="n">input_type</span><span class="o">=</span><span class="s2">"password"</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">"Password"</span><span class="p">),</span>
+            <span class="n">Input</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"confirm"</span><span class="p">,</span> <span class="n">input_type</span><span class="o">=</span><span class="s2">"password"</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">"Confirm"</span><span class="p">),</span>
+            <span class="n">Button</span><span class="p">(</span>
+                <span class="s2">"Check Match"</span><span class="p">,</span>
+                <span class="n">on_click</span><span class="o">=</span><span class="n">form</span><span class="o">.</span><span class="n">password_valid</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#password"</span><span class="p">)</span> <span class="o">==</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#confirm"</span><span class="p">))</span><span class="o">.</span><span class="n">and_</span><span class="p">(</span>
+                        <span class="n">V</span><span class="p">(</span><span class="s2">"#password"</span><span class="p">)</span><span class="o">.</span><span class="n">length</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">8</span>
+                    <span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="s2">"✓ Passwords match"</span><span class="p">,</span> <span class="s2">"✗ Passwords don't match"</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">),</span>
+            <span class="n">Text</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"form.password_valid"</span><span class="p">))</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="s2">"index"</span><span class="p">,</span> <span class="n">index</span><span class="p">())</span>
+</code></pre>
+      </div>
+      <hr/>
+      <h2 id="form-collection-system">
+       Form Collection System
+      </h2>
+      <p>
+       <strong>
+        New in v1.6.7
+       </strong>
+       : Pythonic form data collection and submission without raw JavaScript!
+      </p>
+      <h3 id="formdata-collect_form">
+       FormData &amp; collect_form()
+      </h3>
+      <p>
+       The
+       <code>
+        FormData
+       </code>
+       class and
+       <code>
+        collect_form()
+       </code>
+       helper provide a declarative way to collect form data using
+       <code>
+        V()
+       </code>
+       expressions.
+      </p>
+      <h4 id="basic-usage-3">
+       Basic Usage
+      </h4>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="c1"># Collect form data with kwargs syntax</span>
+<span class="n">form_data</span> <span class="o">=</span> <span class="n">collect_form</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="n">V</span><span class="p">(</span><span class="s2">"#name-input"</span><span class="p">),</span>
+    <span class="n">email</span><span class="o">=</span><span class="n">V</span><span class="p">(</span><span class="s2">"#email-input"</span><span class="p">),</span>
+    <span class="n">age</span><span class="o">=</span><span class="n">V</span><span class="p">(</span><span class="s2">"#age-input"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span>
+    <span class="n">is_premium</span><span class="o">=</span><span class="n">V</span><span class="p">(</span><span class="s2">"#premium-checkbox"</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># Show in alert</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Submit"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">form_data</span><span class="o">.</span><span class="n">alert</span><span class="p">())</span>
+
+<span class="c1"># Log to console</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Log"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">form_data</span><span class="o">.</span><span class="n">log</span><span class="p">())</span>
+
+<span class="c1"># Save to state</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Save"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">form_data</span><span class="o">.</span><span class="n">to_state</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
+</code></pre>
+      </div>
+      <h4 id="advanced-features">
+       Advanced Features
+      </h4>
+      <p>
+       <strong>
+        Nested Dictionaries &amp; Lists:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">form_data</span> <span class="o">=</span> <span class="n">collect_form</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="n">V</span><span class="p">(</span><span class="s2">"#name"</span><span class="p">),</span>
+    <span class="n">email</span><span class="o">=</span><span class="n">V</span><span class="p">(</span><span class="s2">"#email"</span><span class="p">),</span>
+
+    <span class="c1"># Nested validation results</span>
+    <span class="n">validation</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">"email_valid"</span><span class="p">:</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#email"</span><span class="p">)</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="s2">"@"</span><span class="p">),</span>
+        <span class="s2">"age_ok"</span><span class="p">:</span> <span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#age"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">18</span><span class="p">)</span><span class="o">.</span><span class="n">and_</span><span class="p">(</span>
+                   <span class="n">V</span><span class="p">(</span><span class="s2">"#age"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mi">120</span><span class="p">)</span>
+    <span class="p">},</span>
+
+    <span class="c1"># Conditional values</span>
+    <span class="n">discount</span><span class="o">=</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#premium"</span><span class="p">)</span><span class="o">.</span><span class="n">bool</span><span class="p">())</span><span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="s2">"10%"</span><span class="p">,</span> <span class="s2">"0%"</span><span class="p">),</span>
+
+    <span class="c1"># Timestamp</span>
+    <span class="n">submitted_at</span><span class="o">=</span><span class="n">getDateTime</span><span class="p">()</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Alternative Syntaxes:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Using tuples</span>
+<span class="n">form_data</span> <span class="o">=</span> <span class="n">collect_form</span><span class="p">(</span>
+    <span class="p">(</span><span class="s2">"name"</span><span class="p">,</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#name"</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s2">"email"</span><span class="p">,</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#email"</span><span class="p">))</span>
+<span class="p">)</span>
+
+<span class="c1"># Using dict</span>
+<span class="n">form_data</span> <span class="o">=</span> <span class="n">collect_form</span><span class="p">({</span>
+    <span class="s2">"name"</span><span class="p">:</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#name"</span><span class="p">),</span>
+    <span class="s2">"email"</span><span class="p">:</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#email"</span><span class="p">)</span>
+<span class="p">})</span>
+</code></pre>
+      </div>
+      <h4 id="formdata-methods">
+       FormData Methods
+      </h4>
+      <p>
+       <strong>
+        <code>
+         .alert(title)
+        </code>
+       </strong>
+       - Show form data in alert dialog:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">Button</span><span class="p">(</span><span class="s2">"Show Data"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">form_data</span><span class="o">.</span><span class="n">alert</span><span class="p">(</span><span class="s2">"Form Data"</span><span class="p">))</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        <code>
+         .log(message)
+        </code>
+       </strong>
+       - Log form data to console:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">Button</span><span class="p">(</span><span class="s2">"Log Data"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">form_data</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">"Form submitted"</span><span class="p">))</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        <code>
+         .to_state(property)
+        </code>
+       </strong>
+       - Save form data to state:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">Button</span><span class="p">(</span><span class="s2">"Save"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">form_data</span><span class="o">.</span><span class="n">to_state</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">form_data</span><span class="p">))</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        <code>
+         .submit(url, state_property, on_success, on_error)
+        </code>
+       </strong>
+       - Submit to backend:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Simple submit</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Submit"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">form_data</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="s2">"http://localhost:3000/submit"</span><span class="p">))</span>
+
+<span class="c1"># With state and callbacks</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Submit"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">form_data</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span>
+    <span class="n">url</span><span class="o">=</span><span class="s2">"http://localhost:3000/submit"</span><span class="p">,</span>
+    <span class="n">state_property</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">response</span><span class="p">,</span>
+    <span class="n">on_success</span><span class="o">=</span><span class="n">alert</span><span class="p">(</span><span class="s2">"Success!"</span><span class="p">),</span>
+    <span class="n">on_error</span><span class="o">=</span><span class="n">alert</span><span class="p">(</span><span class="s2">"Error!"</span><span class="p">)</span>
+<span class="p">))</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        <code>
+         .submit_and_alert(state_property, title)
+        </code>
+       </strong>
+       - Submit with alert:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">Button</span><span class="p">(</span><span class="s2">"Submit"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">form_data</span><span class="o">.</span><span class="n">submit_and_alert</span><span class="p">(</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+    <span class="s2">"Form Submitted!"</span>
+<span class="p">))</span>
+</code></pre>
+      </div>
+      <h3 id="backend-integration-example">
+       Backend Integration Example
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="s2">"Form with Backend"</span><span class="p">)</span>
+<span class="n">form</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"form"</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="s2">""</span><span class="p">)</span>
+
+<span class="c1"># Collect form data</span>
+<span class="n">form_data</span> <span class="o">=</span> <span class="n">collect_form</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="n">V</span><span class="p">(</span><span class="s2">"#name"</span><span class="p">),</span>
+    <span class="n">email</span><span class="o">=</span><span class="n">V</span><span class="p">(</span><span class="s2">"#email"</span><span class="p">),</span>
+    <span class="n">age</span><span class="o">=</span><span class="n">V</span><span class="p">(</span><span class="s2">"#age"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span>
+    <span class="n">submitted_at</span><span class="o">=</span><span class="n">getDateTime</span><span class="p">()</span>
+<span class="p">)</span>
+
+<span class="nd">@route</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span>
+        <span class="n">Container</span><span class="p">(</span>
+            <span class="n">Input</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"name"</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">"Name"</span><span class="p">),</span>
+            <span class="n">Input</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"email"</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">"Email"</span><span class="p">),</span>
+            <span class="n">Input</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"age"</span><span class="p">,</span> <span class="n">input_type</span><span class="o">=</span><span class="s2">"number"</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">"Age"</span><span class="p">),</span>
+
+            <span class="c1"># Submit to backend</span>
+            <span class="n">Button</span><span class="p">(</span>
+                <span class="s2">"Submit to Backend"</span><span class="p">,</span>
+                <span class="n">on_click</span><span class="o">=</span><span class="n">form_data</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span>
+                    <span class="n">url</span><span class="o">=</span><span class="s2">"http://localhost:3000/submit"</span><span class="p">,</span>
+                    <span class="n">state_property</span><span class="o">=</span><span class="n">form</span><span class="o">.</span><span class="n">response</span><span class="p">,</span>
+                    <span class="n">on_success</span><span class="o">=</span><span class="n">alert</span><span class="p">(</span><span class="s2">"Form submitted successfully!"</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">),</span>
+
+            <span class="c1"># Display backend response</span>
+            <span class="n">Container</span><span class="p">(</span>
+                <span class="n">Text</span><span class="p">(</span><span class="s2">"Backend Response:"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">"font-bold"</span><span class="p">),</span>
+                <span class="n">Text</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"form.response"</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="s2">"index"</span><span class="p">,</span> <span class="n">index</span><span class="p">())</span>
+</code></pre>
+      </div>
+      <hr/>
+      <h2 id="getdatetime-timestamp-helper">
+       getDateTime() - Timestamp Helper
+      </h2>
+      <p>
+       **Generate client-side timestamps for forms and state updates.
+      </p>
+      <h3 id="basic-usage-4">
+       Basic Usage
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="c1"># Default ISO format</span>
+<span class="n">getDateTime</span><span class="p">()</span>  <span class="c1"># "2025-12-04T22:04:09.123Z"</span>
+
+<span class="c1"># Different formats</span>
+<span class="n">getDateTime</span><span class="p">(</span><span class="s2">"iso"</span><span class="p">)</span>        <span class="c1"># "2025-12-04T22:04:09.123Z"</span>
+<span class="n">getDateTime</span><span class="p">(</span><span class="s2">"locale"</span><span class="p">)</span>     <span class="c1"># "12/4/2025, 10:04:09 PM"</span>
+<span class="n">getDateTime</span><span class="p">(</span><span class="s2">"date"</span><span class="p">)</span>       <span class="c1"># "12/4/2025"</span>
+<span class="n">getDateTime</span><span class="p">(</span><span class="s2">"time"</span><span class="p">)</span>       <span class="c1"># "10:04:09 PM"</span>
+<span class="n">getDateTime</span><span class="p">(</span><span class="s2">"timestamp"</span><span class="p">)</span>  <span class="c1"># 1733362449123</span>
+</code></pre>
+      </div>
+      <h3 id="usage-in-forms">
+       Usage in Forms
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Add timestamp to form submission</span>
+<span class="n">form_data</span> <span class="o">=</span> <span class="n">collect_form</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="n">V</span><span class="p">(</span><span class="s2">"#name"</span><span class="p">),</span>
+    <span class="n">email</span><span class="o">=</span><span class="n">V</span><span class="p">(</span><span class="s2">"#email"</span><span class="p">),</span>
+    <span class="n">submitted_at</span><span class="o">=</span><span class="n">getDateTime</span><span class="p">()</span>  <span class="c1"># ISO format</span>
+<span class="p">)</span>
+
+<span class="c1"># Different timestamp formats</span>
+<span class="n">form_data</span> <span class="o">=</span> <span class="n">collect_form</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="n">V</span><span class="p">(</span><span class="s2">"#name"</span><span class="p">),</span>
+    <span class="n">created_at</span><span class="o">=</span><span class="n">getDateTime</span><span class="p">(</span><span class="s2">"iso"</span><span class="p">),</span>
+    <span class="n">display_date</span><span class="o">=</span><span class="n">getDateTime</span><span class="p">(</span><span class="s2">"locale"</span><span class="p">),</span>
+    <span class="n">date_only</span><span class="o">=</span><span class="n">getDateTime</span><span class="p">(</span><span class="s2">"date"</span><span class="p">),</span>
+    <span class="n">time_only</span><span class="o">=</span><span class="n">getDateTime</span><span class="p">(</span><span class="s2">"time"</span><span class="p">),</span>
+    <span class="n">unix_timestamp</span><span class="o">=</span><span class="n">getDateTime</span><span class="p">(</span><span class="s2">"timestamp"</span><span class="p">)</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="usage-with-state">
+       Usage with State
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Update state with current timestamp</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Save"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">last_updated</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">getDateTime</span><span class="p">()))</span>
+
+<span class="c1"># Different formats</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Save Date"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">getDateTime</span><span class="p">(</span><span class="s2">"date"</span><span class="p">)))</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Save Time"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">getDateTime</span><span class="p">(</span><span class="s2">"time"</span><span class="p">)))</span>
+</code></pre>
+      </div>
+      <h3 id="complete-example-2">
+       Complete Example
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="s2">"Timestamp Demo"</span><span class="p">)</span>
+<span class="n">state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"state"</span><span class="p">,</span> <span class="n">last_action</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span> <span class="n">timestamp</span><span class="o">=</span><span class="s2">""</span><span class="p">)</span>
+
+<span class="n">form_data</span> <span class="o">=</span> <span class="n">collect_form</span><span class="p">(</span>
+    <span class="n">action</span><span class="o">=</span><span class="n">V</span><span class="p">(</span><span class="s2">"#action"</span><span class="p">),</span>
+    <span class="n">timestamp</span><span class="o">=</span><span class="n">getDateTime</span><span class="p">(</span><span class="s2">"locale"</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="nd">@route</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span>
+        <span class="n">Container</span><span class="p">(</span>
+            <span class="n">Input</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"action"</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">"What did you do?"</span><span class="p">),</span>
+
+            <span class="n">Button</span><span class="p">(</span>
+                <span class="s2">"Record Action"</span><span class="p">,</span>
+                <span class="n">on_click</span><span class="o">=</span><span class="n">form_data</span><span class="o">.</span><span class="n">to_state</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">last_action</span><span class="p">)</span>
+            <span class="p">),</span>
+
+            <span class="n">Text</span><span class="p">(</span><span class="s2">"Last Action:"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">"font-bold"</span><span class="p">),</span>
+            <span class="n">Text</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"state.last_action"</span><span class="p">)),</span>
+
+            <span class="n">Button</span><span class="p">(</span>
+                <span class="s2">"Update Timestamp"</span><span class="p">,</span>
+                <span class="n">on_click</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">timestamp</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">getDateTime</span><span class="p">(</span><span class="s2">"locale"</span><span class="p">))</span>
+            <span class="p">),</span>
+
+            <span class="n">Text</span><span class="p">(</span><span class="s2">"Current Time:"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">"font-bold"</span><span class="p">),</span>
+            <span class="n">Text</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"state.timestamp"</span><span class="p">))</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="s2">"index"</span><span class="p">,</span> <span class="n">index</span><span class="p">())</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">rTimeCompile</span><span class="p">()</span>
+</code></pre>
+      </div>
       <hr/>
       <h2 id="best-practices">
        Best Practices
@@ -16194,10 +16736,7 @@ def hello():
        Dynamic Operators
       </h2>
       <p>
-       <strong>
-        New in v1.6.4
-       </strong>
-       : Use operators from Select or Input elements!
+       Use operators from Select or Input elements!
       </p>
       <h3 id="the-operator-method">
        The

@@ -1,3 +1,449 @@
+# Release Notes v1.6.7
+
+> **Boolean Operators, Form Collection & Backend Integration**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Boolean & Comparison Operators for V()
+
+Dars Framework v1.6.7 introduces a revolutionary declarative system for boolean logic and validation. Write complex conditionals in pure Python using comparison operators - **no inline JavaScript required!**
+
+**Key Features:**
+- **Comparison Operators** - Use Python operators (`==`, `!=`, `>`, `<`, `>=`, `<=`)
+- **String Methods** - `.includes()`, `.startswith()`, `.endswith()`, `.length()`, `.bool()`
+- **Logical Operators** - `.and_()` and `.or_()` for combining conditions
+- **Conditional Expressions** - `.then()` for ternary operations
+- **Type Safety** - Numeric comparisons require `.int()` or `.float()`
+
+#### Before (v1.6.6) - Raw JavaScript
+
+```python
+Button(
+    "Validate",
+    on_click=dScript("""
+        const email = document.querySelector('#email').value;
+        const age = parseInt(document.querySelector('#age').value);
+        
+        let valid = false;
+        if (email.includes('@') && email.includes('.') && age >= 18 && age <= 120) {
+            valid = true;
+        }
+        
+        const message = valid ? '✓ Valid' : '✗ Invalid';
+        
+        window.Dars.change({
+            id: 'form',
+            dynamic: true,
+            validation: message
+        });
+    """)
+)
+```
+
+#### After (v1.6.7) - Declarative Python
+
+```python
+Button(
+    "Validate",
+    on_click=form.validation.set(
+        (V("#email").includes("@")).and_(
+            V("#email").includes(".")
+        ).and_(
+            V("#age").int() >= 18
+        ).and_(
+            V("#age").int() <= 120
+        ).then("✓ Valid", "✗ Invalid")
+    )
+)
+```
+
+**Benefits:**
+- **90% less code**
+- **Type-safe** with explicit transformations
+- **Readable** - Python syntax
+- **No inline JavaScript** - pure Python
+- **Chainable** - combine multiple conditions
+
+---
+
+### Comparison Operators
+
+```python
+# Numeric comparisons (require .int() or .float())
+V("#age").int() >= 18
+V("#price").float() < 100.0
+V("#quantity").int() == 5
+
+# String equality
+V("#password") == V("#confirm-password")
+V("#email") != ""
+
+# All operators: ==, !=, >, <, >=, <=
+```
+
+### String Methods
+
+```python
+# Check if string contains substring
+V("#email").includes("@")
+
+# Check string start/end
+V("#filename").startswith("report_")
+V("#filename").endswith(".pdf")
+
+# Get string length (returns ValueRef with .int())
+V("#password").length() >= 8
+
+# Convert to boolean
+V("#checkbox").bool()
+```
+
+### Logical Operators
+
+```python
+# AND operator
+(V("#age").int() >= 18).and_(V("#age").int() <= 65)
+
+# OR operator
+(V("#email").includes("@")).or_(V("#phone").length() >= 10)
+
+# Complex combinations
+(V("#name").length() >= 3).and_(
+    (V("#email").includes("@")).and_(
+        V("#email").includes(".")
+    )
+)
+```
+
+### Conditional Expressions
+
+```python
+# Simple conditional
+(V("#age").int() >= 18).then("Adult", "Minor")
+
+# With state updates
+state.message.set(
+    (V("#score").int() >= 60).then("Pass", "Fail")
+)
+
+# Complex validation
+state.validation.set(
+    (V("#password").length() >= 8).and_(
+        V("#password") == V("#confirm")
+    ).then("✓ Valid", "✗ Invalid")
+)
+```
+
+---
+
+### Pythonic Form Collection System
+
+**New in v1.6.7**: Collect and submit form data without writing a single line of JavaScript!
+
+The new `FormData` class and `collect_form()` helper provide a completely declarative way to handle forms using `V()` expressions.
+
+#### Basic Usage
+
+```python
+from dars.all import *
+
+# Collect form data with kwargs syntax
+form_data = collect_form(
+    name=V("#name-input"),
+    email=V("#email-input"),
+    age=V("#age-input").int(),
+    is_premium=V("#premium-checkbox")
+)
+
+# Show in alert
+Button("Submit", on_click=form_data.alert())
+
+# Log to console
+Button("Log", on_click=form_data.log())
+
+# Save to state
+Button("Save", on_click=form_data.to_state(state.data))
+```
+
+#### Advanced Features
+
+**Nested Dictionaries & Lists:**
+
+```python
+form_data = collect_form(
+    name=V("#name"),
+    email=V("#email"),
+    
+    # Nested validation results
+    validation={
+        "email_valid": V("#email").includes("@"),
+        "age_ok": (V("#age").int() >= 18).and_(
+                   V("#age").int() <= 120)
+    },
+    
+    # Conditional values
+    discount=(V("#premium").bool()).then("10%", "0%"),
+    
+    # Timestamp
+    submitted_at=getDateTime()
+)
+```
+
+#### FormData Methods
+
+**`.alert(title)`** - Show form data in alert dialog
+
+**`.log(message)`** - Log form data to console
+
+**`.to_state(property)`** - Save form data to state
+
+**`.submit(url, state_property, on_success, on_error)`** - Submit to backend via POST
+
+**`.submit_and_alert(state_property, title)`** - Submit with alert
+
+---
+
+### Backend Integration
+
+Submit forms to backend APIs with a single method call:
+
+```python
+from dars.all import *
+
+app = App("Form with Backend")
+form = State("form", response="")
+
+# Collect form data
+form_data = collect_form(
+    name=V("#name"),
+    email=V("#email"),
+    age=V("#age").int(),
+    submitted_at=getDateTime()
+)
+
+@route("/")
+def index():
+    return Page(
+        Container(
+            Input(id="name", placeholder="Name"),
+            Input(id="email", placeholder="Email"),
+            Input(id="age", input_type="number", placeholder="Age"),
+            
+            # Submit to backend - NO RAW JAVASCRIPT!
+            Button(
+                "Submit to Backend",
+                on_click=form_data.submit(
+                    url="http://localhost:3000/submit",
+                    state_property=form.response,
+                    on_success=alert("Form submitted successfully!")
+                )
+            ),
+            
+            # Display backend response
+            Container(
+                Text("Backend Response:", style="font-bold"),
+                Text(text=useDynamic("form.response"))
+            )
+        )
+    )
+
+app.add_page("index", index())
+```
+
+**Features:**
+- **Automatic JSON serialization**
+- **State integration** - save response to state
+- **Success/error callbacks**
+- **CORS support**
+- **Nested data structures**
+
+---
+
+### getDateTime() - Timestamp Helper
+
+Generate client-side timestamps in multiple formats:
+
+```python
+# Default ISO format
+getDateTime()  # "2025-12-04T22:04:09.123Z"
+
+# Different formats
+getDateTime("iso")        # "2025-12-04T22:04:09.123Z"
+getDateTime("locale")     # "12/4/2025, 10:04:09 PM"
+getDateTime("date")       # "12/4/2025"
+getDateTime("time")       # "10:04:09 PM"
+getDateTime("timestamp")  # 1733362449123
+```
+
+**Usage in Forms:**
+
+```python
+form_data = collect_form(
+    name=V("#name"),
+    email=V("#email"),
+    submitted_at=getDateTime()  # Automatic timestamp
+)
+```
+
+**Usage with State:**
+
+```python
+Button("Save", on_click=state.last_updated.set(getDateTime()))
+```
+
+---
+
+## Complete Example
+
+Here's a complete form validation and submission example using all new features:
+
+```python
+from dars.all import *
+
+app = App("Complete Form Demo")
+
+form = State("form", 
+    email_valid="",
+    age_valid="",
+    password_valid="",
+    backend_response=""
+)
+
+# Collect form data
+form_data = collect_form(
+    name=V("#name"),
+    email=V("#email"),
+    age=V("#age").int(),
+    password=V("#password"),
+    confirm_password=V("#confirm"),
+    
+    # Nested validation
+    validation={
+        "email_valid": V("#email").includes("@"),
+        "age_ok": (V("#age").int() >= 18).and_(
+                   V("#age").int() <= 120),
+        "password_strong": V("#password").length() >= 8,
+        "passwords_match": V("#password") == V("#confirm")
+    },
+    
+    # Timestamp
+    submitted_at=getDateTime()
+)
+
+@route("/")
+def index():
+    return Page(
+        Container(
+            # Email validation
+            Input(id="email", placeholder="Email"),
+            Button(
+                "Validate Email",
+                on_click=form.email_valid.set(
+                    (V("#email").includes("@")).and_(
+                        V("#email").includes(".")
+                    ).then("✓ Valid", "✗ Invalid")
+                )
+            ),
+            Text(text=useDynamic("form.email_valid")),
+            
+            # Age validation
+            Input(id="age", input_type="number", placeholder="Age"),
+            Button(
+                "Validate Age",
+                on_click=form.age_valid.set(
+                    (V("#age").int() >= 18).and_(
+                        V("#age").int() <= 120
+                    ).then("✓ Valid", "✗ Must be 18-120")
+                )
+            ),
+            Text(text=useDynamic("form.age_valid")),
+            
+            # Password match
+            Input(id="password", input_type="password", placeholder="Password"),
+            Input(id="confirm", input_type="password", placeholder="Confirm"),
+            Button(
+                "Check Match",
+                on_click=form.password_valid.set(
+                    (V("#password") == V("#confirm")).and_(
+                        V("#password").length() >= 8
+                    ).then("✓ Match", "✗ No match")
+                )
+            ),
+            Text(text=useDynamic("form.password_valid")),
+            
+            # Submit to backend
+            Button(
+                "Submit to Backend",
+                on_click=form_data.submit(
+                    url="http://localhost:3000/submit",
+                    state_property=form.backend_response,
+                    on_success=alert("Success!")
+                )
+            ),
+            
+            # Display response
+            Text(text=useDynamic("form.backend_response"))
+        )
+    )
+
+app.add_page("index", index())
+
+if __name__ == "__main__":
+    app.rTimeCompile()
+```
+
+---
+
+## Bug Fixes
+
+### Fixed Transformation Chaining
+
+Fixed a critical bug where `.int()` and `.float()` transformations were overwriting previous transformations instead of chaining them.
+
+**Issue:**
+```python
+# This was failing
+V("#name").length() >= 4  # .length() was being overwritten
+```
+
+**Fixed:**
+```python
+# Now works correctly
+V("#name").length() >= 4  # .length() chains with .int()
+```
+
+### State.set() Expression Compatibility
+
+Added `to_dscript()` method to `BooleanExpression`, `ConditionalExpression`, and `LogicalExpression` classes to make them compatible with `State.set()` calls.
+
+---
+
+## What's Next
+
+Future enhancements planned for 1.7.0:
+- `useVRef()` hook for reactive value references
+- `setVRef()` hook for setting values
+- `updateVRef()` helper for value updates
+- Enhanced exporter integration
+- More string methods (`.replace()`, `.split()`, `.join()`)
+- Array operations
+
+---
+
+## Documentation
+
+- **Hooks Guide**: Updated with boolean operators, form collection, and getDateTime
+- **Operations Guide**: Enhanced with comparison and logical operators
+- **Backend Integration**: New guide for form submission and API integration
+
+---
+
 # Release Notes v1.6.6
 
 > **Custom Utility Styles & State Hot Reload Fix**

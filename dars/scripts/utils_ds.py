@@ -166,6 +166,70 @@ def log(message: Union[str, 'ValueRef']) -> dScript:
         escaped_message = message.replace("'", "\\'")
         return dScript(f"console.log('{escaped_message}');")
 
+def getDateTime(format: str = "iso") -> 'ValueRef':
+    """
+    Get current date/time as a ValueRef for use in forms and state.
+    
+    This returns a special ValueRef that resolves to the current date/time
+    on the client side when the form is submitted or state is updated.
+    
+    Args:
+        format: Format of the datetime string
+               - "iso" (default): ISO 8601 format (e.g., "2025-12-04T21:53:49.123Z")
+               - "locale": Localized format (e.g., "12/4/2025, 9:53:49 PM")
+               - "date": Date only (e.g., "12/4/2025")
+               - "time": Time only (e.g., "9:53:49 PM")
+               - "timestamp": Unix timestamp in milliseconds
+        
+    Returns:
+        ValueRef that resolves to current datetime
+        
+    Example:
+        # In form collection
+        form_data = collect_form(
+            name=V("#name"),
+            submitted_at=getDateTime()  # ISO format
+        )
+        
+        # Different formats
+        collect_form(
+            created_at=getDateTime("iso"),
+            display_date=getDateTime("locale"),
+            date_only=getDateTime("date"),
+            time_only=getDateTime("time"),
+            timestamp=getDateTime("timestamp")
+        )
+        
+        # In state updates
+        Button("Save", on_click=state.last_updated.set(getDateTime()))
+    """
+    from dars.hooks.value_helpers import ValueRef
+    
+    # Create a special ValueRef that generates datetime code
+    class DateTimeRef(ValueRef):
+        def __init__(self, format_type: str):
+            # Don't call super().__init__ since we don't have a selector
+            self.selector = None
+            self.format_type = format_type
+            self._transform = None
+        
+        def _get_code(self) -> str:
+            """Generate JavaScript code to get current datetime."""
+            if self.format_type == "iso":
+                return "(new Date().toISOString())"
+            elif self.format_type == "locale":
+                return "(new Date().toLocaleString())"
+            elif self.format_type == "date":
+                return "(new Date().toLocaleDateString())"
+            elif self.format_type == "time":
+                return "(new Date().toLocaleTimeString())"
+            elif self.format_type == "timestamp":
+                return "(Date.now())"
+            else:
+                # Default to ISO
+                return "(new Date().toISOString())"
+    
+    return DateTimeRef(format)
 
 # ============= DOM Manipulation Utilities =============
 

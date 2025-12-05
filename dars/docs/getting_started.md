@@ -21,33 +21,71 @@ Welcome to Dars, a modern Python framework for building web applications with re
 
 ```python
 
-   from dars.all import *
+from dars.all import *
 
-   app = App(title="Search Demo")
+app = App(title="Hello World", theme="dark")
 
-   # Create a page with nested components
-   page = Page(
-       Container(
-           Text(text="Welcome!", id="welcome-text"),
-           Container(
-               Button(text="Click me", class_name="action-btn"),
-               Button(text="Cancel", class_name="action-btn"),
-               id="buttons-container"
-           ),
-           id="main-container"
-       )
-   )
+# 1. Define State
+state = State("app", title="Hello Dars!", count=0)
 
-   # Find and modify components
-   page.find(id="welcome-text")\
-       .attr(text="Welcome to Dars!", style={"color": "blue"})
+# 2. Define Route
+@route("/")
+def index(): 
+    return Page(
+        Text( # 3. Use useDynamic for reactive updates
+            text=useDynamic("app.title"),
+            style={
+                'font-size': '48px',
+                'color': '#2c3e50',
+                'font-weight': 'bold',
+                'margin-bottom': '20px'
+            }
+        ),
+        
+        # 4. Interactive Button
+        Button(
+            text="Update Title & Count",
+            on_click=(
+                state.title.set("You clicked the button!")
+                .then(state.count.increment(1))
+            ),
+            style={
+                'background-color': '#3498db',
+                'color': 'white',
+                'padding': '15px 30px',
+                'border-radius': '8px',
+                'border': 'none',
+                'cursor': 'pointer',
+                'font-size': '18px'
+            }
+        ),
 
-   # Chain searches to find nested components
-   page.find(id="buttons-container")\
-       .find(class_name="action-btn")\
-       .attr(style={"padding": "10px"})
+        # 5. Display reactive count
+        Text(
+            text=useDynamic("app.count"),
+            style={'font-size': '24px', 'margin-top': '20px'}
+        ),
 
-   app.add_page(name="main", root=page)
+        # 6. useValue for initial value (won't update)
+        Text(
+            text=useValue("app.title"),
+            style={'color': '#95a5a6', 'margin-top': '40px', 'font-style': 'italic'}
+        ),
+
+        style={
+            'display': 'flex', 'flex-direction': 'column', 
+            'align-items': 'center', 'justify-content': 'center', 
+            'height': '100vh', 'font-family': 'Arial, sans-serif',
+            'background-color': '#f0f2f5'
+        }
+    ) 
+
+# 7. Add page
+app.add_page("index", index(), title="index")
+
+# 8. Run app with preview
+if __name__ == "__main__":
+    app.rTimeCompile()
 
 ```
 

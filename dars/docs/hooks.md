@@ -12,6 +12,56 @@ Hooks provide a way to add reactive capabilities to your application. They enabl
 
 ---
 
+## Important: State ID Best Practices
+
+> [!IMPORTANT]
+> When using `State` objects with hooks like `useDynamic` and `useValue`, the **state ID should NOT match any component ID** in your DOM. The state ID is a unique identifier for the state object itself, not a component.
+
+### Why This Matters
+
+The reactive system uses **watchers** to update components when state changes. When you create a `State` object, the ID you provide is used to register the state in the internal registry, not to identify a specific DOM element.
+
+### Examples
+
+**X Incorrect - State ID matches component ID:**
+```python
+# DON'T do this
+state = State("my-button", count=0, disabled=False)
+Button(id="my-button", text=useDynamic("my-button.count"))
+```
+
+In this example, both the state and the button have the ID `"my-button"`, which can cause confusion and unexpected behavior.
+
+**✓ Correct - State has unique ID:**
+```python
+# DO this - give state a descriptive, unique ID
+counter_state = State("counter-state", count=0, disabled=False)
+Button(id="my-button", text=useDynamic("counter-state.count"))
+Button(id="another-button", disabled=useDynamic("counter-state.disabled"))
+```
+
+**✓ Also Correct - Multiple components sharing same state:**
+```python
+# One state can control multiple components
+ui_state = State("ui", count=0, is_disabled=False, message="Hello")
+
+Container(
+    Text(text=useDynamic("ui.message")),
+    Button(id="btn-1", disabled=useDynamic("ui.is_disabled")),
+    Button(id="btn-2", disabled=useDynamic("ui.is_disabled")),
+    Text(text=useDynamic("ui.count"))
+)
+```
+
+### Key Takeaways
+
+1. **State IDs are for the state object**, not for DOM elements
+2. **One state can control many components** through reactive bindings
+3. **Component IDs should be unique** across your DOM
+4. **State IDs should be descriptive** of what they manage (e.g., `"user-data"`, `"cart-state"`, `"ui-controls"`)
+
+---
+
 ## useValue() - Initial Value Access
 
 The `useValue()` hook allows you to access the **initial value** of a state property without creating a reactive binding. This is ideal for form inputs where you want to set a default value but allow the user to edit it freely.
@@ -192,13 +242,13 @@ useDynamic(state_path: str) -> DynamicBinding
 
 ## useWatch() - State Monitoring
 
-The `useWatch()` hook allows you to monitor state changes and execute callbacks (side effects).
+The `useWatch()` hook allows you to monitor state changes and execute callbacks (side effects). It supports watching single or multiple state properties and executing one or more callbacks.
 
-### Usage
+### Basic Usage
 
 The recommended way to use `useWatch` is via the `app.useWatch()` or `page.useWatch()` methods:
 
-**Global Watchers (app.useWatch)**
+**Single State Property**
 ```python
 from dars.all import *
 
@@ -207,6 +257,34 @@ cartState = State("cart", count=0, total=0.0)
 # Logs to console whenever cart.count changes
 app.useWatch("cart.count", log("Cart updated!"))
 app.useWatch("cart.total", log("Total changed"))
+```
+
+**Multiple State Properties (Array Syntax)**
+```python
+productState = State("product", name="Widget", price=19.99, info="")
+
+# Watch multiple properties - callback executes when ANY of them change
+app.useWatch(
+    ["product.name", "product.price"],
+    productState.info.set("Product: " + V("product.name") + " - $" + V("product.price"))
+)
+```
+
+**Multiple Callbacks**
+```python
+# Execute multiple callbacks when state changes
+app.useWatch(
+    "cart.total",
+    log("Total changed!"),
+    alert("Cart updated")
+)
+
+# Combine array syntax with multiple callbacks
+app.useWatch(
+    ["product.name", "product.price"],
+    productState.info.set("Product: " + V("product.name") + " - $" + V("product.price")),
+    log("Product info updated")
+)
 ```
 
 **Page-Specific Watchers (page.useWatch)**
@@ -234,15 +312,26 @@ app.add_script(useWatch("state.prop", log("Changed!")))
 ### Syntax
 
 ```python
-useWatch(state_path: str, callback: Union[dScript, str, Callable]) -> Union[dScript, WatchMarker]
+useWatch(
+    state_path: Union[str, List[str]], 
+    *callbacks: Union[dScript, str, Callable]
+) -> Union[dScript, WatchMarker]
 ```
 
 **Parameters:**
-- `state_path`: Dot-notation path to state property (e.g., `"user.name"`)
-- `callback`: The script or function to execute when the state changes. Can be:
+- `state_path`: State property path(s) to watch. Can be:
+    - Single path string (e.g., `"user.name"`)
+    - List of paths (e.g., `["product.name", "product.price"]`)
+- `*callbacks`: One or more callbacks to execute when state changes. Each can be:
     - `dScript` object (e.g., `log("Changed")`, `alert("Update")`)
+    - State setter (e.g., `productState.info.set(...)`)
     - Inline JavaScript string
     - Python callable returning a `dScript`
+
+**Behavior:**
+- When using an array of state paths, the callback(s) execute when **any** of the watched properties change
+- Multiple callbacks execute in the order they are provided
+- Callbacks can access current state values using `V()` helper
 
 ---
 
@@ -301,43 +390,32 @@ V("cart.total").float()  # Extract state value as float
 
 #### Operations
 
-`ValueRef` objects support Python operators with **important validation**:
-
-**String Concatenation (Always Allowed)**
-```python
-# Concatenation works without transformations
-state.fullname.set(V("#first") + " " + V("#last"))
-message = "Total: $" + V("cart.total")
-```
-
-**Arithmetic Operations (Require Numeric Transformations)**
-
-**New in v1.5.8**: Arithmetic operators (`*`, `/`, `-`, `%`, `**`) now **require** `.int()` or `.float()` transformations to prevent accidental string concatenation:
+`V()` now supports declarative mathematical expressions with operator overloading!
 
 ```python
-# CORRECT - With numeric transformations
-state.total.set(V("#price").float() * V("#qty").int())
-state.age.set(V("#age").int() + 10)
-discount = V("product.price").float() * 0.9
+# Simple arithmetic
+calc.result.set(V(".a").float() + V(".b").float())
 
-# CORRECT - Combining DOM and state values
-productState.total.set(
-    V(".qty-input").int() * V("product.price").float()
+# Complex expressions with automatic precedence
+calc.result.set(
+    (V(".a").float() + V(".b").float()) * V(".c").float()
 )
 
-# ERROR - Without transformations
-state.total.set(V("#price") * V("#qty"))
-# TypeError: Multiplication requires numeric transformation.
-#            Use V('#price').int() or V('#price').float() before multiplying.
+# Dynamic operators from Select elements
+calc.result.set(
+    V(".num1").float() + V(".operation").operator() + V(".num2").float()
+)
 ```
 
-**Supported Operators:**
-- `+` - Addition/Concatenation (always allowed)
-- `*` - Multiplication (requires `.int()` or `.float()`)
-- `/` - Division (requires `.int()` or `.float()`)
-- `-` - Subtraction (requires `.int()` or `.float()`)
-- `%` - Modulo (requires `.int()` or `.float()`)
-- `**` - Power (requires `.int()` or `.float()`)
+**Features:**
+- Operator overloading (`+`, `-`, `*`, `/`, `%`, `**`)
+- Automatic operator precedence
+- Dynamic operators from Select/Input
+- NaN validation with console warnings
+- Type safety (numeric ops require `.float()` or `.int()`)
+
+> [!TIP]
+> For complete documentation on mathematical operations, operator precedence, dynamic operators, and advanced examples, see [Mathematical Operations](operations.md).
 
 #### Complete Example
 
@@ -399,7 +477,7 @@ if __name__ == "__main__":
 The `url()` helper constructs dynamic URLs by interpolating `ValueRef` objects into a template string.
 
 ```python
-# With DOM values
+# Generates: https://api.example.com/users/123/profile
 fetch(
     url("https://api.example.com/users/{id}/profile", id=V("#userId"))
 )

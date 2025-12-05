@@ -35,7 +35,9 @@ fetch_btn = Button(
 )
 
 app.set_root(Container(user_display, fetch_btn))
-app.rTimeCompile()
+
+if __name__ == "__main__":
+    app.rTimeCompile()
 ```
 
 ---
@@ -171,37 +173,6 @@ callback=(
     .then(name_state.text.set(useData('userData').name))
     .then(email_state.text.set(useData('userData').email))
     .then(status_state.text.set("✅ Loaded!"))
-)
-```
-
-### Before vs After
-
-**Before (Raw JavaScript):**
-
-```python
-callback=dScript("""
-    const user = window.userData;
-    if (user) {
-        window.Dars.change({
-            id: 'user-name',
-            dynamic: true,
-            text: user.name || 'Unknown'
-        });
-        window.Dars.change({
-            id: 'user-email',
-            dynamic: true,
-            text: user.email || 'N/A'
-        });
-    }
-""")
-```
-
-**After (Pure Python):**
-
-```python
-callback=(
-    name_state.text.set(useData('userData').name)
-    .then(email_state.text.set(useData('userData').email))
 )
 ```
 

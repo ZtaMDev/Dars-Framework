@@ -326,6 +326,305 @@ class DynamicOperator:
         return f"DynamicOperator({self.value_ref})"
 
 
+class BooleanExpression:
+    """
+    Represents a boolean comparison expression built from ValueRef objects.
+    
+    Supports comparison operators (==, !=, >, <, >=, <=) and logical combinations.
+    Can be used with .then() method for conditional expressions.
+    
+    Example:
+        is_adult = V("#age").int() >= 18
+        discount = is_adult.then(0.2, 0)  # Generates: (age >= 18) ? 0.2 : 0
+    """
+    
+    def __init__(self, left, operator: str, right):
+        """
+        Initialize a boolean expression.
+        
+        Args:
+            left: Left operand (ValueRef, MathExpression, BooleanExpression, or primitive)
+            operator: Comparison operator (==, !=, >, <, >=, <=)
+            right: Right operand (ValueRef, MathExpression, BooleanExpression, or primitive)
+        """
+        self.left = left
+        self.operator = operator
+        self.right = right
+    
+    def _get_operand_code(self, operand) -> str:
+        """
+        Get JavaScript code for an operand.
+        
+        Args:
+            operand: ValueRef, MathExpression, BooleanExpression, or primitive value
+            
+        Returns:
+            JavaScript code string
+        """
+        if isinstance(operand, (ValueRef, MathExpression, BooleanExpression)):
+            return operand._get_code()
+        elif isinstance(operand, bool):
+            return 'true' if operand else 'false'
+        elif isinstance(operand, (int, float)):
+            return str(operand)
+        else:
+            return json.dumps(operand)
+    
+    def _get_code(self) -> str:
+        """
+        Generate JavaScript code from boolean expression.
+        
+        Returns:
+            JavaScript code string that evaluates the comparison
+        """
+        left_code = self._get_operand_code(self.left)
+        right_code = self._get_operand_code(self.right)
+        
+        # Check if operands are async (ValueRef or nested expressions)
+        left_is_async = isinstance(self.left, (ValueRef, MathExpression, BooleanExpression))
+        right_is_async = isinstance(self.right, (ValueRef, MathExpression, BooleanExpression))
+        
+        # If both operands are simple values, return simple expression
+        if not left_is_async and not right_is_async:
+            return f"{left_code} {self.operator} {right_code}"
+        
+        # Generate async IIFE that awaits operands
+        code_parts = []
+        code_parts.append("(async () => {")
+        
+        # Await left operand if async
+        if left_is_async:
+            code_parts.append(f"    const left = await ({left_code});")
+        else:
+            code_parts.append(f"    const left = {left_code};")
+        
+        # Await right operand if async
+        if right_is_async:
+            code_parts.append(f"    const right = await ({right_code});")
+        else:
+            code_parts.append(f"    const right = {right_code};")
+        
+        # Return the comparison
+        code_parts.append(f"    return left {self.operator} right;")
+        code_parts.append("})()")
+        
+        return "\n".join(code_parts)
+    
+    def then(self, true_value, false_value):
+        """
+        Create a conditional expression (ternary operator).
+        
+        This is a Python method that generates JavaScript ternary: condition ? trueVal : falseVal
+        
+        Args:
+            true_value: Value to return if condition is true
+            false_value: Value to return if condition is false
+            
+        Returns:
+            ConditionalExpression object
+            
+        Example:
+            (V("#age").int() >= 18).then("adult", "minor")
+            # Generates: (age >= 18) ? "adult" : "minor"
+        """
+        return ConditionalExpression(self, true_value, false_value)
+    
+    def and_(self, other):
+        """
+        Combine with another boolean expression using AND logic.
+        
+        Args:
+            other: Another BooleanExpression
+            
+        Returns:
+            LogicalExpression object
+            
+        Example:
+            (V("#age").int() >= 18).and_(V("#email").includes("@"))
+            # Generates: (age >= 18) && (email.includes("@"))
+        """
+        return LogicalExpression(self, '&&', other)
+    
+    def or_(self, other):
+        """
+        Combine with another boolean expression using OR logic.
+        
+        Args:
+            other: Another BooleanExpression
+            
+        Returns:
+            LogicalExpression object
+            
+        Example:
+            (V("#age").int() < 18).or_(V("#age").int() > 65)
+            # Generates: (age < 18) || (age > 65)
+        """
+        return LogicalExpression(self, '||', other)
+    
+    def get_code(self) -> str:
+        """Public method for dScript compatibility"""
+        return self._get_code()
+    
+    def to_dscript(self):
+        """Convert to dScript for State.set() compatibility"""
+        from dars.scripts.dscript import dScript
+        return dScript(self._get_code())
+    
+    def __repr__(self):
+        return f"BooleanExpression({self.left} {self.operator} {self.right})"
+
+
+class ConditionalExpression:
+    """
+    Represents a conditional (ternary) expression: condition ? trueVal : falseVal
+    
+    Created by calling .then() on a BooleanExpression.
+    """
+    
+    def __init__(self, condition, true_value, false_value):
+        """
+        Initialize a conditional expression.
+        
+        Args:
+            condition: BooleanExpression
+            true_value: Value if condition is true
+            false_value: Value if condition is false
+        """
+        self.condition = condition
+        self.true_value = true_value
+        self.false_value = false_value
+    
+    def _get_value_code(self, value) -> str:
+        """Get JavaScript code for a value"""
+        if isinstance(value, (ValueRef, MathExpression, BooleanExpression, ConditionalExpression)):
+            return value._get_code()
+        elif isinstance(value, bool):
+            return 'true' if value else 'false'
+        elif isinstance(value, (int, float)):
+            return str(value)
+        elif isinstance(value, dict):
+            # For style dicts
+            return json.dumps(value)
+        else:
+            return json.dumps(value)
+    
+    def _get_code(self) -> str:
+        """
+        Generate JavaScript ternary operator code.
+        
+        Returns:
+            JavaScript code string
+        """
+        condition_code = self.condition._get_code()
+        true_code = self._get_value_code(self.true_value)
+        false_code = self._get_value_code(self.false_value)
+        
+        # Check if any part is async
+        condition_is_async = isinstance(self.condition, (BooleanExpression, ValueRef, MathExpression))
+        true_is_async = isinstance(self.true_value, (ValueRef, MathExpression, BooleanExpression))
+        false_is_async = isinstance(self.false_value, (ValueRef, MathExpression, BooleanExpression))
+        
+        if not condition_is_async and not true_is_async and not false_is_async:
+            return f"{condition_code} ? {true_code} : {false_code}"
+        
+        # Generate async IIFE
+        code_parts = []
+        code_parts.append("(async () => {")
+        code_parts.append(f"    const cond = await ({condition_code});")
+        
+        if true_is_async:
+            code_parts.append(f"    const trueVal = await ({true_code});")
+        else:
+            code_parts.append(f"    const trueVal = {true_code};")
+        
+        if false_is_async:
+            code_parts.append(f"    const falseVal = await ({false_code});")
+        else:
+            code_parts.append(f"    const falseVal = {false_code};")
+        
+        code_parts.append("    return cond ? trueVal : falseVal;")
+        code_parts.append("})()")
+        
+        return "\n".join(code_parts)
+    
+    def get_code(self) -> str:
+        """Public method for dScript compatibility"""
+        return self._get_code()
+    
+    def to_dscript(self):
+        """Convert to dScript for State.set() compatibility"""
+        from dars.scripts.dscript import dScript
+        return dScript(self._get_code())
+    
+    def __repr__(self):
+        return f"ConditionalExpression({self.condition} ? {self.true_value} : {self.false_value})"
+
+
+class LogicalExpression:
+    """
+    Represents a logical expression combining two boolean expressions with && or ||.
+    """
+    
+    def __init__(self, left, operator: str, right):
+        """
+        Initialize a logical expression.
+        
+        Args:
+            left: Left BooleanExpression
+            operator: Logical operator (&& or ||)
+            right: Right BooleanExpression
+        """
+        self.left = left
+        self.operator = operator
+        self.right = right
+    
+    def _get_code(self) -> str:
+        """Generate JavaScript code"""
+        left_code = self.left._get_code() if hasattr(self.left, '_get_code') else str(self.left)
+        right_code = self.right._get_code() if hasattr(self.right, '_get_code') else str(self.right)
+        
+        # Check if async
+        left_is_async = isinstance(self.left, (BooleanExpression, ValueRef, MathExpression))
+        right_is_async = isinstance(self.right, (BooleanExpression, ValueRef, MathExpression))
+        
+        if not left_is_async and not right_is_async:
+            return f"({left_code}) {self.operator} ({right_code})"
+        
+        # Generate async IIFE
+        code_parts = []
+        code_parts.append("(async () => {")
+        code_parts.append(f"    const left = await ({left_code});")
+        code_parts.append(f"    const right = await ({right_code});")
+        code_parts.append(f"    return left {self.operator} right;")
+        code_parts.append("})()")
+        
+        return "\n".join(code_parts)
+    
+    def then(self, true_value, false_value):
+        """Allow chaining .then() on logical expressions"""
+        return ConditionalExpression(self, true_value, false_value)
+    
+    def and_(self, other):
+        """Chain another AND"""
+        return LogicalExpression(self, '&&', other)
+    
+    def or_(self, other):
+        """Chain another OR"""
+        return LogicalExpression(self, '||', other)
+    
+    def get_code(self) -> str:
+        """Public method for dScript compatibility"""
+        return self._get_code()
+    
+    def to_dscript(self):
+        """Convert to dScript for State.set() compatibility"""
+        from dars.scripts.dscript import dScript
+        return dScript(self._get_code())
+    
+    def __repr__(self):
+        return f"LogicalExpression({self.left} {self.operator} {self.right})"
+
+
 
 class ValueRef:
     """
@@ -480,13 +779,23 @@ class ValueRef:
     def int(self) -> 'ValueRef':
         """Convert to integer"""
         new_ref = ValueRef(self.selector)
-        new_ref._transform = lambda x: f"parseInt({x}, 10)"
+        # Chain transformations: if there's an existing transform, apply it first
+        if self._transform:
+            # Apply existing transform, then parseInt
+            new_ref._transform = lambda x: f"parseInt({self._transform(x)}, 10)"
+        else:
+            new_ref._transform = lambda x: f"parseInt({x}, 10)"
         return new_ref
     
     def float(self) -> 'ValueRef':
         """Convert to float"""
         new_ref = ValueRef(self.selector)
-        new_ref._transform = lambda x: f"parseFloat({x})"
+        # Chain transformations: if there's an existing transform, apply it first
+        if self._transform:
+            # Apply existing transform, then parseFloat
+            new_ref._transform = lambda x: f"parseFloat({self._transform(x)})"
+        else:
+            new_ref._transform = lambda x: f"parseFloat({x})"
         return new_ref
     
     def operator(self) -> 'DynamicOperator':
@@ -666,6 +975,195 @@ class ValueRef:
         """.strip()
         return new_ref
     
+    # Comparison operators (return BooleanExpression)
+    def __eq__(self, other) -> 'BooleanExpression':
+        """
+        Equality comparison: V() == other
+        
+        Returns:
+            BooleanExpression object
+            
+        Example:
+            is_same = V("#name") == "John"
+            is_equal = V("#age").int() == V("#min-age").int()
+        """
+        return BooleanExpression(self, '===', other)
+    
+    def __ne__(self, other) -> 'BooleanExpression':
+        """
+        Inequality comparison: V() != other
+        
+        Returns:
+            BooleanExpression object
+            
+        Example:
+            is_different = V("#status") != "pending"
+        """
+        return BooleanExpression(self, '!==', other)
+    
+    def __gt__(self, other) -> 'BooleanExpression':
+        """
+        Greater than: V() > other
+        
+        Requires .int() or .float() transformation.
+        
+        Returns:
+            BooleanExpression object
+            
+        Example:
+            is_adult = V("#age").int() > 18
+        """
+        if not self._has_numeric_transform():
+            raise TypeError(
+                f"Greater than comparison requires numeric transformation. "
+                f"Use V('{self.selector}').int() or V('{self.selector}').float() before comparing."
+            )
+        return BooleanExpression(self, '>', other)
+    
+    def __lt__(self, other) -> 'BooleanExpression':
+        """
+        Less than: V() < other
+        
+        Requires .int() or .float() transformation.
+        
+        Returns:
+            BooleanExpression object
+            
+        Example:
+            is_child = V("#age").int() < 18
+        """
+        if not self._has_numeric_transform():
+            raise TypeError(
+                f"Less than comparison requires numeric transformation. "
+                f"Use V('{self.selector}').int() or V('{self.selector}').float() before comparing."
+            )
+        return BooleanExpression(self, '<', other)
+    
+    def __ge__(self, other) -> 'BooleanExpression':
+        """
+        Greater than or equal: V() >= other
+        
+        Requires .int() or .float() transformation.
+        
+        Returns:
+            BooleanExpression object
+            
+        Example:
+            is_valid = V("#age").int() >= 18
+        """
+        if not self._has_numeric_transform():
+            raise TypeError(
+                f"Greater than or equal comparison requires numeric transformation. "
+                f"Use V('{self.selector}').int() or V('{self.selector}').float() before comparing."
+            )
+        return BooleanExpression(self, '>=', other)
+    
+    def __le__(self, other) -> 'BooleanExpression':
+        """
+        Less than or equal: V() <= other
+        
+        Requires .int() or .float() transformation.
+        
+        Returns:
+            BooleanExpression object
+            
+        Example:
+            is_in_range = V("#value").int() <= 100
+        """
+        if not self._has_numeric_transform():
+            raise TypeError(
+                f"Less than or equal comparison requires numeric transformation. "
+                f"Use V('{self.selector}').int() or V('{self.selector}').float() before comparing."
+            )
+        return BooleanExpression(self, '<=', other)
+    
+    # String methods (return BooleanExpression or ValueRef)
+    def includes(self, substring: str) -> 'BooleanExpression':
+        """
+        Check if string includes substring (generates JS .includes()).
+        
+        Args:
+            substring: Substring to search for
+            
+        Returns:
+            BooleanExpression object
+            
+        Example:
+            has_at = V("#email").includes("@")
+            has_domain = V("#url").includes(".com")
+        """
+        # Create a custom ValueRef that calls .includes()
+        new_ref = ValueRef(self.selector)
+        new_ref._transform = lambda x: f"String({x}).includes({json.dumps(substring)})"
+        # Return a boolean expression that evaluates to the result
+        return BooleanExpression(new_ref, '===', True)
+    
+    def startswith(self, prefix: str) -> 'BooleanExpression':
+        """
+        Check if string starts with prefix (generates JS .startsWith()).
+        
+        Args:
+            prefix: Prefix to check for
+            
+        Returns:
+            BooleanExpression object
+            
+        Example:
+            is_https = V("#url").startswith("https")
+        """
+        new_ref = ValueRef(self.selector)
+        new_ref._transform = lambda x: f"String({x}).startsWith({json.dumps(prefix)})"
+        return BooleanExpression(new_ref, '===', True)
+    
+    def endswith(self, suffix: str) -> 'BooleanExpression':
+        """
+        Check if string ends with suffix (generates JS .endsWith()).
+        
+        Args:
+            suffix: Suffix to check for
+            
+        Returns:
+            BooleanExpression object
+            
+        Example:
+            is_image = V("#filename").endswith(".png")
+        """
+        new_ref = ValueRef(self.selector)
+        new_ref._transform = lambda x: f"String({x}).endsWith({json.dumps(suffix)})"
+        return BooleanExpression(new_ref, '===', True)
+    
+    def length(self) -> 'ValueRef':
+        """
+        Get string length (generates JS .length).
+        
+        Returns:
+            ValueRef with .int() transformation
+            
+        Example:
+            name_length = V("#name").length()
+            is_valid = V("#password").length().int() >= 8
+        """
+        new_ref = ValueRef(self.selector)
+        new_ref._transform = lambda x: f"String({x}).length"
+        # Automatically apply int() since length is always a number
+        return new_ref.int()
+    
+    def bool(self) -> 'ValueRef':
+        """
+        Mark this ValueRef as a boolean type.
+        Converts the value to boolean (generates JS Boolean()).
+        
+        Returns:
+            ValueRef with boolean transformation
+            
+        Example:
+            is_active = V("#is-active").bool()
+            comparison = V("#flag1").bool() == V("#flag2").bool()
+        """
+        new_ref = ValueRef(self.selector)
+        new_ref._transform = lambda x: f"Boolean({x})"
+        return new_ref
+    
     def __str__(self):
         """String representation for f-strings"""
         return f"${{await {self._get_code()}}}"
@@ -680,7 +1178,6 @@ class ValueRef:
     def to_dscript(self) -> dScript:
         """Convert this ValueRef to a dScript"""
         return dScript(self._get_code())
-
 
 def V(selector: str) -> ValueRef:
     """

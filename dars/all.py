@@ -59,7 +59,7 @@ from dars.dars_tests.run_tests import run_app_tests, run_unit_tests, main
 from dars.exporters.web.html_css_js import HTMLCSSJSExporter
 # Script utilities
 from dars.scripts.dscript import dScript, RawJS, Arg
-from dars.scripts.utils_ds import showModal, hideModal, goTo, goToNew, reload, goBack, goForward, alert, confirm, log, show, hide, toggle, addClass, removeClass, toggleClass, scrollTo, scrollToTop, scrollToBottom, scrollToElement, submitForm, resetForm, getValue, clearInput, saveToLocal, loadFromLocal, removeFromLocal, clearLocalStorage, copyToClipboard, copyElementText, focus, blur, setText, setTimeout, getInputValue, switch
+from dars.scripts.utils_ds import showModal, hideModal, goTo, goToNew, reload, goBack, goForward, alert, confirm, log, getDateTime, show, hide, toggle, addClass, removeClass, toggleClass, scrollTo, scrollToTop, scrollToBottom, scrollToElement, submitForm, resetForm, getValue, clearInput, saveToLocal, loadFromLocal, removeFromLocal, clearLocalStorage, copyToClipboard, copyElementText, focus, blur, setText, setTimeout, getInputValue, switch
 from dars.scripts.animations import fadeIn, fadeOut, slideIn, slideOut, scaleIn, scaleOut, shake, bounce, pulse, rotate, flip, colorChange, morphSize, popIn, popOut, sequence  # Animation System
 from dars.scripts.script import *
 # Hooks
@@ -67,6 +67,7 @@ from dars.hooks import useDynamic
 from dars.hooks.use_watch import useWatch
 from dars.hooks.use_value import useValue
 from dars.hooks.value_helpers import V, url, transform
+from dars.hooks.form_helpers import FormData, collect_form
 # KeyCode for keyboard events
 from dars.scripts.keycode import KeyCode, onKey, addGlobalKeys
 from dars.version import __version__
@@ -107,7 +108,7 @@ __all__ = [
     # Navigation utilities
     'goTo', 'goToNew', 'reload', 'goBack', 'goForward',
     # Alert & console utilities
-    'alert', 'confirm', 'log',
+    'alert', 'confirm', 'log', 'getDateTime',
     # DOM manipulation utilities
     'show', 'hide', 'toggle', 'addClass', 'removeClass', 'toggleClass', 'setText',
     # Scroll utilities
@@ -134,4 +135,6 @@ __all__ = [
     'useValue', 'V', 'url', 'transform',
     # KeyCode for keyboard events
     'KeyCode', 'onKey', 'addGlobalKeys', 'switch',
+    # Form utilities
+    'FormData', 'collect_form',
 ]
