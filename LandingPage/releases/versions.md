@@ -1,3 +1,383 @@
+# Release Notes v1.6.8
+
+> **Component-Level State Updates with updateVRef()**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### updateVRef() - Pythonic Component-Level State
+
+Dars Framework v1.6.8 introduces `updateVRef()`, a powerful new function for updating DOM values and component state without requiring State objects. This completes the component-level state management cycle alongside `V()`.
+
+**The Complete Cycle:**
+1. **Read**: `V("#input")` - Extract values (v1.5.8)
+2. **Validate**: `V("#input").length() >= 3` - Boolean validation (v1.6.7)
+3. **Update**: `updateVRef("#input", "new value")` - Update values (v1.6.8) **NEW!**
+
+#### Before (v1.6.7) - Raw JavaScript
+
+```python
+Button(
+    "Increment",
+    on_click=dScript("""
+        const el = document.querySelector('#count');
+        const current = parseInt(el.textContent);
+        el.textContent = current + 1;
+    """)
+)
+```
+
+#### After (v1.6.8) - Declarative Python
+
+```python
+Button(
+    "Increment",
+    on_click=updateVRef("#count", V("#count").int() + 1)
+)
+```
+
+**Benefits:**
+- **95% less code**
+- **Type-safe** with V() expressions
+- **Pythonic** - no inline JavaScript
+- **Composable** - works with all V() features
+- **Batch updates** - update multiple elements at once
+
+---
+
+### Key Features
+
+#### 1. Simple Value Updates
+
+Update any DOM element value with a single function call:
+
+```python
+# Update text content
+Button("Set Name", on_click=updateVRef("#name", "John Doe"))
+
+# Update input value
+Button("Clear", on_click=updateVRef("#email", ""))
+
+# Update checkbox
+Button("Check", on_click=updateVRef("#agree", True))
+
+# Update number
+Button("Set Price", on_click=updateVRef("#price", 99.99))
+```
+
+#### 2. V() Expression Integration
+
+Use V() expressions to create dynamic updates:
+
+```python
+# Copy values
+Button("Copy", on_click=updateVRef("#target", V("#source")))
+
+# With transformations
+Button("Uppercase", on_click=updateVRef("#output", V("#input").upper()))
+
+# With calculations
+Button("Calculate", on_click=updateVRef("#total",
+    V("#price").float() * V("#qty").int()
+))
+```
+
+#### 3. Boolean Expression Support
+
+Combine with boolean operators for conditional updates:
+
+```python
+# Conditional text
+Button("Check Age", on_click=updateVRef("#status",
+    (V("#age").int() >= 18).then("Adult", "Minor")
+))
+
+# Validation messages
+Button("Validate", on_click=updateVRef("#message",
+    (V("#email").includes("@")).then("✓ Valid", "✗ Invalid")
+))
+```
+
+#### 4. Batch Updates
+
+Update multiple elements with a single call:
+
+```python
+# Clear form
+Button("Clear All", on_click=updateVRef({
+    "#name": "",
+    "#email": "",
+    "#age": ""
+}))
+
+# Fill sample data
+Button("Fill Sample", on_click=updateVRef({
+    "#name": "John Doe",
+    "#email": "john@example.com",
+    "#age": 25
+}))
+```
+
+---
+
+### Complete Examples
+
+#### Example 1: Counter (No State Object!)
+
+```python
+from dars.all import *
+
+@route("/counter")
+def counter():
+    return Page(
+        Container(
+            # Display count
+            Text("0", id="count", style="text-[48px] font-bold"),
+            
+            # Update buttons
+            Button("+", on_click=updateVRef("#count", V("#count").int() + 1)),
+            Button("-", on_click=updateVRef("#count", V("#count").int() - 1)),
+            Button("Reset", on_click=updateVRef("#count", 0))
+        )
+    )
+```
+
+#### Example 2: Form Auto-Fill
+
+```python
+@route("/form")
+def form():
+    return Page(
+        Container(
+            Input(id="first-name", placeholder="First Name"),
+            Input(id="last-name", placeholder="Last Name"),
+            Input(id="full-name", placeholder="Full Name", readonly=True),
+            
+            # Auto-generate full name
+            Button(
+                "Generate Full Name",
+                on_click=updateVRef("#full-name",
+                    V("#first-name") + " " + V("#last-name")
+                )
+            ),
+            
+            # Clear all
+            Button(
+                "Clear All",
+                on_click=updateVRef({
+                    "#first-name": "",
+                    "#last-name": "",
+                    "#full-name": ""
+                })
+            )
+        )
+    )
+```
+
+#### Example 3: Shopping Cart Calculations
+
+```python
+@route("/cart")
+def cart():
+    return Page(
+        Container(
+            Input(id="price", input_type="number", value="19.99"),
+            Input(id="quantity", input_type="number", value="1"),
+            Text("0", id="total"),
+            
+            # Calculate total
+            Button(
+                "Calculate Total",
+                on_click=updateVRef("#total",
+                    V("#price").float() * V("#quantity").int()
+                )
+            ),
+            
+            # Apply discount
+            Button(
+                "Apply 10% Discount",
+                on_click=updateVRef("#total",
+                    V("#total").float() * 0.9
+                )
+            )
+        )
+    )
+```
+
+#### Example 4: Smart Validation
+
+```python
+@route("/signup")
+def signup():
+    return Page(
+        Container(
+            Input(id="username", placeholder="Username"),
+            Text("", id="username-status"),
+            
+            # Validate and normalize
+            Button(
+                "Validate Username",
+                on_click=updateVRef("#username-status",
+                    (V("#username").length() >= 3).then(
+                        "✓ Valid username",
+                        "✗ Too short (need 3+ characters)"
+                    )
+                )
+            ),
+            
+            # Auto-fix: lowercase
+            Button(
+                "Normalize",
+                on_click=updateVRef("#username",
+                    V("#username").lower().trim()
+                )
+            )
+        )
+    )
+```
+
+---
+
+### API Reference
+
+#### Signature
+
+```python
+def updateVRef(
+    selector: Union[str, Dict[str, Any]], 
+    value: Any = None
+) -> dScript
+```
+
+**Parameters:**
+- `selector`: CSS selector string or dict of {selector: value} pairs
+- `value`: Value to set (string, number, bool, ValueRef, or expression)
+
+**Returns:**
+- `dScript` object for use in event handlers
+
+**Supported Value Types:**
+- Literals: `"text"`, `42`, `True`
+- V() expressions: `V("#source")`
+- Transformations: `V("#input").upper()`
+- Math expressions: `V("#a").int() + V("#b").int()`
+- Boolean expressions: `(V("#age").int() >= 18).then("Adult", "Minor")`
+
+**Supported Elements:**
+- `Input` / `Textarea`: Updates `.value` property
+- `Checkbox` / `Radio`: Updates `.checked` property
+- `Select`: Updates `.value` property
+- Other elements: Updates `.textContent`
+
+---
+
+### Integration with Existing Features
+
+#### With collect_form()
+
+```python
+# Collect, validate, and update
+form_data = collect_form(
+    name=V("#name"),
+    email=V("#email")
+)
+
+# Normalize before submit
+Button(
+    "Normalize & Submit",
+    on_click=sequence(
+        updateVRef({
+            "#name": V("#name").trim(),
+            "#email": V("#email").lower().trim()
+        }),
+        form_data.submit("http://localhost:3000/submit")
+    )
+)
+```
+
+#### With Boolean Operators
+
+```python
+# Smart updates based on validation
+Button(
+    "Update Status",
+    on_click=updateVRef("#status",
+        (V("#email").includes("@")).and_(
+            V("#password").length() >= 8
+        ).then("✓ Ready", "✗ Incomplete")
+    )
+)
+```
+
+#### With State (Hybrid Approach)
+
+```python
+# Local updates for UI
+Button("Preview", on_click=updateVRef("#preview",
+    "Name: " + V("#name") + ", Age: " + V("#age")
+))
+
+# Save to global state when ready
+user = State("user", name="", age=0)
+Button("Save", on_click=sequence(
+    user.name.set(V("#name")),
+    user.age.set(V("#age").int())
+))
+```
+
+---
+
+## When to Use What
+
+### Use `updateVRef()` when:
+- Updating UI elements temporarily
+- Form auto-fill and normalization
+- Local calculations and previews
+- Component-level state
+- You don't need reactivity across components
+
+### Use `State.set()` when:
+- Data needs to persist
+- Multiple components need the value
+- You need automatic reactivity
+- Application-level state
+
+### Use both (Hybrid):
+- Local updates for immediate feedback
+- State updates for persistence
+- Best of both worlds!
+
+---
+
+## Bug Fixes
+
+- Fixed edge case in `FormData` where nested boolean expressions weren't properly serialized
+
+---
+
+## What's Next
+
+Future enhancements planned for 1.7.0:
+- `useVRef()` - Reactive V() expressions with dependencies
+- `setVRef()` - Set values accessible via V() selectors
+- Full exporter integration for reactive bindings
+- Enhanced component-level reactivity
+
+---
+
+## Documentation
+
+- **Hooks Guide**: Updated with updateVRef() examples and use cases
+- **Operations Guide**: Enhanced with updateVRef() integration examples
+- **Best Practices**: Added guidelines for component-level vs global state
+
+---
+
 # Release Notes v1.6.7
 
 > **Boolean Operators, Form Collection & Backend Integration**

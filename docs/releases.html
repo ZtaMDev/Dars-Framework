@@ -252,13 +252,13 @@
       (function(){function addCopyButtons(){document.querySelectorAll("pre code").forEach(function(code){var pre=code.parentElement;if(!pre||pre.querySelector(".dars-code-copy"))return;var btn=document.createElement("button");btn.className="dars-code-copy";btn.type="button";btn.textContent="Copy";btn.addEventListener("click",async function(e){e.stopPropagation();try{await navigator.clipboard.writeText(code.innerText);btn.textContent="Copied";btn.classList.add("copied");setTimeout(function(){btn.textContent="Copy";btn.classList.remove("copied")},1200)}catch(err){btn.textContent="Error";setTimeout(function(){btn.textContent="Copy"},1200)}});pre.appendChild(btn);});}function guessLang(text){var t=text.trim();if(/^{[\s\S]*}$/.test(t)||/^\[/.test(t))return "json";if(/^(pip |python |python3 |dars |#|\$ )/m.test(t))return "bash";if(/\b(def |class |import |from |print\(|self\b)/.test(t))return "python";return null;}function stripPygments(code){if(code && code.innerHTML && code.innerHTML.indexOf("<span")!==-1){code.textContent = code.innerText;}}function prepareAndHighlight(){document.querySelectorAll("pre code").forEach(function(code){stripPygments(code);if(!code.className||code.className.indexOf("language-")===-1){var g=guessLang(code.innerText);code.classList.add("language-"+(g||"none"));}if(window.Prism&&Prism.highlightElement){Prism.highlightElement(code);}});}document.addEventListener("DOMContentLoaded",function(){try{prepareAndHighlight();}catch(e){};try{addCopyButtons()}catch(e){}});})();
      </script>
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_177">
-      <h1 id="release-notes-v167">
-       Release Notes v1.6.7
+      <h1 id="release-notes-v168">
+       Release Notes v1.6.8
       </h1>
       <blockquote>
        <p>
         <strong>
-         Boolean Operators, Form Collection &amp; Backend Integration
+         Component-Level State Updates with updateVRef()
         </strong>
        </p>
       </blockquote>
@@ -270,6 +270,628 @@
 </code></pre>
       </div>
       <h2 id="whats-new">
+       What's New
+      </h2>
+      <h3 id="updatevref-pythonic-component-level-state">
+       updateVRef() - Pythonic Component-Level State
+      </h3>
+      <p>
+       Dars Framework v1.6.8 introduces
+       <code>
+        updateVRef()
+       </code>
+       , a powerful new function for updating DOM values and component state without requiring State objects. This completes the component-level state management cycle alongside
+       <code>
+        V()
+       </code>
+       .
+      </p>
+      <p>
+       <strong>
+        The Complete Cycle:
+       </strong>
+       1.
+       <strong>
+        Read
+       </strong>
+       :
+       <code>
+        V("#input")
+       </code>
+       - Extract values (v1.5.8)
+2.
+       <strong>
+        Validate
+       </strong>
+       :
+       <code>
+        V("#input").length() &gt;= 3
+       </code>
+       - Boolean validation (v1.6.7)
+3.
+       <strong>
+        Update
+       </strong>
+       :
+       <code>
+        updateVRef("#input", "new value")
+       </code>
+       - Update values (v1.6.8)
+       <strong>
+        NEW!
+       </strong>
+      </p>
+      <h4 id="before-v167-raw-javascript">
+       Before (v1.6.7) - Raw JavaScript
+      </h4>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">Button</span><span class="p">(</span>
+    <span class="s2">"Increment"</span><span class="p">,</span>
+    <span class="n">on_click</span><span class="o">=</span><span class="n">dScript</span><span class="p">(</span><span class="s2">"""</span>
+<span class="s2">        const el = document.querySelector('#count');</span>
+<span class="s2">        const current = parseInt(el.textContent);</span>
+<span class="s2">        el.textContent = current + 1;</span>
+<span class="s2">    """</span><span class="p">)</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h4 id="after-v168-declarative-python">
+       After (v1.6.8) - Declarative Python
+      </h4>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">Button</span><span class="p">(</span>
+    <span class="s2">"Increment"</span><span class="p">,</span>
+    <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#count"</span><span class="p">,</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#count"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Benefits:
+       </strong>
+       -
+       <strong>
+        95% less code
+       </strong>
+       -
+       <strong>
+        Type-safe
+       </strong>
+       with V() expressions
+-
+       <strong>
+        Pythonic
+       </strong>
+       - no inline JavaScript
+-
+       <strong>
+        Composable
+       </strong>
+       - works with all V() features
+-
+       <strong>
+        Batch updates
+       </strong>
+       - update multiple elements at once
+      </p>
+      <hr/>
+      <h3 id="key-features">
+       Key Features
+      </h3>
+      <h4 id="1-simple-value-updates">
+       1. Simple Value Updates
+      </h4>
+      <p>
+       Update any DOM element value with a single function call:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Update text content</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Set Name"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#name"</span><span class="p">,</span> <span class="s2">"John Doe"</span><span class="p">))</span>
+
+<span class="c1"># Update input value</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Clear"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#email"</span><span class="p">,</span> <span class="s2">""</span><span class="p">))</span>
+
+<span class="c1"># Update checkbox</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Check"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#agree"</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
+
+<span class="c1"># Update number</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Set Price"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#price"</span><span class="p">,</span> <span class="mf">99.99</span><span class="p">))</span>
+</code></pre>
+      </div>
+      <h4 id="2-v-expression-integration">
+       2. V() Expression Integration
+      </h4>
+      <p>
+       Use V() expressions to create dynamic updates:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Copy values</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Copy"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#target"</span><span class="p">,</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#source"</span><span class="p">)))</span>
+
+<span class="c1"># With transformations</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Uppercase"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#output"</span><span class="p">,</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#input"</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()))</span>
+
+<span class="c1"># With calculations</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Calculate"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#total"</span><span class="p">,</span>
+    <span class="n">V</span><span class="p">(</span><span class="s2">"#price"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">*</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#qty"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span>
+<span class="p">))</span>
+</code></pre>
+      </div>
+      <h4 id="3-boolean-expression-support">
+       3. Boolean Expression Support
+      </h4>
+      <p>
+       Combine with boolean operators for conditional updates:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Conditional text</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Check Age"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#status"</span><span class="p">,</span>
+    <span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#age"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">18</span><span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="s2">"Adult"</span><span class="p">,</span> <span class="s2">"Minor"</span><span class="p">)</span>
+<span class="p">))</span>
+
+<span class="c1"># Validation messages</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Validate"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#message"</span><span class="p">,</span>
+    <span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#email"</span><span class="p">)</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="s2">"@"</span><span class="p">))</span><span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="s2">"✓ Valid"</span><span class="p">,</span> <span class="s2">"✗ Invalid"</span><span class="p">)</span>
+<span class="p">))</span>
+</code></pre>
+      </div>
+      <h4 id="4-batch-updates">
+       4. Batch Updates
+      </h4>
+      <p>
+       Update multiple elements with a single call:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Clear form</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Clear All"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">({</span>
+    <span class="s2">"#name"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+    <span class="s2">"#email"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+    <span class="s2">"#age"</span><span class="p">:</span> <span class="s2">""</span>
+<span class="p">}))</span>
+
+<span class="c1"># Fill sample data</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Fill Sample"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">({</span>
+    <span class="s2">"#name"</span><span class="p">:</span> <span class="s2">"John Doe"</span><span class="p">,</span>
+    <span class="s2">"#email"</span><span class="p">:</span> <span class="s2">"john@example.com"</span><span class="p">,</span>
+    <span class="s2">"#age"</span><span class="p">:</span> <span class="mi">25</span>
+<span class="p">}))</span>
+</code></pre>
+      </div>
+      <hr/>
+      <h3 id="complete-examples">
+       Complete Examples
+      </h3>
+      <h4 id="example-1-counter-no-state-object">
+       Example 1: Counter (No State Object!)
+      </h4>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="nd">@route</span><span class="p">(</span><span class="s2">"/counter"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">counter</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span>
+        <span class="n">Container</span><span class="p">(</span>
+            <span class="c1"># Display count</span>
+            <span class="n">Text</span><span class="p">(</span><span class="s2">"0"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"count"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">"text-[48px] font-bold"</span><span class="p">),</span>
+
+            <span class="c1"># Update buttons</span>
+            <span class="n">Button</span><span class="p">(</span><span class="s2">"+"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#count"</span><span class="p">,</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#count"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)),</span>
+            <span class="n">Button</span><span class="p">(</span><span class="s2">"-"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#count"</span><span class="p">,</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#count"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)),</span>
+            <span class="n">Button</span><span class="p">(</span><span class="s2">"Reset"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#count"</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+</code></pre>
+      </div>
+      <h4 id="example-2-form-auto-fill">
+       Example 2: Form Auto-Fill
+      </h4>
+      <div class="codehilite">
+       <pre><span></span><code><span class="nd">@route</span><span class="p">(</span><span class="s2">"/form"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">form</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span>
+        <span class="n">Container</span><span class="p">(</span>
+            <span class="n">Input</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"first-name"</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">"First Name"</span><span class="p">),</span>
+            <span class="n">Input</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"last-name"</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">"Last Name"</span><span class="p">),</span>
+            <span class="n">Input</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"full-name"</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">"Full Name"</span><span class="p">,</span> <span class="n">readonly</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+
+            <span class="c1"># Auto-generate full name</span>
+            <span class="n">Button</span><span class="p">(</span>
+                <span class="s2">"Generate Full Name"</span><span class="p">,</span>
+                <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#full-name"</span><span class="p">,</span>
+                    <span class="n">V</span><span class="p">(</span><span class="s2">"#first-name"</span><span class="p">)</span> <span class="o">+</span> <span class="s2">" "</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#last-name"</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">),</span>
+
+            <span class="c1"># Clear all</span>
+            <span class="n">Button</span><span class="p">(</span>
+                <span class="s2">"Clear All"</span><span class="p">,</span>
+                <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">({</span>
+                    <span class="s2">"#first-name"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+                    <span class="s2">"#last-name"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+                    <span class="s2">"#full-name"</span><span class="p">:</span> <span class="s2">""</span>
+                <span class="p">})</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+</code></pre>
+      </div>
+      <h4 id="example-3-shopping-cart-calculations">
+       Example 3: Shopping Cart Calculations
+      </h4>
+      <div class="codehilite">
+       <pre><span></span><code><span class="nd">@route</span><span class="p">(</span><span class="s2">"/cart"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cart</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span>
+        <span class="n">Container</span><span class="p">(</span>
+            <span class="n">Input</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"price"</span><span class="p">,</span> <span class="n">input_type</span><span class="o">=</span><span class="s2">"number"</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s2">"19.99"</span><span class="p">),</span>
+            <span class="n">Input</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"quantity"</span><span class="p">,</span> <span class="n">input_type</span><span class="o">=</span><span class="s2">"number"</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s2">"1"</span><span class="p">),</span>
+            <span class="n">Text</span><span class="p">(</span><span class="s2">"0"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"total"</span><span class="p">),</span>
+
+            <span class="c1"># Calculate total</span>
+            <span class="n">Button</span><span class="p">(</span>
+                <span class="s2">"Calculate Total"</span><span class="p">,</span>
+                <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#total"</span><span class="p">,</span>
+                    <span class="n">V</span><span class="p">(</span><span class="s2">"#price"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">*</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#quantity"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span>
+                <span class="p">)</span>
+            <span class="p">),</span>
+
+            <span class="c1"># Apply discount</span>
+            <span class="n">Button</span><span class="p">(</span>
+                <span class="s2">"Apply 10% Discount"</span><span class="p">,</span>
+                <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#total"</span><span class="p">,</span>
+                    <span class="n">V</span><span class="p">(</span><span class="s2">"#total"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">*</span> <span class="mf">0.9</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+</code></pre>
+      </div>
+      <h4 id="example-4-smart-validation">
+       Example 4: Smart Validation
+      </h4>
+      <div class="codehilite">
+       <pre><span></span><code><span class="nd">@route</span><span class="p">(</span><span class="s2">"/signup"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">signup</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span>
+        <span class="n">Container</span><span class="p">(</span>
+            <span class="n">Input</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"username"</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">"Username"</span><span class="p">),</span>
+            <span class="n">Text</span><span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"username-status"</span><span class="p">),</span>
+
+            <span class="c1"># Validate and normalize</span>
+            <span class="n">Button</span><span class="p">(</span>
+                <span class="s2">"Validate Username"</span><span class="p">,</span>
+                <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#username-status"</span><span class="p">,</span>
+                    <span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#username"</span><span class="p">)</span><span class="o">.</span><span class="n">length</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span>
+                        <span class="s2">"✓ Valid username"</span><span class="p">,</span>
+                        <span class="s2">"✗ Too short (need 3+ characters)"</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">),</span>
+
+            <span class="c1"># Auto-fix: lowercase</span>
+            <span class="n">Button</span><span class="p">(</span>
+                <span class="s2">"Normalize"</span><span class="p">,</span>
+                <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#username"</span><span class="p">,</span>
+                    <span class="n">V</span><span class="p">(</span><span class="s2">"#username"</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">trim</span><span class="p">()</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+</code></pre>
+      </div>
+      <hr/>
+      <h3 id="api-reference">
+       API Reference
+      </h3>
+      <h4 id="signature">
+       Signature
+      </h4>
+      <div class="codehilite">
+       <pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">updateVRef</span><span class="p">(</span>
+    <span class="n">selector</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span> 
+    <span class="n">value</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">dScript</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Parameters:
+       </strong>
+       -
+       <code>
+        selector
+       </code>
+       : CSS selector string or dict of {selector: value} pairs
+-
+       <code>
+        value
+       </code>
+       : Value to set (string, number, bool, ValueRef, or expression)
+      </p>
+      <p>
+       <strong>
+        Returns:
+       </strong>
+       -
+       <code>
+        dScript
+       </code>
+       object for use in event handlers
+      </p>
+      <p>
+       <strong>
+        Supported Value Types:
+       </strong>
+       - Literals:
+       <code>
+        "text"
+       </code>
+       ,
+       <code>
+        42
+       </code>
+       ,
+       <code>
+        True
+       </code>
+       - V() expressions:
+       <code>
+        V("#source")
+       </code>
+       - Transformations:
+       <code>
+        V("#input").upper()
+       </code>
+       - Math expressions:
+       <code>
+        V("#a").int() + V("#b").int()
+       </code>
+       - Boolean expressions:
+       <code>
+        (V("#age").int() &gt;= 18).then("Adult", "Minor")
+       </code>
+      </p>
+      <p>
+       <strong>
+        Supported Elements:
+       </strong>
+       -
+       <code>
+        Input
+       </code>
+       /
+       <code>
+        Textarea
+       </code>
+       : Updates
+       <code>
+        .value
+       </code>
+       property
+-
+       <code>
+        Checkbox
+       </code>
+       /
+       <code>
+        Radio
+       </code>
+       : Updates
+       <code>
+        .checked
+       </code>
+       property
+-
+       <code>
+        Select
+       </code>
+       : Updates
+       <code>
+        .value
+       </code>
+       property
+- Other elements: Updates
+       <code>
+        .textContent
+       </code>
+      </p>
+      <hr/>
+      <h3 id="integration-with-existing-features">
+       Integration with Existing Features
+      </h3>
+      <h4 id="with-collect_form">
+       With collect_form()
+      </h4>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Collect, validate, and update</span>
+<span class="n">form_data</span> <span class="o">=</span> <span class="n">collect_form</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="n">V</span><span class="p">(</span><span class="s2">"#name"</span><span class="p">),</span>
+    <span class="n">email</span><span class="o">=</span><span class="n">V</span><span class="p">(</span><span class="s2">"#email"</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># Normalize before submit</span>
+<span class="n">Button</span><span class="p">(</span>
+    <span class="s2">"Normalize &amp; Submit"</span><span class="p">,</span>
+    <span class="n">on_click</span><span class="o">=</span><span class="n">sequence</span><span class="p">(</span>
+        <span class="n">updateVRef</span><span class="p">({</span>
+            <span class="s2">"#name"</span><span class="p">:</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#name"</span><span class="p">)</span><span class="o">.</span><span class="n">trim</span><span class="p">(),</span>
+            <span class="s2">"#email"</span><span class="p">:</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#email"</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">trim</span><span class="p">()</span>
+        <span class="p">}),</span>
+        <span class="n">form_data</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="s2">"http://localhost:3000/submit"</span><span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h4 id="with-boolean-operators">
+       With Boolean Operators
+      </h4>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Smart updates based on validation</span>
+<span class="n">Button</span><span class="p">(</span>
+    <span class="s2">"Update Status"</span><span class="p">,</span>
+    <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#status"</span><span class="p">,</span>
+        <span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#email"</span><span class="p">)</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="s2">"@"</span><span class="p">))</span><span class="o">.</span><span class="n">and_</span><span class="p">(</span>
+            <span class="n">V</span><span class="p">(</span><span class="s2">"#password"</span><span class="p">)</span><span class="o">.</span><span class="n">length</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">8</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="s2">"✓ Ready"</span><span class="p">,</span> <span class="s2">"✗ Incomplete"</span><span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h4 id="with-state-hybrid-approach">
+       With State (Hybrid Approach)
+      </h4>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Local updates for UI</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Preview"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#preview"</span><span class="p">,</span>
+    <span class="s2">"Name: "</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#name"</span><span class="p">)</span> <span class="o">+</span> <span class="s2">", Age: "</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#age"</span><span class="p">)</span>
+<span class="p">))</span>
+
+<span class="c1"># Save to global state when ready</span>
+<span class="n">user</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"user"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span> <span class="n">age</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Save"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">sequence</span><span class="p">(</span>
+    <span class="n">user</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#name"</span><span class="p">)),</span>
+    <span class="n">user</span><span class="o">.</span><span class="n">age</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#age"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">())</span>
+<span class="p">))</span>
+</code></pre>
+      </div>
+      <hr/>
+      <h2 id="when-to-use-what">
+       When to Use What
+      </h2>
+      <h3 id="use-updatevref-when">
+       Use
+       <code>
+        updateVRef()
+       </code>
+       when:
+      </h3>
+      <ul>
+       <li>
+        Updating UI elements temporarily
+       </li>
+       <li>
+        Form auto-fill and normalization
+       </li>
+       <li>
+        Local calculations and previews
+       </li>
+       <li>
+        Component-level state
+       </li>
+       <li>
+        You don't need reactivity across components
+       </li>
+      </ul>
+      <h3 id="use-stateset-when">
+       Use
+       <code>
+        State.set()
+       </code>
+       when:
+      </h3>
+      <ul>
+       <li>
+        Data needs to persist
+       </li>
+       <li>
+        Multiple components need the value
+       </li>
+       <li>
+        You need automatic reactivity
+       </li>
+       <li>
+        Application-level state
+       </li>
+      </ul>
+      <h3 id="use-both-hybrid">
+       Use both (Hybrid):
+      </h3>
+      <ul>
+       <li>
+        Local updates for immediate feedback
+       </li>
+       <li>
+        State updates for persistence
+       </li>
+       <li>
+        Best of both worlds!
+       </li>
+      </ul>
+      <hr/>
+      <h2 id="bug-fixes">
+       Bug Fixes
+      </h2>
+      <ul>
+       <li>
+        Fixed edge case in
+        <code>
+         FormData
+        </code>
+        where nested boolean expressions weren't properly serialized
+       </li>
+      </ul>
+      <hr/>
+      <h2 id="whats-next">
+       What's Next
+      </h2>
+      <p>
+       Future enhancements planned for 1.7.0:
+-
+       <code>
+        useVRef()
+       </code>
+       - Reactive V() expressions with dependencies
+-
+       <code>
+        setVRef()
+       </code>
+       - Set values accessible via V() selectors
+- Full exporter integration for reactive bindings
+- Enhanced component-level reactivity
+      </p>
+      <hr/>
+      <h2 id="documentation">
+       Documentation
+      </h2>
+      <ul>
+       <li>
+        <strong>
+         Hooks Guide
+        </strong>
+        : Updated with updateVRef() examples and use cases
+       </li>
+       <li>
+        <strong>
+         Operations Guide
+        </strong>
+        : Enhanced with updateVRef() integration examples
+       </li>
+       <li>
+        <strong>
+         Best Practices
+        </strong>
+        : Added guidelines for component-level vs global state
+       </li>
+      </ul>
+      <hr/>
+      <h1 id="release-notes-v167">
+       Release Notes v1.6.7
+      </h1>
+      <blockquote>
+       <p>
+        <strong>
+         Boolean Operators, Form Collection &amp; Backend Integration
+        </strong>
+       </p>
+      </blockquote>
+      <h2 id="installation-2">
+       Installation
+      </h2>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
+</code></pre>
+      </div>
+      <h2 id="whats-new-2">
        What's New
       </h2>
       <h3 id="boolean-comparison-operators-for-v">
@@ -859,7 +1481,7 @@
 </code></pre>
       </div>
       <hr/>
-      <h2 id="bug-fixes">
+      <h2 id="bug-fixes-2">
        Bug Fixes
       </h2>
       <h3 id="fixed-transformation-chaining">
@@ -923,7 +1545,7 @@
        calls.
       </p>
       <hr/>
-      <h2 id="whats-next">
+      <h2 id="whats-next-2">
        What's Next
       </h2>
       <p>
@@ -960,7 +1582,7 @@
 - Array operations
       </p>
       <hr/>
-      <h2 id="documentation">
+      <h2 id="documentation-2">
        Documentation
       </h2>
       <ul>
@@ -994,14 +1616,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-2">
+      <h2 id="installation-3">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-2">
+      <h2 id="whats-new-3">
        What's New
       </h2>
       <h3 id="custom-utility-styles">
@@ -1093,7 +1715,7 @@
         properties.
        </li>
       </ul>
-      <h3 id="documentation-2">
+      <h3 id="documentation-3">
        Documentation
       </h3>
       <ul>
@@ -1133,14 +1755,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-3">
+      <h2 id="installation-4">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-3">
+      <h2 id="whats-new-4">
        What's New
       </h2>
       <h3 id="massive-styling-system-expansion">
@@ -1378,14 +2000,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-4">
+      <h2 id="installation-5">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-4">
+      <h2 id="whats-new-5">
        What's New
       </h2>
       <h3 id="pythonic-expression-system-with-v">
@@ -1805,7 +2427,7 @@
 </code></pre>
       </div>
       <hr/>
-      <h2 id="whats-next-2">
+      <h2 id="whats-next-3">
        What's Next
       </h2>
       <p>
@@ -1867,14 +2489,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-5">
+      <h2 id="installation-6">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-5">
+      <h2 id="whats-new-6">
        What's New
       </h2>
       <h3 id="tailwind-like-utility-class-system">
@@ -2116,14 +2738,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-6">
+      <h2 id="installation-7">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-6">
+      <h2 id="whats-new-7">
        What's New
       </h2>
       <h3 id="enhanced-usevalue-hook-simplified-usage">
@@ -2205,14 +2827,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-7">
+      <h2 id="installation-8">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-7">
+      <h2 id="whats-new-8">
        What's New
       </h2>
       <h3 id="enhanced-usewatch-hook-array-syntax-multiple-callbacks">
@@ -2284,7 +2906,7 @@
        </strong>
        : Simple comma-separated syntax for callbacks
       </p>
-      <h3 id="bug-fixes-2">
+      <h3 id="bug-fixes-3">
        Bug Fixes
       </h3>
       <h4 id="fixed-custom-state-property-handling">
@@ -2399,7 +3021,7 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-8">
+      <h2 id="installation-9">
        Installation
       </h2>
       <div class="codehilite">
@@ -2791,14 +3413,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-9">
+      <h2 id="installation-10">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-8">
+      <h2 id="whats-new-9">
        What's New
       </h2>
       <h3 id="1-unified-keyboard-events-on_key_press">
@@ -2995,14 +3617,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-10">
+      <h2 id="installation-11">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-9">
+      <h2 id="whats-new-10">
        What's New
       </h2>
       <h3 id="1-v-helper-state-path-support">
@@ -3410,7 +4032,7 @@
 </code></pre>
       </div>
       <hr/>
-      <h2 id="bug-fixes-3">
+      <h2 id="bug-fixes-4">
        Bug Fixes
       </h2>
       <h3 id="usevalue-selector-application">
@@ -3597,7 +4219,7 @@
        </li>
       </ul>
       <hr/>
-      <h2 id="whats-next-3">
+      <h2 id="whats-next-4">
        What's Next
       </h2>
       <p>
@@ -3614,14 +4236,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-11">
+      <h2 id="installation-12">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-10">
+      <h2 id="whats-new-11">
        What's New
       </h2>
       <h3 id="1-usevalue-hook">
@@ -3728,14 +4350,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-12">
+      <h2 id="installation-13">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-11">
+      <h2 id="whats-new-12">
        What's New
       </h2>
       <h3 id="1-expanded-usedynamic-support-for-built-in-components">
@@ -3968,7 +4590,7 @@
 <span class="n">DataTable</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">theme</span><span class="o">=</span><span class="s2">"striped"</span><span class="p">,</span> <span class="n">page_size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 </code></pre>
       </div>
-      <h2 id="bug-fixes-4">
+      <h2 id="bug-fixes-5">
        Bug Fixes
       </h2>
       <h3 id="statev2-incrementdecrement">
@@ -4051,7 +4673,7 @@
        None.
       </p>
       <hr/>
-      <h2 id="whats-next-4">
+      <h2 id="whats-next-5">
        What's Next
       </h2>
       <p>
@@ -4081,14 +4703,14 @@
         hook.
        </p>
       </blockquote>
-      <h2 id="installation-13">
+      <h2 id="installation-14">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-12">
+      <h2 id="whats-new-13">
        What's New
       </h2>
       <h3 id="1-usedynamic-for-built-in-components">
@@ -4191,14 +4813,14 @@
         relaunch with correct license.
        </p>
       </blockquote>
-      <h2 id="installation-14">
+      <h2 id="installation-15">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-13">
+      <h2 id="whats-new-14">
        What's New
       </h2>
       <h3 id="hooks-system-usedynamic">
@@ -4278,7 +4900,7 @@
         : All matching reactive spans update automatically
        </li>
       </ol>
-      <h4 id="key-features">
+      <h4 id="key-features-2">
        Key Features
       </h4>
       <ul>
@@ -4422,7 +5044,7 @@
 </code></pre>
       </div>
       <hr/>
-      <h3 id="bug-fixes-5">
+      <h3 id="bug-fixes-6">
        Bug Fixes
       </h3>
       <h4 id="fixed-markdown-syntax-highlighting-in-multipage-apps">
@@ -4566,7 +5188,7 @@
 </code></pre>
       </div>
       <hr/>
-      <h2 id="documentation-3">
+      <h2 id="documentation-4">
        Documentation
       </h2>
       <p>
@@ -4606,7 +5228,7 @@
        for more details.
       </p>
       <hr/>
-      <h2 id="whats-next-5">
+      <h2 id="whats-next-6">
        What's Next
       </h2>
       <p>
@@ -4622,14 +5244,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-15">
+      <h2 id="installation-16">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-14">
+      <h2 id="whats-new-15">
        What's New
       </h2>
       <h3 id="hooks-system-usedynamic-2">
@@ -4709,7 +5331,7 @@
         : All matching reactive spans update automatically
        </li>
       </ol>
-      <h4 id="key-features-2">
+      <h4 id="key-features-3">
        Key Features
       </h4>
       <ul>
@@ -4853,7 +5475,7 @@
 </code></pre>
       </div>
       <hr/>
-      <h3 id="bug-fixes-6">
+      <h3 id="bug-fixes-7">
        Bug Fixes
       </h3>
       <h4 id="fixed-markdown-syntax-highlighting-in-multipage-apps-2">
@@ -4997,7 +5619,7 @@
 </code></pre>
       </div>
       <hr/>
-      <h2 id="documentation-4">
+      <h2 id="documentation-5">
        Documentation
       </h2>
       <p>
@@ -5037,7 +5659,7 @@
        for more details.
       </p>
       <hr/>
-      <h2 id="whats-next-6">
+      <h2 id="whats-next-7">
        What's Next
       </h2>
       <p>
@@ -5053,14 +5675,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-16">
+      <h2 id="installation-17">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-15">
+      <h2 id="whats-new-16">
        What's New
       </h2>
       <h3 id="function-components-system">
@@ -5261,14 +5883,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-17">
+      <h2 id="installation-18">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-16">
+      <h2 id="whats-new-17">
        What's New
       </h2>
       <h3 id="backend-http-utilities-system">
@@ -5512,7 +6134,7 @@
        property for JavaScript generation
 - Seamless integration with existing state management
       </p>
-      <h2 id="documentation-5">
+      <h2 id="documentation-6">
        Documentation
       </h2>
       <h3 id="new-documentation">
@@ -5549,7 +6171,7 @@
        </strong>
        - This is a fully backward-compatible release. All existing code continues to work.
       </p>
-      <h2 id="bug-fixes-7">
+      <h2 id="bug-fixes-8">
        Bug Fixes
       </h2>
       <ul>
@@ -5655,14 +6277,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-18">
+      <h2 id="installation-19">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-17">
+      <h2 id="whats-new-18">
        What's New
       </h2>
       <h3 id="animation-system-stability">
@@ -5729,7 +6351,7 @@
 <span class="p">)</span>
 </code></pre>
       </div>
-      <h2 id="bug-fixes-8">
+      <h2 id="bug-fixes-9">
        Bug Fixes
       </h2>
       <ul>
@@ -5773,14 +6395,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-19">
+      <h2 id="installation-20">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-18">
+      <h2 id="whats-new-19">
        What's New
       </h2>
       <h3 id="state-v2-event-handler-support">
@@ -5853,7 +6475,7 @@
       <p>
        Comprehensive comparison table and use case guidance added to state management documentation.
       </p>
-      <h2 id="bug-fixes-9">
+      <h2 id="bug-fixes-10">
        Bug Fixes
       </h2>
       <ul>
@@ -5874,7 +6496,7 @@
         properly handles non-JSON-serializable values
        </li>
       </ul>
-      <h2 id="documentation-6">
+      <h2 id="documentation-7">
        Documentation
       </h2>
       <ul>
@@ -5919,7 +6541,7 @@
         , and more.
        </p>
       </blockquote>
-      <h2 id="installation-20">
+      <h2 id="installation-21">
        Installation
       </h2>
       <div class="codehilite">
@@ -6040,7 +6662,7 @@
 <span class="n">counter</span><span class="o">.</span><span class="n">class_name</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </code></pre>
       </div>
-      <h2 id="bug-fixes-10">
+      <h2 id="bug-fixes-11">
        Bug Fixes
       </h2>
       <h3 id="fixed-property-type-handling">
@@ -6374,7 +6996,7 @@
         Introducing State V2 and comprehensive animation system. This is the biggest update to Dars state management, bringing a pure Pythonic API and 15+ built-in animations.
        </p>
       </blockquote>
-      <h2 id="installation-21">
+      <h2 id="installation-22">
        Installation
       </h2>
       <div class="codehilite">
@@ -6388,7 +7010,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.7
 </code></pre>
       </div>
-      <h2 id="whats-new-19">
+      <h2 id="whats-new-20">
        What's New
       </h2>
       <h3 id="state-v2-pure-pythonic-state-management">
@@ -6687,7 +7309,7 @@
 - All dState/cState references removed from active docs
 - Migration guides included for existing projects
       </p>
-      <h2 id="bug-fixes-11">
+      <h2 id="bug-fixes-12">
        Bug Fixes
       </h2>
       <p>
@@ -6960,7 +7582,7 @@
         : Introduces Single Page Application (SPA) support and a powerful client-side routing system.
        </p>
       </blockquote>
-      <h2 id="installation-22">
+      <h2 id="installation-23">
        Installation
       </h2>
       <div class="codehilite">
@@ -6974,7 +7596,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.5
 </code></pre>
       </div>
-      <h2 id="whats-new-20">
+      <h2 id="whats-new-21">
        What's New
       </h2>
       <h3 id="single-page-application-spa-support">
@@ -7077,7 +7699,7 @@
         Critical bug fix release. Removes non-functional features, fixes style merge, and improves state restoration.
        </p>
       </blockquote>
-      <h2 id="installation-23">
+      <h2 id="installation-24">
        Installation
       </h2>
       <div class="codehilite">
@@ -7143,7 +7765,7 @@
         State management enhancements with compile-time validation, component self-navigation, and critical style merge fix. Improves developer experience and fixes property replacement bug.
        </p>
       </blockquote>
-      <h2 id="installation-24">
+      <h2 id="installation-25">
        Installation
       </h2>
       <div class="codehilite">
@@ -7157,7 +7779,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.3
 </code></pre>
       </div>
-      <h2 id="whats-new-21">
+      <h2 id="whats-new-22">
        What's New
       </h2>
       <ul>
@@ -7207,7 +7829,7 @@
         for enhanced client-side interactions.
        </p>
       </blockquote>
-      <h2 id="installation-25">
+      <h2 id="installation-26">
        Installation
       </h2>
       <div class="codehilite">
@@ -7221,7 +7843,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.2
 </code></pre>
       </div>
-      <h2 id="whats-new-22">
+      <h2 id="whats-new-23">
        What's New
       </h2>
       <h3 id="utility-functions-utils_ds">
@@ -7411,7 +8033,7 @@
         SEO and Apple device optimizations. Enhanced metadata generation with automatic MIME type detection for favicons and comprehensive iOS/Safari support.
        </p>
       </blockquote>
-      <h2 id="installation-26">
+      <h2 id="installation-27">
        Installation
       </h2>
       <div class="codehilite">
@@ -7425,7 +8047,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.1
 </code></pre>
       </div>
-      <h2 id="whats-new-23">
+      <h2 id="whats-new-24">
        What's New
       </h2>
       <h3 id="automatic-favicon-mime-type-detection">
@@ -7740,7 +8362,7 @@
         Simple Template update.
        </p>
       </blockquote>
-      <h2 id="installation-27">
+      <h2 id="installation-28">
        Installation
       </h2>
       <div class="codehilite">
@@ -7768,7 +8390,7 @@
         Desktop File System API, Pythonic Arg helper, keyboard event filtering, and comprehensive template synchronization. Major enhancements to desktop capabilities with improved developer experience.
        </p>
       </blockquote>
-      <h2 id="installation-28">
+      <h2 id="installation-29">
        Installation
       </h2>
       <div class="codehilite">
@@ -7782,7 +8404,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.9
 </code></pre>
       </div>
-      <h2 id="whats-new-24">
+      <h2 id="whats-new-25">
        What's New
       </h2>
       <h3 id="desktop-file-system-api-list_directory">
@@ -8077,7 +8699,7 @@
        and similar events work correctly
 - Maintains backward compatibility with non-filtered events
       </p>
-      <h2 id="bug-fixes-12">
+      <h2 id="bug-fixes-13">
        Bug Fixes
       </h2>
       <ul>
@@ -8195,7 +8817,7 @@
 <span class="p">)</span>
 </code></pre>
       </div>
-      <h2 id="documentation-7">
+      <h2 id="documentation-8">
        Documentation
       </h2>
       <ul>
@@ -8233,7 +8855,7 @@
         for async chaining.
        </p>
       </blockquote>
-      <h2 id="installation-29">
+      <h2 id="installation-30">
        Installation
       </h2>
       <div class="codehilite">
@@ -8247,7 +8869,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.8
 </code></pre>
       </div>
-      <h2 id="whats-new-25">
+      <h2 id="whats-new-26">
        What's New
       </h2>
       <h3 id="dynamic-state-updates-with-this">
@@ -8695,7 +9317,7 @@
         for dynamic DOM operations with safe event hydration.
        </p>
       </blockquote>
-      <h2 id="installation-30">
+      <h2 id="installation-31">
        Installation
       </h2>
       <div class="codehilite">
@@ -8709,7 +9331,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.6
 </code></pre>
       </div>
-      <h2 id="whats-new-26">
+      <h2 id="whats-new-27">
        What's New
       </h2>
       <h3 id="compile-time-component-manipulation">
@@ -8872,7 +9494,7 @@
         Enhanced styling and development experience update featuring active styles, improved preview system, and advanced file monitoring. Delivers better visual feedback and faster development workflow.
        </p>
       </blockquote>
-      <h2 id="installation-31">
+      <h2 id="installation-32">
        Installation
       </h2>
       <div class="codehilite">
@@ -8886,7 +9508,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.5
 </code></pre>
       </div>
-      <h2 id="whats-new-27">
+      <h2 id="whats-new-28">
        What's New
       </h2>
       <h3 id="active-styles-support">
@@ -9029,7 +9651,7 @@
         Enhanced interactivity update featuring hover styles, multi-handler events, and runtime versioning. Improves component styling and event handling flexibility.
        </p>
       </blockquote>
-      <h2 id="installation-32">
+      <h2 id="installation-33">
        Installation
       </h2>
       <div class="codehilite">
@@ -9043,7 +9665,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.4
 </code></pre>
       </div>
-      <h2 id="whats-new-28">
+      <h2 id="whats-new-29">
        What's New
       </h2>
       <h3 id="hover-styles-support">
@@ -9222,7 +9844,7 @@
         Minor update featuring new semantic Section component and enhanced state serialization. Continues JavaScript migration improvements from v1.3.2.
        </p>
       </blockquote>
-      <h2 id="installation-33">
+      <h2 id="installation-34">
        Installation
       </h2>
       <div class="codehilite">
@@ -9236,7 +9858,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.3
 </code></pre>
       </div>
-      <h2 id="whats-new-29">
+      <h2 id="whats-new-30">
        What's New
       </h2>
       <h3 id="section-component">
@@ -9386,7 +10008,7 @@
         Major minification improvements with combined JS files and optimized event handling. Electron desktop exporter remains in beta.
        </p>
       </blockquote>
-      <h2 id="installation-34">
+      <h2 id="installation-35">
        Installation
       </h2>
       <div class="codehilite">
@@ -9510,7 +10132,7 @@
         : Fallback minification when Vite is unavailable
        </li>
       </ul>
-      <h2 id="bug-fixes-13">
+      <h2 id="bug-fixes-14">
        Bug Fixes
       </h2>
       <ul>
@@ -9682,7 +10304,7 @@
         Native desktop functions and DX improved with dev mode and file system integration.
        </p>
       </blockquote>
-      <h2 id="installation-35">
+      <h2 id="installation-36">
        Installation
       </h2>
       <div class="codehilite">
@@ -9733,7 +10355,7 @@
       <p>
        Also you can use dScripts to run custom javascript code in the desktop app. and for now 'dars dev' is supported but python main.py with rTimeCompile() is not supported because it have issues with relative paths.
       </p>
-      <h2 id="bug-fixes-14">
+      <h2 id="bug-fixes-15">
        Bug Fixes
       </h2>
       <ul>
@@ -9767,7 +10389,7 @@
         Native desktop export (BETA), improved CLI and doctor integration, and metadata fixes for packaging. This is a BETA release: usable for testing, not recommended for production.
        </p>
       </blockquote>
-      <h2 id="installation-36">
+      <h2 id="installation-37">
        Installation
       </h2>
       <div class="codehilite">
@@ -9953,7 +10575,7 @@ dars<span class="w"> </span>build
 <span class="p">}</span>
 </code></pre>
       </div>
-      <h2 id="bug-fixes-15">
+      <h2 id="bug-fixes-16">
        Bug Fixes
       </h2>
       <ul>
@@ -10050,7 +10672,7 @@ dars<span class="w"> </span>build
         Optional default minification, precise CLI control, faster builds, and clearer minification status.
        </p>
       </blockquote>
-      <h2 id="installation-37">
+      <h2 id="installation-38">
        Installation
       </h2>
       <div class="codehilite">
@@ -10207,7 +10829,7 @@ dars<span class="w"> </span>build
         </ul>
        </li>
       </ul>
-      <h2 id="bug-fixes-16">
+      <h2 id="bug-fixes-17">
        Bug Fixes
       </h2>
       <ul>
@@ -10443,6 +11065,93 @@ dars<span class="w"> </span>build
      <div class="sidebar-category">
       Versions
      </div>
+     <a class="sidebar-link sidebar-level-1" href="#release-notes-v168" style="margin-left: 0px">
+      Release Notes v1.6.8
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#installation" style="margin-left: 20px">
+      Installation
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#whats-new" style="margin-left: 20px">
+      What's New
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#updatevref-pythonic-component-level-state" style="margin-left: 40px">
+      updateVRef() - Pythonic Component-Level State
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#before-v167-raw-javascript" style="margin-left: 60px">
+      Before (v1.6.7) - Raw JavaScript
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#after-v168-declarative-python" style="margin-left: 60px">
+      After (v1.6.8) - Declarative Python
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#key-features" style="margin-left: 40px">
+      Key Features
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#1-simple-value-updates" style="margin-left: 60px">
+      1. Simple Value Updates
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#2-v-expression-integration" style="margin-left: 60px">
+      2. V() Expression Integration
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#3-boolean-expression-support" style="margin-left: 60px">
+      3. Boolean Expression Support
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#4-batch-updates" style="margin-left: 60px">
+      4. Batch Updates
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#complete-examples" style="margin-left: 40px">
+      Complete Examples
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#example-1-counter-no-state-object" style="margin-left: 60px">
+      Example 1: Counter (No State Object!)
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#example-2-form-auto-fill" style="margin-left: 60px">
+      Example 2: Form Auto-Fill
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#example-3-shopping-cart-calculations" style="margin-left: 60px">
+      Example 3: Shopping Cart Calculations
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#example-4-smart-validation" style="margin-left: 60px">
+      Example 4: Smart Validation
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#api-reference" style="margin-left: 40px">
+      API Reference
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#signature" style="margin-left: 60px">
+      Signature
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#integration-with-existing-features" style="margin-left: 40px">
+      Integration with Existing Features
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#with-collectform" style="margin-left: 60px">
+      With collect_form()
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#with-boolean-operators" style="margin-left: 60px">
+      With Boolean Operators
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#with-state-hybrid-approach" style="margin-left: 60px">
+      With State (Hybrid Approach)
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#when-to-use-what" style="margin-left: 20px">
+      When to Use What
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#use-updatevref-when" style="margin-left: 40px">
+      Use `updateVRef()` when:
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#use-stateset-when" style="margin-left: 40px">
+      Use `State.set()` when:
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#use-both-hybrid" style="margin-left: 40px">
+      Use both (Hybrid):
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#bug-fixes" style="margin-left: 20px">
+      Bug Fixes
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#whats-next" style="margin-left: 20px">
+      What's Next
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#documentation" style="margin-left: 20px">
+      Documentation
+     </a>
      <a class="sidebar-link sidebar-level-1" href="#release-notes-v167" style="margin-left: 0px">
       Release Notes v1.6.7
      </a>

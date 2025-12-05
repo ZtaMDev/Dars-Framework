@@ -1469,6 +1469,48 @@
      <a class="sidebar-link sidebar-level-3" href="#backend-integration-example" style="margin-left: 40px">
       Backend Integration Example
      </a>
+     <a class="sidebar-link sidebar-level-2" href="#updatevref-component-level-state-updates" style="margin-left: 20px">
+      updateVRef() - Component-Level State Updates
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#basic-usage" style="margin-left: 40px">
+      Basic Usage
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#with-v-expressions" style="margin-left: 40px">
+      With V() Expressions
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#with-boolean-expressions" style="margin-left: 40px">
+      With Boolean Expressions
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#batch-updates" style="margin-left: 40px">
+      Batch Updates
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#complete-examples" style="margin-left: 40px">
+      Complete Examples
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#example-1-counter-no-state-object" style="margin-left: 60px">
+      Example 1: Counter (No State Object!)
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#example-2-form-auto-fill" style="margin-left: 60px">
+      Example 2: Form Auto-Fill
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#example-3-shopping-cart" style="margin-left: 60px">
+      Example 3: Shopping Cart
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#syntax" style="margin-left: 40px">
+      Syntax
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#integration-with-other-features" style="margin-left: 40px">
+      Integration with Other Features
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#with-collectform" style="margin-left: 60px">
+      With collect_form()
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#with-state-hybrid-approach" style="margin-left: 60px">
+      With State (Hybrid Approach)
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#when-to-use-updatevref-vs-stateset" style="margin-left: 40px">
+      When to Use updateVRef() vs State.set()
+     </a>
      <a class="sidebar-link sidebar-level-2" href="#getdatetime-timestamp-helper" style="margin-left: 20px">
       getDateTime() - Timestamp Helper
      </a>
@@ -16078,10 +16120,7 @@ def hello():
        Form Collection System
       </h2>
       <p>
-       <strong>
-        New in v1.6.7
-       </strong>
-       : Pythonic form data collection and submission without raw JavaScript!
+       Pythonic form data collection and submission without raw JavaScript!
       </p>
       <h3 id="formdata-collect_form">
        FormData &amp; collect_form()
@@ -16293,6 +16332,499 @@ def hello():
 <span class="n">app</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="s2">"index"</span><span class="p">,</span> <span class="n">index</span><span class="p">())</span>
 </code></pre>
       </div>
+      <h2 id="updatevref-component-level-state-updates">
+       updateVRef() - Component-Level State Updates
+      </h2>
+      <p>
+       Update DOM element values declaratively without State objects!
+      </p>
+      <p>
+       The
+       <code>
+        updateVRef()
+       </code>
+       function completes the component-level state management cycle, providing a Pythonic way to update values alongside
+       <code>
+        V()
+       </code>
+       for reading and boolean operators for validation.
+      </p>
+      <p>
+       <strong>
+        The Complete Cycle:
+       </strong>
+       1.
+       <strong>
+        Read
+       </strong>
+       :
+       <code>
+        V("#input")
+       </code>
+       - Extract values
+2.
+       <strong>
+        Validate
+       </strong>
+       :
+       <code>
+        V("#input").length() &gt;= 3
+       </code>
+       - Boolean validation
+       <br/>
+       3.
+       <strong>
+        Update
+       </strong>
+       :
+       <code>
+        updateVRef("#input", "new value")
+       </code>
+       - Update values ✨
+       <strong>
+        NEW!
+       </strong>
+      </p>
+      <h3 id="basic-usage-4">
+       Basic Usage
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="c1"># Update text content</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Set Name"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#name"</span><span class="p">,</span> <span class="s2">"John Doe"</span><span class="p">))</span>
+
+<span class="c1"># Update input value</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Clear Email"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#email"</span><span class="p">,</span> <span class="s2">""</span><span class="p">))</span>
+
+<span class="c1"># Update checkbox</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Check Box"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#agree"</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
+
+<span class="c1"># Update number</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Set Price"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#price"</span><span class="p">,</span> <span class="mf">99.99</span><span class="p">))</span>
+</code></pre>
+      </div>
+      <h3 id="with-v-expressions">
+       With V() Expressions
+      </h3>
+      <p>
+       Combine
+       <code>
+        updateVRef()
+       </code>
+       with
+       <code>
+        V()
+       </code>
+       expressions for dynamic updates:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Copy values between elements</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Copy"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#target"</span><span class="p">,</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#source"</span><span class="p">)))</span>
+
+<span class="c1"># With transformations</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Uppercase"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#output"</span><span class="p">,</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#input"</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()))</span>
+
+<span class="c1"># With calculations</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Calculate Total"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#total"</span><span class="p">,</span>
+    <span class="n">V</span><span class="p">(</span><span class="s2">"#price"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">*</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#qty"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span>
+<span class="p">))</span>
+
+<span class="c1"># With string concatenation</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Generate Full Name"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#full-name"</span><span class="p">,</span>
+    <span class="n">V</span><span class="p">(</span><span class="s2">"#first-name"</span><span class="p">)</span> <span class="o">+</span> <span class="s2">" "</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#last-name"</span><span class="p">)</span>
+<span class="p">))</span>
+</code></pre>
+      </div>
+      <h3 id="with-boolean-expressions">
+       With Boolean Expressions
+      </h3>
+      <p>
+       Use boolean operators for conditional updates:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Conditional text based on age</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Check Age"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#status"</span><span class="p">,</span>
+    <span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#age"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">18</span><span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="s2">"Adult"</span><span class="p">,</span> <span class="s2">"Minor"</span><span class="p">)</span>
+<span class="p">))</span>
+
+<span class="c1"># Validation messages</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Validate Email"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#message"</span><span class="p">,</span>
+    <span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#email"</span><span class="p">)</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="s2">"@"</span><span class="p">))</span><span class="o">.</span><span class="n">and_</span><span class="p">(</span>
+        <span class="n">V</span><span class="p">(</span><span class="s2">"#email"</span><span class="p">)</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="s2">"."</span><span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="s2">"✓ Valid email"</span><span class="p">,</span> <span class="s2">"✗ Invalid email"</span><span class="p">)</span>
+<span class="p">))</span>
+
+<span class="c1"># Complex validation</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Check Password"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#pwd-status"</span><span class="p">,</span>
+    <span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#password"</span><span class="p">)</span><span class="o">.</span><span class="n">length</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">8</span><span class="p">)</span><span class="o">.</span><span class="n">and_</span><span class="p">(</span>
+        <span class="n">V</span><span class="p">(</span><span class="s2">"#password"</span><span class="p">)</span> <span class="o">==</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#confirm"</span><span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="s2">"✓ Passwords match"</span><span class="p">,</span> <span class="s2">"✗ Passwords don't match"</span><span class="p">)</span>
+<span class="p">))</span>
+</code></pre>
+      </div>
+      <h3 id="batch-updates">
+       Batch Updates
+      </h3>
+      <p>
+       Update multiple elements with a single call:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Clear entire form</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Clear All"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">({</span>
+    <span class="s2">"#name"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+    <span class="s2">"#email"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+    <span class="s2">"#age"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+    <span class="s2">"#phone"</span><span class="p">:</span> <span class="s2">""</span>
+<span class="p">}))</span>
+
+<span class="c1"># Fill sample data</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Fill Sample Data"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">({</span>
+    <span class="s2">"#name"</span><span class="p">:</span> <span class="s2">"John Doe"</span><span class="p">,</span>
+    <span class="s2">"#email"</span><span class="p">:</span> <span class="s2">"john@example.com"</span><span class="p">,</span>
+    <span class="s2">"#age"</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span>
+    <span class="s2">"#phone"</span><span class="p">:</span> <span class="s2">"555-0123"</span>
+<span class="p">}))</span>
+
+<span class="c1"># Mix literals and expressions</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Update All"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">({</span>
+    <span class="s2">"#full-name"</span><span class="p">:</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#first"</span><span class="p">)</span> <span class="o">+</span> <span class="s2">" "</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#last"</span><span class="p">),</span>
+    <span class="s2">"#email-lower"</span><span class="p">:</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#email"</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span>
+    <span class="s2">"#age-status"</span><span class="p">:</span> <span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#age"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">18</span><span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="s2">"Adult"</span><span class="p">,</span> <span class="s2">"Minor"</span><span class="p">)</span>
+<span class="p">}))</span>
+</code></pre>
+      </div>
+      <h3 id="complete-examples">
+       Complete Examples
+      </h3>
+      <h4 id="example-1-counter-no-state-object">
+       Example 1: Counter (No State Object!)
+      </h4>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="s2">"Counter Demo"</span><span class="p">)</span>
+
+<span class="nd">@route</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span>
+        <span class="n">Container</span><span class="p">(</span>
+            <span class="c1"># Display count</span>
+            <span class="n">Text</span><span class="p">(</span><span class="s2">"Count: "</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">"font-bold"</span><span class="p">),</span>
+            <span class="n">Text</span><span class="p">(</span><span class="s2">"0"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"count"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">"text-[48px] font-bold text-blue-600"</span><span class="p">),</span>
+
+            <span class="c1"># Update buttons</span>
+            <span class="n">Container</span><span class="p">(</span>
+                <span class="n">Button</span><span class="p">(</span>
+                    <span class="s2">"+"</span><span class="p">,</span>
+                    <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#count"</span><span class="p">,</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#count"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>
+                    <span class="n">style</span><span class="o">=</span><span class="s2">"bg-green-500 text-white px-6 py-3 rounded"</span>
+                <span class="p">),</span>
+                <span class="n">Button</span><span class="p">(</span>
+                    <span class="s2">"-"</span><span class="p">,</span>
+                    <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#count"</span><span class="p">,</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#count"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span>
+                    <span class="n">style</span><span class="o">=</span><span class="s2">"bg-red-500 text-white px-6 py-3 rounded"</span>
+                <span class="p">),</span>
+                <span class="n">Button</span><span class="p">(</span>
+                    <span class="s2">"Reset"</span><span class="p">,</span>
+                    <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#count"</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                    <span class="n">style</span><span class="o">=</span><span class="s2">"bg-gray-500 text-white px-6 py-3 rounded"</span>
+                <span class="p">),</span>
+                <span class="n">style</span><span class="o">=</span><span class="s2">"flex gap-2"</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="s2">"index"</span><span class="p">,</span> <span class="n">index</span><span class="p">())</span>
+</code></pre>
+      </div>
+      <h4 id="example-2-form-auto-fill">
+       Example 2: Form Auto-Fill
+      </h4>
+      <div class="codehilite">
+       <pre><span></span><code><span class="nd">@route</span><span class="p">(</span><span class="s2">"/form"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">form</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span>
+        <span class="n">Container</span><span class="p">(</span>
+            <span class="n">Input</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"first-name"</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">"First Name"</span><span class="p">),</span>
+            <span class="n">Input</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"last-name"</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">"Last Name"</span><span class="p">),</span>
+            <span class="n">Input</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"full-name"</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">"Full Name"</span><span class="p">,</span> <span class="n">readonly</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+
+            <span class="c1"># Auto-generate full name</span>
+            <span class="n">Button</span><span class="p">(</span>
+                <span class="s2">"Generate Full Name"</span><span class="p">,</span>
+                <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#full-name"</span><span class="p">,</span>
+                    <span class="n">V</span><span class="p">(</span><span class="s2">"#first-name"</span><span class="p">)</span> <span class="o">+</span> <span class="s2">" "</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#last-name"</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">),</span>
+
+            <span class="c1"># Normalize inputs</span>
+            <span class="n">Button</span><span class="p">(</span>
+                <span class="s2">"Normalize All"</span><span class="p">,</span>
+                <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">({</span>
+                    <span class="s2">"#first-name"</span><span class="p">:</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#first-name"</span><span class="p">)</span><span class="o">.</span><span class="n">trim</span><span class="p">(),</span>
+                    <span class="s2">"#last-name"</span><span class="p">:</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#last-name"</span><span class="p">)</span><span class="o">.</span><span class="n">trim</span><span class="p">()</span>
+                <span class="p">})</span>
+            <span class="p">),</span>
+
+            <span class="c1"># Clear all</span>
+            <span class="n">Button</span><span class="p">(</span>
+                <span class="s2">"Clear All"</span><span class="p">,</span>
+                <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">({</span>
+                    <span class="s2">"#first-name"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+                    <span class="s2">"#last-name"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+                    <span class="s2">"#full-name"</span><span class="p">:</span> <span class="s2">""</span>
+                <span class="p">})</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+</code></pre>
+      </div>
+      <h4 id="example-3-shopping-cart">
+       Example 3: Shopping Cart
+      </h4>
+      <div class="codehilite">
+       <pre><span></span><code><span class="nd">@route</span><span class="p">(</span><span class="s2">"/cart"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cart</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span>
+        <span class="n">Container</span><span class="p">(</span>
+            <span class="n">Input</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"price"</span><span class="p">,</span> <span class="n">input_type</span><span class="o">=</span><span class="s2">"number"</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s2">"19.99"</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">"Price"</span><span class="p">),</span>
+            <span class="n">Input</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"quantity"</span><span class="p">,</span> <span class="n">input_type</span><span class="o">=</span><span class="s2">"number"</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s2">"1"</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">"Quantity"</span><span class="p">),</span>
+
+            <span class="n">Text</span><span class="p">(</span><span class="s2">"Total: $"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">"font-bold"</span><span class="p">),</span>
+            <span class="n">Text</span><span class="p">(</span><span class="s2">"0"</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"total"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">"text-[24px] text-green-600"</span><span class="p">),</span>
+
+            <span class="c1"># Calculate total</span>
+            <span class="n">Button</span><span class="p">(</span>
+                <span class="s2">"Calculate Total"</span><span class="p">,</span>
+                <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#total"</span><span class="p">,</span>
+                    <span class="n">V</span><span class="p">(</span><span class="s2">"#price"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">*</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#quantity"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span>
+                <span class="p">)</span>
+            <span class="p">),</span>
+
+            <span class="c1"># Apply discount</span>
+            <span class="n">Button</span><span class="p">(</span>
+                <span class="s2">"Apply 10% Discount"</span><span class="p">,</span>
+                <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#total"</span><span class="p">,</span>
+                    <span class="n">V</span><span class="p">(</span><span class="s2">"#total"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">*</span> <span class="mf">0.9</span>
+                <span class="p">)</span>
+            <span class="p">),</span>
+
+            <span class="c1"># Reset</span>
+            <span class="n">Button</span><span class="p">(</span>
+                <span class="s2">"Reset"</span><span class="p">,</span>
+                <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">({</span>
+                    <span class="s2">"#price"</span><span class="p">:</span> <span class="s2">"19.99"</span><span class="p">,</span>
+                    <span class="s2">"#quantity"</span><span class="p">:</span> <span class="s2">"1"</span><span class="p">,</span>
+                    <span class="s2">"#total"</span><span class="p">:</span> <span class="s2">"0"</span>
+                <span class="p">})</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="syntax-4">
+       Syntax
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">updateVRef</span><span class="p">(</span><span class="n">selector</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">dScript</span>
+<span class="n">updateVRef</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">dScript</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Parameters:
+       </strong>
+       -
+       <code>
+        selector
+       </code>
+       : CSS selector string (e.g.,
+       <code>
+        "#id"
+       </code>
+       ,
+       <code>
+        ".class"
+       </code>
+       )
+-
+       <code>
+        value
+       </code>
+       : Value to set - can be:
+  - Literal:
+       <code>
+        "text"
+       </code>
+       ,
+       <code>
+        42
+       </code>
+       ,
+       <code>
+        True
+       </code>
+       - V() expression:
+       <code>
+        V("#source")
+       </code>
+       - Transformation:
+       <code>
+        V("#input").upper()
+       </code>
+       - Math expression:
+       <code>
+        V("#a").int() + V("#b").int()
+       </code>
+       - Boolean expression:
+       <code>
+        (V("#age").int() &gt;= 18).then("Adult", "Minor")
+       </code>
+       -
+       <code>
+        dict
+       </code>
+       : Dictionary of
+       <code>
+        {selector: value}
+       </code>
+       pairs for batch updates
+      </p>
+      <p>
+       <strong>
+        Returns:
+       </strong>
+       -
+       <code>
+        dScript
+       </code>
+       object for use in event handlers
+      </p>
+      <p>
+       <strong>
+        Supported Elements:
+       </strong>
+       -
+       <code>
+        Input
+       </code>
+       /
+       <code>
+        Textarea
+       </code>
+       : Updates
+       <code>
+        .value
+       </code>
+       property
+-
+       <code>
+        Checkbox
+       </code>
+       /
+       <code>
+        Radio
+       </code>
+       : Updates
+       <code>
+        .checked
+       </code>
+       property
+-
+       <code>
+        Select
+       </code>
+       : Updates
+       <code>
+        .value
+       </code>
+       property
+- Other elements: Updates
+       <code>
+        .textContent
+       </code>
+      </p>
+      <h3 id="integration-with-other-features">
+       Integration with Other Features
+      </h3>
+      <h4 id="with-collect_form">
+       With collect_form()
+      </h4>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Normalize before collecting</span>
+<span class="n">form_data</span> <span class="o">=</span> <span class="n">collect_form</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="n">V</span><span class="p">(</span><span class="s2">"#name"</span><span class="p">),</span>
+    <span class="n">email</span><span class="o">=</span><span class="n">V</span><span class="p">(</span><span class="s2">"#email"</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="n">Button</span><span class="p">(</span>
+    <span class="s2">"Normalize &amp; Submit"</span><span class="p">,</span>
+    <span class="n">on_click</span><span class="o">=</span><span class="n">sequence</span><span class="p">(</span>
+        <span class="n">updateVRef</span><span class="p">({</span>
+            <span class="s2">"#name"</span><span class="p">:</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#name"</span><span class="p">)</span><span class="o">.</span><span class="n">trim</span><span class="p">(),</span>
+            <span class="s2">"#email"</span><span class="p">:</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#email"</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">trim</span><span class="p">()</span>
+        <span class="p">}),</span>
+        <span class="n">form_data</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="s2">"http://localhost:3000/submit"</span><span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h4 id="with-state-hybrid-approach">
+       With State (Hybrid Approach)
+      </h4>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Local updates for preview</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Preview"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">"#preview"</span><span class="p">,</span>
+    <span class="s2">"Name: "</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#name"</span><span class="p">)</span> <span class="o">+</span> <span class="s2">", Email: "</span> <span class="o">+</span> <span class="n">V</span><span class="p">(</span><span class="s2">"#email"</span><span class="p">)</span>
+<span class="p">))</span>
+
+<span class="c1"># Save to global state</span>
+<span class="n">user</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"user"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span> <span class="n">email</span><span class="o">=</span><span class="s2">""</span><span class="p">)</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Save to State"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">sequence</span><span class="p">(</span>
+    <span class="n">user</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#name"</span><span class="p">)),</span>
+    <span class="n">user</span><span class="o">.</span><span class="n">email</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"#email"</span><span class="p">))</span>
+<span class="p">))</span>
+</code></pre>
+      </div>
+      <h3 id="when-to-use-updatevref-vs-stateset">
+       When to Use updateVRef() vs State.set()
+      </h3>
+      <p>
+       <strong>
+        Use
+        <code>
+         updateVRef()
+        </code>
+        when:
+       </strong>
+       - Updating UI elements temporarily
+- Form auto-fill and normalization
+- Local calculations and previews
+- Component-level state
+- You don't need reactivity across components
+      </p>
+      <p>
+       <strong>
+        Use
+        <code>
+         State.set()
+        </code>
+        when:
+       </strong>
+       - Data needs to persist
+- Multiple components need the value
+- You need automatic reactivity
+- Application-level state
+      </p>
+      <p>
+       <strong>
+        Use both (Hybrid):
+       </strong>
+       - Local updates for immediate feedback
+- State updates for persistence
+- Best of both worlds!
+      </p>
       <hr/>
       <h2 id="getdatetime-timestamp-helper">
        getDateTime() - Timestamp Helper
@@ -16300,7 +16832,7 @@ def hello():
       <p>
        **Generate client-side timestamps for forms and state updates.
       </p>
-      <h3 id="basic-usage-4">
+      <h3 id="basic-usage-5">
        Basic Usage
       </h3>
       <div class="codehilite">

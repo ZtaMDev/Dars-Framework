@@ -169,6 +169,36 @@ class MathExpression:
                 
                 return self._generate_dynamic_operator_code(num1, operator, num2)
         
+        # Detect if this is string concatenation vs math operation
+        # Math operations are indicated by .int() or .float() transformations
+        # If operator is '+' and neither operand has numeric transformation, it's string concat
+        is_math_operation = False
+        
+        if self.operator == '+':
+            # Helper function to check if an expression is a math operation
+            def is_math_expr(expr):
+                """Recursively check if expression is a math operation."""
+                if isinstance(expr, ValueRef):
+                    # Check if it has numeric transformation
+                    if expr._transform is not None:
+                        transform_str = str(expr._transform('x'))
+                        return 'parseInt' in transform_str or 'parseFloat' in transform_str
+                    return False
+                elif isinstance(expr, MathExpression):
+                    # For nested MathExpression, check if it's a math operation
+                    # If operator is not '+', it's always math
+                    if expr.operator != '+':
+                        return True
+                    # If operator is '+', recursively check operands
+                    return is_math_expr(expr.left) or is_math_expr(expr.right)
+                return False
+            
+            # Check if either operand indicates a math operation
+            is_math_operation = is_math_expr(self.left) or is_math_expr(self.right)
+        else:
+            # All other operators (-, *, /, %, **) are always math operations
+            is_math_operation = True
+        
         # Generate code that awaits all operands
         left_code = self._get_operand_code(self.left)
         right_code = self._get_operand_code(self.right)
@@ -197,20 +227,24 @@ class MathExpression:
         else:
             code_parts.append(f"    const right = {right_code};")
         
-        # Validate inputs
-        code_parts.append("    if (isNaN(left) || isNaN(right)) {")
-        code_parts.append("        console.warn('[Dars] Invalid input: one or more values are NaN. Returning 0.');")
-        code_parts.append("        return 0;")
-        code_parts.append("    }")
+        # Only validate for NaN if this is a math operation
+        if is_math_operation:
+            # Validate inputs for math operations
+            code_parts.append("    if (isNaN(left) || isNaN(right)) {")
+            code_parts.append("        console.warn('[Dars] Invalid input: one or more values are NaN. Returning 0.');")
+            code_parts.append("        return 0;")
+            code_parts.append("    }")
         
         # Return the operation
         code_parts.append(f"    const result = left {self.operator} right;")
         
-        # Validate result
-        code_parts.append("    if (isNaN(result)) {")
-        code_parts.append("        console.warn('[Dars] Operation resulted in NaN. Returning 0.');")
-        code_parts.append("        return 0;")
-        code_parts.append("    }")
+        # Only validate result for NaN if this is a math operation
+        if is_math_operation:
+            # Validate result for math operations
+            code_parts.append("    if (isNaN(result)) {")
+            code_parts.append("        console.warn('[Dars] Operation resulted in NaN. Returning 0.');")
+            code_parts.append("        return 0;")
+            code_parts.append("    }")
         
         code_parts.append("    return result;")
         code_parts.append("})()")

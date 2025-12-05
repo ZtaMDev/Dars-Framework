@@ -1,4 +1,384 @@
-window.__DARS_VDOM__={type:"T1",id:"page_157",key:"0",children:[{type:"T2",id:"container_158",key:"0/0",children:[{type:"T3",id:"dars-navbar",key:"0/0/0",children:[{type:"T2",id:"navbar-left",key:"0/0/0/0",children:[{type:"T4",id:"image_159",key:"0/0/0/0/0"},{type:"T5",id:"text_160",key:"0/0/0/0/1",text:"Dars Framework"}]},{type:"T2",id:"container_161",key:"0/0/0/1",children:[{type:"T2",id:"navbar-right",key:"0/0/0/1/0",children:[{type:"T6",id:"link_162",key:"0/0/0/1/0/0",text:"Home"},{type:"T6",id:"link_163",key:"0/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_164",key:"0/0/0/1/0/2",text:"Releases"},{type:"T6",id:"link_165",key:"0/0/0/1/0/3",text:"PlayGround"},{type:"T6",id:"link_166",key:"0/0/0/1/0/4",text:"GitHub"}]},{type:"T2",id:"hamburger-menu",key:"0/0/0/1/1",children:[{type:"T2",id:"hamburger-btn",key:"0/0/0/1/1/0",children:[{type:"T2",id:"container_167",key:"0/0/0/1/1/0/0",children:[{type:"T2",id:"container_168",key:"0/0/0/1/1/0/0/0"},{type:"T2",id:"container_169",key:"0/0/0/1/1/0/0/1"},{type:"T2",id:"container_170",key:"0/0/0/1/1/0/0/2"}]}]},{type:"T2",id:"mobile-menu",key:"0/0/0/1/1/1",children:[{type:"T6",id:"link_171",key:"0/0/0/1/1/1/0",text:"Home"},{type:"T6",id:"link_172",key:"0/0/0/1/1/1/1",text:"Documentation"},{type:"T6",id:"link_173",key:"0/0/0/1/1/1/2",text:"Releases"},{type:"T6",id:"link_174",key:"0/0/0/1/1/1/3",text:"PlayGround"},{type:"T6",id:"link_175",key:"0/0/0/1/1/1/4",text:"GitHub"}]}]}]}]}]},{type:"T2",id:"container_176",key:"0/1",children:[{type:"T2",id:"markdown-content-container",key:"0/1/0",children:[{type:"T9",id:"markdown_177",key:"0/1/0/0",text:`# Release Notes v1.6.7
+window.__DARS_VDOM__={type:"T1",id:"page_157",key:"0",children:[{type:"T2",id:"container_158",key:"0/0",children:[{type:"T3",id:"dars-navbar",key:"0/0/0",children:[{type:"T2",id:"navbar-left",key:"0/0/0/0",children:[{type:"T4",id:"image_159",key:"0/0/0/0/0"},{type:"T5",id:"text_160",key:"0/0/0/0/1",text:"Dars Framework"}]},{type:"T2",id:"container_161",key:"0/0/0/1",children:[{type:"T2",id:"navbar-right",key:"0/0/0/1/0",children:[{type:"T6",id:"link_162",key:"0/0/0/1/0/0",text:"Home"},{type:"T6",id:"link_163",key:"0/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_164",key:"0/0/0/1/0/2",text:"Releases"},{type:"T6",id:"link_165",key:"0/0/0/1/0/3",text:"PlayGround"},{type:"T6",id:"link_166",key:"0/0/0/1/0/4",text:"GitHub"}]},{type:"T2",id:"hamburger-menu",key:"0/0/0/1/1",children:[{type:"T2",id:"hamburger-btn",key:"0/0/0/1/1/0",children:[{type:"T2",id:"container_167",key:"0/0/0/1/1/0/0",children:[{type:"T2",id:"container_168",key:"0/0/0/1/1/0/0/0"},{type:"T2",id:"container_169",key:"0/0/0/1/1/0/0/1"},{type:"T2",id:"container_170",key:"0/0/0/1/1/0/0/2"}]}]},{type:"T2",id:"mobile-menu",key:"0/0/0/1/1/1",children:[{type:"T6",id:"link_171",key:"0/0/0/1/1/1/0",text:"Home"},{type:"T6",id:"link_172",key:"0/0/0/1/1/1/1",text:"Documentation"},{type:"T6",id:"link_173",key:"0/0/0/1/1/1/2",text:"Releases"},{type:"T6",id:"link_174",key:"0/0/0/1/1/1/3",text:"PlayGround"},{type:"T6",id:"link_175",key:"0/0/0/1/1/1/4",text:"GitHub"}]}]}]}]}]},{type:"T2",id:"container_176",key:"0/1",children:[{type:"T2",id:"markdown-content-container",key:"0/1/0",children:[{type:"T9",id:"markdown_177",key:"0/1/0/0",text:`# Release Notes v1.6.8
+
+> **Component-Level State Updates with updateVRef()**
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+## What's New
+
+### updateVRef() - Pythonic Component-Level State
+
+Dars Framework v1.6.8 introduces \`updateVRef()\`, a powerful new function for updating DOM values and component state without requiring State objects. This completes the component-level state management cycle alongside \`V()\`.
+
+**The Complete Cycle:**
+1. **Read**: \`V("#input")\` - Extract values (v1.5.8)
+2. **Validate**: \`V("#input").length() >= 3\` - Boolean validation (v1.6.7)
+3. **Update**: \`updateVRef("#input", "new value")\` - Update values (v1.6.8) **NEW!**
+
+#### Before (v1.6.7) - Raw JavaScript
+
+\`\`\`python
+Button(
+    "Increment",
+    on_click=dScript("""
+        const el = document.querySelector('#count');
+        const current = parseInt(el.textContent);
+        el.textContent = current + 1;
+    """)
+)
+\`\`\`
+
+#### After (v1.6.8) - Declarative Python
+
+\`\`\`python
+Button(
+    "Increment",
+    on_click=updateVRef("#count", V("#count").int() + 1)
+)
+\`\`\`
+
+**Benefits:**
+- **95% less code**
+- **Type-safe** with V() expressions
+- **Pythonic** - no inline JavaScript
+- **Composable** - works with all V() features
+- **Batch updates** - update multiple elements at once
+
+---
+
+### Key Features
+
+#### 1. Simple Value Updates
+
+Update any DOM element value with a single function call:
+
+\`\`\`python
+# Update text content
+Button("Set Name", on_click=updateVRef("#name", "John Doe"))
+
+# Update input value
+Button("Clear", on_click=updateVRef("#email", ""))
+
+# Update checkbox
+Button("Check", on_click=updateVRef("#agree", True))
+
+# Update number
+Button("Set Price", on_click=updateVRef("#price", 99.99))
+\`\`\`
+
+#### 2. V() Expression Integration
+
+Use V() expressions to create dynamic updates:
+
+\`\`\`python
+# Copy values
+Button("Copy", on_click=updateVRef("#target", V("#source")))
+
+# With transformations
+Button("Uppercase", on_click=updateVRef("#output", V("#input").upper()))
+
+# With calculations
+Button("Calculate", on_click=updateVRef("#total",
+    V("#price").float() * V("#qty").int()
+))
+\`\`\`
+
+#### 3. Boolean Expression Support
+
+Combine with boolean operators for conditional updates:
+
+\`\`\`python
+# Conditional text
+Button("Check Age", on_click=updateVRef("#status",
+    (V("#age").int() >= 18).then("Adult", "Minor")
+))
+
+# Validation messages
+Button("Validate", on_click=updateVRef("#message",
+    (V("#email").includes("@")).then("\u2713 Valid", "\u2717 Invalid")
+))
+\`\`\`
+
+#### 4. Batch Updates
+
+Update multiple elements with a single call:
+
+\`\`\`python
+# Clear form
+Button("Clear All", on_click=updateVRef({
+    "#name": "",
+    "#email": "",
+    "#age": ""
+}))
+
+# Fill sample data
+Button("Fill Sample", on_click=updateVRef({
+    "#name": "John Doe",
+    "#email": "john@example.com",
+    "#age": 25
+}))
+\`\`\`
+
+---
+
+### Complete Examples
+
+#### Example 1: Counter (No State Object!)
+
+\`\`\`python
+from dars.all import *
+
+@route("/counter")
+def counter():
+    return Page(
+        Container(
+            # Display count
+            Text("0", id="count", style="text-[48px] font-bold"),
+            
+            # Update buttons
+            Button("+", on_click=updateVRef("#count", V("#count").int() + 1)),
+            Button("-", on_click=updateVRef("#count", V("#count").int() - 1)),
+            Button("Reset", on_click=updateVRef("#count", 0))
+        )
+    )
+\`\`\`
+
+#### Example 2: Form Auto-Fill
+
+\`\`\`python
+@route("/form")
+def form():
+    return Page(
+        Container(
+            Input(id="first-name", placeholder="First Name"),
+            Input(id="last-name", placeholder="Last Name"),
+            Input(id="full-name", placeholder="Full Name", readonly=True),
+            
+            # Auto-generate full name
+            Button(
+                "Generate Full Name",
+                on_click=updateVRef("#full-name",
+                    V("#first-name") + " " + V("#last-name")
+                )
+            ),
+            
+            # Clear all
+            Button(
+                "Clear All",
+                on_click=updateVRef({
+                    "#first-name": "",
+                    "#last-name": "",
+                    "#full-name": ""
+                })
+            )
+        )
+    )
+\`\`\`
+
+#### Example 3: Shopping Cart Calculations
+
+\`\`\`python
+@route("/cart")
+def cart():
+    return Page(
+        Container(
+            Input(id="price", input_type="number", value="19.99"),
+            Input(id="quantity", input_type="number", value="1"),
+            Text("0", id="total"),
+            
+            # Calculate total
+            Button(
+                "Calculate Total",
+                on_click=updateVRef("#total",
+                    V("#price").float() * V("#quantity").int()
+                )
+            ),
+            
+            # Apply discount
+            Button(
+                "Apply 10% Discount",
+                on_click=updateVRef("#total",
+                    V("#total").float() * 0.9
+                )
+            )
+        )
+    )
+\`\`\`
+
+#### Example 4: Smart Validation
+
+\`\`\`python
+@route("/signup")
+def signup():
+    return Page(
+        Container(
+            Input(id="username", placeholder="Username"),
+            Text("", id="username-status"),
+            
+            # Validate and normalize
+            Button(
+                "Validate Username",
+                on_click=updateVRef("#username-status",
+                    (V("#username").length() >= 3).then(
+                        "\u2713 Valid username",
+                        "\u2717 Too short (need 3+ characters)"
+                    )
+                )
+            ),
+            
+            # Auto-fix: lowercase
+            Button(
+                "Normalize",
+                on_click=updateVRef("#username",
+                    V("#username").lower().trim()
+                )
+            )
+        )
+    )
+\`\`\`
+
+---
+
+### API Reference
+
+#### Signature
+
+\`\`\`python
+def updateVRef(
+    selector: Union[str, Dict[str, Any]], 
+    value: Any = None
+) -> dScript
+\`\`\`
+
+**Parameters:**
+- \`selector\`: CSS selector string or dict of {selector: value} pairs
+- \`value\`: Value to set (string, number, bool, ValueRef, or expression)
+
+**Returns:**
+- \`dScript\` object for use in event handlers
+
+**Supported Value Types:**
+- Literals: \`"text"\`, \`42\`, \`True\`
+- V() expressions: \`V("#source")\`
+- Transformations: \`V("#input").upper()\`
+- Math expressions: \`V("#a").int() + V("#b").int()\`
+- Boolean expressions: \`(V("#age").int() >= 18).then("Adult", "Minor")\`
+
+**Supported Elements:**
+- \`Input\` / \`Textarea\`: Updates \`.value\` property
+- \`Checkbox\` / \`Radio\`: Updates \`.checked\` property
+- \`Select\`: Updates \`.value\` property
+- Other elements: Updates \`.textContent\`
+
+---
+
+### Integration with Existing Features
+
+#### With collect_form()
+
+\`\`\`python
+# Collect, validate, and update
+form_data = collect_form(
+    name=V("#name"),
+    email=V("#email")
+)
+
+# Normalize before submit
+Button(
+    "Normalize & Submit",
+    on_click=sequence(
+        updateVRef({
+            "#name": V("#name").trim(),
+            "#email": V("#email").lower().trim()
+        }),
+        form_data.submit("http://localhost:3000/submit")
+    )
+)
+\`\`\`
+
+#### With Boolean Operators
+
+\`\`\`python
+# Smart updates based on validation
+Button(
+    "Update Status",
+    on_click=updateVRef("#status",
+        (V("#email").includes("@")).and_(
+            V("#password").length() >= 8
+        ).then("\u2713 Ready", "\u2717 Incomplete")
+    )
+)
+\`\`\`
+
+#### With State (Hybrid Approach)
+
+\`\`\`python
+# Local updates for UI
+Button("Preview", on_click=updateVRef("#preview",
+    "Name: " + V("#name") + ", Age: " + V("#age")
+))
+
+# Save to global state when ready
+user = State("user", name="", age=0)
+Button("Save", on_click=sequence(
+    user.name.set(V("#name")),
+    user.age.set(V("#age").int())
+))
+\`\`\`
+
+---
+
+## When to Use What
+
+### Use \`updateVRef()\` when:
+- Updating UI elements temporarily
+- Form auto-fill and normalization
+- Local calculations and previews
+- Component-level state
+- You don't need reactivity across components
+
+### Use \`State.set()\` when:
+- Data needs to persist
+- Multiple components need the value
+- You need automatic reactivity
+- Application-level state
+
+### Use both (Hybrid):
+- Local updates for immediate feedback
+- State updates for persistence
+- Best of both worlds!
+
+---
+
+## Bug Fixes
+
+- Fixed edge case in \`FormData\` where nested boolean expressions weren't properly serialized
+
+---
+
+## What's Next
+
+Future enhancements planned for 1.7.0:
+- \`useVRef()\` - Reactive V() expressions with dependencies
+- \`setVRef()\` - Set values accessible via V() selectors
+- Full exporter integration for reactive bindings
+- Enhanced component-level reactivity
+
+---
+
+## Documentation
+
+- **Hooks Guide**: Updated with updateVRef() examples and use cases
+- **Operations Guide**: Enhanced with updateVRef() integration examples
+- **Best Practices**: Added guidelines for component-level vs global state
+
+---
+
+# Release Notes v1.6.7
 
 > **Boolean Operators, Form Collection & Backend Integration**
 
@@ -4346,4 +4726,4 @@ Upgrade Recommendation: Recommended for all users; especially helpful for projec
 # Older release notes can be found
 
 In the github repository [Here](https://github.com/ZtaMDev/Dars-Framework/releases).
-`}]},{type:"T2",id:"footer-section",key:"0/1/1",children:[{type:"T2",id:"container_178",key:"0/1/1/0",children:[{type:"T2",id:"container_179",key:"0/1/1/0/0",children:[{type:"T2",id:"container_180",key:"0/1/1/0/0/0",children:[{type:"T4",id:"image_181",key:"0/1/1/0/0/0/0"},{type:"T2",id:"container_182",key:"0/1/1/0/0/0/1",children:[{type:"T5",id:"text_183",key:"0/1/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_184",key:"0/1/1/0/0/1",children:[{type:"T2",id:"container_185",key:"0/1/1/0/0/1/0",children:[{type:"T5",id:"text_186",key:"0/1/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_187",key:"0/1/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_188",key:"0/1/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_189",key:"0/1/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_190",key:"0/1/1/0/0/1/1",children:[{type:"T5",id:"text_191",key:"0/1/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_192",key:"0/1/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_193",key:"0/1/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_194",key:"0/1/1/0/0/1/2",children:[{type:"T5",id:"text_195",key:"0/1/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_196",key:"0/1/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_197",key:"0/1/1/0/0/2",children:[{type:"T2",id:"container_198",key:"0/1/1/0/0/2/0",children:[{type:"T5",id:"text_199",key:"0/1/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_200",key:"0/1/1/0/0/2/1",children:[{type:"T5",id:"text_201",key:"0/1/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_202",key:"0/1/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_203",key:"0/1/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_204",key:"0/1/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]},{type:"T10",id:"documentation-sidebar",key:"0/2"}]},function(){const c=new Map;let l=null,p=null;function u(){}function k(){}function b(n,t){if(!n)return;t(n);const e=n.children||[];for(let a=0;a<e.length;a++)b(e[a],t)}function S(n,t){if(!(!n||!t))for(const[e,a]of Object.entries(t))try{a===!1||a===null||typeof a>"u"?n.removeAttribute(e):n.setAttribute(e,String(a))}catch{}}function P(n,t={},e={}){for(const a in t)if(!(a in e))try{n.removeAttribute(a)}catch{}for(const a in e){const o=e[a];try{o===!1||o===null||typeof o>"u"?n.removeAttribute(a):n.setAttribute(a,String(o))}catch{}}}function V(n,t={},e={}){for(const a in t)if(!(a in e))try{n.style.removeProperty(a.replace(/_/g,"-"))}catch{}for(const a in e){const o=e[a];try{n.style.setProperty(a.replace(/_/g,"-"),String(o))}catch{}}}function F(n,t){(t||document).addEventListener(n,function(e){let a=e.target;const o=t||document;for(;a&&a!==o;){const m=a.id;if(m&&c.has(m)){const y=c.get(m);if(a&&a.__darsEv&&a.__darsEv[n])return;let d=y[n];if(!d&&(n==="keydown"||n==="keyup"||n==="keypress")){const i=e.key||e.code;if(i){const r=n+"."+i;d=y[r]}}if(typeof d=="function"){try{d.call(a,e)}catch(i){console.error("[Dars] handler error",i)}return}}a=a.parentNode}},!0)}function _(n,t){return n&&t?n.type!==t.type:n!==t}function x(n){if(!n)return;const t=n.children||[];for(let e=0;e<t.length;e++)x(t[e]);if(n.id&&c.delete(n.id),n.id){const e=document.getElementById(n.id);if(e&&e.parentNode)try{e.parentNode.removeChild(e)}catch{}}}function v(n,t){if(!t||!t.id)return{ok:!1,reason:"missing-new"};let e=document.getElementById(t.id);if(!e){const i=n&&n.id?document.getElementById(n.id):null;if(i)try{i.id=t.id,e=i}catch{}}if(!e)return{ok:!1,reason:"missing-el"};if(_(n,t))return{ok:!1,reason:"type-changed"};const a=!!t.isIsland;if(!a&&t.class&&(e.className=t.class),a||P(e,n&&n.props||{},t.props||{}),a||V(e,n&&n.style||{},t.style||{}),!a&&Object.prototype.hasOwnProperty.call(t,"text")&&e.textContent!==String(t.text||"")&&(e.textContent=String(t.text||"")),a)return{ok:!0};const o=n&&n.children?n.children:[],m=t.children?t.children:[],y=new Map;for(let i=0;i<o.length;i++){const r=o[i]&&(o[i].id||o[i].key)||null;r&&y.set(String(r),o[i])}const d=new Set;for(let i=0;i<m.length;i++){const r=m[i],h=r&&(r.id||r.key)||null;if(!h)if(i<o.length){const s=v(o[i],r);if(!s.ok)return s;d.add(o[i]);continue}else return{ok:!1,reason:"children-added"};const w=y.get(String(h));if(w){const s=v(w,r);if(!s.ok)return s;d.add(w)}else{if(i<o.length){const f=o[i];if(!_(f,r)){const g=v(f,r);if(!g.ok)return g;d.add(f);continue}}const s=createSubtree(r);if(s){const f=i<o.length?o[i]:null;if(f&&f.id){const g=document.getElementById(f.id);g&&g.parentNode?g.parentNode.insertBefore(s,g):e.appendChild(s)}else e.appendChild(s);continue}return{ok:!1,reason:"children-added"}}}for(let i=0;i<o.length;i++){const r=o[i];d.has(r)||x(r)}return{ok:!0}}function N(n){typeof requestAnimationFrame=="function"?requestAnimationFrame(n):setTimeout(n,16)}function M(n){const t=l;if(!t){l=n;try{window.__DARS_VDOM__=n}catch{}return}N(()=>{const e=v(t,n);if(!e.ok){console.warn("[Dars] Structural change detected (",e.reason,"), reloading...");try{location.reload()}catch{}return}l=n;try{window.__DARS_VDOM__=n}catch{}})}function R(n){l=n;try{window.__DARS_VDOM__=n}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(e=>F(e,document))}function B(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const n=window.__DARS_VERSION_URL||"version.txt";let t=null,e=!1,a=0;const o=10;let m=!1;function y(i,r,h,w){try{const s=new XMLHttpRequest;w&&(s.responseType=w),s.open("GET",i,!0),s.timeout=5e3,s.onreadystatechange=function(){s.readyState===4&&(s.status>=200&&s.status<300?r(s.response):h())},s.onerror=h,s.ontimeout=h,s.setRequestHeader("Cache-Control","no-store"),s.send()}catch{h()}}function d(){m||y(n,function(i){let r=(i||"").toString().trim();if(!r||r==="0"){if(a+=1,a>=o){console.warn("[Dars] version file not found after",o,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(d,600);return}if(a=0,e=!1,p||(p=r),r&&r!==p){p=r;try{location.reload()}catch{}return}t=setTimeout(d,600)},function(){if(a+=1,a>=o){console.warn("[Dars] version file not reachable after",o,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(d,600)},"text")}return d(),()=>{try{m=!0,t&&clearTimeout(t),window.__DARS_STOP_HOTRELOAD=null}catch{}}}document.addEventListener("DOMContentLoaded",function(){if(window.__DARS_VDOM__?R(window.__DARS_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=B()}catch{}}})}(),window.addEventListener("scroll",()=>{const c=document.getElementById("dars-navbar");window.scrollY>20?c.classList.add("scrolled"):c.classList.remove("scrolled");const l=document.getElementById("features-section");if(l&&!l.classList.contains("visible")){const p=l.getBoundingClientRect().top,u=window.innerHeight/1.5;p<u&&(l.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((b,S)=>{setTimeout(()=>{b.style.opacity="1",b.style.transform="translateY(0)"},S*100)}))}});const C=document.getElementById("hero-logo"),D=document.getElementById("hero-title"),T=document.getElementById("hero-description"),A=document.getElementById("pip-command"),I=document.getElementById("get-started-btn"),E=document.getElementById("scroll-text");C&&setTimeout(()=>C.classList.add("show"),5),D&&setTimeout(()=>D.classList.add("show"),350),T&&setTimeout(()=>T.classList.add("show"),650),A&&setTimeout(()=>A.classList.add("show"),950),I&&setTimeout(()=>I.classList.add("show"),1250),E&&setTimeout(()=>E.classList.add("show"),1500),document.addEventListener("DOMContentLoaded",function(){const c=document.getElementById("hamburger-btn"),l=document.getElementById("mobile-menu"),p=document.body;c&&l&&(c.addEventListener("click",function(u){u.stopPropagation(),l.style.display==="flex"?(l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open")):(l.style.display="flex",c.classList.add("menu-open"),p.classList.add("menu-open"))}),l.querySelectorAll("a").forEach(u=>{u.addEventListener("click",function(){l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open")})}),document.addEventListener("click",function(u){!c.contains(u.target)&&!l.contains(u.target)&&(l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open"))}),document.addEventListener("keydown",function(u){u.key==="Escape"&&l.style.display==="flex"&&(l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open"))}))});
+`}]},{type:"T2",id:"footer-section",key:"0/1/1",children:[{type:"T2",id:"container_178",key:"0/1/1/0",children:[{type:"T2",id:"container_179",key:"0/1/1/0/0",children:[{type:"T2",id:"container_180",key:"0/1/1/0/0/0",children:[{type:"T4",id:"image_181",key:"0/1/1/0/0/0/0"},{type:"T2",id:"container_182",key:"0/1/1/0/0/0/1",children:[{type:"T5",id:"text_183",key:"0/1/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_184",key:"0/1/1/0/0/1",children:[{type:"T2",id:"container_185",key:"0/1/1/0/0/1/0",children:[{type:"T5",id:"text_186",key:"0/1/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_187",key:"0/1/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_188",key:"0/1/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_189",key:"0/1/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_190",key:"0/1/1/0/0/1/1",children:[{type:"T5",id:"text_191",key:"0/1/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_192",key:"0/1/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_193",key:"0/1/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_194",key:"0/1/1/0/0/1/2",children:[{type:"T5",id:"text_195",key:"0/1/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_196",key:"0/1/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_197",key:"0/1/1/0/0/2",children:[{type:"T2",id:"container_198",key:"0/1/1/0/0/2/0",children:[{type:"T5",id:"text_199",key:"0/1/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_200",key:"0/1/1/0/0/2/1",children:[{type:"T5",id:"text_201",key:"0/1/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_202",key:"0/1/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_203",key:"0/1/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_204",key:"0/1/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]},{type:"T10",id:"documentation-sidebar",key:"0/2"}]},function(){const c=new Map;let l=null,p=null;function u(){}function k(){}function b(n,t){if(!n)return;t(n);const e=n.children||[];for(let a=0;a<e.length;a++)b(e[a],t)}function S(n,t){if(!(!n||!t))for(const[e,a]of Object.entries(t))try{a===!1||a===null||typeof a>"u"?n.removeAttribute(e):n.setAttribute(e,String(a))}catch{}}function E(n,t={},e={}){for(const a in t)if(!(a in e))try{n.removeAttribute(a)}catch{}for(const a in e){const o=e[a];try{o===!1||o===null||typeof o>"u"?n.removeAttribute(a):n.setAttribute(a,String(o))}catch{}}}function P(n,t={},e={}){for(const a in t)if(!(a in e))try{n.style.removeProperty(a.replace(/_/g,"-"))}catch{}for(const a in e){const o=e[a];try{n.style.setProperty(a.replace(/_/g,"-"),String(o))}catch{}}}function R(n,t){(t||document).addEventListener(n,function(e){let a=e.target;const o=t||document;for(;a&&a!==o;){const m=a.id;if(m&&c.has(m)){const y=c.get(m);if(a&&a.__darsEv&&a.__darsEv[n])return;let d=y[n];if(!d&&(n==="keydown"||n==="keyup"||n==="keypress")){const i=e.key||e.code;if(i){const r=n+"."+i;d=y[r]}}if(typeof d=="function"){try{d.call(a,e)}catch(i){console.error("[Dars] handler error",i)}return}}a=a.parentNode}},!0)}function _(n,t){return n&&t?n.type!==t.type:n!==t}function x(n){if(!n)return;const t=n.children||[];for(let e=0;e<t.length;e++)x(t[e]);if(n.id&&c.delete(n.id),n.id){const e=document.getElementById(n.id);if(e&&e.parentNode)try{e.parentNode.removeChild(e)}catch{}}}function v(n,t){if(!t||!t.id)return{ok:!1,reason:"missing-new"};let e=document.getElementById(t.id);if(!e){const i=n&&n.id?document.getElementById(n.id):null;if(i)try{i.id=t.id,e=i}catch{}}if(!e)return{ok:!1,reason:"missing-el"};if(_(n,t))return{ok:!1,reason:"type-changed"};const a=!!t.isIsland;if(!a&&t.class&&(e.className=t.class),a||E(e,n&&n.props||{},t.props||{}),a||P(e,n&&n.style||{},t.style||{}),!a&&Object.prototype.hasOwnProperty.call(t,"text")&&e.textContent!==String(t.text||"")&&(e.textContent=String(t.text||"")),a)return{ok:!0};const o=n&&n.children?n.children:[],m=t.children?t.children:[],y=new Map;for(let i=0;i<o.length;i++){const r=o[i]&&(o[i].id||o[i].key)||null;r&&y.set(String(r),o[i])}const d=new Set;for(let i=0;i<m.length;i++){const r=m[i],h=r&&(r.id||r.key)||null;if(!h)if(i<o.length){const s=v(o[i],r);if(!s.ok)return s;d.add(o[i]);continue}else return{ok:!1,reason:"children-added"};const w=y.get(String(h));if(w){const s=v(w,r);if(!s.ok)return s;d.add(w)}else{if(i<o.length){const f=o[i];if(!_(f,r)){const g=v(f,r);if(!g.ok)return g;d.add(f);continue}}const s=createSubtree(r);if(s){const f=i<o.length?o[i]:null;if(f&&f.id){const g=document.getElementById(f.id);g&&g.parentNode?g.parentNode.insertBefore(s,g):e.appendChild(s)}else e.appendChild(s);continue}return{ok:!1,reason:"children-added"}}}for(let i=0;i<o.length;i++){const r=o[i];d.has(r)||x(r)}return{ok:!0}}function F(n){typeof requestAnimationFrame=="function"?requestAnimationFrame(n):setTimeout(n,16)}function M(n){const t=l;if(!t){l=n;try{window.__DARS_VDOM__=n}catch{}return}F(()=>{const e=v(t,n);if(!e.ok){console.warn("[Dars] Structural change detected (",e.reason,"), reloading...");try{location.reload()}catch{}return}l=n;try{window.__DARS_VDOM__=n}catch{}})}function B(n){l=n;try{window.__DARS_VDOM__=n}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(e=>R(e,document))}function N(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const n=window.__DARS_VERSION_URL||"version.txt";let t=null,e=!1,a=0;const o=10;let m=!1;function y(i,r,h,w){try{const s=new XMLHttpRequest;w&&(s.responseType=w),s.open("GET",i,!0),s.timeout=5e3,s.onreadystatechange=function(){s.readyState===4&&(s.status>=200&&s.status<300?r(s.response):h())},s.onerror=h,s.ontimeout=h,s.setRequestHeader("Cache-Control","no-store"),s.send()}catch{h()}}function d(){m||y(n,function(i){let r=(i||"").toString().trim();if(!r||r==="0"){if(a+=1,a>=o){console.warn("[Dars] version file not found after",o,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(d,600);return}if(a=0,e=!1,p||(p=r),r&&r!==p){p=r;try{location.reload()}catch{}return}t=setTimeout(d,600)},function(){if(a+=1,a>=o){console.warn("[Dars] version file not reachable after",o,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(d,600)},"text")}return d(),()=>{try{m=!0,t&&clearTimeout(t),window.__DARS_STOP_HOTRELOAD=null}catch{}}}document.addEventListener("DOMContentLoaded",function(){if(window.__DARS_VDOM__?B(window.__DARS_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=N()}catch{}}})}(),window.addEventListener("scroll",()=>{const c=document.getElementById("dars-navbar");window.scrollY>20?c.classList.add("scrolled"):c.classList.remove("scrolled");const l=document.getElementById("features-section");if(l&&!l.classList.contains("visible")){const p=l.getBoundingClientRect().top,u=window.innerHeight/1.5;p<u&&(l.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((b,S)=>{setTimeout(()=>{b.style.opacity="1",b.style.transform="translateY(0)"},S*100)}))}});const C=document.getElementById("hero-logo"),D=document.getElementById("hero-title"),T=document.getElementById("hero-description"),V=document.getElementById("pip-command"),A=document.getElementById("get-started-btn"),I=document.getElementById("scroll-text");C&&setTimeout(()=>C.classList.add("show"),5),D&&setTimeout(()=>D.classList.add("show"),350),T&&setTimeout(()=>T.classList.add("show"),650),V&&setTimeout(()=>V.classList.add("show"),950),A&&setTimeout(()=>A.classList.add("show"),1250),I&&setTimeout(()=>I.classList.add("show"),1500),document.addEventListener("DOMContentLoaded",function(){const c=document.getElementById("hamburger-btn"),l=document.getElementById("mobile-menu"),p=document.body;c&&l&&(c.addEventListener("click",function(u){u.stopPropagation(),l.style.display==="flex"?(l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open")):(l.style.display="flex",c.classList.add("menu-open"),p.classList.add("menu-open"))}),l.querySelectorAll("a").forEach(u=>{u.addEventListener("click",function(){l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open")})}),document.addEventListener("click",function(u){!c.contains(u.target)&&!l.contains(u.target)&&(l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open"))}),document.addEventListener("keydown",function(u){u.key==="Escape"&&l.style.display==="flex"&&(l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open"))}))});

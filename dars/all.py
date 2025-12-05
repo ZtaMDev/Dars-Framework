@@ -68,6 +68,9 @@ from dars.hooks.use_watch import useWatch
 from dars.hooks.use_value import useValue
 from dars.hooks.value_helpers import V, url, transform
 from dars.hooks.form_helpers import FormData, collect_form
+from dars.hooks.use_vref import useVRef
+from dars.hooks.set_vref import setVRef
+from dars.hooks.update_vref import updateVRef
 # KeyCode for keyboard events
 from dars.scripts.keycode import KeyCode, onKey, addGlobalKeys
 from dars.version import __version__
@@ -133,6 +136,8 @@ __all__ = [
     'useDynamic', 'useWatch',
     # useValue Hook
     'useValue', 'V', 'url', 'transform',
+    # VRef Hooks
+    'useVRef', 'setVRef', 'updateVRef',
     # KeyCode for keyboard events
     'KeyCode', 'onKey', 'addGlobalKeys', 'switch',
     # Form utilities
