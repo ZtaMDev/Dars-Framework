@@ -6,12 +6,13 @@
 #
 # Copyright (c) 2025 ZtaDev
 """
-Route Types for Secure Routing
+Route Types for Secure Routing and SSR
 
-This module defines route types for the Dars Framework security system:
+This module defines route types for the Dars Framework:
 - PUBLIC: Routes that load immediately (no authentication required)
 - PRIVATE: Routes that require authentication (lazy loaded from backend)
 - PROTECTED: Routes with custom middleware (lazy loaded with middleware check)
+- SSR: Server-Side Rendered routes (rendered on backend, fetched on navigation)
 """
 
 from enum import Enum
@@ -23,16 +24,13 @@ if TYPE_CHECKING:
 
 class RouteType(Enum):
     """
-    Route type enum for security and lazy loading.
+    Enumeration of route types for security and rendering strategies.
     
-    Attributes:
-        PUBLIC: Route loads immediately, no authentication required
-        PRIVATE: Route requires authentication, lazy loaded from backend
-        PROTECTED: Route with custom middleware, lazy loaded with checks
+    - PUBLIC: Client-side rendered, included in initial bundle
+    - SSR: Server-side rendered, fetched from backend on navigation
     """
     PUBLIC = "public"
-    PRIVATE = "private"
-    PROTECTED = "protected"
+    SSR = "ssr"  # Server-Side Rendering
 
 
 class RouteMetadata:
@@ -41,7 +39,7 @@ class RouteMetadata:
     
     Attributes:
         path: Route path (e.g., "/home", "/admin")
-        route_type: Type of route (PUBLIC, PRIVATE, PROTECTED)
+        route_type: Type of route (PUBLIC, SSR)
         requires_auth: Whether route requires authentication
         middleware: List of middleware to apply
         loader_endpoint: Backend endpoint to load route from
@@ -70,13 +68,13 @@ class RouteMetadata:
         self.requires_auth = requires_auth
         self.middleware = middleware or []
         
-        # Auto-generate loader endpoint for private/protected routes
+        # Auto-generate loader endpoint for SSR routes
         if loader_endpoint:
             self.loader_endpoint = loader_endpoint
-        elif route_type in (RouteType.PRIVATE, RouteType.PROTECTED):
-            # Extract route name from path
+        elif route_type == RouteType.SSR:
+            # SSR routes use /api/ssr/ prefix
             route_name = path.strip('/').replace('/', '_') or 'index'
-            self.loader_endpoint = f"/api/routes/{route_name}"
+            self.loader_endpoint = f"/api/ssr/{route_name}"
         else:
             self.loader_endpoint = None
     

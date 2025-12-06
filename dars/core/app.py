@@ -143,6 +143,21 @@ class Page:
 
 class App:
     """Main class that represents a Dars application"""
+    
+    def __init__(self, title: str = "Dars App", meta: dict = None, ssr_url: str = None):
+        self.title = title
+        self.meta = meta or {}
+        self.pages = {}
+        self.ssr_url = ssr_url  # URL for SSR backend fetching
+        self._spa_routes = {}
+        self._spa_404_page = None
+        self._spa_403_page = None
+        
+        # Initialize default meta tags
+        if "viewport" not in self.meta:
+            self.meta["viewport"] = "width=device-width, initial-scale=1.0"
+        if "charset" not in self.meta:
+            self.meta["charset"] = "utf-8"
 
     def rTimeCompile(self, exporter=None, port=None, add_file_types=".py, .js, .css", watchfiledialog=False):
         """
@@ -872,6 +887,8 @@ class App:
                     return
 
             except Exception as e:
+                import traceback
+                traceback.print_exc()
                 initialization_complete.set()
                 raise
 
@@ -1215,6 +1232,7 @@ class App:
         self._spa_route_tree: Optional['RouteNode'] = None  # Tree structure for nested routes
         self._spa_index_route: str = None      # Main SPA route
         self._spa_404_page: Optional[Page] = None  # Custom 404 page
+        self._spa_403_page: Optional[Page] = None  # Custom 403 Forbidden page
         
         self.scripts: List['Script'] = []
         self.global_styles: Dict[str, Any] = {}
@@ -1429,6 +1447,19 @@ class App:
             app.set_404_page(not_found_page)
         """
         self._spa_404_page = page
+    
+    def set_403_page(self, page: 'Page'):
+        """
+        Set custom 403 Forbidden page for SPA routing.
+        
+        Args:
+            page: Page instance to display when access is forbidden
+        
+        Example:
+            forbidden_page = Page(Container(Text("403 - Access Forbidden")))
+            app.set_403_page(forbidden_page)
+        """
+        self._spa_403_page = page
         
     def add_script(self, script: 'Script'):
         """Adds a script to the app"""
@@ -1628,8 +1659,18 @@ class App:
         if not self.title:
             errors.append("The application title can't be empty.")
 
-        # Validación single-page y multipage
-        if self.is_multipage():
+        # Validación SPA, multipage y single-page
+        if self.has_spa_routes():
+            # SPA mode - validate SPA routes
+            if not self._spa_routes:
+                errors.append("The app has SPA routing enabled but there are no routes registered.")
+            for name, spa_route in self._spa_routes.items():
+                if not spa_route.root:
+                    errors.append(f"The SPA route '{name}' hasn't a root component.")
+                else:
+                    errors.extend(self._validate_component(spa_route.root, path=f"spa_routes['{name}']"))
+        elif self.is_multipage():
+            # Traditional multipage mode
             if not self._pages:
                 errors.append("The app is on multipage mode but there are no pages registered.")
             for name, page in self._pages.items():
@@ -1638,6 +1679,7 @@ class App:
                 else:
                     errors.extend(self._validate_component(page.root, path=f"pages['{name}']"))
         else:
+            # Single-page mode
             if not self.root:
                 errors.append("Can't find a root component (single-page mode)")
             else:

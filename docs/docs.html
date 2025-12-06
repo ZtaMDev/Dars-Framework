@@ -345,6 +345,9 @@
      <a class="sidebar-link sidebar-level-3" href="#minification-labels-in-output" style="margin-left: 40px">
       Minification labels in output
      </a>
+     <a class="sidebar-link sidebar-level-3" href="#ssr-workflow-full-stack" style="margin-left: 40px">
+      SSR Workflow (Full-Stack)
+     </a>
      <div class="sidebar-divider">
      </div>
      <div class="sidebar-category">
@@ -1178,8 +1181,23 @@
      <a class="sidebar-link sidebar-level-3" href="#custom-404-page" style="margin-left: 40px">
       Custom 404 Page
      </a>
+     <a class="sidebar-link sidebar-level-2" href="#403-handling" style="margin-left: 20px">
+      403 Handling
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#default-403-page" style="margin-left: 40px">
+      Default 403 Page
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#custom-403-page" style="margin-left: 40px">
+      Custom 403 Page
+     </a>
      <a class="sidebar-link sidebar-level-2" href="#hot-reload" style="margin-left: 20px">
       Hot Reload
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#ssr-hydration" style="margin-left: 20px">
+      SSR &amp; Hydration
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#how-it-works" style="margin-left: 40px">
+      How it Works
      </a>
      <div class="sidebar-divider">
      </div>
@@ -1611,6 +1629,18 @@
      </a>
      <a class="sidebar-link sidebar-level-3" href="#component-management" style="margin-left: 40px">
       Component Management
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#ssr-backend-setup" style="margin-left: 20px">
+      SSR Backend Setup
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#project-structure" style="margin-left: 40px">
+      Project Structure
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#configuration-apiconfigpy" style="margin-left: 40px">
+      Configuration (`apiConfig.py`)
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#running-the-backend" style="margin-left: 40px">
+      Running the Backend
      </a>
      <div class="sidebar-divider">
      </div>
@@ -2778,8 +2808,11 @@ dars<span class="w"> </span>build
 <span class="c1"># List supported export formats</span>
 <span class="w"> </span>dars<span class="w"> </span>formats
 
-<span class="c1"># Initialize a new project</span>
+<span class="c1"># Initialize a new project (Default is SPA)</span>
 <span class="w"> </span>dars<span class="w"> </span>init<span class="w"> </span>my_new_project
+
+<span class="c1"># Initialize a Full-Stack SSR project</span>
+<span class="w"> </span>dars<span class="w"> </span>init<span class="w"> </span>my_new_project<span class="w"> </span>--type<span class="w"> </span>ssr
 
 <span class="c1"># Initialize a project with a specific template</span>
 <span class="w"> </span>dars<span class="w"> </span>init<span class="w"> </span>my_new_project<span class="w"> </span>-t<span class="w"> </span>demo/complete_app
@@ -2893,11 +2926,21 @@ dars<span class="w"> </span>build
         <tr>
          <td>
           <code>
+           dars init my_project --type ssr
+          </code>
+         </td>
+         <td>
+          Create a new Full-Stack SSR project
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
            dars init my_project
           </code>
          </td>
          <td>
-          Create a new Dars project
+          Create a new Dars project (SPA Default)
          </td>
         </tr>
         <tr>
@@ -3078,6 +3121,100 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
         Getting Started
        </a>
        guide and the main documentation index.
+      </p>
+      <h3 id="ssr-workflow-full-stack">
+       SSR Workflow (Full-Stack)
+      </h3>
+      <p>
+       When working with SSR (
+       <code>
+        dars init --type ssr
+       </code>
+       ), the workflow involves two processes:
+      </p>
+      <ol>
+       <li>
+        <strong>
+         Backend (
+         <code>
+          python backend/api.py
+         </code>
+         )
+        </strong>
+        : Runs on port 8000. Handles API requests and initial HTML rendering.
+       </li>
+       <li>
+        <strong>
+         Frontend (
+         <code>
+          dars dev
+         </code>
+         )
+        </strong>
+        : Runs on port 3000. Serves static assets, bundles scripts, and proxies to backend.
+       </li>
+      </ol>
+      <p>
+       <strong>
+        Common Commands:
+       </strong>
+      </p>
+      <table>
+       <thead>
+        <tr>
+         <th>
+          Command
+         </th>
+         <th>
+          Description
+         </th>
+        </tr>
+       </thead>
+       <tbody>
+        <tr>
+         <td>
+          <code>
+           dars init --type ssr
+          </code>
+         </td>
+         <td>
+          Scaffolds a project with
+          <code>
+           backend/
+          </code>
+          folder and SSR config.
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           dars dev
+          </code>
+         </td>
+         <td>
+          Starts the hot-reload frontend server (requires backend running).
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           dars build
+          </code>
+         </td>
+         <td>
+          Builds static assets to
+          <code>
+           dist/
+          </code>
+          for production.
+         </td>
+        </tr>
+       </tbody>
+      </table>
+      <p>
+       <em>
+        Note: For production, you only need to run the backend (which serves the built assets).
+       </em>
       </p>
      </div>
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_115">
@@ -14168,6 +14305,49 @@ def hello():
        </code>
        but will see your custom design.
       </p>
+      <h2 id="403-handling">
+       403 Handling
+      </h2>
+      <p>
+       Similar to 404 pages, you can define a custom 403 Forbidden page for unauthorized access to private routes.
+      </p>
+      <h3 id="default-403-page">
+       Default 403 Page
+      </h3>
+      <p>
+       Dars includes a default 403 page that informs users they don't have permission to access the requested resource.
+      </p>
+      <h3 id="custom-403-page">
+       Custom 403 Page
+      </h3>
+      <p>
+       You can customize the 403 page using
+       <code>
+        app.set_403_page()
+       </code>
+       .
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Create your custom 403 page</span>
+<span class="n">forbidden_page</span> <span class="o">=</span> <span class="n">Page</span><span class="p">(</span>
+    <span class="n">Container</span><span class="p">(</span>
+        <span class="n">Text</span><span class="p">(</span><span class="s2">"⛔ Access Denied"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s2">"fontSize"</span><span class="p">:</span> <span class="s2">"32px"</span><span class="p">,</span> <span class="s2">"color"</span><span class="p">:</span> <span class="s2">"red"</span><span class="p">}),</span>
+        <span class="n">Text</span><span class="p">(</span><span class="s2">"You do not have permission to view this page."</span><span class="p">),</span>
+        <span class="n">Link</span><span class="p">(</span><span class="s2">"Go to Login"</span><span class="p">,</span> <span class="n">href</span><span class="o">=</span><span class="s2">"/login"</span><span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># Register it</span>
+<span class="n">app</span><span class="o">.</span><span class="n">set_403_page</span><span class="p">(</span><span class="n">forbidden_page</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       Dars will automatically redirect to
+       <code>
+        /prohibited
+       </code>
+       and show this page when a user tries to access a private route without authentication.
+      </p>
       <h2 id="hot-reload">
        Hot Reload
       </h2>
@@ -14204,6 +14384,70 @@ def hello():
         : When possible, navigation state is preserved across reloads.
        </li>
       </ul>
+      <hr/>
+      <h2 id="ssr-hydration">
+       SSR &amp; Hydration
+      </h2>
+      <p>
+       Dars introduces a robust "Dual Hydration" system for Server-Side Rendering (SSR) routes.
+      </p>
+      <h3 id="how-it-works">
+       How it Works
+      </h3>
+      <ol>
+       <li>
+        <strong>
+         Backend Rendering
+        </strong>
+        : The server renders the initial HTML and injects a VDOM snapshot (
+        <code>
+         window.__ROUTE_VDOM__
+        </code>
+        ) into the DOM.
+       </li>
+       <li>
+        <strong>
+         Script Injection
+        </strong>
+        : The server checks if there is a corresponding client-side bundle for the route (e.g.,
+        <code>
+         app_{slug}.js
+        </code>
+        ) and injects a reference to it.
+       </li>
+       <li>
+        <strong>
+         Client Hydration
+        </strong>
+        :
+        <ul>
+         <li>
+          The
+          <code>
+           dars.min.js
+          </code>
+          runtime loads and checks for
+          <code>
+           __ROUTE_VDOM__
+          </code>
+          .
+         </li>
+         <li>
+          If found, it hydrates the DOM immediately without fetching data again.
+         </li>
+         <li>
+          The browser loads the injected
+          <code>
+           app_{slug}.js
+          </code>
+          bundle, which contains the interactive logic (event handlers, state).
+         </li>
+        </ul>
+       </li>
+      </ol>
+      <p>
+       This architecture prevents "Flash of Unstyled Content" (FOUC), race conditions, and double-rendering, ensuring that events function correctly even after a page reload.
+      </p>
      </div>
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_122">
       <h1 id="state-management-in-dars">
@@ -18580,6 +18824,108 @@ def hello():
        </code>
        .
       </p>
+      <hr/>
+      <h2 id="ssr-backend-setup">
+       SSR Backend Setup
+      </h2>
+      <p>
+       Dars provides a built-in
+       <code>
+        create_ssr_app
+       </code>
+       helper to easily serve your Dars application with Server-Side Rendering (SSR) using FastAPI.
+      </p>
+      <h3 id="project-structure">
+       Project Structure
+      </h3>
+      <p>
+       When you run
+       <code>
+        dars init --type ssr
+       </code>
+       , Dars creates a backend structure for you:
+*
+       <code>
+        backend/api.py
+       </code>
+       : Entry point for the FastAPI server (Default Port: 8000).
+*
+       <code>
+        backend/apiConfig.py
+       </code>
+       : Configuration helper for environment management.
+      </p>
+      <h3 id="configuration-apiconfigpy">
+       Configuration (
+       <code>
+        apiConfig.py
+       </code>
+       )
+      </h3>
+      <p>
+       To switch between Development and Production modes, simply edit the
+       <code>
+        MODE
+       </code>
+       variable in
+       <code>
+        backend/apiConfig.py
+       </code>
+       :
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DarsEnv</span><span class="p">:</span>
+    <span class="c1"># Set this to "production" when deploying</span>
+    <span class="n">MODE</span> <span class="o">=</span> <span class="s2">"development"</span> 
+
+    <span class="n">DEV</span> <span class="o">=</span> <span class="s2">"development"</span>
+    <span class="n">BUILD</span> <span class="o">=</span> <span class="s2">"production"</span>
+
+    <span class="c1"># ...</span>
+</code></pre>
+      </div>
+      <ul>
+       <li>
+        <strong>
+         Development
+        </strong>
+        : Backend runs on
+        <code>
+         localhost:8000
+        </code>
+        , Frontend on
+        <code>
+         localhost:3000
+        </code>
+        .
+        <code>
+         dars dev
+        </code>
+        proxies requests.
+       </li>
+       <li>
+        <strong>
+         Production
+        </strong>
+        : Backend serves everything.
+       </li>
+      </ul>
+      <h3 id="running-the-backend">
+       Running the Backend
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Start the SSR Backend (Port 3000)</span>
+python<span class="w"> </span>backend/api.py
+</code></pre>
+      </div>
+      <p>
+       In a separate terminal, run the frontend dev server:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Start Frontend Dev Server (Port 8000)</span>
+dars<span class="w"> </span>dev
+</code></pre>
+      </div>
      </div>
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_126">
       <h1 id="events-in-dars">
@@ -22156,7 +22502,7 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
     </div>
    </div>
   </div>
-  <script data-dars-lib="" defer="" src="lib/dars.min.js" type="module">
+  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1764979940" type="module">
   </script>
   <script defer="" src="app_docs.js">
   </script>

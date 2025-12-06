@@ -811,7 +811,8 @@ self.addEventListener('fetch', event => {
                 extra_scripts_html += f'    <script src="{src}"{type_attr}></script>\n'
         
         # Incluir dars.min.js (ESM) antes de runtime/script
-        dars_lib_tag = '<script type="module" src="lib/dars.min.js" defer data-dars-lib></script>'
+        import time
+        dars_lib_tag = f'<script type="module" src="lib/dars.min.js?v={int(time.time())}" defer data-dars-lib></script>'
 
         # State bootstrap: emit JSON (+ obfuscation in bundle) + module to register states
         bootstrap_json_tag = ""
@@ -930,11 +931,11 @@ self.addEventListener('fetch', event => {
         {links_html}
         {og_tags_html}
         {twitter_tags_html}
-    <link rel=\"stylesheet\" href=\"runtime_css.css\">\n    <link rel=\"stylesheet\" href=\"{css_file}\">
+        <link rel=\"stylesheet\" href=\"runtime_css.css\">\n    <link rel=\"stylesheet\" href=\"{css_file}\">
+        {vdom_script_tag}
     </head>
     <body>
         {body_content}
-        {vdom_script_tag}
         {version_vars_html}
         {dars_lib_tag}
         {runtime_script_tag}
@@ -2578,25 +2579,33 @@ body {
         return ()=>{{ try{{ stopped = true; if(timer) clearTimeout(timer); window.__DARS_STOP_HOTRELOAD = null; }}catch(_ ){{ }} }};
     }}
 
-document.addEventListener('DOMContentLoaded', function(){{
-initializeStates();
-//Inicializar eventos antes de la hidratación
-initializeEvents();
-        
-if(window.__DARS_VDOM__){{
-hydrate(window.__DARS_VDOM__);
-}} else {{
-console.warn('[Dars] No VDOM snapshot found for hydration');
-}}
-// Activar hot-reload incremental en dev si hay URLs definidas (evitar múltiples pollers)
-if(window.__DARS_VERSION_URL && window.__DARS_SNAPSHOT_URL){{
-try{{ if (typeof window.__DARS_STOP_HOTRELOAD === 'function') {{ window.__DARS_STOP_HOTRELOAD(); }} }}catch(_){{ }}
-try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
-}}
+    function _darsInit(){{
+        initializeStates();
+        //Inicializar eventos antes de la hidratación
+        initializeEvents();
+                
+        if(window.__DARS_VDOM__){{
+        hydrate(window.__DARS_VDOM__);
+        }} else if(window.__ROUTE_VDOM__){{
+        hydrate(window.__ROUTE_VDOM__);
+        }} else {{
+        console.warn('[Dars] No VDOM snapshot found for hydration');
+        }}
+        // Activar hot-reload incremental en dev si hay URLs definidas (evitar múltiples pollers)
+        if(window.__DARS_VERSION_URL && window.__DARS_SNAPSHOT_URL){{
+        try{{ if (typeof window.__DARS_STOP_HOTRELOAD === 'function') {{ window.__DARS_STOP_HOTRELOAD(); }} }}catch(_){{ }}
+        try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
+        }}
 
-// Initialize reactive bindings for useDynamic
-{self._generate_reactive_bindings_js()}
-}});
+        // Initialize reactive bindings for useDynamic
+        {self._generate_reactive_bindings_js()}
+    }}
+
+    if(document.readyState === 'complete' || document.readyState === 'interactive'){{
+        _darsInit();
+    }} else {{
+        document.addEventListener('DOMContentLoaded', _darsInit);
+    }}
 }})();
 """
         return runtime
@@ -3100,15 +3109,37 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
                     lines.append(f'    // Evento {event_name} para componente {comp_id}')
                     lines.append(f'    if (!eventMap.has("{comp_id}")) eventMap.set("{comp_id}", {{}});')
                     
-                    # NUEVO: Ejecutar cada handler en su propio contexto
+    # NUEVO: Ejecutar cada handler en su propio contexto
                     if len(valid_handlers) == 1:
                         # Caso único handler - mantener compatibilidad
                         lines.append(f'    eventMap.get("{comp_id}")["{event_name}"] = async function(event) {{')
+                        # Robust loading logic start
+                        lines.append('        // Ensure runtime loaded')
+                        lines.append('        if (!window.Dars) {')
+                        lines.append("            try {")
+                        lines.append("                const m = await import('/lib/dars.min.js');")
+                        lines.append("                window.Dars = m.default || m;")
+                        lines.append("                if (!window.Dars.change && m.change) window.Dars.change = m.change;")
+                        lines.append("                if (!window.Dars.getState && m.getState) window.Dars.getState = m.getState;")
+                        lines.append("            } catch (e) { console.error('[Dars] Failed to lazy load runtime', e); }")
+                        lines.append('        }')
+                        # Robust loading logic end
                         lines.append(f'        try {{ {valid_handlers[0]} }} catch(e) {{ console.error("Error en handler:", e); }}')
                         lines.append(f'    }};')
                     else:
                         # Múltiples handlers - ejecutar cada uno individualmente
                         lines.append(f'    eventMap.get("{comp_id}")["{event_name}"] = async function(event) {{')
+                        # Robust loading logic start
+                        lines.append('        // Ensure runtime loaded')
+                        lines.append('        if (!window.Dars) {')
+                        lines.append("            try {")
+                        lines.append("                const m = await import('/lib/dars.min.js');")
+                        lines.append("                window.Dars = m.default || m;")
+                        lines.append("                if (!window.Dars.change && m.change) window.Dars.change = m.change;")
+                        lines.append("                if (!window.Dars.getState && m.getState) window.Dars.getState = m.getState;")
+                        lines.append("            } catch (e) { console.error('[Dars] Failed to lazy load runtime', e); }")
+                        lines.append('        }')
+                        # Robust loading logic end
                         for i, handler_code in enumerate(valid_handlers):
                             lines.append(f'        // Handler {i+1}')
                             lines.append(f'        try {{ {handler_code} }} catch(e) {{ console.error("Error en handler {i+1}:", e); }}')
@@ -4404,7 +4435,12 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
         """Export SPA with client-side routing."""
         import json, copy
         from dars.components.basic.container import Container
-        spa_config = {'routes': [], 'index': None, 'notFound': None}
+        spa_config = {
+            'routes': [], 
+            'index': None, 
+            'notFound': None,
+            'backendUrl': getattr(app, 'ssr_url', 'http://localhost:3000') or 'http://localhost:3000'
+        }
         for route_name, spa_route in app._spa_routes.items():
             route_app = copy.copy(app)
             route_app.root = spa_route.root
@@ -4412,6 +4448,22 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
             if isinstance(route_app.root, list): route_app.root = Container(children=route_app.root)
             route_html = self.render_component(route_app.root)
             route_vdom, route_events_map = {}, {}
+            # Determine route type first
+            route_metadata = None
+            if hasattr(spa_route.root, '__dars_route_metadata__'):
+                route_metadata = spa_route.root.__dars_route_metadata__
+            
+            from dars.core.route_types import RouteType
+            route_type = route_metadata.route_type if route_metadata else RouteType.PUBLIC
+            
+            # Initialize script names (will be empty for SSR)
+            vdom_filename = ""
+            runtime_filename = ""
+            script_filename = ""
+            scripts_array = []
+            
+            # Always generate scripts and VDOM for ALL route types (PUBLIC and SSR)
+            # This ensures app_{route_name}.js exists for hydration
             try:
                 vdom_builder = VDomBuilder(id_provider=self.get_component_id)
                 route_vdom, route_events_map = vdom_builder.build(route_app.root), vdom_builder.events_map
@@ -4421,17 +4473,11 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
             # Generate runtime JS with events/states for this route
             runtime_js = self.generate_javascript(route_app, route_app.root, route_events_map)
             
-            # Write runtime file for this route
-            runtime_filename = f"runtime_dars_{route_name}.js"
-            self.write_file(os.path.join(output_path, runtime_filename), runtime_js)
-            
-            # Write VDOM file for this route  
+            # Generate VDOM JS content
             vdom_json = json.dumps(route_vdom, ensure_ascii=False, separators=(",", ":"), cls=DarsJSONEncoder)
-            vdom_filename = f"vdom_tree_{route_name}.js"
             vdom_js_content = f"window.__DARS_VDOM__ = {vdom_json};\n"
-            self.write_file(os.path.join(output_path, vdom_filename), vdom_js_content)
-            
-            # Collect and write scripts for this route (app scripts + page scripts)
+
+            # Collect scripts for this route (app scripts + page scripts)
             route_scripts = []
             route_scripts.extend(getattr(app, 'scripts', []))
             if hasattr(route_app.root, 'get_scripts'):
@@ -4441,28 +4487,33 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
             combined_js, external_srcs, is_module = self._prepare_page_scripts(
                 route_scripts, output_path, project_root
             )
+
+            # Always use bundle mode logic for SPA/SSR to ensure app_{route_name}.js exists
+            # This is required for consistent loading by ssr.py and the client router
+            # Bundle mode: Combine everything into app_{route_name}.js
+            if route_name == "index":
+                app_js_filename = "app.js"
+            else:
+                app_js_filename = f"app_{route_name}.js"
             
-            # Write combined scripts to file
-            script_filename = f"script_{route_name}.js"
-            if combined_js:
-                self.write_file(os.path.join(output_path, script_filename), combined_js)
-            # Build scripts array: vdom, runtime, then page scripts (use absolute paths)
-            scripts_array = [f"/{vdom_filename}", f"/{runtime_filename}"]
-            if combined_js:
-                scripts_array.append(f"/{script_filename}")
-            
-            # Check route metadata for security settings
-            route_metadata = None
-            if hasattr(spa_route.root, '__dars_route_metadata__'):
-                route_metadata = spa_route.root.__dars_route_metadata__
-            
-            # Determine route type
-            from dars.core.route_types import RouteType
-            route_type = route_metadata.route_type if route_metadata else RouteType.PUBLIC
-            
+            combined_all_js = f"""// Combined JS for {route_name}
+// VDOM
+{vdom_js_content}
+
+// Runtime
+{runtime_js}
+
+// User Scripts
+{combined_js}
+"""
+            self.write_file(os.path.join(output_path, app_js_filename), combined_all_js)
+            scripts_array = [f"/{app_js_filename}"]
+
+
+
+
             # Build route config based on type
             if route_type == RouteType.PUBLIC:
-                # PUBLIC routes: include full data in initial bundle
                 route_config = {
                     'name': route_name, 
                     'path': spa_route.route, 
@@ -4470,22 +4521,36 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
                     'type': 'public',
                     'html': route_html, 
                     'styles': '',
-                    'scripts': scripts_array, 
-                    'events': route_events_map, 
-                    'vdom': route_vdom, 
+                    'scripts': scripts_array,
                     'states': [], 
                     'preload': spa_route.preload or [],
                     'parent': spa_route.parent
                 }
-            else:
-                # PRIVATE/PROTECTED routes: only metadata, lazy load from backend
+            elif route_type == RouteType.SSR:
+                # SSR routes: only metadata, render on backend
                 route_config = {
                     'name': route_name,
                     'path': spa_route.route,
                     'title': spa_route.title or app.title,
-                    'type': route_type.value,  # 'private' or 'protected'
-                    'requires_auth': route_metadata.requires_auth if route_metadata else False,
-                    'loader': route_metadata.loader_endpoint if route_metadata else f"/api/routes/{route_name}",
+                    'type': 'ssr',
+                    'ssr_endpoint': route_metadata.loader_endpoint if route_metadata else f"/api/ssr/{route_name}",
+                    'parent': spa_route.parent
+                }
+                
+                # Still write route files for backend SSR to use
+                # but don't include them in initial __DARS_SPA_CONFIG__
+            else:
+                # Default to PUBLIC if unknown type (fallback)
+                route_config = {
+                    'name': route_name, 
+                    'path': spa_route.route, 
+                    'title': spa_route.title or app.title,
+                    'type': 'public',
+                    'html': route_html, 
+                    'styles': '',
+                    'scripts': scripts_array,
+                    'states': [], 
+                    'preload': spa_route.preload or [],
                     'parent': spa_route.parent
                 }
                 
@@ -4536,6 +4601,50 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
             }
             spa_config['routes'].append(route_404)
             spa_config['notFoundPath'] = '/404'
+        
+        # 403 Forbidden page (for unauthorized access to private routes)
+        if hasattr(app, '_spa_403_page') and app._spa_403_page:
+            forbidden_app = copy.copy(app)
+            
+            # Handle both component and wrapper
+            if hasattr(app._spa_403_page, 'root'):
+                forbidden_app.root = app._spa_403_page.root
+            else:
+                forbidden_app.root = app._spa_403_page
+            
+            if isinstance(forbidden_app.root, list):
+                forbidden_app.root = Container(children=forbidden_app.root)
+            
+            route_403 = {
+                'name': '__403__', 'path': '/prohibited', 'title': '403 Forbidden',
+                'html': self.render_component(forbidden_app.root),
+                'styles': '', 'scripts': [], 'preload': []
+            }
+            spa_config['routes'].append(route_403)
+            spa_config['forbiddenPath'] = '/prohibited'
+        else:
+            # Default 403 page
+            from dars.components.basic.text import Text
+            
+            default_403_root = Container(
+                Text("403 Forbidden", style={"fontSize": "48px", "fontWeight": "bold", "marginBottom": "20px", "color": "#dc2626"}),
+                Text("You don't have permission to access this page.", style={"fontSize": "18px", "color": "#666", "marginBottom": "10px"}),
+                Text("Please log in or contact an administrator.", style={"fontSize": "16px", "color": "#999"}),
+                style={
+                    "display": "flex", "flexDirection": "column", "alignItems": "center",
+                    "justifyContent": "center", "height": "100vh", "fontFamily": "system-ui, -apple-system, sans-serif",
+                    "backgroundColor": "#f9f9f9", "margin": "0", "padding": "20px", "textAlign": "center"
+                }
+            )
+            
+            route_403 = {
+                'name': '__403__', 'path': '/prohibited', 'title': '403 Forbidden',
+                'html': self.render_component(default_403_root),
+                'styles': '', 'scripts': [], 'preload': []
+            }
+            spa_config['routes'].append(route_403)
+            spa_config['forbiddenPath'] = '/prohibited'
+        
         # Hot reload script for dev mode (only if not bundle)
         hot_reload_script = ""
         if not bundle:
@@ -4590,5 +4699,37 @@ try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
             spa_html = soup.prettify()
         except: pass
         self.write_file(os.path.join(output_path, "index.html"), spa_html)
+
+        # Generate snapshot/version for SPA hot reload (dev mode only)
+        if not bundle:
+            try:
+                # Find index/root component to use for snapshot
+                snapshot_root = None
+                
+                # Check explicit index in spa routes
+                idx_route_name = app.get_spa_index()
+                if idx_route_name and idx_route_name in app._spa_routes:
+                    snapshot_root = app._spa_routes[idx_route_name].root
+                
+                # Fallback to first route if no index
+                if not snapshot_root and app._spa_routes:
+                    first_route_name = list(app._spa_routes.keys())[0]
+                    snapshot_root = app._spa_routes[first_route_name].root
+                
+                if snapshot_root:
+                    vdom_json = self.generate_vdom_snapshot(snapshot_root)
+                else:
+                    vdom_json = '{}'
+            except Exception:
+                vdom_json = '{}'
+            
+            self.write_file(os.path.join(output_path, "snapshot.json"), vdom_json)
+            
+            try:
+                import time
+                version_val = str(int(time.time()*1000))
+            except Exception:
+                version_val = "1"
+            self.write_file(os.path.join(output_path, "version.txt"), version_val)
 
 

@@ -1,3 +1,92 @@
+# Release Notes v1.6.9
+
+> **Dars SSR System & Backend Integration**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Dars Server-Side Rendering (SSR)
+
+v1.6.9 marks the official release of the **Dars SSR System**, bringing true full-stack capabilities to the framework. You can now render pages on the server.
+
+---
+
+### Dars Backend
+
+The new `dars.backend` module integrates seamlessly with **FastAPI**, allowing you to serve your Dars application alongside your API routes.
+
+#### Key Functions
+- **`create_ssr_app(dars_app)`**: Converts your Dars App into a standard ASGI application (FastAPI) capable of server-side rendering.
+- **`RouteType.SSR`**: A new route type that tells Dars to render the page component on the server before sending it to the client.
+
+#### Example: API + SSR Project
+
+```python
+# backend/api.py
+from fastapi import FastAPI
+from dars.backend.ssr import create_ssr_app
+from main import app as dars_app
+
+# Create full-stack app
+app = create_ssr_app(dars_app)
+
+# Add custom API endpoints
+@app.get("/api/custom")
+def custom_endpoint():
+    return {"message": "Hello from API"}
+```
+
+---
+
+### SSR Routing
+
+Enable Server-Side Rendering for specific pages with a single parameter:
+
+```python
+@route("/dashboard", route_type=RouteType.SSR)
+def dashboard():
+    return Page(
+        # This is rendered on the server!
+        Heading("Welcome Back", level=1),
+        Text(f"Server Time: {datetime.now()}")
+    )
+```
+
+---
+
+### Full-Stack CLI Workflow
+
+The CLI has been updated to support the new full-stack architecture.
+
+#### New Init Command
+Create a complete SSR-ready project structure:
+```bash
+dars init my-app --type ssr
+```
+This generates:
+- `backend/` directory with `api.py` and `apiConfig.py`
+- `main.py` configured for SSR
+- Dual-port setup for development
+
+#### Development Environment
+- **Frontend (Port 8000)**: Hot-reloading dev server.
+- **Backend (Port 3000)**: SSR and API server.
+
+The system allows you to configure the SSR backend URL dynamically:
+
+```python
+# Automatically points to localhost:3000 in dev, and relative in prod
+ssr_url = DarsEnv.get_urls()['backend']
+app = App(ssr_url=ssr_url)
+```
+
+---
+
 # Release Notes v1.6.8
 
 > **Component-Level State Updates with updateVRef()**

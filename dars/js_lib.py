@@ -764,11 +764,39 @@ function registerSPAConfig(config){{
     // Register 404 page if exists
     if(config['notFound']){{ __spa404Route = config['notFound']; }}
     
-    // Initialize router on DOM ready
-    if(document.readyState === 'loading'){{
-      document.addEventListener('DOMContentLoaded', function(){{ _initializeRouter(); }});
-    }}else{{
-      _initializeRouter();
+    // Robust initialization strategy
+    window.__DARS_ROUTER_INIT = false;
+    
+    function _attemptInit() {{
+      if (window.__DARS_ROUTER_INIT) return;
+      
+      // If VDOM is missing but might be coming (interactive/loading), wait unless it's the 'load' event
+      const hasData = window.__ROUTE_VDOM__ || window.__DARS_VDOM__;
+      const isComplete = document.readyState === 'complete';
+      
+      if (hasData || isComplete) {{
+        window.__DARS_ROUTER_INIT = true;
+        _initializeRouter();
+      }}
+    }}
+
+    // 1. Try immediately
+    _attemptInit();
+
+    // 2. Try on DOMContentLoaded (earliest safe moment)
+    if (!window.__DARS_ROUTER_INIT) {{
+      document.addEventListener('DOMContentLoaded', _attemptInit);
+    }}
+
+    // 3. Try on load (fallback for late scripts)
+    if (!window.__DARS_ROUTER_INIT) {{
+      window.addEventListener('load', function() {{ 
+        // Force init on load even if data missing (it's not coming)
+        if (!window.__DARS_ROUTER_INIT) {{
+             window.__DARS_ROUTER_INIT = true;
+             _initializeRouter();
+        }}
+      }});
     }}
   }}catch(e){{ console.error('[Dars Router] Config error:', e); }}
 }}
@@ -780,7 +808,39 @@ function _initializeRouter(){{
   try{{
     // Handle initial route
     const initialPath = window.location.pathname;
-    _navigateToRoute(initialPath, {{ 'replace': true, 'skipPushState': true }});
+    
+    // Skip initial fetch if already hydrated (SSR)
+    let skipInit = false;
+    const match = _matchRoute(initialPath);
+
+    const vdomSource = window.__ROUTE_VDOM__ || window.__DARS_VDOM__;
+    if (vdomSource) {{
+        
+        // Find matching route to set as current
+        if (match && match.route) {{
+            // Update global state to reflect current route without navigating
+            __spaCurrentRoute = initialPath;
+            __spaCurrentParams = match.params || {{}};
+            window['__DARS_ROUTE_PARAMS__'] = __spaCurrentParams;
+
+            // Mark the route as loaded and populate its data from SSR
+            match.route.vdom = vdomSource;
+            match.route.html = document.getElementById('__dars_spa_root__') ? document.getElementById('__dars_spa_root__').innerHTML : '';
+            match.route.loaded = true;
+            
+            // Ensure history state is correctly set for the initial page
+            window.history.replaceState({{ 
+                path: initialPath, 
+                params: __spaCurrentParams
+            }}, document.title, initialPath);
+            
+            skipInit = true;
+        }}
+    }}
+    
+    if (!skipInit) {{
+        _navigateToRoute(initialPath, {{ 'replace': true, 'skipPushState': true }});
+    }}
     
     // Listen for popstate (browser back/forward)
     window.addEventListener('popstate', function(event){{
@@ -825,7 +885,7 @@ function navigateTo(path, params){{
 /**
  * Internal navigation handler
  */
-function _navigateToRoute(path, options){{
+async function _navigateToRoute(path, options){{
   try{{
     options = options || {{}};
     
@@ -852,7 +912,7 @@ function _navigateToRoute(path, options){{
          // Avoid infinite loop if 404 page itself is missing
          if(path !== notFoundPath){{
              console.log('[Dars Router] Redirecting to 404 path:', notFoundPath);
-             _navigateToRoute(notFoundPath, {{ 'replace': true, 'skipPushState': false }});
+             await _navigateToRoute(notFoundPath, {{ 'replace': true, 'skipPushState': false }});
              return;
          }}
       }}
@@ -882,8 +942,8 @@ function _navigateToRoute(path, options){{
       }}
     }}
     
-    // Load route content
-    _loadRoute(route, params);
+    // Load route content (await for lazy loading)
+    await _loadRoute(route, params);
     
     // Update current route
     __spaCurrentRoute = path;
@@ -912,8 +972,49 @@ function _navigateToRoute(path, options){{
 /**
  * Load and render a route (Hierarchical)
  */
-function _loadRoute(route, params){{
+async function _loadRoute(route, params){{
   try{{
+    // Check if route is SSR and needs lazy loading
+    if(route['type'] === 'ssr' && !route['html']){{
+      
+      try{{
+        // Build backend URL
+        const backendUrl = (__spaConfig && __spaConfig['backendUrl']) || '';
+        const loaderUrl = route['ssr_endpoint'] || `/api/ssr/${{route['name']}}`;
+        let fullUrl = backendUrl ? `${{backendUrl}}${{loaderUrl}}` : loaderUrl;
+        
+        // Add cache buster for dev/hot reload
+        const sep = fullUrl.includes('?') ? '&' : '?';
+        fullUrl = fullUrl + sep + '_t=' + Date.now();
+        
+        // Fetch route data from backend
+        // Note: For SSR we don't send auth token by default as it's public facing usually
+        // If needed, we can add it back later
+        const response = await fetch(fullUrl, {{
+          headers: {{ 'Content-Type': 'application/json' }}
+        }});
+          
+        if(!response.ok){{
+          throw new Error(`Failed to load route: ${{response.status}}`);
+        }}
+          
+        // Parse route data
+        const routeData = await response.json();
+          
+        // Update route object with loaded data
+        route['html'] = routeData['html'] || '';
+        route['scripts'] = routeData['scripts'] || [];
+        route['events'] = routeData['events'] || {{}};
+        route['vdom'] = routeData['vdom'] || {{}};
+        route['states'] = routeData['states'] || [];
+      }}catch(error){{
+        console.error('[Dars Router] Error loading SSR route:', error);
+        // On error stay on current page or redirect to index?
+        // For now just log and return
+        return;
+      }}
+    }}
+    
     // 1. Build route chain [Root, ..., Parent, Child]
     const chain = [];
     let curr = route;
@@ -924,8 +1025,32 @@ function _loadRoute(route, params){{
 
     let container = document.getElementById('__dars_spa_root__');
     if(!container) return;
+    
+    // 2. Cleanup scripts and styles for routes NOT in the active chain (BEFORE rendering new route)
+    const activeRouteNames = new Set(chain.map(r =\u003e r['name']));
+    
+    // Remove old route scripts immediately
+    const allScripts = document.querySelectorAll('.dars-route-script');
+    allScripts.forEach(script =\u003e {{
+      const scriptRoute = script.getAttribute('data-route');
+      if(scriptRoute \u0026\u0026 !activeRouteNames.has(scriptRoute)){{
+        console.log('[Dars Router] Removing script for inactive route:', scriptRoute);
+        try{{ script.remove(); }}catch(e){{ }}
+      }}
+    }});
+    
+    // Remove old route styles immediately
+    const allStyles = document.querySelectorAll('style[id^="dars-route-styles-"]');
+    allStyles.forEach(style =\u003e {{
+      const styleId = style.id;
+      const routeName = styleId.replace('dars-route-styles-', '');
+      if(routeName \u0026\u0026 !activeRouteNames.has(routeName)){{
+        console.log('[Dars Router] Removing styles for inactive route:', routeName);
+        try{{ style.remove(); }}catch(e){{ }}
+      }}
+    }});
 
-    // 2. Render chain
+    // 3. Render chain
     for(let i=0; i<chain.length; i++){{
       const r = chain[i];
       
@@ -989,19 +1114,6 @@ function _loadRoute(route, params){{
         container = outlet;
       }}
     }}
-    
-    // 3. Cleanup scripts for routes NOT in the active chain (deferred to allow timeouts)
-    const activeRouteNames = new Set(chain.map(r => r['name']));
-    const allScripts = document.querySelectorAll('.dars-route-script');
-    allScripts.forEach(script => {{
-      const scriptRoute = script.getAttribute('data-route');
-      if(scriptRoute && !activeRouteNames.has(scriptRoute)){{
-        // Defer removal to allow any setTimeout in the script to complete
-        setTimeout(() => {{
-          try{{ script.remove(); }}catch(e){{ }}
-        }}, 5000); // 5 second grace period
-      }}
-    }});
 
   }}catch(e){{ console.error('[Dars Router] Load error:', e); }}
 }}
@@ -1042,12 +1154,20 @@ function _executeScripts(scripts, routeName){{
           // Inline script code
           try{{ (0, eval)(script); }}catch(e){{ console.error('[Dars Router] Script error:', e); }}
         }}
-      }}else if(script['src']){{
-        // External script
-        _loadExternalScript(script['src'], script['module'], routeName);
-      }}else if(script['code']){{
-        // Code property
-        try{{ (0, eval)(script['code']); }}catch(e){{ console.error('[Dars Router] Script error:', e); }}
+      }}else{{
+        // Script object
+        if(script['src']){{
+            _loadExternalScript(script['src'], script['module'], routeName);
+        }}else if(script['code']){{
+            try{{
+                const s = document.createElement('script');
+                s.textContent = script['code'];
+                s.className = 'dars-route-script';
+                if(routeName) s.setAttribute('data-route', routeName);
+                if(script['module']) s.type = 'module';
+                document.body.appendChild(s);
+            }}catch(e){{ console.error('[Dars Router] Script error:', e); }}
+        }}
       }}
     }}
   }}catch(e){{ }}

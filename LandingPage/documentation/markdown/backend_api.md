@@ -319,3 +319,45 @@ delete_btn.on_click = deleteComp("component-id")
 ---
 
 For more examples, see the test files in `tst/proj/test_http_demo.py` and `tst/proj/test_http_utils.py`.
+
+---
+
+## SSR Backend Setup
+
+Dars provides a built-in `create_ssr_app` helper to easily serve your Dars application with Server-Side Rendering (SSR) using FastAPI.
+
+### Project Structure
+When you run `dars init --type ssr`, Dars creates a backend structure for you:
+*   `backend/api.py`: Entry point for the FastAPI server (Default Port: 8000).
+*   `backend/apiConfig.py`: Configuration helper for environment management.
+
+### Configuration (`apiConfig.py`)
+To switch between Development and Production modes, simply edit the `MODE` variable in `backend/apiConfig.py`:
+
+```python
+class DarsEnv:
+    # Set this to "production" when deploying
+    MODE = "development" 
+    
+    DEV = "development"
+    BUILD = "production"
+    
+    # ...
+```
+
+*   **Development**: Backend runs on `localhost:8000`, Frontend on `localhost:3000`. `dars dev` proxies requests.
+*   **Production**: Backend serves everything.
+
+### Running the Backend
+
+```bash
+# Start the SSR Backend (Port 3000)
+python backend/api.py
+```
+
+In a separate terminal, run the frontend dev server:
+
+```bash
+# Start Frontend Dev Server (Port 8000)
+dars dev
+```

@@ -662,75 +662,260 @@ if __name__ == "__main__":
                 main_py.write_text(HELLO_WORLD_CODE.strip(), encoding="utf-8")
                 console.print(f"[green]✔ {translator.get('main_py_created')}[/green]")
         else:
-            # Default hello world code (sin template)
-            HELLO_WORLD_CODE = """
-from dars.all import *
+            # Default Web/Fullstack Scaffold (based on initexample)
+            
+            # 1. apiConfig.py
+            API_CONFIG_PY_CODE = """import os
+import sys
 
-app = App(title="Hello World", theme="dark"%s)
-# Crear componentes
-index = Page(
-    Text(
-        text="Hello World",
-        style={
-            'font-size': '48px',
-            'color': '#2c3e50',
-            'margin-bottom': '20px',
-            'font-weight': 'bold',
-            'text-align': 'center'
+class DarsEnv:
+    # Set this to "production" when deploying
+    MODE = "development" 
+    
+    DEV = "development"
+    BUILD = "production"
+    
+    @staticmethod
+    def get_env():
+        return DarsEnv.MODE
+
+    @staticmethod
+    def is_dev():
+        return DarsEnv.get_env() == DarsEnv.DEV
+
+    @staticmethod
+    def get_urls():
+        # Configuration for URLs
+        if DarsEnv.is_dev():
+            return {
+                "backend": "http://localhost:3000", # SSR/API Server
+                "frontend": "http://localhost:8000" # Dev Server
+            }
+        return {
+            "backend": "/", # Production: Same origin
+            "frontend": "/"
         }
-    ),
-    Text(
-        text="Hello World",
-        style={
-            'font-size': '20px',
-            'color': '#7f8c8d',
-            'margin-bottom': '40px',
-            'text-align': 'center'
-        }
-    ),
+"""
 
-    Button(
-        text="Click Me!",
-        on_click= dScript("alert('Hello World')"),
-        on_mouse_enter=dScript("this.style.backgroundColor = '#2980b9';"),
-        on_mouse_leave=dScript("this.style.backgroundColor = '#3498db';"),
-        style={
-            'background-color': '#3498db',
-            'color': 'white',
-            'padding': '15px 30px',
-            'border': 'none',
-            'border-radius': '8px',
-            'font-size': '18px',
-            'cursor': 'pointer',
-            'transition': 'background-color 0.3s'
-        }
-    ),
-    style={
-        'display': 'flex',
-        'flex-direction': 'column',
-        'align-items': 'center',
-        'justify-content': 'center',
-        'min-height': '100vh',
-        'background-color': '#f0f2f5',
-        'font-family': 'Arial, sans-serif'
-    }
-) 
+            # 2. backend/api.py (No sys.path hacks, relies on python -m module execution)
+            API_PY_CODE = """\"""
+SSR Backend - Dars Framework
+Run with: python -m backend.api
+\"""
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from dars.backend.ssr import create_ssr_app
+import sys
+import os
+from apiConfig import DarsEnv
 
-app.add_page("index", index, title="Hello World", index=True)
+# Import the Dars app
+import sys
+sys.path.insert(0, '.')
+from main import app as dars_app
 
+
+# Create FastAPI app with SSR support
+app = create_ssr_app(dars_app)
+
+# Enable CORS for local development
+if DarsEnv.is_dev():
+    urls = DarsEnv.get_urls()
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[urls['frontend'], "http://127.0.0.1:3000"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+if __name__ == "__main__":
+    import uvicorn
+    urls = DarsEnv.get_urls()
+    print(" " + "="*60)
+    print("Dars SSR Backend")
+    print("="*60)
+    print(f"Endpoints:")
+    print(f" • {urls['backend']}/              - API info")
+    print(f" • {urls['backend']}/api/ssr/*     - SSR routes")
+    print(f"Frontend: {urls['frontend']}")
+    print("="*60 + " ")
+    
+    uvicorn.run(app, host="127.0.0.1", port=3000)
+"""
+
+            # 3. separate templates logic
+            
+            # Template for 'ssr' type
+            SSR_TEMPLATE_CODE = """from dars.all import *
+from backend.apiConfig import DarsEnv
+
+# Configure SSR URL
+# In dev: http://localhost:8000
+# In prod: / (same origin)
+ssr_url = DarsEnv.get_urls()['backend']
+
+app = App(title="Hello World", theme="dark", ssr_url=ssr_url)
+
+# 1. Define State
+state = State("app", title_val="Simple Counter", count=0)
+
+# 2. Define Route
+@route("/", route_type=RouteType.SSR)
+def index(): 
+    return Page(
+        # 3. Use useValue for app text
+        Text(
+            text=useValue("app.title_val"),
+            style="fs-[33px] text-black font-bold mb-[5x] ",
+        ),
+
+        # 4. Display reactive count
+        Text(
+            text=useDynamic("app.count"),
+            style="fs-[48px] mt-5 mb-[12px]"
+        ),
+        # 5. Interactive Button
+        Button(
+            text="+1",
+            on_click=(
+                state.count.increment(1)
+            ),
+            style="bg-[#3498db] text-white p-[15px] px-[30px] rounded-[8px] border-none cursor-pointer fs-[18px]",
+        ),
+
+        # 6. Interactive Button
+        Button(
+            text="-1",
+            on_click=(
+                state.count.decrement(1)
+            ),
+            style="bg-[#3498db] text-white p-[15px] px-[30px] rounded-[8px] border-none cursor-pointer fs-[18px] mt-[5px]",
+        ),
+        # 7. Interactive Button
+        Button(
+            text="Reset",
+            on_click=(
+                state.reset()
+            ),
+            style="bg-[#3498db] text-white p-[15px] px-[30px] rounded-[8px] border-none cursor-pointer fs-[18px] mt-[5px]",
+        ),
+        style="flex flex-col items-center justify-center h-[100vh] ffam-[Arial] bg-[#f0f2f5]",
+
+    ) 
+
+# 8. Add page
+app.add_page("index", index(), title="index")
+
+# 9. Run app with preview
 if __name__ == "__main__":
     app.rTimeCompile()
 """
-            # Include desktop=True when requested
-            desktop_suffix = ", desktop=True" if str(proj_type).lower() == 'desktop' else ""
-            HELLO_WORLD_CODE = HELLO_WORLD_CODE.replace('%s', desktop_suffix)
-            # If this is a desktop scaffold, also include the desktop API imports
-            if str(proj_type).lower() == 'desktop':
-                # Add `from dars.desktop import *` right after the dars.all import
-                HELLO_WORLD_CODE = HELLO_WORLD_CODE.replace('from dars.all import *', 'from dars.all import *\nfrom dars.desktop import *', 1)
-            main_py = Path(name) / "main.py"
-            main_py.write_text(HELLO_WORLD_CODE.strip(), encoding="utf-8")
-            console.print(f"[green]✔ {translator.get('main_py_created')}[/green]")
+
+            # Template for 'web' type (default SPA)
+            SPA_TEMPLATE_CODE = """from dars.all import *
+
+app = App(title="Hello World", theme="dark")
+
+# 1. Define State
+state = State("app", title_val="Simple Counter", count=0)
+
+# 2. Define Route
+@route("/")
+def index(): 
+    return Page(
+        # 3. Use useValue for app text
+        Text(
+            text=useValue("app.title_val"),
+            style="fs-[33px] text-black font-bold mb-[5x] ",
+        ),
+
+        # 4. Display reactive count
+        Text(
+            text=useDynamic("app.count"),
+            style="fs-[48px] mt-5 mb-[12px]"
+        ),
+        # 5. Interactive Button
+        Button(
+            text="+1",
+            on_click=(
+                state.count.increment(1)
+            ),
+            style="bg-[#3498db] text-white p-[15px] px-[30px] rounded-[8px] border-none cursor-pointer fs-[18px]",
+        ),
+
+        # 6. Interactive Button
+        Button(
+            text="-1",
+            on_click=(
+                state.count.decrement(1)
+            ),
+            style="bg-[#3498db] text-white p-[15px] px-[30px] rounded-[8px] border-none cursor-pointer fs-[18px] mt-[5px]",
+        ),
+        # 7. Interactive Button
+        Button(
+            text="Reset",
+            on_click=(
+                state.reset()
+            ),
+            style="bg-[#3498db] text-white p-[15px] px-[30px] rounded-[8px] border-none cursor-pointer fs-[18px] mt-[5px]",
+        ),
+        style="flex flex-col items-center justify-center h-[100vh] ffam-[Arial] bg-[#f0f2f5]",
+
+    ) 
+
+# 8. Add page
+app.add_page("index", index(), title="index")
+
+# 9. Run app with preview
+if __name__ == "__main__":
+    app.rTimeCompile()
+"""
+            
+            # 4. dars.config.json
+            DARS_CONFIG_JSON_CODE = """{
+  "entry": "main.py",
+  "format": "web",
+  "outdir": "dist",
+  "include": [],
+  "exclude": [
+    "**/__pycache__",
+    ".git",
+    ".venv",
+    "node_modules"
+  ],
+  "bundle": true,
+  "defaultMinify": true,
+  "viteMinify": true,
+  "markdownHighlight": true,
+  "markdownHighlightTheme": "auto"
+}"""
+
+            # Write Initial Files
+            root_path = Path(name)
+            
+            if proj_type == 'ssr':
+                # write SSR template
+                (root_path / "main.py").write_text(SSR_TEMPLATE_CODE.strip(), encoding="utf-8")
+                console.print(f"[green]✔ {translator.get('main_py_created')} (SSR Mode)[/green]")
+                
+                # Update config json if needed (SSR often uses web format, so standard json is fine)
+                # Just change comment or logic if SSR required specific flags. For now standard is OK.
+                (root_path / "dars.config.json").write_text(DARS_CONFIG_JSON_CODE.strip(), encoding="utf-8")
+                
+                # Backend Directory (Only for SSR)
+                backend_dir = root_path / "backend"
+                backend_dir.mkdir(exist_ok=True)
+                (backend_dir / "__init__.py").touch()
+                (backend_dir / "api.py").write_text(API_PY_CODE.strip(), encoding="utf-8")
+                (backend_dir / "apiConfig.py").write_text(API_CONFIG_PY_CODE.strip(), encoding="utf-8")
+                console.print(f"[green]✔ Fullstack scaffold created (backend, apiConfig, main.py)[/green]")
+            else:
+                # Default Web/SPA
+                (root_path / "main.py").write_text(SPA_TEMPLATE_CODE.strip(), encoding="utf-8")
+                console.print(f"[green]✔ {translator.get('main_py_created')} (SPA Mode)[/green]")
+                (root_path / "dars.config.json").write_text(DARS_CONFIG_JSON_CODE.strip(), encoding="utf-8")
+
 
         # Create default dars.config.json for the new project
         try:
@@ -977,8 +1162,8 @@ def create_parser(include_hidden: bool = True) -> argparse.ArgumentParser:
         help='Create or update dars.config.json in the target (or current) directory'
     )
     init_parser.add_argument(
-        '--type', '-T', choices=['web', 'desktop'], default='web',
-        help='Project type scaffold (web | desktop). Default: web'
+        '--type', '-T', choices=['web', 'desktop', 'ssr'], default='web',
+        help='Project type scaffold (web | desktop | ssr). Default: web'
     )
 
     # Build command (config-driven)
@@ -1995,17 +2180,18 @@ def main():
 # Utility: ensure lib/dars.min.js exists at project root (no overwrite)
 def ensure_dars_lib(project_root: str):
     try:
-        os.makedirs(os.path.join(project_root, 'lib'), exist_ok=True)
-        dest = os.path.join(project_root, 'lib', 'dars.min.js')
-        if not os.path.exists(dest):
-            try:
-                from dars.js_lib import DARS_MIN_JS
-                with open(dest, 'w', encoding='utf-8') as fdst:
-                    fdst.write(DARS_MIN_JS)
-            except Exception:
-                pass
-    except Exception:
-        pass
+        from dars.js_lib import DARS_MIN_JS
+        lib_dir = os.path.join(project_root, "lib")
+        os.makedirs(lib_dir, exist_ok=True)
+        
+        lib_file = os.path.join(lib_dir, "dars.min.js")
+        
+        # Always overwrite to ensure updates propagate (especially dev mode fixes)
+        with open(lib_file, 'w', encoding='utf-8') as f:
+            f.write(DARS_MIN_JS)
+            
+    except Exception as e:
+        print(f"[yellow]⚠ Failed to update dars.min.js: {e}[/yellow]")
 
 if __name__ == "__main__":
     main()
