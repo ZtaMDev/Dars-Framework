@@ -1,3 +1,64 @@
+# Release Notes v1.7.0
+
+> **Complete VRef System & Multi-Element Updates**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### New Hook: setVRef()
+
+Introducing `setVRef()`, a powerful new hook that allows you to create independent value references tied to specific DOM selectors. Unlike `useValue` which sets initial values for single components, `setVRef` creates a lightweight, portable reference that can be shared across your application.
+
+**Key Capabilities:**
+*   **Independent Values:** Define values that live in the DOM, identified by a CSS selector.
+*   **Shared References:** Use a class selector (e.g., `.shared-value`) to share a single value across multiple components.
+*   **Function Component Support:** seamless integration with `@FunctionComponent` templates.
+
+### Multi-Element Updates (Synchronized State)
+
+The `updateVRef()` hook has been upgraded to support widespread updates. When you use a **class selector** (e.g., `.my-value`) with `setVRef` and `updateVRef`, **all** matching elements in the DOM will update simultaneously.
+
+This allows you to share a single "value reference" across multiple independent components (like a main display and a sidebar preview) and keep them in sync with a single line of code.
+
+### Extended Component Support
+
+Extended `useValue` and `useDynamic` support to cover the entire component library. You can now use reactive bindings in:
+- `Card`
+- `Modal`
+- `Navbar`
+- `DatePicker`
+- `ProgressBar`
+- `Tooltip`
+- `Spinner`
+
+## Example: Shared Counter
+
+```python
+from dars.all import *
+
+# 1. Define a shared reference using a class selector
+count_ref = setVRef(0, ".shared-count")
+
+# 2. Use it in multiple places
+Container(
+    # First component
+    Text(count_ref, class_name="shared-count"),
+    
+    # Second component (Function Component)
+    CountDisplay(count_ref, class_name="shared-count")
+)
+
+# 3. Update BOTH with one click!
+Button("Increment All", on_click=updateVRef(".shared-count", V(".shared-count").int() + 1))
+```
+
+---
+
 # Release Notes v1.6.9
 
 > **Dars SSR System & Backend Integration**

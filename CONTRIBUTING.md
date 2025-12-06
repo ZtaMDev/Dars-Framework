@@ -4,7 +4,6 @@ First off, thank you for considering contributing to Dars Framework! It's people
 
 ## Table of Contents
 
-- [Code of Conduct](#code-of-conduct)
 - [How Can I Contribute?](#how-can-i-contribute)
   - [Reporting Bugs](#reporting-bugs)
   - [Suggesting Enhancements](#suggesting-enhancements)
@@ -15,10 +14,6 @@ First off, thank you for considering contributing to Dars Framework! It's people
 - [Testing](#testing)
 - [Documentation](#documentation)
 - [Community](#community)
-
-## Code of Conduct
-
-This project and everyone participating in it is governed by the [Dars Framework Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to the project maintainers.
 
 ## How Can I Contribute?
 
@@ -154,7 +149,7 @@ Fixes #456
 
 ### Prerequisites
 
-- Python 3.9 or higher
+- Python 3.11 or higher
 - pip (Python package installer)
 - Git
 
@@ -162,7 +157,7 @@ Fixes #456
 
 1. **Clone your fork:**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/Dars-Framework.git
+   git clone https://github.com/ZtaMDev/Dars-Framework.git
    cd Dars-Framework
    ```
 
@@ -302,7 +297,6 @@ When creating new components:
 2. **Define clear props** - Use type hints for all component properties
 3. **Implement `render()`** - Abstract method that exporters will implement
 4. **Add examples** - Include usage examples in docstrings
-5. **Write tests** - Add unit tests for your component
 
 **Example:**
 
@@ -400,8 +394,6 @@ When adding features, update:
 
 1. **README.md** - If it affects getting started or core features
 2. **Documentation markdown** - Add/update files in `LandingPage/documentation/markdown/`
-3. **Examples** - Add working examples to `tst/proj/v1/`
-4. **Release notes** - Update `LandingPage/releases/versions.md`
 
 ### Documentation Style
 
@@ -432,5 +424,3 @@ By contributing to Dars Framework, you agree that your contributions will be lic
 ---
 
 Thank you for contributing to Dars Framework! 🎉
-
-**Happy coding!** 🚀

@@ -26,7 +26,7 @@ Try dars without installing nothing(single page mode) just visit the [Dars Playg
 ## How It Works
 - Build your UI using Python classes and components (like Text, Button, Container, Page, etc).
 - Preview instantly with hot-reload using `app.rTimeCompile()`.
-- Export your app to static web files with a single CLI command.
+- Export your app to static/dynamic/ssr web files with a single CLI command.
 - Export to native desktop apps (BETA) using project config `format: "desktop"` and `dars build`.
 - Use multipage, layouts, scripts, and more—see docs for advanced features.
 - For more information visit the [Documentation](https://ztamdev.github.io/Dars-Framework/docs.html)

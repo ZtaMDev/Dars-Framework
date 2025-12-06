@@ -79,7 +79,7 @@ def updateVRef(
             return f"'{str(val)}'"
     
     def _generate_update_code(sel: str, val: Any) -> str:
-        """Generate JavaScript code to update a single element."""
+        """Generate JavaScript code to update one or more elements."""
         value_code = _generate_value_code(val)
         
         return f"""
@@ -93,9 +93,9 @@ def updateVRef(
             window.__DARS_VREF_VALUES__[selector] = value;
         }}
         
-        // Update DOM element
-        const el = document.querySelector(selector);
-        if (el) {{
+        // Update DOM elements
+        const elements = document.querySelectorAll(selector);
+        elements.forEach(el => {{
             // Handle different element types
             if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {{
                 if (el.type === 'checkbox' || el.type === 'radio') {{
@@ -108,7 +108,7 @@ def updateVRef(
             }} else {{
                 el.textContent = value;
             }}
-        }}
+        }});
         
         // Trigger VRef bindings update
         if (window.Dars && window.Dars.updateVRef) {{

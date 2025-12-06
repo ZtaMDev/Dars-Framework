@@ -1487,6 +1487,21 @@
      <a class="sidebar-link sidebar-level-3" href="#backend-integration-example" style="margin-left: 40px">
       Backend Integration Example
      </a>
+     <a class="sidebar-link sidebar-level-2" href="#setvref-independent-value-reference" style="margin-left: 20px">
+      setVRef() - Independent Value Reference
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#basic-usage" style="margin-left: 40px">
+      Basic Usage
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#shared-values-multi-component-updates" style="margin-left: 40px">
+      Shared Values (Multi-Component Updates)
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#usage-in-functioncomponents" style="margin-left: 40px">
+      Usage in FunctionComponents
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#syntax" style="margin-left: 40px">
+      Syntax
+     </a>
      <a class="sidebar-link sidebar-level-2" href="#updatevref-component-level-state-updates" style="margin-left: 20px">
       updateVRef() - Component-Level State Updates
      </a>
@@ -16576,6 +16591,141 @@ def hello():
 <span class="n">app</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="s2">"index"</span><span class="p">,</span> <span class="n">index</span><span class="p">())</span>
 </code></pre>
       </div>
+      <hr/>
+      <h2 id="setvref-independent-value-reference">
+       setVRef() - Independent Value Reference
+      </h2>
+      <p>
+       The
+       <code>
+        setVRef()
+       </code>
+       hook allows you to define initial values that are tied to a specific CSS selector. This is the foundation for creating component-level state that can be shared across multiple components without using global
+       <code>
+        State
+       </code>
+       objects.
+      </p>
+      <h3 id="basic-usage-4">
+       Basic Usage
+      </h3>
+      <p>
+       Create a reference with an initial value and a selector, then pass it to components.
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="c1"># Create a reference tied to the "#count" ID</span>
+<span class="n">count_ref</span> <span class="o">=</span> <span class="n">setVRef</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">"#count"</span><span class="p">)</span>
+
+<span class="c1"># Use it in a component</span>
+<span class="n">Text</span><span class="p">(</span><span class="n">count_ref</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"count"</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="shared-values-multi-component-updates">
+       Shared Values (Multi-Component Updates)
+      </h3>
+      <p>
+       By using a
+       <strong>
+        class selector
+       </strong>
+       , you can share the same value across multiple components and update them all simultaneously!
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Create a reference tied to a CLASS selector</span>
+<span class="n">price_ref</span> <span class="o">=</span> <span class="n">setVRef</span><span class="p">(</span><span class="mf">99.99</span><span class="p">,</span> <span class="s2">".product-price"</span><span class="p">)</span>
+
+<span class="c1"># Use in multiple places</span>
+<span class="n">Container</span><span class="p">(</span>
+    <span class="n">Text</span><span class="p">(</span><span class="s2">"Price: $"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">"font-bold"</span><span class="p">),</span>
+    <span class="n">Text</span><span class="p">(</span><span class="n">price_ref</span><span class="p">,</span> <span class="n">class_name</span><span class="o">=</span><span class="s2">"product-price"</span><span class="p">),</span>  <span class="c1"># Main display</span>
+
+    <span class="n">Container</span><span class="p">(</span>
+        <span class="n">Text</span><span class="p">(</span><span class="s2">"Also shown here: $"</span><span class="p">),</span>
+        <span class="n">Text</span><span class="p">(</span><span class="n">price_ref</span><span class="p">,</span> <span class="n">class_name</span><span class="o">=</span><span class="s2">"product-price"</span><span class="p">)</span>   <span class="c1"># Secondary display</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># Update ALL elements matching ".product-price" at once</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Discount"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">".product-price"</span><span class="p">,</span> <span class="mf">49.99</span><span class="p">))</span>
+</code></pre>
+      </div>
+      <h3 id="usage-in-functioncomponents">
+       Usage in FunctionComponents
+      </h3>
+      <p>
+       <code>
+        setVRef
+       </code>
+       works seamlessly with
+       <code>
+        @FunctionComponent
+       </code>
+       . The value is resolved internally, so your templates remain clean.
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="nd">@FunctionComponent</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">UserBadge</span><span class="p">(</span><span class="n">name_ref</span><span class="p">,</span> <span class="o">**</span><span class="n">props</span><span class="p">):</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">'''</span>
+<span class="s1">    &lt;div </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">class_name</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">Props</span><span class="o">.</span><span class="n">style</span><span class="si">}</span><span class="s1">&gt;</span>
+<span class="s1">        User: &lt;span class="user-name"&gt;</span><span class="si">{</span><span class="n">name_ref</span><span class="si">}</span><span class="s1">&lt;/span&gt;</span>
+<span class="s1">    &lt;/div&gt;</span>
+<span class="s1">    '''</span>
+
+<span class="c1"># Define ref</span>
+<span class="n">user_ref</span> <span class="o">=</span> <span class="n">setVRef</span><span class="p">(</span><span class="s2">"Guest"</span><span class="p">,</span> <span class="s2">".user-name"</span><span class="p">)</span>
+
+<span class="c1"># Render</span>
+<span class="n">UserBadge</span><span class="p">(</span><span class="n">user_ref</span><span class="p">,</span> <span class="n">class_name</span><span class="o">=</span><span class="s2">"badge"</span><span class="p">)</span>
+
+<span class="c1"># Update</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Login"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">".user-name"</span><span class="p">,</span> <span class="s2">"John Doe"</span><span class="p">))</span>
+</code></pre>
+      </div>
+      <h3 id="syntax-4">
+       Syntax
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">setVRef</span><span class="p">(</span><span class="n">initial_value</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">selector</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VRefValue</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Parameters:
+       </strong>
+       -
+       <code>
+        initial_value
+       </code>
+       : The initial value to display (string, number, boolean).
+-
+       <code>
+        selector
+       </code>
+       : The CSS selector (ID or Class) that identifies the element(s).
+  - Use
+       <code>
+        #id
+       </code>
+       for single elements.
+  - Use
+       <code>
+        .class
+       </code>
+       for multiple elements sharing the value.
+      </p>
+      <p>
+       <strong>
+        Returns:
+       </strong>
+       -
+       <code>
+        VRefValue
+       </code>
+       : An object representing the value, ready to be passed to components.
+      </p>
+      <hr/>
       <h2 id="updatevref-component-level-state-updates">
        updateVRef() - Component-Level State Updates
       </h2>
@@ -16629,7 +16779,7 @@ def hello():
         NEW!
        </strong>
       </p>
-      <h3 id="basic-usage-4">
+      <h3 id="basic-usage-5">
        Basic Usage
       </h3>
       <div class="codehilite">
@@ -16867,7 +17017,7 @@ def hello():
     <span class="p">)</span>
 </code></pre>
       </div>
-      <h3 id="syntax-4">
+      <h3 id="syntax-5">
        Syntax
       </h3>
       <div class="codehilite">
@@ -17076,7 +17226,7 @@ def hello():
       <p>
        **Generate client-side timestamps for forms and state updates.
       </p>
-      <h3 id="basic-usage-5">
+      <h3 id="basic-usage-6">
        Basic Usage
       </h3>
       <div class="codehilite">
@@ -22502,7 +22652,7 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
     </div>
    </div>
   </div>
-  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1764979940" type="module">
+  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1765053966" type="module">
   </script>
   <script defer="" src="app_docs.js">
   </script>

@@ -33,7 +33,9 @@ from dars.components.basic.spinner import Spinner
 from dars.components.basic.tooltip import Tooltip
 from dars.components.basic.markdown import Markdown
 from dars.components.basic.section import Section
-from typing import Dict, Any
+from typing import Dict, Any, List
+import dars.hooks.use_vref as use_vref
+import dars.hooks.set_vref as set_vref
 import os
 from bs4 import BeautifulSoup
 from dars.exporters.web.vdom import VDomBuilder
@@ -2599,6 +2601,9 @@ body {
 
         // Initialize reactive bindings for useDynamic
         {self._generate_reactive_bindings_js()}
+
+        // Initialize VRef bindings
+        {self._generate_vref_bindings_js()}
     }}
 
     if(document.readyState === 'complete' || document.readyState === 'interactive'){{
@@ -3075,6 +3080,169 @@ body {
         
         return '\n'.join(lines)
     
+    def _generate_vref_bindings_js(self) -> str:
+        """Generate JavaScript for VRef bindings and values."""
+        lines = []
+
+        # 1. Register VRef Values (setVRef)
+        if hasattr(set_vref, '_VREF_VALUES_REGISTRY') and set_vref._VREF_VALUES_REGISTRY:
+            lines.append("    // VRef Values Registration")
+            lines.append("    if (!window.__DARS_VREF_VALUES__) window.__DARS_VREF_VALUES__ = {};")
+            
+            for selector, vref_val in set_vref._VREF_VALUES_REGISTRY.items():
+                if hasattr(vref_val, 'generate_registry_js'):
+                    lines.append(vref_val.generate_registry_js())
+        
+        # 2. Register VRef Bindings (useVRef)
+        if hasattr(use_vref, '_VREF_BINDINGS_REGISTRY') and use_vref._VREF_BINDINGS_REGISTRY:
+            lines.append("    // VRef Bindings Registration")
+            
+            for binding in use_vref._VREF_BINDINGS_REGISTRY:
+                if hasattr(binding, 'generate_reactive_js'):
+                    lines.append(binding.generate_reactive_js())
+
+        if not lines:
+            return "    // No VRef bindings"
+
+        return '\n'.join(lines)
+
+    def _process_vref_props(self, component: Component) -> Dict[str, Any]:
+        """
+        Process component properties to detect VRef bindings/values.
+        Returns a dictionary with:
+        - 'attrs': Dict of HTML attributes to add (data-vref, data-vref-value)
+        - 'initial_values': Dict of resolved initial values for props
+        """
+        from dars.hooks.use_vref import _VREF_BINDINGS_REGISTRY
+        from dars.hooks.set_vref import _VREF_VALUES_REGISTRY
+        
+        vref_attrs = {}
+        initial_values = {}
+        
+        # Helper to check if a value is a VRef object or marker
+        def check_vref(val):
+            # First check if it's a VRef object directly
+            if hasattr(val, '__class__'):
+                class_name = val.__class__.__name__
+                if class_name == 'VRefBinding':
+                    # It's a binding object
+                    return "binding", val
+                elif class_name == 'VRefValue':
+                    # It's a value object
+                    return "value", val
+            
+            # Then check if it's a string marker
+            val_str = str(val)
+            
+            # Check for value marker: __DARS_VREF_VALUE_{ID}__
+            if "__DARS_VREF_VALUE_" in val_str:
+                return "value", val_str
+                
+            # Check for binding marker: __DARS_VREF_{ID}__
+            if "__DARS_VREF_" in val_str and "__DARS_VREF_VALUE_" not in val_str:
+                return "binding", val_str
+                
+            return None, None
+
+        props_to_check = getattr(component, 'props', {})
+        
+        # Also check direct component attributes
+        all_props = {**props_to_check}
+        if hasattr(component, 'text') and component.text is not None: 
+            all_props['text'] = component.text
+        if hasattr(component, 'value') and component.value is not None: 
+            all_props['value'] = component.value
+        if hasattr(component, 'src') and component.src is not None:
+            all_props['src'] = component.src
+        if hasattr(component, 'href') and component.href is not None:
+            all_props['href'] = component.href
+        if hasattr(component, 'placeholder') and component.placeholder is not None:
+            all_props['placeholder'] = component.placeholder
+        
+        bindings = []
+        
+        for prop, value in all_props.items():
+            # Skip if value is None
+            if value is None:
+                continue
+                
+            # Handle style dict specially
+            if prop == 'style' and isinstance(value, dict):
+                for style_prop, style_val in value.items():
+                    vtype, vref_obj_or_marker = check_vref(style_val)
+                    if vtype == 'binding':
+                        # Find or use binding object
+                        if isinstance(vref_obj_or_marker, str):
+                            binding = next((b for b in _VREF_BINDINGS_REGISTRY if str(b) == vref_obj_or_marker), None)
+                        else:
+                            binding = vref_obj_or_marker
+                        
+                        if binding and hasattr(binding, 'get_initial_value'):
+                            # Store resolved value for this style property
+                            if 'style' not in initial_values:
+                                initial_values['style'] = {}
+                            initial_values['style'][style_prop] = binding.get_initial_value()
+                        
+                        marker = str(binding) if binding else vref_obj_or_marker
+                        bindings.append(marker)
+                    elif vtype == 'value':
+                        # Find or use VRefValue object
+                        if isinstance(vref_obj_or_marker, str):
+                            vref_val = next((v for v in _VREF_VALUES_REGISTRY.values() if str(v) == vref_obj_or_marker), None)
+                        else:
+                            vref_val = vref_obj_or_marker
+                        
+                        if vref_val:
+                            if 'style' not in initial_values:
+                                initial_values['style'] = {}
+                            initial_values['style'][style_prop] = vref_val.value
+                            vref_attrs['data-vref-value'] = str(vref_val)
+                continue
+
+            # Check if the property value contains a VRef marker or is a VRef object
+            vtype, vref_obj_or_marker = check_vref(value)
+            
+            if vtype == "binding":
+                # It's a binding (useVRef)
+                if isinstance(vref_obj_or_marker, str):
+                    # It's a string marker, find the binding object
+                    binding = next((b for b in _VREF_BINDINGS_REGISTRY if str(b) == vref_obj_or_marker), None)
+                else:
+                    # It's the binding object itself
+                    binding = vref_obj_or_marker
+                
+                if binding and hasattr(binding, 'get_initial_value'):
+                    try:
+                        initial_values[prop] = binding.get_initial_value()
+                    except Exception as e:
+                        # If we can't get initial value, use empty string
+                        initial_values[prop] = ""
+                
+                # Store the marker for data-vref attribute
+                marker = str(binding) if binding else vref_obj_or_marker
+                bindings.append(marker)
+                
+            elif vtype == "value":
+                 # It's a value source (setVRef)
+                 if isinstance(vref_obj_or_marker, str):
+                     # It's a string marker, find the VRefValue object
+                     vref_val = next((v for v in _VREF_VALUES_REGISTRY.values() if str(v) == vref_obj_or_marker), None)
+                 else:
+                     # It's the VRefValue object itself
+                     vref_val = vref_obj_or_marker
+                 
+                 if vref_val:
+                     initial_values[prop] = vref_val.value
+                     vref_attrs['data-vref-value'] = str(vref_val)
+
+        if bindings:
+            # Join multiple bindings with space
+            vref_attrs['data-vref'] = " ".join(bindings)
+            
+        return {'attrs': vref_attrs, 'initial_values': initial_values}
+
+
+    
     def _generate_events_js(self, events_map: Dict[str, Dict[str, Any]]) -> str:
         """Genera código JS para inicializar todos los eventos directamente en el runtime"""
         lines = []
@@ -3475,8 +3643,111 @@ body {
         except Exception as e:
             print(f"Warning: Error processing useValue markers in FunctionComponent: {e}")
         
-        return rendered
+        # Process VRef Markers (useVRef/setVRef) using BeautifulSoup
+        try:
+            from dars.hooks.use_vref import _VREF_BINDINGS_REGISTRY
+            from dars.hooks.set_vref import _VREF_VALUES_REGISTRY
+            import re
+            
+            # Helper to check if string contains VRef marker
+            # Matches: __DARS_VREF_VALUE_ID__ (Value) or __DARS_VREF_ID__ (Binding)
+            # Group 1: 'VALUE_' (optional). Group 2: ID (hex + underscores)
+            vref_pattern = r'__DARS_VREF_(VALUE_)?([a-f0-9_]+)__'
+            
+            if re.search(vref_pattern, rendered):
+                soup = BeautifulSoup(rendered, 'html.parser')
+                modified = False
+                
+                # 1. Text content
+                for element in soup.find_all(string=re.compile(vref_pattern)):
+                    text = element.string
+                    matches = re.finditer(vref_pattern, text)
+                    if matches:
+                        new_text = text
+                        parent = element.parent
+                        
+                        for match in matches:
+                            marker = match.group(0)
+                            marker_prefix = match.group(1) # 'VALUE_' or None
+                            marker_id = match.group(2)
+                            
+                            marker_type = 'VALUE' if marker_prefix == 'VALUE_' else 'BINDING'
+                            
+                            initial_val = ""
+                            if marker_type == 'VALUE':
+                                vref_val = _VREF_VALUES_REGISTRY.get(marker_id)
+                                if vref_val:
+                                    initial_val = str(vref_val.value)
+                                    if parent:
+                                        parent['data-vref-value'] = marker
 
+                            new_text = new_text.replace(marker, initial_val)
+                            
+                        element.replace_with(new_text)
+                        modified = True
+                        
+                # 2. Attributes
+                for tag in soup.find_all(True):
+                    for attr_name, attr_value in list(tag.attrs.items()):
+                        # Attributes can be string or list
+                        if isinstance(attr_value, str):
+                            if re.search(vref_pattern, attr_value):
+                                new_val = attr_value
+                                for match in re.finditer(vref_pattern, attr_value):
+                                    marker = match.group(0)
+                                    marker_prefix = match.group(1) # 'VALUE_' or None
+                                    marker_id = match.group(2)
+                                    
+                                    marker_type = 'VALUE' if marker_prefix == 'VALUE_' else 'BINDING'
+                                    
+                                    initial_val = ""
+                                    if marker_type == 'VALUE':
+                                        vref_val = _VREF_VALUES_REGISTRY.get(marker_id)
+                                        if vref_val:
+                                            initial_val = str(vref_val.value)
+                                            tag['data-vref-value'] = marker
+                                    
+                                    new_val = new_val.replace(marker, initial_val)
+                                tag[attr_name] = new_val
+                                modified = True
+
+                        elif isinstance(attr_value, list):
+                            new_list = []
+                            list_mod = False
+                            for item in attr_value:
+                                if isinstance(item, str) and re.search(vref_pattern, item):
+                                    new_item = item
+                                    for match in re.finditer(vref_pattern, item):
+                                        marker = match.group(0)
+                                        marker_prefix = match.group(1) # 'VALUE_' or None
+                                        marker_id = match.group(2)
+                                        
+                                        marker_type = 'VALUE' if marker_prefix == 'VALUE_' else 'BINDING'
+                                        
+                                        initial_val = ""
+                                        if marker_type == 'VALUE':
+                                            vref_val = _VREF_VALUES_REGISTRY.get(marker_id)
+                                            if vref_val:
+                                                initial_val = str(vref_val.value)
+                                                tag['data-vref-value'] = marker
+
+                                        new_item = new_item.replace(marker, initial_val)
+                                    new_list.append(new_item)
+                                    list_mod = True
+                                else:
+                                    new_list.append(item)
+                            if list_mod:
+                                tag[attr_name] = new_list
+                                modified = True
+
+                if modified:
+                    rendered = str(soup)
+
+        except Exception as e:
+            # print(f"Warning: Error processing VRef markers: {e}")
+            pass
+
+        return rendered
 
     def render_component(self, component: Component) -> str:
         if not isinstance(component, Component):
@@ -3585,6 +3856,11 @@ body {
                 self._built_in_bindings = []
             self._built_in_bindings.extend(dynamic_info['bindings'])
 
+        # Process VRef props
+        vref_info = self._process_vref_props(grid)
+        vref_attrs = vref_info['attrs']
+        vref_str = ' '.join([f'{k}="{v}"' for k, v in vref_attrs.items()])
+
         class_attr = f'class="dars-grid {grid.class_name or ""}"'
         style = f'display: grid; grid-template-rows: repeat({grid.rows}, 1fr); grid-template-columns: repeat({grid.cols}, 1fr); gap: {getattr(grid, "gap", "16px")};'
         # Render anchors/positions
@@ -3626,7 +3902,7 @@ body {
                         elif '%' in anchor.y or 'px' in anchor.y: anchor_style += f'top: {anchor.y}; position: relative;'
             grid_item_style = f'grid-row: {row} / span {row_span}; grid-column: {col} / span {col_span}; {anchor_style}'
             children_html += f'<div style="{grid_item_style}">{self.render_component(child)}</div>'
-        return f'<div id="{component_id}" {class_attr} style="{style}">{children_html}</div>'
+        return f'<div id="{component_id}" {class_attr} style="{style}" {vref_str}>{children_html}</div>'
 
     def render_flex(self, flex):
         """Renderiza un FlexLayout como un div con CSS flexbox."""
@@ -3642,6 +3918,11 @@ body {
             if not hasattr(self, '_built_in_bindings'):
                 self._built_in_bindings = []
             self._built_in_bindings.extend(dynamic_info['bindings'])
+
+        # Process VRef props
+        vref_info = self._process_vref_props(flex)
+        vref_attrs = vref_info['attrs']
+        vref_str = ' '.join([f'{k}="{v}"' for k, v in vref_attrs.items()])
 
         class_attr = f'class="dars-flex {flex.class_name or ""}"'
         style = f'display: flex; flex-direction: {getattr(flex, "direction", "row")}; flex-wrap: {getattr(flex, "wrap", "wrap")}; justify-content: {getattr(flex, "justify", "flex-start")}; align-items: {getattr(flex, "align", "stretch")}; gap: {getattr(flex, "gap", "16px")};'
@@ -3675,7 +3956,7 @@ body {
                         elif anchor.y == 'bottom': anchor_style += 'align-self: flex-end;'
                         elif '%' in anchor.y or 'px' in anchor.y: anchor_style += f'top: {anchor.y}; position: relative;'
             children_html += f'<div style="{anchor_style}">{self.render_component(child)}</div>'
-        return f'<div id="{component_id}" {class_attr} style="{style}">{children_html}</div>'
+        return f'<div id="{component_id}" {class_attr} style="{style}" {vref_str}>{children_html}</div>'
 
     def render_page(self, page):
         """Renderiza un componente Page como root de una página multipage"""
@@ -3719,7 +4000,17 @@ body {
         else:
             text_value = text.text
             
-        return f'<span id="{component_id}" {class_attr} {style_attr}>{text_value}</span>'
+        # Process VRef props
+        vref_info = self._process_vref_props(text)
+        vref_attrs = vref_info['attrs']
+        vref_initial = vref_info['initial_values']
+        vref_str = ' '.join([f'{k}="{v}"' for k, v in vref_attrs.items()])
+        
+        # Use VRef initial value if available
+        if 'text' in vref_initial:
+            text_value = vref_initial['text']
+
+        return f'<span id="{component_id}" {class_attr} {style_attr} {vref_str}>{text_value}</span>'
         
     def render_button(self, button: Button) -> str:
         """Renderiza un componente Button"""
@@ -3755,7 +4046,17 @@ body {
         
         disabled_attr = "disabled" if disabled_val else ""
         
-        return f'<button id="{component_id}" {class_attr} {style_attr} {type_attr} {disabled_attr}>{text_value}</button>'
+        # Process VRef props
+        vref_info = self._process_vref_props(button)
+        vref_attrs = vref_info['attrs']
+        vref_initial = vref_info['initial_values']
+        vref_str = ' '.join([f'{k}="{v}"' for k, v in vref_attrs.items()])
+        
+        # Use VRef initial value if available
+        if 'text' in vref_initial:
+            text_value = vref_initial['text']
+
+        return f'<button id="{component_id}" {class_attr} {style_attr} {type_attr} {disabled_attr} {vref_str}>{text_value}</button>'
         
     def render_input(self, input_comp: Input) -> str:
         """Renderiza un componente Input"""
@@ -3775,9 +4076,17 @@ body {
             if not hasattr(self, '_built_in_bindings'):
                 self._built_in_bindings = []
             self._built_in_bindings.extend(dynamic_info['bindings'])
+
+        # Process VRef props
+        vref_info = self._process_vref_props(input_comp)
+        vref_attrs = vref_info['attrs']
+        vref_initial = vref_info['initial_values']
+        vref_str = ' '.join([f'{k}="{v}"' for k, v in vref_attrs.items()])
         
-        # Handle value
-        if 'value' in dynamic_info['initial_values'] and dynamic_info['initial_values']['value'] is not None:
+        # Handle value (check VRef first)
+        if 'value' in vref_initial:
+            value_val = vref_initial['value']
+        elif 'value' in dynamic_info['initial_values'] and dynamic_info['initial_values']['value'] is not None:
             value_val = dynamic_info['initial_values']['value']
         else:
             value_val = input_comp.value
@@ -3806,7 +4115,7 @@ body {
         if hasattr(required_val, 'marker'): required_val = False
         required_attr = "required" if required_val else ""
         
-        return f'<input id="{component_id}" {class_attr} {style_attr} {type_attr} {value_attr} {placeholder_attr} {disabled_attr} {readonly_attr} {required_attr} />'
+        return f'<input id="{component_id}" {class_attr} {style_attr} {type_attr} {value_attr} {placeholder_attr} {disabled_attr} {readonly_attr} {required_attr} {vref_str} />'
         
     def render_container(self, container: Container) -> str:
         """Renderiza un componente Container"""
@@ -3822,6 +4131,11 @@ body {
             if not hasattr(self, '_built_in_bindings'):
                 self._built_in_bindings = []
             self._built_in_bindings.extend(dynamic_info['bindings'])
+
+        # Process VRef props
+        vref_info = self._process_vref_props(container)
+        vref_attrs = vref_info['attrs']
+        vref_str = ' '.join([f'{k}="{v}"' for k, v in vref_attrs.items()])
             
         class_attr = f'class="dars-container {container.class_name or ""}"'
         style_attr = f'style="{self.render_styles(container.style)}"' if container.style else ""
@@ -3850,7 +4164,7 @@ body {
         for child in flat_children:
             children_html += self.render_component(child)
 
-        return f'<div id="{component_id}" {class_attr} {style_attr}{data_attrs}>{children_html}</div>'
+        return f'<div id="{component_id}" {class_attr} {style_attr}{data_attrs} {vref_str}>{children_html}</div>'
 
     def render_section(self, section: Section):
         """Renderiza un componente Section"""
@@ -3913,7 +4227,19 @@ body {
         alt_val = dynamic_info['initial_values'].get('alt', image.alt)
         if hasattr(alt_val, 'marker'): alt_val = ""
 
-        return f'<img id="{component_id}" src="{src_val}" alt="{alt_val}" {width_attr} {height_attr} {class_attr} {style_attr} />'
+        # Process VRef props
+        vref_info = self._process_vref_props(image)
+        vref_attrs = vref_info['attrs']
+        vref_initial = vref_info['initial_values']
+        vref_str = ' '.join([f'{k}="{v}"' for k, v in vref_attrs.items()])
+        
+        # Use VRef initial values if available
+        if 'src' in vref_initial:
+            src_val = vref_initial['src']
+        if 'alt' in vref_initial:
+            alt_val = vref_initial['alt']
+
+        return f'<img id="{component_id}" src="{src_val}" alt="{alt_val}" {width_attr} {height_attr} {class_attr} {style_attr} {vref_str} />'
 
     def render_link(self, link: Link) -> str:
         """Renderiza un componente Link"""
@@ -3941,7 +4267,19 @@ body {
         text_val = dynamic_info['initial_values'].get('text', link.text)
         if hasattr(text_val, 'marker'): text_val = ""
 
-        return f'<a id="{component_id}" href="{href_val}" {target_attr} {class_attr} {style_attr}>{text_val}</a>'
+        # Process VRef props
+        vref_info = self._process_vref_props(link)
+        vref_attrs = vref_info['attrs']
+        vref_initial = vref_info['initial_values']
+        vref_str = ' '.join([f'{k}="{v}"' for k, v in vref_attrs.items()])
+        
+        # Use VRef initial values if available
+        if 'href' in vref_initial:
+            href_val = vref_initial['href']
+        if 'text' in vref_initial:
+            text_val = vref_initial['text']
+
+        return f'<a id="{component_id}" href="{href_val}" {target_attr} {class_attr} {style_attr} {vref_str}>{text_val}</a>'
 
     def render_textarea(self, textarea: Textarea) -> str:
         """Renderiza un componente Textarea"""
@@ -4001,19 +4339,55 @@ body {
                  disabled_attr, readonly_attr, required_attr, maxlength_attr]
         attrs_str = " ".join(attr for attr in attrs if attr)
         
-        return f'<textarea id="{component_id}" {attrs_str}>{value_val or ""}</textarea>'
+        # Process VRef props
+        vref_info = self._process_vref_props(textarea)
+        vref_attrs = vref_info['attrs']
+        vref_initial = vref_info['initial_values']
+        vref_str = ' '.join([f'{k}="{v}"' for k, v in vref_attrs.items()])
+        
+        # Use VRef initial value if available
+        if 'value' in vref_initial:
+            value_val = vref_initial['value']
+
+        return f'<textarea id="{component_id}" {attrs_str} {vref_str}>{value_val or ""}</textarea>'
 
     def render_card(self, card: Card) -> str:
         """Renderiza un componente Card"""
         component_id = self.get_component_id(card, prefix="card")
         class_attr = f'class="dars-card {card.class_name or ""}"'
         style_attr = f'style="{self.render_styles(card.style)}"' if card.style else ""
-        title_html = f'<h2>{card.title}</h2>' if card.title else ""
+        # Process useValue props FIRST (non-reactive initial values)
+        value_info = self._process_value_props(card)
+        
+        # Then process dynamic props (reactive bindings)
+        dynamic_info = self._process_dynamic_props(card)
+        
+        if dynamic_info['bindings']:
+            if not hasattr(self, '_built_in_bindings'):
+                self._built_in_bindings = []
+            self._built_in_bindings.extend(dynamic_info['bindings'])
+
+        # Process VRef props
+        vref_info = self._process_vref_props(card)
+        vref_attrs = vref_info['attrs']
+        vref_initial = vref_info['initial_values']
+        vref_str = ' '.join([f'{k}="{v}"' for k, v in vref_attrs.items()])
+        
+        # Resolve title: VRef > useValue > useDynamic > prop
+        title_val = vref_initial.get('title')
+        if title_val is None:
+             title_val = value_info['initial_values'].get('title')
+        if title_val is None:
+             title_val = dynamic_info['initial_values'].get('title', card.title)
+        
+        if hasattr(title_val, 'marker'): title_val = ""
+        
+        title_html = f'<h2>{title_val}</h2>' if title_val else ""
         children_html = ""
         for child in card.children:
             children_html += self.render_component(child)
 
-        return f'<div id="{component_id}" {class_attr} {style_attr}>{title_html}{children_html}</div>'
+        return f'<div id="{component_id}" {class_attr} {style_attr} {vref_str}>{title_html}{children_html}</div>'
 
     def render_modal(self, modal: Modal) -> str:
         """Renderiza un componente Modal"""
@@ -4028,13 +4402,44 @@ body {
         modal_style = f'{display_style} position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000;'
         if modal.style:
             modal_style += f' {self.render_styles(modal.style)}'
+            
+        # Process useValue props FIRST (non-reactive initial values)
+        value_info = self._process_value_props(modal)
+        
+        # Then process dynamic props (reactive bindings)
+        dynamic_info = self._process_dynamic_props(modal)
+        
+        if dynamic_info['bindings']:
+            if not hasattr(self, '_built_in_bindings'):
+                self._built_in_bindings = []
+            self._built_in_bindings.extend(dynamic_info['bindings'])
+
+        # Process VRef props
+        vref_info = self._process_vref_props(modal)
+        vref_attrs = vref_info['attrs']
+        vref_initial = vref_info['initial_values']
+        vref_str = ' '.join([f'{k}="{v}"' for k, v in vref_attrs.items()])
+        
+        # Resolve title: VRef > useValue > useDynamic > prop
+        title_val = vref_initial.get('title')
+        if title_val is None:
+             title_val = value_info['initial_values'].get('title')
+        if title_val is None:
+             title_val = dynamic_info['initial_values'].get('title', modal.title)
+        
+        if hasattr(title_val, 'marker'): title_val = ""
+            
+        # Resolve is_open/is_enabled logic if possible (mostly client-side but initial state matters)
+        # Assuming is_enabled maps to data-enabled
+        # useDynamic might act on data-enabled?
+        
         data_enabled = f'data-enabled="{str(getattr(modal, "is_enabled", True)).lower()}"'
-        title_html = f'<h2>{modal.title}</h2>' if modal.title else ""
+        title_html = f'<h2>{title_val}</h2>' if title_val else ""
         children_html = ""
         for child in modal.children:
             children_html += self.render_component(child)
         return (
-            f'<div id="{component_id}" class="{class_list}" {data_enabled}{hidden_attr} style="{modal_style}">\n'
+            f'<div id="{component_id}" class="{class_list}" {data_enabled}{hidden_attr} style="{modal_style}" {vref_str}>\n'
             f'    <div class="dars-modal-content" style="background: white; padding: 20px; border-radius: 8px; max-width: 500px; width: 90%;">\n'
             f'        {title_html}\n'
             f'        {children_html}\n'
@@ -4047,7 +4452,34 @@ body {
         component_id = self.get_component_id(navbar, prefix="navbar")
         class_attr = f'class="dars-navbar {navbar.class_name or ""}"'
         style_attr = f'style="{self.render_styles(navbar.style)}"' if navbar.style else ""
-        brand_html = f'<div class="dars-navbar-brand">{navbar.brand}</div>' if navbar.brand else ""
+        
+        # Process useValue props FIRST (non-reactive initial values)
+        value_info = self._process_value_props(navbar)
+        
+        # Then process dynamic props (reactive bindings)
+        dynamic_info = self._process_dynamic_props(navbar)
+        
+        if dynamic_info['bindings']:
+            if not hasattr(self, '_built_in_bindings'):
+                self._built_in_bindings = []
+            self._built_in_bindings.extend(dynamic_info['bindings'])
+
+        # Process VRef props
+        vref_info = self._process_vref_props(navbar)
+        vref_attrs = vref_info['attrs']
+        vref_initial = vref_info['initial_values']
+        vref_str = ' '.join([f'{k}="{v}"' for k, v in vref_attrs.items()])
+        
+        # Resolve brand: VRef > useValue > useDynamic > prop
+        brand_val = vref_initial.get('brand')
+        if brand_val is None:
+             brand_val = value_info['initial_values'].get('brand')
+        if brand_val is None:
+             brand_val = dynamic_info['initial_values'].get('brand', navbar.brand)
+        
+        if hasattr(brand_val, 'marker'): brand_val = ""
+        
+        brand_html = f'<div class="dars-navbar-brand">{brand_val}</div>' if brand_val else ""
         # Soporta hijos como lista o *args (igual que Container)
         children = getattr(navbar, 'children', [])
         if callable(children):
@@ -4060,7 +4492,7 @@ body {
         for child in children:
             children_html += self.render_component(child)
 
-        return f'<nav id="{component_id}" {class_attr} {style_attr}>{brand_html}<div class="dars-navbar-nav">{children_html}</div></nav>'
+        return f'<nav id="{component_id}" {class_attr} {style_attr} {vref_str}>{brand_html}<div class="dars-navbar-nav">{children_html}</div></nav>'
 
     def render_checkbox(self, checkbox: Checkbox) -> str:
         """Renderiza un componente Checkbox"""
@@ -4079,8 +4511,17 @@ body {
                 self._built_in_bindings = []
             self._built_in_bindings.extend(dynamic_info['bindings'])
             
+        # Process VRef props
+        vref_info = self._process_vref_props(checkbox)
+        vref_attrs = vref_info['attrs']
+        vref_initial = vref_info['initial_values']
+        vref_str = ' '.join([f'{k}="{v}"' for k, v in vref_attrs.items()])
+            
         # Handle checked
-        checked_val = dynamic_info['initial_values'].get('checked', checkbox.checked)
+        checked_val = vref_initial.get('checked', None)
+        if checked_val is None:
+             checked_val = dynamic_info['initial_values'].get('checked', checkbox.checked)
+        
         if hasattr(checked_val, 'marker'): checked_val = False
         checked_attr = "checked" if checked_val else ""
         
@@ -4102,7 +4543,7 @@ body {
         
         label_html = f'<label for="{component_id}">{checkbox.label}</label>' if checkbox.label else ""
         
-        return f'<div class="dars-checkbox-wrapper"><input type="checkbox" id="{component_id}" {attrs_str}>{label_html}</div>'
+        return f'<div class="dars-checkbox-wrapper"><input type="checkbox" id="{component_id}" {attrs_str} {vref_str}>{label_html}</div>'
 
     def render_radiobutton(self, radio: RadioButton) -> str:
         """Renderiza un componente RadioButton"""
@@ -4121,8 +4562,17 @@ body {
                 self._built_in_bindings = []
             self._built_in_bindings.extend(dynamic_info['bindings'])
             
+        # Process VRef props
+        vref_info = self._process_vref_props(radio)
+        vref_attrs = vref_info['attrs']
+        vref_initial = vref_info['initial_values']
+        vref_str = ' '.join([f'{k}="{v}"' for k, v in vref_attrs.items()])
+
         # Handle checked
-        checked_val = dynamic_info['initial_values'].get('checked', radio.checked)
+        checked_val = vref_initial.get('checked', None)
+        if checked_val is None:
+            checked_val = dynamic_info['initial_values'].get('checked', radio.checked)
+        
         if hasattr(checked_val, 'marker'): checked_val = False
         checked_attr = "checked" if checked_val else ""
         
@@ -4144,7 +4594,7 @@ body {
         
         label_html = f'<label for="{component_id}">{radio.label}</label>' if radio.label else ""
         
-        return f'<div class="dars-radio-wrapper"><input type="radio" id="{component_id}" {attrs_str}>{label_html}</div>'
+        return f'<div class="dars-radio-wrapper"><input type="radio" id="{component_id}" {attrs_str} {vref_str}>{label_html}</div>'
 
     def render_select(self, select: Select) -> str:
         """Renderiza un componente Select"""
@@ -4173,8 +4623,16 @@ body {
         if hasattr(required_val, 'marker'): required_val = False
         required_attr = "required" if required_val else ""
         
-        # Handle value - check useValue first, then useDynamic, then default
-        current_value = value_info['initial_values'].get('value')
+        # Process VRef props
+        vref_info = self._process_vref_props(select)
+        vref_attrs = vref_info['attrs']
+        vref_initial = vref_info['initial_values']
+        vref_str = ' '.join([f'{k}="{v}"' for k, v in vref_attrs.items()])
+        
+        # Handle value - check VRef, then useValue, then useDynamic, then default
+        current_value = vref_initial.get('value')
+        if current_value is None:
+            current_value = value_info['initial_values'].get('value')
         if current_value is None:
             current_value = dynamic_info['initial_values'].get('value', select.value)
         if hasattr(current_value, 'marker'):
@@ -4197,7 +4655,7 @@ body {
             disabled = "disabled" if option.disabled else ""
             options_html += f'<option value="{option.value}" {selected} {disabled}>{option.label}</option>'
         
-        return f'<select id="{component_id}" {attrs_str}>{options_html}</select>'
+        return f'<select id="{component_id}" {attrs_str} {vref_str}>{options_html}</select>'
 
     def render_slider(self, slider: Slider) -> str:
         """Renderiza un componente Slider"""
@@ -4220,30 +4678,78 @@ body {
         disabled_val = dynamic_info['initial_values'].get('disabled', slider.disabled)
         if hasattr(disabled_val, 'marker'): disabled_val = False
         disabled_attr = "disabled" if disabled_val else ""
-        min_attr = f'min="{slider.min_value}"'
-        max_attr = f'max="{slider.max_value}"'
-        value_attr = f'value="{slider.value}"'
+        # Process VRef props
+        vref_info = self._process_vref_props(slider)
+        vref_attrs = vref_info['attrs']
+        vref_initial = vref_info['initial_values']
+        vref_str = ' '.join([f'{k}="{v}"' for k, v in vref_attrs.items()])
+        
+        # Handle value
+        slider_val = vref_initial.get('value', slider.value)
+        value_attr = f'value="{slider_val}"'
+
+        if hasattr(slider.min_value, 'marker'): min_val = 0
+        else: min_val = slider.min_value
+        min_attr = f'min="{min_val}"'
+        
+        if hasattr(slider.max_value, 'marker'): max_val = 100
+        else: max_val = slider.max_value
+        max_attr = f'max="{max_val}"'
+
         step_attr = f'step="{slider.step}"'
         
         attrs = [class_attr, style_attr, disabled_attr, min_attr, max_attr, value_attr, step_attr]
         attrs_str = " ".join(attr for attr in attrs if attr)
         
         label_html = f'<label for="{component_id}">{slider.label}</label>' if slider.label else ""
-        value_display = f'<span class="dars-slider-value">{slider.value}</span>' if slider.show_value else ""
+        value_display = f'<span class="dars-slider-value">{slider_val}</span>' if slider.show_value else ""
         
         wrapper_class = "dars-slider-vertical" if slider.orientation == "vertical" else "dars-slider-horizontal"
         
-        return f'<div class="dars-slider-wrapper {wrapper_class}">{label_html}<input type="range" id="{component_id}" {attrs_str}>{value_display}</div>'
+        return f'<div class="dars-slider-wrapper {wrapper_class}">{label_html}<input type="range" id="{component_id}" {attrs_str} {vref_str}>{value_display}</div>'
 
     def render_datepicker(self, datepicker: DatePicker) -> str:
         """Renderiza un componente DatePicker"""
         component_id = self.get_component_id(datepicker, prefix="datepicker")
         class_attr = f'class="dars-datepicker {datepicker.class_name or ""}"'
         style_attr = f'style="{self.render_styles(datepicker.style)}"' if datepicker.style else ""
-        disabled_attr = "disabled" if datepicker.disabled else ""
-        required_attr = "required" if datepicker.required else ""
-        readonly_attr = "readonly" if datepicker.readonly else ""
-        value_attr = f'value="{datepicker.value}"' if datepicker.value else ""
+        # Process useValue props FIRST (non-reactive initial values)
+        value_info = self._process_value_props(datepicker)
+        
+        # Then process dynamic props (reactive bindings)
+        dynamic_info = self._process_dynamic_props(datepicker)
+        
+        if dynamic_info['bindings']:
+            if not hasattr(self, '_built_in_bindings'):
+                self._built_in_bindings = []
+            self._built_in_bindings.extend(dynamic_info['bindings'])
+            
+        disabled_val = dynamic_info['initial_values'].get('disabled', datepicker.disabled)
+        if hasattr(disabled_val, 'marker'): disabled_val = False
+        disabled_attr = "disabled" if disabled_val else ""
+        
+        required_val = dynamic_info['initial_values'].get('required', datepicker.required)
+        if hasattr(required_val, 'marker'): required_val = False
+        required_attr = "required" if required_val else ""
+        
+        readonly_val = dynamic_info['initial_values'].get('readonly', datepicker.readonly)
+        if hasattr(readonly_val, 'marker'): readonly_val = False
+        readonly_attr = "readonly" if readonly_val else ""
+        
+        # Process VRef props
+        vref_info = self._process_vref_props(datepicker)
+        vref_attrs = vref_info['attrs']
+        vref_initial = vref_info['initial_values']
+        vref_str = ' '.join([f'{k}="{v}"' for k, v in vref_attrs.items()])
+        
+        date_val = vref_initial.get('value')
+        if date_val is None:
+            date_val = value_info['initial_values'].get('value')
+        if date_val is None:
+            date_val = dynamic_info['initial_values'].get('value', datepicker.value)
+        if hasattr(date_val, 'marker'): date_val = ""
+            
+        value_attr = f'value="{date_val}"' if date_val else ""
         placeholder_attr = f'placeholder="{datepicker.placeholder}"' if datepicker.placeholder else ""
         min_attr = f'min="{datepicker.min_date}"' if datepicker.min_date else ""
         max_attr = f'max="{datepicker.max_date}"' if datepicker.max_date else ""
@@ -4257,9 +4763,9 @@ body {
         
         # Si es inline, usar un div contenedor adicional
         if datepicker.inline:
-            return f'<div class="dars-datepicker-inline"><input type="{input_type}" id="{component_id}" {attrs_str}></div>'
+            return f'<div class="dars-datepicker-inline"><input type="{input_type}" id="{component_id}" {attrs_str} {vref_str}></div>'
         else:
-            return f'<input type="{input_type}" id="{component_id}" {attrs_str}>'
+            return f'<input type="{input_type}" id="{component_id}" {attrs_str} {vref_str}>'
 
     def render_table(self, table: Table) -> str:
         # Renderizado HTML para Table
@@ -4290,14 +4796,85 @@ body {
         return html
 
     def render_progressbar(self, bar: ProgressBar) -> str:
-        percent = min(max(bar.value / bar.max_value * 100, 0), 100)
-        return f'<div class="dars-progressbar"><div class="dars-progressbar-bar" style="width: {percent}%;"></div></div>'
+        # Process useValue props FIRST (non-reactive initial values)
+        value_info = self._process_value_props(bar)
+        
+        # Then process dynamic props (reactive bindings)
+        dynamic_info = self._process_dynamic_props(bar)
+        
+        if dynamic_info['bindings']:
+            if not hasattr(self, '_built_in_bindings'):
+                self._built_in_bindings = []
+            self._built_in_bindings.extend(dynamic_info['bindings'])
+            
+        # Process VRef props
+        vref_info = self._process_vref_props(bar)
+        vref_attrs = vref_info['attrs']
+        vref_initial = vref_info['initial_values']
+        vref_str = ' '.join([f'{k}="{v}"' for k, v in vref_attrs.items()])
+        
+        val = vref_initial.get('value')
+        if val is None:
+            val = value_info['initial_values'].get('value')
+        if val is None:
+            val = dynamic_info['initial_values'].get('value', bar.value)
+
+        max_val = vref_initial.get('max_value')
+        if max_val is None:
+             max_val = value_info['initial_values'].get('max_value')
+        if max_val is None:
+             max_val = dynamic_info['initial_values'].get('max_value', bar.max_value)
+        
+        # Handle markers in calc if initial value wasn't resolved deeply (unlikely for int/float but possible)
+        if hasattr(val, 'marker'): val = 0
+        if hasattr(max_val, 'marker'): max_val = 100
+        
+        percent = min(max(val / max_val * 100, 0), 100)
+        return f'<div class="dars-progressbar" {vref_str}><div class="dars-progressbar-bar" style="width: {percent}%;"></div></div>'
 
     def render_spinner(self, spinner: Spinner) -> str:
-        return '<div class="dars-spinner"></div>'
+        # Process useValue props FIRST
+        self._process_value_props(spinner)
+        # Then process dynamic props
+        dynamic_info = self._process_dynamic_props(spinner)
+        if dynamic_info['bindings']:
+             if not hasattr(self, '_built_in_bindings'):
+                self._built_in_bindings = []
+             self._built_in_bindings.extend(dynamic_info['bindings'])
+
+        # Process VRef props
+        vref_info = self._process_vref_props(spinner)
+        vref_attrs = vref_info['attrs']
+        vref_str = ' '.join([f'{k}="{v}"' for k, v in vref_attrs.items()])
+        return f'<div class="dars-spinner" {vref_str}></div>'
 
     def render_tooltip(self, tooltip: Tooltip) -> str:
-        return f'<div class="dars-tooltip dars-tooltip-{tooltip.position}">{self.render_component(tooltip.child) if hasattr(tooltip.child, "render") else tooltip.child}<span class="dars-tooltip-text">{tooltip.text}</span></div>'
+        # Process useValue props FIRST (non-reactive initial values)
+        value_info = self._process_value_props(tooltip)
+        
+        # Then process dynamic props (reactive bindings)
+        dynamic_info = self._process_dynamic_props(tooltip)
+        
+        if dynamic_info['bindings']:
+            if not hasattr(self, '_built_in_bindings'):
+                self._built_in_bindings = []
+            self._built_in_bindings.extend(dynamic_info['bindings'])
+
+        # Process VRef props
+        vref_info = self._process_vref_props(tooltip)
+        vref_attrs = vref_info['attrs']
+        vref_initial = vref_info['initial_values']
+        vref_str = ' '.join([f'{k}="{v}"' for k, v in vref_attrs.items()])
+        
+        text_val = vref_initial.get('text')
+        if text_val is None:
+             text_val = value_info['initial_values'].get('text')
+        if text_val is None:
+             text_val = dynamic_info['initial_values'].get('text', tooltip.text)
+             
+        if hasattr(text_val, 'marker'): text_val = ""
+        
+        return f'<div class="dars-tooltip dars-tooltip-{tooltip.position}" {vref_str}>{self.render_component(tooltip.child) if hasattr(tooltip.child, "render") else tooltip.child}<span class="dars-tooltip-text">{text_val}</span></div>'
     
     def render_markdown(self, markdown: 'Markdown') -> str:
         """Render a Markdown component"""
@@ -4388,7 +4965,31 @@ body {
         class_name = f"{class_name} dars-code-theme-{theme_tag}"
         class_attr = f'class="{class_name.strip()}"'
 
-        return f'{assets}<div id="{component_id}" {class_attr} {style_attr}>{html_content}</div>'
+        # Process VRef props
+        vref_info = self._process_vref_props(markdown)
+        vref_attrs = vref_info['attrs']
+        vref_initial = vref_info['initial_values']
+        vref_str = ' '.join([f'{k}="{v}"' for k, v in vref_attrs.items()])
+
+        # If VRef provides content, it might override processed HTML or be raw markdown.
+        # For now, if content is VRef, we just let client side handle it via data-vref.
+        # But for initial render, we check if we resolved it.
+        # Note: resolving markdown content on exporter side implies we need to convert it to HTML again if it changed.
+        # However, _process_vref_props resolved value is likely the raw string.
+        if 'content' in vref_initial:
+            # Re-process markdown if we have a resolved initial value that is different
+            # For simplicity, if we have a resolved value, we treat it as the source.
+            resolved_content = vref_initial['content']
+            try:
+                import markdown2
+                html_content = markdown2.markdown(
+                    resolved_content,
+                    extras=["fenced-code-blocks", "code-friendly", "tables", "header-ids"],
+                )
+            except ImportError:
+                html_content = self._basic_markdown_to_html(resolved_content)
+
+        return f'{assets}<div id="{component_id}" {class_attr} {style_attr} {vref_str}>{html_content}</div>'
 
     def _basic_markdown_to_html(self, markdown_text: str) -> str:
         """Basic markdown to HTML conversion as fallback"""
@@ -4429,7 +5030,12 @@ body {
             for event_name in component.events:
                 events_attr += f' data-event-{event_name}="true"'
         
-        return f'<div id="{component_id}" {class_attr} {style_attr}{events_attr}>{children_html}</div>'
+        # Process VRef props
+        vref_info = self._process_vref_props(component)
+        vref_attrs = vref_info['attrs']
+        vref_str = ' '.join([f'{k}="{v}"' for k, v in vref_attrs.items()])
+        
+        return f'<div id="{component_id}" {class_attr} {style_attr}{events_attr} {vref_str}>{children_html}</div>'
     
     def _export_spa(self, app: App, output_path: str, bundle: bool, should_combine_js: bool, project_root: str) -> bool:
         """Export SPA with client-side routing."""

@@ -113,23 +113,23 @@ This phase transforms Dars into a complete fullstack Python framework with enter
 
 #### Security & Routing (v1.6.9 - v1.7.5)
 
-- [ ] **Secure Router Foundation (v1.6.9)**
-    - [ ] Lazy loading for private routes
-    - [ ] Route obfuscation (hide sensitive routes from client)
-    - [ ] Route types: `public`, `private`, `protected`
-    - [ ] Backend route loader endpoints
+- [x] **Secure Router Foundation (v1.6.9)**
+    - [x] Lazy loading for private routes
+    - [x] Route obfuscation (hide sensitive routes from client)
+    - [x] Route types: `public`, `private`, `protected`
+    - [x] Backend route loader endpoints
 
 - [ ] **VRef Hooks + Middleware (v1.7.0)**
-    - [ ] Complete `useVRef()` and `setVRef()` exporter integration
-    - [ ] Middleware system (AuthMiddleware, RateLimitMiddleware, CORSMiddleware)
-    - [ ] Middleware chain execution
-    - [ ] Route-specific and global middleware
+    - [x] Complete `setVRef()` exporter integration
+    - [] Middleware system (AuthMiddleware, RateLimitMiddleware, CORSMiddleware)
+    - [] Middleware chain execution
+    - [] Route-specific and global middleware
 
-- [ ] **FastAPI Backend Plugin (v1.7.1)**
-    - [ ] `DarsBackend` class for FastAPI integration
-    - [ ] Route loading endpoints
-    - [ ] Middleware execution in backend
-    - [ ] Request/response serialization
+- [x] **FastAPI Backend Plugin (v1.7.1)**
+    - [x] `DarsBackend` class for FastAPI integration
+    - [x] Route loading endpoints
+    - [x] Middleware execution in backend
+    - [x] Request/response serialization
 
 - [ ] **Authentication System (v1.7.2)**
     - [ ] JWT token generation and verification
@@ -138,10 +138,10 @@ This phase transforms Dars into a complete fullstack Python framework with enter
     - [ ] Auth endpoints (`/api/auth/login`, `/api/auth/logout`, `/api/auth/refresh`)
 
 - [ ] **SSR Implementation (v1.7.3)**
-    - [ ] Server-side rendering without middleware
-    - [ ] Direct backend integration for SSR
+    - [x] Server-side rendering without middleware
+    - [x] Direct backend integration for SSR
     - [ ] Context injection
-    - [ ] Client-side hydration
+    - [x] Client-side hydration
 
 - [ ] **Route Guards & Permissions (v1.7.4)**
     - [ ] Role-based access control (RBAC)
@@ -162,13 +162,12 @@ This phase transforms Dars into a complete fullstack Python framework with enter
     - [ ] Detection of `api.py` and `apiConfig.py`
     - [ ] Desktop mode support (Electron with `/darsBackend`)
 
-- [ ] **apiConfig.py System (v1.7.7)**
-    - [ ] Centralized URL configuration
-    - [ ] `DEV_FRONTEND_URL` and `DEV_BACKEND_URL` constants
-    - [ ] `BUILD_FRONTEND_URL` and `BUILD_BACKEND_URL` constants
-    - [ ] `get_frontend_url()` and `get_backend_url()` helpers
-    - [ ] Environment-aware URL switching (`DARS_ENV=dev` or `DARS_ENV=build`)
-    - [ ] Accessible from both frontend and backend
+- [x] **apiConfig.py System (v1.7.7)**
+    - [x] Centralized URL configuration
+    - [x] `DEV_FRONTEND_URL` and `DEV_BACKEND_URL` constants
+    - [x] `BUILD_FRONTEND_URL` and `BUILD_BACKEND_URL` constants
+    - [x] `get_frontend_url()` and `get_backend_url()` helpers
+    - [x] Accessible from both frontend and backend
 
 - [ ] **Dev Server Orchestration (v1.7.8)**
     - [ ] `dars dev` starts both frontend and backend concurrently

@@ -4480,6 +4480,89 @@ def index():
 app.add_page("index", index())
 \`\`\`
 
+---
+
+## setVRef() - Independent Value Reference
+
+The \`setVRef()\` hook allows you to define initial values that are tied to a specific CSS selector. This is the foundation for creating component-level state that can be shared across multiple components without using global \`State\` objects.
+
+### Basic Usage
+
+Create a reference with an initial value and a selector, then pass it to components.
+
+\`\`\`python
+from dars.all import *
+
+# Create a reference tied to the "#count" ID
+count_ref = setVRef(0, "#count")
+
+# Use it in a component
+Text(count_ref, id="count")
+\`\`\`
+
+### Shared Values (Multi-Component Updates)
+
+By using a **class selector**, you can share the same value across multiple components and update them all simultaneously!
+
+\`\`\`python
+# Create a reference tied to a CLASS selector
+price_ref = setVRef(99.99, ".product-price")
+
+# Use in multiple places
+Container(
+    Text("Price: $", style="font-bold"),
+    Text(price_ref, class_name="product-price"),  # Main display
+    
+    Container(
+        Text("Also shown here: $"),
+        Text(price_ref, class_name="product-price")   # Secondary display
+    )
+)
+
+# Update ALL elements matching ".product-price" at once
+Button("Discount", on_click=updateVRef(".product-price", 49.99))
+\`\`\`
+
+### Usage in FunctionComponents
+
+\`setVRef\` works seamlessly with \`@FunctionComponent\`. The value is resolved internally, so your templates remain clean.
+
+\`\`\`python
+@FunctionComponent
+def UserBadge(name_ref, **props):
+    return f'''
+    <div {Props.class_name} {Props.style}>
+        User: <span class="user-name">{name_ref}</span>
+    </div>
+    '''
+
+# Define ref
+user_ref = setVRef("Guest", ".user-name")
+
+# Render
+UserBadge(user_ref, class_name="badge")
+
+# Update
+Button("Login", on_click=updateVRef(".user-name", "John Doe"))
+\`\`\`
+
+### Syntax
+
+\`\`\`python
+setVRef(initial_value: Any, selector: str) -> VRefValue
+\`\`\`
+
+**Parameters:**
+- \`initial_value\`: The initial value to display (string, number, boolean).
+- \`selector\`: The CSS selector (ID or Class) that identifies the element(s).
+  - Use \`#id\` for single elements.
+  - Use \`.class\` for multiple elements sharing the value.
+
+**Returns:**
+- \`VRefValue\`: An object representing the value, ready to be passed to components.
+
+---
+
 ## updateVRef() - Component-Level State Updates
 
 Update DOM element values declaratively without State objects!
