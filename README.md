@@ -526,12 +526,6 @@ Build using config:
 dars build
 ```
 
-Export using the config entry and outdir:
-
-```bash
-dars export config --format html
-```
-
 ---
 
-See LandingPage docs for details: state_management.md, events.md, scripts.md, routing.md.
+See LandingPage docs for details.
