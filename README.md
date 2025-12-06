@@ -4,9 +4,11 @@
   <img src="https://raw.githubusercontent.com/ZtaMDev/Dars-Framework/CrystalMain/Dars-logo.png" alt="Dars Framework Logo" width="200" />
 </p>
 
-![PyPI](https://img.shields.io/pypi/v/dars-framework?color=brightgreen)
-![Python Version](https://img.shields.io/pypi/pyversions/dars-framework)
-![License](https://img.shields.io/github/license/ZtaMDev/Dars-Framework)
+<p align="center">
+  <img src="https://img.shields.io/pypi/v/dars-framework?color=brightgreen" alt="PyPI Version" />
+  <img src="https://img.shields.io/pypi/pyversions/dars-framework?color=blue" alt="Python Versions" />
+  <img src="https://img.shields.io/github/license/ZtaMDev/Dars-Framework" alt="License" />
+</p>
 
 <p align="center">
   <em>Dars is a Full-Stack multiplatform Python UI framework for building modern, interactive web and desktop apps with Python code. Seamlessly integrated with FastAPI, it allows you to build complete applications with Server-Side Rendering (SSR) and reactive SPA capabilities also classic multipage html and desktop apps in a single codebase.</em>
