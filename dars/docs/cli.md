@@ -18,8 +18,11 @@ Open your terminal in your project directory and use any of the following comman
 # List supported export formats
  dars formats
 
-# Initialize a new project
+# Initialize a new project (Default is SPA)
  dars init my_new_project
+
+# Initialize a Full-Stack SSR project
+ dars init my_new_project --type ssr
 
 # Initialize a project with a specific template
  dars init my_new_project -t demo/complete_app
@@ -51,7 +54,8 @@ Open your terminal in your project directory and use any of the following comman
 | `dars init --type desktop`              | Scaffold desktop-capable project (BETA)     |
 | `dars build` (desktop config)           | Build desktop app artifacts (BETA)          |
 | `dars build --no-minify`                | Build skipping default Python minifier      |
-| `dars init my_project`                  | Create a new Dars project                   |
+| `dars init my_project --type ssr`       | Create a new Full-Stack SSR project        |
+| `dars init my_project`                  | Create a new Dars project (SPA Default)     |
 | `dars info my_app.py`                   | Show info about your app                    |
 | `dars formats`                          | List supported export formats               |
 | `dars --help`                           | Show help and all CLI options               |
@@ -104,3 +108,20 @@ dars init  -L
 - Applying minification (default + vite): both are active.
 
 For more, see the [Getting Started](#getting-started-with-dars) guide and the main documentation index.
+
+### SSR Workflow (Full-Stack)
+
+When working with SSR (`dars init --type ssr`), the workflow involves two processes:
+
+1.  **Backend (`python backend/api.py`)**: Runs on port 8000. Handles API requests and initial HTML rendering.
+2.  **Frontend (`dars dev`)**: Runs on port 3000. Serves static assets, bundles scripts, and proxies to backend.
+
+**Common Commands:**
+
+| Command | Description |
+|---------|-------------|
+| `dars init --type ssr` | Scaffolds a project with `backend/` folder and SSR config. |
+| `dars dev` | Starts the hot-reload frontend server (requires backend running). |
+| `dars build` | Builds static assets to `dist/` for production. |
+
+*Note: For production, you only need to run the backend (which serves the built assets).*

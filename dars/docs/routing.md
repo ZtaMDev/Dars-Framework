@@ -127,6 +127,34 @@ app.set_404_page(not_found_page)
 
 Now, when a 404 occurs, users will be redirected to `/404` but will see your custom design.
 
+## 403 Handling
+
+Similar to 404 pages, you can define a custom 403 Forbidden page for unauthorized access to private routes.
+
+### Default 403 Page
+
+Dars includes a default 403 page that informs users they don't have permission to access the requested resource.
+
+### Custom 403 Page
+
+You can customize the 403 page using `app.set_403_page()`.
+
+```python
+# Create your custom 403 page
+forbidden_page = Page(
+    Container(
+        Text("⛔ Access Denied", style={"fontSize": "32px", "color": "red"}),
+        Text("You do not have permission to view this page."),
+        Link("Go to Login", href="/login")
+    )
+)
+
+# Register it
+app.set_403_page(forbidden_page)
+```
+
+Dars will automatically redirect to `/prohibited` and show this page when a user tries to access a private route without authentication.
+
 ## Hot Reload
 
 The development server (`dars dev`) includes an intelligent hot reload system for SPAs:
@@ -135,3 +163,19 @@ The development server (`dars dev`) includes an intelligent hot reload system fo
 - **Smart Polling**: It checks for updates every 500ms without spamming your console logs.
 - **Retry Limit**: If the server goes down, the client stops polling after 10 consecutive errors to prevent browser lag.
 - **State Preservation**: When possible, navigation state is preserved across reloads.
+
+---
+
+## SSR & Hydration
+
+Dars introduces a robust "Dual Hydration" system for Server-Side Rendering (SSR) routes.
+
+### How it Works
+1.  **Backend Rendering**: The server renders the initial HTML and injects a VDOM snapshot (`window.__ROUTE_VDOM__`) into the DOM.
+2.  **Script Injection**: The server checks if there is a corresponding client-side bundle for the route (e.g., `app_{slug}.js`) and injects a reference to it.
+3.  **Client Hydration**:
+    *   The `dars.min.js` runtime loads and checks for `__ROUTE_VDOM__`.
+    *   If found, it hydrates the DOM immediately without fetching data again.
+    *   The browser loads the injected `app_{slug}.js` bundle, which contains the interactive logic (event handlers, state).
+
+This architecture prevents "Flash of Unstyled Content" (FOUC), race conditions, and double-rendering, ensuring that events function correctly even after a page reload.
