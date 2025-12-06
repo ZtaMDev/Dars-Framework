@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <em>Dars is a multiplatform Python UI framework for building modern, interactive web and desktop apps with Python code. Write your interface in Python, export it to web technologies and deploy anywhere.</em>
+  <em>Dars is a Full-Stack multiplatform Python UI framework for building modern, interactive web and desktop apps with Python code. Seamlessly integrated with FastAPI, it allows you to build complete applications with Server-Side Rendering (SSR) and reactive SPA capabilities also classic multipage html and desktop apps in a single codebase.</em>
 </p>
 
 <div align="center">
@@ -209,9 +209,31 @@ button.on_click = sequence(
 ---
 
 
-## SPA Routing System
+## Routing System (SPA & SSR)
 
-Dars introduces a powerful client-side routing system for Single Page Applications:
+Dars Framework offers a flexible routing system that supports both Client-Side Routing (SPA) and Server-Side Rendering (SSR).
+
+### Server-Side Rendering (SSR)
+
+**New in v1.6.9!** Render pages on the server for faster initial loads. Use the `route_type` parameter:
+
+```python
+from dars.all import *
+
+# Rendered on the server before being sent to the client
+@route("/dashboard", route_type=RouteType.SSR)
+def dashboard():
+    return Page(
+        Heading("Server-Side Rendered Page"),
+        Text(f"Server Timestamp: {datetime.now()}"),
+        # Client-side reactivity still works after hydration!
+        Button("Click Me", on_click=alert("Hello from Client"))
+    )
+```
+
+### Client-Side Routing (SPA)
+
+Default routing behaves as a standard Single Page Application (SPA), handling navigation instantly in the browser without reloading.
 
 ### Basic Routing
 
@@ -400,6 +422,7 @@ For complete documentation, see the [Backend API Guide](https://ztamdev.github.i
 |-----------------------------------------|--------------------------------------------|
 | `dars export my_app.py --format html`   | Export app to HTML/CSS/JS in `./my_app_web` |
 | `dars init --type desktop`               | Scaffold desktop-capable project (BETA)     |
+| `dars init --type ssr`                   | Scaffold full-stack SSR project             |
 | `dars build` (desktop config)            | Build desktop app artifacts (BETA)          |
 | `dars preview ./my_app_web`             | Preview exported app locally                |
 | `dars init my_project`                  | Create a new Dars project (also creates dars.config.json) |
