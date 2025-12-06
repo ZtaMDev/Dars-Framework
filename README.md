@@ -4,7 +4,7 @@
   <img src="https://raw.githubusercontent.com/ZtaMDev/Dars-Framework/CrystalMain/Dars-logo.png" alt="Dars Framework Logo" width="200" />
 </p>
 
-![PyPI](https://img.shields.io/pypi/v/dars-framework)
+![PyPI](https://img.shields.io/pypi/v/dars-framework?color=brightgreen)
 ![Python Version](https://img.shields.io/pypi/pyversions/dars-framework)
 ![License](https://img.shields.io/github/license/ZtaMDev/Dars-Framework)
 
