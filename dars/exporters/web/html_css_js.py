@@ -250,7 +250,8 @@ class HTMLCSSJSExporter(Exporter):
             self.write_file(os.path.join(output_path, "styles.css"), custom_css_content)
 
             # Verificar si debemos combinar archivos JS
-            should_combine_js = bundle and vite_minify
+            # Siempre combinamos en modo bundle, independientemente de Vite.
+            should_combine_js = bool(bundle)
 
             # SPA Routing: exportar SPA routes si existen (no retornar, permitir multipage también)
             if hasattr(app, "has_spa_routes") and app.has_spa_routes():

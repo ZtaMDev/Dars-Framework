@@ -1,3 +1,85 @@
+# Release Notes v1.7.5
+
+> **CLI Doctor, Error Handling & JS Minification Improvements**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Faster, More Helpful `dars doctor`
+
+The `dars doctor` command has been refined to give you **actionable diagnostics** with less noise:
+
+- Single-pass detection for:
+  - Node.js LTS
+  - Bun
+  - Optional tools: `esbuild`, `vite`, `electron`, `electron-builder`
+  - Python dependencies from `pyproject.toml`
+- Clear report table with required vs detected versions and status.
+- Non-interactive modes:
+  - `dars doctor --check` exits with code `0` when core requirements (Python deps) are satisfied, `1` otherwise.
+  - `dars doctor --all --yes` attempts to install all missing tools using Bun and pip without extra prompts.
+- When Bun is missing, doctor can invoke the official installers:
+  - Windows (PowerShell): `powershell -NoProfile -ExecutionPolicy Bypass -c "irm bun.sh/install.ps1 | iex"`
+  - macOS/Linux: `curl -fsSL https://bun.sh/install | bash`
+- Optional web/desktop tools can be installed globally with Bun:
+  - `bun add -g vite`
+  - `bun add -g esbuild`
+  - `bun add -g electron`
+  - `bun add -g electron-builder`
+
+These improvements make `dars doctor` a practical environment bootstrapper, not just a checker.
+
+### Short, Human-Friendly CLI Errors
+
+The CLI now avoids dumping huge tracebacks for common scenarios:
+
+- Global wrapper around the `main()` entrypoint shows concise messages:
+  - On `KeyboardInterrupt` (Ctrl+C): `Process interrupted by user`.
+  - On generic errors: `Process failed: <message>`.
+  - Full tracebacks are still available when running with `DARS_DEBUG=1`.
+- `dars build` specifically catches `KeyboardInterrupt` around the heavy export step and reports:
+  - `Process interrupted by user during build` instead of a long stack trace.
+
+This improves the day-to-day UX, especially when cancelling long builds or dev sessions.
+
+### JS Bundling: Always `app.js` in Build Mode
+
+The web exporter has been updated so that **JS combination depends only on the bundle flag**, not on Vite:
+
+- When `bundle=True` (build/production):
+  - Single-page apps export a unified `app.js` bundle containing:
+    - VDOM snapshot
+    - Dars runtime glue
+    - Page/user scripts
+  - Multi-page apps export per-page bundles: `app_{slug}.js`.
+- When `bundle=False` (development):
+  - The exporter keeps separate files (`runtime_dars*.js`, `script*.js`, `vdom_tree*.js`) for easier debugging.
+
+This guarantees consistent bundling in production regardless of whether Vite is used for minification.
+
+### Safer & Smarter JS Minification (Default vs Vite)
+
+JS minification has been hardened to avoid runtime breakage and to clearly separate **default** minify from **Vite-based** minify:
+
+- `minify_js` now follows this strategy:
+  - If `viteMinify` is enabled (`DARS_VITE_MINIFY=1`) and Vite is available, use Vite for JS minification.
+  - If Vite is enabled but not available, and `esbuild` is installed, fall back to `esbuild` as the minifier backend.
+  - If `viteMinify` is disabled, skip Vite/esbuild and use the conservative **regex-based Python minifier** (comments + whitespace) for JS.
+- The core runtime bundle `dars.min.js` is now **explicitly skipped** by the default minifier to avoid corrupting already-minified code.
+  - This prevents `SyntaxError: Invalid or unexpected token` errors that could occur when re-minifying the runtime.
+- The CLI progress label reflects the actual mode:
+  - `Applying minification (default)` when only the Python-side minifier is used.
+  - `Applying minification (default + vite)` when both the default and Vite/esbuild pipelines are active.
+
+These changes make minification more predictable, safer for the Dars runtime, and better aligned with the `viteMinify` flag in `dars.config.json`.
+
+---
+
 # Release Notes v1.7.4
 
 > **Real SSR Hydration, SPA Config & Streaming**

@@ -23,6 +23,8 @@ SAFE_HTML_EXT = {'.html', '.htm'}
 SKIP_PATTERNS = (
     r'^snapshot.*\.json$',
     r'^version.*\.txt$',
+    # Core runtime bundle is already minified; skip to avoid corrupting it
+    r'^dars\.min\.js$',
 )
 
 _pat_compiled = [re.compile(p) for p in SKIP_PATTERNS]
@@ -79,30 +81,40 @@ def minify_js(src: str) -> str:
     """Minify a JS source string. Uses esbuild if available; otherwise Python fallback."""
     # Fast path: dump to temp file and use Vite/esbuild when available
     _vite_enabled = os.getenv('DARS_VITE_MINIFY', '1') == '1'
-    if _vite_enabled and (_vite_available() or _esbuild_available()):
-        try:
-            import tempfile
-            with tempfile.NamedTemporaryFile('w', delete=False, suffix='.js', encoding='utf-8') as tf_in:
-                tf_in.write(src)
-                in_path = tf_in.name
-            with tempfile.NamedTemporaryFile('r', delete=False, suffix='.js', encoding='utf-8') as tf_out:
-                out_path = tf_out.name
-            ok = False
-            if _vite_enabled and _vite_available():
-                ok = _vite_minify_js(in_path, out_path)
-            if not ok and _esbuild_available():
-                ok = _esbuild_minify_js(in_path, out_path)
-            if ok:
+    try:
+        import tempfile
+        with tempfile.NamedTemporaryFile('w', delete=False, suffix='.js', encoding='utf-8') as tf_in:
+            tf_in.write(src)
+            in_path = tf_in.name
+        with tempfile.NamedTemporaryFile('r', delete=False, suffix='.js', encoding='utf-8') as tf_out:
+            out_path = tf_out.name
+
+        ok = False
+        # 1) Prefer Vite when explicitly enabled and available
+        if _vite_enabled and _vite_available():
+            ok = _vite_minify_js(in_path, out_path)
+
+        # 2) Solo usar esbuild cuando viteMinify está habilitado; si Vite falló pero
+        # esbuild está disponible, usarlo como backend de minificación para el modo Vite.
+        if _vite_enabled and not ok and _esbuild_available():
+            ok = _esbuild_minify_js(in_path, out_path)
+
+        if ok:
+            try:
+                with open(out_path, 'r', encoding='utf-8') as fr:
+                    return fr.read()
+            finally:
                 try:
-                    with open(out_path, 'r', encoding='utf-8') as fr:
-                        return fr.read()
-                finally:
-                    try: os.remove(in_path)
-                    except Exception: pass
-                    try: os.remove(out_path)
-                    except Exception: pass
-        except Exception:
-            pass
+                    os.remove(in_path)
+                except Exception:
+                    pass
+                try:
+                    os.remove(out_path)
+                except Exception:
+                    pass
+    except Exception:
+        # Fall back to conservative regex-based minifier below
+        pass
     # Conservative regex fallback
     try:
         s = _js_block_comments.sub("", src)

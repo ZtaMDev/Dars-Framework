@@ -1785,7 +1785,11 @@ def main():
             bundle_flag = True
         if format_name == 'desktop':
             bundle_flag = True
-        success = exporter.export_app(app, format_name, outdir, show_preview=False, bundle=bundle_flag)
+        try:
+            success = exporter.export_app(app, format_name, outdir, show_preview=False, bundle=bundle_flag)
+        except KeyboardInterrupt:
+            console.print("[yellow]Process interrupted by user during build[/yellow]")
+            sys.exit(1)
         if not success:
             sys.exit(1)
 
@@ -2168,11 +2172,16 @@ def main():
         code = run_forcedev()
         sys.exit(code)
 
-    else:
-        # Fallback: pretty help with header
-        pretty_print_help(parser)
-
-
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        console.print("[yellow]Process interrupted by user[/yellow]")
+        sys.exit(1)
+    except Exception as e:
+        # If DARS_DEBUG=1, re-raise to show full traceback
+        if os.environ.get("DARS_DEBUG") == "1":
+            raise
+        console.print(f"[red]Process failed: {e}[/red]")
+        sys.exit(1)

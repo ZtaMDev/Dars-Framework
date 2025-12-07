@@ -85,8 +85,8 @@ def install_bun() -> Tuple[bool, str]:
 def install_esbuild() -> Tuple[bool, str]:
     # Prefer Bun-managed dev dep
     if has_bun():
-        print("Executing: bun add -d esbuild")
-        code = run_live(["bun", "add", "-d", "esbuild"], shell=False)
+        print("Executing: bun add -g esbuild")
+        code = run_live(["bun", "add", "-g", "esbuild"], shell=False)
         return (code == 0, "")
     # Node fallback: use npx without install (sufficient for detection), nothing to install
     return True, ""
@@ -94,7 +94,25 @@ def install_esbuild() -> Tuple[bool, str]:
 
 def install_vite() -> Tuple[bool, str]:
     if has_bun():
-        print("Executing: bun add -d vite")
-        code = run_live(["bun", "add", "-d", "vite"], shell=False)
+        print("Executing: bun add -g vite")
+        code = run_live(["bun", "add", "-g", "vite"], shell=False)
         return (code == 0, "")
     return True, ""
+
+
+def install_electron_global() -> Tuple[bool, str]:
+    """Install Electron globally via Bun if available."""
+    if has_bun():
+        print("Executing: bun add -g electron")
+        code = run_live(["bun", "add", "-g", "electron"], shell=False)
+        return (code == 0, "")
+    return False, "Bun is not available to install Electron globally."
+
+
+def install_electron_builder_global() -> Tuple[bool, str]:
+    """Install electron-builder globally via Bun if available."""
+    if has_bun():
+        print("Executing: bun add -g electron-builder")
+        code = run_live(["bun", "add", "-g", "electron-builder"], shell=False)
+        return (code == 0, "")
+    return False, "Bun is not available to install electron-builder globally."
