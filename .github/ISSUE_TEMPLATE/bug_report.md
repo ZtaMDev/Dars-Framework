@@ -1,32 +1,40 @@
 ---
-name: Bug report
-about: Create a report to help us improve dars
+name: Bug Report
+about: Report a reproducible issue in the Dars Framework
 title: ''
 labels: bug
 assignees: ZtaMDev
-
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+## Describe the Bug
+A clear and concise description of the issue.
 
-**To Reproduce**
+## To Reproduce
 Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+1. Create a component using [...]
+2. Run the application with [...]
+3. Observe the error output
 
-**Expected behavior**
+## Expected Behavior
 A clear and concise description of what you expected to happen.
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+## Code Example
+If applicable, provide a minimal reproducible example.
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
+```python
+from dars.all import *
+# ...
+````
 
-**Additional context**
-Add any other context about the problem here.
+## Environment
+
+Provide as much detail as possible:
+
+* Dars Framework version: [e.g., 1.6.4]
+* Python version: [e.g., 3.10.0]
+* Operating System: [e.g., Windows 11, macOS 13, Ubuntu 22.04]
+* Browser (if applicable): [e.g., Chrome 120, Firefox 121]
+
+## Additional Context
+
+Add any additional information or relevant logs.
