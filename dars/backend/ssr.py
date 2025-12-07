@@ -152,10 +152,89 @@ class SSRRenderer:
             traceback.print_exc()
             route_vdom = {}
             route_events_map = {}
-        
-        # Generate VDOM JavaScript
+
+        # Generate VDOM JavaScript and initial state snapshot for hydration
         vdom_json = json.dumps(route_vdom, ensure_ascii=False, separators=(",", ":"), cls=DarsJSONEncoder)
-        vdom_js = f"window.__ROUTE_VDOM__ = {vdom_json};"
+
+        # Collect initial state configuration (V1 + V2) so the client can
+        # register states without requiring a separate static export.
+        try:
+            from dars.core.state import STATE_BOOTSTRAP  # type: ignore
+            initial_states = list(STATE_BOOTSTRAP) if STATE_BOOTSTRAP else []
+        except Exception:
+            initial_states = []
+
+        # State V2 snapshot (if available)
+        try:
+            from dars.core.state_v2 import STATE_V2_REGISTRY  # type: ignore
+            initial_states_v2 = [s.to_dict() for s in STATE_V2_REGISTRY] if STATE_V2_REGISTRY else []
+        except Exception:
+            initial_states_v2 = []
+
+        states_json = json.dumps(initial_states, ensure_ascii=False, separators=(",", ":"), cls=DarsJSONEncoder)
+        states_v2_json = json.dumps(initial_states_v2, ensure_ascii=False, separators=(",", ":"), cls=DarsJSONEncoder)
+
+        # Build a minimal SPA config so the client router can resolve routes on
+        # first load without requiring the static export pipeline. We keep this
+        # intentionally light-weight and focused on routing.
+        spa_config = {
+            "routes": [],
+            "index": None,
+            "notFound": None,
+            "notFoundPath": None,
+        }
+
+        # Optional backend URL for SSR fetches (mirrors App.ssr_url usage)
+        if getattr(self.app, "ssr_url", None):
+            spa_config["backendUrl"] = self.app.ssr_url
+
+        # Build per-route config based on the in-memory SPA routes
+        for name, spa_route in self.app._spa_routes.items():  # type: ignore[attr-defined]
+            r_meta = getattr(spa_route.root, "__dars_route_metadata__", None)
+            r_type = getattr(r_meta, "route_type", RouteType.PUBLIC)
+
+            route_type_str = "ssr" if r_type == RouteType.SSR else "public"
+            rcfg = {
+                "name": name,
+                "path": getattr(spa_route, "route", None),
+                "title": getattr(spa_route, "title", None) or self.app.title,
+                "type": route_type_str,
+                "parent": getattr(spa_route, "parent", None),
+            }
+
+            if route_type_str == "ssr":
+                # Use the same default pattern as the exporter
+                loader_endpoint = getattr(r_meta, "loader_endpoint", None) or f"/api/ssr/{name}"
+                rcfg["ssr_endpoint"] = loader_endpoint
+
+            spa_config["routes"].append(rcfg)
+
+            # Index route
+            if getattr(spa_route, "index", False):
+                spa_config["index"] = name
+
+        # Derive a simple 404 route if the SPA app has one configured
+        not_found_page = getattr(self.app, "_spa_404_page", None)
+        if not_found_page is not None:
+            spa_config["notFoundPath"] = "/404"
+            spa_config["routes"].append({
+                "name": "__404__",
+                "path": "/404",
+                "title": "404 Not Found",
+                "type": "public",
+                "parent": None,
+            })
+
+        spa_config_json = json.dumps(spa_config, ensure_ascii=False, separators=(",", ":"), cls=DarsJSONEncoder)
+
+        # Expose SPA config, VDOM and state snapshots on the window object so
+        # js_lib can hydrate without re-creating the DOM from scratch.
+        vdom_js = (
+            f"window.__DARS_SPA_CONFIG__ = {spa_config_json};\n"
+            f"window.__ROUTE_VDOM__ = {vdom_json};\n"
+            f"window.__DARS_STATE__ = {states_json};\n"
+            f"window.__DARS_STATE_V2__ = {states_v2_json};"
+        )
 
         # Only inject VDOM snapshot AND the bundled script for this page.
         # This matches the behavior of static HTML export where app_{slug}.js is included.
@@ -175,7 +254,12 @@ class SSRRenderer:
             meta_tags_html = f'<meta name="description" content="{route_app.description}">' if hasattr(route_app, 'description') and route_app.description else ''
             page_title = route_app.title
         
-        # Construct full HTML document with meta tags
+        # Construct full HTML document with meta tags.
+        #
+        # IMPORTANT: wrap the rendered body inside the __dars_spa_root__
+        # container so that the SPA router in dars.min.js can detect and
+        # hydrate the already-rendered content instead of re-rendering it
+        # from scratch on first load.
         full_html = f"""<!DOCTYPE html>
 <html lang="{route_app.language if hasattr(route_app, 'language') else 'en'}">
 <head>
@@ -187,7 +271,9 @@ class SSRRenderer:
     <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-    {body_html}
+    <div id="__dars_spa_root__">
+        {body_html}
+    </div>
     <script type="module" src="/lib/dars.min.js" defer></script>
     <script>{vdom_js}</script>
     <script type="module" src="/{script_fn}"></script>
@@ -204,12 +290,15 @@ class SSRRenderer:
             ],
             "events": route_events_map,
             "vdom": route_vdom,
-            "states": [],
+            # Provide initial state snapshot for dynamic loading/hydration.
+            "states": initial_states,
+            "statesV2": initial_states_v2,
+            "spaConfig": spa_config,
             "headMetadata": head_metadata  # Include for client hydration
         }
 
 
-def create_ssr_app(dars_app: App, prefix: str = "/api/ssr") -> FastAPI:
+def create_ssr_app(dars_app: App, prefix: str = "/api/ssr", streaming: bool = False) -> FastAPI:
     """
     Create a FastAPI app with automatic SSR endpoints for all SSR routes.
     
@@ -253,7 +342,7 @@ def create_ssr_app(dars_app: App, prefix: str = "/api/ssr") -> FastAPI:
         if metadata and metadata.route_type == RouteType.SSR:
             ssr_routes.append((name, route))
     
-    from fastapi.responses import HTMLResponse, JSONResponse
+    from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 
     # Create endpoints for each SSR route
     for route_name, route in ssr_routes:
@@ -283,9 +372,39 @@ def create_ssr_app(dars_app: App, prefix: str = "/api/ssr") -> FastAPI:
                     try:
                         params = dict(request.query_params)
                         result = renderer.render_route(name, params)
-                        # Remove debugging comment before serving
                         full_html = result['fullHtml']
-                        return HTMLResponse(content=full_html, status_code=200)
+
+                        if not streaming:
+                            # Classic non-streaming response
+                            return HTMLResponse(content=full_html, status_code=200)
+
+                        # Streaming mode: try to send <head> first, then body.
+                        # We do a simple split on the <body> tag; if it fails,
+                        # we fall back to a single-chunk streaming response.
+                        lower_html = full_html.lower()
+                        body_idx = lower_html.find("<body")
+                        if body_idx == -1:
+                            async def iter_single():
+                                yield full_html.encode("utf-8")
+                            return StreamingResponse(iter_single(), media_type="text/html")
+
+                        # Find the end of the opening <body> tag
+                        body_tag_end = lower_html.find('>', body_idx)
+                        if body_tag_end == -1:
+                            async def iter_single():
+                                yield full_html.encode("utf-8")
+                            return StreamingResponse(iter_single(), media_type="text/html")
+
+                        head_part = full_html[:body_tag_end + 1]
+                        body_part = full_html[body_tag_end + 1:]
+
+                        async def iter_html():
+                            # Send <html> + <head> + opening <body> first
+                            yield head_part.encode("utf-8")
+                            # Then the rest of the document
+                            yield body_part.encode("utf-8")
+
+                        return StreamingResponse(iter_html(), media_type="text/html")
                     except ValueError as e:
                          # Fallback to 404
                         raise HTTPException(status_code=404, detail=str(e))

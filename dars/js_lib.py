@@ -201,6 +201,16 @@ function registerStates(statesConfig) {{
   }}
 }}
 
+// If the server rendered the page with an initial state snapshot
+// (window.__DARS_STATE__), register it immediately so hydration can
+// reuse the existing DOM without requiring a separate static export
+// pipeline.
+try {{
+  if (typeof window !== 'undefined' && Array.isArray(window.__DARS_STATE__)) {{
+    registerStates(window.__DARS_STATE__);
+  }}
+}} catch(_) {{ }}
+
 function getState(name){{ return __registry.get(name); }}
 
 function _restoreDefault(id, snap, vnode, eventsMap){{
@@ -1369,6 +1379,16 @@ const Dars = {{
     releaseUrl: DARS_RELEASE_URL,
     updatePageMetadata: updatePageMetadata  // Expose for SPA metadata updates
 }};
+
+// If the SSR backend provided a snapshot for State V2, expose it on the
+// Dars object so tools or advanced integrations can inspect it. The
+// current runtime does not require this snapshot to function, but having
+// it available keeps the data round-trip complete.
+try {{
+  if (typeof window !== 'undefined' && Array.isArray(window.__DARS_STATE_V2__)) {{
+    Dars.stateV2Snapshot = window.__DARS_STATE_V2__;
+  }}
+}} catch(_) {{ }}
 
 // ==================== HEAD METADATA UPDATES ====================
 // Update head metadata on SPA route change

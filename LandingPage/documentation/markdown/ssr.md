@@ -262,32 +262,55 @@ DarsEnv.get_urls() → {
 
 ## SSR API Reference
 
-### `create_ssr_app(dars_app, prefix="/api/ssr")`
+### `create_ssr_app(dars_app, prefix="/api/ssr", streaming=False)`
 
 Creates a FastAPI application with automatic SSR endpoints.
 
 **Parameters:**
 - `dars_app` (App): Your Dars application instance
 - `prefix` (str): URL prefix for SSR endpoints (default: `/api/ssr`)
+- `streaming` (bool): When `True`, enables HTML streaming so the `<head>` and opening `<body>` are sent first, and the rest of the document is streamed afterwards. Default is `False` (classic non-streaming response).
 
 **Returns:**
 - FastAPI application with registered SSR routes
 
 **Auto-generated Endpoints:**
 
-For each SSR route in your Dars app, creates:
-- `GET /api/ssr/{route_name}` - Renders the route server-side
+For each SSR route in your Dars app, `create_ssr_app` creates:
+- `GET {prefix}/{route_name}` - JSON payload used by the SPA router for lazy SSR loading
+- `GET {route_path}` - Full HTML SSR endpoint (e.g. `/`, `/blog`, `/dashboard`)
 
-**Example:**
+Additionally, if no SSR route takes `/`, a health-check endpoint is added at:
+- `GET /` - Returns basic JSON info about the SSR backend
+
+**Example (non-streaming):**
 ```python
 from dars.backend.ssr import create_ssr_app
 
 app = create_ssr_app(dars_app)
-# Automatically creates:
+# Automatically creates, for example:
 # - GET /api/ssr/index
 # - GET /api/ssr/dashboard
-# - GET / (health check)
+# - GET /           (if root not taken by an SSR route)
 ```
+
+**Example (streaming enabled):**
+```python
+from dars.backend.ssr import create_ssr_app
+
+app = create_ssr_app(dars_app, streaming=True)
+# HTML responses for SSR routes are sent in two chunks:
+# 1) <html> + <head> + opening <body>
+# 2) The rest of the document (body content + scripts)
+```
+
+Behind the scenes, `create_ssr_app` uses `SSRRenderer` to:
+- Render the SSR route to HTML and wrap it in `__dars_spa_root__` for hydration.
+- Build a minimal SPA config and expose it as `window.__DARS_SPA_CONFIG__`.
+- Serialize initial state snapshots:
+  - V1: `window.__DARS_STATE__` (STATE_BOOTSTRAP)
+  - V2: `window.__DARS_STATE_V2__` (STATE_V2_REGISTRY via `to_dict()`)
+- Inject a VDOM snapshot as `window.__ROUTE_VDOM__`.
 
 ### `SSRRenderer`
 
@@ -299,22 +322,20 @@ from dars.backend.ssr import SSRRenderer
 renderer = SSRRenderer(dars_app)
 result = renderer.render_route("dashboard", params={"user_id": "123"})
 
-# Returns:
+# Returns (simplified):
 {
     "name": "dashboard",
-    "html": "<div>...</div>",
-    "scripts": [...],
-    "events": {...},
-    "vdom": {...},
-    "states": []
+    "html": "<div>...</div>",              # Body HTML for SPA hydration
+    "fullHtml": "<!DOCTYPE html>...",      # Complete HTML document with <head>
+    "scripts": [...],                       # Core + page-specific scripts
+    "events": {...},                        # Event map for client-side binding
+    "vdom": {...},                          # VDOM snapshot for the route
+    "states": [...],                        # V1 state snapshot (STATE_BOOTSTRAP)
+    "statesV2": [...],                      # V2 state snapshot (STATE_V2_REGISTRY)
+    "spaConfig": {...},                     # Minimal SPA routing config
+    "headMetadata": {...}                   # Metadata extracted from Head component
 }
 ```
-
----
-
-## Mixing Route Types
-
-You can combine SSR, SPA, and Static routes in one application:
 
 ```python
 app = App(title="Hybrid App", ssr_url=ssr_url)

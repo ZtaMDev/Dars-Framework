@@ -1,3 +1,63 @@
+# Release Notes v1.7.4
+
+> **Real SSR Hydration, SPA Config & Streaming**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Real SSR Hydration & SPA Integration
+
+Dars Framework 1.7.4 refines the SSR system to deliver a **true SSR experience**:
+
+- The server now renders **the entire page** (HTML + `<head>` + `<body>`) using `SSRRenderer`.
+- The content is delivered wrapped in `__dars_spa_root__`, allowing the Dars SPA router to hydrate the existing DOM without re-rendering from scratch.
+- A minimal SPA route configuration is exposed as `window.__DARS_SPA_CONFIG__`, so the client runtime knows all paths, route types, and SSR endpoints from the very first load.
+
+### Serialized Initial State (V1 + V2)
+
+To enable full hydration without a static export pipeline, the SSR backend now serializes the initial state:
+
+- **V1 (STATE_BOOTSTRAP)** → `window.__DARS_STATE__`
+- **V2 (STATE_V2_REGISTRY)** → `window.__DARS_STATE_V2__` (via `State.to_dict()`)
+
+The `dars.min.js` runtime automatically registers the V1 snapshot and exposes the V2 snapshot as `Dars.stateV2Snapshot` for tools and advanced debugging.
+
+### Enriched JSON SSR Endpoints
+
+The SSR JSON endpoints (`/api/ssr/{route_name}`) now return richer information for the SPA router and external tooling:
+
+- `html` – Body HTML for incremental hydration.
+- `vdom` – Per-route VDOM snapshot.
+- `events` – Event map for attaching handlers on the client.
+- `states` – V1 state snapshot.
+- `statesV2` – V2 state snapshot.
+- `spaConfig` – Minimal SPA routes configuration.
+- `headMetadata` – Metadata extracted from the `Head` component.
+
+### HTML Streaming (Experimental)
+
+`create_ssr_app` now accepts a new optional `streaming` parameter:
+
+```python
+from dars.backend.ssr import create_ssr_app
+
+fastapi_app = create_ssr_app(dars_app, streaming=True)
+```
+
+When `streaming=True`, HTML responses for SSR routes are sent in two parts:
+
+1. `<!DOCTYPE html>`, `<html>`, full `<head>` and the opening `<body>` tag.
+2. The rest of the document (`__dars_spa_root__` + hydration scripts).
+
+This allows browsers and crawlers to receive metadata and the `<head>` **as early as possible**, improving FCP and SEO while the body content finishes rendering.
+
+---
+
 # Release Notes v1.7.3
 
 > **Complete Head Component & SEO Metadata Support**

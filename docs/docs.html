@@ -1291,14 +1291,11 @@
      <a class="sidebar-link sidebar-level-2" href="#ssr-api-reference" style="margin-left: 20px">
       SSR API Reference
      </a>
-     <a class="sidebar-link sidebar-level-3" href="#createssrappdarsapp-prefixapissr" style="margin-left: 40px">
-      `create_ssr_app(dars_app, prefix="/api/ssr")`
+     <a class="sidebar-link sidebar-level-3" href="#createssrappdarsapp-prefixapissr-streamingfalse" style="margin-left: 40px">
+      `create_ssr_app(dars_app, prefix="/api/ssr", streaming=False)`
      </a>
      <a class="sidebar-link sidebar-level-3" href="#ssrrenderer" style="margin-left: 40px">
       `SSRRenderer`
-     </a>
-     <a class="sidebar-link sidebar-level-2" href="#mixing-route-types" style="margin-left: 20px">
-      Mixing Route Types
      </a>
      <a class="sidebar-link sidebar-level-2" href="#deployment" style="margin-left: 20px">
       Deployment
@@ -15377,9 +15374,9 @@ Client Side:
       <h2 id="ssr-api-reference">
        SSR API Reference
       </h2>
-      <h3 id="create_ssr_appdars_app-prefixapissr">
+      <h3 id="create_ssr_appdars_app-prefixapissr-streamingfalse">
        <code>
-        create_ssr_app(dars_app, prefix="/api/ssr")
+        create_ssr_app(dars_app, prefix="/api/ssr", streaming=False)
        </code>
       </h3>
       <p>
@@ -15403,6 +15400,27 @@ Client Side:
         /api/ssr
        </code>
        )
+-
+       <code>
+        streaming
+       </code>
+       (bool): When
+       <code>
+        True
+       </code>
+       , enables HTML streaming so the
+       <code>
+        &lt;head&gt;
+       </code>
+       and opening
+       <code>
+        &lt;body&gt;
+       </code>
+       are sent first, and the rest of the document is streamed afterwards. Default is
+       <code>
+        False
+       </code>
+       (classic non-streaming response).
       </p>
       <p>
        <strong>
@@ -15416,28 +15434,116 @@ Client Side:
        </strong>
       </p>
       <p>
-       For each SSR route in your Dars app, creates:
+       For each SSR route in your Dars app,
+       <code>
+        create_ssr_app
+       </code>
+       creates:
 -
        <code>
-        GET /api/ssr/{route_name}
+        GET {prefix}/{route_name}
        </code>
-       - Renders the route server-side
+       - JSON payload used by the SPA router for lazy SSR loading
+-
+       <code>
+        GET {route_path}
+       </code>
+       - Full HTML SSR endpoint (e.g.
+       <code>
+        /
+       </code>
+       ,
+       <code>
+        /blog
+       </code>
+       ,
+       <code>
+        /dashboard
+       </code>
+       )
+      </p>
+      <p>
+       Additionally, if no SSR route takes
+       <code>
+        /
+       </code>
+       , a health-check endpoint is added at:
+-
+       <code>
+        GET /
+       </code>
+       - Returns basic JSON info about the SSR backend
       </p>
       <p>
        <strong>
-        Example:
+        Example (non-streaming):
        </strong>
       </p>
       <div class="codehilite">
        <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.backend.ssr</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_ssr_app</span>
 
 <span class="n">app</span> <span class="o">=</span> <span class="n">create_ssr_app</span><span class="p">(</span><span class="n">dars_app</span><span class="p">)</span>
-<span class="c1"># Automatically creates:</span>
+<span class="c1"># Automatically creates, for example:</span>
 <span class="c1"># - GET /api/ssr/index</span>
 <span class="c1"># - GET /api/ssr/dashboard</span>
-<span class="c1"># - GET / (health check)</span>
+<span class="c1"># - GET /           (if root not taken by an SSR route)</span>
 </code></pre>
       </div>
+      <p>
+       <strong>
+        Example (streaming enabled):
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.backend.ssr</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_ssr_app</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">create_ssr_app</span><span class="p">(</span><span class="n">dars_app</span><span class="p">,</span> <span class="n">streaming</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># HTML responses for SSR routes are sent in two chunks:</span>
+<span class="c1"># 1) &lt;html&gt; + &lt;head&gt; + opening &lt;body&gt;</span>
+<span class="c1"># 2) The rest of the document (body content + scripts)</span>
+</code></pre>
+      </div>
+      <p>
+       Behind the scenes,
+       <code>
+        create_ssr_app
+       </code>
+       uses
+       <code>
+        SSRRenderer
+       </code>
+       to:
+- Render the SSR route to HTML and wrap it in
+       <code>
+        __dars_spa_root__
+       </code>
+       for hydration.
+- Build a minimal SPA config and expose it as
+       <code>
+        window.__DARS_SPA_CONFIG__
+       </code>
+       .
+- Serialize initial state snapshots:
+  - V1:
+       <code>
+        window.__DARS_STATE__
+       </code>
+       (STATE_BOOTSTRAP)
+  - V2:
+       <code>
+        window.__DARS_STATE_V2__
+       </code>
+       (STATE_V2_REGISTRY via
+       <code>
+        to_dict()
+       </code>
+       )
+- Inject a VDOM snapshot as
+       <code>
+        window.__ROUTE_VDOM__
+       </code>
+       .
+      </p>
       <h3 id="ssrrenderer">
        <code>
         SSRRenderer
@@ -15452,24 +15558,21 @@ Client Side:
 <span class="n">renderer</span> <span class="o">=</span> <span class="n">SSRRenderer</span><span class="p">(</span><span class="n">dars_app</span><span class="p">)</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">renderer</span><span class="o">.</span><span class="n">render_route</span><span class="p">(</span><span class="s2">"dashboard"</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">"user_id"</span><span class="p">:</span> <span class="s2">"123"</span><span class="p">})</span>
 
-<span class="c1"># Returns:</span>
+<span class="c1"># Returns (simplified):</span>
 <span class="p">{</span>
     <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"dashboard"</span><span class="p">,</span>
-    <span class="s2">"html"</span><span class="p">:</span> <span class="s2">"&lt;div&gt;...&lt;/div&gt;"</span><span class="p">,</span>
-    <span class="s2">"scripts"</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">],</span>
-    <span class="s2">"events"</span><span class="p">:</span> <span class="p">{</span><span class="o">...</span><span class="p">},</span>
-    <span class="s2">"vdom"</span><span class="p">:</span> <span class="p">{</span><span class="o">...</span><span class="p">},</span>
-    <span class="s2">"states"</span><span class="p">:</span> <span class="p">[]</span>
+    <span class="s2">"html"</span><span class="p">:</span> <span class="s2">"&lt;div&gt;...&lt;/div&gt;"</span><span class="p">,</span>              <span class="c1"># Body HTML for SPA hydration</span>
+    <span class="s2">"fullHtml"</span><span class="p">:</span> <span class="s2">"&lt;!DOCTYPE html&gt;..."</span><span class="p">,</span>      <span class="c1"># Complete HTML document with &lt;head&gt;</span>
+    <span class="s2">"scripts"</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">],</span>                       <span class="c1"># Core + page-specific scripts</span>
+    <span class="s2">"events"</span><span class="p">:</span> <span class="p">{</span><span class="o">...</span><span class="p">},</span>                        <span class="c1"># Event map for client-side binding</span>
+    <span class="s2">"vdom"</span><span class="p">:</span> <span class="p">{</span><span class="o">...</span><span class="p">},</span>                          <span class="c1"># VDOM snapshot for the route</span>
+    <span class="s2">"states"</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">],</span>                        <span class="c1"># V1 state snapshot (STATE_BOOTSTRAP)</span>
+    <span class="s2">"statesV2"</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">],</span>                      <span class="c1"># V2 state snapshot (STATE_V2_REGISTRY)</span>
+    <span class="s2">"spaConfig"</span><span class="p">:</span> <span class="p">{</span><span class="o">...</span><span class="p">},</span>                     <span class="c1"># Minimal SPA routing config</span>
+    <span class="s2">"headMetadata"</span><span class="p">:</span> <span class="p">{</span><span class="o">...</span><span class="p">}</span>                   <span class="c1"># Metadata extracted from Head component</span>
 <span class="p">}</span>
 </code></pre>
       </div>
-      <hr/>
-      <h2 id="mixing-route-types">
-       Mixing Route Types
-      </h2>
-      <p>
-       You can combine SSR, SPA, and Static routes in one application:
-      </p>
       <div class="codehilite">
        <pre><span></span><code><span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"Hybrid App"</span><span class="p">,</span> <span class="n">ssr_url</span><span class="o">=</span><span class="n">ssr_url</span><span class="p">)</span>
 
@@ -23750,7 +23853,7 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
     </div>
    </div>
   </div>
-  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1765129939" type="module">
+  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1765133694" type="module">
   </script>
   <script defer="" src="app_docs.js">
   </script>
