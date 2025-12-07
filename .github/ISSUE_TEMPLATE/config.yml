@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and General Discussion
+    url: https://github.com/ZtaMDev/Dars-Framework/discussions
+    about: Please use GitHub Discussions for general questions.
