@@ -26,6 +26,7 @@ docs = Page(
             Markdown(file_path="./documentation/markdown/custom_components.md", class_name="markdown_docs", dark_theme=True, id="md-custom_components"),
             Markdown(file_path="./documentation/markdown/animations.md", class_name="markdown_docs", dark_theme=True, id="md-animations"),
             Markdown(file_path="./documentation/markdown/routing.md", class_name="markdown_docs", dark_theme=True, id="md-routing"),
+            Markdown(file_path="./documentation/markdown/ssr.md", class_name="markdown_docs", dark_theme=True, id="md-ssr"),
             Markdown(file_path="./documentation/markdown/state_management.md", class_name="markdown_docs", dark_theme=True, id="md-state_management"),
             Markdown(file_path="./documentation/markdown/hooks.md", class_name="markdown_docs", dark_theme=True, id="md-hooks"),
             Markdown(file_path="./documentation/markdown/operations.md", class_name="markdown_docs", dark_theme=True, id="md-operations"),

@@ -1193,11 +1193,103 @@
      <a class="sidebar-link sidebar-level-2" href="#hot-reload" style="margin-left: 20px">
       Hot Reload
      </a>
-     <a class="sidebar-link sidebar-level-2" href="#ssr-hydration" style="margin-left: 20px">
-      SSR &amp; Hydration
+     <a class="sidebar-link sidebar-level-2" href="#server-side-rendering-ssr" style="margin-left: 20px">
+      Server-Side Rendering (SSR)
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#quick-overview" style="margin-left: 40px">
+      Quick Overview
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#basic-ssr-route" style="margin-left: 40px">
+      Basic SSR Route
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#dual-hydration-system" style="margin-left: 40px">
+      Dual Hydration System
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#creating-an-ssr-project" style="margin-left: 40px">
+      Creating an SSR Project
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#complete-ssr-documentation" style="margin-left: 40px">
+      Complete SSR Documentation
+     </a>
+     <div class="sidebar-divider">
+     </div>
+     <div class="sidebar-category">
+      Ssr
+     </div>
+     <a class="sidebar-link sidebar-level-1" href="#server-side-rendering-in-dars-framework" style="margin-left: 0px">
+      Server-Side Rendering in Dars Framework
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#overview" style="margin-left: 20px">
+      Overview
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#architecture" style="margin-left: 20px">
+      Architecture
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#how-ssr-works-in-dars" style="margin-left: 40px">
+      How SSR Works in Dars
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#dual-hydration-system" style="margin-left: 40px">
+      Dual Hydration System
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#quick-start" style="margin-left: 20px">
+      Quick Start
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#creating-an-ssr-project" style="margin-left: 40px">
+      Creating an SSR Project
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#project-structure" style="margin-left: 40px">
+      Project Structure
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#frontend-mainpy" style="margin-left: 60px">
+      Frontend (`main.py`)
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#backend-backendapipy" style="margin-left: 60px">
+      Backend (`backend/api.py`)
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#environment-config-backendapiconfigpy" style="margin-left: 60px">
+      Environment Config (`backend/apiConfig.py`)
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#route-types" style="margin-left: 20px">
+      Route Types
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#1-ssr-routes-routetypessr" style="margin-left: 40px">
+      1. SSR Routes (`RouteType.SSR`)
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#2-spa-routes-routetypepublic-default" style="margin-left: 40px">
+      2. SPA Routes (`RouteType.PUBLIC`) - Default
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#development-workflow" style="margin-left: 20px">
+      Development Workflow
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#running-in-development" style="margin-left: 40px">
+      Running in Development
      </a>
      <a class="sidebar-link sidebar-level-3" href="#how-it-works" style="margin-left: 40px">
-      How it Works
+      How It Works
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#environment-detection" style="margin-left: 40px">
+      Environment Detection
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#ssr-api-reference" style="margin-left: 20px">
+      SSR API Reference
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#createssrappdarsapp-prefixapissr" style="margin-left: 40px">
+      `create_ssr_app(dars_app, prefix="/api/ssr")`
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#ssrrenderer" style="margin-left: 40px">
+      `SSRRenderer`
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#mixing-route-types" style="margin-left: 20px">
+      Mixing Route Types
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#deployment" style="margin-left: 20px">
+      Deployment
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#production-configuration" style="margin-left: 40px">
+      Production Configuration
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#deployment-platforms" style="margin-left: 40px">
+      Deployment Platforms
      </a>
      <div class="sidebar-divider">
      </div>
@@ -2336,6 +2428,11 @@
        <li>
         <a href="#spa-routing-in-dars-framework">
          SPA Routing
+        </a>
+       </li>
+       <li>
+        <a href="#server-side-rendering-in-dars-framework">
+         SSR Routing
         </a>
        </li>
        <li>
@@ -14394,68 +14491,705 @@ def hello():
        </li>
       </ul>
       <hr/>
-      <h2 id="ssr-hydration">
-       SSR &amp; Hydration
+      <h2 id="server-side-rendering-ssr">
+       Server-Side Rendering (SSR)
       </h2>
       <p>
-       Dars introduces a robust "Dual Hydration" system for Server-Side Rendering (SSR) routes.
+       Dars Framework provides complete Server-Side Rendering support integrated with FastAPI, allowing you to build full-stack applications with both server-rendered and client-side pages.
       </p>
-      <h3 id="how-it-works">
-       How it Works
+      <h3 id="quick-overview">
+       Quick Overview
+      </h3>
+      <p>
+       SSR routes are rendered on the server before being sent to the client, providing:
+- Faster initial page load
+- Progressive enhancement
+- Flexible architecture (mix SSR, SPA, and Static routes)
+      </p>
+      <h3 id="basic-ssr-route">
+       Basic SSR Route
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">backend.apiConfig</span><span class="w"> </span><span class="kn">import</span> <span class="n">DarsEnv</span>
+
+<span class="c1"># Configure SSR URL</span>
+<span class="n">ssr_url</span> <span class="o">=</span> <span class="n">DarsEnv</span><span class="o">.</span><span class="n">get_urls</span><span class="p">()[</span><span class="s1">'backend'</span><span class="p">]</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"My App"</span><span class="p">,</span> <span class="n">ssr_url</span><span class="o">=</span><span class="n">ssr_url</span><span class="p">)</span>
+
+<span class="c1"># Define SSR route</span>
+<span class="nd">@route</span><span class="p">(</span><span class="s2">"/"</span><span class="p">,</span> <span class="n">route_type</span><span class="o">=</span><span class="n">RouteType</span><span class="o">.</span><span class="n">SSR</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">home</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span>
+        <span class="n">Heading</span><span class="p">(</span><span class="s2">"Welcome!"</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+        <span class="n">Text</span><span class="p">(</span><span class="s2">"This page is rendered on the server!"</span><span class="p">)</span>
+    <span class="p">)</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="s2">"home"</span><span class="p">,</span> <span class="n">home</span><span class="p">(),</span> <span class="n">title</span><span class="o">=</span><span class="s2">"Home"</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="dual-hydration-system">
+       Dual Hydration System
+      </h3>
+      <p>
+       Dars uses a sophisticated "Dual Hydration" approach:
+      </p>
+      <ol>
+       <li>
+        <strong>
+         Server Side
+        </strong>
+        : Renders component to HTML and builds VDOM snapshot
+       </li>
+       <li>
+        <strong>
+         Client Side
+        </strong>
+        : Displays server HTML immediately, then hydrates with JavaScript
+       </li>
+       <li>
+        <strong>
+         Result
+        </strong>
+        : No flickering, instant content, full interactivity
+       </li>
+      </ol>
+      <p>
+       This prevents Flash of Unstyled Content (FOUC), double rendering, and race conditions.
+      </p>
+      <h3 id="creating-an-ssr-project">
+       Creating an SSR Project
+      </h3>
+      <p>
+       Use the Dars CLI to scaffold a complete SSR project with FastAPI backend:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code>dars<span class="w"> </span>init<span class="w"> </span>my-ssr-app<span class="w"> </span>--type<span class="w"> </span>ssr
+<span class="nb">cd</span><span class="w"> </span>my-ssr-app
+</code></pre>
+      </div>
+      <p>
+       This creates a full-stack project with:
+- Frontend Dars app (
+       <code>
+        main.py
+       </code>
+       )
+- FastAPI backend (
+       <code>
+        backend/api.py
+       </code>
+       )
+- Environment configuration
+- Development and production setup
+      </p>
+      <h3 id="complete-ssr-documentation">
+       Complete SSR Documentation
+      </h3>
+      <p>
+       For comprehensive SSR documentation including:
+- Architecture and how it works
+- Development workflow
+- API reference (
+       <code>
+        create_ssr_app
+       </code>
+       ,
+       <code>
+        SSRRenderer
+       </code>
+       )
+- Mixing SSR, SPA, and Static routes
+- Deployment guide
+- Advanced features (authentication, custom endpoints)
+- Best practices and troubleshooting
+- Real-world examples
+      </p>
+      <p>
+       <strong>
+        See the
+        <a href="#server-side-rendering-in-dars-framework">
+         Complete SSR Guide
+        </a>
+       </strong>
+      </p>
+      <hr/>
+     </div>
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="md-ssr">
+      <h1 id="server-side-rendering-in-dars-framework">
+       Server-Side Rendering in Dars Framework
+      </h1>
+      <p>
+       Dars Framework provides a complete Server-Side Rendering solution integrated with FastAPI, allowing you to build full-stack applications with both server-rendered and client-side pages in a single codebase.
+      </p>
+      <h2 id="overview">
+       Overview
+      </h2>
+      <p>
+       SSR in Dars renders your pages on the server before sending them to the client, providing:
+      </p>
+      <ul>
+       <li>
+        <strong>
+         Faster Initial Load
+        </strong>
+        : Users see content immediately without waiting for JavaScript
+       </li>
+       <li>
+        <strong>
+         Flexible Architecture
+        </strong>
+        : Mix SSR and SPA routes in the same application
+       </li>
+      </ul>
+      <h2 id="architecture">
+       Architecture
+      </h2>
+      <h3 id="how-ssr-works-in-dars">
+       How SSR Works in Dars
       </h3>
       <ol>
        <li>
         <strong>
-         Backend Rendering
+         Client Request
         </strong>
-        : The server renders the initial HTML and injects a VDOM snapshot (
+        : Browser requests a page (e.g.,
         <code>
-         window.__ROUTE_VDOM__
+         /dashboard
         </code>
-        ) into the DOM.
+        )
        </li>
        <li>
         <strong>
-         Script Injection
+         Server Rendering
         </strong>
-        : The server checks if there is a corresponding client-side bundle for the route (e.g.,
-        <code>
-         app_{slug}.js
-        </code>
-        ) and injects a reference to it.
+        : FastAPI backend renders the Dars component to HTML
+       </li>
+       <li>
+        <strong>
+         HTML Response
+        </strong>
+        : Server sends fully-rendered HTML with embedded VDOM
        </li>
        <li>
         <strong>
          Client Hydration
         </strong>
-        :
-        <ul>
-         <li>
-          The
-          <code>
-           dars.min.js
-          </code>
-          runtime loads and checks for
-          <code>
-           __ROUTE_VDOM__
-          </code>
-          .
-         </li>
-         <li>
-          If found, it hydrates the DOM immediately without fetching data again.
-         </li>
-         <li>
-          The browser loads the injected
-          <code>
-           app_{slug}.js
-          </code>
-          bundle, which contains the interactive logic (event handlers, state).
-         </li>
-        </ul>
+        : Browser loads JavaScript and "hydrates" the static HTML
+       </li>
+       <li>
+        <strong>
+         Interactive
+        </strong>
+        : Page becomes fully interactive with event handlers
        </li>
       </ol>
+      <h3 id="dual-hydration-system">
+       Dual Hydration System
+      </h3>
       <p>
-       This architecture prevents "Flash of Unstyled Content" (FOUC), race conditions, and double-rendering, ensuring that events function correctly even after a page reload.
+       Dars uses a sophisticated "Dual Hydration" approach to prevent flickering and ensure smooth transitions:
+      </p>
+      <pre>
+<code class="language-none">Server Side:
+1. Render component to HTML
+2. Build VDOM representation
+3. Inject VDOM as window.__ROUTE_VDOM__
+4. Send HTML + VDOM to client
+
+Client Side:
+1. Display server-rendered HTML (instant)
+2. Load dars.min.js runtime
+3. Detect __ROUTE_VDOM__ presence
+4. Hydrate DOM without re-rendering
+5. Attach event handlers and state
+</code></pre>
+      <p>
+       This prevents:
+- Flash of Unstyled Content (FOUC)
+- Double rendering
+- Race conditions
+- Lost event handlers
+      </p>
+      <hr/>
+      <h2 id="quick-start">
+       Quick Start
+      </h2>
+      <h3 id="creating-an-ssr-project">
+       Creating an SSR Project
+      </h3>
+      <p>
+       Use the Dars CLI to scaffold a complete SSR project:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code>dars<span class="w"> </span>init<span class="w"> </span>my-ssr-app<span class="w"> </span>--type<span class="w"> </span>ssr
+<span class="nb">cd</span><span class="w"> </span>my-ssr-app
+</code></pre>
+      </div>
+      <p>
+       This creates:
+      </p>
+      <pre>
+<code class="language-none">my-ssr-app/
+├── main.py              # Frontend (Dars app)
+├── backend/
+│   ├── api.py          # FastAPI server with SSR
+│   └── apiConfig.py    # Environment configuration
+└── dars.config.json    # Dars configuration
+
+</code></pre>
+      <h3 id="project-structure">
+       Project Structure
+      </h3>
+      <h4 id="frontend-mainpy">
+       Frontend (
+       <code>
+        main.py
+       </code>
+       )
+      </h4>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">backend.apiConfig</span><span class="w"> </span><span class="kn">import</span> <span class="n">DarsEnv</span>
+
+<span class="c1"># Configure SSR URL</span>
+<span class="n">ssr_url</span> <span class="o">=</span> <span class="n">DarsEnv</span><span class="o">.</span><span class="n">get_urls</span><span class="p">()[</span><span class="s1">'backend'</span><span class="p">]</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"My SSR App"</span><span class="p">,</span> <span class="n">ssr_url</span><span class="o">=</span><span class="n">ssr_url</span><span class="p">)</span>
+
+<span class="c1"># Define SSR route</span>
+<span class="nd">@route</span><span class="p">(</span><span class="s2">"/"</span><span class="p">,</span> <span class="n">route_type</span><span class="o">=</span><span class="n">RouteType</span><span class="o">.</span><span class="n">SSR</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span>
+        <span class="n">Text</span><span class="p">(</span><span class="s2">"Hello from Server!"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">"fs-[32px]"</span><span class="p">),</span>
+        <span class="n">Button</span><span class="p">(</span><span class="s2">"Click Me"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">alert</span><span class="p">(</span><span class="s2">"Interactive!"</span><span class="p">))</span>
+    <span class="p">)</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="s2">"index"</span><span class="p">,</span> <span class="n">index</span><span class="p">(),</span> <span class="n">title</span><span class="o">=</span><span class="s2">"Home"</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">rTimeCompile</span><span class="p">()</span>
+</code></pre>
+      </div>
+      <h4 id="backend-backendapipy">
+       Backend (
+       <code>
+        backend/api.py
+       </code>
+       )
+      </h4>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastAPI</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi.middleware.cors</span><span class="w"> </span><span class="kn">import</span> <span class="n">CORSMiddleware</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dars.backend.ssr</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_ssr_app</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">apiConfig</span><span class="w"> </span><span class="kn">import</span> <span class="n">DarsEnv</span>
+
+<span class="c1"># Import Dars app</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">'.'</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">main</span><span class="w"> </span><span class="kn">import</span> <span class="n">app</span> <span class="k">as</span> <span class="n">dars_app</span>
+
+<span class="c1"># Create FastAPI app with SSR</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">create_ssr_app</span><span class="p">(</span><span class="n">dars_app</span><span class="p">)</span>
+
+<span class="c1"># Enable CORS for development</span>
+<span class="k">if</span> <span class="n">DarsEnv</span><span class="o">.</span><span class="n">is_dev</span><span class="p">():</span>
+    <span class="n">urls</span> <span class="o">=</span> <span class="n">DarsEnv</span><span class="o">.</span><span class="n">get_urls</span><span class="p">()</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span>
+        <span class="n">CORSMiddleware</span><span class="p">,</span>
+        <span class="n">allow_origins</span><span class="o">=</span><span class="p">[</span><span class="n">urls</span><span class="p">[</span><span class="s1">'frontend'</span><span class="p">]],</span>
+        <span class="n">allow_credentials</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">allow_methods</span><span class="o">=</span><span class="p">[</span><span class="s2">"*"</span><span class="p">],</span>
+        <span class="n">allow_headers</span><span class="o">=</span><span class="p">[</span><span class="s2">"*"</span><span class="p">],</span>
+    <span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">uvicorn</span>
+    <span class="n">uvicorn</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s2">"127.0.0.1"</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">3000</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <h4 id="environment-config-backendapiconfigpy">
+       Environment Config (
+       <code>
+        backend/apiConfig.py
+       </code>
+       )
+      </h4>
+      <div class="codehilite">
+       <pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DarsEnv</span><span class="p">:</span>
+    <span class="n">MODE</span> <span class="o">=</span> <span class="s2">"development"</span>  <span class="c1"># or "production"</span>
+
+    <span class="n">DEV</span> <span class="o">=</span> <span class="s2">"development"</span>
+    <span class="n">BUILD</span> <span class="o">=</span> <span class="s2">"production"</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_dev</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">DarsEnv</span><span class="o">.</span><span class="n">MODE</span> <span class="o">==</span> <span class="n">DarsEnv</span><span class="o">.</span><span class="n">DEV</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_urls</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">DarsEnv</span><span class="o">.</span><span class="n">is_dev</span><span class="p">():</span>
+            <span class="k">return</span> <span class="p">{</span>
+                <span class="s2">"backend"</span><span class="p">:</span> <span class="s2">"http://localhost:3000"</span><span class="p">,</span>
+                <span class="s2">"frontend"</span><span class="p">:</span> <span class="s2">"http://localhost:8000"</span>
+            <span class="p">}</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">"backend"</span><span class="p">:</span> <span class="s2">"/"</span><span class="p">,</span>
+            <span class="s2">"frontend"</span><span class="p">:</span> <span class="s2">"/"</span>
+        <span class="p">}</span>
+</code></pre>
+      </div>
+      <hr/>
+      <h2 id="route-types">
+       Route Types
+      </h2>
+      <p>
+       Dars supports two routing modes that can be mixed in the same application:
+      </p>
+      <h3 id="1-ssr-routes-routetypessr">
+       1. SSR Routes (
+       <code>
+        RouteType.SSR
+       </code>
+       )
+      </h3>
+      <p>
+       Server-rendered on every request.
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="nd">@route</span><span class="p">(</span><span class="s2">"/dashboard"</span><span class="p">,</span> <span class="n">route_type</span><span class="o">=</span><span class="n">RouteType</span><span class="o">.</span><span class="n">SSR</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dashboard</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span>
+        <span class="n">Text</span><span class="p">(</span><span class="s2">"Dashboard"</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+        <span class="n">Text</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Rendered at: </span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        When to use:
+       </strong>
+       - SEO-critical pages (landing pages, blog posts)
+- Dynamic content that changes frequently
+- Pages requiring authentication checks server-side
+- Initial load performance is critical
+      </p>
+      <h3 id="2-spa-routes-routetypepublic-default">
+       2. SPA Routes (
+       <code>
+        RouteType.PUBLIC
+       </code>
+       ) - Default
+      </h3>
+      <p>
+       Client-side navigation, no server rendering.
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="nd">@route</span><span class="p">(</span><span class="s2">"/settings"</span><span class="p">)</span>  <span class="c1"># Default is PUBLIC</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">settings</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span>
+        <span class="n">Text</span><span class="p">(</span><span class="s2">"Settings"</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+        <span class="c1"># Interactive forms, real-time updates</span>
+    <span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        When to use:
+       </strong>
+       - Admin dashboards (not recommended for now in the future will be supported with Dars Middleware)
+- Interactive tools
+- Pages behind authentication
+- Real-time applications
+      </p>
+      <h2 id="development-workflow">
+       Development Workflow
+      </h2>
+      <h3 id="running-in-development">
+       Running in Development
+      </h3>
+      <p>
+       You need
+       <strong>
+        two servers
+       </strong>
+       running simultaneously:
+      </p>
+      <p>
+       <strong>
+        Terminal 1 - Frontend Dev Server:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code>dars<span class="w"> </span>dev
+<span class="c1"># Runs on http://localhost:8000</span>
+<span class="c1"># Hot reload for UI changes</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Terminal 2 - Backend SSR Server:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>backend.api
+<span class="c1"># Runs on http://localhost:3000</span>
+<span class="c1"># Handles SSR rendering</span>
+</code></pre>
+      </div>
+      <h3 id="how-it-works">
+       How It Works
+      </h3>
+      <ol>
+       <li>
+        <strong>
+         Frontend Server (8000)
+        </strong>
+        : Serves static files and handles SPA routing
+       </li>
+       <li>
+        <strong>
+         Backend Server (3000)
+        </strong>
+        : Renders SSR routes and provides API endpoints
+       </li>
+       <li>
+        <strong>
+         Communication
+        </strong>
+        : Frontend fetches SSR content from backend via
+        <code>
+         /api/ssr/*
+        </code>
+       </li>
+      </ol>
+      <h3 id="environment-detection">
+       Environment Detection
+      </h3>
+      <p>
+       The
+       <code>
+        DarsEnv
+       </code>
+       class automatically configures URLs:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Development</span>
+<span class="n">DarsEnv</span><span class="o">.</span><span class="n">get_urls</span><span class="p">()</span> <span class="err">→</span> <span class="p">{</span>
+    <span class="s2">"backend"</span><span class="p">:</span> <span class="s2">"http://localhost:3000"</span><span class="p">,</span>
+    <span class="s2">"frontend"</span><span class="p">:</span> <span class="s2">"http://localhost:8000"</span>
+<span class="p">}</span>
+
+<span class="c1"># Production</span>
+<span class="n">DarsEnv</span><span class="o">.</span><span class="n">get_urls</span><span class="p">()</span> <span class="err">→</span> <span class="p">{</span>
+    <span class="s2">"backend"</span><span class="p">:</span> <span class="s2">"/"</span><span class="p">,</span>
+    <span class="s2">"frontend"</span><span class="p">:</span> <span class="s2">"/"</span>
+<span class="p">}</span>
+</code></pre>
+      </div>
+      <hr/>
+      <h2 id="ssr-api-reference">
+       SSR API Reference
+      </h2>
+      <h3 id="create_ssr_appdars_app-prefixapissr">
+       <code>
+        create_ssr_app(dars_app, prefix="/api/ssr")
+       </code>
+      </h3>
+      <p>
+       Creates a FastAPI application with automatic SSR endpoints.
+      </p>
+      <p>
+       <strong>
+        Parameters:
+       </strong>
+       -
+       <code>
+        dars_app
+       </code>
+       (App): Your Dars application instance
+-
+       <code>
+        prefix
+       </code>
+       (str): URL prefix for SSR endpoints (default:
+       <code>
+        /api/ssr
+       </code>
+       )
+      </p>
+      <p>
+       <strong>
+        Returns:
+       </strong>
+       - FastAPI application with registered SSR routes
+      </p>
+      <p>
+       <strong>
+        Auto-generated Endpoints:
+       </strong>
+      </p>
+      <p>
+       For each SSR route in your Dars app, creates:
+-
+       <code>
+        GET /api/ssr/{route_name}
+       </code>
+       - Renders the route server-side
+      </p>
+      <p>
+       <strong>
+        Example:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.backend.ssr</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_ssr_app</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">create_ssr_app</span><span class="p">(</span><span class="n">dars_app</span><span class="p">)</span>
+<span class="c1"># Automatically creates:</span>
+<span class="c1"># - GET /api/ssr/index</span>
+<span class="c1"># - GET /api/ssr/dashboard</span>
+<span class="c1"># - GET / (health check)</span>
+</code></pre>
+      </div>
+      <h3 id="ssrrenderer">
+       <code>
+        SSRRenderer
+       </code>
+      </h3>
+      <p>
+       Low-level class for manual SSR rendering.
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.backend.ssr</span><span class="w"> </span><span class="kn">import</span> <span class="n">SSRRenderer</span>
+
+<span class="n">renderer</span> <span class="o">=</span> <span class="n">SSRRenderer</span><span class="p">(</span><span class="n">dars_app</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">renderer</span><span class="o">.</span><span class="n">render_route</span><span class="p">(</span><span class="s2">"dashboard"</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">"user_id"</span><span class="p">:</span> <span class="s2">"123"</span><span class="p">})</span>
+
+<span class="c1"># Returns:</span>
+<span class="p">{</span>
+    <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"dashboard"</span><span class="p">,</span>
+    <span class="s2">"html"</span><span class="p">:</span> <span class="s2">"&lt;div&gt;...&lt;/div&gt;"</span><span class="p">,</span>
+    <span class="s2">"scripts"</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">],</span>
+    <span class="s2">"events"</span><span class="p">:</span> <span class="p">{</span><span class="o">...</span><span class="p">},</span>
+    <span class="s2">"vdom"</span><span class="p">:</span> <span class="p">{</span><span class="o">...</span><span class="p">},</span>
+    <span class="s2">"states"</span><span class="p">:</span> <span class="p">[]</span>
+<span class="p">}</span>
+</code></pre>
+      </div>
+      <hr/>
+      <h2 id="mixing-route-types">
+       Mixing Route Types
+      </h2>
+      <p>
+       You can combine SSR, SPA, and Static routes in one application:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"Hybrid App"</span><span class="p">,</span> <span class="n">ssr_url</span><span class="o">=</span><span class="n">ssr_url</span><span class="p">)</span>
+
+<span class="c1"># SSR for landing page (SEO)</span>
+<span class="nd">@route</span><span class="p">(</span><span class="s2">"/"</span><span class="p">,</span> <span class="n">route_type</span><span class="o">=</span><span class="n">RouteType</span><span class="o">.</span><span class="n">SSR</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">home</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">Text</span><span class="p">(</span><span class="s2">"Welcome!"</span><span class="p">))</span>
+
+<span class="c1"># SPA for dashboard (interactive)</span>
+<span class="nd">@route</span><span class="p">(</span><span class="s2">"/dashboard"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dashboard</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">Text</span><span class="p">(</span><span class="s2">"Dashboard"</span><span class="p">))</span>
+
+<span class="c1"># Static for docs (performance)</span>
+<span class="nd">@route</span><span class="p">(</span><span class="s2">"/docs"</span><span class="p">,</span> <span class="n">route_type</span><span class="o">=</span><span class="n">RouteType</span><span class="o">.</span><span class="n">STATIC</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">docs</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="n">Text</span><span class="p">(</span><span class="s2">"Documentation"</span><span class="p">))</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="s2">"home"</span><span class="p">,</span> <span class="n">home</span><span class="p">(),</span> <span class="n">title</span><span class="o">=</span><span class="s2">"Home"</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="s2">"dashboard"</span><span class="p">,</span> <span class="n">dashboard</span><span class="p">(),</span> <span class="n">title</span><span class="o">=</span><span class="s2">"Dashboard"</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="s2">"docs"</span><span class="p">,</span> <span class="n">docs</span><span class="p">(),</span> <span class="n">title</span><span class="o">=</span><span class="s2">"Docs"</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Navigation Behavior:
+       </strong>
+       - SSR → SPA: Fetches from backend, hydrates
+- SPA → SPA: Client-side navigation (instant)
+- Any → Static: Loads pre-rendered HTML
+      </p>
+      <hr/>
+      <h2 id="deployment">
+       Deployment
+      </h2>
+      <h3 id="production-configuration">
+       Production Configuration
+      </h3>
+      <p>
+       <strong>
+        1. Update Environment Mode:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># backend/apiConfig.py</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DarsEnv</span><span class="p">:</span>
+    <span class="n">MODE</span> <span class="o">=</span> <span class="s2">"production"</span>  <span class="c1"># Change from "development"</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        2. Build Frontend:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code>dars<span class="w"> </span>build
+<span class="c1"># Generates static files in ./dist</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        3. Deploy Backend:
+       </strong>
+      </p>
+      <p>
+       Your FastAPI backend serves both:
+- SSR-rendered pages via
+       <code>
+        /api/ssr/*
+       </code>
+       - Static files from
+       <code>
+        ./dist
+       </code>
+      </p>
+      <p>
+       <strong>
+        Example Production Server:
+       </strong>
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># backend/api.py</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastAPI</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi.staticfiles</span><span class="w"> </span><span class="kn">import</span> <span class="n">StaticFiles</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dars.backend.ssr</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_ssr_app</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">main</span><span class="w"> </span><span class="kn">import</span> <span class="n">app</span> <span class="k">as</span> <span class="n">dars_app</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">create_ssr_app</span><span class="p">(</span><span class="n">dars_app</span><span class="p">)</span>
+
+<span class="c1"># Serve static files</span>
+<span class="n">app</span><span class="o">.</span><span class="n">mount</span><span class="p">(</span><span class="s2">"/"</span><span class="p">,</span> <span class="n">StaticFiles</span><span class="p">(</span><span class="n">directory</span><span class="o">=</span><span class="s2">"dist"</span><span class="p">,</span> <span class="n">html</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">"static"</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">uvicorn</span>
+    <span class="n">uvicorn</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s2">"0.0.0.0"</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">8000</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="deployment-platforms">
+       Deployment Platforms
+      </h3>
+      <p>
+       <strong>
+        Vercel / Netlify:
+       </strong>
+       - Deploy FastAPI backend as serverless function
+- Serve static files from CDN
+- Configure environment variables
       </p>
      </div>
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="md-state_management">
@@ -22629,7 +23363,7 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
     </div>
    </div>
   </div>
-  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1765075774" type="module">
+  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1765077123" type="module">
   </script>
   <script defer="" src="app_docs.js">
   </script>

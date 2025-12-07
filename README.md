@@ -221,7 +221,7 @@ Dars Framework offers a flexible routing system that supports both Client-Side R
 
 ### Server-Side Rendering (SSR)
 
-**New in v1.6.9!** Render pages on the server for faster initial loads. Use the `route_type` parameter:
+Render pages on the server for faster initial loads using dars backend integration with fastapi. Use the `route_type` parameter:
 
 ```python
 from dars.all import *
@@ -231,11 +231,13 @@ from dars.all import *
 def dashboard():
     return Page(
         Heading("Server-Side Rendered Page"),
-        Text(f"Server Timestamp: {datetime.now()}"),
+        Text(f"Hello from dashboard"),
         # Client-side reactivity still works after hydration!
         Button("Click Me", on_click=alert("Hello from Client"))
     )
 ```
+
+More information about SSR can be found in the [SSR/SPA Routing Guide](https://ztamdev.github.io/Dars-Framework/docs.html#server-side-rendering-in-dars-framework).
 
 ### Client-Side Routing (SPA)
 

@@ -166,16 +166,75 @@ The development server (`dars dev`) includes an intelligent hot reload system fo
 
 ---
 
-## SSR & Hydration
+## Server-Side Rendering (SSR)
 
-Dars introduces a robust "Dual Hydration" system for Server-Side Rendering (SSR) routes.
+Dars Framework provides complete Server-Side Rendering support integrated with FastAPI, allowing you to build full-stack applications with both server-rendered and client-side pages.
 
-### How it Works
-1.  **Backend Rendering**: The server renders the initial HTML and injects a VDOM snapshot (`window.__ROUTE_VDOM__`) into the DOM.
-2.  **Script Injection**: The server checks if there is a corresponding client-side bundle for the route (e.g., `app_{slug}.js`) and injects a reference to it.
-3.  **Client Hydration**:
-    *   The `dars.min.js` runtime loads and checks for `__ROUTE_VDOM__`.
-    *   If found, it hydrates the DOM immediately without fetching data again.
-    *   The browser loads the injected `app_{slug}.js` bundle, which contains the interactive logic (event handlers, state).
+### Quick Overview
 
-This architecture prevents "Flash of Unstyled Content" (FOUC), race conditions, and double-rendering, ensuring that events function correctly even after a page reload.
+SSR routes are rendered on the server before being sent to the client, providing:
+- Faster initial page load
+- Progressive enhancement
+- Flexible architecture (mix SSR, SPA, and Static routes)
+
+### Basic SSR Route
+
+```python
+from dars.all import *
+from backend.apiConfig import DarsEnv
+
+# Configure SSR URL
+ssr_url = DarsEnv.get_urls()['backend']
+app = App(title="My App", ssr_url=ssr_url)
+
+# Define SSR route
+@route("/", route_type=RouteType.SSR)
+def home():
+    return Page(
+        Heading("Welcome!", level=1),
+        Text("This page is rendered on the server!")
+    )
+
+app.add_page("home", home(), title="Home")
+```
+
+### Dual Hydration System
+
+Dars uses a sophisticated "Dual Hydration" approach:
+
+1. **Server Side**: Renders component to HTML and builds VDOM snapshot
+2. **Client Side**: Displays server HTML immediately, then hydrates with JavaScript
+3. **Result**: No flickering, instant content, full interactivity
+
+This prevents Flash of Unstyled Content (FOUC), double rendering, and race conditions.
+
+### Creating an SSR Project
+
+Use the Dars CLI to scaffold a complete SSR project with FastAPI backend:
+
+```bash
+dars init my-ssr-app --type ssr
+cd my-ssr-app
+```
+
+This creates a full-stack project with:
+- Frontend Dars app (`main.py`)
+- FastAPI backend (`backend/api.py`)
+- Environment configuration
+- Development and production setup
+
+### Complete SSR Documentation
+
+For comprehensive SSR documentation including:
+- Architecture and how it works
+- Development workflow
+- API reference (`create_ssr_app`, `SSRRenderer`)
+- Mixing SSR, SPA, and Static routes
+- Deployment guide
+- Advanced features (authentication, custom endpoints)
+- Best practices and troubleshooting
+- Real-world examples
+
+**See the [Complete SSR Guide](#server-side-rendering-in-dars-framework)**
+
+---

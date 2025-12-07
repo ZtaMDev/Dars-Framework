@@ -10,6 +10,7 @@ Welcome to the official Dars Framework documentation. Here you will find detaile
 - [Dars Project Configuration](#dars-project-configuration)
 - [App class](#app-class-and-pwa-features-in-dars-framework)
 - [SPA Routing](#spa-routing-in-dars-framework)
+- [SSR Routing](#server-side-rendering-in-dars-framework)
 - [Backend HTTP Utilities & API Communication](#backend-http-utilities)
 - [State Management](#state-management-in-dars)
 - [Components](#dars-components-documentation)
@@ -3319,20 +3320,458 @@ The development server (\`dars dev\`) includes an intelligent hot reload system 
 
 ---
 
-## SSR & Hydration
+## Server-Side Rendering (SSR)
 
-Dars introduces a robust "Dual Hydration" system for Server-Side Rendering (SSR) routes.
+Dars Framework provides complete Server-Side Rendering support integrated with FastAPI, allowing you to build full-stack applications with both server-rendered and client-side pages.
 
-### How it Works
-1.  **Backend Rendering**: The server renders the initial HTML and injects a VDOM snapshot (\`window.__ROUTE_VDOM__\`) into the DOM.
-2.  **Script Injection**: The server checks if there is a corresponding client-side bundle for the route (e.g., \`app_{slug}.js\`) and injects a reference to it.
-3.  **Client Hydration**:
-    *   The \`dars.min.js\` runtime loads and checks for \`__ROUTE_VDOM__\`.
-    *   If found, it hydrates the DOM immediately without fetching data again.
-    *   The browser loads the injected \`app_{slug}.js\` bundle, which contains the interactive logic (event handlers, state).
+### Quick Overview
 
-This architecture prevents "Flash of Unstyled Content" (FOUC), race conditions, and double-rendering, ensuring that events function correctly even after a page reload.
-`},{type:"T9",id:"md-state_management",key:"0/2/0/11",text:`# State Management in Dars
+SSR routes are rendered on the server before being sent to the client, providing:
+- Faster initial page load
+- Progressive enhancement
+- Flexible architecture (mix SSR, SPA, and Static routes)
+
+### Basic SSR Route
+
+\`\`\`python
+from dars.all import *
+from backend.apiConfig import DarsEnv
+
+# Configure SSR URL
+ssr_url = DarsEnv.get_urls()['backend']
+app = App(title="My App", ssr_url=ssr_url)
+
+# Define SSR route
+@route("/", route_type=RouteType.SSR)
+def home():
+    return Page(
+        Heading("Welcome!", level=1),
+        Text("This page is rendered on the server!")
+    )
+
+app.add_page("home", home(), title="Home")
+\`\`\`
+
+### Dual Hydration System
+
+Dars uses a sophisticated "Dual Hydration" approach:
+
+1. **Server Side**: Renders component to HTML and builds VDOM snapshot
+2. **Client Side**: Displays server HTML immediately, then hydrates with JavaScript
+3. **Result**: No flickering, instant content, full interactivity
+
+This prevents Flash of Unstyled Content (FOUC), double rendering, and race conditions.
+
+### Creating an SSR Project
+
+Use the Dars CLI to scaffold a complete SSR project with FastAPI backend:
+
+\`\`\`bash
+dars init my-ssr-app --type ssr
+cd my-ssr-app
+\`\`\`
+
+This creates a full-stack project with:
+- Frontend Dars app (\`main.py\`)
+- FastAPI backend (\`backend/api.py\`)
+- Environment configuration
+- Development and production setup
+
+### Complete SSR Documentation
+
+For comprehensive SSR documentation including:
+- Architecture and how it works
+- Development workflow
+- API reference (\`create_ssr_app\`, \`SSRRenderer\`)
+- Mixing SSR, SPA, and Static routes
+- Deployment guide
+- Advanced features (authentication, custom endpoints)
+- Best practices and troubleshooting
+- Real-world examples
+
+**See the [Complete SSR Guide](#server-side-rendering-in-dars-framework)**
+
+---
+`},{type:"T9",id:"md-ssr",key:"0/2/0/11",text:`# Server-Side Rendering in Dars Framework
+
+Dars Framework provides a complete Server-Side Rendering solution integrated with FastAPI, allowing you to build full-stack applications with both server-rendered and client-side pages in a single codebase.
+
+## Overview
+
+SSR in Dars renders your pages on the server before sending them to the client, providing:
+
+- **Faster Initial Load**: Users see content immediately without waiting for JavaScript
+- **Flexible Architecture**: Mix SSR and SPA routes in the same application
+
+## Architecture
+
+### How SSR Works in Dars
+
+1. **Client Request**: Browser requests a page (e.g., \`/dashboard\`)
+2. **Server Rendering**: FastAPI backend renders the Dars component to HTML
+3. **HTML Response**: Server sends fully-rendered HTML with embedded VDOM
+4. **Client Hydration**: Browser loads JavaScript and "hydrates" the static HTML
+5. **Interactive**: Page becomes fully interactive with event handlers
+
+### Dual Hydration System
+
+Dars uses a sophisticated "Dual Hydration" approach to prevent flickering and ensure smooth transitions:
+
+\`\`\`
+Server Side:
+1. Render component to HTML
+2. Build VDOM representation
+3. Inject VDOM as window.__ROUTE_VDOM__
+4. Send HTML + VDOM to client
+
+Client Side:
+1. Display server-rendered HTML (instant)
+2. Load dars.min.js runtime
+3. Detect __ROUTE_VDOM__ presence
+4. Hydrate DOM without re-rendering
+5. Attach event handlers and state
+\`\`\`
+
+This prevents:
+- Flash of Unstyled Content (FOUC)
+- Double rendering
+- Race conditions
+- Lost event handlers
+
+---
+
+## Quick Start
+
+### Creating an SSR Project
+
+Use the Dars CLI to scaffold a complete SSR project:
+
+\`\`\`bash
+dars init my-ssr-app --type ssr
+cd my-ssr-app
+\`\`\`
+
+This creates:
+\`\`\`
+my-ssr-app/
+\u251C\u2500\u2500 main.py              # Frontend (Dars app)
+\u251C\u2500\u2500 backend/
+\u2502   \u251C\u2500\u2500 api.py          # FastAPI server with SSR
+\u2502   \u2514\u2500\u2500 apiConfig.py    # Environment configuration
+\u2514\u2500\u2500 dars.config.json    # Dars configuration
+
+\`\`\`
+
+### Project Structure
+
+#### Frontend (\`main.py\`)
+
+\`\`\`python
+from dars.all import *
+from backend.apiConfig import DarsEnv
+
+# Configure SSR URL
+ssr_url = DarsEnv.get_urls()['backend']
+app = App(title="My SSR App", ssr_url=ssr_url)
+
+# Define SSR route
+@route("/", route_type=RouteType.SSR)
+def index():
+    return Page(
+        Text("Hello from Server!", style="fs-[32px]"),
+        Button("Click Me", on_click=alert("Interactive!"))
+    )
+
+app.add_page("index", index(), title="Home")
+
+if __name__ == "__main__":
+    app.rTimeCompile()
+\`\`\`
+
+#### Backend (\`backend/api.py\`)
+
+\`\`\`python
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from dars.backend.ssr import create_ssr_app
+from apiConfig import DarsEnv
+
+# Import Dars app
+import sys
+sys.path.insert(0, '.')
+from main import app as dars_app
+
+# Create FastAPI app with SSR
+app = create_ssr_app(dars_app)
+
+# Enable CORS for development
+if DarsEnv.is_dev():
+    urls = DarsEnv.get_urls()
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[urls['frontend']],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=3000)
+\`\`\`
+
+#### Environment Config (\`backend/apiConfig.py\`)
+
+\`\`\`python
+class DarsEnv:
+    MODE = "development"  # or "production"
+    
+    DEV = "development"
+    BUILD = "production"
+    
+    @staticmethod
+    def is_dev():
+        return DarsEnv.MODE == DarsEnv.DEV
+    
+    @staticmethod
+    def get_urls():
+        if DarsEnv.is_dev():
+            return {
+                "backend": "http://localhost:3000",
+                "frontend": "http://localhost:8000"
+            }
+        return {
+            "backend": "/",
+            "frontend": "/"
+        }
+\`\`\`
+
+---
+
+## Route Types
+
+Dars supports two routing modes that can be mixed in the same application:
+
+### 1. SSR Routes (\`RouteType.SSR\`)
+
+Server-rendered on every request.
+
+\`\`\`python
+@route("/dashboard", route_type=RouteType.SSR)
+def dashboard():
+    return Page(
+        Text("Dashboard", level=1),
+        Text(f"Rendered at: {datetime.now()}")
+    )
+\`\`\`
+
+**When to use:**
+- SEO-critical pages (landing pages, blog posts)
+- Dynamic content that changes frequently
+- Pages requiring authentication checks server-side
+- Initial load performance is critical
+
+### 2. SPA Routes (\`RouteType.PUBLIC\`) - Default
+
+Client-side navigation, no server rendering.
+
+\`\`\`python
+@route("/settings")  # Default is PUBLIC
+def settings():
+    return Page(
+        Text("Settings", level=1),
+        # Interactive forms, real-time updates
+    )
+\`\`\`
+
+**When to use:**
+- Admin dashboards (not recommended for now in the future will be supported with Dars Middleware)
+- Interactive tools
+- Pages behind authentication
+- Real-time applications
+
+## Development Workflow
+
+### Running in Development
+
+You need **two servers** running simultaneously:
+
+**Terminal 1 - Frontend Dev Server:**
+\`\`\`bash
+dars dev
+# Runs on http://localhost:8000
+# Hot reload for UI changes
+\`\`\`
+
+**Terminal 2 - Backend SSR Server:**
+\`\`\`bash
+python -m backend.api
+# Runs on http://localhost:3000
+# Handles SSR rendering
+\`\`\`
+
+### How It Works
+
+1. **Frontend Server (8000)**: Serves static files and handles SPA routing
+2. **Backend Server (3000)**: Renders SSR routes and provides API endpoints
+3. **Communication**: Frontend fetches SSR content from backend via \`/api/ssr/*\`
+
+### Environment Detection
+
+The \`DarsEnv\` class automatically configures URLs:
+
+\`\`\`python
+# Development
+DarsEnv.get_urls() \u2192 {
+    "backend": "http://localhost:3000",
+    "frontend": "http://localhost:8000"
+}
+
+# Production
+DarsEnv.get_urls() \u2192 {
+    "backend": "/",
+    "frontend": "/"
+}
+\`\`\`
+
+---
+
+## SSR API Reference
+
+### \`create_ssr_app(dars_app, prefix="/api/ssr")\`
+
+Creates a FastAPI application with automatic SSR endpoints.
+
+**Parameters:**
+- \`dars_app\` (App): Your Dars application instance
+- \`prefix\` (str): URL prefix for SSR endpoints (default: \`/api/ssr\`)
+
+**Returns:**
+- FastAPI application with registered SSR routes
+
+**Auto-generated Endpoints:**
+
+For each SSR route in your Dars app, creates:
+- \`GET /api/ssr/{route_name}\` - Renders the route server-side
+
+**Example:**
+\`\`\`python
+from dars.backend.ssr import create_ssr_app
+
+app = create_ssr_app(dars_app)
+# Automatically creates:
+# - GET /api/ssr/index
+# - GET /api/ssr/dashboard
+# - GET / (health check)
+\`\`\`
+
+### \`SSRRenderer\`
+
+Low-level class for manual SSR rendering.
+
+\`\`\`python
+from dars.backend.ssr import SSRRenderer
+
+renderer = SSRRenderer(dars_app)
+result = renderer.render_route("dashboard", params={"user_id": "123"})
+
+# Returns:
+{
+    "name": "dashboard",
+    "html": "<div>...</div>",
+    "scripts": [...],
+    "events": {...},
+    "vdom": {...},
+    "states": []
+}
+\`\`\`
+
+---
+
+## Mixing Route Types
+
+You can combine SSR, SPA, and Static routes in one application:
+
+\`\`\`python
+app = App(title="Hybrid App", ssr_url=ssr_url)
+
+# SSR for landing page (SEO)
+@route("/", route_type=RouteType.SSR)
+def home():
+    return Page(Text("Welcome!"))
+
+# SPA for dashboard (interactive)
+@route("/dashboard")
+def dashboard():
+    return Page(Text("Dashboard"))
+
+# Static for docs (performance)
+@route("/docs", route_type=RouteType.STATIC)
+def docs():
+    return Page(Text("Documentation"))
+
+app.add_page("home", home(), title="Home", index=True)
+app.add_page("dashboard", dashboard(), title="Dashboard")
+app.add_page("docs", docs(), title="Docs")
+\`\`\`
+
+**Navigation Behavior:**
+- SSR \u2192 SPA: Fetches from backend, hydrates
+- SPA \u2192 SPA: Client-side navigation (instant)
+- Any \u2192 Static: Loads pre-rendered HTML
+
+---
+
+## Deployment
+
+### Production Configuration
+
+**1. Update Environment Mode:**
+
+\`\`\`python
+# backend/apiConfig.py
+class DarsEnv:
+    MODE = "production"  # Change from "development"
+\`\`\`
+
+**2. Build Frontend:**
+
+\`\`\`bash
+dars build
+# Generates static files in ./dist
+\`\`\`
+
+**3. Deploy Backend:**
+
+Your FastAPI backend serves both:
+- SSR-rendered pages via \`/api/ssr/*\`
+- Static files from \`./dist\`
+
+**Example Production Server:**
+
+\`\`\`python
+# backend/api.py
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from dars.backend.ssr import create_ssr_app
+from main import app as dars_app
+
+app = create_ssr_app(dars_app)
+
+# Serve static files
+app.mount("/", StaticFiles(directory="dist", html=True), name="static")
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+\`\`\`
+
+### Deployment Platforms
+
+**Vercel / Netlify:**
+- Deploy FastAPI backend as serverless function
+- Serve static files from CDN
+- Configure environment variables`},{type:"T9",id:"md-state_management",key:"0/2/0/12",text:`# State Management in Dars
 
 Dars Framework features **powerful state management systems**, designed for different use cases:
 
@@ -3662,7 +4101,7 @@ this().state(text=RawJS("someVar + ' processed'"))
 - Don't need state tracking
 - Making one-off updates
 - Working with async operations
-- Targeting the clicked element`},{type:"T9",id:"md-hooks",key:"0/2/0/12",text:`# Hooks System
+- Targeting the clicked element`},{type:"T9",id:"md-hooks",key:"0/2/0/13",text:`# Hooks System
 
 Dars Framework introduces a **Hooks system** inspired by React, enabling reactive and stateful behavior in both FunctionComponents and built-in components.
 
@@ -4977,7 +5416,7 @@ if __name__ == "__main__":
 - Nest state paths more than 2 levels deep (currently supports \`stateName.property\`).
 - Use arithmetic operators without numeric transformations.
 
----`},{type:"T9",id:"md-operations",key:"0/2/0/13",text:`# Operations in Dars
+---`},{type:"T9",id:"md-operations",key:"0/2/0/14",text:`# Operations in Dars
 
 Dars introduces a powerful, declarative system for mathematical expressions using operator overloading. Write complex calculations in pure Python without any inline JavaScript!
 
@@ -5448,7 +5887,7 @@ class DynamicOperator:
 \`\`\`
 
 ---
-`},{type:"T9",id:"md-backend_api",key:"0/2/0/14",text:`# Backend HTTP Utilities 
+`},{type:"T9",id:"md-backend_api",key:"0/2/0/15",text:`# Backend HTTP Utilities 
 
 Dars Framework provides a powerful, **Pythonic system** for handling HTTP requests and API communication without writing any JavaScript. The \`dars.backend\` module enables you to fetch data, bind it to components, and create reactive UIs entirely in Python.
 
@@ -5811,7 +6250,7 @@ In a separate terminal, run the frontend dev server:
 # Start Frontend Dev Server (Port 8000)
 dars dev
 \`\`\`
-`},{type:"T9",id:"md-events",key:"0/2/0/15",text:`# Events in Dars
+`},{type:"T9",id:"md-events",key:"0/2/0/16",text:`# Events in Dars
 
 This is the documentation for the events in Dars.
 
@@ -5925,7 +6364,7 @@ button.on_click = [
     )
 ]
 \`\`\`
-`},{type:"T9",id:"md-KeyEvents",key:"0/2/0/16",text:`# Keyboard Events in Dars
+`},{type:"T9",id:"md-KeyEvents",key:"0/2/0/17",text:`# Keyboard Events in Dars
 
 Dars provides a powerful and intuitive system for handling keyboard events in your applications. This guide covers everything from basic key detection to advanced global shortcuts.
 
@@ -6417,7 +6856,7 @@ Input(
 - **Use \`switch()\`** for handling multiple different keys
 - **Use \`addGlobalKeys()\`** for app-wide shortcuts (always with modifiers!)
 - **Combine with State and V()** for dynamic, reactive keyboard interactions
-`},{type:"T9",id:"md-exporters",key:"0/2/0/17",text:`# Dars - Exporter Documentation
+`},{type:"T9",id:"md-exporters",key:"0/2/0/18",text:`# Dars - Exporter Documentation
 
 ## Introduction
 
@@ -6737,7 +7176,7 @@ All file paths are relative to the app's directory. See [State Management](state
 - Not yet recommended for production.
 - Some advanced packaging and signing options may require manual configuration.
 - Expect changes to configuration keys and defaults as the feature matures.
-`},{type:"T9",id:"md-scripts",key:"0/2/0/18",text:`# Dars - Script System
+`},{type:"T9",id:"md-scripts",key:"0/2/0/19",text:`# Dars - Script System
 
 ## Introduction to Scripts
 
@@ -7513,4 +7952,4 @@ app.add_page("index", page, index=True)
 | \`sequence\` | Chain animations | \`*animations\` |
 
 All animations return \`dScript\` objects and can be used with \`.then()\` for advanced chaining.
-`}]},{type:"T2",id:"footer-section",key:"0/2/1",children:[{type:"T2",id:"container_111",key:"0/2/1/0",children:[{type:"T2",id:"container_112",key:"0/2/1/0/0",children:[{type:"T2",id:"container_113",key:"0/2/1/0/0/0",children:[{type:"T4",id:"image_114",key:"0/2/1/0/0/0/0"},{type:"T2",id:"container_115",key:"0/2/1/0/0/0/1",children:[{type:"T5",id:"text_116",key:"0/2/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_117",key:"0/2/1/0/0/1",children:[{type:"T2",id:"container_118",key:"0/2/1/0/0/1/0",children:[{type:"T5",id:"text_119",key:"0/2/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_120",key:"0/2/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_121",key:"0/2/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_122",key:"0/2/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_123",key:"0/2/1/0/0/1/1",children:[{type:"T5",id:"text_124",key:"0/2/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_125",key:"0/2/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_126",key:"0/2/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_127",key:"0/2/1/0/0/1/2",children:[{type:"T5",id:"text_128",key:"0/2/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_129",key:"0/2/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_130",key:"0/2/1/0/0/2",children:[{type:"T2",id:"container_131",key:"0/2/1/0/0/2/0",children:[{type:"T5",id:"text_132",key:"0/2/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_133",key:"0/2/1/0/0/2/1",children:[{type:"T5",id:"text_134",key:"0/2/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_135",key:"0/2/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_136",key:"0/2/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_137",key:"0/2/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]}]},function(){const c=new Map;let l=null,p=null;function u(){}function w(){}function _(n,t){if(!n)return;t(n);const e=n.children||[];for(let o=0;o<e.length;o++)_(e[o],t)}function S(n,t){if(!(!n||!t))for(const[e,o]of Object.entries(t))try{o===!1||o===null||typeof o>"u"?n.removeAttribute(e):n.setAttribute(e,String(o))}catch{}}function V(n,t={},e={}){for(const o in t)if(!(o in e))try{n.removeAttribute(o)}catch{}for(const o in e){const i=e[o];try{i===!1||i===null||typeof i>"u"?n.removeAttribute(o):n.setAttribute(o,String(i))}catch{}}}function R(n,t={},e={}){for(const o in t)if(!(o in e))try{n.style.removeProperty(o.replace(/_/g,"-"))}catch{}for(const o in e){const i=e[o];try{n.style.setProperty(o.replace(/_/g,"-"),String(i))}catch{}}}function M(n,t){(t||document).addEventListener(n,function(e){let o=e.target;const i=t||document;for(;o&&o!==i;){const m=o.id;if(m&&c.has(m)){const y=c.get(m);if(o&&o.__darsEv&&o.__darsEv[n])return;let d=y[n];if(!d&&(n==="keydown"||n==="keyup"||n==="keypress")){const a=e.key||e.code;if(a){const r=n+"."+a;d=y[r]}}if(typeof d=="function"){try{d.call(o,e)}catch(a){console.error("[Dars] handler error",a)}return}}o=o.parentNode}},!0)}function v(n,t){return n&&t?n.type!==t.type:n!==t}function k(n){if(!n)return;const t=n.children||[];for(let e=0;e<t.length;e++)k(t[e]);if(n.id&&c.delete(n.id),n.id){const e=document.getElementById(n.id);if(e&&e.parentNode)try{e.parentNode.removeChild(e)}catch{}}}function x(n,t){if(!t||!t.id)return{ok:!1,reason:"missing-new"};let e=document.getElementById(t.id);if(!e){const a=n&&n.id?document.getElementById(n.id):null;if(a)try{a.id=t.id,e=a}catch{}}if(!e)return{ok:!1,reason:"missing-el"};if(v(n,t))return{ok:!1,reason:"type-changed"};const o=!!t.isIsland;if(!o&&t.class&&(e.className=t.class),o||V(e,n&&n.props||{},t.props||{}),o||R(e,n&&n.style||{},t.style||{}),!o&&Object.prototype.hasOwnProperty.call(t,"text")&&e.textContent!==String(t.text||"")&&(e.textContent=String(t.text||"")),o)return{ok:!0};const i=n&&n.children?n.children:[],m=t.children?t.children:[],y=new Map;for(let a=0;a<i.length;a++){const r=i[a]&&(i[a].id||i[a].key)||null;r&&y.set(String(r),i[a])}const d=new Set;for(let a=0;a<m.length;a++){const r=m[a],h=r&&(r.id||r.key)||null;if(!h)if(a<i.length){const s=x(i[a],r);if(!s.ok)return s;d.add(i[a]);continue}else return{ok:!1,reason:"children-added"};const b=y.get(String(h));if(b){const s=x(b,r);if(!s.ok)return s;d.add(b)}else{if(a<i.length){const f=i[a];if(!v(f,r)){const g=x(f,r);if(!g.ok)return g;d.add(f);continue}}const s=createSubtree(r);if(s){const f=a<i.length?i[a]:null;if(f&&f.id){const g=document.getElementById(f.id);g&&g.parentNode?g.parentNode.insertBefore(s,g):e.appendChild(s)}else e.appendChild(s);continue}return{ok:!1,reason:"children-added"}}}for(let a=0;a<i.length;a++){const r=i[a];d.has(r)||k(r)}return{ok:!0}}function F(n){typeof requestAnimationFrame=="function"?requestAnimationFrame(n):setTimeout(n,16)}function L(n){const t=l;if(!t){l=n;try{window.__DARS_VDOM__=n}catch{}return}F(()=>{const e=x(t,n);if(!e.ok){console.warn("[Dars] Structural change detected (",e.reason,"), reloading...");try{location.reload()}catch{}return}l=n;try{window.__DARS_VDOM__=n}catch{}})}function T(n){l=n;try{window.__DARS_VDOM__=n}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(e=>M(e,document))}function O(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const n=window.__DARS_VERSION_URL||"version.txt";let t=null,e=!1,o=0;const i=10;let m=!1;function y(a,r,h,b){try{const s=new XMLHttpRequest;b&&(s.responseType=b),s.open("GET",a,!0),s.timeout=5e3,s.onreadystatechange=function(){s.readyState===4&&(s.status>=200&&s.status<300?r(s.response):h())},s.onerror=h,s.ontimeout=h,s.setRequestHeader("Cache-Control","no-store"),s.send()}catch{h()}}function d(){m||y(n,function(a){let r=(a||"").toString().trim();if(!r||r==="0"){if(o+=1,o>=i){console.warn("[Dars] version file not found after",i,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(d,600);return}if(o=0,e=!1,p||(p=r),r&&r!==p){p=r;try{location.reload()}catch{}return}t=setTimeout(d,600)},function(){if(o+=1,o>=i){console.warn("[Dars] version file not reachable after",i,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(d,600)},"text")}return d(),()=>{try{m=!0,t&&clearTimeout(t),window.__DARS_STOP_HOTRELOAD=null}catch{}}}function C(){if(window.__DARS_VDOM__?T(window.__DARS_VDOM__):window.__ROUTE_VDOM__?T(window.__ROUTE_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=O()}catch{}}}document.readyState==="complete"||document.readyState==="interactive"?C():document.addEventListener("DOMContentLoaded",C)}(),window.addEventListener("scroll",()=>{const c=document.getElementById("dars-navbar");window.scrollY>20?c.classList.add("scrolled"):c.classList.remove("scrolled");const l=document.getElementById("features-section");if(l&&!l.classList.contains("visible")){const p=l.getBoundingClientRect().top,u=window.innerHeight/1.5;p<u&&(l.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((_,S)=>{setTimeout(()=>{_.style.opacity="1",_.style.transform="translateY(0)"},S*100)}))}});const D=document.getElementById("hero-logo"),P=document.getElementById("hero-title"),A=document.getElementById("hero-description"),B=document.getElementById("pip-command"),E=document.getElementById("get-started-btn"),I=document.getElementById("scroll-text");D&&setTimeout(()=>D.classList.add("show"),5),P&&setTimeout(()=>P.classList.add("show"),350),A&&setTimeout(()=>A.classList.add("show"),650),B&&setTimeout(()=>B.classList.add("show"),950),E&&setTimeout(()=>E.classList.add("show"),1250),I&&setTimeout(()=>I.classList.add("show"),1500),document.addEventListener("DOMContentLoaded",function(){const c=document.getElementById("hamburger-btn"),l=document.getElementById("mobile-menu"),p=document.body;c&&l&&(c.addEventListener("click",function(u){u.stopPropagation(),l.style.display==="flex"?(l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open")):(l.style.display="flex",c.classList.add("menu-open"),p.classList.add("menu-open"))}),l.querySelectorAll("a").forEach(u=>{u.addEventListener("click",function(){l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open")})}),document.addEventListener("click",function(u){!c.contains(u.target)&&!l.contains(u.target)&&(l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open"))}),document.addEventListener("keydown",function(u){u.key==="Escape"&&l.style.display==="flex"&&(l.style.display="none",c.classList.remove("menu-open"),p.classList.remove("menu-open"))}))});
+`}]},{type:"T2",id:"footer-section",key:"0/2/1",children:[{type:"T2",id:"container_111",key:"0/2/1/0",children:[{type:"T2",id:"container_112",key:"0/2/1/0/0",children:[{type:"T2",id:"container_113",key:"0/2/1/0/0/0",children:[{type:"T4",id:"image_114",key:"0/2/1/0/0/0/0"},{type:"T2",id:"container_115",key:"0/2/1/0/0/0/1",children:[{type:"T5",id:"text_116",key:"0/2/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_117",key:"0/2/1/0/0/1",children:[{type:"T2",id:"container_118",key:"0/2/1/0/0/1/0",children:[{type:"T5",id:"text_119",key:"0/2/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_120",key:"0/2/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_121",key:"0/2/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_122",key:"0/2/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_123",key:"0/2/1/0/0/1/1",children:[{type:"T5",id:"text_124",key:"0/2/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_125",key:"0/2/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_126",key:"0/2/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_127",key:"0/2/1/0/0/1/2",children:[{type:"T5",id:"text_128",key:"0/2/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_129",key:"0/2/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_130",key:"0/2/1/0/0/2",children:[{type:"T2",id:"container_131",key:"0/2/1/0/0/2/0",children:[{type:"T5",id:"text_132",key:"0/2/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_133",key:"0/2/1/0/0/2/1",children:[{type:"T5",id:"text_134",key:"0/2/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_135",key:"0/2/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_136",key:"0/2/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_137",key:"0/2/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]}]},function(){const d=new Map;let l=null,p=null;function u(){}function S(){}function _(n,t){if(!n)return;t(n);const e=n.children||[];for(let o=0;o<e.length;o++)_(e[o],t)}function v(n,t){if(!(!n||!t))for(const[e,o]of Object.entries(t))try{o===!1||o===null||typeof o>"u"?n.removeAttribute(e):n.setAttribute(e,String(o))}catch{}}function R(n,t={},e={}){for(const o in t)if(!(o in e))try{n.removeAttribute(o)}catch{}for(const o in e){const i=e[o];try{i===!1||i===null||typeof i>"u"?n.removeAttribute(o):n.setAttribute(o,String(i))}catch{}}}function V(n,t={},e={}){for(const o in t)if(!(o in e))try{n.style.removeProperty(o.replace(/_/g,"-"))}catch{}for(const o in e){const i=e[o];try{n.style.setProperty(o.replace(/_/g,"-"),String(i))}catch{}}}function M(n,t){(t||document).addEventListener(n,function(e){let o=e.target;const i=t||document;for(;o&&o!==i;){const m=o.id;if(m&&d.has(m)){const f=d.get(m);if(o&&o.__darsEv&&o.__darsEv[n])return;let c=f[n];if(!c&&(n==="keydown"||n==="keyup"||n==="keypress")){const a=e.key||e.code;if(a){const r=n+"."+a;c=f[r]}}if(typeof c=="function"){try{c.call(o,e)}catch(a){console.error("[Dars] handler error",a)}return}}o=o.parentNode}},!0)}function w(n,t){return n&&t?n.type!==t.type:n!==t}function k(n){if(!n)return;const t=n.children||[];for(let e=0;e<t.length;e++)k(t[e]);if(n.id&&d.delete(n.id),n.id){const e=document.getElementById(n.id);if(e&&e.parentNode)try{e.parentNode.removeChild(e)}catch{}}}function x(n,t){if(!t||!t.id)return{ok:!1,reason:"missing-new"};let e=document.getElementById(t.id);if(!e){const a=n&&n.id?document.getElementById(n.id):null;if(a)try{a.id=t.id,e=a}catch{}}if(!e)return{ok:!1,reason:"missing-el"};if(w(n,t))return{ok:!1,reason:"type-changed"};const o=!!t.isIsland;if(!o&&t.class&&(e.className=t.class),o||R(e,n&&n.props||{},t.props||{}),o||V(e,n&&n.style||{},t.style||{}),!o&&Object.prototype.hasOwnProperty.call(t,"text")&&e.textContent!==String(t.text||"")&&(e.textContent=String(t.text||"")),o)return{ok:!0};const i=n&&n.children?n.children:[],m=t.children?t.children:[],f=new Map;for(let a=0;a<i.length;a++){const r=i[a]&&(i[a].id||i[a].key)||null;r&&f.set(String(r),i[a])}const c=new Set;for(let a=0;a<m.length;a++){const r=m[a],h=r&&(r.id||r.key)||null;if(!h)if(a<i.length){const s=x(i[a],r);if(!s.ok)return s;c.add(i[a]);continue}else return{ok:!1,reason:"children-added"};const b=f.get(String(h));if(b){const s=x(b,r);if(!s.ok)return s;c.add(b)}else{if(a<i.length){const y=i[a];if(!w(y,r)){const g=x(y,r);if(!g.ok)return g;c.add(y);continue}}const s=createSubtree(r);if(s){const y=a<i.length?i[a]:null;if(y&&y.id){const g=document.getElementById(y.id);g&&g.parentNode?g.parentNode.insertBefore(s,g):e.appendChild(s)}else e.appendChild(s);continue}return{ok:!1,reason:"children-added"}}}for(let a=0;a<i.length;a++){const r=i[a];c.has(r)||k(r)}return{ok:!0}}function F(n){typeof requestAnimationFrame=="function"?requestAnimationFrame(n):setTimeout(n,16)}function L(n){const t=l;if(!t){l=n;try{window.__DARS_VDOM__=n}catch{}return}F(()=>{const e=x(t,n);if(!e.ok){console.warn("[Dars] Structural change detected (",e.reason,"), reloading...");try{location.reload()}catch{}return}l=n;try{window.__DARS_VDOM__=n}catch{}})}function T(n){l=n;try{window.__DARS_VDOM__=n}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(e=>M(e,document))}function O(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const n=window.__DARS_VERSION_URL||"version.txt";let t=null,e=!1,o=0;const i=10;let m=!1;function f(a,r,h,b){try{const s=new XMLHttpRequest;b&&(s.responseType=b),s.open("GET",a,!0),s.timeout=5e3,s.onreadystatechange=function(){s.readyState===4&&(s.status>=200&&s.status<300?r(s.response):h())},s.onerror=h,s.ontimeout=h,s.setRequestHeader("Cache-Control","no-store"),s.send()}catch{h()}}function c(){m||f(n,function(a){let r=(a||"").toString().trim();if(!r||r==="0"){if(o+=1,o>=i){console.warn("[Dars] version file not found after",i,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(c,600);return}if(o=0,e=!1,p||(p=r),r&&r!==p){p=r;try{location.reload()}catch{}return}t=setTimeout(c,600)},function(){if(o+=1,o>=i){console.warn("[Dars] version file not reachable after",i,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(c,600)},"text")}return c(),()=>{try{m=!0,t&&clearTimeout(t),window.__DARS_STOP_HOTRELOAD=null}catch{}}}function C(){if(window.__DARS_VDOM__?T(window.__DARS_VDOM__):window.__ROUTE_VDOM__?T(window.__ROUTE_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=O()}catch{}}}document.readyState==="complete"||document.readyState==="interactive"?C():document.addEventListener("DOMContentLoaded",C)}(),window.addEventListener("scroll",()=>{const d=document.getElementById("dars-navbar");window.scrollY>20?d.classList.add("scrolled"):d.classList.remove("scrolled");const l=document.getElementById("features-section");if(l&&!l.classList.contains("visible")){const p=l.getBoundingClientRect().top,u=window.innerHeight/1.5;p<u&&(l.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((_,v)=>{setTimeout(()=>{_.style.opacity="1",_.style.transform="translateY(0)"},v*100)}))}});const D=document.getElementById("hero-logo"),P=document.getElementById("hero-title"),A=document.getElementById("hero-description"),B=document.getElementById("pip-command"),E=document.getElementById("get-started-btn"),I=document.getElementById("scroll-text");D&&setTimeout(()=>D.classList.add("show"),5),P&&setTimeout(()=>P.classList.add("show"),350),A&&setTimeout(()=>A.classList.add("show"),650),B&&setTimeout(()=>B.classList.add("show"),950),E&&setTimeout(()=>E.classList.add("show"),1250),I&&setTimeout(()=>I.classList.add("show"),1500),document.addEventListener("DOMContentLoaded",function(){const d=document.getElementById("hamburger-btn"),l=document.getElementById("mobile-menu"),p=document.body;d&&l&&(d.addEventListener("click",function(u){u.stopPropagation(),l.style.display==="flex"?(l.style.display="none",d.classList.remove("menu-open"),p.classList.remove("menu-open")):(l.style.display="flex",d.classList.add("menu-open"),p.classList.add("menu-open"))}),l.querySelectorAll("a").forEach(u=>{u.addEventListener("click",function(){l.style.display="none",d.classList.remove("menu-open"),p.classList.remove("menu-open")})}),document.addEventListener("click",function(u){!d.contains(u.target)&&!l.contains(u.target)&&(l.style.display="none",d.classList.remove("menu-open"),p.classList.remove("menu-open"))}),document.addEventListener("keydown",function(u){u.key==="Escape"&&l.style.display==="flex"&&(l.style.display="none",d.classList.remove("menu-open"),p.classList.remove("menu-open"))}))});

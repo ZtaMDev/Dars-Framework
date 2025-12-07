@@ -388,6 +388,7 @@ def create_sidebar():
         "./documentation/markdown/custom_components.md",
         "./documentation/markdown/animations.md",
         "./documentation/markdown/routing.md",
+        "./documentation/markdown/ssr.md",
         "./documentation/markdown/state_management.md",
         "./documentation/markdown/operations.md",
         "./documentation/markdown/hooks.md",
