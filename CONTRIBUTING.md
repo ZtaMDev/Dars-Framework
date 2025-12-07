@@ -408,7 +408,6 @@ When adding features, update:
 
 - **GitHub Issues** - For bugs and feature requests
 - **Discussions** - For questions and general discussion
-- **Discord** - Join our community server (link in README)
 
 ### Recognition
 
