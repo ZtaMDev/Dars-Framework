@@ -11,6 +11,7 @@ class Markdown(Component):
         class_name: Optional[str] = None,
         style: Optional[Dict[str, Any]] = None,
         dark_theme: bool = False,
+        lazy: bool = False,
         **kwargs
     ):
         """
@@ -23,6 +24,7 @@ class Markdown(Component):
             class_name: CSS class name
             style: CSS styles
             dark_theme: Enable dark theme styling
+            lazy: Enable lazy loading (fetches content only when visible)
         """
         super().__init__(id=id, class_name=class_name, style=style, **kwargs)
         
@@ -35,6 +37,7 @@ class Markdown(Component):
         self.content = content
         self.file_path = file_path
         self.dark_theme = dark_theme
+        self.lazy = lazy
         self.rendered_html = ""
         
         # Load and process markdown content

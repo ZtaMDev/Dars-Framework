@@ -1,4 +1,173 @@
+# Release Notes v1.7.1
+
+> **CLI Performance & Developer Experience Improvements**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Instant Server Startup
+
+The `dars dev` command now starts **instantly** thanks to background directory cleanup. No more waiting for file deletion(probably)!
+
+**Before (v1.7.0):**
+- Startup blocked by `dars_preview` directory deletion
+- 2-5 second delay on large projects
+- No visual feedback during initialization
+
+**After (v1.7.1):**
+- **Instant startup** - cleanup happens in background
+- Visual spinner: "Starting preview..."
+- Non-blocking architecture
+
+**How it works:**
+1. Old `dars_preview` renamed to `dars_preview_trash_{timestamp}`
+2. Deletion happens in daemon thread
+3. Server starts immediately
+4. Spinner shows progress
+
+---
+
+### Fast Exit on Ctrl+C
+
+Pressing Ctrl+C now exits **immediately** with visual feedback.
+
+**Before (v1.7.0):**
+- Blocked on preview file deletion
+- 3-10 second wait on large projects
+- No feedback during cleanup
+
+**After (v1.7.1):**
+- **Instant response** to Ctrl+C
+- Background cleanup with spinner
+- Maximum 2-second timeout
+- Visual feedback: "Cleaning up preview files..."
+
+**Exit Flow:**
+```
+Ctrl+C pressed
+↓
+"Exiting server..." (immediate)
+↓
+"Cleaning up preview files..." (spinner, max 2s)
+↓
+"✔ Preview files deleted." (done!)
+```
+
+---
+
+### HMR Bug Fixes
+
+#### Fixed: Syntax Highlighting Lost on Hot Reload
+
+**Problem:** After the first load, code blocks had Prism.js highlighting. But after making a change and triggering hot reload, the highlighting disappeared.
+
+**Root Cause:** The `HTMLCSSJSExporter` instance is reused across hot reloads. State flags like `_hljs_injected_pages` persisted, causing the exporter to skip script injection on subsequent exports.
+
+**Solution:** Reset state flags at the start of every `export()` call:
+
+```python
+# dars/exporters/web/html_css_js.py
+def export(self, app, output_path, bundle=False):
+    # Reset state for HMR
+    if hasattr(self, "_hljs_injected_pages"):
+        self._hljs_injected_pages.clear()
+    
+    # Reset lazy script flags
+    lazy_keys = [k for k in self.__dict__.keys() 
+                 if k.startswith("_lazy_script_injected_")]
+    for k in lazy_keys:
+        delattr(self, k)
+```
+
+**Result:** Syntax highlighting now works reliably across all hot reloads!
+
+---
+
+#### Fixed: Empty Code Blocks
+
+**Problem:** Code blocks appeared as black boxes with no content.
+
+**Root Cause:** A regex pattern in `render_markdown` was capturing the closing `>` of the `<code>` tag, removing all content after it.
+
+**Solution:** Fixed regex to preserve code content:
+
+```python
+# Before (broken)
+re.sub(r'<pre([^>]*)>\s*<code(?![^>]*class=)([^>]*)>', ...)
+
+# After (fixed)
+re.sub(r'<pre([^>]*)>\s*<code(?![^>]*class=)', ...)
+```
+
+---
+
+### Developer Experience Improvements
+
+**Visual Feedback:**
+- "Starting preview..." spinner during initialization
+- "Cleaning up preview files..." spinner on exit
+- Success messages with color coding
+- Instant response to all commands
+
+---
+
+## Technical Details
+
+### Background Cleanup Architecture
+
+```python
+# Rename old directory
+trash_name = f"dars_preview_trash_{int(time.time()*1000)}"
+os.rename(preview_dir, trash_path)
+
+# Delete in background thread
+def _bg_cleanup(path):
+    shutil.rmtree(path, ignore_errors=True)
+
+threading.Thread(target=_bg_cleanup, args=(trash_path,), daemon=True).start()
+```
+
+---
+
+### State Reset Pattern
+
+The HMR fix introduces a pattern for managing exporter state across hot reloads:
+
+```python
+# Reset per-page injection tracking
+if hasattr(self, "_hljs_injected_pages"):
+    self._hljs_injected_pages.clear()
+
+# Reset dynamic flags
+lazy_keys = [k for k in self.__dict__.keys() 
+             if k.startswith("_lazy_script_injected_")]
+for k in lazy_keys:
+    delattr(self, k)
+```
+
+This ensures scripts are re-injected on every export, maintaining consistency across development cycles.
+
+---
+
+## Files Modified
+
+### Core Changes
+- `dars/core/app.py` - Background cleanup, startup/exit spinners
+- `dars/exporters/web/html_css_js.py` - HMR state reset, regex fix
+
+### Impact
+- **Web Mode**: Faster startup and exit
+- **Desktop Mode**: Same optimizations applied
+
+---
+
 # Release Notes v1.7.0
+
 
 > **Complete VRef System & Multi-Element Updates**
 

@@ -2298,9 +2298,9 @@
      <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js">
      </script>
      <script>
-      (function(){function addCopyButtons(){document.querySelectorAll("pre code").forEach(function(code){var pre=code.parentElement;if(!pre||pre.querySelector(".dars-code-copy"))return;var btn=document.createElement("button");btn.className="dars-code-copy";btn.type="button";btn.textContent="Copy";btn.addEventListener("click",async function(e){e.stopPropagation();try{await navigator.clipboard.writeText(code.innerText);btn.textContent="Copied";btn.classList.add("copied");setTimeout(function(){btn.textContent="Copy";btn.classList.remove("copied")},1200)}catch(err){btn.textContent="Error";setTimeout(function(){btn.textContent="Copy"},1200)}});pre.appendChild(btn);});}function guessLang(text){var t=text.trim();if(/^{[\s\S]*}$/.test(t)||/^\[/.test(t))return "json";if(/^(pip |python |python3 |dars |#|\$ )/m.test(t))return "bash";if(/\b(def |class |import |from |print\(|self\b)/.test(t))return "python";return null;}function stripPygments(code){if(code && code.innerHTML && code.innerHTML.indexOf("<span")!==-1){code.textContent = code.innerText;}}function prepareAndHighlight(){document.querySelectorAll("pre code").forEach(function(code){stripPygments(code);if(!code.className||code.className.indexOf("language-")===-1){var g=guessLang(code.innerText);code.classList.add("language-"+(g||"none"));}if(window.Prism&&Prism.highlightElement){Prism.highlightElement(code);}});}document.addEventListener("DOMContentLoaded",function(){try{prepareAndHighlight();}catch(e){};try{addCopyButtons()}catch(e){}});})();
+      (function(){window.DarsMarkdown={addCopyButtons:function(root){(root||document).querySelectorAll("pre code").forEach(function(code){var pre=code.parentElement;if(!pre||pre.querySelector(".dars-code-copy"))return;var btn=document.createElement("button");btn.className="dars-code-copy";btn.type="button";btn.textContent="Copy";btn.addEventListener("click",async function(e){e.stopPropagation();try{await navigator.clipboard.writeText(code.innerText);btn.textContent="Copied";btn.classList.add("copied");setTimeout(function(){btn.textContent="Copy";btn.classList.remove("copied")},1200)}catch(err){btn.textContent="Error";setTimeout(function(){btn.textContent="Copy"},1200)}});pre.appendChild(btn)})},guessLang:function(text){var t=text.trim();if(/^{[\s\S]*}$/.test(t)||/^\[/.test(t))return "json";if(/^(pip |python |python3 |dars |#|\$ )/m.test(t))return "bash";if(/\b(def |class |import |from |print\(|self\b)/.test(t))return "python";return null},stripPygments:function(code){if(code&&code.innerHTML&&code.innerHTML.indexOf("<span")!==-1){code.textContent=code.innerText}},highlight:function(root){var self=this;(root||document).querySelectorAll("pre code").forEach(function(code){self.stripPygments(code);if(!code.className||code.className.indexOf("language-")===-1){var g=self.guessLang(code.innerText);code.classList.add("language-"+(g||"none"))}if(window.Prism&&Prism.highlightElement){Prism.highlightElement(code)}});self.addCopyButtons(root)}};document.addEventListener("DOMContentLoaded",function(){try{window.DarsMarkdown.highlight()}catch(e){}});document.addEventListener("dars:content-loaded",function(e){if(e.detail&&e.detail.element){try{window.DarsMarkdown.highlight(e.detail.element)}catch(err){}}})})();
      </script>
-     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_111">
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="md-index">
       <h1 id="dars-framework-documentation">
        Dars Framework Documentation
       </h1>
@@ -2319,6 +2319,11 @@
        <li>
         <a href="#getting-started-with-dars">
          Getting Started with Dars
+        </a>
+       </li>
+       <li>
+        <a href="#dars-cli-reference">
+         CLI Usage and Commands
         </a>
        </li>
        <li>
@@ -2403,7 +2408,7 @@
        </li>
       </ul>
      </div>
-     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_112">
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="md-install">
       <h1 id="installation-guide-dars-framework">
        Installation Guide - Dars Framework
       </h1>
@@ -2632,7 +2637,7 @@ dars<span class="w"> </span>build
 - Some platform targets (like macOS) require building on that OS for signing.
       </p>
      </div>
-     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_113">
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="md-getting_started">
       <h1 id="getting-started-with-dars">
        Getting Started with Dars
       </h1>
@@ -2798,7 +2803,7 @@ dars<span class="w"> </span>build
        Start building with Dars...
       </p>
      </div>
-     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_114">
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="md-cli">
       <h1 id="dars-cli-reference">
        Dars CLI Reference
       </h1>
@@ -3232,7 +3237,7 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
        </em>
       </p>
      </div>
-     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_115">
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="md-config">
       <h1 id="dars-project-configuration">
        Dars Project Configuration
       </h1>
@@ -3560,7 +3565,7 @@ Desktop build target. Only effective when
        </li>
       </ul>
      </div>
-     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_116">
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="md-app">
       <h1 id="app-class-and-pwa-features-in-dars-framework">
        App Class and PWA Features in Dars Framework
       </h1>
@@ -4140,7 +4145,7 @@ Desktop build target. Only effective when
 - Edge (full support)
       </p>
      </div>
-     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_117">
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="md-components">
       <h1 id="dars-components-documentation">
        Dars - Components Documentation
       </h1>
@@ -9661,7 +9666,7 @@ def hello():
        Components provide a solid foundation for creating modern and responsive user interfaces that can be exported to multiple platforms while maintaining consistency and functionality.
       </p>
      </div>
-     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_118">
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="md-styling">
       <h1 id="styling-system-in-dars">
        Styling System in Dars
       </h1>
@@ -13270,7 +13275,7 @@ def hello():
        ) directly in the list.
       </p>
      </div>
-     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_119">
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="md-custom_components">
       <h1 id="custom-components-in-dars-framework">
        Custom Components in Dars Framework
       </h1>
@@ -13685,7 +13690,7 @@ def hello():
       </div>
       <hr/>
      </div>
-     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_120">
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="md-animations">
       <h1 id="dars-animation-system">
        Dars Animation System
       </h1>
@@ -14108,7 +14113,7 @@ def hello():
 </code></pre>
       </div>
      </div>
-     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_121">
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="md-routing">
       <h1 id="spa-routing-in-dars-framework">
        SPA Routing in Dars Framework
       </h1>
@@ -14464,7 +14469,7 @@ def hello():
        This architecture prevents "Flash of Unstyled Content" (FOUC), race conditions, and double-rendering, ensuring that events function correctly even after a page reload.
       </p>
      </div>
-     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_122">
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="md-state_management">
       <h1 id="state-management-in-dars">
        State Management in Dars
       </h1>
@@ -15023,7 +15028,7 @@ def hello():
        </li>
       </ul>
      </div>
-     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_123">
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="md-hooks">
       <h1 id="hooks-system">
        Hooks System
       </h1>
@@ -17381,7 +17386,7 @@ def hello():
       </p>
       <hr/>
      </div>
-     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_124">
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="md-operations">
       <h1 id="operations-in-dars">
        Operations in Dars
       </h1>
@@ -18226,7 +18231,7 @@ def hello():
       </div>
       <hr/>
      </div>
-     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_125">
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="md-backend_api">
       <h1 id="backend-http-utilities">
        Backend HTTP Utilities
       </h1>
@@ -19077,7 +19082,7 @@ dars<span class="w"> </span>dev
 </code></pre>
       </div>
      </div>
-     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_126">
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="md-events">
       <h1 id="events-in-dars">
        Events in Dars
       </h1>
@@ -19340,7 +19345,7 @@ dars<span class="w"> </span>dev
 </code></pre>
       </div>
      </div>
-     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_127">
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="md-KeyEvents">
       <h1 id="keyboard-events-in-dars">
        Keyboard Events in Dars
       </h1>
@@ -20009,7 +20014,7 @@ dars<span class="w"> </span>dev
        </li>
       </ul>
      </div>
-     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_128">
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="md-exporters">
       <h1 id="dars-exporter-documentation">
        Dars - Exporter Documentation
       </h1>
@@ -20579,7 +20584,7 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
        </li>
       </ul>
      </div>
-     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_129">
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="md-scripts">
       <h1 id="dars-script-system">
        Dars - Script System
       </h1>
@@ -22505,19 +22510,19 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
     </div>
     <div class="dars-container" id="footer-section" style="background: linear-gradient(135deg, #0a1512 0%, #0f1e1a 100%);
     margin-top: auto;">
-     <div class="dars-container" id="container_130" style="background: rgba(10, 15, 13, 0.8);
+     <div class="dars-container" id="container_111" style="background: rgba(10, 15, 13, 0.8);
     backdrop-filter: blur(12px);
     border-top: 1px solid rgba(100,255,200,0.15);">
-      <div class="dars-container" id="container_131" style="max-width: 1200px;
+      <div class="dars-container" id="container_112" style="max-width: 1200px;
     margin: 0 auto;
     padding: 50px 20px;">
-       <div class="dars-container" id="container_132" style="display: flex;
+       <div class="dars-container" id="container_113" style="display: flex;
     align-items: center;
     margin-bottom: 30px;">
-        <img alt="Dars Framework" class="dars-image" height="50px" id="image_133" src="Dars-logo.png" style="margin-right: 15px;
+        <img alt="Dars Framework" class="dars-image" height="50px" id="image_114" src="Dars-logo.png" style="margin-right: 15px;
     filter: drop-shadow(0 0 10px rgba(162, 255, 226, 0.4));" width="50px"/>
-        <div class="dars-container" id="container_134" style="text-align: left;">
-         <span class="dars-text" id="text_135" style="font-size: 24px;
+        <div class="dars-container" id="container_115" style="text-align: left;">
+         <span class="dars-text" id="text_116" style="font-size: 24px;
     font-weight: 700;
     color: #a2ffe2;
     margin-bottom: 5px;">
@@ -22525,20 +22530,20 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
          </span>
         </div>
        </div>
-       <div class="dars-container" id="container_136" style="display: flex;
+       <div class="dars-container" id="container_117" style="display: flex;
     flex-wrap: wrap;
     gap: 40px;
     justify-content: space-between;
     margin-bottom: 30px;">
-        <div class="dars-container" id="container_137" style="flex: 1;
+        <div class="dars-container" id="container_118" style="flex: 1;
     min-width: 150px;">
-         <span class="dars-text" id="text_138" style="font-size: 18px;
+         <span class="dars-text" id="text_119" style="font-size: 18px;
     font-weight: 600;
     color: #a2ffe2;
     margin-bottom: 15px;">
           Quick Links
          </span>
-         <a class="dars-link" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_139" style="color: #a0cfc0;
+         <a class="dars-link" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_120" style="color: #a0cfc0;
     text-decoration: none;
     display: block;
     margin-bottom: 8px;
@@ -22546,7 +22551,7 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
     font-size: 14px;" target="_self">
           Documentation
          </a>
-         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework" id="link_140" style="color: #a0cfc0;
+         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework" id="link_121" style="color: #a0cfc0;
     text-decoration: none;
     display: block;
     margin-bottom: 8px;
@@ -22554,7 +22559,7 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
     font-size: 14px;" target="_self">
           GitHub
          </a>
-         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework/tree/CrystalMain/dars/templates/examples" id="link_141" style="color: #a0cfc0;
+         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework/tree/CrystalMain/dars/templates/examples" id="link_122" style="color: #a0cfc0;
     text-decoration: none;
     display: block;
     margin-bottom: 8px;
@@ -22563,15 +22568,15 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
           Examples
          </a>
         </div>
-        <div class="dars-container" id="container_142" style="flex: 1;
+        <div class="dars-container" id="container_123" style="flex: 1;
     min-width: 150px;">
-         <span class="dars-text" id="text_143" style="font-size: 18px;
+         <span class="dars-text" id="text_124" style="font-size: 18px;
     font-weight: 600;
     color: #a2ffe2;
     margin-bottom: 15px;">
           Resources
          </span>
-         <a class="dars-link" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_144" style="color: #a0cfc0;
+         <a class="dars-link" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_125" style="color: #a0cfc0;
     text-decoration: none;
     display: block;
     margin-bottom: 8px;
@@ -22579,7 +22584,7 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
     font-size: 14px;" target="_self">
           Getting Started
          </a>
-         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework/releases.html" id="link_145" style="color: #a0cfc0;
+         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework/releases.html" id="link_126" style="color: #a0cfc0;
     text-decoration: none;
     display: block;
     margin-bottom: 8px;
@@ -22588,15 +22593,15 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
           Releases
          </a>
         </div>
-        <div class="dars-container" id="container_146" style="flex: 2;
+        <div class="dars-container" id="container_127" style="flex: 2;
     min-width: 200px;">
-         <span class="dars-text" id="text_147" style="font-size: 18px;
+         <span class="dars-text" id="text_128" style="font-size: 18px;
     font-weight: 600;
     color: #a2ffe2;
     margin-bottom: 15px;">
           Info:
          </span>
-         <span class="dars-text" id="text_148" style="color: #a0cfc0;
+         <span class="dars-text" id="text_129" style="color: #a0cfc0;
     font-size: 14px;
     line-height: 1.5;
     margin-bottom: 15px;">
@@ -22604,41 +22609,41 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
          </span>
         </div>
        </div>
-       <div class="dars-container" id="container_149" style="display: flex;
+       <div class="dars-container" id="container_130" style="display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
     padding-top: 20px;
     border-top: 1px solid rgba(100,255,200,0.1);">
-        <div class="dars-container" id="container_150" style="flex: 1;">
-         <span class="dars-text" id="text_151" style="color: #a0cfc0;
+        <div class="dars-container" id="container_131" style="flex: 1;">
+         <span class="dars-text" id="text_132" style="color: #a0cfc0;
     font-size: 14px;
     opacity: 0.7;">
           © 2024 Dars Framework.
          </span>
         </div>
-        <div class="dars-container" id="container_152" style="flex: 1;
+        <div class="dars-container" id="container_133" style="flex: 1;
     text-align: right;">
-         <span class="dars-text" id="text_153" style="color: #a0cfc0;
+         <span class="dars-text" id="text_134" style="color: #a0cfc0;
     font-size: 14px;
     opacity: 0.7;
     display: inline;">
           Created with
          </span>
-         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework" id="link_154" style="color: #a2ffe2;
+         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework" id="link_135" style="color: #a2ffe2;
     text-decoration: none;
     font-weight: 600;
     display: inline;
     font-size: 14px;" target="_self">
           Dars Framework
          </a>
-         <span class="dars-text" id="text_155" style="color: #a0cfc0;
+         <span class="dars-text" id="text_136" style="color: #a0cfc0;
     font-size: 14px;
     opacity: 0.7;
     display: inline;">
           by
          </span>
-         <a class="dars-link" href="https://github.com/ZtaMDev" id="link_156" style="color: #a2ffe2;
+         <a class="dars-link" href="https://github.com/ZtaMDev" id="link_137" style="color: #a2ffe2;
     text-decoration: none;
     font-weight: 600;
     display: inline;
@@ -22652,7 +22657,7 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
     </div>
    </div>
   </div>
-  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1765053966" type="module">
+  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1765068272" type="module">
   </script>
   <script defer="" src="app_docs.js">
   </script>

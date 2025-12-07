@@ -333,12 +333,30 @@ class App:
 
         cwd_original = os.getcwd()
 
-        # ---- PREVIEW DIR ----
+        # ---- PREVIEW DIR CLEANUP (OPTIMIZED) ----
         preview_dir = os.path.join(project_root, "dars_preview")
-        try:
-            shutil.rmtree(preview_dir, ignore_errors=True)
-        except:
-            pass
+        
+        # Optimization: Rename and delete in background to avoid blocking startup
+        if os.path.exists(preview_dir):
+            try:
+                # Create a unique trash name
+                trash_name = f"dars_preview_trash_{int(time.time()*1000)}"
+                trash_path = os.path.join(project_root, trash_name)
+                os.rename(preview_dir, trash_path)
+                
+                # Delete in background thread
+                def _bg_cleanup(path):
+                    try:
+                        shutil.rmtree(path, ignore_errors=True)
+                    except: pass
+                    
+                threading.Thread(target=_bg_cleanup, args=(trash_path,), daemon=True).start()
+            except Exception:
+                # Fallback to blocking delete if rename fails (e.g. open files)
+                try:
+                    shutil.rmtree(preview_dir, ignore_errors=True)
+                except: pass
+                
         os.makedirs(preview_dir, exist_ok=True)
 
         # ---- LOAD CONFIG AND DETECT MODE ----
@@ -357,7 +375,14 @@ class App:
 
         # Detect desktop mode from config or attribute
         fmt = str(cfg.get('format', '')).lower() if cfg else ''
+        # Fix logic: Use self.desktop attribute if available, regardless of config
         is_desktop = bool(getattr(self, 'desktop', False) or fmt == 'desktop')
+
+        # ---- STARTUP SPINNER ----
+        startup_status = None
+        if console:
+            startup_status = console.status("[bold cyan]Starting preview...[/bold cyan]", spinner="dots")
+            startup_status.start()
 
         # ---- ENHANCED FILE WATCHING SYSTEM ----
         class EnhancedFileWatcher:
@@ -584,7 +609,6 @@ class App:
                     else:
                         print(f"[Dars] Hot reload failed: {e}\n{tb}")
                     return False # Indicate failure
-
         # ---- DESKTOP MODE ----
         if is_desktop:
             try:
@@ -596,9 +620,8 @@ class App:
                 else:
                     print(f"[Dars] Desktop dev setup failed: {e}")
                 return
-
-            # Mark initialization as in progress
-            initialization_complete.clear()
+            
+ 
 
             try:
                 with pushd(project_root):
@@ -867,16 +890,24 @@ class App:
                     cleanup_done_event.set()
                     time.sleep(0.1)  # Minimal delay
                     
-                    # Clean up preview directory
-                    try:
-                        shutil.rmtree(preview_dir, ignore_errors=True)
-                        if console:
-                            console.print("[yellow]Preview files deleted.[/yellow]")
-                        else:
-                            print("Preview files deleted.")
-                    except Exception as e:
-                        if console:
-                            console.print(f"[yellow]Note: Could not delete preview directory: {e}[/yellow]")
+                    # Clean up preview directory in background
+                    def _cleanup_preview():
+                        try:
+                            shutil.rmtree(preview_dir, ignore_errors=True)
+                        except Exception:
+                            pass
+                    
+                    cleanup_thread = threading.Thread(target=_cleanup_preview, daemon=True)
+                    cleanup_thread.start()
+                    
+                    # Show spinner while cleaning up (max 2 seconds)
+                    if console:
+                        with console.status("[yellow]Cleaning up preview files...[/yellow]", spinner="dots"):
+                            cleanup_thread.join(timeout=2.0)
+                        console.print("[green]✔ Preview files deleted.[/green]")
+                    else:
+                        cleanup_thread.join(timeout=2.0)
+                        print("Preview files deleted.")
                     
                     # Restore original directory
                     try:
@@ -918,6 +949,10 @@ class App:
         url = f"http://localhost:{port}"
         app_title = getattr(self, 'title', 'Dars App')
 
+        # Stop spinner before showing success
+        if startup_status:
+            startup_status.stop()
+
         # Mensaje inicial bonito con Panel
         try:
             if console and Panel and Text:
@@ -925,7 +960,7 @@ class App:
                     Text(
                         f"✔ App running successfully\n\nName: {app_title}\nPreview available at: {url}\n\nPress Ctrl+C to stop the server.",
                         style="bold green", justify="center"),
-                    title="Dars Preview", border_style="cyan")
+                    title="Dars Preview", border_style="bold blue", expand=False)
                 console.print(panel)
             else:
                 print(f"[Dars] App '{app_title}' running. Preview at {url}")
@@ -1098,16 +1133,25 @@ class App:
             except Exception:
                 pass
 
-            # Fast preview directory cleanup
-            try:
-                shutil.rmtree(preview_dir, ignore_errors=True)
-                if console:
-                    console.print("[yellow]Preview files deleted.[/yellow]")
-                else:
-                    print("Preview files deleted.")
-            except Exception as e:
-                if console:
-                    console.print(f"[yellow]Note: Could not delete preview directory: {e}[/yellow]")
+            # Fast preview directory cleanup in background
+            def _cleanup_preview():
+                try:
+                    shutil.rmtree(preview_dir, ignore_errors=True)
+                except Exception:
+                    pass
+            
+            # Start cleanup in background
+            cleanup_thread = threading.Thread(target=_cleanup_preview, daemon=True)
+            cleanup_thread.start()
+            
+            # Show spinner while cleaning up (max 2 seconds)
+            if console:
+                with console.status("[yellow]Cleaning up preview files...[/yellow]", spinner="dots"):
+                    cleanup_thread.join(timeout=2.0)
+                console.print("[green]✔ Preview files deleted.[/green]")
+            else:
+                cleanup_thread.join(timeout=2.0)
+                print("Preview files deleted.")
 
     
     def __init__(

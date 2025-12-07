@@ -69,6 +69,16 @@ class HTMLCSSJSExporter(Exporter):
         
     def export(self, app: App, output_path: str, bundle: bool = False) -> bool:
         """Exporta la aplicación a HTML/CSS/JS (soporta multipágina)."""
+        # ---- HMR FIX: Reset state for hot reload ----
+        if hasattr(self, "_hljs_injected_pages"):
+            self._hljs_injected_pages.clear()
+        
+        # Reset lazy script flags to ensure re-injection
+        lazy_keys = [k for k in self.__dict__.keys() if k.startswith("_lazy_script_injected_")]
+        for k in lazy_keys:
+            delattr(self, k)
+        # ---------------------------------------------
+        
         try:
             # Initialize watch scripts list for this export
             self._watch_scripts = []
@@ -78,7 +88,10 @@ class HTMLCSSJSExporter(Exporter):
             self._type_obfuscation = bool(bundle)
             self._type_map = {}
             self._type_seq = 0
+            self._type_map = {}
+            self._type_seq = 0
             self.create_output_directory(output_path)
+            self._current_output_path = output_path
 
             # --- Copiar recursos adicionales desde la carpeta del proyecto ---
             import inspect, shutil
@@ -3761,13 +3774,15 @@ body {
         from dars.components.basic.page import Page
         from dars.components.layout.grid import GridLayout
         from dars.components.layout.flex import FlexLayout
+        from dars.components.visualization.chart import Chart
+        from dars.components.visualization.table import DataTable
         
         
         # Lista de componentes built-in de Dars que NO deben usar su propio metodo render()
         builtin_components = [
             Page, GridLayout, FlexLayout, Text, Button, Input, Container, Image, Link, 
             Textarea, Card, Modal, Navbar, Checkbox, RadioButton, Select, Slider, 
-            DatePicker, Table, Tabs, Accordion, ProgressBar, Spinner, Tooltip, Markdown, Section
+            DatePicker, Table, Tabs, Accordion, ProgressBar, Spinner, Tooltip, Markdown, Section,
         ]
         
         # Verificar si es un componente personalizado (no built-in)
@@ -4877,7 +4892,7 @@ body {
         return f'<div class="dars-tooltip dars-tooltip-{tooltip.position}" {vref_str}>{self.render_component(tooltip.child) if hasattr(tooltip.child, "render") else tooltip.child}<span class="dars-tooltip-text">{text_val}</span></div>'
     
     def render_markdown(self, markdown: 'Markdown') -> str:
-        """Render a Markdown component"""
+        """Render a Markdown component with optional lazy loading"""
         try:
             import markdown2
             # Convert markdown to HTML
@@ -4901,27 +4916,20 @@ body {
         if markdown.dark_theme:
             class_name += " dars-markdown-dark"
         
-        class_attr = f'class="{class_name.strip()}"'
-        style_attr = f'style="{self.render_styles(markdown.style)}"' if markdown.style else ""
-
         # Normalize code block classes for client highlighters (e.g., Prism)
-        # markdown2 may emit <code class="lang-python">; convert to language-python
         import re
         html_content = re.sub(r'<code class="lang-([a-zA-Z0-9_+-]+)">', r'<code class="language-\1">', html_content)
-        # If a <pre><code> lacks a class, add language-none for Prism to process
-        html_content = re.sub(r'<pre([^>]*)>\s*<code(?![^>]*class=)([^>]*)>', r'<pre\1>\n<code class="language-none"\2>', html_content)
-        # Ensure multiline code blocks render correctly even without extra CSS and allow absolute-positioned copy button
+        html_content = re.sub(r'<pre([^>]*)>\s*<code(?![^>]*class=)', r'<pre\1>\n<code class="language-none"', html_content)
         html_content = html_content.replace(
             '<pre><code',
             '<pre style="white-space: pre; overflow:auto; position: relative;"><code'
         )
 
-        # Auto-inject highlight.js (CSS + JS + init) once per page if enabled in config and not injected
+        # Config detection for highlighting
         assets = ""
         cfg_hl = True
         hl_theme = "auto"
         try:
-            # Try to read config for markdownHighlight; default True if missing/errors
             app_source = getattr(getattr(self, 'app', None), '__source__', None)
             project_root = os.getcwd() if not app_source else os.path.dirname(os.path.abspath(app_source))
             from dars.config import load_config
@@ -4931,11 +4939,10 @@ body {
         except Exception:
             cfg_hl = True
         
-        # Track injection per-page for multipage apps (use a set to track page IDs)
+        # Track injection per-page
         if not hasattr(self, "_hljs_injected_pages"):
             self._hljs_injected_pages = set()
         
-        # Get current page identifier (try to determine which page we're rendering)
         current_page_id = getattr(self, '_current_page_id', 'default')
         
         if cfg_hl and current_page_id not in self._hljs_injected_pages:
@@ -4956,36 +4963,206 @@ body {
             parts.append('<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>\n')
             parts.append('<script>window.Prism=window.Prism||{};Prism.plugins=Prism.plugins||{};Prism.plugins.autoloader=Prism.plugins.autoloader||{};Prism.plugins.autoloader.languages_path="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/";</script>\n')
             parts.append('<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>\n')
-            parts.append('<script>(function(){function addCopyButtons(){document.querySelectorAll("pre code").forEach(function(code){var pre=code.parentElement;if(!pre||pre.querySelector(".dars-code-copy"))return;var btn=document.createElement("button");btn.className="dars-code-copy";btn.type="button";btn.textContent="Copy";btn.addEventListener("click",async function(e){e.stopPropagation();try{await navigator.clipboard.writeText(code.innerText);btn.textContent="Copied";btn.classList.add("copied");setTimeout(function(){btn.textContent="Copy";btn.classList.remove("copied")},1200)}catch(err){btn.textContent="Error";setTimeout(function(){btn.textContent="Copy"},1200)}});pre.appendChild(btn);});}function guessLang(text){var t=text.trim();if(/^{[\\s\\S]*}$/.test(t)||/^\\[/.test(t))return "json";if(/^(pip |python |python3 |dars |#|\\$ )/m.test(t))return "bash";if(/\\b(def |class |import |from |print\\(|self\\b)/.test(t))return "python";return null;}function stripPygments(code){if(code && code.innerHTML && code.innerHTML.indexOf("<span")!==-1){code.textContent = code.innerText;}}function prepareAndHighlight(){document.querySelectorAll("pre code").forEach(function(code){stripPygments(code);if(!code.className||code.className.indexOf("language-")===-1){var g=guessLang(code.innerText);code.classList.add("language-"+(g||"none"));}if(window.Prism&&Prism.highlightElement){Prism.highlightElement(code);}});}document.addEventListener("DOMContentLoaded",function(){try{prepareAndHighlight();}catch(e){};try{addCopyButtons()}catch(e){}});})();</script>')
+            # Improved script that exposes functions globally
+            parts.append('<script>(function(){window.DarsMarkdown={addCopyButtons:function(root){(root||document).querySelectorAll("pre code").forEach(function(code){var pre=code.parentElement;if(!pre||pre.querySelector(".dars-code-copy"))return;var btn=document.createElement("button");btn.className="dars-code-copy";btn.type="button";btn.textContent="Copy";btn.addEventListener("click",async function(e){e.stopPropagation();try{await navigator.clipboard.writeText(code.innerText);btn.textContent="Copied";btn.classList.add("copied");setTimeout(function(){btn.textContent="Copy";btn.classList.remove("copied")},1200)}catch(err){btn.textContent="Error";setTimeout(function(){btn.textContent="Copy"},1200)}});pre.appendChild(btn)})},guessLang:function(text){var t=text.trim();if(/^{[\\s\\S]*}$/.test(t)||/^\\[/.test(t))return "json";if(/^(pip |python |python3 |dars |#|\\$ )/m.test(t))return "bash";if(/\\b(def |class |import |from |print\\(|self\\b)/.test(t))return "python";return null},stripPygments:function(code){if(code&&code.innerHTML&&code.innerHTML.indexOf("<span")!==-1){code.textContent=code.innerText}},highlight:function(root){var self=this;(root||document).querySelectorAll("pre code").forEach(function(code){self.stripPygments(code);if(!code.className||code.className.indexOf("language-")===-1){var g=self.guessLang(code.innerText);code.classList.add("language-"+(g||"none"))}if(window.Prism&&Prism.highlightElement){Prism.highlightElement(code)}});self.addCopyButtons(root)}};document.addEventListener("DOMContentLoaded",function(){try{window.DarsMarkdown.highlight()}catch(e){}});document.addEventListener("dars:content-loaded",function(e){if(e.detail&&e.detail.element){try{window.DarsMarkdown.highlight(e.detail.element)}catch(err){}}})})();</script>')
             assets = ''.join(parts)
             self._hljs_injected_pages.add(current_page_id)
 
-        # Add stable theme class to container for easier overriding if needed
+        # Add stable theme class
         theme_tag = hl_theme if hl_theme in ('light','dark') else 'auto'
         class_name = f"{class_name} dars-code-theme-{theme_tag}"
+        
+        # Lazy Loading Handler
+        if getattr(markdown, 'lazy', False):
+            # Generate ID for template
+            template_id = f"tpl_{component_id}"
+            
+            # Inject Lazy Loader Script (Once per page/export)
+            # Use a unique ID for the script to avoid duplication in DOM if rendered multiple times
+            lazy_script_tag = ""
+            if not hasattr(self, f"_lazy_script_injected_{current_page_id}"):
+                setattr(self, f"_lazy_script_injected_{current_page_id}", True)
+                lazy_script_tag = """
+<script>
+(function() {
+    if (window.__DARS_LAZY_TEMPLATE__) return;
+    window.__DARS_LAZY_TEMPLATE__ = true;
+    
+    // Global map: targetID -> placeholderElement
+    const hiddenIdMap = new Map();
+    
+    function initLazy() {
+        if (!('IntersectionObserver' in window)) {
+            document.querySelectorAll('[data-lazy-template]').forEach(hydrate);
+            return;
+        }
+
+        const observed = new WeakSet();
+        
+        function indexTemplate(el) {
+            const tplId = el.getAttribute('data-lazy-template');
+            if (!tplId) return;
+            const tpl = document.getElementById(tplId);
+            if (!tpl) return;
+            
+            // Scan for IDs inside the template content (without parsing/rendering)
+            tpl.content.querySelectorAll('[id]').forEach(node => {
+                hiddenIdMap.set(node.id, el);
+            });
+            // Also index the component ID itself if strictly binding
+            hiddenIdMap.set(tplId.replace('tpl_', ''), el);
+        }
+        
+        function hydrate(el) {
+            const tplId = el.getAttribute('data-lazy-template');
+            if (tplId) {
+                const tpl = document.getElementById(tplId);
+                if (tpl) {
+                    el.appendChild(tpl.content.cloneNode(true));
+                    el.removeAttribute('data-lazy-template');
+                    el.classList.remove('dars-lazy-markdown');
+                    document.dispatchEvent(new CustomEvent('dars:content-loaded', { detail: { element: el } }));
+                    
+                    // Remove hydrated IDs from map to keep index clean (optional)
+                    // hiddenIdMap.forEach((val, key) => { if(val === el) hiddenIdMap.delete(key); });
+                }
+            }
+        }
+        
+        // Observer for scrolling
+        const observer = new IntersectionObserver((entries, obs) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const el = entry.target;
+                    hydrate(el);
+                    obs.unobserve(el);
+                    observed.delete(el);
+                }
+            });
+        }, { rootMargin: "600px 0px" }); 
+        
+        function scan() {
+            document.querySelectorAll('.dars-lazy-markdown[data-lazy-template]').forEach(el => {
+                // Index it
+                indexTemplate(el);
+                // Observe it
+                if (!observed.has(el)) {
+                    observer.observe(el);
+                    observed.add(el);
+                }
+            });
+        }
+        
+        // --- Navigation Interceptor ---
+        
+        async function handleHash(hash) {
+            if (!hash) return;
+            const id = hash.slice(1);
+            
+            // 1. Check if element exists in live DOM
+            let target = document.getElementById(id);
+            if (target) {
+                target.scrollIntoView({behavior: 'smooth', block: 'start'});
+                return;
+            }
+            
+            // 2. Check if it's hidden in a template
+            const placeholder = hiddenIdMap.get(id);
+            if (placeholder && placeholder.hasAttribute('data-lazy-template')) {
+                // Force hydrate
+                hydrate(placeholder);
+                
+                // Wait for DOM
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        target = document.getElementById(id);
+                        if (target) {
+                            target.scrollIntoView({behavior: 'smooth', block: 'start'});
+                        }
+                    });
+                });
+            }
+        }
+        
+        // Intercept Clicks
+        document.addEventListener('click', (e) => {
+            const link = e.target.closest('a[href^="#"]');
+            if (link) {
+                const hash = link.getAttribute('href');
+                if (hash && hash.length > 1) {
+                    // Check if we need to intervene
+                    const id = hash.slice(1);
+                    if (!document.getElementById(id) && hiddenIdMap.has(id)) {
+                        e.preventDefault();
+                        history.pushState(null, null, hash);
+                        handleHash(hash);
+                    }
+                }
+            }
+        });
+        
+        // Handle Initial Hydration
+        window.addEventListener('load', () => {
+             // Initial Scan
+            scan();
+            // Check Hash
+            if (window.location.hash) {
+                // Timeout to ensure index is built and layout settled
+                setTimeout(() => handleHash(window.location.hash), 50);
+            }
+        });
+        
+        // Mutation Observer for dynamic content
+        let mutationTimeout;
+        new MutationObserver(() => {
+            if (mutationTimeout) clearTimeout(mutationTimeout);
+            mutationTimeout = setTimeout(scan, 100);
+        }).observe(document.body, { childList: true, subtree: true });
+        
+        // Global API
+        window.Dars = window.Dars || {};
+        window.Dars.forceCheckLazy = scan;
+        window.Dars.hydrate = hydrate;
+        window.Dars.navigateTo = handleHash;
+    }
+    
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initLazy);
+    else initLazy();
+})();
+</script>
+"""
+                assets += lazy_script_tag
+
+            # Return placeholder + hidden template
+            # Ensure placeholder has dimension so IO triggers correctly
+            lazy_style = markdown.style.copy() if markdown.style else {}
+            if 'min-height' not in lazy_style and 'minHeight' not in lazy_style and 'height' not in lazy_style:
+                lazy_style['min-height'] = '200px'
+            
+            style_str = self.render_styles(lazy_style)
+            class_attr = f'class="{class_name.strip()} dars-lazy-markdown"'
+            
+            vref_info = self._process_vref_props(markdown)
+            vref_str = ' '.join([f'{k}="{v}"' for k, v in vref_info['attrs'].items()])
+            
+            template_html = f'<template id="{template_id}">{html_content}</template>'
+            
+            return f'{assets}{template_html}<div id="{component_id}" {class_attr} style="{style_str}" data-lazy-template="{template_id}" {vref_str}></div>'
+
+        # Normal Render
         class_attr = f'class="{class_name.strip()}"'
+        style_attr = f'style="{self.render_styles(markdown.style)}"' if markdown.style else ""
 
         # Process VRef props
         vref_info = self._process_vref_props(markdown)
-        vref_attrs = vref_info['attrs']
         vref_initial = vref_info['initial_values']
-        vref_str = ' '.join([f'{k}="{v}"' for k, v in vref_attrs.items()])
+        vref_str = ' '.join([f'{k}="{v}"' for k, v in vref_info['attrs'].items()])
 
-        # If VRef provides content, it might override processed HTML or be raw markdown.
-        # For now, if content is VRef, we just let client side handle it via data-vref.
-        # But for initial render, we check if we resolved it.
-        # Note: resolving markdown content on exporter side implies we need to convert it to HTML again if it changed.
-        # However, _process_vref_props resolved value is likely the raw string.
         if 'content' in vref_initial:
-            # Re-process markdown if we have a resolved initial value that is different
-            # For simplicity, if we have a resolved value, we treat it as the source.
             resolved_content = vref_initial['content']
             try:
                 import markdown2
-                html_content = markdown2.markdown(
-                    resolved_content,
-                    extras=["fenced-code-blocks", "code-friendly", "tables", "header-ids"],
-                )
+                html_content = markdown2.markdown(resolved_content, extras=["fenced-code-blocks", "code-friendly", "tables", "header-ids"])
             except ImportError:
                 html_content = self._basic_markdown_to_html(resolved_content)
 
