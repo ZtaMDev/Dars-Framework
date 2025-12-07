@@ -20,70 +20,61 @@ Welcome to Dars, a modern Python framework for building web applications with re
    All components in Dars now support a powerful search and modification system:
 
 ```python
-
 from dars.all import *
 
 app = App(title="Hello World", theme="dark")
 
 # 1. Define State
-state = State("app", title="Hello Dars!", count=0)
+state = State("app", title_val="Simple Counter", count=0)
 
 # 2. Define Route
 @route("/")
 def index(): 
     return Page(
-        Text( # 3. Use useDynamic for reactive updates
-            text=useDynamic("app.title"),
-            style={
-                'font-size': '48px',
-                'color': '#2c3e50',
-                'font-weight': 'bold',
-                'margin-bottom': '20px'
-            }
-        ),
-        
-        # 4. Interactive Button
-        Button(
-            text="Update Title & Count",
-            on_click=(
-                state.title.set("You clicked the button!")
-                .then(state.count.increment(1))
-            ),
-            style={
-                'background-color': '#3498db',
-                'color': 'white',
-                'padding': '15px 30px',
-                'border-radius': '8px',
-                'border': 'none',
-                'cursor': 'pointer',
-                'font-size': '18px'
-            }
+        # 3. Use useValue for app text
+        Text(
+            text=useValue("app.title_val"),
+            style="fs-[33px] text-black font-bold mb-[5x] ",
         ),
 
-        # 5. Display reactive count
+        # 4. Display reactive count
         Text(
             text=useDynamic("app.count"),
-            style={'font-size': '24px', 'margin-top': '20px'}
+            style="fs-[48px] mt-5 mb-[12px]"
+        ),
+        # 5. Interactive Button
+        Button(
+            text="+1",
+            on_click=(
+                state.count.increment(1)
+            ),
+            style="bg-[#3498db] text-white p-[15px] px-[30px] rounded-[8px] border-none cursor-pointer fs-[18px]",
         ),
 
-        # 6. useValue for initial value (won't update)
-        Text(
-            text=useValue("app.title"),
-            style={'color': '#95a5a6', 'margin-top': '40px', 'font-style': 'italic'}
+        # 6. Interactive Button
+        Button(
+            text="-1",
+            on_click=(
+                state.count.decrement(1)
+            ),
+            style="bg-[#3498db] text-white p-[15px] px-[30px] rounded-[8px] border-none cursor-pointer fs-[18px] mt-[5px]",
         ),
+        # 7. Interactive Button
+        Button(
+            text="Reset",
+            on_click=(
+                state.reset()
+            ),
+            style="bg-[#3498db] text-white p-[15px] px-[30px] rounded-[8px] border-none cursor-pointer fs-[18px] mt-[5px]",
+        ),
+        style="flex flex-col items-center justify-center h-[100vh] ffam-[Arial] bg-[#f0f2f5]",
 
-        style={
-            'display': 'flex', 'flex-direction': 'column', 
-            'align-items': 'center', 'justify-content': 'center', 
-            'height': '100vh', 'font-family': 'Arial, sans-serif',
-            'background-color': '#f0f2f5'
-        }
     ) 
 
-# 7. Add page
+# 8. Add page
 app.add_page("index", index(), title="index")
 
-# 8. Run app with preview
+# 9. Run app with preview
 if __name__ == "__main__":
     app.rTimeCompile()
 

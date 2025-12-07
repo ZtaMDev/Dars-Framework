@@ -1261,9 +1261,6 @@
      <a class="sidebar-link sidebar-level-3" href="#choose-state-v2-when" style="margin-left: 40px">
       Choose State V2 When:
      </a>
-     <a class="sidebar-link sidebar-level-3" href="#choose-dstatecstate-when" style="margin-left: 40px">
-      Choose dState/cState When:
-     </a>
      <a class="sidebar-link sidebar-level-3" href="#use-this-when" style="margin-left: 40px">
       Use `this()` When:
      </a>
@@ -2710,64 +2707,56 @@ dars<span class="w"> </span>build
 <span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"Hello World"</span><span class="p">,</span> <span class="n">theme</span><span class="o">=</span><span class="s2">"dark"</span><span class="p">)</span>
 
 <span class="c1"># 1. Define State</span>
-<span class="n">state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"app"</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">"Hello Dars!"</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="s2">"app"</span><span class="p">,</span> <span class="n">title_val</span><span class="o">=</span><span class="s2">"Simple Counter"</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
 <span class="c1"># 2. Define Route</span>
 <span class="nd">@route</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">():</span> 
     <span class="k">return</span> <span class="n">Page</span><span class="p">(</span>
-        <span class="n">Text</span><span class="p">(</span> <span class="c1"># 3. Use useDynamic for reactive updates</span>
-            <span class="n">text</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"app.title"</span><span class="p">),</span>
-            <span class="n">style</span><span class="o">=</span><span class="p">{</span>
-                <span class="s1">'font-size'</span><span class="p">:</span> <span class="s1">'48px'</span><span class="p">,</span>
-                <span class="s1">'color'</span><span class="p">:</span> <span class="s1">'#2c3e50'</span><span class="p">,</span>
-                <span class="s1">'font-weight'</span><span class="p">:</span> <span class="s1">'bold'</span><span class="p">,</span>
-                <span class="s1">'margin-bottom'</span><span class="p">:</span> <span class="s1">'20px'</span>
-            <span class="p">}</span>
+        <span class="c1"># 3. Use useValue for app text</span>
+        <span class="n">Text</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="n">useValue</span><span class="p">(</span><span class="s2">"app.title_val"</span><span class="p">),</span>
+            <span class="n">style</span><span class="o">=</span><span class="s2">"fs-[33px] text-black font-bold mb-[5x] "</span><span class="p">,</span>
         <span class="p">),</span>
 
-        <span class="c1"># 4. Interactive Button</span>
-        <span class="n">Button</span><span class="p">(</span>
-            <span class="n">text</span><span class="o">=</span><span class="s2">"Update Title &amp; Count"</span><span class="p">,</span>
-            <span class="n">on_click</span><span class="o">=</span><span class="p">(</span>
-                <span class="n">state</span><span class="o">.</span><span class="n">title</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"You clicked the button!"</span><span class="p">)</span>
-                <span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">count</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
-            <span class="p">),</span>
-            <span class="n">style</span><span class="o">=</span><span class="p">{</span>
-                <span class="s1">'background-color'</span><span class="p">:</span> <span class="s1">'#3498db'</span><span class="p">,</span>
-                <span class="s1">'color'</span><span class="p">:</span> <span class="s1">'white'</span><span class="p">,</span>
-                <span class="s1">'padding'</span><span class="p">:</span> <span class="s1">'15px 30px'</span><span class="p">,</span>
-                <span class="s1">'border-radius'</span><span class="p">:</span> <span class="s1">'8px'</span><span class="p">,</span>
-                <span class="s1">'border'</span><span class="p">:</span> <span class="s1">'none'</span><span class="p">,</span>
-                <span class="s1">'cursor'</span><span class="p">:</span> <span class="s1">'pointer'</span><span class="p">,</span>
-                <span class="s1">'font-size'</span><span class="p">:</span> <span class="s1">'18px'</span>
-            <span class="p">}</span>
-        <span class="p">),</span>
-
-        <span class="c1"># 5. Display reactive count</span>
+        <span class="c1"># 4. Display reactive count</span>
         <span class="n">Text</span><span class="p">(</span>
             <span class="n">text</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"app.count"</span><span class="p">),</span>
-            <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s1">'font-size'</span><span class="p">:</span> <span class="s1">'24px'</span><span class="p">,</span> <span class="s1">'margin-top'</span><span class="p">:</span> <span class="s1">'20px'</span><span class="p">}</span>
+            <span class="n">style</span><span class="o">=</span><span class="s2">"fs-[48px] mt-5 mb-[12px]"</span>
+        <span class="p">),</span>
+        <span class="c1"># 5. Interactive Button</span>
+        <span class="n">Button</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">"+1"</span><span class="p">,</span>
+            <span class="n">on_click</span><span class="o">=</span><span class="p">(</span>
+                <span class="n">state</span><span class="o">.</span><span class="n">count</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="p">),</span>
+            <span class="n">style</span><span class="o">=</span><span class="s2">"bg-[#3498db] text-white p-[15px] px-[30px] rounded-[8px] border-none cursor-pointer fs-[18px]"</span><span class="p">,</span>
         <span class="p">),</span>
 
-        <span class="c1"># 6. useValue for initial value (won't update)</span>
-        <span class="n">Text</span><span class="p">(</span>
-            <span class="n">text</span><span class="o">=</span><span class="n">useValue</span><span class="p">(</span><span class="s2">"app.title"</span><span class="p">),</span>
-            <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s1">'color'</span><span class="p">:</span> <span class="s1">'#95a5a6'</span><span class="p">,</span> <span class="s1">'margin-top'</span><span class="p">:</span> <span class="s1">'40px'</span><span class="p">,</span> <span class="s1">'font-style'</span><span class="p">:</span> <span class="s1">'italic'</span><span class="p">}</span>
+        <span class="c1"># 6. Interactive Button</span>
+        <span class="n">Button</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">"-1"</span><span class="p">,</span>
+            <span class="n">on_click</span><span class="o">=</span><span class="p">(</span>
+                <span class="n">state</span><span class="o">.</span><span class="n">count</span><span class="o">.</span><span class="n">decrement</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="p">),</span>
+            <span class="n">style</span><span class="o">=</span><span class="s2">"bg-[#3498db] text-white p-[15px] px-[30px] rounded-[8px] border-none cursor-pointer fs-[18px] mt-[5px]"</span><span class="p">,</span>
         <span class="p">),</span>
+        <span class="c1"># 7. Interactive Button</span>
+        <span class="n">Button</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">"Reset"</span><span class="p">,</span>
+            <span class="n">on_click</span><span class="o">=</span><span class="p">(</span>
+                <span class="n">state</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+            <span class="p">),</span>
+            <span class="n">style</span><span class="o">=</span><span class="s2">"bg-[#3498db] text-white p-[15px] px-[30px] rounded-[8px] border-none cursor-pointer fs-[18px] mt-[5px]"</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">style</span><span class="o">=</span><span class="s2">"flex flex-col items-center justify-center h-[100vh] ffam-[Arial] bg-[#f0f2f5]"</span><span class="p">,</span>
 
-        <span class="n">style</span><span class="o">=</span><span class="p">{</span>
-            <span class="s1">'display'</span><span class="p">:</span> <span class="s1">'flex'</span><span class="p">,</span> <span class="s1">'flex-direction'</span><span class="p">:</span> <span class="s1">'column'</span><span class="p">,</span> 
-            <span class="s1">'align-items'</span><span class="p">:</span> <span class="s1">'center'</span><span class="p">,</span> <span class="s1">'justify-content'</span><span class="p">:</span> <span class="s1">'center'</span><span class="p">,</span> 
-            <span class="s1">'height'</span><span class="p">:</span> <span class="s1">'100vh'</span><span class="p">,</span> <span class="s1">'font-family'</span><span class="p">:</span> <span class="s1">'Arial, sans-serif'</span><span class="p">,</span>
-            <span class="s1">'background-color'</span><span class="p">:</span> <span class="s1">'#f0f2f5'</span>
-        <span class="p">}</span>
     <span class="p">)</span> 
 
-<span class="c1"># 7. Add page</span>
+<span class="c1"># 8. Add page</span>
 <span class="n">app</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="s2">"index"</span><span class="p">,</span> <span class="n">index</span><span class="p">(),</span> <span class="n">title</span><span class="o">=</span><span class="s2">"index"</span><span class="p">)</span>
 
-<span class="c1"># 8. Run app with preview</span>
+<span class="c1"># 9. Run app with preview</span>
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
     <span class="n">app</span><span class="o">.</span><span class="n">rTimeCompile</span><span class="p">()</span>
 </code></pre>
@@ -14989,23 +14978,6 @@ def hello():
         Working with single components
        </li>
       </ul>
-      <h3 id="choose-dstatecstate-when">
-       Choose dState/cState When:
-      </h3>
-      <ul>
-       <li>
-        Building complex state machines
-       </li>
-       <li>
-        Need immutable default state (state 0)
-       </li>
-       <li>
-        Require cross-state calls
-       </li>
-       <li>
-        Managing multi-step workflows
-       </li>
-      </ul>
       <h3 id="use-this-when">
        Use
        <code>
@@ -22657,7 +22629,7 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
     </div>
    </div>
   </div>
-  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1765068272" type="module">
+  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1765075774" type="module">
   </script>
   <script defer="" src="app_docs.js">
   </script>

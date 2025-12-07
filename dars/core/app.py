@@ -875,37 +875,54 @@ class App:
                 except KeyboardInterrupt:
                     shutdown_event.set()
                 finally:
-                    # Fast cleanup for desktop mode
-                    stop_electron()
-                    for w in watchers:
-                        try:
-                            w.stop()
-                        except Exception:
-                            pass
-                    for dw in directory_watchers:
-                        try:
-                            dw.stop()
-                        except Exception:
-                            pass
-                    cleanup_done_event.set()
-                    time.sleep(0.1)  # Minimal delay
+                    # Show stopped message IMMEDIATELY
+                    if console:
+                        console.print("[green]✔ Preview stopped.[/green]")
+                    else:
+                        print("✔ Preview stopped.")
                     
-                    # Clean up preview directory in background
+                    # All cleanup in background thread
+                    def _background_cleanup():
+                        # Stop Electron
+                        stop_electron()
+                        
+                        # Stop watchers
+                        for w in watchers:
+                            try:
+                                w.stop()
+                            except Exception:
+                                pass
+                        
+                        # Stop directory watchers
+                        for dw in directory_watchers:
+                            try:
+                                dw.stop()
+                            except Exception:
+                                pass
+                    
+                    # Start background cleanup
+                    cleanup_bg_thread = threading.Thread(target=_background_cleanup, daemon=True)
+                    cleanup_bg_thread.start()
+                    
+                    cleanup_done_event.set()
+                    
+                    # Clean up preview directory with spinner
                     def _cleanup_preview():
                         try:
                             shutil.rmtree(preview_dir, ignore_errors=True)
                         except Exception:
                             pass
                     
-                    cleanup_thread = threading.Thread(target=_cleanup_preview, daemon=True)
-                    cleanup_thread.start()
-                    
                     # Show spinner while cleaning up (max 2 seconds)
                     if console:
                         with console.status("[yellow]Cleaning up preview files...[/yellow]", spinner="dots"):
+                            cleanup_thread = threading.Thread(target=_cleanup_preview, daemon=True)
+                            cleanup_thread.start()
                             cleanup_thread.join(timeout=2.0)
                         console.print("[green]✔ Preview files deleted.[/green]")
                     else:
+                        cleanup_thread = threading.Thread(target=_cleanup_preview, daemon=True)
+                        cleanup_thread.start()
                         cleanup_thread.join(timeout=2.0)
                         print("Preview files deleted.")
                     
@@ -993,33 +1010,42 @@ class App:
         if not files_to_watch:
             files_to_watch = [app_file]
 
-        # Crear EnhancedFileWatchers para archivos individuales
-        for f in files_to_watch:
-            try:
-                w = EnhancedFileWatcher(f, lambda f=f: handle_file_change(f"File changed: {os.path.relpath(f, project_root)}"))
-                w.start()
-                watchers.append(w)
-            except Exception as e:
-                if console:
-                    console.print(f"[yellow]Warning: could not watch {f}: {e}[/yellow]")
-                else:
-                    print(f"[Dars] Warning: could not watch {f}: {e}")
+        # Initialize watchers in background for faster startup
+        def _init_watchers():
+            # Crear EnhancedFileWatchers para archivos individuales
+            for f in files_to_watch:
+                if shutdown_event.is_set():
+                    break
+                try:
+                    w = EnhancedFileWatcher(f, lambda f=f: handle_file_change(f"File changed: {os.path.relpath(f, project_root)}"))
+                    w.start()
+                    watchers.append(w)
+                except Exception as e:
+                    if console:
+                        console.print(f"[yellow]Warning: could not watch {f}: {e}[/yellow]")
+                    else:
+                        print(f"[Dars] Warning: could not watch {f}: {e}")
 
-        # Crear DirectoryWatcher para detectar nuevos archivos
-        try:
-            dir_watcher = DirectoryWatcher(
-                project_root, 
-                watch_exts, 
-                lambda msg: handle_file_change(msg),
-                poll_interval=2.0
-            )
-            dir_watcher.start()
-            directory_watchers.append(dir_watcher)
-        except Exception as e:
-            if console:
-                console.print(f"[yellow]Warning: could not start directory watcher: {e}[/yellow]")
+            # Crear DirectoryWatcher para detectar nuevos archivos
+            if not shutdown_event.is_set():
+                try:
+                    dir_watcher = DirectoryWatcher(
+                        project_root, 
+                        watch_exts, 
+                        lambda msg: handle_file_change(msg),
+                        poll_interval=2.0
+                    )
+                    dir_watcher.start()
+                    directory_watchers.append(dir_watcher)
+                except Exception as e:
+                    if console:
+                        console.print(f"[yellow]Warning: could not start directory watcher: {e}[/yellow]")
+        
+        # Start watcher initialization in background
+        watcher_init_thread = threading.Thread(target=_init_watchers, daemon=True)
+        watcher_init_thread.start()
 
-        # Mark initialization as complete
+        # Mark initialization as complete (don't wait for watchers)
         initialization_complete.set()
 
         # Check if shutdown was requested during initialization
@@ -1090,42 +1116,47 @@ class App:
             # FAST CLEANUP - New version style
             shutdown_event.set()
             
-            # Stop watchers first (fast)
-            for w in watchers:
-                try:
-                    w.stop()
-                except Exception:
-                    pass
-            
-            # Stop directory watchers
-            for dw in directory_watchers:
-                try:
-                    dw.stop()
-                except Exception:
-                    pass
-
-            # Fast server shutdown
-            try:
-                if server and hasattr(server, "httpd"):
-                    # Fast shutdown without graceful waiting
-                    try:
-                        server.httpd.shutdown()
-                    except Exception:
-                        pass
-                    try:
-                        server.httpd.server_close()
-                    except Exception:
-                        pass
-            except Exception:
-                pass
-
-            cleanup_done_event.set()
-            time.sleep(0.15)  # Minimal delay for cleanup
-
+            # Show stopped message IMMEDIATELY (before any cleanup)
             if console:
                 console.print("[green]✔ Preview stopped.[/green]")
             else:
                 print("✔ Preview stopped.")
+            
+            # All cleanup in background thread
+            def _background_cleanup():
+                # Stop watchers
+                for w in watchers:
+                    try:
+                        w.stop()
+                    except Exception:
+                        pass
+                
+                # Stop directory watchers
+                for dw in directory_watchers:
+                    try:
+                        dw.stop()
+                    except Exception:
+                        pass
+                
+                # Server shutdown
+                try:
+                    if server and hasattr(server, "httpd"):
+                        try:
+                            server.httpd.shutdown()
+                        except Exception:
+                            pass
+                        try:
+                            server.httpd.server_close()
+                        except Exception:
+                            pass
+                except Exception:
+                    pass
+            
+            # Start background cleanup
+            cleanup_bg_thread = threading.Thread(target=_background_cleanup, daemon=True)
+            cleanup_bg_thread.start()
+            
+            cleanup_done_event.set()
 
             # Restore original directory
             try:
@@ -1140,16 +1171,16 @@ class App:
                 except Exception:
                     pass
             
-            # Start cleanup in background
-            cleanup_thread = threading.Thread(target=_cleanup_preview, daemon=True)
-            cleanup_thread.start()
-            
             # Show spinner while cleaning up (max 2 seconds)
             if console:
                 with console.status("[yellow]Cleaning up preview files...[/yellow]", spinner="dots"):
+                    cleanup_thread = threading.Thread(target=_cleanup_preview, daemon=True)
+                    cleanup_thread.start()
                     cleanup_thread.join(timeout=2.0)
                 console.print("[green]✔ Preview files deleted.[/green]")
             else:
+                cleanup_thread = threading.Thread(target=_cleanup_preview, daemon=True)
+                cleanup_thread.start()
                 cleanup_thread.join(timeout=2.0)
                 print("Preview files deleted.")
 

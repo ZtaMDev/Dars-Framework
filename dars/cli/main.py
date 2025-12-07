@@ -1470,7 +1470,6 @@ def main():
             console.print(f"[red]{translator.get('error_output_create')}: {outdir} -> {e}[/red]")
             sys.exit(1)
 
-        ensure_dars_lib(project_root)
         success = exporter.export_app(app, args.format, outdir, args.preview)
         sys.exit(0 if success else 1)
         
@@ -1503,7 +1502,6 @@ def main():
                     update_config(project_root, {"format": "web"})
             except Exception:
                 pass
-            ensure_dars_lib(project_root)
             console.print("[green]✔ dars.config.json created/updated[/green]")
             # If desktop format, ensure backend scaffold exists
             try:
@@ -1769,7 +1767,6 @@ def main():
             console.print(f"[red]{translator.get('error_output_create')}: {outdir} -> {e}[/red]")
             sys.exit(1)
 
-        ensure_dars_lib(project_root)
         app = exporter.load_app_from_file(entry)
         if app is None:
             sys.exit(1)
@@ -2097,8 +2094,6 @@ def main():
             console.print(f"[yellow]{translator.get('edit_config_hint')}[/yellow]")
             sys.exit(1)
 
-        # Ensure dars.min.js exists in project
-        ensure_dars_lib(project_root)
         # Run entry in development mode (the entry typically calls app.rTimeCompile())
         import subprocess
         process = None
@@ -2177,21 +2172,7 @@ def main():
         # Fallback: pretty help with header
         pretty_print_help(parser)
 
-# Utility: ensure lib/dars.min.js exists at project root (no overwrite)
-def ensure_dars_lib(project_root: str):
-    try:
-        from dars.js_lib import DARS_MIN_JS
-        lib_dir = os.path.join(project_root, "lib")
-        os.makedirs(lib_dir, exist_ok=True)
-        
-        lib_file = os.path.join(lib_dir, "dars.min.js")
-        
-        # Always overwrite to ensure updates propagate (especially dev mode fixes)
-        with open(lib_file, 'w', encoding='utf-8') as f:
-            f.write(DARS_MIN_JS)
-            
-    except Exception as e:
-        print(f"[yellow]⚠ Failed to update dars.min.js: {e}[/yellow]")
+
 
 if __name__ == "__main__":
     main()

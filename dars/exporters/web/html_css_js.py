@@ -107,13 +107,28 @@ class HTMLCSSJSExporter(Exporter):
                 project_root = os.path.dirname(os.path.abspath(app_source))
 
             # --- Escribir librería de reactividad (dars.min.js) embebida ---
+            # Optimization: Skip if file exists and content is identical (hot reload)
             try:
                 lib_dir = os.path.join(output_path, 'lib')
                 os.makedirs(lib_dir, exist_ok=True)
                 dest_js = os.path.join(lib_dir, 'dars.min.js')
-                from dars.js_lib import DARS_MIN_JS
-                with open(dest_js, 'w', encoding='utf-8') as f:
-                    f.write(DARS_MIN_JS)
+                
+                # Check if file exists and content matches
+                should_write = True
+                if os.path.exists(dest_js):
+                    try:
+                        with open(dest_js, 'r', encoding='utf-8') as f:
+                            existing_content = f.read()
+                        from dars.js_lib import DARS_MIN_JS
+                        if existing_content == DARS_MIN_JS:
+                            should_write = False  # Skip write, already up to date
+                    except Exception:
+                        pass  # If read fails, write anyway
+                
+                if should_write:
+                    from dars.js_lib import DARS_MIN_JS
+                    with open(dest_js, 'w', encoding='utf-8') as f:
+                        f.write(DARS_MIN_JS)
             except Exception:
                 pass
 
@@ -132,6 +147,7 @@ class HTMLCSSJSExporter(Exporter):
                 resolved = {"public_abs": None, "include": [], "exclude": []}
 
             # Copiar public/assets completos al output
+            # Optimization: Smart copy - only if files changed
             try:
                 public_abs = resolved.get("public_abs")
                 include = cfg.get("include", []) if cfg else []
@@ -144,8 +160,58 @@ class HTMLCSSJSExporter(Exporter):
                         public_abs = cand_public
                     elif os.path.isdir(cand_assets):
                         public_abs = cand_assets
+                
                 if public_abs and os.path.isdir(public_abs):
-                    copy_public_dir(public_abs, output_path, include=include, exclude=exclude)
+                    # Smart copy: check if public dir has changes (dev mode only)
+                    should_copy = True
+                    
+                    # Only use marker optimization in dev mode (bundle=False)
+                    if not bundle:
+                        marker_file = os.path.join(output_path, ".public_sync")
+                        
+                        if os.path.exists(marker_file):
+                            try:
+                                # Get last sync time and file count
+                                with open(marker_file, 'r') as f:
+                                    lines = f.read().strip().split('\n')
+                                    last_sync = float(lines[0])
+                                    last_count = int(lines[1]) if len(lines) > 1 else 0
+                                
+                                # Count current files and check mtimes
+                                has_changes = False
+                                current_count = 0
+                                for root, dirs, files in os.walk(public_abs):
+                                    for file in files:
+                                        current_count += 1
+                                        file_path = os.path.join(root, file)
+                                        # New or modified file
+                                        if os.path.getmtime(file_path) > last_sync:
+                                            has_changes = True
+                                            break
+                                    if has_changes:
+                                        break
+                                
+                                # Check if files were deleted (count mismatch)
+                                if current_count != last_count:
+                                    has_changes = True
+                                
+                                should_copy = has_changes
+                            except Exception:
+                                should_copy = True  # If check fails, copy to be safe
+                    
+                    if should_copy:
+                        copy_public_dir(public_abs, output_path, include=include, exclude=exclude)
+                        
+                        # Update marker only in dev mode
+                        if not bundle:
+                            try:
+                                import time
+                                file_count = sum(1 for _, _, files in os.walk(public_abs) for _ in files)
+                                marker_file = os.path.join(output_path, ".public_sync")
+                                with open(marker_file, 'w') as f:
+                                    f.write(f"{time.time()}\n{file_count}")
+                            except Exception:
+                                pass
             except Exception:
                 # Mejor esfuerzo, no romper export
                 pass

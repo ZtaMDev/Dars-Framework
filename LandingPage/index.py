@@ -28,7 +28,6 @@ app = App(
     keywords=["framework","python","python framework", "dars","dars framework", "ui components", "declarative UI"]
 )
 
-
 index = Page(
     create_navbar(),
     create_hero(),
@@ -43,4 +42,4 @@ app.add_page("index", index, title="Dars Framework", index=True)
 app.add_page("docs", docs, title="Dars Docs")
 app.add_page("releases", releases, title="Dars Versions")
 if __name__ == "__main__":
-    app.rTimeCompile(add_file_types=".py, .js, .css, .md, .svg")
+    app.rTimeCompile(add_file_types=".py, .js, .css, .md, .svg, .png")
