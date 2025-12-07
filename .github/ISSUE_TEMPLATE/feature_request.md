@@ -1,20 +1,30 @@
 ---
-name: Feature request
-about: Suggest an idea for dars
+name: Feature Request
+about: Suggest an enhancement for the Dars Framework
 title: ''
-labels: documentation, enhancement, good first issue, help wanted
+labels: enhancement
 assignees: ZtaMDev
-
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+## Is Your Feature Request Related to a Problem?
+A clear and concise description of the problem.  
+Example: I am often limited by [...]
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+## Describe the Solution You Would Like
+What is the expected behavior or new functionality?
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+## Code Example
+If applicable, provide an example of how the feature should be used.
 
-**Additional context**
-Add any other context or screenshots about the feature request here.
+```python
+from dars.all import *
+# Example usage here
+````
+
+## Describe Alternatives You Have Considered
+
+List any alternative solutions or workarounds.
+
+## Additional Context
+
+Add any context, references, or screenshots that will help explain the request.

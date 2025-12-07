@@ -6,8 +6,6 @@ First off, thank you for considering contributing to Dars Framework! It's people
 
 - [How Can I Contribute?](#how-can-i-contribute)
   - [Reporting Bugs](#reporting-bugs)
-  - [Suggesting Enhancements](#suggesting-enhancements)
-  - [Pull Requests](#pull-requests)
 - [Development Setup](#development-setup)
 - [Project Structure](#project-structure)
 - [Coding Guidelines](#coding-guidelines)
@@ -108,7 +106,6 @@ We actively welcome your pull requests! Here's the process:
 
 **Commit Message Format:**
 
-```
 <type>(<scope>): <subject>
 
 <body>
@@ -167,46 +164,20 @@ Fixes #456
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 
-3. **Install in editable mode:**
+4. **Install dependencies:**
    ```bash
-   pip install -e .
+   pip install -r requirements.txt
+   ```
+   
+5. **Install in editable mode using PyDepM:**
+   ```bash
+   pydep install -e
    ```
 
-4. **Install development dependencies:**
-   ```bash
-   pip install pytest pytest-cov black flake8 mypy
-   ```
-
-5. **Create a branch for your changes:**
+6. **Create a branch for your changes:**
    ```bash
    git checkout -b feature/my-new-feature
    ```
-
-### Running Tests
-
-```bash
-# Run all tests
-pytest
-
-# Run with coverage
-pytest --cov=dars --cov-report=html
-
-# Run specific test file
-pytest tests/test_components.py
-
-# Run with verbose output
-pytest -v
-```
-
-### Running Examples
-
-```bash
-# Navigate to examples directory
-cd tst/proj/v1
-
-# Run an example
-python calculator_declarative.py
-```
 
 ## Project Structure
 
@@ -233,15 +204,11 @@ Dars-Framework/
 │   ├── exporters/            # Export systems
 │   │   └── web/             # Web exporter (HTML/CSS/JS)
 │   └── cli/                  # CLI tools
-├── tests/                    # Test suite
-├── tst/proj/v1/             # Example projects
 ├── LandingPage/             # Documentation site
 │   ├── documentation/       # Markdown documentation
 │   └── releases/            # Release notes
-├── .content/                # Internal documentation
 ├── README.md
 ├── CONTRIBUTING.md          # This file
-├── CODE_OF_CONDUCT.md
 ├── LICENSE
 └── pypackage.json           # Package configuration
 ```
@@ -408,7 +375,6 @@ When adding features, update:
 
 - **GitHub Issues** - For bugs and feature requests
 - **Discussions** - For questions and general discussion
-- **Discord** - Join our community server (link in README)
 
 ### Recognition
 
