@@ -230,7 +230,7 @@ from dars.all import *
 @route("/dashboard", route_type=RouteType.SSR)
 def dashboard():
     return Page(
-        Heading("Server-Side Rendered Page"),
+        Text("Server-Side Rendered Page"),
         Text(f"Hello from dashboard"),
         # Client-side reactivity still works after hydration!
         Button("Click Me", on_click=alert("Hello from Client"))
