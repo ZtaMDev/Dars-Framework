@@ -1,4 +1,41 @@
-window.__DARS_VDOM__={type:"T1",id:"page_138",key:"0",children:[{type:"T2",id:"container_139",key:"0/0",children:[{type:"T3",id:"dars-navbar",key:"0/0/0",children:[{type:"T2",id:"navbar-left",key:"0/0/0/0",children:[{type:"T4",id:"image_140",key:"0/0/0/0/0"},{type:"T5",id:"text_141",key:"0/0/0/0/1",text:"Dars Framework"}]},{type:"T2",id:"container_142",key:"0/0/0/1",children:[{type:"T2",id:"navbar-right",key:"0/0/0/1/0",children:[{type:"T6",id:"link_143",key:"0/0/0/1/0/0",text:"Home"},{type:"T6",id:"link_144",key:"0/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_145",key:"0/0/0/1/0/2",text:"Releases"},{type:"T6",id:"link_146",key:"0/0/0/1/0/3",text:"PlayGround"},{type:"T6",id:"link_147",key:"0/0/0/1/0/4",text:"GitHub"}]},{type:"T2",id:"hamburger-menu",key:"0/0/0/1/1",children:[{type:"T2",id:"hamburger-btn",key:"0/0/0/1/1/0",children:[{type:"T2",id:"container_148",key:"0/0/0/1/1/0/0",children:[{type:"T2",id:"container_149",key:"0/0/0/1/1/0/0/0"},{type:"T2",id:"container_150",key:"0/0/0/1/1/0/0/1"},{type:"T2",id:"container_151",key:"0/0/0/1/1/0/0/2"}]}]},{type:"T2",id:"mobile-menu",key:"0/0/0/1/1/1",children:[{type:"T6",id:"link_152",key:"0/0/0/1/1/1/0",text:"Home"},{type:"T6",id:"link_153",key:"0/0/0/1/1/1/1",text:"Documentation"},{type:"T6",id:"link_154",key:"0/0/0/1/1/1/2",text:"Releases"},{type:"T6",id:"link_155",key:"0/0/0/1/1/1/3",text:"PlayGround"},{type:"T6",id:"link_156",key:"0/0/0/1/1/1/4",text:"GitHub"}]}]}]}]}]},{type:"T2",id:"container_157",key:"0/1",children:[{type:"T2",id:"markdown-content-container",key:"0/1/0",children:[{type:"T9",id:"markdown_158",key:"0/1/0/0",text:`# Release Notes v1.7.2
+window.__DARS_VDOM__={type:"T1",id:"page_138",key:"0",children:[{type:"T2",id:"container_139",key:"0/0",children:[{type:"T3",id:"dars-navbar",key:"0/0/0",children:[{type:"T2",id:"navbar-left",key:"0/0/0/0",children:[{type:"T4",id:"image_140",key:"0/0/0/0/0"},{type:"T5",id:"text_141",key:"0/0/0/0/1",text:"Dars Framework"}]},{type:"T2",id:"container_142",key:"0/0/0/1",children:[{type:"T2",id:"navbar-right",key:"0/0/0/1/0",children:[{type:"T6",id:"link_143",key:"0/0/0/1/0/0",text:"Home"},{type:"T6",id:"link_144",key:"0/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_145",key:"0/0/0/1/0/2",text:"Releases"},{type:"T6",id:"link_146",key:"0/0/0/1/0/3",text:"PlayGround"},{type:"T6",id:"link_147",key:"0/0/0/1/0/4",text:"GitHub"}]},{type:"T2",id:"hamburger-menu",key:"0/0/0/1/1",children:[{type:"T2",id:"hamburger-btn",key:"0/0/0/1/1/0",children:[{type:"T2",id:"container_148",key:"0/0/0/1/1/0/0",children:[{type:"T2",id:"container_149",key:"0/0/0/1/1/0/0/0"},{type:"T2",id:"container_150",key:"0/0/0/1/1/0/0/1"},{type:"T2",id:"container_151",key:"0/0/0/1/1/0/0/2"}]}]},{type:"T2",id:"mobile-menu",key:"0/0/0/1/1/1",children:[{type:"T6",id:"link_152",key:"0/0/0/1/1/1/0",text:"Home"},{type:"T6",id:"link_153",key:"0/0/0/1/1/1/1",text:"Documentation"},{type:"T6",id:"link_154",key:"0/0/0/1/1/1/2",text:"Releases"},{type:"T6",id:"link_155",key:"0/0/0/1/1/1/3",text:"PlayGround"},{type:"T6",id:"link_156",key:"0/0/0/1/1/1/4",text:"GitHub"}]}]}]}]}]},{type:"T2",id:"container_157",key:"0/1",children:[{type:"T2",id:"markdown-content-container",key:"0/1/0",children:[{type:"T9",id:"markdown_158",key:"0/1/0/0",text:`# Release Notes v1.7.3
+
+> **Complete Head Component & SEO Metadata Support**
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+## What's New
+
+### Complete Head Component Support
+
+The \`Head\` component now works seamlessly across all export modes: **SPA**, **SSR**, and **Multipage**. You can manage your page title, description, and social media metadata (Open Graph, Twitter Cards) directly from your Python components.
+
+\`\`\`python
+Head(
+    title="My App",
+    description="The best app ever",
+    og_image="/share.png"
+)
+\`\`\`
+
+### Dynamic SPA Metadata
+
+In Single Page Applications (SPA), the document metadata now **updates automatically** when navigating between routes. The router intelligentally applies:
+- \`<title>\`
+- Meta tags (\`description\`, \`keywords\`, etc.)
+- Open Graph tags (\`og:title\`, \`og:image\`, etc.)
+- Twitter Card tags
+- Canonical links and favicons
+
+This ensures your SPA is SEO-friendly and displays correct previews when shared on social media, even for client-side routes.
+
+---
+
+# Release Notes v1.7.2
 
 > **Performance & Developer Experience Enhancements**
 

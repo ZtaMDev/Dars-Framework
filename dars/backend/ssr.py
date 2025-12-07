@@ -70,11 +70,6 @@ class SSRRenderer:
                 if path:
                     # Remote URL?
                     if path.startswith('http://') or path.startswith('https://') or path.startswith('//'):
-                        # Cannot inject efficiently, maybe allow client to load?
-                        # For now, we only handle local files as requested "backend collects JS"
-                        # But we can't inject remote JS easily due to CORS/Security.
-                        # We will append a loader for it in the combined JS?
-                        # Better to append as a dynamic import or script injection in JS.
                         combined_js.append(f"// Remote script: {path}\n(function(){{ var s=document.createElement('script'); s.src='{path}'; s.className='dars-route-script'; document.head.appendChild(s); }})();")
                     else:
                         # Local file - read and inject
@@ -91,9 +86,6 @@ class SSRRenderer:
                     continue
 
             # 3. String (treated as inline code usually, but could be path in some contexts?)
-            # In Dars, raw strings in scripts list are usually paths if they look like paths, or code if not?
-            # actually usually strings are paths in some old version, but newer dScript uses objects.
-            # safe assumption: if it has newlines or lacks extension, it's code. 
             if isinstance(script, str):
                 if script.endswith('.js') and '\n' not in script:
                      # Treat as file path
@@ -122,7 +114,7 @@ class SSRRenderer:
             params: Optional route parameters (e.g., from URL path)
         
         Returns:
-            Dictionary containing rendered HTML, scripts, events, and VDOM
+            Dictionary containing rendered HTML, scripts, events, VDOM, and head metadata
         
         Raises:
             ValueError: If route not found or not an SSR route
@@ -146,8 +138,8 @@ class SSRRenderer:
         # Create a fresh exporter instance for this render to ensure clean state (IDs)
         exporter = HTMLCSSJSExporter()
         
-        # Render component to HTML
-        html = exporter.render_component(route.root)
+        # Render component to HTML (body content only)
+        body_html = exporter.render_component(route.root)
         
         # Build VDOM and events
         try:
@@ -169,16 +161,51 @@ class SSRRenderer:
         # This matches the behavior of static HTML export where app_{slug}.js is included.
         script_fn = "app.js" if route_name == "index" else f"app_{route_name}.js"
         
+        # Extract head metadata if Head component was used
+        head_metadata = getattr(exporter, '_page_head_metadata', {})
+        
+        # Generate meta tags HTML for SSR
+        if head_metadata:
+            # Use the exporter's method to generate meta tags
+            meta_tags_html = exporter._generate_page_meta_tags(head_metadata, route_app)
+            page_title = head_metadata.get('title', route_app.title)
+        else:
+
+            # No Head component - use minimal meta tags
+            meta_tags_html = f'<meta name="description" content="{route_app.description}">' if hasattr(route_app, 'description') and route_app.description else ''
+            page_title = route_app.title
+        
+        # Construct full HTML document with meta tags
+        full_html = f"""<!DOCTYPE html>
+<html lang="{route_app.language if hasattr(route_app, 'language') else 'en'}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {meta_tags_html}
+    <title>{page_title}</title>
+    <link rel="stylesheet" href="/runtime_css.css">
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    {body_html}
+    <script type="module" src="/lib/dars.min.js" defer></script>
+    <script>{vdom_js}</script>
+    <script type="module" src="/{script_fn}"></script>
+</body>
+</html>"""
+        
         return {
             "name": route_name,
-            "html": html,
+            "html": body_html,  # Body HTML for SPA hydration
+            "fullHtml": full_html,  # Complete HTML document with <head>
             "scripts": [
                 {"type": "core", "code": vdom_js},
                 {"type": "user", "src": f"/{script_fn}", "module": True}
             ],
             "events": route_events_map,
             "vdom": route_vdom,
-            "states": []
+            "states": [],
+            "headMetadata": head_metadata  # Include for client hydration
         }
 
 
@@ -226,37 +253,60 @@ def create_ssr_app(dars_app: App, prefix: str = "/api/ssr") -> FastAPI:
         if metadata and metadata.route_type == RouteType.SSR:
             ssr_routes.append((name, route))
     
+    from fastapi.responses import HTMLResponse, JSONResponse
+
     # Create endpoints for each SSR route
     for route_name, route in ssr_routes:
-        # Create endpoint dynamically
-        def create_endpoint(name: str):
+        # 1. API Endpoint (JSON) - used by SPA hydration
+        def create_api_endpoint(name: str):
             async def endpoint(request: Request):
                 try:
-                    # Extract route params from query string
                     params = dict(request.query_params)
-                    
-                    # Render route
                     result = renderer.render_route(name, params)
-                    return result
+                    return JSONResponse(result)
                 except ValueError as e:
                     raise HTTPException(status_code=404, detail=str(e))
                 except Exception as e:
                     raise HTTPException(status_code=500, detail=f"SSR render error: {str(e)}")
-            
             return endpoint
         
-        # Register endpoint
-        endpoint_path = f"{prefix}/{route_name}"
-        fastapi_app.get(endpoint_path)(create_endpoint(route_name))
-        print(f"[SSR] Registered endpoint: {endpoint_path}")
+        # Register API endpoint
+        api_path = f"{prefix}/{route_name}"
+        fastapi_app.get(api_path)(create_api_endpoint(route_name))
+        print(f"[SSR] Registered API endpoint: {api_path}")
+
+        # 2. HTML Endpoint - used by browser/crawlers (SEO)
+        # Only if the route has a defined path
+        if hasattr(route, 'route') and route.route:
+            def create_html_endpoint(name: str):
+                async def html_endpoint(request: Request):
+                    try:
+                        params = dict(request.query_params)
+                        result = renderer.render_route(name, params)
+                        # Remove debugging comment before serving
+                        full_html = result['fullHtml']
+                        return HTMLResponse(content=full_html, status_code=200)
+                    except ValueError as e:
+                         # Fallback to 404
+                        raise HTTPException(status_code=404, detail=str(e))
+                    except Exception as e:
+                         # In dev, show error. In prod, maybe fallback to SPA?
+                        raise HTTPException(status_code=500, detail=str(e))
+                return html_endpoint
+
+            # Register HTML endpoint
+            # We use the actual route path (e.g., "/" or "/blog")
+            fastapi_app.get(route.route)(create_html_endpoint(route_name))
+            print(f"[SSR] Registered HTML endpoint: {route.route} -> {route_name}")
     
-    # Health check endpoint
-    @fastapi_app.get("/")
-    async def root():
-        return {
-            "message": f"{dars_app.title} - SSR Backend",
-            "ssr_routes": [name for name, _ in ssr_routes],
-            "endpoints": [f"{prefix}/{name}" for name, _ in ssr_routes]
-        }
+    # Health check endpoint (only if root is not taken)
+    root_taken = any(r.route == "/" for _, r in ssr_routes if hasattr(r, 'route'))
+    if not root_taken:
+        @fastapi_app.get("/")
+        async def root():
+            return {
+                "message": f"{dars_app.title} - SSR Backend",
+                "ssr_routes": [name for name, _ in ssr_routes],
+            }
     
     return fastapi_app

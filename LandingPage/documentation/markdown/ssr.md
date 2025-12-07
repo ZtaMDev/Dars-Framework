@@ -44,6 +44,24 @@ This prevents:
 - Race conditions
 - Lost event handlers
 
+### SEO & Metadata
+
+SSR routes are fully SEO-optimized. Using the `Head` component allows you to inject metadata directly into the server-rendered HTML.
+
+```python
+@route("/blog/post-1", route_type=RouteType.SSR)
+def blog_post():
+    return Page(
+        Head(
+            title="My Amazing Blog Post",
+            description="Read this incredible story...",
+            keywords="blog, story, amazing",
+            og_type="article"
+        ),
+        # ... content ...
+    )
+```
+
 ---
 
 ## Quick Start

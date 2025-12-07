@@ -46,13 +46,17 @@ def useWatch(state_path: str | list[str], *js_helpers):
     Watch a state property (or list of properties) and execute callback(s) when it changes.
     
     Usage with app.add_script():
+        ```python
         app.add_script(useWatch("user.name", log("Name changed!")))
-        
+        ```
     Usage with multiple states:
+        ```python
         app.add_script(useWatch(["user.name", "user.email"], log("Contact info changed!")))
-        
+        ```
     Usage with multiple callbacks:
+        ```python
         app.add_script(useWatch("user.name", log("Name changed!"), alert("Update!")))
+        ```
     
     The returned WatchMarker has a get_code() method that generates the JavaScript.
     """

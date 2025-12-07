@@ -120,6 +120,7 @@ def setVRef(value: Any, selector: str) -> VRefValue:
         ValueError: If selector format is invalid
         
     Examples:
+    ```python
         # Set a value with selector
         price = setVRef(value=99.99, selector=".product-price")
         
@@ -142,5 +143,6 @@ def setVRef(value: Any, selector: str) -> VRefValue:
         
         # Update via updateVRef() function
         Button(on_click=updateVRef(".product-price", 149.99))
+    ```
     """
     return VRefValue(value, selector)

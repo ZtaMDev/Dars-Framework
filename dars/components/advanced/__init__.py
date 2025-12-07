@@ -11,5 +11,7 @@ from .navbar import Navbar
 from .table import Table
 from .tabs import Tabs
 from .accordion import Accordion
+from .head import Head
 
-__all__ = ['Card', 'Modal', 'Navbar', 'Table', 'Tabs', 'Accordion']
+__all__ = ['Card', 'Modal', 'Navbar', 'Table', 'Tabs', 'Accordion', 'Head']
+

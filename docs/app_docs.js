@@ -904,6 +904,7 @@ input_field = Input(
 - [Base Component Class](#base-component-class)
 - [Component Search](#component-search-and-modification)
 - [Page](#page)
+- [Head](#head)
 - [Text](#text)
 - [Button](#button)
 - [Input](#input)
@@ -1116,6 +1117,46 @@ index.add_script(
     dScript(code="console.log('Hello world')")
 )
 \`\`\`
+
+### Head
+
+The \`Head\` component allows you to manage the \`<head>\` section of your page, including the title, meta tags, and links. It supports SEO metadata like Open Graph and Twitter Cards.
+
+#### Head Syntax
+
+\`\`\`python
+from dars.components.advanced.head import Head
+
+head = Head(
+    title="My Page Title",
+    description="This is a description for SEO.",
+    keywords="dars, framework, python",
+    og_title="My Open Graph Title",
+    twitter_card="summary_large_image"
+)
+\`\`\`
+
+#### Head Properties
+
+| Property | Type | Description |
+|-----------|------|-------------|
+| \`title\` | str | The page title (\`<title>\`) |
+| \`description\` | str | Meta description |
+| \`keywords\` | str/list | Meta keywords |
+| \`author\` | str | Meta author |
+| \`robots\` | str | Robots meta tag |
+| \`canonical\` | str | Canonical URL link |
+| \`favicon\` | str | Favicon URL link |
+| \`og_title\` | str | Open Graph title |
+| \`og_description\` | str | Open Graph description |
+| \`og_image\` | str | Open Graph image URL |
+| \`og_type\` | str | Open Graph type (default: "website") |
+| \`twitter_card\` | str | Twitter card type (default: "summary") |
+| \`twitter_site\` | str | Twitter site handle |
+| \`twitter_creator\` | str | Twitter creator handle |
+| \`meta\` | dict | Custom meta tags \`{name: content}\` |
+| \`links\` | list | Custom link tags \`[{rel: ..., href: ...}]\` |
+| \`structured_data\` | dict | JSON-LD structured data |
 
 ### Text
 
@@ -3318,6 +3359,38 @@ The development server (\`dars dev\`) includes an intelligent hot reload system 
 - **Retry Limit**: If the server goes down, the client stops polling after 10 consecutive errors to prevent browser lag.
 - **State Preservation**: When possible, navigation state is preserved across reloads.
 
+## SEO & Metadata
+
+Dars handles SEO automatically in Single Page Applications. The router intelligently updates the document metadata when navigating between routes.
+
+### Using the Head Component
+
+To control page metadata for each route, use the \`Head\` component:
+
+\`\`\`python
+from dars.components.advanced.head import Head
+
+@app.route("/about")
+def about():
+    return Page(
+        Head(
+            title="About Us - My App",
+            description="Learn more about our company.",
+            og_image="/images/about-og.jpg"
+        ),
+        Container(Text("About Content"))
+    )
+\`\`\`
+
+The router dynamically updates:
+- \`<title>\`
+- Meta tags (\`description\`, \`keywords\`, etc.)
+- Open Graph tags (\`og:title\`, \`og:type\`, etc.)
+- Twitter Cards
+
+This ensures that even client-side routes display the correct information in the browser tab and when shared on social media.
+
+
 ---
 
 ## Server-Side Rendering (SSR)
@@ -3437,6 +3510,24 @@ This prevents:
 - Double rendering
 - Race conditions
 - Lost event handlers
+
+### SEO & Metadata
+
+SSR routes are fully SEO-optimized. Using the \`Head\` component allows you to inject metadata directly into the server-rendered HTML.
+
+\`\`\`python
+@route("/blog/post-1", route_type=RouteType.SSR)
+def blog_post():
+    return Page(
+        Head(
+            title="My Amazing Blog Post",
+            description="Read this incredible story...",
+            keywords="blog, story, amazing",
+            og_type="article"
+        ),
+        # ... content ...
+    )
+\`\`\`
 
 ---
 
@@ -7952,4 +8043,4 @@ app.add_page("index", page, index=True)
 | \`sequence\` | Chain animations | \`*animations\` |
 
 All animations return \`dScript\` objects and can be used with \`.then()\` for advanced chaining.
-`}]},{type:"T2",id:"footer-section",key:"0/2/1",children:[{type:"T2",id:"container_111",key:"0/2/1/0",children:[{type:"T2",id:"container_112",key:"0/2/1/0/0",children:[{type:"T2",id:"container_113",key:"0/2/1/0/0/0",children:[{type:"T4",id:"image_114",key:"0/2/1/0/0/0/0"},{type:"T2",id:"container_115",key:"0/2/1/0/0/0/1",children:[{type:"T5",id:"text_116",key:"0/2/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_117",key:"0/2/1/0/0/1",children:[{type:"T2",id:"container_118",key:"0/2/1/0/0/1/0",children:[{type:"T5",id:"text_119",key:"0/2/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_120",key:"0/2/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_121",key:"0/2/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_122",key:"0/2/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_123",key:"0/2/1/0/0/1/1",children:[{type:"T5",id:"text_124",key:"0/2/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_125",key:"0/2/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_126",key:"0/2/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_127",key:"0/2/1/0/0/1/2",children:[{type:"T5",id:"text_128",key:"0/2/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_129",key:"0/2/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_130",key:"0/2/1/0/0/2",children:[{type:"T2",id:"container_131",key:"0/2/1/0/0/2/0",children:[{type:"T5",id:"text_132",key:"0/2/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_133",key:"0/2/1/0/0/2/1",children:[{type:"T5",id:"text_134",key:"0/2/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_135",key:"0/2/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_136",key:"0/2/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_137",key:"0/2/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]}]},function(){const d=new Map;let l=null,p=null;function u(){}function S(){}function _(n,t){if(!n)return;t(n);const e=n.children||[];for(let o=0;o<e.length;o++)_(e[o],t)}function v(n,t){if(!(!n||!t))for(const[e,o]of Object.entries(t))try{o===!1||o===null||typeof o>"u"?n.removeAttribute(e):n.setAttribute(e,String(o))}catch{}}function R(n,t={},e={}){for(const o in t)if(!(o in e))try{n.removeAttribute(o)}catch{}for(const o in e){const i=e[o];try{i===!1||i===null||typeof i>"u"?n.removeAttribute(o):n.setAttribute(o,String(i))}catch{}}}function V(n,t={},e={}){for(const o in t)if(!(o in e))try{n.style.removeProperty(o.replace(/_/g,"-"))}catch{}for(const o in e){const i=e[o];try{n.style.setProperty(o.replace(/_/g,"-"),String(i))}catch{}}}function M(n,t){(t||document).addEventListener(n,function(e){let o=e.target;const i=t||document;for(;o&&o!==i;){const m=o.id;if(m&&d.has(m)){const f=d.get(m);if(o&&o.__darsEv&&o.__darsEv[n])return;let c=f[n];if(!c&&(n==="keydown"||n==="keyup"||n==="keypress")){const a=e.key||e.code;if(a){const r=n+"."+a;c=f[r]}}if(typeof c=="function"){try{c.call(o,e)}catch(a){console.error("[Dars] handler error",a)}return}}o=o.parentNode}},!0)}function w(n,t){return n&&t?n.type!==t.type:n!==t}function k(n){if(!n)return;const t=n.children||[];for(let e=0;e<t.length;e++)k(t[e]);if(n.id&&d.delete(n.id),n.id){const e=document.getElementById(n.id);if(e&&e.parentNode)try{e.parentNode.removeChild(e)}catch{}}}function x(n,t){if(!t||!t.id)return{ok:!1,reason:"missing-new"};let e=document.getElementById(t.id);if(!e){const a=n&&n.id?document.getElementById(n.id):null;if(a)try{a.id=t.id,e=a}catch{}}if(!e)return{ok:!1,reason:"missing-el"};if(w(n,t))return{ok:!1,reason:"type-changed"};const o=!!t.isIsland;if(!o&&t.class&&(e.className=t.class),o||R(e,n&&n.props||{},t.props||{}),o||V(e,n&&n.style||{},t.style||{}),!o&&Object.prototype.hasOwnProperty.call(t,"text")&&e.textContent!==String(t.text||"")&&(e.textContent=String(t.text||"")),o)return{ok:!0};const i=n&&n.children?n.children:[],m=t.children?t.children:[],f=new Map;for(let a=0;a<i.length;a++){const r=i[a]&&(i[a].id||i[a].key)||null;r&&f.set(String(r),i[a])}const c=new Set;for(let a=0;a<m.length;a++){const r=m[a],h=r&&(r.id||r.key)||null;if(!h)if(a<i.length){const s=x(i[a],r);if(!s.ok)return s;c.add(i[a]);continue}else return{ok:!1,reason:"children-added"};const b=f.get(String(h));if(b){const s=x(b,r);if(!s.ok)return s;c.add(b)}else{if(a<i.length){const y=i[a];if(!w(y,r)){const g=x(y,r);if(!g.ok)return g;c.add(y);continue}}const s=createSubtree(r);if(s){const y=a<i.length?i[a]:null;if(y&&y.id){const g=document.getElementById(y.id);g&&g.parentNode?g.parentNode.insertBefore(s,g):e.appendChild(s)}else e.appendChild(s);continue}return{ok:!1,reason:"children-added"}}}for(let a=0;a<i.length;a++){const r=i[a];c.has(r)||k(r)}return{ok:!0}}function F(n){typeof requestAnimationFrame=="function"?requestAnimationFrame(n):setTimeout(n,16)}function L(n){const t=l;if(!t){l=n;try{window.__DARS_VDOM__=n}catch{}return}F(()=>{const e=x(t,n);if(!e.ok){console.warn("[Dars] Structural change detected (",e.reason,"), reloading...");try{location.reload()}catch{}return}l=n;try{window.__DARS_VDOM__=n}catch{}})}function T(n){l=n;try{window.__DARS_VDOM__=n}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(e=>M(e,document))}function O(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const n=window.__DARS_VERSION_URL||"version.txt";let t=null,e=!1,o=0;const i=10;let m=!1;function f(a,r,h,b){try{const s=new XMLHttpRequest;b&&(s.responseType=b),s.open("GET",a,!0),s.timeout=5e3,s.onreadystatechange=function(){s.readyState===4&&(s.status>=200&&s.status<300?r(s.response):h())},s.onerror=h,s.ontimeout=h,s.setRequestHeader("Cache-Control","no-store"),s.send()}catch{h()}}function c(){m||f(n,function(a){let r=(a||"").toString().trim();if(!r||r==="0"){if(o+=1,o>=i){console.warn("[Dars] version file not found after",i,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(c,600);return}if(o=0,e=!1,p||(p=r),r&&r!==p){p=r;try{location.reload()}catch{}return}t=setTimeout(c,600)},function(){if(o+=1,o>=i){console.warn("[Dars] version file not reachable after",i,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(c,600)},"text")}return c(),()=>{try{m=!0,t&&clearTimeout(t),window.__DARS_STOP_HOTRELOAD=null}catch{}}}function C(){if(window.__DARS_VDOM__?T(window.__DARS_VDOM__):window.__ROUTE_VDOM__?T(window.__ROUTE_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=O()}catch{}}}document.readyState==="complete"||document.readyState==="interactive"?C():document.addEventListener("DOMContentLoaded",C)}(),window.addEventListener("scroll",()=>{const d=document.getElementById("dars-navbar");window.scrollY>20?d.classList.add("scrolled"):d.classList.remove("scrolled");const l=document.getElementById("features-section");if(l&&!l.classList.contains("visible")){const p=l.getBoundingClientRect().top,u=window.innerHeight/1.5;p<u&&(l.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((_,v)=>{setTimeout(()=>{_.style.opacity="1",_.style.transform="translateY(0)"},v*100)}))}});const D=document.getElementById("hero-logo"),P=document.getElementById("hero-title"),A=document.getElementById("hero-description"),B=document.getElementById("pip-command"),E=document.getElementById("get-started-btn"),I=document.getElementById("scroll-text");D&&setTimeout(()=>D.classList.add("show"),5),P&&setTimeout(()=>P.classList.add("show"),350),A&&setTimeout(()=>A.classList.add("show"),650),B&&setTimeout(()=>B.classList.add("show"),950),E&&setTimeout(()=>E.classList.add("show"),1250),I&&setTimeout(()=>I.classList.add("show"),1500),document.addEventListener("DOMContentLoaded",function(){const d=document.getElementById("hamburger-btn"),l=document.getElementById("mobile-menu"),p=document.body;d&&l&&(d.addEventListener("click",function(u){u.stopPropagation(),l.style.display==="flex"?(l.style.display="none",d.classList.remove("menu-open"),p.classList.remove("menu-open")):(l.style.display="flex",d.classList.add("menu-open"),p.classList.add("menu-open"))}),l.querySelectorAll("a").forEach(u=>{u.addEventListener("click",function(){l.style.display="none",d.classList.remove("menu-open"),p.classList.remove("menu-open")})}),document.addEventListener("click",function(u){!d.contains(u.target)&&!l.contains(u.target)&&(l.style.display="none",d.classList.remove("menu-open"),p.classList.remove("menu-open"))}),document.addEventListener("keydown",function(u){u.key==="Escape"&&l.style.display==="flex"&&(l.style.display="none",d.classList.remove("menu-open"),p.classList.remove("menu-open"))}))});
+`}]},{type:"T2",id:"footer-section",key:"0/2/1",children:[{type:"T2",id:"container_111",key:"0/2/1/0",children:[{type:"T2",id:"container_112",key:"0/2/1/0/0",children:[{type:"T2",id:"container_113",key:"0/2/1/0/0/0",children:[{type:"T4",id:"image_114",key:"0/2/1/0/0/0/0"},{type:"T2",id:"container_115",key:"0/2/1/0/0/0/1",children:[{type:"T5",id:"text_116",key:"0/2/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_117",key:"0/2/1/0/0/1",children:[{type:"T2",id:"container_118",key:"0/2/1/0/0/1/0",children:[{type:"T5",id:"text_119",key:"0/2/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_120",key:"0/2/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_121",key:"0/2/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_122",key:"0/2/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_123",key:"0/2/1/0/0/1/1",children:[{type:"T5",id:"text_124",key:"0/2/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_125",key:"0/2/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_126",key:"0/2/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_127",key:"0/2/1/0/0/1/2",children:[{type:"T5",id:"text_128",key:"0/2/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_129",key:"0/2/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_130",key:"0/2/1/0/0/2",children:[{type:"T2",id:"container_131",key:"0/2/1/0/0/2/0",children:[{type:"T5",id:"text_132",key:"0/2/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_133",key:"0/2/1/0/0/2/1",children:[{type:"T5",id:"text_134",key:"0/2/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_135",key:"0/2/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_136",key:"0/2/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_137",key:"0/2/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]}]},function(){const d=new Map;let l=null,p=null;function u(){}function S(){}function _(n,t){if(!n)return;t(n);const e=n.children||[];for(let o=0;o<e.length;o++)_(e[o],t)}function w(n,t){if(!(!n||!t))for(const[e,o]of Object.entries(t))try{o===!1||o===null||typeof o>"u"?n.removeAttribute(e):n.setAttribute(e,String(o))}catch{}}function I(n,t={},e={}){for(const o in t)if(!(o in e))try{n.removeAttribute(o)}catch{}for(const o in e){const i=e[o];try{i===!1||i===null||typeof i>"u"?n.removeAttribute(o):n.setAttribute(o,String(i))}catch{}}}function V(n,t={},e={}){for(const o in t)if(!(o in e))try{n.style.removeProperty(o.replace(/_/g,"-"))}catch{}for(const o in e){const i=e[o];try{n.style.setProperty(o.replace(/_/g,"-"),String(i))}catch{}}}function M(n,t){(t||document).addEventListener(n,function(e){let o=e.target;const i=t||document;for(;o&&o!==i;){const m=o.id;if(m&&d.has(m)){const y=d.get(m);if(o&&o.__darsEv&&o.__darsEv[n])return;let c=y[n];if(!c&&(n==="keydown"||n==="keyup"||n==="keypress")){const a=e.key||e.code;if(a){const r=n+"."+a;c=y[r]}}if(typeof c=="function"){try{c.call(o,e)}catch(a){console.error("[Dars] handler error",a)}return}}o=o.parentNode}},!0)}function v(n,t){return n&&t?n.type!==t.type:n!==t}function k(n){if(!n)return;const t=n.children||[];for(let e=0;e<t.length;e++)k(t[e]);if(n.id&&d.delete(n.id),n.id){const e=document.getElementById(n.id);if(e&&e.parentNode)try{e.parentNode.removeChild(e)}catch{}}}function x(n,t){if(!t||!t.id)return{ok:!1,reason:"missing-new"};let e=document.getElementById(t.id);if(!e){const a=n&&n.id?document.getElementById(n.id):null;if(a)try{a.id=t.id,e=a}catch{}}if(!e)return{ok:!1,reason:"missing-el"};if(v(n,t))return{ok:!1,reason:"type-changed"};const o=!!t.isIsland;if(!o&&t.class&&(e.className=t.class),o||I(e,n&&n.props||{},t.props||{}),o||V(e,n&&n.style||{},t.style||{}),!o&&Object.prototype.hasOwnProperty.call(t,"text")&&e.textContent!==String(t.text||"")&&(e.textContent=String(t.text||"")),o)return{ok:!0};const i=n&&n.children?n.children:[],m=t.children?t.children:[],y=new Map;for(let a=0;a<i.length;a++){const r=i[a]&&(i[a].id||i[a].key)||null;r&&y.set(String(r),i[a])}const c=new Set;for(let a=0;a<m.length;a++){const r=m[a],h=r&&(r.id||r.key)||null;if(!h)if(a<i.length){const s=x(i[a],r);if(!s.ok)return s;c.add(i[a]);continue}else return{ok:!1,reason:"children-added"};const b=y.get(String(h));if(b){const s=x(b,r);if(!s.ok)return s;c.add(b)}else{if(a<i.length){const f=i[a];if(!v(f,r)){const g=x(f,r);if(!g.ok)return g;c.add(f);continue}}const s=createSubtree(r);if(s){const f=a<i.length?i[a]:null;if(f&&f.id){const g=document.getElementById(f.id);g&&g.parentNode?g.parentNode.insertBefore(s,g):e.appendChild(s)}else e.appendChild(s);continue}return{ok:!1,reason:"children-added"}}}for(let a=0;a<i.length;a++){const r=i[a];c.has(r)||k(r)}return{ok:!0}}function F(n){typeof requestAnimationFrame=="function"?requestAnimationFrame(n):setTimeout(n,16)}function L(n){const t=l;if(!t){l=n;try{window.__DARS_VDOM__=n}catch{}return}F(()=>{const e=x(t,n);if(!e.ok){console.warn("[Dars] Structural change detected (",e.reason,"), reloading...");try{location.reload()}catch{}return}l=n;try{window.__DARS_VDOM__=n}catch{}})}function T(n){l=n;try{window.__DARS_VDOM__=n}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(e=>M(e,document))}function O(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const n=window.__DARS_VERSION_URL||"version.txt";let t=null,e=!1,o=0;const i=10;let m=!1;function y(a,r,h,b){try{const s=new XMLHttpRequest;b&&(s.responseType=b),s.open("GET",a,!0),s.timeout=5e3,s.onreadystatechange=function(){s.readyState===4&&(s.status>=200&&s.status<300?r(s.response):h())},s.onerror=h,s.ontimeout=h,s.setRequestHeader("Cache-Control","no-store"),s.send()}catch{h()}}function c(){m||y(n,function(a){let r=(a||"").toString().trim();if(!r||r==="0"){if(o+=1,o>=i){console.warn("[Dars] version file not found after",i,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(c,600);return}if(o=0,e=!1,p||(p=r),r&&r!==p){p=r;try{location.reload()}catch{}return}t=setTimeout(c,600)},function(){if(o+=1,o>=i){console.warn("[Dars] version file not reachable after",i,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(c,600)},"text")}return c(),()=>{try{m=!0,t&&clearTimeout(t),window.__DARS_STOP_HOTRELOAD=null}catch{}}}function C(){if(window.__DARS_VDOM__?T(window.__DARS_VDOM__):window.__ROUTE_VDOM__?T(window.__ROUTE_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=O()}catch{}}}document.readyState==="complete"||document.readyState==="interactive"?C():document.addEventListener("DOMContentLoaded",C)}(),window.addEventListener("scroll",()=>{const d=document.getElementById("dars-navbar");window.scrollY>20?d.classList.add("scrolled"):d.classList.remove("scrolled");const l=document.getElementById("features-section");if(l&&!l.classList.contains("visible")){const p=l.getBoundingClientRect().top,u=window.innerHeight/1.5;p<u&&(l.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((_,w)=>{setTimeout(()=>{_.style.opacity="1",_.style.transform="translateY(0)"},w*100)}))}});const D=document.getElementById("hero-logo"),P=document.getElementById("hero-title"),A=document.getElementById("hero-description"),B=document.getElementById("pip-command"),E=document.getElementById("get-started-btn"),R=document.getElementById("scroll-text");D&&setTimeout(()=>D.classList.add("show"),5),P&&setTimeout(()=>P.classList.add("show"),350),A&&setTimeout(()=>A.classList.add("show"),650),B&&setTimeout(()=>B.classList.add("show"),950),E&&setTimeout(()=>E.classList.add("show"),1250),R&&setTimeout(()=>R.classList.add("show"),1500),document.addEventListener("DOMContentLoaded",function(){const d=document.getElementById("hamburger-btn"),l=document.getElementById("mobile-menu"),p=document.body;d&&l&&(d.addEventListener("click",function(u){u.stopPropagation(),l.style.display==="flex"?(l.style.display="none",d.classList.remove("menu-open"),p.classList.remove("menu-open")):(l.style.display="flex",d.classList.add("menu-open"),p.classList.add("menu-open"))}),l.querySelectorAll("a").forEach(u=>{u.addEventListener("click",function(){l.style.display="none",d.classList.remove("menu-open"),p.classList.remove("menu-open")})}),document.addEventListener("click",function(u){!d.contains(u.target)&&!l.contains(u.target)&&(l.style.display="none",d.classList.remove("menu-open"),p.classList.remove("menu-open"))}),document.addEventListener("keydown",function(u){u.key==="Escape"&&l.style.display==="flex"&&(l.style.display="none",d.classList.remove("menu-open"),p.classList.remove("menu-open"))}))});

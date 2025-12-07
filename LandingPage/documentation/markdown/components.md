@@ -153,6 +153,7 @@ input_field = Input(
 - [Base Component Class](#base-component-class)
 - [Component Search](#component-search-and-modification)
 - [Page](#page)
+- [Head](#head)
 - [Text](#text)
 - [Button](#button)
 - [Input](#input)
@@ -365,6 +366,46 @@ index.add_script(
     dScript(code="console.log('Hello world')")
 )
 ```
+
+### Head
+
+The `Head` component allows you to manage the `<head>` section of your page, including the title, meta tags, and links. It supports SEO metadata like Open Graph and Twitter Cards.
+
+#### Head Syntax
+
+```python
+from dars.components.advanced.head import Head
+
+head = Head(
+    title="My Page Title",
+    description="This is a description for SEO.",
+    keywords="dars, framework, python",
+    og_title="My Open Graph Title",
+    twitter_card="summary_large_image"
+)
+```
+
+#### Head Properties
+
+| Property | Type | Description |
+|-----------|------|-------------|
+| `title` | str | The page title (`<title>`) |
+| `description` | str | Meta description |
+| `keywords` | str/list | Meta keywords |
+| `author` | str | Meta author |
+| `robots` | str | Robots meta tag |
+| `canonical` | str | Canonical URL link |
+| `favicon` | str | Favicon URL link |
+| `og_title` | str | Open Graph title |
+| `og_description` | str | Open Graph description |
+| `og_image` | str | Open Graph image URL |
+| `og_type` | str | Open Graph type (default: "website") |
+| `twitter_card` | str | Twitter card type (default: "summary") |
+| `twitter_site` | str | Twitter site handle |
+| `twitter_creator` | str | Twitter creator handle |
+| `meta` | dict | Custom meta tags `{name: content}` |
+| `links` | list | Custom link tags `[{rel: ..., href: ...}]` |
+| `structured_data` | dict | JSON-LD structured data |
 
 ### Text
 

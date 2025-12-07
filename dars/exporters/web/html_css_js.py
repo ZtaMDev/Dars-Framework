@@ -1002,16 +1002,35 @@ self.addEventListener('fetch', event => {
             vdom_script_tag = f'<script src="{vdom_script}"></script>' if vdom_script else ''
             runtime_script_tag = f'<script src="{runtime_file}"{" type=\"module\"" if script_is_module else ""} defer></script>' if runtime_file else ''
             main_script_tag = f'<script src="{script_file}"{" type=\"module\"" if script_is_module else ""}></script>' if script_file else ''
+        
+        # Get page-specific metadata if Head component was used
+        page_metadata = getattr(self, '_page_head_metadata', {})
+        
+        # Get title (page-specific or app default)
+        page_title = page_metadata.get('title', app.title)
+        
+        # Generate meta tags - _generate_page_meta_tags handles fallbacks to app defaults
+        # So we ALWAYS use it, whether or not there's page_metadata
+        if page_metadata:
+            # Page has Head component - use custom metadata
+            final_meta_tags = self._generate_page_meta_tags(page_metadata, app)
+        else:
+            # No Head component - use app defaults
+            final_meta_tags = meta_tags_html
+        
+        # Reset metadata for next page
+        if hasattr(self, '_page_head_metadata'):
+            self._page_head_metadata = {}
 
         html_template = f"""<!DOCTYPE html>
     <html lang="{app.language}">
     <head>
         <meta charset="{app.config.get('charset', 'UTF-8')}">
-        {meta_tags_html}
-        <title>{app.title}</title>
-        {links_html}
-        {og_tags_html}
-        {twitter_tags_html}
+        {final_meta_tags}
+        <title>{page_title}</title>
+        {links_html if not page_metadata else ''}
+        {og_tags_html if not page_metadata else ''}
+        {twitter_tags_html if not page_metadata else ''}
         <link rel=\"stylesheet\" href=\"runtime_css.css\">\n    <link rel=\"stylesheet\" href=\"{css_file}\">
         {vdom_script_tag}
     </head>
@@ -3833,9 +3852,20 @@ body {
             raise TypeError(f"render_component wait to recived an instance of Component, but recive an {component}")
         """Render an HTML component"""
         
+        # FIRST: Recursively scan for Head components in the tree
+        # This ensures Head metadata is extracted even if Head is nested inside Page or other components
+        self._scan_for_head_components(component)
+        
         # Check if it's a function component
         if hasattr(component, '_is_function_component') and component._is_function_component:
             return self.render_function_component(component)
+        
+        # Special handling for Head component (SEO metadata)
+        from dars.components.advanced.head import Head
+        if isinstance(component, Head):
+            # Metadata already extracted in _scan_for_head_components
+            # Head component renders nothing visible
+            return ""
             
         from dars.components.basic.page import Page
         from dars.components.layout.grid import GridLayout
@@ -5362,28 +5392,43 @@ body {
 
 
             # Build route config based on type
+            
+            # Extract Head metadata if available (after render_component)
+            head_metadata = getattr(self, '_page_head_metadata', {})
+            route_title = head_metadata.get('title', spa_route.title or app.title)
+            
+            # Reset metadata for next route
+            if hasattr(self, '_page_head_metadata'):
+                self._page_head_metadata = {}
+            
             if route_type == RouteType.PUBLIC:
                 route_config = {
                     'name': route_name, 
                     'path': spa_route.route, 
-                    'title': spa_route.title or app.title,
+                    'title': route_title,  # Use Head metadata if available
                     'type': 'public',
                     'html': route_html, 
                     'styles': '',
                     'scripts': scripts_array,
+                    'events': route_events_map,
+                    'vdom': route_vdom,
                     'states': [], 
                     'preload': spa_route.preload or [],
-                    'parent': spa_route.parent
+                    'parent': spa_route.parent,
+                    'headMetadata': head_metadata  # Include for client-side updates
                 }
+
+
             elif route_type == RouteType.SSR:
                 # SSR routes: only metadata, render on backend
                 route_config = {
                     'name': route_name,
                     'path': spa_route.route,
-                    'title': spa_route.title or app.title,
+                    'title': route_title,  # Use Head metadata if available
                     'type': 'ssr',
                     'ssr_endpoint': route_metadata.loader_endpoint if route_metadata else f"/api/ssr/{route_name}",
-                    'parent': spa_route.parent
+                    'parent': spa_route.parent,
+                    'headMetadata': head_metadata  # Include for client-side updates
                 }
                 
                 # Still write route files for backend SSR to use
@@ -5393,14 +5438,17 @@ body {
                 route_config = {
                     'name': route_name, 
                     'path': spa_route.route, 
-                    'title': spa_route.title or app.title,
+                    'title': route_title,  # Use Head metadata if available
                     'type': 'public',
                     'html': route_html, 
                     'styles': '',
                     'scripts': scripts_array,
+                    'events': route_events_map,
+                    'vdom': route_vdom,
                     'states': [], 
                     'preload': spa_route.preload or [],
-                    'parent': spa_route.parent
+                    'parent': spa_route.parent,
+                    'headMetadata': head_metadata  # Include for client-side updates
                 }
                 
                 # Still write the route files for backend to serve
@@ -5542,7 +5590,27 @@ body {
 })();
 </script>"""
         
-        spa_html = f'''<!DOCTYPE html><html lang="{getattr(app, "language", "en")}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>{app.title}</title><link rel="stylesheet" href="/runtime_css.css"><link rel="stylesheet" href="/styles.css"></head><body><div id="__dars_spa_root__"></div><script type="module" src="/lib/dars.min.js"></script><script>const __DARS_SPA_CONFIG__ = {json.dumps(spa_config, ensure_ascii=False, separators=(",", ":"), cls=DarsJSONEncoder)};window.addEventListener("DOMContentLoaded", function() {{ if (window.Dars && window.Dars.router) window.Dars.router.registerConfig(__DARS_SPA_CONFIG__);else console.error("[Dars SPA] Router not available");}});\u003c/script\u003e{hot_reload_script}</body></html>'''
+        # Extract initial meta tags from index route if it has Head metadata
+        initial_title = app.title
+        initial_meta_tags = ''
+        
+        # Find index route
+        index_route = None
+        for route in spa_config.get('routes', []):
+            if route.get('name') == spa_config.get('index') or (not spa_config.get('index') and route.get('name') == 'index'):
+                index_route = route
+                break
+        
+        # Generate meta tags from index route's Head metadata
+        if index_route:
+            if index_route.get('headMetadata'):
+                head_metadata = index_route['headMetadata']
+                initial_title = head_metadata.get('title', app.title)
+                
+                # Use the same method that generates meta tags for multipage
+                initial_meta_tags = self._generate_page_meta_tags(head_metadata, app)
+        
+        spa_html = f'''<!DOCTYPE html><html lang="{getattr(app, "language", "en")}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">{initial_meta_tags}<title>{initial_title}</title><link rel="stylesheet" href="/runtime_css.css"><link rel="stylesheet" href="/styles.css"></head><body><div id="__dars_spa_root__"></div><script type="module" src="/lib/dars.min.js"></script><script>const __DARS_SPA_CONFIG__ = {json.dumps(spa_config, ensure_ascii=False, separators=(",", ":"), cls=DarsJSONEncoder)};window.addEventListener("DOMContentLoaded", function() {{ if (window.Dars && window.Dars.router) window.Dars.router.registerConfig(__DARS_SPA_CONFIG__);else console.error("[Dars SPA] Router not available");}});</script>{hot_reload_script}</body></html>'''
         try:
             soup = BeautifulSoup(spa_html, "html.parser")
             spa_html = soup.prettify()
@@ -5580,5 +5648,192 @@ body {
             except Exception:
                 version_val = "1"
             self.write_file(os.path.join(output_path, "version.txt"), version_val)
-
-
+    
+    def _scan_for_head_components(self, component):
+        """
+        Recursively scan component tree for Head components and extract metadata.
+        This is called before rendering to ensure Head components are found even when nested.
+        """
+        from dars.components.advanced.head import Head
+        from dars.core.component import Component
+        
+        # Check if this component is a Head
+        if isinstance(component, Head):
+            if not hasattr(self, '_page_head_metadata'):
+                self._page_head_metadata = {}
+            metadata = self._extract_head_metadata(component)
+            self._page_head_metadata.update(metadata)
+            return
+        
+        # Recursively scan children
+        if hasattr(component, 'children') and component.children:
+            for child in component.children:
+                if isinstance(child, Component):
+                    self._scan_for_head_components(child)
+    
+    def _extract_head_metadata(self, head_component):
+        """Extract metadata from Head component"""
+        metadata = {}
+        
+        # Only include non-None values
+        if head_component.title:
+            metadata['title'] = head_component.title
+        if head_component.description:
+            metadata['description'] = head_component.description
+        if head_component.keywords:
+            metadata['keywords'] = head_component.keywords
+        if head_component.author:
+            metadata['author'] = head_component.author
+        if head_component.robots:
+            metadata['robots'] = head_component.robots
+        if head_component.canonical:
+            metadata['canonical'] = head_component.canonical
+        if head_component.favicon:
+            metadata['favicon'] = head_component.favicon
+        
+        # Open Graph
+        og = {}
+        if head_component.og_title:
+            og['title'] = head_component.og_title
+        if head_component.og_description:
+            og['description'] = head_component.og_description
+        if head_component.og_image:
+            og['image'] = head_component.og_image
+            if head_component.og_image_width:
+                og['image_width'] = head_component.og_image_width
+            if head_component.og_image_height:
+                og['image_height'] = head_component.og_image_height
+        if head_component.og_type:
+            og['type'] = head_component.og_type
+        if head_component.og_url:
+            og['url'] = head_component.og_url
+        if head_component.og_site_name:
+            og['site_name'] = head_component.og_site_name
+        if head_component.og_locale:
+            og['locale'] = head_component.og_locale
+        if og:
+            metadata['og'] = og
+        
+        # Twitter
+        twitter = {}
+        if head_component.twitter_card:
+            twitter['card'] = head_component.twitter_card
+        if head_component.twitter_site:
+            twitter['site'] = head_component.twitter_site
+        if head_component.twitter_creator:
+            twitter['creator'] = head_component.twitter_creator
+        if head_component.twitter_title:
+            twitter['title'] = head_component.twitter_title
+        if head_component.twitter_description:
+            twitter['description'] = head_component.twitter_description
+        if head_component.twitter_image:
+            twitter['image'] = head_component.twitter_image
+        if twitter:
+            metadata['twitter'] = twitter
+        
+        # Custom
+        if head_component.meta:
+            metadata['custom_meta'] = head_component.meta
+        if head_component.links:
+            metadata['custom_links'] = head_component.links
+        if head_component.structured_data:
+            metadata['structured_data'] = head_component.structured_data
+        
+        return metadata
+    
+    def _generate_page_meta_tags(self, page_metadata, app):
+        """Generate HTML meta tags from page metadata (Head component)"""
+        import html as html_module
+        tags = []
+        
+        # Description
+        desc = page_metadata.get('description', getattr(app, 'description', None))
+        if desc:
+            tags.append(f'<meta name="description" content="{html_module.escape(desc)}">')
+        
+        # Keywords
+        keywords = page_metadata.get('keywords', getattr(app, 'keywords', None))
+        if keywords:
+            if isinstance(keywords, list):
+                kw_str = ', '.join(keywords)
+            else:
+                kw_str = keywords
+            tags.append(f'<meta name="keywords" content="{html_module.escape(kw_str)}">')
+        
+        # Author
+        author = page_metadata.get('author', getattr(app, 'author', None))
+        if author:
+            tags.append(f'<meta name="author" content="{html_module.escape(author)}">')
+        
+        # Robots
+        robots = page_metadata.get('robots')
+        if robots:
+            tags.append(f'<meta name="robots" content="{html_module.escape(robots)}">')
+        
+        # Canonical
+        canonical = page_metadata.get('canonical')
+        if canonical:
+            tags.append(f'<link rel="canonical" href="{html_module.escape(canonical)}">')
+        
+        # Favicon (page-specific or app default)
+        favicon = page_metadata.get('favicon', getattr(app, 'favicon', None))
+        if favicon:
+            tags.append(f'<link rel="icon" href="{html_module.escape(favicon)}">')
+        
+        # Open Graph
+        og = page_metadata.get('og', {})
+        if og.get('title'):
+            tags.append(f'<meta property="og:title" content="{html_module.escape(og["title"])}">')
+        if og.get('description'):
+            tags.append(f'<meta property="og:description" content="{html_module.escape(og["description"])}">')
+        if og.get('image'):
+            tags.append(f'<meta property="og:image" content="{html_module.escape(og["image"])}">')
+            if og.get('image_width'):
+                tags.append(f'<meta property="og:image:width" content="{og["image_width"]}">')
+            if og.get('image_height'):
+                tags.append(f'<meta property="og:image:height" content="{og["image_height"]}">')
+        if og.get('type'):
+            tags.append(f'<meta property="og:type" content="{html_module.escape(og["type"])}">')
+        if og.get('url'):
+            tags.append(f'<meta property="og:url" content="{html_module.escape(og["url"])}">')
+        if og.get('site_name'):
+            tags.append(f'<meta property="og:site_name" content="{html_module.escape(og["site_name"])}">')
+        if og.get('locale'):
+            tags.append(f'<meta property="og:locale" content="{html_module.escape(og["locale"])}">')
+        
+        # Twitter Card
+        twitter = page_metadata.get('twitter', {})
+        if twitter.get('card'):
+            tags.append(f'<meta name="twitter:card" content="{html_module.escape(twitter["card"])}">')
+        if twitter.get('site'):
+            tags.append(f'<meta name="twitter:site" content="{html_module.escape(twitter["site"])}">')
+        if twitter.get('creator'):
+            tags.append(f'<meta name="twitter:creator" content="{html_module.escape(twitter["creator"])}">')
+        if twitter.get('title'):
+            tags.append(f'<meta name="twitter:title" content="{html_module.escape(twitter["title"])}">')
+        if twitter.get('description'):
+            tags.append(f'<meta name="twitter:description" content="{html_module.escape(twitter["description"])}">')
+        if twitter.get('image'):
+            tags.append(f'<meta name="twitter:image" content="{html_module.escape(twitter["image"])}">')
+        
+        # Custom meta tags
+        for meta in page_metadata.get('custom_meta', []):
+            attrs = []
+            for key, value in meta.items():
+                attrs.append(f'{key}="{html_module.escape(str(value))}"')
+            tags.append(f'<meta {" ".join(attrs)}>')
+        
+        # Custom link tags
+        for link in page_metadata.get('custom_links', []):
+            attrs = []
+            for key, value in link.items():
+                attrs.append(f'{key}="{html_module.escape(str(value))}"')
+            tags.append(f'<link {" ".join(attrs)}>')
+        
+        # JSON-LD structured data
+        structured_data = page_metadata.get('structured_data')
+        if structured_data:
+            json_str = json.dumps(structured_data, ensure_ascii=False, indent=2)
+            tags.append(f'<script type="application/ld+json">\n{json_str}\n</script>')
+        
+        return '\n    '.join(tags)

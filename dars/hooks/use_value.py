@@ -163,11 +163,13 @@ def useValue(state_path: str, selector: str = None) -> ValueMarker:
         ValueMarker instance (resolves to initial value string in templates)
     
     Example:
+        ```python
         In FunctionComponent template (resolves to string)
         <div>{useValue("user.name")}</div>
         
         In component props with selector
         Input(value=useValue("user.name", "input.name-field"))
+        ```
     """
     return ValueMarker(state_path, selector)
 

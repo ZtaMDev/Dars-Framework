@@ -164,6 +164,38 @@ The development server (`dars dev`) includes an intelligent hot reload system fo
 - **Retry Limit**: If the server goes down, the client stops polling after 10 consecutive errors to prevent browser lag.
 - **State Preservation**: When possible, navigation state is preserved across reloads.
 
+## SEO & Metadata
+
+Dars handles SEO automatically in Single Page Applications. The router intelligently updates the document metadata when navigating between routes.
+
+### Using the Head Component
+
+To control page metadata for each route, use the `Head` component:
+
+```python
+from dars.components.advanced.head import Head
+
+@app.route("/about")
+def about():
+    return Page(
+        Head(
+            title="About Us - My App",
+            description="Learn more about our company.",
+            og_image="/images/about-og.jpg"
+        ),
+        Container(Text("About Content"))
+    )
+```
+
+The router dynamically updates:
+- `<title>`
+- Meta tags (`description`, `keywords`, etc.)
+- Open Graph tags (`og:title`, `og:type`, etc.)
+- Twitter Cards
+
+This ensures that even client-side routes display the correct information in the browser tab and when shared on social media.
+
+
 ---
 
 ## Server-Side Rendering (SSR)

@@ -1226,6 +1226,7 @@ def V(selector: str) -> ValueRef:
         ValueRef instance
     
     Example:
+    ```python
         # CSS selectors (DOM elements)
         username = V(".username-input")
         email = V("#email-field")
@@ -1246,6 +1247,7 @@ def V(selector: str) -> ValueRef:
         # In state updates
         userState.name.set(V(".input"))
         cartState.total.set(V("cart.total").float() + 10)
+    ```
     """
     return ValueRef(selector)
 

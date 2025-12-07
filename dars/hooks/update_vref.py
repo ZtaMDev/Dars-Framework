@@ -37,6 +37,7 @@ def updateVRef(
         dScript object for use in event handlers
         
     Examples:
+        ```python
         # Single update
         Button(on_click=updateVRef("#name", "John"))
         
@@ -60,6 +61,7 @@ def updateVRef(
         
         # Update VRef value (set via setVRef)
         Button(on_click=updateVRef(".product-price", 149.99))
+        ```
     """
     
     def _generate_value_code(val: Any) -> str:

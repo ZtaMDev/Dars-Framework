@@ -89,6 +89,7 @@ def useDynamic(state_path: str) -> DynamicBinding:
         DynamicBinding object that will be replaced with reactive HTML
     
     Example:
+    ```python
         userState = State("user", name="John", email="john@example.com")
         
         @FunctionComponent
@@ -102,11 +103,16 @@ def useDynamic(state_path: str) -> DynamicBinding:
         
         # Later, when state changes:
         userState.name.set("Jane")  # DOM automatically updates
+    ```
     
     Example 2:
-        userState = State("user", name="John", email="john@example.com")
+
+    ```python
+    userState = State("user", name="John", email="john@example.com")
         
-        Text(text=useDynamic("user.name"))
+    Text(text=useDynamic("user.name"))
+    ```
+    
     Notes:
         - The state_path must reference a registered State object
         - The binding is one-way: state → DOM

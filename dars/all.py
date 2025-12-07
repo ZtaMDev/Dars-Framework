@@ -39,6 +39,7 @@ from dars.components.basic.tooltip import Tooltip
 from dars.components.layout.anchor import AnchorPoint
 from dars.components.layout.flex import FlexLayout
 from dars.components.basic.section import Section
+from dars.components.advanced.head import Head
 from dars.components.advanced.outlet import Outlet
 # Layout
 from dars.components.layout.grid import GridLayout, LayoutBase
@@ -87,7 +88,7 @@ __all__ = [
     'App', 'Component', 'EventManager',
     'Button', 'Checkbox', 'Container', 'DatePicker', 'Image', 'Input', 'Link', 'Page', 'ProgressBar',
     'RadioButton', 'Select', 'Slider', 'Spinner', 'Text', 'Textarea', 'Tooltip',
-    'Accordion', 'Card', 'Modal', 'Navbar', 'Table', 'Tabs', 'Section', 'Outlet',
+    'Accordion', 'Card', 'Modal', 'Navbar', 'Table', 'Tabs', 'Section', 'Outlet', 'Head',
     # Visualization
     'Chart', 'DataTable',
     'GridLayout', 'FlexLayout', 'LayoutBase', 'AnchorPoint',

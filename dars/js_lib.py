@@ -1114,9 +1114,27 @@ async function _loadRoute(route, params){{
         container = outlet;
       }}
     }}
+    
+    // Update page metadata (title, description, OG tags, etc.) if available
+    const leafRoute = chain[chain.length - 1];
+    if (leafRoute) {{
+      if (leafRoute['headMetadata']) {{
+        try {{
+          updatePageMetadata(leafRoute['headMetadata']);
+        }} catch(e) {{
+          console.error('[Dars Router] Error updating metadata:', e);
+        }}
+      }} else if (leafRoute['title']) {{
+        // Fallback: update title only if no headMetadata
+        try {{
+          document.title = leafRoute['title'];
+        }} catch(e) {{}}
+      }}
+    }}
 
   }}catch(e){{ console.error('[Dars Router] Load error:', e); }}
 }}
+
 
 /**
  * Inject styles for a route
@@ -1348,8 +1366,96 @@ const Dars = {{
         matchRoute: _matchRoute
     }},
     version: DARS_VERSION,
-    releaseUrl: DARS_RELEASE_URL
+    releaseUrl: DARS_RELEASE_URL,
+    updatePageMetadata: updatePageMetadata  // Expose for SPA metadata updates
 }};
+
+// ==================== HEAD METADATA UPDATES ====================
+// Update head metadata on SPA route change
+function updatePageMetadata(metadata) {{
+    if (!metadata) return;
+    
+    try {{
+        // Update title
+        if (metadata.title) {{
+            document.title = metadata.title;
+        }}
+        
+        // Update or create meta tags
+        _updateMeta('description', metadata.description);
+        _updateMeta('author', metadata.author);
+        _updateMeta('robots', metadata.robots);
+        
+        // Keywords
+        if (metadata.keywords) {{
+            const kw = Array.isArray(metadata.keywords) 
+                ? metadata.keywords.join(', ') 
+                : metadata.keywords;
+            _updateMeta('keywords', kw);
+        }}
+        
+        // Canonical
+        if (metadata.canonical) {{
+            _updateLink('canonical', metadata.canonical);
+        }}
+        
+        // Favicon
+        if (metadata.favicon) {{
+            _updateLink('icon', metadata.favicon);
+        }}
+        
+        // Open Graph
+        const og = metadata.og || {{}};
+        _updateMeta('og:title', og.title, 'property');
+        _updateMeta('og:description', og.description, 'property');
+        _updateMeta('og:image', og.image, 'property');
+        _updateMeta('og:type', og.type, 'property');
+        _updateMeta('og:url', og.url, 'property');
+        _updateMeta('og:site_name', og.site_name, 'property');
+        _updateMeta('og:locale', og.locale, 'property');
+        
+        // Twitter
+        const twitter = metadata.twitter || {{}};
+        _updateMeta('twitter:card', twitter.card);
+        _updateMeta('twitter:site', twitter.site);
+        _updateMeta('twitter:creator', twitter.creator);
+        _updateMeta('twitter:title', twitter.title);
+        _updateMeta('twitter:description', twitter.description);
+        _updateMeta('twitter:image', twitter.image);
+    }} catch(e) {{
+        try {{ console.error('[Dars] Metadata update error:', e); }} catch(_) {{}}
+    }}
+}}
+
+function _updateMeta(name, content, attr) {{
+    attr = attr || 'name';
+    if (!content) return;
+    
+    try {{
+        let meta = document.querySelector(`meta[${{attr}}="${{name}}"]`);
+        if (!meta) {{
+            meta = document.createElement('meta');
+            meta.setAttribute(attr, name);
+            document.head.appendChild(meta);
+        }}
+        meta.setAttribute('content', String(content));
+    }} catch(_) {{}}
+}}
+
+function _updateLink(rel, href) {{
+    if (!href) return;
+    
+    try {{
+        let link = document.querySelector(`link[rel="${{rel}}"]`);
+        if (!link) {{
+            link = document.createElement('link');
+            link.setAttribute('rel', rel);
+            document.head.appendChild(link);
+        }}
+        link.setAttribute('href', String(href));
+    }} catch(_) {{}}
+}}
+
 try {{ window.Dars = window.Dars || Dars; }} catch(_) {{}}
 export {{ registerState, registerStates, getState, change, $ }};
 export default Dars;

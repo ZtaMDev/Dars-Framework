@@ -1,3 +1,40 @@
+# Release Notes v1.7.3
+
+> **Complete Head Component & SEO Metadata Support**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Complete Head Component Support
+
+The `Head` component now works seamlessly across all export modes: **SPA**, **SSR**, and **Multipage**. You can manage your page title, description, and social media metadata (Open Graph, Twitter Cards) directly from your Python components.
+
+```python
+Head(
+    title="My App",
+    description="The best app ever",
+    og_image="/share.png"
+)
+```
+
+### Dynamic SPA Metadata
+
+In Single Page Applications (SPA), the document metadata now **updates automatically** when navigating between routes. The router intelligentally applies:
+- `<title>`
+- Meta tags (`description`, `keywords`, etc.)
+- Open Graph tags (`og:title`, `og:image`, etc.)
+- Twitter Card tags
+- Canonical links and favicons
+
+This ensures your SPA is SEO-friendly and displays correct previews when shared on social media, even for client-side routes.
+
+---
+
 # Release Notes v1.7.2
 
 > **Performance & Developer Experience Enhancements**

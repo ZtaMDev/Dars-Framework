@@ -525,6 +525,15 @@
      <a class="sidebar-link sidebar-level-4" href="#page-scripts-system" style="margin-left: 60px">
       Page Scripts System
      </a>
+     <a class="sidebar-link sidebar-level-3" href="#head" style="margin-left: 40px">
+      Head
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#head-syntax" style="margin-left: 60px">
+      Head Syntax
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#head-properties" style="margin-left: 60px">
+      Head Properties
+     </a>
      <a class="sidebar-link sidebar-level-3" href="#text" style="margin-left: 40px">
       Text
      </a>
@@ -1193,6 +1202,12 @@
      <a class="sidebar-link sidebar-level-2" href="#hot-reload" style="margin-left: 20px">
       Hot Reload
      </a>
+     <a class="sidebar-link sidebar-level-2" href="#seo-metadata" style="margin-left: 20px">
+      SEO &amp; Metadata
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#using-the-head-component" style="margin-left: 40px">
+      Using the Head Component
+     </a>
      <a class="sidebar-link sidebar-level-2" href="#server-side-rendering-ssr" style="margin-left: 20px">
       Server-Side Rendering (SSR)
      </a>
@@ -1230,6 +1245,9 @@
      </a>
      <a class="sidebar-link sidebar-level-3" href="#dual-hydration-system" style="margin-left: 40px">
       Dual Hydration System
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#seo-metadata" style="margin-left: 40px">
+      SEO &amp; Metadata
      </a>
      <a class="sidebar-link sidebar-level-2" href="#quick-start" style="margin-left: 20px">
       Quick Start
@@ -4699,6 +4717,11 @@ Desktop build target. Only effective when
         </a>
        </li>
        <li>
+        <a href="#head">
+         Head
+        </a>
+       </li>
+       <li>
         <a href="#text">
          Text
         </a>
@@ -5334,6 +5357,286 @@ Use the
 <span class="p">)</span>
 </code></pre>
       </div>
+      <h3 id="head">
+       Head
+      </h3>
+      <p>
+       The
+       <code>
+        Head
+       </code>
+       component allows you to manage the
+       <code>
+        &lt;head&gt;
+       </code>
+       section of your page, including the title, meta tags, and links. It supports SEO metadata like Open Graph and Twitter Cards.
+      </p>
+      <h4 id="head-syntax">
+       Head Syntax
+      </h4>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.components.advanced.head</span><span class="w"> </span><span class="kn">import</span> <span class="n">Head</span>
+
+<span class="n">head</span> <span class="o">=</span> <span class="n">Head</span><span class="p">(</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">"My Page Title"</span><span class="p">,</span>
+    <span class="n">description</span><span class="o">=</span><span class="s2">"This is a description for SEO."</span><span class="p">,</span>
+    <span class="n">keywords</span><span class="o">=</span><span class="s2">"dars, framework, python"</span><span class="p">,</span>
+    <span class="n">og_title</span><span class="o">=</span><span class="s2">"My Open Graph Title"</span><span class="p">,</span>
+    <span class="n">twitter_card</span><span class="o">=</span><span class="s2">"summary_large_image"</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h4 id="head-properties">
+       Head Properties
+      </h4>
+      <table>
+       <thead>
+        <tr>
+         <th>
+          Property
+         </th>
+         <th>
+          Type
+         </th>
+         <th>
+          Description
+         </th>
+        </tr>
+       </thead>
+       <tbody>
+        <tr>
+         <td>
+          <code>
+           title
+          </code>
+         </td>
+         <td>
+          str
+         </td>
+         <td>
+          The page title (
+          <code>
+           &lt;title&gt;
+          </code>
+          )
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           description
+          </code>
+         </td>
+         <td>
+          str
+         </td>
+         <td>
+          Meta description
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           keywords
+          </code>
+         </td>
+         <td>
+          str/list
+         </td>
+         <td>
+          Meta keywords
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           author
+          </code>
+         </td>
+         <td>
+          str
+         </td>
+         <td>
+          Meta author
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           robots
+          </code>
+         </td>
+         <td>
+          str
+         </td>
+         <td>
+          Robots meta tag
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           canonical
+          </code>
+         </td>
+         <td>
+          str
+         </td>
+         <td>
+          Canonical URL link
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           favicon
+          </code>
+         </td>
+         <td>
+          str
+         </td>
+         <td>
+          Favicon URL link
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           og_title
+          </code>
+         </td>
+         <td>
+          str
+         </td>
+         <td>
+          Open Graph title
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           og_description
+          </code>
+         </td>
+         <td>
+          str
+         </td>
+         <td>
+          Open Graph description
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           og_image
+          </code>
+         </td>
+         <td>
+          str
+         </td>
+         <td>
+          Open Graph image URL
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           og_type
+          </code>
+         </td>
+         <td>
+          str
+         </td>
+         <td>
+          Open Graph type (default: "website")
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           twitter_card
+          </code>
+         </td>
+         <td>
+          str
+         </td>
+         <td>
+          Twitter card type (default: "summary")
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           twitter_site
+          </code>
+         </td>
+         <td>
+          str
+         </td>
+         <td>
+          Twitter site handle
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           twitter_creator
+          </code>
+         </td>
+         <td>
+          str
+         </td>
+         <td>
+          Twitter creator handle
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           meta
+          </code>
+         </td>
+         <td>
+          dict
+         </td>
+         <td>
+          Custom meta tags
+          <code>
+           {name: content}
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           links
+          </code>
+         </td>
+         <td>
+          list
+         </td>
+         <td>
+          Custom link tags
+          <code>
+           [{rel: ..., href: ...}]
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           structured_data
+          </code>
+         </td>
+         <td>
+          dict
+         </td>
+         <td>
+          JSON-LD structured data
+         </td>
+        </tr>
+       </tbody>
+      </table>
       <h3 id="text">
        Text
       </h3>
@@ -14490,6 +14793,66 @@ def hello():
         : When possible, navigation state is preserved across reloads.
        </li>
       </ul>
+      <h2 id="seo-metadata">
+       SEO &amp; Metadata
+      </h2>
+      <p>
+       Dars handles SEO automatically in Single Page Applications. The router intelligently updates the document metadata when navigating between routes.
+      </p>
+      <h3 id="using-the-head-component">
+       Using the Head Component
+      </h3>
+      <p>
+       To control page metadata for each route, use the
+       <code>
+        Head
+       </code>
+       component:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.components.advanced.head</span><span class="w"> </span><span class="kn">import</span> <span class="n">Head</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">"/about"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">about</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span>
+        <span class="n">Head</span><span class="p">(</span>
+            <span class="n">title</span><span class="o">=</span><span class="s2">"About Us - My App"</span><span class="p">,</span>
+            <span class="n">description</span><span class="o">=</span><span class="s2">"Learn more about our company."</span><span class="p">,</span>
+            <span class="n">og_image</span><span class="o">=</span><span class="s2">"/images/about-og.jpg"</span>
+        <span class="p">),</span>
+        <span class="n">Container</span><span class="p">(</span><span class="n">Text</span><span class="p">(</span><span class="s2">"About Content"</span><span class="p">))</span>
+    <span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       The router dynamically updates:
+-
+       <code>
+        &lt;title&gt;
+       </code>
+       - Meta tags (
+       <code>
+        description
+       </code>
+       ,
+       <code>
+        keywords
+       </code>
+       , etc.)
+- Open Graph tags (
+       <code>
+        og:title
+       </code>
+       ,
+       <code>
+        og:type
+       </code>
+       , etc.)
+- Twitter Cards
+      </p>
+      <p>
+       This ensures that even client-side routes display the correct information in the browser tab and when shared on social media.
+      </p>
       <hr/>
       <h2 id="server-side-rendering-ssr">
        Server-Side Rendering (SSR)
@@ -14711,6 +15074,30 @@ Client Side:
 - Race conditions
 - Lost event handlers
       </p>
+      <h3 id="seo-metadata">
+       SEO &amp; Metadata
+      </h3>
+      <p>
+       SSR routes are fully SEO-optimized. Using the
+       <code>
+        Head
+       </code>
+       component allows you to inject metadata directly into the server-rendered HTML.
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="nd">@route</span><span class="p">(</span><span class="s2">"/blog/post-1"</span><span class="p">,</span> <span class="n">route_type</span><span class="o">=</span><span class="n">RouteType</span><span class="o">.</span><span class="n">SSR</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">blog_post</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span>
+        <span class="n">Head</span><span class="p">(</span>
+            <span class="n">title</span><span class="o">=</span><span class="s2">"My Amazing Blog Post"</span><span class="p">,</span>
+            <span class="n">description</span><span class="o">=</span><span class="s2">"Read this incredible story..."</span><span class="p">,</span>
+            <span class="n">keywords</span><span class="o">=</span><span class="s2">"blog, story, amazing"</span><span class="p">,</span>
+            <span class="n">og_type</span><span class="o">=</span><span class="s2">"article"</span>
+        <span class="p">),</span>
+        <span class="c1"># ... content ...</span>
+    <span class="p">)</span>
+</code></pre>
+      </div>
       <hr/>
       <h2 id="quick-start">
        Quick Start
@@ -23363,7 +23750,7 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
     </div>
    </div>
   </div>
-  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1765077123" type="module">
+  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1765129939" type="module">
   </script>
   <script defer="" src="app_docs.js">
   </script>

@@ -192,6 +192,7 @@ def useVRef(
         VRefBinding object for use in component props or FunctionComponent templates
         
     Examples:
+        ```python
         # Single V() expression
         Text(text=useVRef(V("#price").float() * 1.21))
         
@@ -216,5 +217,6 @@ def useVRef(
             (V("#age").int() >= 18).then("Adult", "Minor"),
             dependencies=[V("#age")]
         ))
+        ```
     """
     return VRefBinding(vexpr, dependencies, callbacks)
