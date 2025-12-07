@@ -1,3 +1,46 @@
+# Release Notes v1.7.6
+
+> **Security Hardening for Prism.js Integration**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Safer CDN Loading for Syntax Highlighting
+
+This release focuses on tightening the security of the **Prism.js** integration used for code highlighting in exported documentation and apps.
+
+Previously, the Prism script was injected without any additional security attributes:
+
+```html
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+```
+
+Starting from **v1.7.6**, Dars now injects the script tag with **Subresource Integrity (SRI)**, `crossorigin`, and `referrerpolicy` attributes:
+
+```html
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"
+  integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg=="
+  crossorigin="anonymous"
+  referrerpolicy="no-referrer">
+</script>
+```
+
+#### Benefits
+
+- **Subresource Integrity (SRI)** ensures that the script loaded from the CDN has not been tampered with.
+- `crossorigin="anonymous"` is required for SRI on cross-origin resources and avoids leaking credentials.
+- `referrerpolicy="no-referrer"` prevents the browser from sending the full URL of your site to the CDN as the HTTP referrer.
+
+This change makes the default code-highlighting setup more secure by default, while remaining fully backwards compatible for existing projects.
+
+---
+
 # Release Notes v1.7.5
 
 > **CLI Doctor, Error Handling & JS Minification Improvements**
