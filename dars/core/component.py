@@ -520,8 +520,14 @@ def FunctionComponent(func: Callable) -> type:
             template_props = {}
             
             # Props that belong to the Component base class
-            component_keys = ['id', 'class_name', 'style', 'hover_style', 
-                             'active_style', 'key', 'children']
+            # Note: lifecycle hooks (onMount/onUpdate/onUnmount) are treated as
+            # component-level props so they are available in component.props
+            # and can be serialized into VDOM lifecycle metadata.
+            component_keys = [
+                'id', 'class_name', 'style', 'hover_style',
+                'active_style', 'key', 'children',
+                'onMount', 'onUpdate', 'onUnmount',
+            ]
             
             for key, value in kwargs.items():
                 if key in component_keys or key.startswith('on_'):

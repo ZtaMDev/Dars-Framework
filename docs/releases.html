@@ -246,19 +246,19 @@
      <script>
       window.Prism=window.Prism||{};Prism.plugins=Prism.plugins||{};Prism.plugins.autoloader=Prism.plugins.autoloader||{};Prism.plugins.autoloader.languages_path="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/";
      </script>
-     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js">
+     <script crossorigin="anonymous" referrerpolicy="no-referrer" src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js">
      </script>
      <script>
       (function(){window.DarsMarkdown={addCopyButtons:function(root){(root||document).querySelectorAll("pre code").forEach(function(code){var pre=code.parentElement;if(!pre||pre.querySelector(".dars-code-copy"))return;var btn=document.createElement("button");btn.className="dars-code-copy";btn.type="button";btn.textContent="Copy";btn.addEventListener("click",async function(e){e.stopPropagation();try{await navigator.clipboard.writeText(code.innerText);btn.textContent="Copied";btn.classList.add("copied");setTimeout(function(){btn.textContent="Copy";btn.classList.remove("copied")},1200)}catch(err){btn.textContent="Error";setTimeout(function(){btn.textContent="Copy"},1200)}});pre.appendChild(btn)})},guessLang:function(text){var t=text.trim();if(/^{[\s\S]*}$/.test(t)||/^\[/.test(t))return "json";if(/^(pip |python |python3 |dars |#|\$ )/m.test(t))return "bash";if(/\b(def |class |import |from |print\(|self\b)/.test(t))return "python";return null},stripPygments:function(code){if(code&&code.innerHTML&&code.innerHTML.indexOf("<span")!==-1){code.textContent=code.innerText}},highlight:function(root){var self=this;(root||document).querySelectorAll("pre code").forEach(function(code){self.stripPygments(code);if(!code.className||code.className.indexOf("language-")===-1){var g=self.guessLang(code.innerText);code.classList.add("language-"+(g||"none"))}if(window.Prism&&Prism.highlightElement){Prism.highlightElement(code)}});self.addCopyButtons(root)}};document.addEventListener("DOMContentLoaded",function(){try{window.DarsMarkdown.highlight()}catch(e){}});document.addEventListener("dars:content-loaded",function(e){if(e.detail&&e.detail.element){try{window.DarsMarkdown.highlight(e.detail.element)}catch(err){}}})})();
      </script>
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_158">
-      <h1 id="release-notes-v176">
-       Release Notes v1.7.6
+      <h1 id="release-notes-v177">
+       Release Notes v1.7.7
       </h1>
       <blockquote>
        <p>
         <strong>
-         Security Hardening for Prism.js Integration
+         Component Lifecycle Hooks, Dynamic VRefs &amp; Safer Runtime Updates
         </strong>
        </p>
       </blockquote>
@@ -270,6 +270,636 @@
 </code></pre>
       </div>
       <h2 id="whats-new">
+       What's New
+      </h2>
+      <h3 id="component-lifecycle-hooks-onmount-onupdate-onunmount">
+       Component Lifecycle Hooks (onMount, onUpdate, onUnmount)
+      </h3>
+      <p>
+       This release introduces
+       <strong>
+        component-level lifecycle hooks
+       </strong>
+       , available both for regular components and
+       <code>
+        @FunctionComponent
+       </code>
+       :
+      </p>
+      <ul>
+       <li>
+        New props on components (and FunctionComponents):
+        <ul>
+         <li>
+          <code>
+           onMount
+          </code>
+         </li>
+         <li>
+          <code>
+           onUpdate
+          </code>
+         </li>
+         <li>
+          <code>
+           onUnmount
+          </code>
+         </li>
+        </ul>
+       </li>
+       <li>
+        Hooks accept
+        <code>
+         dScript
+        </code>
+        &amp; functions or inline JS strings.
+       </li>
+       <li>
+        The VDOM now includes a
+        <code>
+         lifecycle
+        </code>
+        block per node with:
+        <ul>
+         <li>
+          Hook type (
+          <code>
+           inline
+          </code>
+          /
+          <code>
+           dscript
+          </code>
+          ).
+         </li>
+         <li>
+          JS code ready to be executed in the runtime.
+         </li>
+        </ul>
+       </li>
+      </ul>
+      <h3 id="dynamic-createcompdeletecomp-with-lifecycle-and-events">
+       Dynamic createComp/deleteComp with Lifecycle and Events
+      </h3>
+      <p>
+       The dynamic backend helpers are now fully compatible with lifecycle, events and VRefs:
+      </p>
+      <ul>
+       <li>
+        <p>
+         <code>
+          createComp(target, root, position="append")
+         </code>
+         :
+        </p>
+        <ul>
+         <li>
+          Uses
+          <code>
+           VDomBuilder
+          </code>
+          to serialize the full component into VDOM.
+         </li>
+         <li>
+          Injects the
+          <code>
+           _events
+          </code>
+          map produced by the exporter for that subtree.
+         </li>
+         <li>
+          In the runtime,
+          <code>
+           runtime.createComponent(rootId, vdom, pos)
+          </code>
+          :
+          <ul>
+           <li>
+            Builds actual DOM from the VDOM.
+           </li>
+           <li>
+            Rehydrates events for the whole subtree (
+            <code>
+             _attachEventsForVNode
+            </code>
+            ).
+           </li>
+           <li>
+            Registers lifecycle in
+            <code>
+             __lifecycle
+            </code>
+            and fires
+            <code>
+             onMount
+            </code>
+            for all nodes with hooks.
+           </li>
+           <li>
+            Calls
+            <code>
+             DarsHydrate(el)
+            </code>
+            so the rest of bindings (V(), VRefs, useDynamic, etc.) attach to the dynamic subtree as well.
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <p>
+         <code>
+          deleteComp(id)
+         </code>
+         :
+        </p>
+        <ul>
+         <li>
+          Calls
+          <code>
+           runtime.deleteComponent(id)
+          </code>
+          .
+         </li>
+         <li>
+          The runtime runs
+          <code>
+           onUnmount
+          </code>
+          for that id before removing the node and its VDOM entry.
+         </li>
+        </ul>
+       </li>
+      </ul>
+      <p>
+       Result: components created and destroyed with
+       <code>
+        createComp
+       </code>
+       /
+       <code>
+        deleteComp
+       </code>
+       have the
+       <strong>
+        same lifecycle behavior
+       </strong>
+       and event rehydration as components rendered in the initial VDOM.
+      </p>
+      <h3 id="onupdate-wired-into-dynamic-changes-and-vrefs">
+       onUpdate wired into dynamic changes and VRefs
+      </h3>
+      <p>
+       The
+       <code>
+        onUpdate
+       </code>
+       hook now fires in two key scenarios:
+      </p>
+      <ol>
+       <li>
+        <p>
+         <strong>
+          Dynamic state changes
+         </strong>
+         (runtime
+         <code>
+          change()
+         </code>
+         ):
+        </p>
+        <ul>
+         <li>
+          When
+          <code>
+           Dars.change({ id, dynamic: true, ... })
+          </code>
+          is called (e.g. via
+          <code>
+           updateComp()
+          </code>
+          ), the runtime:
+          <ul>
+           <li>
+            Applies changes to
+            <code>
+             text
+            </code>
+            ,
+            <code>
+             html
+            </code>
+            ,
+            <code>
+             style
+            </code>
+            ,
+            <code>
+             attrs
+            </code>
+            ,
+            <code>
+             classes
+            </code>
+            , etc.
+           </li>
+           <li>
+            Notifies watchers (
+            <code>
+             watch()
+            </code>
+            / internals).
+           </li>
+           <li>
+            Calls
+            <code>
+             _runLifecycle(id, 'onUpdate')
+            </code>
+            whether the element exists or the change is purely logical.
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+       <li>
+        <p>
+         <strong>
+          VRef changes
+         </strong>
+         via
+         <code>
+          updateVRef()
+         </code>
+         :
+        </p>
+        <ul>
+         <li>
+          New runtime helper:
+          <code>
+           Dars.updateVRef(selector)
+          </code>
+          .
+         </li>
+         <li>
+          <p>
+           The JS generated by
+           <code>
+            updateVRef(...)
+           </code>
+           now, after updating the DOM and
+           <code>
+            window.__DARS_VREF_VALUES__
+           </code>
+           , does:
+          </p>
+          <div class="codehilite">
+           <pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">Dars</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">window</span><span class="p">.</span><span class="nx">Dars</span><span class="p">.</span><span class="nx">updateVRef</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nb">window</span><span class="p">.</span><span class="nx">Dars</span><span class="p">.</span><span class="nx">updateVRef</span><span class="p">(</span><span class="nx">selector</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre>
+          </div>
+         </li>
+         <li>
+          <p>
+           <code>
+            Dars.updateVRef(selector)
+           </code>
+           :
+          </p>
+          <ul>
+           <li>
+            Finds all elements matching the selector.
+           </li>
+           <li>
+            For each, walks up the DOM tree until it finds the first ancestor with lifecycle registered.
+           </li>
+           <li>
+            Runs
+            <code>
+             onUpdate
+            </code>
+            for that id (once per id), allowing parent components to react to shared VRef changes.
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+      </ol>
+      <h3 id="improved-dynamic-vrefs-setvref-updatevref">
+       Improved dynamic VRefs (setVRef + updateVRef)
+      </h3>
+      <p>
+       Several adjustments ensure
+       <code>
+        setVRef()
+       </code>
+       works equally well in the initial render and in components created dynamically via
+       <code>
+        createComp
+       </code>
+       :
+      </p>
+      <ul>
+       <li>
+        <code>
+         setVRef(value, selector)
+        </code>
+        now creates a
+        <code>
+         VRefValue
+        </code>
+        whose metadata is preserved in the VDOM:
+        <ul>
+         <li>
+          <code>
+           Text(text=setVRef(0, ".dyn_count"))
+          </code>
+          serializes as:
+          <ul>
+           <li>
+            <code>
+             text: "0"
+            </code>
+            (initial value).
+           </li>
+           <li>
+            <code>
+             class: "dyn_count"
+            </code>
+            auto-added when the selector is of type
+            <code>
+             .class
+            </code>
+            .
+           </li>
+          </ul>
+         </li>
+         <li>
+          The runtime registers
+          <code>
+           window.__DARS_VREF_VALUES__['.dyn_count'] = 0
+          </code>
+          during hydration.
+         </li>
+        </ul>
+       </li>
+       <li>
+        This works the same when that
+        <code>
+         Text
+        </code>
+        is part of a component created with
+        <code>
+         createComp
+        </code>
+        : the VDOM includes both the initial value and the class, and
+        <code>
+         updateVRef(".dyn_count", ...)
+        </code>
+        can find and update all instances correctly.
+       </li>
+      </ul>
+      <h3 id="new-equal-helper-for-expressions-with-v">
+       New equal() helper for expressions with V()
+      </h3>
+      <p>
+       To make it easier to compose numeric and literal expressions with
+       <code>
+        V()
+       </code>
+       , this release adds the
+       <code>
+        equal()
+       </code>
+       helper in
+       <code>
+        dars.hooks.value_helpers
+       </code>
+       :
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.hooks.value_helpers</span><span class="w"> </span><span class="kn">import</span> <span class="n">V</span><span class="p">,</span> <span class="n">equal</span>
+
+<span class="c1"># Sumar 1 a un VRef</span>
+<span class="n">Button</span><span class="p">(</span>
+    <span class="s2">"Increment"</span><span class="p">,</span>
+    <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">".dyn_count"</span><span class="p">,</span> <span class="n">V</span><span class="p">(</span><span class="s2">".dyn_count"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="c1"># Resetear a 0 usando equal()</span>
+<span class="n">Button</span><span class="p">(</span>
+    <span class="s2">"Reset"</span><span class="p">,</span>
+    <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">".dyn_count"</span><span class="p">,</span> <span class="n">equal</span><span class="p">(</span><span class="mi">0</span><span class="p">)),</span>
+<span class="p">)</span>
+
+<span class="c1"># Combinar con otra expresión basada en V()</span>
+<span class="n">expr</span> <span class="o">=</span> <span class="n">V</span><span class="p">(</span><span class="s2">".a"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">+</span> <span class="n">equal</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">".b"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">())</span>
+<span class="n">updateVRef</span><span class="p">(</span><span class="s2">".result"</span><span class="p">,</span> <span class="n">expr</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <ul>
+       <li>
+        <code>
+         equal(value)
+        </code>
+        normalizes any value (literal,
+        <code>
+         V()
+        </code>
+        ,
+        <code>
+         MathExpression
+        </code>
+        , etc.) into a
+        <code>
+         MathExpression
+        </code>
+        , so it integrates into the operation tree with the same async semantics and
+        <code>
+         NaN
+        </code>
+        validation as the rest of the expression system.
+       </li>
+      </ul>
+      <blockquote>
+       <p>
+        Note: to reset a VRef it's better to use
+        <code>
+         equal(0)
+        </code>
+        directly as the target value instead of adding it to the current value.
+       </p>
+      </blockquote>
+      <h3 id="fixes-in-updatecomp-and-js-generation">
+       Fixes in updateComp() and JS generation
+      </h3>
+      <p>
+       JS generation for
+       <code>
+        updateComp()
+       </code>
+       (dynamic backend) has been hardened so it works correctly with complex expressions containing
+       <code>
+        //
+       </code>
+       comments and async IIFEs such as those generated by
+       <code>
+        updateVRef(...)
+       </code>
+       :
+      </p>
+      <ul>
+       <li>
+        The internal code in
+        <code>
+         updateComp()
+        </code>
+        now:
+        <ul>
+         <li>
+          No longer collapses whitespace/newlines in the JS payload, avoiding cases where
+          <code>
+           //
+          </code>
+          comments consume the rest of the line.
+         </li>
+         <li>
+          Safely strips the trailing
+          <code>
+           ;
+          </code>
+          from
+          <code>
+           dScript.code
+          </code>
+          before inlining it into the
+          <code>
+           change({ ... })
+          </code>
+          payload.
+         </li>
+        </ul>
+       </li>
+       <li>
+        This allows
+        <code>
+         updateComp()
+        </code>
+        to be combined with complex scripts (including those generated by
+        <code>
+         V()
+        </code>
+        /
+        <code>
+         updateVRef
+        </code>
+        ) without causing
+        <code>
+         SyntaxError
+        </code>
+        in
+        <code>
+         app.js
+        </code>
+        .
+       </li>
+      </ul>
+      <h3 id="documentation-updates">
+       Documentation updates
+      </h3>
+      <p>
+       The hooks and components documentation has been updated to reflect these changes:
+      </p>
+      <ul>
+       <li>
+        <code>
+         LandingPage/documentation/markdown/hooks.md
+        </code>
+        :
+        <ul>
+         <li>
+          Extended
+          <strong>
+           Pythonic Value Helpers
+          </strong>
+          section with the new
+          <code>
+           equal()
+          </code>
+          helper and examples together with
+          <code>
+           V()
+          </code>
+          and
+          <code>
+           updateVRef
+          </code>
+          .
+         </li>
+        </ul>
+       </li>
+       <li>
+        <code>
+         LandingPage/documentation/markdown/components.md
+        </code>
+        :
+        <ul>
+         <li>
+          The
+          <strong>
+           Runtime Component Manipulation (createComp / deleteComp)
+          </strong>
+          and new
+          <strong>
+           Component Lifecycle Hooks
+          </strong>
+          sections explain that dynamically created subtrees:
+          <ul>
+           <li>
+            Rehydrate events.
+           </li>
+           <li>
+            Register and execute lifecycle hooks (
+            <code>
+             onMount
+            </code>
+            /
+            <code>
+             onUpdate
+            </code>
+            /
+            <code>
+             onUnmount
+            </code>
+            ).
+           </li>
+           <li>
+            Are compatible with VRefs and the current VDOM system.
+           </li>
+          </ul>
+         </li>
+        </ul>
+       </li>
+      </ul>
+      <hr/>
+      <h1 id="release-notes-v176">
+       Release Notes v1.7.6
+      </h1>
+      <blockquote>
+       <p>
+        <strong>
+         Security Hardening for Prism.js Integration
+        </strong>
+       </p>
+      </blockquote>
+      <h2 id="installation-2">
+       Installation
+      </h2>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
+</code></pre>
+      </div>
+      <h2 id="whats-new-2">
        What's New
       </h2>
       <h3 id="safer-cdn-loading-for-syntax-highlighting">
@@ -354,14 +984,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-2">
+      <h2 id="installation-3">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-2">
+      <h2 id="whats-new-3">
        What's New
       </h2>
       <h3 id="faster-more-helpful-dars-doctor">
@@ -751,14 +1381,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-3">
+      <h2 id="installation-4">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-3">
+      <h2 id="whats-new-4">
        What's New
       </h2>
       <h3 id="real-ssr-hydration-spa-integration">
@@ -980,14 +1610,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-4">
+      <h2 id="installation-5">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-4">
+      <h2 id="whats-new-5">
        What's New
       </h2>
       <h3 id="complete-head-component-support">
@@ -1068,14 +1698,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-5">
+      <h2 id="installation-6">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-5">
+      <h2 id="whats-new-6">
        What's New
       </h2>
       <h3 id="instant-server-shutdown">
@@ -1417,14 +2047,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-6">
+      <h2 id="installation-7">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-6">
+      <h2 id="whats-new-7">
        What's New
       </h2>
       <h3 id="instant-server-startup">
@@ -1729,14 +2359,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-7">
+      <h2 id="installation-8">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-7">
+      <h2 id="whats-new-8">
        What's New
       </h2>
       <h3 id="new-hook-setvref">
@@ -1893,14 +2523,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-8">
+      <h2 id="installation-9">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-8">
+      <h2 id="whats-new-9">
        What's New
       </h2>
       <h3 id="dars-server-side-rendering-ssr">
@@ -2059,14 +2689,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-9">
+      <h2 id="installation-10">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-9">
+      <h2 id="whats-new-10">
        What's New
       </h2>
       <h3 id="updatevref-pythonic-component-level-state">
@@ -2681,14 +3311,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-10">
+      <h2 id="installation-11">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-10">
+      <h2 id="whats-new-11">
        What's New
       </h2>
       <h3 id="boolean-comparison-operators-for-v">
@@ -3413,14 +4043,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-11">
+      <h2 id="installation-12">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-11">
+      <h2 id="whats-new-12">
        What's New
       </h2>
       <h3 id="custom-utility-styles">
@@ -3552,14 +4182,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-12">
+      <h2 id="installation-13">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-12">
+      <h2 id="whats-new-13">
        What's New
       </h2>
       <h3 id="massive-styling-system-expansion">
@@ -3751,7 +4381,7 @@
         : Fixed an issue where multi-line CSS strings in utilities were not correctly parsed into valid CSS rules.
        </li>
       </ul>
-      <h3 id="documentation-updates">
+      <h3 id="documentation-updates-2">
        Documentation Updates
       </h3>
       <ul>
@@ -3797,14 +4427,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-13">
+      <h2 id="installation-14">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-13">
+      <h2 id="whats-new-14">
        What's New
       </h2>
       <h3 id="pythonic-expression-system-with-v">
@@ -4286,14 +4916,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-14">
+      <h2 id="installation-15">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-14">
+      <h2 id="whats-new-15">
        What's New
       </h2>
       <h3 id="tailwind-like-utility-class-system">
@@ -4535,14 +5165,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-15">
+      <h2 id="installation-16">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-15">
+      <h2 id="whats-new-16">
        What's New
       </h2>
       <h3 id="enhanced-usevalue-hook-simplified-usage">
@@ -4624,14 +5254,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-16">
+      <h2 id="installation-17">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-16">
+      <h2 id="whats-new-17">
        What's New
       </h2>
       <h3 id="enhanced-usewatch-hook-array-syntax-multiple-callbacks">
@@ -4818,7 +5448,7 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-17">
+      <h2 id="installation-18">
        Installation
       </h2>
       <div class="codehilite">
@@ -5210,14 +5840,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-18">
+      <h2 id="installation-19">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-17">
+      <h2 id="whats-new-18">
        What's New
       </h2>
       <h3 id="1-unified-keyboard-events-on_key_press">
@@ -5414,14 +6044,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-19">
+      <h2 id="installation-20">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-18">
+      <h2 id="whats-new-19">
        What's New
       </h2>
       <h3 id="1-v-helper-state-path-support">
@@ -5981,7 +6611,7 @@
        ) is unchanged and still works without transformations.
       </p>
       <hr/>
-      <h2 id="documentation-updates-2">
+      <h2 id="documentation-updates-3">
        Documentation Updates
       </h2>
       <ul>
@@ -6033,14 +6663,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-20">
+      <h2 id="installation-21">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-19">
+      <h2 id="whats-new-20">
        What's New
       </h2>
       <h3 id="1-usevalue-hook">
@@ -6147,14 +6777,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-21">
+      <h2 id="installation-22">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-20">
+      <h2 id="whats-new-21">
        What's New
       </h2>
       <h3 id="1-expanded-usedynamic-support-for-built-in-components">
@@ -6500,14 +7130,14 @@
         hook.
        </p>
       </blockquote>
-      <h2 id="installation-22">
+      <h2 id="installation-23">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-21">
+      <h2 id="whats-new-22">
        What's New
       </h2>
       <h3 id="1-usedynamic-for-built-in-components">
@@ -6610,14 +7240,14 @@
         relaunch with correct license.
        </p>
       </blockquote>
-      <h2 id="installation-23">
+      <h2 id="installation-24">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-22">
+      <h2 id="whats-new-23">
        What's New
       </h2>
       <h3 id="hooks-system-usedynamic">
@@ -7041,14 +7671,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-24">
+      <h2 id="installation-25">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-23">
+      <h2 id="whats-new-24">
        What's New
       </h2>
       <h3 id="hooks-system-usedynamic-2">
@@ -7472,14 +8102,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-25">
+      <h2 id="installation-26">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-24">
+      <h2 id="whats-new-25">
        What's New
       </h2>
       <h3 id="function-components-system">
@@ -7680,14 +8310,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-26">
+      <h2 id="installation-27">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-25">
+      <h2 id="whats-new-26">
        What's New
       </h2>
       <h3 id="backend-http-utilities-system">
@@ -8074,14 +8704,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-27">
+      <h2 id="installation-28">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-26">
+      <h2 id="whats-new-27">
        What's New
       </h2>
       <h3 id="animation-system-stability">
@@ -8192,14 +8822,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-28">
+      <h2 id="installation-29">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-27">
+      <h2 id="whats-new-28">
        What's New
       </h2>
       <h3 id="state-v2-event-handler-support">
@@ -8338,7 +8968,7 @@
         , and more.
        </p>
       </blockquote>
-      <h2 id="installation-29">
+      <h2 id="installation-30">
        Installation
       </h2>
       <div class="codehilite">
@@ -8793,7 +9423,7 @@
         Introducing State V2 and comprehensive animation system. This is the biggest update to Dars state management, bringing a pure Pythonic API and 15+ built-in animations.
        </p>
       </blockquote>
-      <h2 id="installation-30">
+      <h2 id="installation-31">
        Installation
       </h2>
       <div class="codehilite">
@@ -8807,7 +9437,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.7
 </code></pre>
       </div>
-      <h2 id="whats-new-28">
+      <h2 id="whats-new-29">
        What's New
       </h2>
       <h3 id="state-v2-pure-pythonic-state-management">
@@ -9086,7 +9716,7 @@
 - Migration path provided in updated documentation
 - New projects should use State V2 exclusively
       </p>
-      <h2 id="documentation-updates-3">
+      <h2 id="documentation-updates-4">
        Documentation Updates
       </h2>
       <p>
@@ -9379,7 +10009,7 @@
         : Introduces Single Page Application (SPA) support and a powerful client-side routing system.
        </p>
       </blockquote>
-      <h2 id="installation-31">
+      <h2 id="installation-32">
        Installation
       </h2>
       <div class="codehilite">
@@ -9393,7 +10023,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.5
 </code></pre>
       </div>
-      <h2 id="whats-new-29">
+      <h2 id="whats-new-30">
        What's New
       </h2>
       <h3 id="single-page-application-spa-support">
@@ -9496,7 +10126,7 @@
         Critical bug fix release. Removes non-functional features, fixes style merge, and improves state restoration.
        </p>
       </blockquote>
-      <h2 id="installation-32">
+      <h2 id="installation-33">
        Installation
       </h2>
       <div class="codehilite">
@@ -9562,7 +10192,7 @@
         State management enhancements with compile-time validation, component self-navigation, and critical style merge fix. Improves developer experience and fixes property replacement bug.
        </p>
       </blockquote>
-      <h2 id="installation-33">
+      <h2 id="installation-34">
        Installation
       </h2>
       <div class="codehilite">
@@ -9576,7 +10206,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.3
 </code></pre>
       </div>
-      <h2 id="whats-new-30">
+      <h2 id="whats-new-31">
        What's New
       </h2>
       <ul>
@@ -9626,7 +10256,7 @@
         for enhanced client-side interactions.
        </p>
       </blockquote>
-      <h2 id="installation-34">
+      <h2 id="installation-35">
        Installation
       </h2>
       <div class="codehilite">
@@ -9640,7 +10270,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.2
 </code></pre>
       </div>
-      <h2 id="whats-new-31">
+      <h2 id="whats-new-32">
        What's New
       </h2>
       <h3 id="utility-functions-utils_ds">
@@ -9830,7 +10460,7 @@
         SEO and Apple device optimizations. Enhanced metadata generation with automatic MIME type detection for favicons and comprehensive iOS/Safari support.
        </p>
       </blockquote>
-      <h2 id="installation-35">
+      <h2 id="installation-36">
        Installation
       </h2>
       <div class="codehilite">
@@ -9844,7 +10474,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.1
 </code></pre>
       </div>
-      <h2 id="whats-new-32">
+      <h2 id="whats-new-33">
        What's New
       </h2>
       <h3 id="automatic-favicon-mime-type-detection">
@@ -10159,7 +10789,7 @@
         Simple Template update.
        </p>
       </blockquote>
-      <h2 id="installation-36">
+      <h2 id="installation-37">
        Installation
       </h2>
       <div class="codehilite">
@@ -10187,7 +10817,7 @@
         Desktop File System API, Pythonic Arg helper, keyboard event filtering, and comprehensive template synchronization. Major enhancements to desktop capabilities with improved developer experience.
        </p>
       </blockquote>
-      <h2 id="installation-37">
+      <h2 id="installation-38">
        Installation
       </h2>
       <div class="codehilite">
@@ -10201,7 +10831,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.9
 </code></pre>
       </div>
-      <h2 id="whats-new-33">
+      <h2 id="whats-new-34">
        What's New
       </h2>
       <h3 id="desktop-file-system-api-list_directory">
@@ -10652,7 +11282,7 @@
         for async chaining.
        </p>
       </blockquote>
-      <h2 id="installation-38">
+      <h2 id="installation-39">
        Installation
       </h2>
       <div class="codehilite">
@@ -10666,7 +11296,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.8
 </code></pre>
       </div>
-      <h2 id="whats-new-34">
+      <h2 id="whats-new-35">
        What's New
       </h2>
       <h3 id="dynamic-state-updates-with-this">
@@ -10980,7 +11610,7 @@
         : Reliable Electron termination before restart
        </li>
       </ul>
-      <h2 id="documentation-updates-4">
+      <h2 id="documentation-updates-5">
        Documentation Updates
       </h2>
       <p>
@@ -11114,7 +11744,7 @@
         for dynamic DOM operations with safe event hydration.
        </p>
       </blockquote>
-      <h2 id="installation-39">
+      <h2 id="installation-40">
        Installation
       </h2>
       <div class="codehilite">
@@ -11128,7 +11758,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.6
 </code></pre>
       </div>
-      <h2 id="whats-new-35">
+      <h2 id="whats-new-36">
        What's New
       </h2>
       <h3 id="compile-time-component-manipulation">
@@ -11291,7 +11921,7 @@
         Enhanced styling and development experience update featuring active styles, improved preview system, and advanced file monitoring. Delivers better visual feedback and faster development workflow.
        </p>
       </blockquote>
-      <h2 id="installation-40">
+      <h2 id="installation-41">
        Installation
       </h2>
       <div class="codehilite">
@@ -11305,7 +11935,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.5
 </code></pre>
       </div>
-      <h2 id="whats-new-36">
+      <h2 id="whats-new-37">
        What's New
       </h2>
       <h3 id="active-styles-support">
@@ -11448,7 +12078,7 @@
         Enhanced interactivity update featuring hover styles, multi-handler events, and runtime versioning. Improves component styling and event handling flexibility.
        </p>
       </blockquote>
-      <h2 id="installation-41">
+      <h2 id="installation-42">
        Installation
       </h2>
       <div class="codehilite">
@@ -11462,7 +12092,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.4
 </code></pre>
       </div>
-      <h2 id="whats-new-37">
+      <h2 id="whats-new-38">
        What's New
       </h2>
       <h3 id="hover-styles-support">
@@ -11641,7 +12271,7 @@
         Minor update featuring new semantic Section component and enhanced state serialization. Continues JavaScript migration improvements from v1.3.2.
        </p>
       </blockquote>
-      <h2 id="installation-42">
+      <h2 id="installation-43">
        Installation
       </h2>
       <div class="codehilite">
@@ -11655,7 +12285,7 @@
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.3
 </code></pre>
       </div>
-      <h2 id="whats-new-38">
+      <h2 id="whats-new-39">
        What's New
       </h2>
       <h3 id="section-component">
@@ -11712,7 +12342,7 @@
 - Better performance: Streamlined state management
 - Enhanced minification: Better compatibility with Vite optimization
       </p>
-      <h3 id="documentation-updates-5">
+      <h3 id="documentation-updates-6">
        Documentation Updates
       </h3>
       <ul>
@@ -11805,7 +12435,7 @@
         Major minification improvements with combined JS files and optimized event handling. Electron desktop exporter remains in beta.
        </p>
       </blockquote>
-      <h2 id="installation-43">
+      <h2 id="installation-44">
        Installation
       </h2>
       <div class="codehilite">
@@ -12101,7 +12731,7 @@
         Native desktop functions and DX improved with dev mode and file system integration.
        </p>
       </blockquote>
-      <h2 id="installation-44">
+      <h2 id="installation-45">
        Installation
       </h2>
       <div class="codehilite">
@@ -12186,7 +12816,7 @@
         Native desktop export (BETA), improved CLI and doctor integration, and metadata fixes for packaging. This is a BETA release: usable for testing, not recommended for production.
        </p>
       </blockquote>
-      <h2 id="installation-45">
+      <h2 id="installation-46">
        Installation
       </h2>
       <div class="codehilite">
@@ -12469,7 +13099,7 @@ dars<span class="w"> </span>build
         Optional default minification, precise CLI control, faster builds, and clearer minification status.
        </p>
       </blockquote>
-      <h2 id="installation-46">
+      <h2 id="installation-47">
        Installation
       </h2>
       <div class="codehilite">
@@ -12862,6 +13492,36 @@ dars<span class="w"> </span>build
      <div class="sidebar-category">
       Versions
      </div>
+     <a class="sidebar-link sidebar-level-1" href="#release-notes-v177" style="margin-left: 0px">
+      Release Notes v1.7.7
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#installation" style="margin-left: 20px">
+      Installation
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#whats-new" style="margin-left: 20px">
+      What's New
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#component-lifecycle-hooks-onmount-onupdate-onunmount" style="margin-left: 40px">
+      Component Lifecycle Hooks (onMount, onUpdate, onUnmount)
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#dynamic-createcompdeletecomp-with-lifecycle-and-events" style="margin-left: 40px">
+      Dynamic createComp/deleteComp with Lifecycle and Events
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#onupdate-wired-into-dynamic-changes-and-vrefs" style="margin-left: 40px">
+      onUpdate wired into dynamic changes and VRefs
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#improved-dynamic-vrefs-setvref-updatevref" style="margin-left: 40px">
+      Improved dynamic VRefs (setVRef + updateVRef)
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#new-equal-helper-for-expressions-with-v" style="margin-left: 40px">
+      New equal() helper for expressions with V()
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#fixes-in-updatecomp-and-js-generation" style="margin-left: 40px">
+      Fixes in updateComp() and JS generation
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#documentation-updates" style="margin-left: 40px">
+      Documentation updates
+     </a>
      <a class="sidebar-link sidebar-level-1" href="#release-notes-v176" style="margin-left: 0px">
       Release Notes v1.7.6
      </a>
@@ -14566,7 +15226,7 @@ dars<span class="w"> </span>build
         });
    </script>
   </div>
-  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1765137028" type="module">
+  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1765148320" type="module">
   </script>
   <script defer="" src="app_releases.js">
   </script>

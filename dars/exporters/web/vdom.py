@@ -38,6 +38,7 @@ class VNode:
         children: Optional[List["VNode"]] = None,
         text: Optional[str] = None,
         is_island: bool = False,
+        lifecycle: Optional[Dict[str, Any]] = None,
     ) -> None:
         self.type = type_name
         self.id = id
@@ -50,6 +51,8 @@ class VNode:
         self.children = children or []
         self.text = text
         self.isIsland = is_island
+        # Optional lifecycle hooks metadata (onMount/onUpdate/onUnmount)
+        self.lifecycle = lifecycle or {}
 
     def to_dict(self) -> Dict[str, Any]:
         d: Dict[str, Any] = {
@@ -66,6 +69,8 @@ class VNode:
         if self.text is not None:
             d["text"] = self.text
         d["isIsland"] = bool(self.isIsland)
+        if self.lifecycle:
+            d["lifecycle"] = self.lifecycle
         return d
 
 
@@ -106,7 +111,9 @@ class VDomBuilder:
         EXCLUDE_KEYS = {
             'id', 'class_name', 'style', 'children', 'events', 'scripts', 'key',
             'props',  # avoid nesting component.props inside props
-            'rendered_html','active_style', 'hover_style'  # avoid transporting heavy derived HTML payloads
+            'rendered_html','active_style', 'hover_style',  # avoid transporting heavy derived HTML payloads
+            # Lifecycle props are exported separately in the lifecycle block
+            'onMount', 'onUpdate', 'onUnmount',
         }
 
         # 1) Base props from component.props
@@ -196,73 +203,115 @@ class VDomBuilder:
         return events_payload or None
 
     def _text_value(self, component: Component) -> Optional[str]: # type: ignore
-        # Try extracting a textual value if the component has a primary text prop
+        """Try extracting a textual value if the component has a primary text prop.
+
+        Also handles special marker types like useValue / DynamicBinding / setVRef
+        so that initial values are resolved on the server/export side and
+        serialized into VDOM.text.
+        """
         try:
             for cand in ('text', 'content', 'value', 'label'):
-                if hasattr(component, cand):
-                    v = getattr(component, cand)
-                    
-                    # Handle ValueMarker objects directly
-                    if hasattr(v, 'marker_id') and v.marker_id.startswith('__DARS_VALUE_'):
+                if not hasattr(component, cand):
+                    continue
+
+                v = getattr(component, cand)
+
+                # --- setVRef / VRefValue support ---
+                # Components like Text(text=setVRef(0, '.dyn_count')) should render
+                # the initial value and also carry the selector (.dyn_count) as a
+                # class/id so that V() / updateVRef work even for createComp.
+                try:
+                    from dars.hooks.set_vref import VRefValue  # type: ignore
+                except Exception:  # pragma: no cover - defensive
+                    VRefValue = None  # type: ignore
+
+                if VRefValue is not None and isinstance(v, VRefValue):  # type: ignore
+                    try:
+                        # Ensure selector is reflected in the component's class_name
+                        sel = getattr(v, 'selector', None)
+                        if isinstance(sel, str) and sel:
+                            existing_cls = getattr(component, 'class_name', None) or ''
+                            classes = set(str(existing_cls).split()) if existing_cls else set()
+                            # Only auto-add class for .class selectors; #id selectors
+                            # are typically set explicitly via id/attrs.
+                            if sel.startswith('.'):
+                                cls_name = sel[1:]
+                                if cls_name and cls_name not in classes:
+                                    classes.add(cls_name)
+                                    try:
+                                        component.class_name = ' '.join(sorted(classes))
+                                    except Exception:
+                                        pass
+                        # Use the VRef initial value for text
+                        val = v.get_initial_value()
+                        return str(val)
+                    except Exception:
+                        # Fallback to default handling below
+                        pass
+
+                # Handle ValueMarker objects directly
+                if hasattr(v, 'marker_id') and getattr(v, 'marker_id', '').startswith('__DARS_VALUE_'):
+                    try:
+                        from dars.hooks.use_value import get_value_registry
+                        registry = get_value_registry()
+                        mid = getattr(v, 'marker_id', '')
+                        if mid in registry:
+                            marker = registry[mid]
+                            val = marker.get_initial_value()
+                            return str(val)
+                    except Exception:
+                        pass
+
+                # Handle DynamicBinding objects directly
+                if hasattr(v, 'state_path') and hasattr(v, 'get_initial_value'):
+                    try:
+                        val = v.get_initial_value()
+                        if val is not None:
+                            return str(val)
+                    except Exception:
+                        pass
+
+                if isinstance(v, (str, int, float)):
+                    # Check if it's a DynamicBinding marker
+                    if isinstance(v, str) and v.startswith('__DARS_DYNAMIC_'):
+                        # Resolve the marker to the initial state value
+                        try:
+                            from dars.hooks.use_dynamic import get_bindings_registry
+                            from dars.core.state_v2 import STATE_V2_REGISTRY
+                            import re
+
+                            registry = get_bindings_registry()
+                            marker_pattern = r'__DARS_DYNAMIC_\d+_\d+__'
+                            match = re.match(marker_pattern, v)
+
+                            if match and v in registry:
+                                state_path = registry[v]
+                                parts = state_path.split('.')
+                                if len(parts) >= 2:
+                                    state_id = parts[0]
+                                    prop_name = parts[1]
+                                    # Find state by ID (search in reverse to get the latest instance)
+                                    state = next((s for s in reversed(STATE_V2_REGISTRY) if s.component.id == state_id), None)
+                                    if state:
+                                        prop = getattr(state, prop_name, None)
+                                        if prop:
+                                            return str(prop.value)
+                        except Exception:
+                            pass
+
+                    # Check if it's a ValueMarker (useValue)
+                    if isinstance(v, str) and v.startswith('__DARS_VALUE_'):
                         try:
                             from dars.hooks.use_value import get_value_registry
                             registry = get_value_registry()
-                            if v.marker_id in registry:
-                                val = v.get_initial_value()
-                                return str(val)
-                        except Exception:
-                            pass
-                    
-                    # Handle DynamicBinding objects directly
-                    if hasattr(v, 'state_path') and hasattr(v, 'get_initial_value'):
-                        try:
-                            val = v.get_initial_value()
-                            if val is not None:
+                            if v in registry:
+                                marker = registry[v]
+                                val = marker.get_initial_value()
                                 return str(val)
                         except Exception:
                             pass
 
-                    if isinstance(v, (str, int, float)):
-                        # Check if it's a DynamicBinding marker
-                        if isinstance(v, str) and v.startswith('__DARS_DYNAMIC_'):
-                            # Resolve the marker to the initial state value
-                            try:
-                                from dars.hooks.use_dynamic import get_bindings_registry
-                                from dars.core.state_v2 import STATE_V2_REGISTRY
-                                import re
-                                
-                                registry = get_bindings_registry()
-                                marker_pattern = r'__DARS_DYNAMIC_\d+_\d+__'
-                                match = re.match(marker_pattern, v)
-                                
-                                if match and v in registry:
-                                    state_path = registry[v]
-                                    parts = state_path.split('.')
-                                    if len(parts) >= 2:
-                                        state_id = parts[0]
-                                        prop_name = parts[1]
-                                        # Find state by ID (search in reverse to get the latest instance)
-                                        state = next((s for s in reversed(STATE_V2_REGISTRY) if s.component.id == state_id), None)
-                                        if state:
-                                            prop = getattr(state, prop_name, None)
-                                            if prop:
-                                                return str(prop.value)
-                            except Exception:
-                                pass
-                        
-                        # Check if it's a ValueMarker (useValue)
-                        if isinstance(v, str) and v.startswith('__DARS_VALUE_'):
-                            try:
-                                from dars.hooks.use_value import get_value_registry
-                                registry = get_value_registry()
-                                if v in registry:
-                                    marker = registry[v]
-                                    val = marker.get_initial_value()
-                                    return str(val)
-                            except Exception:
-                                pass
-                                
-                        return str(v)
+                    return str(v)
         except Exception:
             pass
         return None
@@ -291,6 +340,36 @@ class VDomBuilder:
 
         # Props
         safe_props = self._safe_props(component)
+
+        # Lifecycle hooks (onMount/onUpdate/onUnmount) are extracted from component.props
+        lifecycle: Dict[str, Any] = {}
+        try:
+            base_props = getattr(component, 'props', {}) or {}
+            for hook_name in ('onMount', 'onUpdate', 'onUnmount'):
+                if hook_name in base_props and base_props[hook_name] is not None:
+                    raw = base_props[hook_name]
+                    code = None
+                    kind = 'inline'
+                    try:
+                        if hasattr(raw, 'get_code'):
+                            code = raw.get_code()
+                            kind = 'dscript'
+                        elif isinstance(raw, dict):
+                            code = raw.get('code') or raw.get('value')
+                        elif isinstance(raw, str):
+                            code = raw
+                        else:
+                            code = str(raw)
+                    except Exception:
+                        code = None
+
+                    if isinstance(code, str) and code.strip():
+                        lifecycle[hook_name] = {
+                            'type': kind,
+                            'code': code.strip(),
+                        }
+        except Exception:
+            lifecycle = {}
 
         # Events
         events_payload = self._serialize_events(component)
@@ -335,5 +414,6 @@ class VDomBuilder:
             children=children_nodes,
             text=text_value,
             is_island=is_island,
+            lifecycle=lifecycle,
         )
         return vnode

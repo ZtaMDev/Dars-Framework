@@ -106,10 +106,16 @@ def updateComp(target: Union[str, Component], **kwargs) -> dScript:
     parts = [f"id: '{target_id}'", "dynamic: true"]
     
     for k, v in kwargs.items():
-        if isinstance(v, dScript): # Use dScript instead of RawJS if imported differently, but RawJS is safer check if available
-            parts.append(f"{k}: {v.code}")
-        elif hasattr(v, 'code'): # Generic check for script objects
-             parts.append(f"{k}: {v.code}")
+        if isinstance(v, dScript):  # Inline dScript code as JS expression
+            expr = (v.code or "").rstrip()
+            if expr.endswith(";"):
+                expr = expr[:-1]
+            parts.append(f"{k}: {expr}")
+        elif hasattr(v, 'code'):  # Generic check for Script / RawJS-like objects
+            expr = (getattr(v, 'code', "") or "").rstrip()
+            if expr.endswith(";"):
+                expr = expr[:-1]
+            parts.append(f"{k}: {expr}")
         elif k == 'style' and isinstance(v, dict):
             parts.append(f"style: {json.dumps(v)}")
         elif k == 'attrs' and isinstance(v, dict):
@@ -121,23 +127,28 @@ def updateComp(target: Union[str, Component], **kwargs) -> dScript:
             
     payload = ", ".join(parts)
     
-    # Generate JS code
+    # Generate JS code.
+    # IMPORTANT: we must *not* collapse whitespace/newlines here because
+    # nested dScript code (e.g. updateVRef + V()) may contain '//' comments.
+    # If we strip newlines, those comments will swallow the rest of the line
+    # and produce invalid JS inside the change({ ... }) payload.
     code = (
-        "(async () => {"
-        "  try {"
-        "    let ch = window.__DARS_CHANGE_FN;"
-        "    if (!ch) {"
-        "      if (window.Dars && typeof window.Dars.change === 'function') {"
-        "        ch = window.Dars.change.bind(window.Dars);"
-        "      } else {"
-        "        const m = await import('./lib/dars.min.js');"
-        "        ch = (m.change || (m.default && m.default.change));"
-        "      }"
-        "      if (typeof ch === 'function') window.__DARS_CHANGE_FN = ch;"
-        "    }"
-        f"    if (typeof ch === 'function') ch({{{payload}}});"
-        "  } catch (e) { /* noop */ }"
-        "})();"
+        "(async () => {\n"
+        "  try {\n"
+        "    let ch = window.__DARS_CHANGE_FN;\n"
+        "    if (!ch) {\n"
+        "      if (window.Dars && typeof window.Dars.change === 'function') {\n"
+        "        ch = window.Dars.change.bind(window.Dars);\n"
+        "      } else {\n"
+        "        const m = await import('./lib/dars.min.js');\n"
+        "        ch = (m.change || (m.default && m.default.change));\n"
+        "      }\n"
+        "      if (typeof ch === 'function') window.__DARS_CHANGE_FN = ch;\n"
+        "    }\n"
+        f"    if (typeof ch === 'function') ch({{{payload}}});\n"
+        "  } catch (e) { /* noop */ }\n"
+        "})();\n"
     )
-    
-    return dScript(code=' '.join(code.split()))
+
+    # Return code as-is to preserve inner dScript formatting and comments
+    return dScript(code=code)

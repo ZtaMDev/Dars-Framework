@@ -1252,6 +1252,29 @@ def V(selector: str) -> ValueRef:
     return ValueRef(selector)
 
 
+def equal(value: Union[ValueRef, MathExpression, BooleanExpression, ConditionalExpression, LogicalExpression, int, float, str, bool]) -> MathExpression:
+    """Helper to normalize a value into a MathExpression.
+
+    This makes it easy to combine literals or other expressions with V()/MathExpression
+    trees without worrying about operator precedence or async semantics.
+
+    Examples
+    -------
+    - Simple literal:
+        V(".dyn").int() + equal(0)
+
+    - With another V() expression:
+        V(".a").int() + equal(V(".b").int())
+    """
+
+    # If value is already a MathExpression, just return it
+    if isinstance(value, MathExpression):
+        return value
+
+    # Otherwise, wrap it in a neutral MathExpression (value + 0)
+    return MathExpression(value, '+', 0)
+
+
 def url(template: str, **kwargs) -> str:
     """Build dynamic URLs with clean syntax"""
     result = template

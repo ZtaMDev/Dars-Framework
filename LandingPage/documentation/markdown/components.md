@@ -77,19 +77,85 @@ delete_btn = Button(
 )
 ```
 
-### Event Rehydration
+---
 
-- When a subtree is created with `createComp`, all events defined in its Python components are attached at runtime.
-- This includes nested children and multiple handlers per node.
+## Component Lifecycle Hooks (onMount, onUpdate, onUnmount)
 
-### Multiple Instances and CSS Class
+Dars components (including `@FunctionComponent`) support **lifecycle hooks** that run in the browser:
 
-- Elements get a helper class `dars-id-<id>` in addition to the DOM `id`.
-- This makes it easier to query duplicate instances when they exist.
+- `onMount`: runs once when the component is registered in the runtime and mounted into the DOM.
+- `onUpdate`: runs after dynamic changes that affect the component, for example:
+  - `Dars.change({ id, dynamic: true, ... })` (used internally by `updateComp`).
+  - VRef changes that affect its subtree (`updateVRef()` + `Dars.updateVRef`).
+- `onUnmount`: runs right before the component is removed from the DOM (for example, via `deleteComp`).
 
-### Notes
+Hooks accept `dScript` or inline JS strings and are passed as component props.
 
-- These APIs are for dynamic changes in the browser. For compile-time changes (before export/preview), use `App.create()` and `App.delete()` described in the App documentation.
+### Basic Usage
+
+```python
+from dars.all import *
+
+@route("/")
+def index():
+    counter_box = Container(
+        Text("Dynamic counter: ", id="dyn_label"),
+        Text(setVRef(0, ".dyn_count")),
+        id="dyn_box",
+        class_name="p-4 border rounded mb-2",
+        onMount=dScript("console.log('[Lifecycle] dyn_box mounted');"),
+        onUpdate=dScript("console.log('[Lifecycle] dyn_box updated');"),
+        onUnmount=dScript("console.log('[Lifecycle] dyn_box unmounted');"),
+    )
+
+    host_id = "dyn_host"
+
+    return Page(
+        Container(
+            Container(id=host_id),
+
+            # Dynamically create the component with lifecycle and VRefs
+            Button(
+                "Create",
+                on_click=createComp(counter_box, host_id, position="append"),
+            ),
+
+            # Update the value using V() + updateVRef (triggers onUpdate)
+            Button(
+                "Increment",
+                on_click=updateVRef(
+                    ".dyn_count",
+                    V(".dyn_count").int() + 1,
+                ),
+            ),
+
+            # Delete the component (triggers onUnmount)
+            Button(
+                "Delete",
+                on_click=deleteComp("dyn_box"),
+            ),
+        )
+    )
+```
+
+### Behavior in different flows
+
+- **Initial render / hydration**:
+  - The VDOM includes a `lifecycle` block per node with `onMount`, `onUpdate`, `onUnmount`.
+  - The runtime registers hooks during `DarsHydrate` and runs `onMount` once per id.
+
+- **createComp / deleteComp**:
+  - `createComp` uses `VDomBuilder` to include lifecycle and events in the dynamic VDOM.
+  - `runtime.createComponent` registers lifecycle for the subtree and runs `onMount` after inserting it into the DOM.
+  - `deleteComp` causes `runtime.deleteComponent` to run `onUnmount` before removing the node.
+
+- **Dynamic changes and VRefs**:
+  - `updateComp()` generates calls to `Dars.change({ id, dynamic: true, ... })`, which eventually call `onUpdate` for that id.
+  - `updateVRef(selector, ...)` updates DOM and VRefs, then calls `Dars.updateVRef(selector)`, which finds the nearest lifecycle-enabled ancestor for each affected element and runs its `onUpdate`.
+
+This allows you to attach side effects (logs, external integrations, controlled side-effects) to your components' lifecycle, both for static components and those created/removed at runtime.
+
+---
 
 ## dScript Basic Usage
 
