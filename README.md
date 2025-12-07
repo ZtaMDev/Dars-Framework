@@ -27,7 +27,7 @@ DeepWiki [here](https://deepwiki.com/ZtaMDev/Dars-Framework) |
 pip install dars-framework
 ```
 
-Try dars without installing nothing(single page mode) just visit the [Dars Playground](https://dars-playground.vercel.app/)
+Try dars without installing nothing just visit the [Dars Playground](https://dars-playground.vercel.app/)
 
 ## How It Works
 - Build your UI using Python classes and components (like Text, Button, Container, Page, etc).
