@@ -6,8 +6,6 @@ First off, thank you for considering contributing to Dars Framework! It's people
 
 - [How Can I Contribute?](#how-can-i-contribute)
   - [Reporting Bugs](#reporting-bugs)
-  - [Suggesting Enhancements](#suggesting-enhancements)
-  - [Pull Requests](#pull-requests)
 - [Development Setup](#development-setup)
 - [Project Structure](#project-structure)
 - [Coding Guidelines](#coding-guidelines)
