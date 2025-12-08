@@ -426,20 +426,22 @@ For complete documentation, see the [Backend API Guide](https://ztamdev.github.i
 
 ## CLI Usage
 
-| Command                                 | What it does                               |
-|-----------------------------------------|--------------------------------------------|
-| `dars export my_app.py --format html`   | Export app to HTML/CSS/JS in `./my_app_web` |
-| `dars init --type desktop`               | Scaffold desktop-capable project (BETA)     |
-| `dars init --type ssr`                   | Scaffold full-stack SSR project             |
-| `dars build` (desktop config)            | Build desktop app artifacts (BETA)          |
-| `dars preview ./my_app_web`             | Preview exported app locally                |
-| `dars init my_project`                  | Create a new Dars project (also creates dars.config.json) |
-| `dars init --update`                    | Create/Update dars.config.json in current dir |
-| `dars build`                            | Build using dars.config.json (entry/outdir/format) |
-| `dars config validate`                  | Validate dars.config.json and print report   |
-| `dars info my_app.py`                   | Show info about your app                    |
-| `dars formats`                          | List supported export formats               |
-| `dars --help`                           | Show help and all CLI options               |
+| Command                                   | What it does                                 |
+|-------------------------------------------|----------------------------------------------|
+| `dars export my_app.py --format html`     | Export app to HTML/CSS/JS in `./my_app_web`   |
+| `dars init --type desktop`               | Scaffold desktop-capable project (BETA)       |
+| `dars init --type ssr`                   | Scaffold full-stack SSR project (SSR + API)   |
+| `dars build` (desktop config)            | Build desktop app artifacts (BETA)            |
+| `dars preview ./my_app_web`              | Preview exported app locally                  |
+| `dars init my_project`                   | Create a new Dars project (also creates dars.config.json) |
+| `dars init --update`                     | Create/Update dars.config.json in current dir |
+| `dars build`                             | Build using dars.config.json (entry/outdir/format) |
+| `dars config validate`                   | Validate dars.config.json and print report    |
+| `dars info my_app.py`                    | Show info about your app                      |
+| `dars formats`                           | List supported export formats                 |
+| `dars dev`                               | Run the configured entry file with hot preview (app.rTimeCompile) |
+| `dars dev --backend`                     | Run only the configured backendEntry (FastAPI/SSR backend) |
+| `dars --help`                            | Show help and all CLI options                 |
 
 Tip: use `dars doctor` to review optional tooling that can enhance bundling/minification.
 
@@ -507,7 +509,9 @@ Example default:
   "defaultMinify": true,
   "viteMinify": true,
   "utility_styles": {},
-  "markdownHighlight": true
+  "markdownHighlight": true,
+  "markdownHighlightTheme": "auto",
+  "backendEntry": "backend.api:app"
 }
 ```
 
@@ -521,6 +525,7 @@ Example default:
 - `viteMinify`: Toggle the Vite/esbuild minifier for JS/CSS. Default `true`.
 - `utility_styles`: Dictionary defining custom utility classes. Keys are class names, values are lists of utility strings or raw CSS properties.
 - `markdownHighlight`: Auto-inject a client-side syntax highlighter for fenced code blocks in Markdown. Default `true`.
+ - `backendEntry`: Python import path for your SSR/backend app (e.g. `"backend.api:app"`). Required when your app uses `RouteType.SSR` routes. Used by `dars dev --backend`.
 
 Validate your config:
 

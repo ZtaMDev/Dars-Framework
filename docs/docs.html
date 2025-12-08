@@ -3070,6 +3070,26 @@ dars<span class="w"> </span>build
         <tr>
          <td>
           <code>
+           dars dev
+          </code>
+         </td>
+         <td>
+          Run the configured entry file with hot preview (app.rTimeCompile)
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           dars dev --backend
+          </code>
+         </td>
+         <td>
+          Run only the configured backendEntry (FastAPI/SSR backend)
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
            dars info my_app.py
           </code>
          </td>
@@ -3259,23 +3279,43 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
       <ol>
        <li>
         <strong>
-         Backend (
-         <code>
-          python backend/api.py
-         </code>
-         )
-        </strong>
-        : Runs on port 8000. Handles API requests and initial HTML rendering.
-       </li>
-       <li>
-        <strong>
          Frontend (
          <code>
           dars dev
          </code>
          )
         </strong>
-        : Runs on port 3000. Serves static assets, bundles scripts, and proxies to backend.
+        : Runs the Dars preview server on port
+        <code>
+         8000
+        </code>
+        using
+        <code>
+         app.rTimeCompile()
+        </code>
+        .
+       </li>
+       <li>
+        <strong>
+         Backend (
+         <code>
+          dars dev --backend
+         </code>
+         )
+        </strong>
+        : Runs the FastAPI SSR backend on port
+        <code>
+         3000
+        </code>
+        using
+        <code>
+         backendEntry
+        </code>
+        from
+        <code>
+         dars.config.json
+        </code>
+        .
        </li>
       </ol>
       <p>
@@ -3316,7 +3356,21 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
           </code>
          </td>
          <td>
-          Starts the hot-reload frontend server (requires backend running).
+          Starts the hot-reload frontend preview server.
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           dars dev --backend
+          </code>
+         </td>
+         <td>
+          Starts the SSR/backend server defined by
+          <code>
+           backendEntry
+          </code>
+          .
          </td>
         </tr>
         <tr>
@@ -3370,7 +3424,10 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
 <span class="w">  </span><span class="nt">"bundle"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">"defaultMinify"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">"viteMinify"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"markdownHighlight"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">  </span><span class="nt">"markdownHighlight"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"markdownHighlightTheme"</span><span class="p">:</span><span class="w"> </span><span class="s2">"auto"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"utility_styles"</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">  </span><span class="nt">"backendEntry"</span><span class="p">:</span><span class="w"> </span><span class="s2">"backend.api:app"</span>
 <span class="p">}</span>
 </code></pre>
       </div>
@@ -3525,6 +3582,36 @@ Auto-inject a client-side syntax highlighter for fenced code blocks in Markdown.
            false
           </code>
           : no assets injected; you can include your own highlighter or none at all.
+         </li>
+        </ul>
+       </li>
+       <li>
+        <p>
+         backendEntry
+Python import path for your FastAPI/SSR backend application (e.g.
+         <code>
+          "backend.api:app"
+         </code>
+         ).
+        </p>
+        <ul>
+         <li>
+          Used by tools like
+          <code>
+           dars dev --backend
+          </code>
+          to start the backend server.
+         </li>
+         <li>
+          When your app defines routes with
+          <code>
+           RouteType.SSR
+          </code>
+          ,
+          <code>
+           dars config validate
+          </code>
+          will require this field to be present.
          </li>
         </ul>
        </li>
@@ -15495,7 +15582,7 @@ Client Side:
       <p>
        You need
        <strong>
-        two servers
+        two processes
        </strong>
        running simultaneously:
       </p>
@@ -15507,7 +15594,7 @@ Client Side:
       <div class="codehilite">
        <pre><span></span><code>dars<span class="w"> </span>dev
 <span class="c1"># Runs on http://localhost:8000</span>
-<span class="c1"># Hot reload for UI changes</span>
+<span class="c1"># Uses app.rTimeCompile() with hot reload for UI changes</span>
 </code></pre>
       </div>
       <p>
@@ -15516,9 +15603,9 @@ Client Side:
        </strong>
       </p>
       <div class="codehilite">
-       <pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>backend.api
+       <pre><span></span><code>dars<span class="w"> </span>dev<span class="w"> </span>--backend
 <span class="c1"># Runs on http://localhost:3000</span>
-<span class="c1"># Handles SSR rendering</span>
+<span class="c1"># Starts uvicorn with the backendEntry from dars.config.json (by default "backend.api:app")</span>
 </code></pre>
       </div>
       <h3 id="how-it-works">
@@ -15529,22 +15616,26 @@ Client Side:
         <strong>
          Frontend Server (8000)
         </strong>
-        : Serves static files and handles SPA routing
+        : Serves the Dars preview (HTML/CSS/JS) and handles SPA routing.
        </li>
        <li>
-        <strong>
-         Backend Server (3000)
-        </strong>
-        : Renders SSR routes and provides API endpoints
+        <p>
+         <strong>
+          Backend Server (3000)
+         </strong>
+         : Renders SSR routes and provides API endpoints.
+        </p>
        </li>
        <li>
-        <strong>
-         Communication
-        </strong>
-        : Frontend fetches SSR content from backend via
-        <code>
-         /api/ssr/*
-        </code>
+        <p>
+         <strong>
+          Communication
+         </strong>
+         : Frontend fetches SSR content from backend via
+         <code>
+          /api/ssr/*
+         </code>
+        </p>
        </li>
       </ol>
       <h3 id="environment-detection">
@@ -24090,7 +24181,7 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
     </div>
    </div>
   </div>
-  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1765148317" type="module">
+  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1765229473" type="module">
   </script>
   <script defer="" src="app_docs.js">
   </script>

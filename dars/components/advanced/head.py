@@ -165,6 +165,9 @@ class Head(Component):
         self.links = links or []
         self.structured_data = structured_data
     
+    def render(self, exporter: Optional[object] = None) -> str:
+        return ""
+
     def __repr__(self):
         """String representation for debugging"""
         title_str = f"title='{self.title}'" if self.title else "no title"

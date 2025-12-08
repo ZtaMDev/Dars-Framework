@@ -218,26 +218,27 @@ def settings():
 
 ### Running in Development
 
-You need **two servers** running simultaneously:
+You need **two processes** running simultaneously:
 
 **Terminal 1 - Frontend Dev Server:**
 ```bash
 dars dev
 # Runs on http://localhost:8000
-# Hot reload for UI changes
+# Uses app.rTimeCompile() with hot reload for UI changes
 ```
 
 **Terminal 2 - Backend SSR Server:**
 ```bash
-python -m backend.api
+dars dev --backend
 # Runs on http://localhost:3000
-# Handles SSR rendering
+# Starts uvicorn with the backendEntry from dars.config.json (by default "backend.api:app")
 ```
 
 ### How It Works
 
-1. **Frontend Server (8000)**: Serves static files and handles SPA routing
-2. **Backend Server (3000)**: Renders SSR routes and provides API endpoints
+1. **Frontend Server (8000)**: Serves the Dars preview (HTML/CSS/JS) and handles SPA routing.
+2. **Backend Server (3000)**: Renders SSR routes and provides API endpoints.
+
 3. **Communication**: Frontend fetches SSR content from backend via `/api/ssr/*`
 
 ### Environment Detection

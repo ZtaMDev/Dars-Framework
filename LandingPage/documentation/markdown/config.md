@@ -15,7 +15,10 @@ The file (dars.config.json) configures how Dars exports and builds your project.
   "bundle": false,
   "defaultMinify": true,
   "viteMinify": true,
-  "markdownHighlight": true
+  "markdownHighlight": true,
+  "markdownHighlightTheme": "auto",
+  "utility_styles": {},
+  "backendEntry": "backend.api:app"
 }
 ```
 
@@ -57,6 +60,11 @@ The file (dars.config.json) configures how Dars exports and builds your project.
   Auto-inject a client-side syntax highlighter for fenced code blocks in Markdown.
   - `true` (default): injects Prism.js assets once per page and highlights `pre code` blocks.
   - `false`: no assets injected; you can include your own highlighter or none at all.
+
+- backendEntry
+  Python import path for your FastAPI/SSR backend application (e.g. `"backend.api:app"`).
+  - Used by tools like `dars dev --backend` to start the backend server.
+  - When your app defines routes with `RouteType.SSR`, `dars config validate` will require this field to be present.
 
 ## Desktop-specific (BETA)
 

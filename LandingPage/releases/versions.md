@@ -1,3 +1,88 @@
+# Release Notes v1.7.8
+
+> **Full-Stack SSR DX: backendEntry Defaults, Validation & CLI Backend Runner**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Automatic backendEntry for SSR Projects
+
+When you scaffold a new SSR project with:
+
+```bash
+dars init my-app --type ssr
+```
+
+Dars now creates a `dars.config.json` that includes a default backend entry:
+
+```json
+"backendEntry": "backend.api:app"
+```
+
+This matches the generated `backend/api.py` file and makes it trivial to start the FastAPI SSR backend.
+
+### Smarter Config Validation for SSR
+
+The `dars config validate` command has been extended to understand when your project is using SSR:
+
+- Introspects the `entry` module and inspects:
+  - SPA routes (`app._spa_routes`) for `RouteType.SSR`.
+  - Multipage routes (`app._pages`) whose root metadata has `route_type = RouteType.SSR`.
+- If dynamic detection fails, a fallback **static scan** looks for `RouteType.SSR` in the entry source file.
+- When any SSR route is detected and `backendEntry` is missing in `dars.config.json`, validation now reports:
+
+> This app is not going to work because you don't have configured the backendEntry in dars.config.json with your backend entry file.
+
+This prevents half-configured SSR apps where routes are marked as `RouteType.SSR` but no backend has been wired.
+
+### New CLI Command: `dars dev --backend`
+
+To simplify the SSR development workflow, a new flag was added to the `dars dev` command:
+
+```bash
+# Frontend dev (preview + hot reload)
+dars dev
+
+# Backend-only dev (SSR/API)
+dars dev --backend
+```
+
+Behavior:
+
+- `dars dev` (no flags):
+  - Resolves `entry` from `dars.config.json` (default `main.py`).
+  - Runs the file directly (`python main.py`), which is expected to call `app.rTimeCompile()`.
+  - Starts the Dars preview server on `http://localhost:8000` with hot reload.
+
+- `dars dev --backend`:
+  - Reads `backendEntry` from `dars.config.json` (e.g. `"backend.api:app"`).
+  - Starts the FastAPI SSR backend via uvicorn:
+
+    ```bash
+    python -m uvicorn backend.api:app --reload --host 127.0.0.1 --port 3000
+    ```
+
+  - If `backendEntry` is missing, uses the same validation message as `dars config validate` to explain that SSR will not work.
+
+Result: you can now run a full-stack SSR dev setup with two explicit terminals:
+
+```bash
+# Terminal 1 - Frontend
+dars dev
+
+# Terminal 2 - Backend
+dars dev --backend
+```
+
+This keeps logs cleanly separated while still leveraging the built-in hot reload from `app.rTimeCompile()` and uvicorn's reload system.
+
+---
+
 # Release Notes v1.7.7
 
 > **Component Lifecycle Hooks, Dynamic VRefs & Safer Runtime Updates**

@@ -1991,6 +1991,7 @@ class App:
         
     def get_stats(self) -> Dict[str, Any]:
         """Return application stadistics (single-page and multipage)"""
+        # Multipage mode (classic pages)
         if self.is_multipage():
             total_components = 0
             max_depth = 0
@@ -2006,7 +2007,27 @@ class App:
                 'global_styles_count': len(self.global_styles),
                 'total_pages': len(self._pages)
             }
-        elif self.root:
+
+        # SPA / SSR mode (routes stored in _spa_routes)
+        if self.has_spa_routes():
+            total_components = 0
+            max_depth = 0
+            for spa_route in self._spa_routes.values():
+                root = getattr(spa_route, 'root', None)
+                if root:
+                    total_components += self._count_components(root)
+                    depth = self._calculate_max_depth(root)
+                    max_depth = max(max_depth, depth)
+            return {
+                'total_components': total_components,
+                'max_depth': max_depth,
+                'scripts_count': len(self.scripts),
+                'global_styles_count': len(self.global_styles),
+                'total_pages': len(self._spa_routes) or 0,
+            }
+
+        # Single-page mode
+        if self.root:
             return {
                 'total_components': self._count_components(self.root),
                 'max_depth': self._calculate_max_depth(self.root),
@@ -2014,23 +2035,29 @@ class App:
                 'global_styles_count': len(self.global_styles),
                 'total_pages': 1
             }
-        else:
-            return {
-                'total_components': 0,
-                'max_depth': 0,
-                'scripts_count': len(self.scripts),
-                'global_styles_count': len(self.global_styles),
-                'total_pages': 0
-            }
+
+        # No root defined
+        return {
+            'total_components': 0,
+            'max_depth': 0,
+            'scripts_count': len(self.scripts),
+            'global_styles_count': len(self.global_styles),
+            'total_pages': 0
+        }
 
     def calculate_max_depth(self) -> int:
         """Calculates the maximun depth of a component tree (single page and multipage)"""
         if self.is_multipage():
             return max((self._calculate_max_depth(page.root) for page in self._pages.values() if page.root), default=0)
-        elif self.root:
+
+        if self.has_spa_routes():
+            return max((self._calculate_max_depth(getattr(route, 'root', None))
+                        for route in self._spa_routes.values() if getattr(route, 'root', None)), default=0)
+
+        if self.root:
             return self._calculate_max_depth(self.root)
-        else:
-            return 0
+
+        return 0
 
     def _calculate_max_depth(self, component: Component, current_depth: int = 0) -> int:
         """Calculates the maximun depth of a component tree (internal use)"""

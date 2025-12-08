@@ -707,7 +707,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dars.backend.ssr import create_ssr_app
 import sys
 import os
-from apiConfig import DarsEnv
+from backend.apiConfig import DarsEnv
 
 # Import the Dars app
 import sys
@@ -873,6 +873,7 @@ if __name__ == "__main__":
 """
             
             # 4. dars.config.json
+            # Default config for SPA / desktop projects
             DARS_CONFIG_JSON_CODE = """{
   "entry": "main.py",
   "format": "web",
@@ -888,7 +889,29 @@ if __name__ == "__main__":
   "defaultMinify": true,
   "viteMinify": true,
   "markdownHighlight": true,
-  "markdownHighlightTheme": "auto"
+  "markdownHighlightTheme": "auto",
+  "utility_styles": {}
+}"""
+
+            # Config template for SSR projects: includes backendEntry pointing to the default backend
+            DARS_CONFIG_JSON_SSR_CODE = """{
+  "entry": "main.py",
+  "format": "web",
+  "outdir": "dist",
+  "include": [],
+  "exclude": [
+    "**/__pycache__",
+    ".git",
+    ".venv",
+    "node_modules"
+  ],
+  "bundle": true,
+  "defaultMinify": true,
+  "viteMinify": true,
+  "markdownHighlight": true,
+  "markdownHighlightTheme": "auto",
+  "utility_styles": {},
+  "backendEntry": "backend.api:app"
 }"""
 
             # Write Initial Files
@@ -899,9 +922,8 @@ if __name__ == "__main__":
                 (root_path / "main.py").write_text(SSR_TEMPLATE_CODE.strip(), encoding="utf-8")
                 console.print(f"[green]✔ {translator.get('main_py_created')} (SSR Mode)[/green]")
                 
-                # Update config json if needed (SSR often uses web format, so standard json is fine)
-                # Just change comment or logic if SSR required specific flags. For now standard is OK.
-                (root_path / "dars.config.json").write_text(DARS_CONFIG_JSON_CODE.strip(), encoding="utf-8")
+                # Create config json for SSR projects, including backendEntry pointing to backend/api.py
+                (root_path / "dars.config.json").write_text(DARS_CONFIG_JSON_SSR_CODE.strip(), encoding="utf-8")
                 
                 # Backend Directory (Only for SSR)
                 backend_dir = root_path / "backend"
@@ -1183,6 +1205,7 @@ def create_parser(include_hidden: bool = True) -> argparse.ArgumentParser:
     # Dev command (run entry in dev mode)
     dev_parser = subparsers.add_parser('dev', help='Run the configured entry file in development mode')
     dev_parser.add_argument('--project', '-p', default='.', help='Project root where dars.config.json resides (default: .)')
+    dev_parser.add_argument('--backend', action='store_true', help='Run only the configured backendEntry (SSR/API) instead of the frontend entry')
     # English-only: no language option on subparsers
     
     # Doctor command
@@ -2048,6 +2071,71 @@ def main():
             if not isinstance(cfg.get('defaultMinify', True), bool):
                 issues.append(err('defaultMinify must be a boolean'))
 
+            # utility_styles must be a dict if present
+            if 'utility_styles' in cfg and cfg['utility_styles'] is not None and not isinstance(cfg['utility_styles'], dict):
+                issues.append(err(translator.get('cfg_utility_styles_type')))
+
+            # If the entry defines any SSR routes (SPA or multipage), backendEntry must be configured
+            has_ssr_routes = False
+            backend_entry = cfg.get('backendEntry')
+            try:
+                if entry and os.path.isfile(entry):
+                    # Import the entry module safely (so __name__ != '__main__')
+                    import importlib.util
+
+                    module_name = os.path.splitext(os.path.basename(entry))[0]
+                    spec = importlib.util.spec_from_file_location(module_name, entry)
+                    module = importlib.util.module_from_spec(spec) if spec else None
+                    if spec and module:
+                        sys.modules[module_name] = module
+                        spec.loader.exec_module(module)  # type: ignore[union-attr]
+
+                        app_obj = getattr(module, 'app', None)
+                        # Detect SSR routes only if this looks like a Dars App
+                        if app_obj is not None:
+                            try:
+                                from dars.core.route_types import RouteType
+                            except Exception:
+                                RouteType = None  # type: ignore
+
+                            if RouteType is not None:
+                                # 1) SPA / SSR routes via _spa_routes
+                                if hasattr(app_obj, 'has_spa_routes') and callable(getattr(app_obj, 'has_spa_routes')):
+                                    if app_obj.has_spa_routes():
+                                        for spa_route in getattr(app_obj, '_spa_routes', {}).values():
+                                            root = getattr(spa_route, 'root', None)
+                                            meta = getattr(root, '__dars_route_metadata__', None)
+                                            if getattr(meta, 'route_type', None) == RouteType.SSR:
+                                                has_ssr_routes = True
+                                                break
+
+                                # 2) Multipage apps via _pages (Page roots with RouteType.SSR)
+                                if not has_ssr_routes and hasattr(app_obj, 'is_multipage') and callable(getattr(app_obj, 'is_multipage')):
+                                    if app_obj.is_multipage():
+                                        for page in getattr(app_obj, '_pages', {}).values():
+                                            root = getattr(page, 'root', None)
+                                            meta = getattr(root, '__dars_route_metadata__', None)
+                                            if getattr(meta, 'route_type', None) == RouteType.SSR:
+                                                has_ssr_routes = True
+                                                break
+            except Exception:
+                # Best-effort: if we can't introspect the app, don't block config validation here
+                pass
+
+            # Fallback: if we still don't know but the entry file clearly uses RouteType.SSR,
+            # assume there are SSR routes so we can warn about missing backendEntry.
+            if not has_ssr_routes and entry and os.path.isfile(entry):
+                try:
+                    with open(entry, 'r', encoding='utf-8') as f:
+                        src = f.read()
+                    if 'RouteType.SSR' in src:
+                        has_ssr_routes = True
+                except Exception:
+                    pass
+
+            if has_ssr_routes and not backend_entry:
+                issues.append(err(translator.get('cfg_backend_entry_missing')))
+
             # Print report
             report = Table(title=translator.get('cfg_validation_title'))
             report.add_column(translator.get('cfg_item'), style="cyan")
@@ -2098,17 +2186,83 @@ def main():
             console.print(f"[yellow]{translator.get('edit_config_hint')}[/yellow]")
             sys.exit(1)
 
-        # Run entry in development mode (the entry typically calls app.rTimeCompile())
         import subprocess
+
+        # If --backend is set, run only the backendEntry (SSR/API) via uvicorn
+        if getattr(args, 'backend', False):
+            backend_entry = cfg.get('backendEntry')
+            if not backend_entry:
+                # Reuse the same message used in config validate
+                console.print(f"[red]{translator.get('cfg_backend_entry_missing')}[/red]")
+                sys.exit(1)
+
+            uvicorn_target = str(backend_entry)
+
+            # Resolve host/port from backend.apiConfig.DarsEnv if available
+            host = '127.0.0.1'
+            port = 3000
+            try:
+                import importlib
+
+                # Ensure project_root is on sys.path so `backend` package is importable
+                if project_root not in sys.path:
+                    sys.path.insert(0, project_root)
+
+                from urllib.parse import urlparse
+
+                api_cfg = importlib.import_module('backend.apiConfig')
+                DarsEnv = getattr(api_cfg, 'DarsEnv', None)
+                if DarsEnv is not None and hasattr(DarsEnv, 'get_urls') and callable(getattr(DarsEnv, 'get_urls')):
+                    urls = DarsEnv.get_urls()
+                    backend_url = urls.get('backend')
+                    if isinstance(backend_url, str):
+                        # Try stdlib parsing first
+                        parsed = urlparse(backend_url)
+                        if parsed.hostname:
+                            host = parsed.hostname
+                        if parsed.port:
+                            port = parsed.port
+                        # Fallback manual parse if urlparse didn't give a port
+                        if parsed.port is None and ':' in backend_url.rsplit('/', 1)[-1]:
+                            tail = backend_url.rsplit('/', 1)[-1]
+                            parts = tail.split(':')
+                            if len(parts) == 2 and parts[1].isdigit():
+                                port = int(parts[1])
+            except Exception:
+                # Fallback to default host/port if anything fails
+                pass
+
+            backend_cmd = [
+                sys.executable,
+                '-m', 'uvicorn',
+                uvicorn_target,
+                '--reload',
+                '--host', str(host),
+                '--port', str(port),
+            ]
+            process = None
+            try:
+                process = subprocess.Popen(backend_cmd, cwd=project_root)
+                process.wait()
+                sys.exit(process.returncode or 0)
+            except KeyboardInterrupt:
+                if process and process.poll() is None:
+                    process.terminate()
+                    process.wait()
+                sys.exit(0)
+            except Exception as e:
+                console.print(f"[red]Failed to start backend dev process: {e}[/red]")
+                sys.exit(1)
+
+        # Default: Run entry in development mode (the entry typically calls app.rTimeCompile()).
+        # Backend/SSR server can be started in a separate terminal with `dars dev --backend` if needed.
         process = None
         try:
-            # Avoid duplicating the same 'Running dev' message that the app itself prints.
-            # The child process (app.rTimeCompile) will emit a detailed "Running dev:" message.
             process = subprocess.Popen([sys.executable, entry], cwd=os.path.dirname(entry))
             process.wait()
             sys.exit(process.returncode or 0)
         except KeyboardInterrupt:
-            if process:
+            if process and process.poll() is None:
                 process.terminate()
                 process.wait()
             sys.exit(0)
