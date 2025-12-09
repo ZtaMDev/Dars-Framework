@@ -4,6 +4,8 @@ from .input import Input
 from .container import Container
 from .page import Page
 from .image import Image
+from .video import Video
+from .audio import Audio
 from .link import Link
 from .textarea import Textarea
 from .checkbox import Checkbox
@@ -23,6 +25,8 @@ __all__ = [
     'Container',
     'Page',
     'Image',
+    'Video',
+    'Audio',
     'Link',
     'Textarea',
     'Checkbox',

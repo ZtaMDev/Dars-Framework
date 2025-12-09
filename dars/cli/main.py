@@ -966,7 +966,7 @@ if __name__ == "__main__":
                         '  "private": true,\n' + \
                         '  "main": "main.js",\n' + \
                         '  "scripts": {"start": "electron ."},\n' + \
-                        '  "devDependencies": {"electron": "latest"}\n' + \
+                        '  "devDependencies": {"electron": "39.2.6"}\n' + \
                     '}\n'
                     (backend_dir / 'package.json').write_text(backend_pkg, encoding='utf-8')
                     # main.js
@@ -1540,7 +1540,7 @@ def main():
                                             '  "private": true,\n' +
                                             '  "main": "main.js",\n' +
                                             '  "scripts": {"start": "electron ."},\n' +
-                                            '  "devDependencies": {"electron": "latest"}\n' +
+                                            '  "devDependencies": {"electron": "39.2.6"}\n' +
                                             '}\n', encoding='utf-8')
                     # main.js
                     main_js_path = backend_dir / 'main.js'
@@ -2180,6 +2180,28 @@ def main():
             console.print("[yellow][Dars] Warning: dars.config.json not found. Run 'dars init --update' to create it.[/yellow]")
         resolved = resolve_paths(cfg, project_root)
         entry = resolved.get('entry_abs') or os.path.join(project_root, cfg.get('entry', 'main.py'))
+
+        # If this is a desktop project and Electron is below the recommended baseline,
+        # emit a non-fatal security warning so users know they should update it.
+        try:
+            fmt = str(cfg.get('format', '')).lower() if cfg else ''
+        except Exception:
+            fmt = ''
+        if fmt == 'desktop':
+            try:
+                from dars.cli.doctor.detect import detect_electron
+                from dars.cli.doctor.doctor import MIN_SAFE_ELECTRON, _is_version_less
+
+                elec = detect_electron()
+                ver = elec.get('version') or None
+                if ver and _is_version_less(str(ver), MIN_SAFE_ELECTRON):
+                    console.print(
+                        f"[yellow][Dars] Warning: Electron {ver} is below the recommended security baseline ({MIN_SAFE_ELECTRON}). "
+                        "Run 'dars doctor --all --yes' to update Electron/electron-builder via Bun.[/yellow]"
+                    )
+            except Exception:
+                # Best-effort only; don't block dev if detection fails
+                pass
 
         if not os.path.exists(entry):
             console.print(f"[red]{translator.get('error_entry_not_found_in_config')}: {entry}[/red]")

@@ -224,6 +224,9 @@ input_field = Input(
 - [Button](#button)
 - [Input](#input)
 - [Container](#container)
+- [Section](#section)
+- [Video](#video)
+- [Audio](#audio)
 - [Markdown](#markdown)
 - [Image](#image)
 - [Link](#link)
@@ -919,11 +922,193 @@ container.add_child(Button("Click me"))
 
 #### Section Properties
 
+
 | Property | Type | Description |
 |-----------|------|-------------|
 | `children` | tuple | Components passed as positional arguments |
 | `additional_children` | list | Optional list of additional components |
 
+
+### Video
+
+The `Video` component is an advanced wrapper over the HTML5 `<video>` element.
+It supports static usage and full reactivity via `State` + `useDynamic`.
+
+```python
+from dars.all import *
+from dars.hooks.value_helpers import V
+
+media_state = State(
+    "media",
+    current_video="/media/intro.mp4",
+    autoplay_video=False,
+    muted_video=True,
+)
+
+Video(
+    src=useDynamic("media.current_video"),
+    poster="/media/poster.jpg",
+    width="720",
+    controls=True,
+    autoplay=useDynamic("media.autoplay_video"),
+    muted=useDynamic("media.muted_video"),
+    preload="metadata",
+    class_name="rounded-[8px] shadow-[0_0_20px_rgba(0,0,0,0.4)] mb-[16px]",
+    attrs={
+        "controlsList": "nodownload",
+    },
+)
+```
+#### Video Properties
+
+| Property | Type | Description | Example |
+|----------|------|-------------|---------|
+| `src` | str / useDynamic | Video source URL (relative or absolute) | `"/media/intro.mp4"` |
+| `poster` | str | Poster image URL | `"/media/poster.jpg"` |
+| `width` | str | Width attribute | `"720"`, `"100%"` |
+| `height` | str | Height attribute | `"480"` |
+| `controls` | bool / useDynamic | Show native controls | `True`, `useDynamic("media.show_controls")` |
+| `autoplay` | bool / useDynamic | Autoplay video when ready | `False`, `useDynamic("media.autoplay_video")` |
+| `loop` | bool / useDynamic | Loop playback | `useDynamic("media.loop_video")` |
+| `muted` | bool / useDynamic | Start muted | `useDynamic("media.muted_video")` |
+| `preload` | str | Preload hint (`auto`, `metadata`, `none`) | `"metadata"` |
+| `plays_inline` | bool | Hint for inline playback on mobile | `True` |
+| `class_name` | str | CSS class name | `"my-video"` |
+| `style` | dict / str | Inline styles | `{ "max-width": "100%" }` |
+| `attrs` | dict | Extra raw attributes | `{ "controlsList": "nodownload" }` |
+
+#### Video Reactivity Notes
+
+- `src`, `autoplay`, `muted`, `loop`, `controls` and `plays_inline` support `useDynamic`.
+- When the associated `State` changes, the exporter generates bindings that:
+  - Update the `src` attribute directly.
+  - For booleans (`autoplay`, `muted`, `loop`, `controls`), add/remove the HTML attribute and sync the DOM property.
+- Defaults:
+  - `controls=True`, `plays_inline=True` by default.
+  - `autoplay`, `loop`, `muted` are **off** by default unless you pass `True` or a state value.
+
+#### Video Example with Toggles
+
+```python
+from dars.all import *
+from dars.hooks.value_helpers import V
+
+media_state = State(
+    "media",
+    current_video="/media/intro.mp4",
+    autoplay_video=False,
+    muted_video=True,
+)
+
+@route("/", index=True)
+def index():
+    return Page(
+        Container(
+            Video(
+                src=useDynamic("media.current_video"),
+                poster="/media/poster.jpg",
+                width="720",
+                controls=True,
+                autoplay=useDynamic("media.autoplay_video"),
+                muted=useDynamic("media.muted_video"),
+                preload="metadata",
+            ),
+            Button(
+                "Toggle Mute",
+                on_click=media_state.muted_video.set(
+                    (V("media.muted_video").bool() == True).then(False, True)
+                ),
+            ),
+            Button(
+                "Toggle Autoplay",
+                on_click=media_state.autoplay_video.set(
+                    (V("media.autoplay_video").bool() == True).then(False, True)
+                ),
+            ),
+        )
+    )
+```
+
+### Audio
+
+The `Audio` component wraps the HTML5 `<audio>` element and supports the same reactive model.
+
+```python
+from dars.all import *
+from dars.hooks.value_helpers import V
+
+media_state = State(
+    "media",
+    current_audio="/media/theme1.mp3",
+    loop_audio=True,
+)
+
+Audio(
+    src=useDynamic("media.current_audio"),
+    controls=True,
+    autoplay=False,
+    loop=useDynamic("media.loop_audio"),
+    preload="auto",
+    class_name="w-[100%] mb-[12px]",
+    attrs={"controlsList": "nodownload"},
+)
+```
+#### Audio Properties
+
+| Property | Type | Description | Example |
+|----------|------|-------------|---------|
+| `src` | str / useDynamic | Audio source URL | `"/media/theme1.mp3"` |
+| `controls` | bool / useDynamic | Show native controls | `True` |
+| `autoplay` | bool / useDynamic | Autoplay audio | `useDynamic("media.autoplay_audio")` |
+| `loop` | bool / useDynamic | Loop playback | `useDynamic("media.loop_audio")` |
+| `muted` | bool / useDynamic | Start muted | `True` |
+| `preload` | str | Preload hint (`auto`, `metadata`, `none`) | `"auto"` |
+| `class_name` | str | CSS class | `"audio-player"` |
+| `style` | dict / str | Inline styles | `{ "width": "100%" }` |
+| `attrs` | dict | Extra attributes | `{ "controlsList": "nodownload" }` |
+
+#### Audio Reactivity Notes
+
+- `src`, `loop`, `autoplay`, `muted`, `controls` support `useDynamic`.
+- Boolean props are wired to the same reactive mechanism que otros componentes built-in:
+  - El runtime añade/quita los atributos HTML y sincroniza las propiedades JS (`el.loop`, `el.muted`, etc.).
+- Es recomendable ubicar los ficheros dentro de `media/` en el root del proyecto y referenciarlos como `/media/...`.
+  El exporter copiará automáticamente esa carpeta al directorio de export.
+
+#### Audio Example with Track Switch
+
+```python
+@route("/audio-demo")
+def audio_demo():
+    return Page(
+        Container(
+            Text("Audio actual:"),
+            Text(useDynamic("media.current_audio")),
+            Audio(
+                src=useDynamic("media.current_audio"),
+                controls=True,
+                loop=useDynamic("media.loop_audio"),
+                preload="auto",
+            ),
+            Container(
+                Button(
+                    "Track 1",
+                    on_click=media_state.current_audio.set("/media/theme1.mp3"),
+                ),
+                Button(
+                    "Track 2",
+                    on_click=media_state.current_audio.set("/media/theme2.mp3"),
+                ),
+                Button(
+                    "Toggle Loop",
+                    on_click=media_state.loop_audio.set(
+                        (V("media.loop_audio").bool() == True).then(False, True)
+                    ),
+                ),
+            ),
+        )
+    )
+```
 
 ### Markdown
 

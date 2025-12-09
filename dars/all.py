@@ -41,6 +41,8 @@ from dars.components.layout.flex import FlexLayout
 from dars.components.basic.section import Section
 from dars.components.advanced.head import Head
 from dars.components.advanced.outlet import Outlet
+from dars.components.basic.video import Video
+from dars.components.basic.audio import Audio
 # Layout
 from dars.components.layout.grid import GridLayout, LayoutBase
 # Core
@@ -88,7 +90,7 @@ __all__ = [
     'App', 'Component', 'EventManager',
     'Button', 'Checkbox', 'Container', 'DatePicker', 'Image', 'Input', 'Link', 'Page', 'ProgressBar',
     'RadioButton', 'Select', 'Slider', 'Spinner', 'Text', 'Textarea', 'Tooltip',
-    'Accordion', 'Card', 'Modal', 'Navbar', 'Table', 'Tabs', 'Section', 'Outlet', 'Head',
+    'Accordion', 'Card', 'Modal', 'Navbar', 'Table', 'Tabs', 'Section', 'Outlet', 'Head', 'Audio', 'Video',
     # Visualization
     'Chart', 'DataTable',
     'GridLayout', 'FlexLayout', 'LayoutBase', 'AnchorPoint',

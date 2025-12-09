@@ -48,10 +48,9 @@ This phase will focus on strengthening the framework's current foundation, impro
     - [x] **Improved Property Typing and Validation**: Extend the property system to include more complex validations and clear error messages at development time, facilitating debugging.
     - [x] **Error Handling and Debugging**: Implement robust tools and mechanisms for runtime error handling and facilitate debugging of Dars applications, both in Python and in the generated JavaScript code.
 
-- [ ] **Component System Enhancements**
+- [c] **Component System Enhancements**
     - [x] **Component Lifecycle**: Define and document a clear lifecycle for components (mounting, updating, unmounting) that allows developers to execute logic at specific times.
     - [x] **Hooks or Mixins**: Explore the implementation of patterns like Hooks or Mixins to reuse state and behavior logic between components more cleanly and modularly.
-    - [ ] **Higher-Order Components (HOCs)**: Facilitate the creation of HOCs for logic reuse and component composition.
 
 - [x] **HTML/CSS/JS Exporter Optimization**
     - [x] **Minification and Bundling**: Integrate minification and bundling tools (e.g., based on `esbuild` or `rollup` via Python) to reduce the size of generated JavaScript and CSS files, improving loading times.
@@ -111,65 +110,65 @@ This phase will focus on mass adoption, long-term stability, and community growt
 
 This phase transforms Dars into a complete fullstack Python framework with enterprise-grade security and automatic backend integration.
 
-#### Security & Routing (v1.6.9 - v1.7.5)
+#### Security & Routing
 
-- [x] **Secure Router Foundation (v1.6.9)**
+- [x] **Secure Router Foundation**
     - [x] Lazy loading for private routes
     - [x] Route obfuscation (hide sensitive routes from client)
     - [x] Route types: `public`, `private`, `protected`
     - [x] Backend route loader endpoints
 
-- [ ] **VRef Hooks + Middleware (v1.7.0)**
+- [ ] **VRef Hooks + Middleware**
     - [x] Complete `setVRef()` exporter integration
     - [ ] Middleware system (AuthMiddleware, RateLimitMiddleware, CORSMiddleware)
     - [ ] Middleware chain execution
     - [ ] Route-specific and global middleware
 
-- [x] **FastAPI Backend Plugin (v1.7.1)**
+- [x] **FastAPI Backend Plugin**
     - [x] `DarsBackend` class for FastAPI integration
     - [x] Route loading endpoints
     - [x] Middleware execution in backend
     - [x] Request/response serialization
 
-- [ ] **Authentication System (v1.7.2)**
+- [ ] **Authentication System**
     - [ ] JWT token generation and verification
     - [ ] Session management
     - [ ] Frontend auth helpers (`login()`, `logout()`, `isAuthenticated()`)
     - [ ] Auth endpoints (`/api/auth/login`, `/api/auth/logout`, `/api/auth/refresh`)
 
-- [ ] **SSR Implementation (v1.7.3)**
+- [ ] **SSR Implementation**
     - [x] Server-side rendering without middleware
     - [x] Direct backend integration for SSR
     - [x] Context injection
     - [x] Client-side hydration
 
-- [ ] **Route Guards & Permissions (v1.7.4)**
+- [ ] **Route Guards & Permissions**
     - [ ] Role-based access control (RBAC)
     - [ ] Permission system with custom checks
     - [ ] Route guard decorators
 
-- [ ] **Production Hardening (v1.7.5)**
+- [ ] **Production Hardening**
     - [ ] HTTPS enforcement
     - [ ] CSRF protection
     - [ ] XSS prevention
     - [ ] Security headers
     - [ ] Audit logging
 
-#### Fullstack Integration (v1.7.6 - v1.8.0)
+#### Fullstack Integration
 
-- [x] **Backend Auto-Detection (v1.7.6)**
+- [x] **Backend Auto-Detection**
     - [x] Automatic detection of `/backend` or `/darsBackend` directories
     - [x] Detection of `api.py` and `apiConfig.py`
     - [ ] Desktop mode support (Electron with `/darsBackend`)
 
-- [x] **apiConfig.py System (v1.7.7)**
+- [x] **apiConfig.py System**
     - [x] Centralized URL configuration
     - [x] `DEV_FRONTEND_URL` and `DEV_BACKEND_URL` constants
     - [x] `BUILD_FRONTEND_URL` and `BUILD_BACKEND_URL` constants
     - [x] `get_frontend_url()` and `get_backend_url()` helpers
     - [x] Accessible from both frontend and backend
 
-- [x] **Dev Server Orchestration (v1.7.8)**
+- [x] **Dev Server Orchestration**
     - [x] `dars dev` starts both frontend and backend concurrently
     - [x] Frontend on `localhost:8000` (rTimeCompile)
     - [x] Backend on `localhost:3000` (uvicorn)
@@ -177,7 +176,7 @@ This phase transforms Dars into a complete fullstack Python framework with enter
     - [x] Clear console output with URLs
     - [x] Graceful shutdown
 
-- [ ] **Smart Build System (v1.7.9)**
+- [ ] **Smart Build System**
     - [ ] `dars build` detects backend presence
     - [ ] Frontend build to `dist/` (or custom output from `dars.config.json`)
     - [ ] Backend build to `{output}_backend/`
@@ -186,7 +185,7 @@ This phase transforms Dars into a complete fullstack Python framework with enter
     - [ ] Auto-generate deployment README
     - [ ] Environment variable replacement
 
-- [ ] **Fullstack Polish & Documentation (v1.8.0)**
+- [ ] **Fullstack Polish & Documentation**
     - [x] Unified CLI experience
     - [x] Fullstack tutorial
     - [x] Backend integration guide
@@ -195,8 +194,8 @@ This phase transforms Dars into a complete fullstack Python framework with enter
     - [ ] Example fullstack apps (Todo, Blog, E-commerce)
 
 **Timeline**: 12 weeks total
-- Security features: 5 weeks (v1.6.9-1.7.5)
-- Fullstack integration: 5 weeks (v1.7.6-1.8.0)
+- Security features: 5 weeks
+- Fullstack integration: 5 weeks
 - Polish & documentation: 2 weeks
 
 **Target**: v1.8.0 - Complete Fullstack Python Framework

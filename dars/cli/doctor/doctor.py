@@ -9,6 +9,7 @@ from .detect import (
     detect_electron_builder,
     read_pyproject_deps,
     check_python_deps,
+    parse_semver,
 )
 from .installers import (
     install_bun,
@@ -22,6 +23,27 @@ from .ui import render_report, prompt_action, confirm_install
 from rich.console import Console
 
 console = Console()
+
+# Minimum Electron version recommended by Dars (security baseline)
+MIN_SAFE_ELECTRON = "39.2.6"
+
+
+def _is_version_less(v: str, minimum: str) -> bool:
+    """Return True if semantic version v < minimum.
+
+    Expects plain "MAJOR.MINOR.PATCH" strings. If parsing fails, be conservative (no warning).
+    """
+    try:
+        def _split(ver: str):
+            parts = (ver or "0.0.0").split(".")
+            parts = (parts + ["0", "0", "0"])[:3]
+            return [int(x) for x in parts]
+
+        v_parts = _split(v)
+        m_parts = _split(minimum)
+        return v_parts < m_parts
+    except Exception:
+        return False
 
 
 def run_doctor(check_only: bool = False, auto_yes: bool = False, install_all: bool = False, force: bool = False) -> int:
@@ -64,7 +86,41 @@ def run_doctor(check_only: bool = False, auto_yes: bool = False, install_all: bo
     if check_only:
         return 0 if not missing_items else 1
 
-    has_missing = bool(missing_items or optional_missing)
+    # Decide installation strategy
+    summary: List[str] = []
+    if not bun.get('ok'):
+        summary.append('Bun (official installer)')
+    if py.get('missing'):
+        summary.append(f"Python deps: {', '.join(py['missing'])}")
+
+    # Track whether optional tooling needs work when install_all=True
+    elec_needs_update = False
+    builder_needs_update = False
+
+    if install_all:
+        if not esb.get('ok'):
+            summary.append('esbuild (bun add -g esbuild)')
+        if not vit.get('ok'):
+            summary.append('vite (bun add -g vite)')
+
+        # Electron/electron-builder: treat missing OR outdated as candidates for update
+        elec_ver = elec.get('version') or None
+        elec_needs_update = (not elec.get('ok')) or (
+            elec_ver is not None and _is_version_less(str(elec_ver), MIN_SAFE_ELECTRON)
+        )
+        if elec_needs_update:
+            summary.append(f"Electron (bun add -D electron@{MIN_SAFE_ELECTRON})")
+
+        builder_ver = builder.get('version') or None
+        # For electron-builder we don't enforce a specific minimum; allow explicit update when missing
+        builder_needs_update = not builder.get('ok')
+        if builder_needs_update:
+            summary.append('electron-builder (bun add -D electron-builder@latest)')
+
+    # Only treat environment as fully satisfied (and exit early) when there is truly
+    # nothing to install or update. When install_all=True, outdated Electron/electron-builder
+    # should still trigger the install phase even if they were previously marked OK.
+    has_missing = bool(missing_items or optional_missing or (install_all and (elec_needs_update or builder_needs_update)))
     if not has_missing:
         cfg['requirements']['node'].update({'ok': bool(node.get('ok')), 'version': node.get('version')})
         cfg['requirements']['bun'].update({'ok': bool(bun.get('ok')), 'version': bun.get('version')})
@@ -73,46 +129,48 @@ def run_doctor(check_only: bool = False, auto_yes: bool = False, install_all: bo
         save_config(cfg)
         return 0
 
-    # Decide installation strategy
-    summary: List[str] = []
-    if not bun.get('ok'):
-        summary.append('Bun (official installer)')
-    if py.get('missing'):
-        summary.append(f"Python deps: {', '.join(py['missing'])}")
-    if install_all:
-        if not esb.get('ok'):
-            summary.append('esbuild (bun add -g esbuild)')
-        if not vit.get('ok'):
-            summary.append('vite (bun add -g vite)')
-        if not elec.get('ok'):
-            summary.append('Electron (bun add -g electron)')
-        if not builder.get('ok'):
-            summary.append('electron-builder (bun add -g electron-builder)')
-
     # In interactive mode, confirm before installing
     if not auto_yes:
         if not confirm_install(summary):
             return 1
 
     # Perform installations (best-effort)
-    with console.status("[cyan]Installing selected items...[/cyan]"):
+    # Note: when install_all=True we call Bun with live output (run_live), so we
+    # avoid wrapping that in a Rich spinner to prevent overlapping text.
+    if install_all:
         try:
             if not bun.get('ok'):
                 install_bun()
         except Exception:
             pass
 
-        # Optional tooling via Bun (global) when requested
-        if install_all:
+        try:
+            if not esb.get('ok'):
+                install_esbuild()
+            if not vit.get('ok'):
+                install_vite()
+
+            # Electron: always attempt to install/update when install_all=True
+            install_electron_global()
+
+            # electron-builder: keep behaviour similar (upgrade when requested)
+            install_electron_builder_global()
+        except Exception:
+            pass
+    else:
+        # For non-install_all flows, keep the spinner UX around any installs.
+        with console.status("[cyan]Installing selected items...[/cyan]"):
+            try:
+                if not bun.get('ok'):
+                    install_bun()
+            except Exception:
+                pass
+
             try:
                 if not esb.get('ok'):
                     install_esbuild()
                 if not vit.get('ok'):
                     install_vite()
-                if not elec.get('ok'):
-                    install_electron_global()
-                if not builder.get('ok'):
-                    install_electron_builder_global()
             except Exception:
                 pass
 

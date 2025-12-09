@@ -1,4 +1,151 @@
-window.__DARS_VDOM__={type:"T1",id:"page_138",key:"0",children:[{type:"T2",id:"container_139",key:"0/0",children:[{type:"T3",id:"dars-navbar",key:"0/0/0",children:[{type:"T2",id:"navbar-left",key:"0/0/0/0",children:[{type:"T4",id:"image_140",key:"0/0/0/0/0"},{type:"T5",id:"text_141",key:"0/0/0/0/1",text:"Dars Framework"}]},{type:"T2",id:"container_142",key:"0/0/0/1",children:[{type:"T2",id:"navbar-right",key:"0/0/0/1/0",children:[{type:"T6",id:"link_143",key:"0/0/0/1/0/0",text:"Home"},{type:"T6",id:"link_144",key:"0/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_145",key:"0/0/0/1/0/2",text:"Releases"},{type:"T6",id:"link_146",key:"0/0/0/1/0/3",text:"PlayGround"},{type:"T6",id:"link_147",key:"0/0/0/1/0/4",text:"GitHub"}]},{type:"T2",id:"hamburger-menu",key:"0/0/0/1/1",children:[{type:"T2",id:"hamburger-btn",key:"0/0/0/1/1/0",children:[{type:"T2",id:"container_148",key:"0/0/0/1/1/0/0",children:[{type:"T2",id:"container_149",key:"0/0/0/1/1/0/0/0"},{type:"T2",id:"container_150",key:"0/0/0/1/1/0/0/1"},{type:"T2",id:"container_151",key:"0/0/0/1/1/0/0/2"}]}]},{type:"T2",id:"mobile-menu",key:"0/0/0/1/1/1",children:[{type:"T6",id:"link_152",key:"0/0/0/1/1/1/0",text:"Home"},{type:"T6",id:"link_153",key:"0/0/0/1/1/1/1",text:"Documentation"},{type:"T6",id:"link_154",key:"0/0/0/1/1/1/2",text:"Releases"},{type:"T6",id:"link_155",key:"0/0/0/1/1/1/3",text:"PlayGround"},{type:"T6",id:"link_156",key:"0/0/0/1/1/1/4",text:"GitHub"}]}]}]}]}]},{type:"T2",id:"container_157",key:"0/1",children:[{type:"T2",id:"markdown-content-container",key:"0/1/0",children:[{type:"T9",id:"markdown_158",key:"0/1/0/0",text:`# Release Notes v1.7.9
+window.__DARS_VDOM__={type:"T1",id:"page_138",key:"0",children:[{type:"T2",id:"container_139",key:"0/0",children:[{type:"T3",id:"dars-navbar",key:"0/0/0",children:[{type:"T2",id:"navbar-left",key:"0/0/0/0",children:[{type:"T4",id:"image_140",key:"0/0/0/0/0"},{type:"T5",id:"text_141",key:"0/0/0/0/1",text:"Dars Framework"}]},{type:"T2",id:"container_142",key:"0/0/0/1",children:[{type:"T2",id:"navbar-right",key:"0/0/0/1/0",children:[{type:"T6",id:"link_143",key:"0/0/0/1/0/0",text:"Home"},{type:"T6",id:"link_144",key:"0/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_145",key:"0/0/0/1/0/2",text:"Releases"},{type:"T6",id:"link_146",key:"0/0/0/1/0/3",text:"PlayGround"},{type:"T6",id:"link_147",key:"0/0/0/1/0/4",text:"GitHub"}]},{type:"T2",id:"hamburger-menu",key:"0/0/0/1/1",children:[{type:"T2",id:"hamburger-btn",key:"0/0/0/1/1/0",children:[{type:"T2",id:"container_148",key:"0/0/0/1/1/0/0",children:[{type:"T2",id:"container_149",key:"0/0/0/1/1/0/0/0"},{type:"T2",id:"container_150",key:"0/0/0/1/1/0/0/1"},{type:"T2",id:"container_151",key:"0/0/0/1/1/0/0/2"}]}]},{type:"T2",id:"mobile-menu",key:"0/0/0/1/1/1",children:[{type:"T6",id:"link_152",key:"0/0/0/1/1/1/0",text:"Home"},{type:"T6",id:"link_153",key:"0/0/0/1/1/1/1",text:"Documentation"},{type:"T6",id:"link_154",key:"0/0/0/1/1/1/2",text:"Releases"},{type:"T6",id:"link_155",key:"0/0/0/1/1/1/3",text:"PlayGround"},{type:"T6",id:"link_156",key:"0/0/0/1/1/1/4",text:"GitHub"}]}]}]}]}]},{type:"T2",id:"container_157",key:"0/1",children:[{type:"T2",id:"markdown-content-container",key:"0/1/0",children:[{type:"T9",id:"markdown_158",key:"0/1/0/0",text:`# Release Notes v1.8.0
+
+> **Advanced Multimedia Components & Electron Security Baseline**
+
+## Installation
+
+\`\`\`bash
+pip install --upgrade dars-framework
+\`\`\`
+
+## What's New
+
+### New Advanced Multimedia Components: Video & Audio
+
+v1.8.0 introduces two new first-class components in the basic library:
+
+- \`Video\`: wrapper around \`<video>\`
+- \`Audio\`: wrapper around \`<audio>\`
+
+Both are **fully reactive** and integrate with the existing hooks system:
+
+- \`State\` + \`useDynamic\` for:
+  - \`src\`
+  - \`autoplay\`
+  - \`muted\`
+  - \`loop\`
+  - \`controls\`
+  - \`plays_inline\` (Video)
+- \`useValue\` for non-reactive initial values.
+- \`VRef\` (setVRef/useVRef) can target \`src\` and other props when needed.
+
+Example:
+
+\`\`\`python
+from dars.all import *
+from dars.hooks.value_helpers import V
+
+media_state = State(
+    "media",
+    current_video="/media/intro.mp4",
+    current_audio="/media/theme1.mp3",
+    autoplay_video=False,
+    muted_video=True,
+    loop_audio=True,
+)
+
+@route("/", index=True)
+def index():
+    return Page(
+        Container(
+            Video(
+                src=useDynamic("media.current_video"),
+                poster="/media/poster.jpg",
+                width="720",
+                controls=True,
+                autoplay=useDynamic("media.autoplay_video"),
+                muted=useDynamic("media.muted_video"),
+                preload="metadata",
+            ),
+            Button(
+                "Toggle Mute",
+                on_click=media_state.muted_video.set(
+                    (V("media.muted_video").bool() == True).then(False, True)
+                ),
+            ),
+            Button(
+                "Toggle Autoplay",
+                on_click=media_state.autoplay_video.set(
+                    (V("media.autoplay_video").bool() == True).then(False, True)
+                ),
+            ),
+            Text("Audio actual:"),
+            Text(useDynamic("media.current_audio")),
+            Audio(
+                src=useDynamic("media.current_audio"),
+                controls=True,
+                loop=useDynamic("media.loop_audio"),
+                preload="auto",
+            ),
+        )
+    )
+\`\`\`
+
+#### Reactive Boolean Attributes
+
+The web exporter has been extended so that \`useDynamic\` bindings on boolean attributes behave correctly:
+
+- When a \`State\` value changes, the runtime:
+  - Adds or removes the HTML attributes: \`autoplay\`, \`muted\`, \`loop\`, \`controls\`, \`playsinline\`.
+  - Synchronizes the corresponding JS properties on the media element (\`el.autoplay\`, \`el.muted\`, etc.).
+- Dynamic markers (from \`useDynamic\`) no longer count as *truthy* defaults:
+  - \`controls=True\`, \`plays_inline=True\` remain active by default.
+  - \`autoplay\`, \`loop\`, \`muted\` are off by default unless explicitly set by state or by a literal \`True\`.
+
+This ensures that Video/Audio behave predictably both on initial render and during reactive updates.
+
+### Automatic media/ Directory Copy
+
+The HTML/CSS/JS exporter now supports a **convention-based media folder**:
+
+- If your project root contains a \`media/\` directory, Dars will:
+  - Recursively copy \`media/\` into the export \`output_path\`.
+  - Preserve subdirectory structure.
+- Any \`src="/media/..."\` used in \`Image\`, \`Video\` or \`Audio\` will point to real files in the exported build.
+
+This makes it straightforward to ship videos, audio tracks and posters alongside your static export.
+
+### Electron 39.2.6 Security Baseline
+
+To keep desktop builds secure and reproducible, v1.8.0 introduces an **Electron security baseline**:
+
+- All desktop templates and Electron scaffolds now pin Electron to \`39.2.6\`:
+  - \`dars/templates/desktop/template/backend/package.json\`
+  - CLI \`init\` desktop scaffolds and \`init --update\` flows.
+- \`dars doctor\` gains version-awareness:
+  - New constant \`MIN_SAFE_ELECTRON = "39.2.6"\`.
+  - When you run \`dars doctor --all --yes\`, Dars will install/update Electron globally via Bun as \`electron@39.2.6\` and \`electron-builder@latest\`.
+- \`dars dev\` for desktop projects now warns if your installed Electron is below the baseline and suggests:
+
+  \`\`\`bash
+  dars doctor --all --yes
+  \`\`\`
+
+This keeps both templates and global tooling aligned with a reviewed Electron version.
+
+### Desktop Dev Flow Fixes (Electron + rTimeCompile)
+
+Several quality-of-life fixes improve desktop (Electron) development:
+
+- \`App.rTimeCompile\` desktop branch:
+  - Stops the "Starting preview..." spinner after Electron launches.
+  - Exits the method immediately when desktop mode finishes, preventing the web preview server from starting on top of Electron dev.
+- \`dars core/js_bridge\`:
+  - \`electron_dev_spawn\` now sets \`ELECTRON_DISABLE_SECURITY_WARNINGS=true\` for dev runs.
+  - This suppresses the noisy *Electron Security Warning (Insecure Content-Security-Policy)* in dev tools without touching the CSP used by the Dars runtime.
+
+Result: smoother desktop dev cycle with clear logs and no accidental web preview server when working on Electron apps.
+
+### Documentation Updates
+
+- \`LandingPage/documentation/markdown/components.md\` now documents:
+  - \`Video\` and \`Audio\` components.
+  - Reactive integration with \`State\`, \`useDynamic\`, \`V()\` and VRefs.
+  - Recommended \`media/\` folder convention for assets.
+
+---
+
+# Release Notes v1.7.9
 
 > **Global JS Error Handling & safer eval() in the runtime**
 
@@ -68,42 +215,6 @@ Two of the most important dynamic execution points are now wired to \`_safeEval\
    - This lets you centralize errors from hydration and dynamic updates, while preserving the same control flow in the runtime.
 
 Result: you get a **single, consistent error-reporting channel** for all dynamic runtime code, without changing how the framework behaves when no hook is provided.
-
-### Dev-focused by design, safe for production
-
-The new error handling path is intentionally **dev-friendly** and conservative:
-
-- In **production builds**, if you do not define \`window.Dars.onError\`, behavior is effectively unchanged compared to previous versions:
-  - The runtime logs eval errors via \`console.error\`.
-  - No extra network calls or side effects are introduced by default.
-- In **development**, you can opt-in to richer error reporting by defining \`window.Dars.onError\` (for example, to:
-  - Mirror client-side errors into the Python preview console.
-  - Aggregate hydration/runtime issues in your own telemetry pipeline.
-  - Show a custom UI overlay when a critical client error occurs).
-
-Because the hook is purely additive and optional, existing applications do not need to change anything to upgrade.
-
-### How to hook into Dars.onError (optional)
-
-If you want to take advantage of the new error pipeline in dev mode, you can define the hook in a small snippet injected by your app or a custom template:
-
-\`\`\`html
-<script>
-  window.Dars = window.Dars || {};
-  window.Dars.onError = function (err, ctx) {
-    // Example: log a compact message for the browser console
-    console.groupCollapsed('[Dars:onError]', err && err.message);
-    console.log('Error:', err);
-    console.log('Context:', ctx);
-    console.groupEnd();
-
-    // You can optionally POST this to a dev-only endpoint
-    // or bridge it back to Python when running dars dev.
-  };
-  <\/script>
-\`\`\`
-
-You are free to scope this snippet to **development only** (for example, via a custom config flag or environment variable); Dars itself does not inject any additional reporting code beyond the \`_safeEval\` helper.
 
 ### Files Modified
 
@@ -5795,4 +5906,4 @@ Upgrade Recommendation: Recommended for all users; especially helpful for projec
 # Older release notes can be found
 
 In the github repository [Here](https://github.com/ZtaMDev/Dars-Framework/releases).
-`}]},{type:"T2",id:"footer-section",key:"0/1/1",children:[{type:"T2",id:"container_159",key:"0/1/1/0",children:[{type:"T2",id:"container_160",key:"0/1/1/0/0",children:[{type:"T2",id:"container_161",key:"0/1/1/0/0/0",children:[{type:"T4",id:"image_162",key:"0/1/1/0/0/0/0"},{type:"T2",id:"container_163",key:"0/1/1/0/0/0/1",children:[{type:"T5",id:"text_164",key:"0/1/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_165",key:"0/1/1/0/0/1",children:[{type:"T2",id:"container_166",key:"0/1/1/0/0/1/0",children:[{type:"T5",id:"text_167",key:"0/1/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_168",key:"0/1/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_169",key:"0/1/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_170",key:"0/1/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_171",key:"0/1/1/0/0/1/1",children:[{type:"T5",id:"text_172",key:"0/1/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_173",key:"0/1/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_174",key:"0/1/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_175",key:"0/1/1/0/0/1/2",children:[{type:"T5",id:"text_176",key:"0/1/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_177",key:"0/1/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_178",key:"0/1/1/0/0/2",children:[{type:"T2",id:"container_179",key:"0/1/1/0/0/2/0",children:[{type:"T5",id:"text_180",key:"0/1/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_181",key:"0/1/1/0/0/2/1",children:[{type:"T5",id:"text_182",key:"0/1/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_183",key:"0/1/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_184",key:"0/1/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_185",key:"0/1/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]},{type:"T10",id:"documentation-sidebar",key:"0/2"}]},function(){const d=new Map;let l=null,p=null;function u(){}function k(){}function v(n,t){if(!n)return;t(n);const e=n.children||[];for(let a=0;a<e.length;a++)v(e[a],t)}function S(n,t){if(!(!n||!t))for(const[e,a]of Object.entries(t))try{a===!1||a===null||typeof a>"u"?n.removeAttribute(e):n.setAttribute(e,String(a))}catch{}}function P(n,t={},e={}){for(const a in t)if(!(a in e))try{n.removeAttribute(a)}catch{}for(const a in e){const o=e[a];try{o===!1||o===null||typeof o>"u"?n.removeAttribute(a):n.setAttribute(a,String(o))}catch{}}}function F(n,t={},e={}){for(const a in t)if(!(a in e))try{n.style.removeProperty(a.replace(/_/g,"-"))}catch{}for(const a in e){const o=e[a];try{n.style.setProperty(a.replace(/_/g,"-"),String(o))}catch{}}}function N(n,t){(t||document).addEventListener(n,function(e){let a=e.target;const o=t||document;for(;a&&a!==o;){const m=a.id;if(m&&d.has(m)){const f=d.get(m);if(a&&a.__darsEv&&a.__darsEv[n])return;let c=f[n];if(!c&&(n==="keydown"||n==="keyup"||n==="keypress")){const i=e.key||e.code;if(i){const r=n+"."+i;c=f[r]}}if(typeof c=="function"){try{c.call(a,e)}catch(i){console.error("[Dars] handler error",i)}return}}a=a.parentNode}},!0)}function _(n,t){return n&&t?n.type!==t.type:n!==t}function x(n){if(!n)return;const t=n.children||[];for(let e=0;e<t.length;e++)x(t[e]);if(n.id&&d.delete(n.id),n.id){const e=document.getElementById(n.id);if(e&&e.parentNode)try{e.parentNode.removeChild(e)}catch{}}}function b(n,t){if(!t||!t.id)return{ok:!1,reason:"missing-new"};let e=document.getElementById(t.id);if(!e){const i=n&&n.id?document.getElementById(n.id):null;if(i)try{i.id=t.id,e=i}catch{}}if(!e)return{ok:!1,reason:"missing-el"};if(_(n,t))return{ok:!1,reason:"type-changed"};const a=!!t.isIsland;if(!a&&t.class&&(e.className=t.class),a||P(e,n&&n.props||{},t.props||{}),a||F(e,n&&n.style||{},t.style||{}),!a&&Object.prototype.hasOwnProperty.call(t,"text")&&e.textContent!==String(t.text||"")&&(e.textContent=String(t.text||"")),a)return{ok:!0};const o=n&&n.children?n.children:[],m=t.children?t.children:[],f=new Map;for(let i=0;i<o.length;i++){const r=o[i]&&(o[i].id||o[i].key)||null;r&&f.set(String(r),o[i])}const c=new Set;for(let i=0;i<m.length;i++){const r=m[i],h=r&&(r.id||r.key)||null;if(!h)if(i<o.length){const s=b(o[i],r);if(!s.ok)return s;c.add(o[i]);continue}else return{ok:!1,reason:"children-added"};const w=f.get(String(h));if(w){const s=b(w,r);if(!s.ok)return s;c.add(w)}else{if(i<o.length){const y=o[i];if(!_(y,r)){const g=b(y,r);if(!g.ok)return g;c.add(y);continue}}const s=createSubtree(r);if(s){const y=i<o.length?o[i]:null;if(y&&y.id){const g=document.getElementById(y.id);g&&g.parentNode?g.parentNode.insertBefore(s,g):e.appendChild(s)}else e.appendChild(s);continue}return{ok:!1,reason:"children-added"}}}for(let i=0;i<o.length;i++){const r=o[i];c.has(r)||x(r)}return{ok:!0}}function M(n){typeof requestAnimationFrame=="function"?requestAnimationFrame(n):setTimeout(n,16)}function O(n){const t=l;if(!t){l=n;try{window.__DARS_VDOM__=n}catch{}return}M(()=>{const e=b(t,n);if(!e.ok){console.warn("[Dars] Structural change detected (",e.reason,"), reloading...");try{location.reload()}catch{}return}l=n;try{window.__DARS_VDOM__=n}catch{}})}function C(n){l=n;try{window.__DARS_VDOM__=n}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(e=>N(e,document))}function B(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const n=window.__DARS_VERSION_URL||"version.txt";let t=null,e=!1,a=0;const o=10;let m=!1;function f(i,r,h,w){try{const s=new XMLHttpRequest;w&&(s.responseType=w),s.open("GET",i,!0),s.timeout=5e3,s.onreadystatechange=function(){s.readyState===4&&(s.status>=200&&s.status<300?r(s.response):h())},s.onerror=h,s.ontimeout=h,s.setRequestHeader("Cache-Control","no-store"),s.send()}catch{h()}}function c(){m||f(n,function(i){let r=(i||"").toString().trim();if(!r||r==="0"){if(a+=1,a>=o){console.warn("[Dars] version file not found after",o,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(c,600);return}if(a=0,e=!1,p||(p=r),r&&r!==p){p=r;try{location.reload()}catch{}return}t=setTimeout(c,600)},function(){if(a+=1,a>=o){console.warn("[Dars] version file not reachable after",o,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(c,600)},"text")}return c(),()=>{try{m=!0,t&&clearTimeout(t),window.__DARS_STOP_HOTRELOAD=null}catch{}}}function D(){if(window.__DARS_VDOM__?C(window.__DARS_VDOM__):window.__ROUTE_VDOM__?C(window.__ROUTE_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=B()}catch{}}}document.readyState==="complete"||document.readyState==="interactive"?D():document.addEventListener("DOMContentLoaded",D)}(),window.addEventListener("scroll",()=>{const d=document.getElementById("dars-navbar");window.scrollY>20?d.classList.add("scrolled"):d.classList.remove("scrolled");const l=document.getElementById("features-section");if(l&&!l.classList.contains("visible")){const p=l.getBoundingClientRect().top,u=window.innerHeight/1.5;p<u&&(l.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((v,S)=>{setTimeout(()=>{v.style.opacity="1",v.style.transform="translateY(0)"},S*100)}))}});const T=document.getElementById("hero-logo"),V=document.getElementById("hero-title"),I=document.getElementById("hero-description"),R=document.getElementById("pip-command"),A=document.getElementById("get-started-btn"),E=document.getElementById("scroll-text");T&&setTimeout(()=>T.classList.add("show"),5),V&&setTimeout(()=>V.classList.add("show"),350),I&&setTimeout(()=>I.classList.add("show"),650),R&&setTimeout(()=>R.classList.add("show"),950),A&&setTimeout(()=>A.classList.add("show"),1250),E&&setTimeout(()=>E.classList.add("show"),1500),document.addEventListener("DOMContentLoaded",function(){const d=document.getElementById("hamburger-btn"),l=document.getElementById("mobile-menu"),p=document.body;d&&l&&(d.addEventListener("click",function(u){u.stopPropagation(),l.style.display==="flex"?(l.style.display="none",d.classList.remove("menu-open"),p.classList.remove("menu-open")):(l.style.display="flex",d.classList.add("menu-open"),p.classList.add("menu-open"))}),l.querySelectorAll("a").forEach(u=>{u.addEventListener("click",function(){l.style.display="none",d.classList.remove("menu-open"),p.classList.remove("menu-open")})}),document.addEventListener("click",function(u){!d.contains(u.target)&&!l.contains(u.target)&&(l.style.display="none",d.classList.remove("menu-open"),p.classList.remove("menu-open"))}),document.addEventListener("keydown",function(u){u.key==="Escape"&&l.style.display==="flex"&&(l.style.display="none",d.classList.remove("menu-open"),p.classList.remove("menu-open"))}))});
+`}]},{type:"T2",id:"footer-section",key:"0/1/1",children:[{type:"T2",id:"container_159",key:"0/1/1/0",children:[{type:"T2",id:"container_160",key:"0/1/1/0/0",children:[{type:"T2",id:"container_161",key:"0/1/1/0/0/0",children:[{type:"T4",id:"image_162",key:"0/1/1/0/0/0/0"},{type:"T2",id:"container_163",key:"0/1/1/0/0/0/1",children:[{type:"T5",id:"text_164",key:"0/1/1/0/0/0/1/0",text:"Dars Framework"}]}]},{type:"T2",id:"container_165",key:"0/1/1/0/0/1",children:[{type:"T2",id:"container_166",key:"0/1/1/0/0/1/0",children:[{type:"T5",id:"text_167",key:"0/1/1/0/0/1/0/0",text:"Quick Links"},{type:"T6",id:"link_168",key:"0/1/1/0/0/1/0/1",text:"Documentation"},{type:"T6",id:"link_169",key:"0/1/1/0/0/1/0/2",text:"GitHub"},{type:"T6",id:"link_170",key:"0/1/1/0/0/1/0/3",text:"Examples"}]},{type:"T2",id:"container_171",key:"0/1/1/0/0/1/1",children:[{type:"T5",id:"text_172",key:"0/1/1/0/0/1/1/0",text:"Resources"},{type:"T6",id:"link_173",key:"0/1/1/0/0/1/1/1",text:"Getting Started"},{type:"T6",id:"link_174",key:"0/1/1/0/0/1/1/2",text:"Releases"}]},{type:"T2",id:"container_175",key:"0/1/1/0/0/1/2",children:[{type:"T5",id:"text_176",key:"0/1/1/0/0/1/2/0",text:"Info: "},{type:"T5",id:"text_177",key:"0/1/1/0/0/1/2/1",text:"A modern Python framework for web and desktop applications"}]}]},{type:"T2",id:"container_178",key:"0/1/1/0/0/2",children:[{type:"T2",id:"container_179",key:"0/1/1/0/0/2/0",children:[{type:"T5",id:"text_180",key:"0/1/1/0/0/2/0/0",text:"\xA9 2024 Dars Framework."}]},{type:"T2",id:"container_181",key:"0/1/1/0/0/2/1",children:[{type:"T5",id:"text_182",key:"0/1/1/0/0/2/1/0",text:"Created with "},{type:"T6",id:"link_183",key:"0/1/1/0/0/2/1/1",text:"Dars Framework"},{type:"T5",id:"text_184",key:"0/1/1/0/0/2/1/2",text:" by "},{type:"T6",id:"link_185",key:"0/1/1/0/0/2/1/3",text:"ZtaDev"}]}]}]}]}]}]},{type:"T10",id:"documentation-sidebar",key:"0/2"}]},function(){const d=new Map;let l=null,p=null;function u(){}function k(){}function v(n,t){if(!n)return;t(n);const e=n.children||[];for(let a=0;a<e.length;a++)v(e[a],t)}function S(n,t){if(!(!n||!t))for(const[e,a]of Object.entries(t))try{a===!1||a===null||typeof a>"u"?n.removeAttribute(e):n.setAttribute(e,String(a))}catch{}}function P(n,t={},e={}){for(const a in t)if(!(a in e))try{n.removeAttribute(a)}catch{}for(const a in e){const o=e[a];try{o===!1||o===null||typeof o>"u"?n.removeAttribute(a):n.setAttribute(a,String(o))}catch{}}}function F(n,t={},e={}){for(const a in t)if(!(a in e))try{n.style.removeProperty(a.replace(/_/g,"-"))}catch{}for(const a in e){const o=e[a];try{n.style.setProperty(a.replace(/_/g,"-"),String(o))}catch{}}}function N(n,t){(t||document).addEventListener(n,function(e){let a=e.target;const o=t||document;for(;a&&a!==o;){const m=a.id;if(m&&d.has(m)){const f=d.get(m);if(a&&a.__darsEv&&a.__darsEv[n])return;let c=f[n];if(!c&&(n==="keydown"||n==="keyup"||n==="keypress")){const i=e.key||e.code;if(i){const r=n+"."+i;c=f[r]}}if(typeof c=="function"){try{c.call(a,e)}catch(i){console.error("[Dars] handler error",i)}return}}a=a.parentNode}},!0)}function _(n,t){return n&&t?n.type!==t.type:n!==t}function x(n){if(!n)return;const t=n.children||[];for(let e=0;e<t.length;e++)x(t[e]);if(n.id&&d.delete(n.id),n.id){const e=document.getElementById(n.id);if(e&&e.parentNode)try{e.parentNode.removeChild(e)}catch{}}}function b(n,t){if(!t||!t.id)return{ok:!1,reason:"missing-new"};let e=document.getElementById(t.id);if(!e){const i=n&&n.id?document.getElementById(n.id):null;if(i)try{i.id=t.id,e=i}catch{}}if(!e)return{ok:!1,reason:"missing-el"};if(_(n,t))return{ok:!1,reason:"type-changed"};const a=!!t.isIsland;if(!a&&t.class&&(e.className=t.class),a||P(e,n&&n.props||{},t.props||{}),a||F(e,n&&n.style||{},t.style||{}),!a&&Object.prototype.hasOwnProperty.call(t,"text")&&e.textContent!==String(t.text||"")&&(e.textContent=String(t.text||"")),a)return{ok:!0};const o=n&&n.children?n.children:[],m=t.children?t.children:[],f=new Map;for(let i=0;i<o.length;i++){const r=o[i]&&(o[i].id||o[i].key)||null;r&&f.set(String(r),o[i])}const c=new Set;for(let i=0;i<m.length;i++){const r=m[i],h=r&&(r.id||r.key)||null;if(!h)if(i<o.length){const s=b(o[i],r);if(!s.ok)return s;c.add(o[i]);continue}else return{ok:!1,reason:"children-added"};const w=f.get(String(h));if(w){const s=b(w,r);if(!s.ok)return s;c.add(w)}else{if(i<o.length){const y=o[i];if(!_(y,r)){const g=b(y,r);if(!g.ok)return g;c.add(y);continue}}const s=createSubtree(r);if(s){const y=i<o.length?o[i]:null;if(y&&y.id){const g=document.getElementById(y.id);g&&g.parentNode?g.parentNode.insertBefore(s,g):e.appendChild(s)}else e.appendChild(s);continue}return{ok:!1,reason:"children-added"}}}for(let i=0;i<o.length;i++){const r=o[i];c.has(r)||x(r)}return{ok:!0}}function M(n){typeof requestAnimationFrame=="function"?requestAnimationFrame(n):setTimeout(n,16)}function O(n){const t=l;if(!t){l=n;try{window.__DARS_VDOM__=n}catch{}return}M(()=>{const e=b(t,n);if(!e.ok){console.warn("[Dars] Structural change detected (",e.reason,"), reloading...");try{location.reload()}catch{}return}l=n;try{window.__DARS_VDOM__=n}catch{}})}function C(n){l=n;try{window.__DARS_VDOM__=n}catch{}["click","dblclick","mousedown","mouseup","mouseenter","mouseleave","mousemove","keydown","keyup","keypress","change","input","submit","focus","blur"].forEach(e=>N(e,document))}function B(){try{if(window.__DARS_HOTRELOAD_DISABLED__)return()=>{}}catch{}const n=window.__DARS_VERSION_URL||"version.txt";let t=null,e=!1,a=0;const o=10;let m=!1;function f(i,r,h,w){try{const s=new XMLHttpRequest;w&&(s.responseType=w),s.open("GET",i,!0),s.timeout=5e3,s.onreadystatechange=function(){s.readyState===4&&(s.status>=200&&s.status<300?r(s.response):h())},s.onerror=h,s.ontimeout=h,s.setRequestHeader("Cache-Control","no-store"),s.send()}catch{h()}}function c(){m||f(n,function(i){let r=(i||"").toString().trim();if(!r||r==="0"){if(a+=1,a>=o){console.warn("[Dars] version file not found after",o,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(c,600);return}if(a=0,e=!1,p||(p=r),r&&r!==p){p=r;try{location.reload()}catch{}return}t=setTimeout(c,600)},function(){if(a+=1,a>=o){console.warn("[Dars] version file not reachable after",o,"attempts. Hot reload disabled for this session."),m=!0;try{window.__DARS_HOTRELOAD_DISABLED__=!0,window.__DARS_STOP_HOTRELOAD=null}catch{}if(t)try{clearTimeout(t)}catch{}return}e||(console.warn("[Dars] waiting for version file..."),e=!0),t=setTimeout(c,600)},"text")}return c(),()=>{try{m=!0,t&&clearTimeout(t),window.__DARS_STOP_HOTRELOAD=null}catch{}}}function D(){if(window.__DARS_VDOM__?C(window.__DARS_VDOM__):window.__ROUTE_VDOM__?C(window.__ROUTE_VDOM__):console.warn("[Dars] No VDOM snapshot found for hydration"),window.__DARS_VERSION_URL&&window.__DARS_SNAPSHOT_URL){try{typeof window.__DARS_STOP_HOTRELOAD=="function"&&window.__DARS_STOP_HOTRELOAD()}catch{}try{window.__DARS_STOP_HOTRELOAD=B()}catch{}}}document.readyState==="complete"||document.readyState==="interactive"?D():document.addEventListener("DOMContentLoaded",D)}(),window.addEventListener("scroll",()=>{const d=document.getElementById("dars-navbar");window.scrollY>20?d.classList.add("scrolled"):d.classList.remove("scrolled");const l=document.getElementById("features-section");if(l&&!l.classList.contains("visible")){const p=l.getBoundingClientRect().top,u=window.innerHeight/1.5;p<u&&(l.classList.add("visible"),document.querySelectorAll('[id^="feature-card-"]').forEach((v,S)=>{setTimeout(()=>{v.style.opacity="1",v.style.transform="translateY(0)"},S*100)}))}});const T=document.getElementById("hero-logo"),V=document.getElementById("hero-title"),I=document.getElementById("hero-description"),A=document.getElementById("pip-command"),R=document.getElementById("get-started-btn"),E=document.getElementById("scroll-text");T&&setTimeout(()=>T.classList.add("show"),5),V&&setTimeout(()=>V.classList.add("show"),350),I&&setTimeout(()=>I.classList.add("show"),650),A&&setTimeout(()=>A.classList.add("show"),950),R&&setTimeout(()=>R.classList.add("show"),1250),E&&setTimeout(()=>E.classList.add("show"),1500),document.addEventListener("DOMContentLoaded",function(){const d=document.getElementById("hamburger-btn"),l=document.getElementById("mobile-menu"),p=document.body;d&&l&&(d.addEventListener("click",function(u){u.stopPropagation(),l.style.display==="flex"?(l.style.display="none",d.classList.remove("menu-open"),p.classList.remove("menu-open")):(l.style.display="flex",d.classList.add("menu-open"),p.classList.add("menu-open"))}),l.querySelectorAll("a").forEach(u=>{u.addEventListener("click",function(){l.style.display="none",d.classList.remove("menu-open"),p.classList.remove("menu-open")})}),document.addEventListener("click",function(u){!d.contains(u.target)&&!l.contains(u.target)&&(l.style.display="none",d.classList.remove("menu-open"),p.classList.remove("menu-open"))}),document.addEventListener("keydown",function(u){u.key==="Escape"&&l.style.display==="flex"&&(l.style.display="none",d.classList.remove("menu-open"),p.classList.remove("menu-open"))}))});

@@ -12,6 +12,12 @@ from typing import List, Optional, Tuple
 
 
 def _run(cmd: List[str], cwd: Optional[str] = None, live: bool = False) -> Tuple[int, str, str]:
+    """Small wrapper around subprocess.run used by JS tooling helpers.
+
+    Note: this function is generic and MUST NOT rely on Electron-specific env vars.
+    Electron-specific tweaks (like ELECTRON_DISABLE_SECURITY_WARNINGS) are handled
+    in electron_dev_spawn, which is only used for desktop dev.
+    """
     try:
         if live:
             p = subprocess.run(cmd, cwd=cwd)
@@ -142,10 +148,15 @@ def electron_dev_spawn(cwd: Optional[str] = None, env: Optional[dict] = None):
         cmd = [npx, "--yes", "electron", "."]
 
     try:
+        # Prepare environment for Electron dev runs
+        if env is None:
+            env = os.environ.copy()
+        # Disable noisy security warnings in dev; Dars controls CSP explicitly.
+        env.setdefault("ELECTRON_DISABLE_SECURITY_WARNINGS", "true")
+
         # On Windows create a new process group so we can terminate the whole tree; on POSIX use setsid
         kwargs = dict(cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        if env is not None:
-            kwargs['env'] = env
+        kwargs['env'] = env
         if os.name == 'nt':
             kwargs['creationflags'] = subprocess.CREATE_NEW_PROCESS_GROUP
         else:

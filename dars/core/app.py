@@ -851,6 +851,13 @@ class App:
                             pass
                     return
 
+                # Stop startup spinner once Electron dev process is running
+                if startup_status:
+                    try:
+                        startup_status.stop()
+                    except Exception:
+                        pass
+
                 try:
                     while not shutdown_event.is_set():
                         if electron_proc and electron_proc.poll() is not None:
@@ -932,13 +939,17 @@ class App:
                     except Exception:
                         pass
                     
-                    return
+
 
             except Exception as e:
                 import traceback
                 traceback.print_exc()
                 initialization_complete.set()
                 raise
+
+            # Desktop mode should never fall through into the web preview flow.
+            # Once the Electron dev loop finishes (normally or via Ctrl+C), exit rTimeCompile.
+            return
 
         # ---- WEB MODE ----
         # Mark initialization as in progress

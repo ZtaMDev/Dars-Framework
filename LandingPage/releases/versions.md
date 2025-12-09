@@ -1,3 +1,150 @@
+# Release Notes v1.8.0
+
+> **Advanced Multimedia Components & Electron Security Baseline**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### New Advanced Multimedia Components: Video & Audio
+
+v1.8.0 introduces two new first-class components in the basic library:
+
+- `Video`: wrapper around `<video>`
+- `Audio`: wrapper around `<audio>`
+
+Both are **fully reactive** and integrate with the existing hooks system:
+
+- `State` + `useDynamic` for:
+  - `src`
+  - `autoplay`
+  - `muted`
+  - `loop`
+  - `controls`
+  - `plays_inline` (Video)
+- `useValue` for non-reactive initial values.
+- `VRef` (setVRef/useVRef) can target `src` and other props when needed.
+
+Example:
+
+```python
+from dars.all import *
+from dars.hooks.value_helpers import V
+
+media_state = State(
+    "media",
+    current_video="/media/intro.mp4",
+    current_audio="/media/theme1.mp3",
+    autoplay_video=False,
+    muted_video=True,
+    loop_audio=True,
+)
+
+@route("/", index=True)
+def index():
+    return Page(
+        Container(
+            Video(
+                src=useDynamic("media.current_video"),
+                poster="/media/poster.jpg",
+                width="720",
+                controls=True,
+                autoplay=useDynamic("media.autoplay_video"),
+                muted=useDynamic("media.muted_video"),
+                preload="metadata",
+            ),
+            Button(
+                "Toggle Mute",
+                on_click=media_state.muted_video.set(
+                    (V("media.muted_video").bool() == True).then(False, True)
+                ),
+            ),
+            Button(
+                "Toggle Autoplay",
+                on_click=media_state.autoplay_video.set(
+                    (V("media.autoplay_video").bool() == True).then(False, True)
+                ),
+            ),
+            Text("Audio actual:"),
+            Text(useDynamic("media.current_audio")),
+            Audio(
+                src=useDynamic("media.current_audio"),
+                controls=True,
+                loop=useDynamic("media.loop_audio"),
+                preload="auto",
+            ),
+        )
+    )
+```
+
+#### Reactive Boolean Attributes
+
+The web exporter has been extended so that `useDynamic` bindings on boolean attributes behave correctly:
+
+- When a `State` value changes, the runtime:
+  - Adds or removes the HTML attributes: `autoplay`, `muted`, `loop`, `controls`, `playsinline`.
+  - Synchronizes the corresponding JS properties on the media element (`el.autoplay`, `el.muted`, etc.).
+- Dynamic markers (from `useDynamic`) no longer count as *truthy* defaults:
+  - `controls=True`, `plays_inline=True` remain active by default.
+  - `autoplay`, `loop`, `muted` are off by default unless explicitly set by state or by a literal `True`.
+
+This ensures that Video/Audio behave predictably both on initial render and during reactive updates.
+
+### Automatic media/ Directory Copy
+
+The HTML/CSS/JS exporter now supports a **convention-based media folder**:
+
+- If your project root contains a `media/` directory, Dars will:
+  - Recursively copy `media/` into the export `output_path`.
+  - Preserve subdirectory structure.
+- Any `src="/media/..."` used in `Image`, `Video` or `Audio` will point to real files in the exported build.
+
+This makes it straightforward to ship videos, audio tracks and posters alongside your static export.
+
+### Electron 39.2.6 Security Baseline
+
+To keep desktop builds secure and reproducible, v1.8.0 introduces an **Electron security baseline**:
+
+- All desktop templates and Electron scaffolds now pin Electron to `39.2.6`:
+  - `dars/templates/desktop/template/backend/package.json`
+  - CLI `init` desktop scaffolds and `init --update` flows.
+- `dars doctor` gains version-awareness:
+  - New constant `MIN_SAFE_ELECTRON = "39.2.6"`.
+  - When you run `dars doctor --all --yes`, Dars will install/update Electron globally via Bun as `electron@39.2.6` and `electron-builder@latest`.
+- `dars dev` for desktop projects now warns if your installed Electron is below the baseline and suggests:
+
+  ```bash
+  dars doctor --all --yes
+  ```
+
+This keeps both templates and global tooling aligned with a reviewed Electron version.
+
+### Desktop Dev Flow Fixes (Electron + rTimeCompile)
+
+Several quality-of-life fixes improve desktop (Electron) development:
+
+- `App.rTimeCompile` desktop branch:
+  - Stops the "Starting preview..." spinner after Electron launches.
+  - Exits the method immediately when desktop mode finishes, preventing the web preview server from starting on top of Electron dev.
+- `dars core/js_bridge`:
+  - `electron_dev_spawn` now sets `ELECTRON_DISABLE_SECURITY_WARNINGS=true` for dev runs.
+  - This suppresses the noisy *Electron Security Warning (Insecure Content-Security-Policy)* in dev tools without touching the CSP used by the Dars runtime.
+
+Result: smoother desktop dev cycle with clear logs and no accidental web preview server when working on Electron apps.
+
+### Documentation Updates
+
+- `LandingPage/documentation/markdown/components.md` now documents:
+  - `Video` and `Audio` components.
+  - Reactive integration with `State`, `useDynamic`, `V()` and VRefs.
+  - Recommended `media/` folder convention for assets.
+
+---
+
 # Release Notes v1.7.9
 
 > **Global JS Error Handling & safer eval() in the runtime**

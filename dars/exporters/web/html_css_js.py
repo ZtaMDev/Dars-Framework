@@ -15,6 +15,8 @@ from dars.components.basic.button import Button
 from dars.components.basic.input import Input
 from dars.components.basic.container import Container
 from dars.components.basic.image import Image
+from dars.components.basic.video import Video
+from dars.components.basic.audio import Audio
 from dars.components.basic.link import Link
 from dars.components.basic.textarea import Textarea
 from dars.components.basic.checkbox import Checkbox
@@ -242,6 +244,31 @@ class HTMLCSSJSExporter(Exporter):
                 src = static.get('src') if isinstance(static, dict) else static
                 if src and os.path.isfile(os.path.join(project_root, src)):
                     shutil.copy2(os.path.join(project_root, src), os.path.join(output_path, os.path.basename(src)))
+
+            # 5) Carpeta de medios genérica (media/)
+            # Si existe un directorio 'media' en el root del proyecto, copiarlo
+            # completo al directorio de export, preservando la estructura.
+            try:
+                media_root = os.path.join(project_root, "media")
+                if os.path.isdir(media_root):
+                    for dirpath, dirnames, filenames in os.walk(media_root):
+                        rel = os.path.relpath(dirpath, media_root)
+                        if rel == ".":
+                            target_dir = os.path.join(output_path, "media")
+                        else:
+                            target_dir = os.path.join(output_path, "media", rel)
+                        os.makedirs(target_dir, exist_ok=True)
+                        for name in filenames:
+                            src_path = os.path.join(dirpath, name)
+                            dst_path = os.path.join(target_dir, name)
+                            try:
+                                shutil.copy2(src_path, dst_path)
+                            except Exception:
+                                # Mejor esfuerzo: si falla copiar un archivo, continuar con el resto
+                                continue
+            except Exception:
+                # Nunca romper el export por problemas en media/
+                pass
 
             base_css_content = self.generate_base_css()
             custom_css_content = self.generate_custom_css(app)
@@ -2872,8 +2899,13 @@ body {
         registry = get_bindings_registry()
         marker_pattern = r'__DARS_DYNAMIC_\d+_\d+__'
         
-        # Check common props (expanded to include disabled, checked)
-        props_to_check = ['text', 'html', 'value', 'placeholder', 'src', 'alt', 'href', 'disabled', 'checked', 'style', 'class_name']
+        # Check common props (expanded to include disabled, checked and media booleans)
+        props_to_check = [
+            'text', 'html', 'value', 'placeholder', 'src', 'alt', 'href',
+            'disabled', 'checked', 'style', 'class_name',
+            # Media / boolean props for Video & Audio
+            'autoplay', 'muted', 'loop', 'controls', 'plays_inline',
+        ]
         
         for prop_name in props_to_check:
             prop_value = getattr(component, prop_name, None)
@@ -3876,10 +3908,13 @@ body {
         
         
         # Lista de componentes built-in de Dars que NO deben usar su propio metodo render()
+        # (salvo casos especiales como Video/Audio que tienen un render() específico pero
+        # se manejan de forma explícita más abajo).
         builtin_components = [
-            Page, GridLayout, FlexLayout, Text, Button, Input, Container, Image, Link, 
-            Textarea, Card, Modal, Navbar, Checkbox, RadioButton, Select, Slider, 
+            Page, GridLayout, FlexLayout, Text, Button, Input, Container, Image, Link,
+            Textarea, Card, Modal, Navbar, Checkbox, RadioButton, Select, Slider,
             DatePicker, Table, Tabs, Accordion, ProgressBar, Spinner, Tooltip, Markdown, Section,
+            Video, Audio,
         ]
         
         # Verificar si es un componente personalizado (no built-in)
@@ -3915,6 +3950,10 @@ body {
             return self.render_section(component)
         elif isinstance(component, Image):
             return self.render_image(component)
+        elif isinstance(component, Video):
+            return self.render_video(component)
+        elif isinstance(component, Audio):
+            return self.render_audio(component)
         elif isinstance(component, Link):
             return self.render_link(component)
         elif isinstance(component, Textarea):
@@ -4352,6 +4391,188 @@ body {
             alt_val = vref_initial['alt']
 
         return f'<img id="{component_id}" src="{src_val}" alt="{alt_val}" {width_attr} {height_attr} {class_attr} {style_attr} {vref_str} />'
+
+    def render_video(self, video: Video) -> str:
+        """Renderiza un componente Video con soporte para useValue/useDynamic/VRef."""
+        component_id = self.get_component_id(video, prefix="video")
+        class_attr = f'class="dars-video {video.class_name or ""}"'
+        style_attr = f'style="{self.render_styles(video.style)}"' if video.style else ""
+        width_attr = f'width="{video.width}"' if getattr(video, 'width', None) else ""
+        height_attr = f'height="{video.height}"' if getattr(video, 'height', None) else ""
+
+        # Process useValue props FIRST (non-reactive initial values)
+        self._process_value_props(video)
+
+        # Then process dynamic props (reactive bindings)
+        dynamic_info = self._process_dynamic_props(video)
+
+        if dynamic_info['bindings']:
+            if not hasattr(self, '_built_in_bindings'):
+                self._built_in_bindings = []
+            self._built_in_bindings.extend(dynamic_info['bindings'])
+
+        initial = dynamic_info['initial_values']
+
+        # Handle src
+        src_val = initial.get('src', getattr(video, 'src', ''))
+        if hasattr(src_val, 'marker'):
+            src_val = ""
+
+        # Handle poster
+        poster_val = initial.get('poster', getattr(video, 'poster', None))
+        if hasattr(poster_val, 'marker'):
+            poster_val = None
+
+        # Handle booleans
+        def _normalize_default_bool(attr_name: str, fallback: bool) -> bool:
+            """Return a safe default for a boolean prop.
+
+            If the component attribute is a dynamic marker (useDynamic), we MUST NOT
+            treat that marker object as True. In that case, fall back to the provided
+            fallback (controls=True, others usually False).
+            """
+            raw = getattr(video, attr_name, fallback)
+            if hasattr(raw, 'marker'):
+                return fallback
+            return bool(raw)
+
+        def _bool_from_initial(key: str, attr_name: str, fallback: bool) -> bool:
+            # Priority: initial dynamic value -> component attr (if not marker) -> fallback
+            val = initial.get(key, None)
+            if hasattr(val, 'marker'):
+                # unresolved dynamic marker => use component attr / fallback
+                return _normalize_default_bool(attr_name, fallback)
+            if val is not None:
+                return bool(val)
+            return _normalize_default_bool(attr_name, fallback)
+
+        controls_val = _bool_from_initial('controls', 'controls', True)
+        autoplay_val = _bool_from_initial('autoplay', 'autoplay', False)
+        loop_val = _bool_from_initial('loop', 'loop', False)
+        muted_val = _bool_from_initial('muted', 'muted', False)
+        playsinline_val = _bool_from_initial('plays_inline', 'plays_inline', True)
+
+        preload_val = initial.get('preload', getattr(video, 'preload', None))
+        if hasattr(preload_val, 'marker'):
+            preload_val = None
+
+        # Process VRef props
+        vref_info = self._process_vref_props(video)
+        vref_attrs = vref_info['attrs']
+        vref_initial = vref_info['initial_values']
+        vref_str = ' '.join([f'{k}="{v}"' for k, v in vref_attrs.items()])
+
+        # Apply VRef overrides
+        if 'src' in vref_initial:
+            src_val = vref_initial['src']
+        if 'poster' in vref_initial:
+            poster_val = vref_initial['poster']
+
+        attrs = [f'id="{component_id}"', f'src="{src_val}"', class_attr, style_attr, width_attr, height_attr, vref_str]
+        if poster_val:
+            attrs.append(f'poster="{poster_val}"')
+        if controls_val:
+            attrs.append('controls')
+        if autoplay_val:
+            attrs.append('autoplay')
+        if loop_val:
+            attrs.append('loop')
+        if muted_val:
+            attrs.append('muted')
+        if preload_val:
+            attrs.append(f'preload="{preload_val}"')
+        if playsinline_val:
+            attrs.append('playsinline')
+
+        extra_attrs = getattr(video, 'extra_attrs', {}) or {}
+        for key, value in extra_attrs.items():
+            if value is True:
+                attrs.append(key)
+            elif value not in (None, False):
+                attrs.append(f'{key}="{value}"')
+
+        attr_str = ' '.join(a for a in attrs if a)
+        return f'<video {attr_str}></video>'
+
+    def render_audio(self, audio: Audio) -> str:
+        """Renderiza un componente Audio con soporte para useValue/useDynamic/VRef."""
+        component_id = self.get_component_id(audio, prefix="audio")
+        class_attr = f'class="dars-audio {audio.class_name or ""}"'
+        style_attr = f'style="{self.render_styles(audio.style)}"' if audio.style else ""
+
+        # Process useValue props FIRST (non-reactive initial values)
+        self._process_value_props(audio)
+
+        # Then process dynamic props (reactive bindings)
+        dynamic_info = self._process_dynamic_props(audio)
+
+        if dynamic_info['bindings']:
+            if not hasattr(self, '_built_in_bindings'):
+                self._built_in_bindings = []
+            self._built_in_bindings.extend(dynamic_info['bindings'])
+
+        initial = dynamic_info['initial_values']
+
+        # Handle src
+        src_val = initial.get('src', getattr(audio, 'src', ''))
+        if hasattr(src_val, 'marker'):
+            src_val = ""
+
+        # Booleans
+        def _normalize_default_bool_a(attr_name: str, fallback: bool) -> bool:
+            raw = getattr(audio, attr_name, fallback)
+            if hasattr(raw, 'marker'):
+                return fallback
+            return bool(raw)
+
+        def _bool_from_initial_a(key: str, attr_name: str, fallback: bool) -> bool:
+            val = initial.get(key, None)
+            if hasattr(val, 'marker'):
+                return _normalize_default_bool_a(attr_name, fallback)
+            if val is not None:
+                return bool(val)
+            return _normalize_default_bool_a(attr_name, fallback)
+
+        controls_val = _bool_from_initial_a('controls', 'controls', True)
+        autoplay_val = _bool_from_initial_a('autoplay', 'autoplay', False)
+        loop_val = _bool_from_initial_a('loop', 'loop', False)
+        muted_val = _bool_from_initial_a('muted', 'muted', False)
+
+        preload_val = initial.get('preload', getattr(audio, 'preload', None))
+        if hasattr(preload_val, 'marker'):
+            preload_val = None
+
+        # Process VRef props
+        vref_info = self._process_vref_props(audio)
+        vref_attrs = vref_info['attrs']
+        vref_initial = vref_info['initial_values']
+        vref_str = ' '.join([f'{k}="{v}"' for k, v in vref_attrs.items()])
+
+        # Apply VRef overrides
+        if 'src' in vref_initial:
+            src_val = vref_initial['src']
+
+        attrs = [f'id="{component_id}"', f'src="{src_val}"', class_attr, style_attr, vref_str]
+        if controls_val:
+            attrs.append('controls')
+        if autoplay_val:
+            attrs.append('autoplay')
+        if loop_val:
+            attrs.append('loop')
+        if muted_val:
+            attrs.append('muted')
+        if preload_val:
+            attrs.append(f'preload="{preload_val}"')
+
+        extra_attrs = getattr(audio, 'extra_attrs', {}) or {}
+        for key, value in extra_attrs.items():
+            if value is True:
+                attrs.append(key)
+            elif value not in (None, False):
+                attrs.append(f'{key}="{value}"')
+
+        attr_str = ' '.join(a for a in attrs if a)
+        return f'<audio {attr_str}></audio>'
 
     def render_link(self, link: Link) -> str:
         """Renderiza un componente Link"""

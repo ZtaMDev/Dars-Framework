@@ -185,9 +185,9 @@ class ElectronExporter(Exporter):
                             # devDeps: ensure electron-builder present
                             devd = data.get('devDependencies') or {}
                             devd.setdefault('electron-builder', 'latest')
-                            # prefer a pinned electron version if missing or not exact
+                            # prefer a pinned, security-reviewed Electron version if missing or not exact
                             if not devd.get('electron') or devd.get('electron').startswith(('^','~','latest')):
-                                devd['electron'] = '39.1.1'
+                                devd['electron'] = '39.2.6'
                             data['devDependencies'] = devd
                             # Force npm to avoid bun ENOENT inside electron-builder
                             if not data.get('packageManager'):
@@ -274,14 +274,14 @@ class ElectronExporter(Exporter):
                     # Use CommonJS for Electron main process
                     "main": "main.js",
                     "scripts": {"start": "electron ."},
-                    "devDependencies": {"electron": "39.1.1", "electron-builder": "latest"},
+                    "devDependencies": {"electron": "39.2.6", "electron-builder": "latest"},
                     "packageManager": "npm@10",
                     "description": app_desc,
                     "author": app_author,
                     "version": default_version,
                     "build": {
                         "directories": {"output": "../"},
-                        "electronVersion": "39.1.1",
+                        "electronVersion": "39.2.6",
                         "appId": "com.dars.TBD",
                         "productName": "TBD",
                         "files": [

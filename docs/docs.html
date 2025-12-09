@@ -591,6 +591,30 @@
      <a class="sidebar-link sidebar-level-4" href="#section-properties" style="margin-left: 60px">
       Section Properties
      </a>
+     <a class="sidebar-link sidebar-level-3" href="#video" style="margin-left: 40px">
+      Video
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#video-properties" style="margin-left: 60px">
+      Video Properties
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#video-reactivity-notes" style="margin-left: 60px">
+      Video Reactivity Notes
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#video-example-with-toggles" style="margin-left: 60px">
+      Video Example with Toggles
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#audio" style="margin-left: 40px">
+      Audio
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#audio-properties" style="margin-left: 60px">
+      Audio Properties
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#audio-reactivity-notes" style="margin-left: 60px">
+      Audio Reactivity Notes
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#audio-example-with-track-switch" style="margin-left: 60px">
+      Audio Example with Track Switch
+     </a>
      <a class="sidebar-link sidebar-level-3" href="#markdown" style="margin-left: 40px">
       Markdown
      </a>
@@ -5027,6 +5051,21 @@ Desktop build target. Only effective when
         </a>
        </li>
        <li>
+        <a href="#section">
+         Section
+        </a>
+       </li>
+       <li>
+        <a href="#video">
+         Video
+        </a>
+       </li>
+       <li>
+        <a href="#audio">
+         Audio
+        </a>
+       </li>
+       <li>
         <a href="#markdown">
          Markdown
         </a>
@@ -7017,6 +7056,813 @@ And also its like the
         </tr>
        </tbody>
       </table>
+      <h3 id="video">
+       Video
+      </h3>
+      <p>
+       The
+       <code>
+        Video
+       </code>
+       component is an advanced wrapper over the HTML5
+       <code>
+        &lt;video&gt;
+       </code>
+       element.
+It supports static usage and full reactivity via
+       <code>
+        State
+       </code>
+       +
+       <code>
+        useDynamic
+       </code>
+       .
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dars.hooks.value_helpers</span><span class="w"> </span><span class="kn">import</span> <span class="n">V</span>
+
+<span class="n">media_state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span>
+    <span class="s2">"media"</span><span class="p">,</span>
+    <span class="n">current_video</span><span class="o">=</span><span class="s2">"/media/intro.mp4"</span><span class="p">,</span>
+    <span class="n">autoplay_video</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">muted_video</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">Video</span><span class="p">(</span>
+    <span class="n">src</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"media.current_video"</span><span class="p">),</span>
+    <span class="n">poster</span><span class="o">=</span><span class="s2">"/media/poster.jpg"</span><span class="p">,</span>
+    <span class="n">width</span><span class="o">=</span><span class="s2">"720"</span><span class="p">,</span>
+    <span class="n">controls</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">autoplay</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"media.autoplay_video"</span><span class="p">),</span>
+    <span class="n">muted</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"media.muted_video"</span><span class="p">),</span>
+    <span class="n">preload</span><span class="o">=</span><span class="s2">"metadata"</span><span class="p">,</span>
+    <span class="n">class_name</span><span class="o">=</span><span class="s2">"rounded-[8px] shadow-[0_0_20px_rgba(0,0,0,0.4)] mb-[16px]"</span><span class="p">,</span>
+    <span class="n">attrs</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">"controlsList"</span><span class="p">:</span> <span class="s2">"nodownload"</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h4 id="video-properties">
+       Video Properties
+      </h4>
+      <table>
+       <thead>
+        <tr>
+         <th>
+          Property
+         </th>
+         <th>
+          Type
+         </th>
+         <th>
+          Description
+         </th>
+         <th>
+          Example
+         </th>
+        </tr>
+       </thead>
+       <tbody>
+        <tr>
+         <td>
+          <code>
+           src
+          </code>
+         </td>
+         <td>
+          str / useDynamic
+         </td>
+         <td>
+          Video source URL (relative or absolute)
+         </td>
+         <td>
+          <code>
+           "/media/intro.mp4"
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           poster
+          </code>
+         </td>
+         <td>
+          str
+         </td>
+         <td>
+          Poster image URL
+         </td>
+         <td>
+          <code>
+           "/media/poster.jpg"
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           width
+          </code>
+         </td>
+         <td>
+          str
+         </td>
+         <td>
+          Width attribute
+         </td>
+         <td>
+          <code>
+           "720"
+          </code>
+          ,
+          <code>
+           "100%"
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           height
+          </code>
+         </td>
+         <td>
+          str
+         </td>
+         <td>
+          Height attribute
+         </td>
+         <td>
+          <code>
+           "480"
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           controls
+          </code>
+         </td>
+         <td>
+          bool / useDynamic
+         </td>
+         <td>
+          Show native controls
+         </td>
+         <td>
+          <code>
+           True
+          </code>
+          ,
+          <code>
+           useDynamic("media.show_controls")
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           autoplay
+          </code>
+         </td>
+         <td>
+          bool / useDynamic
+         </td>
+         <td>
+          Autoplay video when ready
+         </td>
+         <td>
+          <code>
+           False
+          </code>
+          ,
+          <code>
+           useDynamic("media.autoplay_video")
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           loop
+          </code>
+         </td>
+         <td>
+          bool / useDynamic
+         </td>
+         <td>
+          Loop playback
+         </td>
+         <td>
+          <code>
+           useDynamic("media.loop_video")
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           muted
+          </code>
+         </td>
+         <td>
+          bool / useDynamic
+         </td>
+         <td>
+          Start muted
+         </td>
+         <td>
+          <code>
+           useDynamic("media.muted_video")
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           preload
+          </code>
+         </td>
+         <td>
+          str
+         </td>
+         <td>
+          Preload hint (
+          <code>
+           auto
+          </code>
+          ,
+          <code>
+           metadata
+          </code>
+          ,
+          <code>
+           none
+          </code>
+          )
+         </td>
+         <td>
+          <code>
+           "metadata"
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           plays_inline
+          </code>
+         </td>
+         <td>
+          bool
+         </td>
+         <td>
+          Hint for inline playback on mobile
+         </td>
+         <td>
+          <code>
+           True
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           class_name
+          </code>
+         </td>
+         <td>
+          str
+         </td>
+         <td>
+          CSS class name
+         </td>
+         <td>
+          <code>
+           "my-video"
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           style
+          </code>
+         </td>
+         <td>
+          dict / str
+         </td>
+         <td>
+          Inline styles
+         </td>
+         <td>
+          <code>
+           { "max-width": "100%" }
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           attrs
+          </code>
+         </td>
+         <td>
+          dict
+         </td>
+         <td>
+          Extra raw attributes
+         </td>
+         <td>
+          <code>
+           { "controlsList": "nodownload" }
+          </code>
+         </td>
+        </tr>
+       </tbody>
+      </table>
+      <h4 id="video-reactivity-notes">
+       Video Reactivity Notes
+      </h4>
+      <ul>
+       <li>
+        <code>
+         src
+        </code>
+        ,
+        <code>
+         autoplay
+        </code>
+        ,
+        <code>
+         muted
+        </code>
+        ,
+        <code>
+         loop
+        </code>
+        ,
+        <code>
+         controls
+        </code>
+        and
+        <code>
+         plays_inline
+        </code>
+        support
+        <code>
+         useDynamic
+        </code>
+        .
+       </li>
+       <li>
+        When the associated
+        <code>
+         State
+        </code>
+        changes, the exporter generates bindings that:
+        <ul>
+         <li>
+          Update the
+          <code>
+           src
+          </code>
+          attribute directly.
+         </li>
+         <li>
+          For booleans (
+          <code>
+           autoplay
+          </code>
+          ,
+          <code>
+           muted
+          </code>
+          ,
+          <code>
+           loop
+          </code>
+          ,
+          <code>
+           controls
+          </code>
+          ), add/remove the HTML attribute and sync the DOM property.
+         </li>
+        </ul>
+       </li>
+       <li>
+        Defaults:
+        <ul>
+         <li>
+          <code>
+           controls=True
+          </code>
+          ,
+          <code>
+           plays_inline=True
+          </code>
+          by default.
+         </li>
+         <li>
+          <code>
+           autoplay
+          </code>
+          ,
+          <code>
+           loop
+          </code>
+          ,
+          <code>
+           muted
+          </code>
+          are
+          <strong>
+           off
+          </strong>
+          by default unless you pass
+          <code>
+           True
+          </code>
+          or a state value.
+         </li>
+        </ul>
+       </li>
+      </ul>
+      <h4 id="video-example-with-toggles">
+       Video Example with Toggles
+      </h4>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dars.hooks.value_helpers</span><span class="w"> </span><span class="kn">import</span> <span class="n">V</span>
+
+<span class="n">media_state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span>
+    <span class="s2">"media"</span><span class="p">,</span>
+    <span class="n">current_video</span><span class="o">=</span><span class="s2">"/media/intro.mp4"</span><span class="p">,</span>
+    <span class="n">autoplay_video</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">muted_video</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="nd">@route</span><span class="p">(</span><span class="s2">"/"</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span>
+        <span class="n">Container</span><span class="p">(</span>
+            <span class="n">Video</span><span class="p">(</span>
+                <span class="n">src</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"media.current_video"</span><span class="p">),</span>
+                <span class="n">poster</span><span class="o">=</span><span class="s2">"/media/poster.jpg"</span><span class="p">,</span>
+                <span class="n">width</span><span class="o">=</span><span class="s2">"720"</span><span class="p">,</span>
+                <span class="n">controls</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">autoplay</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"media.autoplay_video"</span><span class="p">),</span>
+                <span class="n">muted</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"media.muted_video"</span><span class="p">),</span>
+                <span class="n">preload</span><span class="o">=</span><span class="s2">"metadata"</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="n">Button</span><span class="p">(</span>
+                <span class="s2">"Toggle Mute"</span><span class="p">,</span>
+                <span class="n">on_click</span><span class="o">=</span><span class="n">media_state</span><span class="o">.</span><span class="n">muted_video</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"media.muted_video"</span><span class="p">)</span><span class="o">.</span><span class="n">bool</span><span class="p">()</span> <span class="o">==</span> <span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+                <span class="p">),</span>
+            <span class="p">),</span>
+            <span class="n">Button</span><span class="p">(</span>
+                <span class="s2">"Toggle Autoplay"</span><span class="p">,</span>
+                <span class="n">on_click</span><span class="o">=</span><span class="n">media_state</span><span class="o">.</span><span class="n">autoplay_video</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"media.autoplay_video"</span><span class="p">)</span><span class="o">.</span><span class="n">bool</span><span class="p">()</span> <span class="o">==</span> <span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+                <span class="p">),</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="audio">
+       Audio
+      </h3>
+      <p>
+       The
+       <code>
+        Audio
+       </code>
+       component wraps the HTML5
+       <code>
+        &lt;audio&gt;
+       </code>
+       element and supports the same reactive model.
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dars.hooks.value_helpers</span><span class="w"> </span><span class="kn">import</span> <span class="n">V</span>
+
+<span class="n">media_state</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span>
+    <span class="s2">"media"</span><span class="p">,</span>
+    <span class="n">current_audio</span><span class="o">=</span><span class="s2">"/media/theme1.mp3"</span><span class="p">,</span>
+    <span class="n">loop_audio</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">Audio</span><span class="p">(</span>
+    <span class="n">src</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"media.current_audio"</span><span class="p">),</span>
+    <span class="n">controls</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">autoplay</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">loop</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"media.loop_audio"</span><span class="p">),</span>
+    <span class="n">preload</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span>
+    <span class="n">class_name</span><span class="o">=</span><span class="s2">"w-[100%] mb-[12px]"</span><span class="p">,</span>
+    <span class="n">attrs</span><span class="o">=</span><span class="p">{</span><span class="s2">"controlsList"</span><span class="p">:</span> <span class="s2">"nodownload"</span><span class="p">},</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h4 id="audio-properties">
+       Audio Properties
+      </h4>
+      <table>
+       <thead>
+        <tr>
+         <th>
+          Property
+         </th>
+         <th>
+          Type
+         </th>
+         <th>
+          Description
+         </th>
+         <th>
+          Example
+         </th>
+        </tr>
+       </thead>
+       <tbody>
+        <tr>
+         <td>
+          <code>
+           src
+          </code>
+         </td>
+         <td>
+          str / useDynamic
+         </td>
+         <td>
+          Audio source URL
+         </td>
+         <td>
+          <code>
+           "/media/theme1.mp3"
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           controls
+          </code>
+         </td>
+         <td>
+          bool / useDynamic
+         </td>
+         <td>
+          Show native controls
+         </td>
+         <td>
+          <code>
+           True
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           autoplay
+          </code>
+         </td>
+         <td>
+          bool / useDynamic
+         </td>
+         <td>
+          Autoplay audio
+         </td>
+         <td>
+          <code>
+           useDynamic("media.autoplay_audio")
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           loop
+          </code>
+         </td>
+         <td>
+          bool / useDynamic
+         </td>
+         <td>
+          Loop playback
+         </td>
+         <td>
+          <code>
+           useDynamic("media.loop_audio")
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           muted
+          </code>
+         </td>
+         <td>
+          bool / useDynamic
+         </td>
+         <td>
+          Start muted
+         </td>
+         <td>
+          <code>
+           True
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           preload
+          </code>
+         </td>
+         <td>
+          str
+         </td>
+         <td>
+          Preload hint (
+          <code>
+           auto
+          </code>
+          ,
+          <code>
+           metadata
+          </code>
+          ,
+          <code>
+           none
+          </code>
+          )
+         </td>
+         <td>
+          <code>
+           "auto"
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           class_name
+          </code>
+         </td>
+         <td>
+          str
+         </td>
+         <td>
+          CSS class
+         </td>
+         <td>
+          <code>
+           "audio-player"
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           style
+          </code>
+         </td>
+         <td>
+          dict / str
+         </td>
+         <td>
+          Inline styles
+         </td>
+         <td>
+          <code>
+           { "width": "100%" }
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           attrs
+          </code>
+         </td>
+         <td>
+          dict
+         </td>
+         <td>
+          Extra attributes
+         </td>
+         <td>
+          <code>
+           { "controlsList": "nodownload" }
+          </code>
+         </td>
+        </tr>
+       </tbody>
+      </table>
+      <h4 id="audio-reactivity-notes">
+       Audio Reactivity Notes
+      </h4>
+      <ul>
+       <li>
+        <code>
+         src
+        </code>
+        ,
+        <code>
+         loop
+        </code>
+        ,
+        <code>
+         autoplay
+        </code>
+        ,
+        <code>
+         muted
+        </code>
+        ,
+        <code>
+         controls
+        </code>
+        support
+        <code>
+         useDynamic
+        </code>
+        .
+       </li>
+       <li>
+        Boolean props are wired to the same reactive mechanism que otros componentes built-in:
+        <ul>
+         <li>
+          El runtime añade/quita los atributos HTML y sincroniza las propiedades JS (
+          <code>
+           el.loop
+          </code>
+          ,
+          <code>
+           el.muted
+          </code>
+          , etc.).
+         </li>
+        </ul>
+       </li>
+       <li>
+        Es recomendable ubicar los ficheros dentro de
+        <code>
+         media/
+        </code>
+        en el root del proyecto y referenciarlos como
+        <code>
+         /media/...
+        </code>
+        .
+El exporter copiará automáticamente esa carpeta al directorio de export.
+       </li>
+      </ul>
+      <h4 id="audio-example-with-track-switch">
+       Audio Example with Track Switch
+      </h4>
+      <div class="codehilite">
+       <pre><span></span><code><span class="nd">@route</span><span class="p">(</span><span class="s2">"/audio-demo"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">audio_demo</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span>
+        <span class="n">Container</span><span class="p">(</span>
+            <span class="n">Text</span><span class="p">(</span><span class="s2">"Audio actual:"</span><span class="p">),</span>
+            <span class="n">Text</span><span class="p">(</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"media.current_audio"</span><span class="p">)),</span>
+            <span class="n">Audio</span><span class="p">(</span>
+                <span class="n">src</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"media.current_audio"</span><span class="p">),</span>
+                <span class="n">controls</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">loop</span><span class="o">=</span><span class="n">useDynamic</span><span class="p">(</span><span class="s2">"media.loop_audio"</span><span class="p">),</span>
+                <span class="n">preload</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="n">Container</span><span class="p">(</span>
+                <span class="n">Button</span><span class="p">(</span>
+                    <span class="s2">"Track 1"</span><span class="p">,</span>
+                    <span class="n">on_click</span><span class="o">=</span><span class="n">media_state</span><span class="o">.</span><span class="n">current_audio</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"/media/theme1.mp3"</span><span class="p">),</span>
+                <span class="p">),</span>
+                <span class="n">Button</span><span class="p">(</span>
+                    <span class="s2">"Track 2"</span><span class="p">,</span>
+                    <span class="n">on_click</span><span class="o">=</span><span class="n">media_state</span><span class="o">.</span><span class="n">current_audio</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"/media/theme2.mp3"</span><span class="p">),</span>
+                <span class="p">),</span>
+                <span class="n">Button</span><span class="p">(</span>
+                    <span class="s2">"Toggle Loop"</span><span class="p">,</span>
+                    <span class="n">on_click</span><span class="o">=</span><span class="n">media_state</span><span class="o">.</span><span class="n">loop_audio</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+                        <span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">"media.loop_audio"</span><span class="p">)</span><span class="o">.</span><span class="n">bool</span><span class="p">()</span> <span class="o">==</span> <span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+                    <span class="p">),</span>
+                <span class="p">),</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+</code></pre>
+      </div>
       <h3 id="markdown">
        Markdown
       </h3>
@@ -24181,7 +25027,7 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
     </div>
    </div>
   </div>
-  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1765251467" type="module">
+  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1765322596" type="module">
   </script>
   <script defer="" src="app_docs.js">
   </script>

@@ -101,18 +101,29 @@ def install_vite() -> Tuple[bool, str]:
 
 
 def install_electron_global() -> Tuple[bool, str]:
-    """Install Electron globally via Bun if available."""
+    """Install/update Electron as a devDependency via Bun if available.
+
+    We intentionally install it in the current project (bun add -D) instead of
+    globally, so that `bun x electron --version` – used by detect_electron() –
+    reports the updated baseline version.
+    """
     if has_bun():
-        print("Executing: bun add -g electron")
-        code = run_live(["bun", "add", "-g", "electron"], shell=False)
+        # Pin to a reviewed baseline version instead of relying on 'latest'
+        target = "electron@39.2.6"
+        print(f"Executing: bun add -g {target}")
+        code = run_live(["bun", "add", "-g", target], shell=False)
         return (code == 0, "")
-    return False, "Bun is not available to install Electron globally."
+    return False, "Bun is not available to install Electron via Bun."
 
 
 def install_electron_builder_global() -> Tuple[bool, str]:
-    """Install electron-builder globally via Bun if available."""
+    """Install/update electron-builder as a devDependency via Bun if available.
+
+    Same reasoning as install_electron_global(): we prefer the project-scoped
+    tool that `bun x electron-builder --version` will see.
+    """
     if has_bun():
-        print("Executing: bun add -g electron-builder")
-        code = run_live(["bun", "add", "-g", "electron-builder"], shell=False)
+        print("Executing: bun add -g electron-builder@latest")
+        code = run_live(["bun", "add", "-g", "electron-builder@latest"], shell=False)
         return (code == 0, "")
-    return False, "Bun is not available to install electron-builder globally."
+    return False, "Bun is not available to install electron-builder via Bun."
