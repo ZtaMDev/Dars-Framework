@@ -121,9 +121,9 @@ This phase transforms Dars into a complete fullstack Python framework with enter
 
 - [ ] **VRef Hooks + Middleware (v1.7.0)**
     - [x] Complete `setVRef()` exporter integration
-    - [] Middleware system (AuthMiddleware, RateLimitMiddleware, CORSMiddleware)
-    - [] Middleware chain execution
-    - [] Route-specific and global middleware
+    - [ ] Middleware system (AuthMiddleware, RateLimitMiddleware, CORSMiddleware)
+    - [ ] Middleware chain execution
+    - [ ] Route-specific and global middleware
 
 - [x] **FastAPI Backend Plugin (v1.7.1)**
     - [x] `DarsBackend` class for FastAPI integration
