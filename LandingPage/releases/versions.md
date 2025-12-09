@@ -1,3 +1,82 @@
+# Release Notes v1.7.9
+
+> **Global JS Error Handling & safer eval() in the runtime**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Centralized safeEval for runtime-generated JS
+
+This release introduces a **centralized eval helper** in the core Dars runtime (`dars.min.js`), designed to make hydration/runtime debugging safer and more observable without changing existing behavior in production:
+
+- New internal helper in the JS runtime:
+
+  ```js
+  function _safeEval(code, ctx) {
+    if (code == null) return;
+    try {
+      return (0, eval)(code);
+    } catch (err) {
+      console.error('[Dars] Eval error:', err);
+      // Optional dev hook – only called if you define it
+      try {
+        const D = (globalThis && globalThis.Dars) || (typeof window !== 'undefined' ? window.Dars : null);
+        if (D && typeof D.onError === 'function') {
+          D.onError(err, Object.assign({ code: String(code) }, ctx || {}));
+        }
+      } catch (_) {}
+    }
+  }
+  ```
+
+- The runtime keeps using `eval` internally where necessary, but now all critical call sites go through `_safeEval` instead of raw `(0,eval)(...)`.
+
+### Global JS error hook: window.Dars.onError
+
+To help you surface client-side errors during development (especially hydration and dynamic updates), the runtime now exposes a **single global hook**:
+
+- If present, `window.Dars.onError(err, context)` is invoked by `_safeEval` whenever a runtime-generated script fails.
+- `context` is a small dictionary that always includes:
+  - `code`: the JS string that was evaluated.
+  - Additional fields depending on where the error happened (see below).
+- The hook is **fully optional**:
+  - If `window.Dars` or `window.Dars.onError` are not defined, the runtime simply logs to `console.error` and continues as before.
+  - This means existing projects and production builds keep working without any changes.
+
+### Errors from events and lifecycle hooks now share the same pipeline
+
+Two of the most important dynamic execution points are now wired to `_safeEval` and the global hook:
+
+1. **Event handlers attached from the VDOM**
+
+   - Previously, many handlers used raw `(0,eval)(c)` inside `try/catch` blocks.
+   - Now, event execution goes through `_safeEval(c, { type, event, phase: 'event_handler' })`.
+   - If you define `window.Dars.onError`, you receive:
+     - The original `Error` instance.
+     - The event object (`event`).
+     - The handler type (`type`) and phase (`'event_handler'`).
+
+2. **Component lifecycle hooks (onMount, onUpdate, onUnmount)**
+
+   - Lifecycle JS stored in the VDOM used to be executed with inline `try/catch`.
+   - Now, `_runLifecycle(id, hook)` delegates to `_safeEval(code, { hook, id })` when a lifecycle snippet is present.
+   - This lets you centralize errors from hydration and dynamic updates, while preserving the same control flow in the runtime.
+
+Result: you get a **single, consistent error-reporting channel** for all dynamic runtime code, without changing how the framework behaves when no hook is provided.
+
+### Files Modified
+
+- `dars/js_lib.py`
+  - Added the `_safeEval(code, ctx)` helper to the embedded `DARS_MIN_JS` runtime.
+  - Refactored event handlers and lifecycle execution to use `_safeEval` and forward enriched context to an optional `window.Dars.onError` hook.
+
+---
+
 # Release Notes v1.7.8
 
 > **Full-Stack SSR DX: backendEntry Defaults, Validation & CLI Backend Runner**

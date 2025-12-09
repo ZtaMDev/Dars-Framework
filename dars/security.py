@@ -23,8 +23,6 @@ SAFE_HTML_EXT = {'.html', '.htm'}
 SKIP_PATTERNS = (
     r'^snapshot.*\.json$',
     r'^version.*\.txt$',
-    # Core runtime bundle is already minified; skip to avoid corrupting it
-    r'^dars\.min\.js$',
 )
 
 _pat_compiled = [re.compile(p) for p in SKIP_PATTERNS]
@@ -270,9 +268,17 @@ def minify_output_dir(output_dir: str, extra_skip: Iterable[str] = None, progres
 
         new_content = None
         if ext in SAFE_JS_EXT:
-            # JS: process if default_on or vite_on; tool usage is gated inside minify_js by vite flag
-            if default_on or vite_on:
-                new_content = minify_js(content)
+            base = os.path.basename(full)
+            # Special handling for core runtime bundle: only allow Vite/esbuild, never default regex minifier
+            if base == 'dars.min.js':
+                if vite_on:
+                    new_content = minify_js(content)
+                else:
+                    new_content = None
+            else:
+                # JS: process if default_on or vite_on; tool usage is gated inside minify_js by vite flag
+                if default_on or vite_on:
+                    new_content = minify_js(content)
         elif ext in SAFE_CSS_EXT:
             if default_on or vite_on:
                 new_content = None

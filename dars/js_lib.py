@@ -15,6 +15,22 @@ const __registry = new Map();
 const __vdom = new Map();
 const __lifecycle = new Map(); // id -> lifecycle info (onMount/onUpdate/onUnmount)
 
+// Centralized eval helper with optional global error reporting hook
+function _safeEval(code, ctx){{
+  if (code == null) return;
+  try {{
+    return (0,eval)(code);
+  }} catch (err) {{
+    try {{ console.error('[Dars] Eval error:', err); }} catch(_ ){{}}
+    try {{
+      const D = (globalThis && globalThis.Dars) || (typeof window!=='undefined' ? window.Dars : null);
+      if (D && typeof D.onError === 'function') {{
+        D.onError(err, Object.assign({{ code: String(code) }}, ctx || {{}}));
+      }}
+    }} catch(_ ){{}}
+  }}
+}}
+
 function $(id){{ return document.getElementById(id) || document.querySelector(`[data-id="${{id}}"]`) || null; }}
 
 // Alert helper (non-fatal)
@@ -49,7 +65,7 @@ function _attachEventsForVNode(el, vnode, events, markClass){{
             if(ev.key !== targetKey && ev.code !== targetKey) return; // Wrong key
           }}
           try{{ ev.stopImmediatePropagation(); ev.stopPropagation(); ev.preventDefault(); ev.cancelBubble = true; }}catch(_ ){{ }}
-          for(const c of codes){{ try{{ (0,eval)(c); }}catch(_ ){{ }} }}
+          for(const c of codes){{ _safeEval(c, {{ type, event: ev, phase: 'event_handler' }}); }}
         }};
         try{{ el.addEventListener(baseEvent, handler, {{ capture: true }}); }}catch(_ ){{ }}
         el.__darsEv[type] = handler;
@@ -130,7 +146,7 @@ function _runLifecycle(id, hook){{
     else if(hook === 'onUnmount') code = info.onUnmount;
     else if(hook === 'onMount') code = info.onMount;
     if(typeof code === 'string' && code.trim()){{
-      try{{ (0,eval)(code); }}catch(_ ){{ }}
+      _safeEval(code, {{ hook, id }});
     }}
   }}catch(_ ){{ }}
 }}
