@@ -73,7 +73,7 @@ This phase will focus on expanding Dars' capabilities to new platforms and build
 
 - [ ] **More Integrated Components**
     - [x] **Data Visualization Components**: `Chart` (integration with libraries like Chart.js or D3.js), `Table` (with pagination, sorting, and filtering).
-    - [ ] **Multimedia Components**: `Video`, `Audio`.
+    - [x] **Multimedia Components**: `Video`, `Audio`.
     - [x] **Advanced Navigation Components**: `Router` (for single-page application route management), `Tabs`, `Accordion`.
     - [ ] **Advanced Form Components**: `Validation` (integration with form validation libraries), `FileUpload`.
 
