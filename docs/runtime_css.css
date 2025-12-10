@@ -816,6 +816,24 @@ body {
     filter: brightness(0.9);
 }
 
+/* Basic media defaults for Dars components */
+.dars-video,
+video.dars-video {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    border-radius: var(--dars-border-radius);
+    margin: 0 0 1.25rem 0;
+}
+
+.dars-audio,
+audio.dars-audio {
+    width: 100%;
+    max-width: 100%;
+    display: block;
+    margin: 0.5rem 0 1.25rem 0;
+}
+
 .dars-markdown hr {
     border: none;
     height: 1px;

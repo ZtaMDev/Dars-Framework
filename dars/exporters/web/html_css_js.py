@@ -92,6 +92,13 @@ class HTMLCSSJSExporter(Exporter):
             self._type_seq = 0
             self._type_map = {}
             self._type_seq = 0
+
+            # Initialize style registry for this export (Phase 1 of style optimization)
+            # Maps generated class name -> dict(style)
+            self._style_registry: Dict[str, Dict[str, Any]] = {}
+            # Separate registries for hover/active variants (class -> dict(style))
+            self._hover_style_registry: Dict[str, Dict[str, Any]] = {}
+            self._active_style_registry: Dict[str, Dict[str, Any]] = {}
             self.create_output_directory(output_path)
             self._current_output_path = output_path
 
@@ -270,6 +277,41 @@ class HTMLCSSJSExporter(Exporter):
                 # Nunca romper el export por problemas en media/
                 pass
 
+            # Pre-collect static styles for base/hover/active on deep copies,
+            # so registries are populated before generating styles.css
+            try:
+                import copy as _cpy
+
+                # Multipage pages
+                if app.is_multipage():
+                    for page in app.pages.values():
+                        if page.root:
+                            try:
+                                root_copy = _cpy.deepcopy(page.root)
+                            except Exception:
+                                root_copy = page.root
+                            self._collect_static_styles_from_tree(root_copy)
+
+                # SPA routes
+                if hasattr(app, '_spa_routes') and app._spa_routes:
+                    for route in app._spa_routes.values():
+                        if hasattr(route, 'root') and route.root:
+                            try:
+                                rcopy = _cpy.deepcopy(route.root)
+                            except Exception:
+                                rcopy = route.root
+                            self._collect_static_styles_from_tree(rcopy)
+
+                # Single root
+                if app.root:
+                    try:
+                        root_copy = _cpy.deepcopy(app.root)
+                    except Exception:
+                        root_copy = app.root
+                    self._collect_static_styles_from_tree(root_copy)
+            except Exception:
+                pass
+
             base_css_content = self.generate_base_css()
             custom_css_content = self.generate_custom_css(app)
 
@@ -310,7 +352,12 @@ class HTMLCSSJSExporter(Exporter):
                         continue
                         
                     page_app = copy.copy(app)
-                    page_app.root = page.root
+                    # Use a deep copy of the page root to avoid mutating the shared tree
+                    try:
+                        import copy as _cpy
+                        page_app.root = _cpy.deepcopy(page.root)
+                    except Exception:
+                        page_app.root = page.root
                     if page.title:
                         page_app.title = page.title
                     if page.meta:
@@ -321,7 +368,13 @@ class HTMLCSSJSExporter(Exporter):
                     from dars.components.basic.container import Container
                     if isinstance(page_app.root, list):
                         page_app.root = Container(children=page_app.root)
-                    
+
+                    # Fase 1 estilos: registrar estilos estáticos y reemplazar inline por clases
+                    try:
+                        self._collect_static_styles_from_tree(page_app.root)
+                    except Exception:
+                        pass
+
                     # Generar VDOM y obtener eventos
                     page_events_map = {}
                     try:
@@ -471,8 +524,15 @@ class HTMLCSSJSExporter(Exporter):
                 # Generar VDOM y obtener eventos
                 page_events_map = {}
                 try:
+                    import copy as _cpy
+                    page_app = copy.copy(app)
+                    try:
+                        page_app.root = _cpy.deepcopy(app.root)
+                    except Exception:
+                        page_app.root = app.root
+
                     vdom_builder = VDomBuilder(id_provider=self.get_component_id)
-                    vdom_dict = vdom_builder.build(app.root)
+                    vdom_dict = vdom_builder.build(page_app.root)
                     page_events_map = vdom_builder.events_map
                     
                     if bundle:
@@ -483,12 +543,18 @@ class HTMLCSSJSExporter(Exporter):
                     vdom_js = "window.__DARS_VDOM__ = { };\n"
                     page_events_map = {}
 
+                # Fase 1 estilos: registrar estilos estáticos en la copia y reemplazar inline por clases
+                try:
+                    self._collect_static_styles_from_tree(page_app.root)
+                except Exception:
+                    pass
+
                 # Pre-render components to populate bindings (useDynamic, etc.)
                 # This is critical so that _generate_reactive_bindings_js has data
-                self.render_component(app.root)
+                self.render_component(page_app.root)
 
                 # Generar runtime JS con eventos
-                runtime_js = self.generate_javascript(app, app.root, page_events_map)
+                runtime_js = self.generate_javascript(page_app, page_app.root, page_events_map)
 
                 user_scripts = list(getattr(app, 'scripts', []))
                 # Incluir scripts automáticos generados por helpers de escritorio
@@ -1050,6 +1116,14 @@ self.addEventListener('fetch', event => {
         if hasattr(self, '_page_head_metadata'):
             self._page_head_metadata = {}
 
+        # Generate CSS for style registry (Phase 1)
+        registry_css = self._generate_style_registry_css()
+
+        # Inline <style> block for registry, injected between runtime_css.css and styles.css
+        registry_style_tag = ""
+        if registry_css:
+            registry_style_tag = f"\n        <style id=\"dars-style-registry\">\n{registry_css}\n        </style>\n    "
+
         html_template = f"""<!DOCTYPE html>
     <html lang="{app.language}">
     <head>
@@ -1059,7 +1133,7 @@ self.addEventListener('fetch', event => {
         {links_html if not page_metadata else ''}
         {og_tags_html if not page_metadata else ''}
         {twitter_tags_html if not page_metadata else ''}
-        <link rel=\"stylesheet\" href=\"runtime_css.css\">\n    <link rel=\"stylesheet\" href=\"{css_file}\">
+        <link rel=\"stylesheet\" href=\"runtime_css.css\">{registry_style_tag}<link rel=\"stylesheet\" href=\"{css_file}\">
         {vdom_script_tag}
     </head>
     <body>
@@ -1141,105 +1215,74 @@ self.addEventListener('fetch', event => {
         return css_content
 
     def _generate_hover_styles(self, app: App) -> str:
-        """Genera estilos CSS para hover_style de todos los componentes con mayor especificidad"""
+        """Genera estilos CSS para hover_style usando clases de variante.
+
+        A diferencia de la versión anterior basada en IDs, ahora usamos las
+        clases registradas en self._hover_style_registry para que los mismos
+        nombres funcionen de forma consistente en multipage, single-page, SPA y SSR.
+        """
         hover_css = ""
-        
-        def process_component(component):
-            nonlocal hover_css
-            # Verificar si el componente tiene hover_style y no está vacío
-            if hasattr(component, 'hover_style') and component.hover_style:
-                comp_id = self.get_component_id(component)
-                if comp_id and component.hover_style:
-                    styles_str = self.render_styles(component.hover_style)
-                    if styles_str and styles_str.strip():
-                        # render_styles returns lines separated by \n with indentation
-                        # Split by newline and clean each line
-                        style_lines = [line.strip() for line in styles_str.split('\n') if line.strip()]
-                        
-                        # Add !important to each line
-                        important_styles = []
-                        for line in style_lines:
-                            # Remove trailing semicolon if present
-                            line = line.rstrip(';').strip()
-                            if line:
-                                important_styles.append(f"{line} !important")
-                        
-                        if important_styles:
-                            hover_css += f"#{comp_id}:hover {{\n"
-                            hover_css += "    " + ";\n    ".join(important_styles) + ";\n"
-                            hover_css += "}\n\n"
-            
-            # Procesar hijos recursivamente
-            for child in getattr(component, 'children', []):
-                process_component(child)
-        
-        # Procesar todos los componentes en la aplicación
-        if app.is_multipage():
-            for page in app.pages.values():
-                if page.root:
-                    process_component(page.root)
-        
-        # Procesar rutas SPA
-        if hasattr(app, '_spa_routes') and app._spa_routes:
-            for route in app._spa_routes.values():
-                if hasattr(route, 'root') and route.root:
-                    process_component(route.root)
-                    
-        # Procesar root simple
-        if app.root:
-            process_component(app.root)
-        
+
+        registry = getattr(self, "_hover_style_registry", None) or {}
+        if not registry:
+            return ""
+
+        for class_name, style_dict in registry.items():
+            styles_str = self.render_styles(style_dict)
+            if not styles_str or not styles_str.strip():
+                continue
+
+            # Split by newline and clean each line
+            style_lines = [line.strip() for line in styles_str.split('\n') if line.strip()]
+
+            # Add !important to each line
+            important_styles = []
+            for line in style_lines:
+                # Remove trailing semicolon if present
+                line = line.rstrip(';').strip()
+                if line:
+                    important_styles.append(f"{line} !important")
+
+            if important_styles:
+                hover_css += f".{class_name}:hover {{\n"
+                hover_css += "    " + ";\n    ".join(important_styles) + ";\n"
+                hover_css += "}\n\n"
+
         return hover_css
     
     def _generate_active_styles(self, app: App) -> str:
-        """Genera estilos CSS para active_style de todos los componentes con mayor especificidad"""
-        active_css = ""
-        
-        def process_component(component):
-            nonlocal active_css
-            # Verificar si el componente tiene active_style y no está vacío
-            if hasattr(component, 'active_style') and component.active_style:
-                comp_id = self.get_component_id(component)
-                if comp_id and component.active_style:
-                    styles_str = self.render_styles(component.active_style)
-                    if styles_str and styles_str.strip():
-                        # render_styles returns lines separated by \n with indentation
-                        # Split by newline and clean each line
-                        style_lines = [line.strip() for line in styles_str.split('\n') if line.strip()]
-                        
-                        # Add !important to each line
-                        important_styles = []
-                        for line in style_lines:
-                            # Remove trailing semicolon if present
-                            line = line.rstrip(';').strip()
-                            if line:
-                                important_styles.append(f"{line} !important")
-                        
-                        if important_styles:
-                            active_css += f"#{comp_id}:active {{\n"
-                            active_css += "    " + ";\n    ".join(important_styles) + ";\n"
-                            active_css += "}\n\n"
-            
-            # Procesar hijos recursivamente
-            for child in getattr(component, 'children', []):
-                process_component(child)
-        
-        # Procesar todos los componentes en la aplicación
-        if app.is_multipage():
-            for page in app.pages.values():
-                if page.root:
-                    process_component(page.root)
-        
-        # Procesar rutas SPA
-        if hasattr(app, '_spa_routes') and app._spa_routes:
-            for route in app._spa_routes.values():
-                if hasattr(route, 'root') and route.root:
-                    process_component(route.root)
+        """Genera estilos CSS para active_style usando clases de variante.
 
-        # Procesar root simple
-        if app.root:
-            process_component(app.root)
-        
+        Usa self._active_style_registry para producir reglas .class:active
+        consistentes en todos los modos de exportación.
+        """
+        active_css = ""
+
+        registry = getattr(self, "_active_style_registry", None) or {}
+        if not registry:
+            return ""
+
+        for class_name, style_dict in registry.items():
+            styles_str = self.render_styles(style_dict)
+            if not styles_str or not styles_str.strip():
+                continue
+
+            # Split by newline and clean each line
+            style_lines = [line.strip() for line in styles_str.split('\n') if line.strip()]
+
+            # Add !important to each line
+            important_styles = []
+            for line in style_lines:
+                # Remove trailing semicolon if present
+                line = line.rstrip(';').strip()
+                if line:
+                    important_styles.append(f"{line} !important")
+
+            if important_styles:
+                active_css += f".{class_name}:active {{\n"
+                active_css += "    " + ";\n    ".join(important_styles) + ";\n"
+                active_css += "}\n\n"
+
         return active_css
 
     def render_styles(self, styles: Dict[str, Any]) -> str:
@@ -1285,6 +1328,55 @@ self.addEventListener('fetch', event => {
             css_lines.append(f"{css_prop}: {value};")
         
         return "\n    ".join(css_lines)
+
+
+    # --- Style Registry helpers (Phase 1) ---
+
+    def _style_fingerprint(self, styles: Dict[str, Any]) -> str:
+        """Generate a stable fingerprint for a style dict.
+
+        This uses a JSON dump with sorted keys to ensure equivalent dicts
+        map to the same key. For now we only compute the key; dedup and
+        class assignment will be added when we start consuming the registry.
+        """
+        try:
+            import json, hashlib
+            # Filter out obviously non-serializable values defensively
+            clean = {}
+            for k, v in (styles or {}).items():
+                # Skip nested dicts for now (handled elsewhere like hover_style)
+                if isinstance(v, dict):
+                    continue
+                clean[k] = v
+            data = json.dumps(clean, sort_keys=True, separators=(",", ":"))
+            h = hashlib.sha1(data.encode("utf-8")).hexdigest()[:10]
+            return f"dars-s-{h}"
+        except Exception:
+            # Fallback: unique per call
+            import time
+            return f"dars-s-{int(time.time()*1000000)}"
+
+    def _generate_style_registry_css(self) -> str:
+        """Render the accumulated style registry as CSS rules.
+
+        For now this just serializes any entries present in self._style_registry
+        using the existing render_styles() helper. Population of the registry
+        will be introduced in subsequent steps.
+        """
+        if not getattr(self, "_style_registry", None):
+            return ""
+
+        blocks: List[str] = []
+        for class_name, style_dict in self._style_registry.items():
+            try:
+                css_body = self.render_styles(style_dict)
+                if not css_body:
+                    continue
+                blocks.append(f".{class_name} {{\n    {css_body}\n}}")
+            except Exception:
+                continue
+
+        return "\n\n".join(blocks)
 
     
     def _generate_meta_tags(self, app: App) -> str:
@@ -2224,6 +2316,24 @@ body {
     filter: brightness(0.9);
 }
 
+/* Basic media defaults for Dars components */
+.dars-video,
+video.dars-video {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    border-radius: var(--dars-border-radius);
+    margin: 0 0 1.25rem 0;
+}
+
+.dars-audio,
+audio.dars-audio {
+    width: 100%;
+    max-width: 100%;
+    display: block;
+    margin: 0.5rem 0 1.25rem 0;
+}
+
 .dars-markdown hr {
     border: none;
     height: 1px;
@@ -3057,6 +3167,138 @@ body {
             for child in component.children:
                 if child is not None:
                     self._collect_bindings_from_tree(child)
+
+
+    def _collect_static_styles_from_tree(self, component: Component):
+        """Traverse component tree and register static styles into _style_registry.
+
+        - Only operates on component.style (not hover_style/active_style).
+        - Skips DynamicBinding styles (these remain inline/dynamic for now).
+        - Supports Tailwind-like strings via utilities.parse_utility_string.
+        - For each static style dict, computes a fingerprint -> class_name, stores the dict
+          in _style_registry, appends the class to component.class_name and clears
+          component.style (so HTML renderer no longer emits large inline style).
+        """
+        try:
+            from dars.core.utilities import parse_utility_string
+        except Exception:
+            parse_utility_string = None  # type: ignore
+
+        def process(comp: Component):
+            if comp is None:
+                return
+
+            styles = getattr(comp, "style", None)
+            if not styles:
+                return
+
+            # Skip dynamic bindings for now; they will be handled by cssVars later
+            if hasattr(styles, 'is_dynamic') or type(styles).__name__ == 'DynamicBinding':
+                return
+
+            style_dict: Dict[str, Any]
+            # Tailwind-like string -> dict via utilities
+            if isinstance(styles, str):
+                if not parse_utility_string:
+                    return
+                try:
+                    style_dict = parse_utility_string(styles) or {}
+                except Exception:
+                    return
+            elif isinstance(styles, dict):
+                style_dict = styles or {}
+            else:
+                return
+
+            if not style_dict:
+                return
+
+            # Compute base class name from fingerprint and register dict
+            base_class = self._style_fingerprint(style_dict)
+            if not hasattr(self, "_style_registry"):
+                self._style_registry = {}
+
+            if base_class not in self._style_registry:
+                self._style_registry[base_class] = style_dict
+
+            # Attach generated base class to component.class_name, preserving user classes order
+            existing = getattr(comp, "class_name", "") or ""
+            tokens = existing.split()
+            if base_class not in tokens:
+                # Prepend generated class so user-provided class_name remains intact after it
+                comp.class_name = (base_class + (" " + existing if existing else "")).strip()
+
+            # --- Hover / Active variants (static only) ---
+            def _register_variant(style_value: Any, prefix: str, registry_attr: str):
+                if not style_value:
+                    return
+                # Skip dynamic bindings
+                if hasattr(style_value, 'is_dynamic') or type(style_value).__name__ == 'DynamicBinding':
+                    return
+
+                # Normalize to dict (supports Tailwind-like strings)
+                if isinstance(style_value, str):
+                    if not parse_utility_string:
+                        return
+                    try:
+                        vdict = parse_utility_string(style_value) or {}
+                    except Exception:
+                        return
+                elif isinstance(style_value, dict):
+                    vdict = style_value or {}
+                else:
+                    return
+
+                if not vdict:
+                    return
+
+                # Derive variant class from base fingerprint for stability
+                if base_class.startswith("dars-s-"):
+                    suffix = base_class[len("dars-s-"):]
+                    vclass = f"{prefix}{suffix}"
+                else:
+                    vclass = f"{prefix}{base_class}"
+
+                # Ensure registry exists and store dict
+                registry = getattr(self, registry_attr, None)
+                if registry is None:
+                    registry = {}
+                    setattr(self, registry_attr, registry)
+
+                if vclass not in registry:
+                    registry[vclass] = vdict
+
+                # Attach variant class to component.class_name
+                cur = getattr(comp, "class_name", "") or ""
+                ctokens = cur.split()
+                if vclass not in ctokens:
+                    comp.class_name = (cur + (" " + vclass if cur else vclass)).strip()
+
+            # Register hover_style -> .dars-h-*
+            hover_styles = getattr(comp, "hover_style", None)
+            _register_variant(hover_styles, "dars-h-", "_hover_style_registry")
+
+            # Register active_style -> .dars-a-*
+            active_styles = getattr(comp, "active_style", None)
+            _register_variant(active_styles, "dars-a-", "_active_style_registry")
+
+            # Clear inline style so render_component no longer emits it
+            try:
+                comp.style = {}
+            except Exception:
+                pass
+
+        # Depth-first traversal
+        def walk(node: Component):
+            if node is None:
+                return
+            process(node)
+            if hasattr(node, 'children') and node.children:
+                for ch in node.children:
+                    if ch is not None:
+                        walk(ch)
+
+        walk(component)
 
 
     def _generate_reactive_bindings_js(self) -> str:
@@ -5547,6 +5789,13 @@ body {
             route_app.root = spa_route.root
             if spa_route.title: route_app.title = spa_route.title
             if isinstance(route_app.root, list): route_app.root = Container(children=route_app.root)
+
+            # Phase 1 styles: register static styles and replace inline with classes for SPA routes
+            try:
+                self._collect_static_styles_from_tree(route_app.root)
+            except Exception:
+                pass
+
             route_html = self.render_component(route_app.root)
             route_vdom, route_events_map = {}, {}
             # Determine route type first
@@ -5623,6 +5872,12 @@ body {
             if hasattr(self, '_page_head_metadata'):
                 self._page_head_metadata = {}
             
+            # Generate CSS snapshot for this route from current style registry (may contain shared rules)
+            try:
+                route_styles_css = self._generate_style_registry_css()
+            except Exception:
+                route_styles_css = ""
+
             if route_type == RouteType.PUBLIC:
                 route_config = {
                     'name': route_name, 
@@ -5630,7 +5885,7 @@ body {
                     'title': route_title,  # Use Head metadata if available
                     'type': 'public',
                     'html': route_html, 
-                    'styles': '',
+                    'styles': route_styles_css,
                     'scripts': scripts_array,
                     'events': route_events_map,
                     'vdom': route_vdom,
@@ -5663,7 +5918,7 @@ body {
                     'title': route_title,  # Use Head metadata if available
                     'type': 'public',
                     'html': route_html, 
-                    'styles': '',
+                    'styles': route_styles_css,
                     'scripts': scripts_array,
                     'events': route_events_map,
                     'vdom': route_vdom,

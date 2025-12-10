@@ -26,12 +26,9 @@
   <meta content="website" property="og:type"/>
   <meta content="summary" name="twitter:card"/>
   <link href="runtime_css.css" rel="stylesheet"/>
-  <link href="styles.css" rel="stylesheet"/>
- </head>
- <body>
-  <div class="dars-page" id="page_91" style="background: linear-gradient(135deg, #0f1e1a 0%, #132d24 100%);">
-   <div class="dars-container" id="container_92">
-    <nav class="dars-navbar" id="dars-navbar" style="display: flex;
+  <style id="dars-style-registry">
+   .dars-s-6602c7942b {
+    display: flex;
     align-items: center;
     justify-content: space-between;
     height: 64px;
@@ -43,86 +40,63 @@
     backdrop-filter: blur(12px);
     background: rgba(20, 30, 27, 0.6);
     border-bottom: 1px solid rgba(100,255,200,0.1);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
-     <div class="dars-navbar-nav">
-      <div class="dars-container" id="navbar-left" style="display: flex;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.dars-s-e367a650f8 {
+    display: flex;
     align-items: center;
     justify-content: flex-start;
-    height: 100%;">
-       <img alt="Logo" class="dars-image" height="38px" id="image_93" src="Dars-logo.png" style="object-fit: contain;
-    margin-right: 10px;" width="38px"/>
-       <span class="dars-text" id="text_94" style="font-size: 20px;
+    height: 100%;
+}
+
+.dars-s-1c61bda2a5 {
+    object-fit: contain;
+    margin-right: 10px;
+}
+
+.dars-s-46b1b7db03 {
+    font-size: 20px;
     font-weight: 700;
     color: #a2ffe2;
-    margin: 0;">
-        Dars Framework
-       </span>
-      </div>
-      <div class="dars-container" id="container_95" style="display: flex;
+    margin: 0;
+}
+
+.dars-s-40ffeb2872 {
+    display: flex;
     align-items: center;
     justify-content: flex-end;
     height: 100%;
-    gap: 15px;">
-       <div class="dars-container" id="navbar-right" style="display: flex;
+    gap: 15px;
+}
+
+.dars-s-9d1280a5f9 {
+    display: flex;
     align-items: center;
     justify-content: flex-end;
-    height: 100%;">
-        <a class="dars-link" href="https://ztamdev.github.io/Dars-Framework/" id="link_96" style="color: #a0cfc0;
+    height: 100%;
+}
+
+.dars-s-e68e89f54a {
+    color: #a0cfc0;
     text-decoration: none;
     margin: 0 15px;
     font-weight: 500;
     font-size: 16px;
     transition: all 0.3s ease;
     padding: 8px 16px;
-    border-radius: 6px;" target="_self">
-         Home
-        </a>
-        <a class="dars-link" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_97" style="color: #a0cfc0;
-    text-decoration: none;
-    margin: 0 15px;
-    font-weight: 500;
-    font-size: 16px;
-    transition: all 0.3s ease;
-    padding: 8px 16px;
-    border-radius: 6px;" target="_self">
-         Documentation
-        </a>
-        <a class="dars-link" href="https://ztamdev.github.io/Dars-Framework/releases.html" id="link_98" style="color: #a0cfc0;
-    text-decoration: none;
-    margin: 0 15px;
-    font-weight: 500;
-    font-size: 16px;
-    transition: all 0.3s ease;
-    padding: 8px 16px;
-    border-radius: 6px;" target="_self">
-         Releases
-        </a>
-        <a class="dars-link" href="https://dars-playground.vercel.app/" id="link_99" style="color: #a0cfc0;
-    text-decoration: none;
-    margin: 0 15px;
-    font-weight: 500;
-    font-size: 16px;
-    transition: all 0.3s ease;
-    padding: 8px 16px;
-    border-radius: 6px;" target="_self">
-         PlayGround
-        </a>
-        <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework" id="link_100" style="color: #a0cfc0;
-    text-decoration: none;
-    margin: 0 15px;
-    font-weight: 500;
-    font-size: 16px;
-    transition: all 0.3s ease;
-    padding: 8px 16px;
-    border-radius: 6px;" target="_self">
-         GitHub
-        </a>
-       </div>
-       <div class="dars-container" id="hamburger-menu" style="display: none;
+    border-radius: 6px;
+}
+
+.dars-s-a7fb8b47dc {
+    display: none;
     align-items: center;
     justify-content: flex-end;
-    height: 100%;">
-        <div class="dars-container" id="hamburger-btn" style="display: none;
+    height: 100%;
+}
+
+.dars-s-29f623bc0c {
+    display: none;
     background: rgba(162, 255, 226, 0.1);
     border: 1px solid rgba(162, 255, 226, 0.3);
     border-radius: 10px;
@@ -133,38 +107,39 @@
     align-items: center;
     justify-content: center;
     backdrop-filter: blur(10px);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-         <div class="dars-container" id="container_101" style="display: flex;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.dars-s-a523e4c679 {
+    display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     width: 44px;
     height: 44px;
-    position: relative;">
-          <div class="dars-container" id="container_102" style="width: 24px;
+    position: relative;
+}
+
+.dars-s-443ace78b5 {
+    width: 24px;
     height: 2px;
     background: #a2ffe2;
     border-radius: 2px;
     transition: all 0.3s ease;
-    margin: 3px 0;">
-          </div>
-          <div class="dars-container" id="container_103" style="width: 24px;
+    margin: 3px 0;
+}
+
+.dars-s-dee12a1b3f {
+    width: 18px;
     height: 2px;
     background: #a2ffe2;
     border-radius: 2px;
     transition: all 0.3s ease;
-    margin: 3px 0;">
-          </div>
-          <div class="dars-container" id="container_104" style="width: 18px;
-    height: 2px;
-    background: #a2ffe2;
-    border-radius: 2px;
-    transition: all 0.3s ease;
-    margin: 3px 0;">
-          </div>
-         </div>
-        </div>
-        <div class="dars-container" id="mobile-menu" style="display: none;
+    margin: 3px 0;
+}
+
+.dars-s-f758541826 {
+    display: none;
     position: fixed;
     top: 64px;
     left: 0;
@@ -174,54 +149,521 @@
     border-top: 1px solid rgba(100,255,200,0.15);
     box-shadow: 0 8px 30px rgba(0,0,0,0.4);
     z-index: 999;
-    flex-direction: column;">
-         <a class="dars-link" href="https://ztamdev.github.io/Dars-Framework/" id="link_105" style="color: #a0cfc0;
+    flex-direction: column;
+}
+
+.dars-s-00267e9857 {
+    color: #a0cfc0;
     text-decoration: none;
     display: block;
     padding: 18px 25px;
     font-weight: 500;
     font-size: 18px;
     transition: all 0.3s ease;
-    border-bottom: 1px solid rgba(100,255,200,0.1);" target="_self">
+    border-bottom: 1px solid rgba(100,255,200,0.1);
+}
+
+.dars-s-d4546045aa {
+    color: #a0cfc0;
+    text-decoration: none;
+    display: block;
+    padding: 18px 25px;
+    font-weight: 500;
+    font-size: 18px;
+    transition: all 0.3s ease;
+}
+
+.dars-s-491b197b83 {
+    min-height: 100vh;
+    display: flex;
+    height: auto;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: linear-gradient(135deg, #0f1e1a 0%, #132d24 100%);
+    position: relative;
+    padding-top: 80px;
+    padding: 80px 20px 40px;
+}
+
+.dars-s-331ccf4d1c {
+    opacity: 0;
+    transform: scale(0.8);
+    margin-bottom: 20px;
+    transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dars-s-17903ced0e {
+    font-size: 64px;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(90deg, #92ffe5, #38c49f, #7dfdd8, #92ffe5);
+    background-size: 300% 300%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.8s ease-out;
+    animation: colorCycle 6s ease-in-out infinite alternate;
+}
+
+.dars-s-8082a84e13 {
+    font-size: 20px;
+    color: #a0cfc0;
+    max-width: 800px;
+    text-align: center;
+    margin-top: 20px;
+    opacity: 0;
+    line-height: 1.6;
+    transform: translateY(10px);
+    transition: all 0.9s ease-out;
+}
+
+.dars-s-1d3d8d0500 {
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.9s ease-out;
+}
+
+.dars-s-3af8eaf383 {
+    display: flex;
+    align-items: center;
+    background: rgba(20, 30, 27, 0.6);
+    border: 1px solid rgba(100,255,200,0.1);
+    border-radius: 8px;
+    padding: 0px;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    max-width: fit-content;
+}
+
+.dars-s-6d6cbe40e8 {
+    font-family: monospace;
+    font-size: 18px;
+    color: #92ffe5;
+    background: rgba(20, 30, 27, 0.6);
+    padding: 12px 20px;
+    border-radius: 8px;
+    border: 1px solid rgba(100,255,200,0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    margin-right: 0px;
+    flex: 1;
+}
+
+.dars-s-fed6e6fe34 {
+    background: rgba(20, 30, 27, 0.9);
+    border: 1px solid rgba(100,255,200,0.3);
+    color: #92ffe5;
+    padding: 12px 5px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    opacity: 0;
+    width: 0px;
+    overflow: hidden;
+    white-space: nowrap;
+    margin-left: 0px;
+    flex-shrink: 0;
+}
+
+.dars-s-99e81f041c {
+    margin-top: 25px;
+    margin-bottom: 20px;
+    padding: 14px 42px;
+    font-size: 18px;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    opacity: 0;
+}
+
+.dars-s-7896c298b1 {
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #0a1512 0%, #0f1e1a 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.dars-s-255b435bbe {
+    font-size: 48px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 20px;
+    background: linear-gradient(90deg, #92ffe5, #38c49f, #7dfdd8, #92ffe5);
+    background-size: 300% 300%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    animation: colorCycle 6s ease-in-out infinite alternate;
+}
+
+.dars-s-2e8c681a45 {
+    font-size: 20px;
+    color: #a0cfc0;
+    text-align: center;
+    margin-bottom: 60px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.dars-s-e60bd1be03 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.dars-s-7e9087e9c6 {
+    background: rgba(20, 30, 27, 0.6);
+    border: 1px solid rgba(100,255,200,0.1);
+    border-radius: 16px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: translateY(40px) rotateX(10deg);
+    transition: all 0.6s ease 0.0s;
+}
+
+.dars-s-e7fb390cb3 {
+    text-align: center;
+    padding: 40px 30px;
+}
+
+.dars-s-fe3e68b908 {
+    margin-bottom: 20px;
+    filter: drop-shadow(0 0 10px rgba(162, 255, 226, 0.3));
+    transition: all 0.3s ease;
+}
+
+.dars-s-0f56c0815d {
+    font-size: 24px;
+    font-weight: 700;
+    color: #a2ffe2;
+    margin-bottom: 12px;
+}
+
+.dars-s-e6dba9fc54 {
+    font-size: 16px;
+    color: #a0cfc0;
+    line-height: 1.5;
+}
+
+.dars-s-80f5590a9b {
+    background: rgba(20, 30, 27, 0.6);
+    border: 1px solid rgba(100,255,200,0.1);
+    border-radius: 16px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: translateY(40px) rotateX(10deg);
+    transition: all 0.6s ease 0.1s;
+}
+
+.dars-s-b352dabad1 {
+    background: rgba(20, 30, 27, 0.6);
+    border: 1px solid rgba(100,255,200,0.1);
+    border-radius: 16px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: translateY(40px) rotateX(10deg);
+    transition: all 0.6s ease 0.2s;
+}
+
+.dars-s-8b69500417 {
+    background: rgba(20, 30, 27, 0.6);
+    border: 1px solid rgba(100,255,200,0.1);
+    border-radius: 16px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: translateY(40px) rotateX(10deg);
+    transition: all 0.6s ease 0.3s;
+}
+
+.dars-s-618fc3e02f {
+    background: rgba(20, 30, 27, 0.6);
+    border: 1px solid rgba(100,255,200,0.1);
+    border-radius: 16px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: translateY(40px) rotateX(10deg);
+    transition: all 0.6s ease 0.4s;
+}
+
+.dars-s-72a307dcd3 {
+    background: rgba(20, 30, 27, 0.6);
+    border: 1px solid rgba(100,255,200,0.1);
+    border-radius: 16px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: translateY(40px) rotateX(10deg);
+    transition: all 0.6s ease 0.5s;
+}
+
+.dars-s-c41e03322a {
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #0f1e1a 0%, #132d24 100%);
+    min-height: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.dars-s-fcfe6da3b4 {
+    font-size: 20px;
+    color: #a0cfc0;
+    text-align: center;
+    margin-bottom: 40px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.dars-s-205029c095 {
+    background: rgba(20, 30, 27, 0.6);
+    border: 1px solid rgba(100,255,200,0.1);
+    border-radius: 16px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    transition: all 0.6s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.dars-s-0f852a3959 {
+    margin-bottom: 20px;
+    filter: drop-shadow(0 0 10px rgba(162, 255, 226, 0.4));
+    transition: all 0.3s ease;
+}
+
+.dars-s-eecfabddad {
+    font-size: 16px;
+    color: #a0cfc0;
+    line-height: 1.5;
+    display: inline;
+}
+
+.dars-s-a4b4b8d262 {
+    font-size: 16px;
+    color: #92ffe5;
+    font-weight: 600;
+    font-family: monospace;
+    background: rgba(162, 255, 226, 0.1);
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline;
+    line-height: 1.5;
+}
+
+.dars-s-2bf2b9dc50 {
+    background: linear-gradient(135deg, #0a1512 0%, #0f1e1a 100%);
+    margin-top: auto;
+}
+
+.dars-s-b9edec0647 {
+    background: rgba(10, 15, 13, 0.8);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(100,255,200,0.15);
+}
+
+.dars-s-ad051c31bc {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 50px 20px;
+}
+
+.dars-s-32330b2fbf {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.dars-s-9093a9afde {
+    margin-right: 15px;
+    filter: drop-shadow(0 0 10px rgba(162, 255, 226, 0.4));
+}
+
+.dars-s-3705a9abea {
+    text-align: left;
+}
+
+.dars-s-df9433d016 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #a2ffe2;
+    margin-bottom: 5px;
+}
+
+.dars-s-9ff400f3b3 {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
+    justify-content: space-between;
+    margin-bottom: 30px;
+}
+
+.dars-s-fe64e3094d {
+    flex: 1;
+    min-width: 150px;
+}
+
+.dars-s-8d9bf8c5ed {
+    font-size: 18px;
+    font-weight: 600;
+    color: #a2ffe2;
+    margin-bottom: 15px;
+}
+
+.dars-s-b5b74dba69 {
+    color: #a0cfc0;
+    text-decoration: none;
+    display: block;
+    margin-bottom: 8px;
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+.dars-s-2196eb0df4 {
+    flex: 2;
+    min-width: 200px;
+}
+
+.dars-s-474933a055 {
+    color: #a0cfc0;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 15px;
+}
+
+.dars-s-9a07c4617d {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 20px;
+    border-top: 1px solid rgba(100,255,200,0.1);
+}
+
+.dars-s-b531c31f9b {
+    flex: 1;
+}
+
+.dars-s-132d246545 {
+    color: #a0cfc0;
+    font-size: 14px;
+    opacity: 0.7;
+}
+
+.dars-s-b59da3237c {
+    flex: 1;
+    text-align: right;
+}
+
+.dars-s-7c258fc573 {
+    color: #a0cfc0;
+    font-size: 14px;
+    opacity: 0.7;
+    display: inline;
+}
+
+.dars-s-cb2830d9c8 {
+    color: #a2ffe2;
+    text-decoration: none;
+    font-weight: 600;
+    display: inline;
+    font-size: 14px;
+}
+
+.dars-s-87ae4f7f12 {
+    background: linear-gradient(135deg, #0f1e1a 0%, #132d24 100%);
+}
+
+.dars-s-b781be11b3 {
+    margin-left: 280px;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0f1e1a 0%, #132d24 100%);
+    transition: margin-left 0.3s ease;
+}
+
+.dars-s-c59e376995 {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+  </style>
+  <link href="styles.css" rel="stylesheet"/>
+ </head>
+ <body>
+  <div class="dars-page dars-s-87ae4f7f12" id="page_91">
+   <div class="dars-container" id="container_92">
+    <nav class="dars-navbar dars-s-6602c7942b" id="dars-navbar">
+     <div class="dars-navbar-nav">
+      <div class="dars-container dars-s-e367a650f8" id="navbar-left">
+       <img alt="Logo" class="dars-image dars-s-1c61bda2a5" height="38px" id="image_93" src="Dars-logo.png" width="38px"/>
+       <span class="dars-text dars-s-46b1b7db03" id="text_94">
+        Dars Framework
+       </span>
+      </div>
+      <div class="dars-container dars-s-40ffeb2872" id="container_95">
+       <div class="dars-container dars-s-9d1280a5f9" id="navbar-right">
+        <a class="dars-link dars-s-e68e89f54a" href="https://ztamdev.github.io/Dars-Framework/" id="link_96" target="_self">
+         Home
+        </a>
+        <a class="dars-link dars-s-e68e89f54a" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_97" target="_self">
+         Documentation
+        </a>
+        <a class="dars-link dars-s-e68e89f54a" href="https://ztamdev.github.io/Dars-Framework/releases.html" id="link_98" target="_self">
+         Releases
+        </a>
+        <a class="dars-link dars-s-e68e89f54a" href="https://dars-playground.vercel.app/" id="link_99" target="_self">
+         PlayGround
+        </a>
+        <a class="dars-link dars-s-e68e89f54a" href="https://github.com/ZtaMDev/Dars-Framework" id="link_100" target="_self">
+         GitHub
+        </a>
+       </div>
+       <div class="dars-container dars-s-a7fb8b47dc" id="hamburger-menu">
+        <div class="dars-container dars-s-29f623bc0c" id="hamburger-btn">
+         <div class="dars-container dars-s-a523e4c679" id="container_101">
+          <div class="dars-container dars-s-443ace78b5" id="container_102">
+          </div>
+          <div class="dars-container dars-s-443ace78b5" id="container_103">
+          </div>
+          <div class="dars-container dars-s-dee12a1b3f" id="container_104">
+          </div>
+         </div>
+        </div>
+        <div class="dars-container dars-s-f758541826" id="mobile-menu">
+         <a class="dars-link dars-s-00267e9857" href="https://ztamdev.github.io/Dars-Framework/" id="link_105" target="_self">
           Home
          </a>
-         <a class="dars-link" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_106" style="color: #a0cfc0;
-    text-decoration: none;
-    display: block;
-    padding: 18px 25px;
-    font-weight: 500;
-    font-size: 18px;
-    transition: all 0.3s ease;
-    border-bottom: 1px solid rgba(100,255,200,0.1);" target="_self">
+         <a class="dars-link dars-s-00267e9857" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_106" target="_self">
           Documentation
          </a>
-         <a class="dars-link" href="https://ztamdev.github.io/Dars-Framework/releases.html" id="link_107" style="color: #a0cfc0;
-    text-decoration: none;
-    display: block;
-    padding: 18px 25px;
-    font-weight: 500;
-    font-size: 18px;
-    transition: all 0.3s ease;
-    border-bottom: 1px solid rgba(100,255,200,0.1);" target="_self">
+         <a class="dars-link dars-s-00267e9857" href="https://ztamdev.github.io/Dars-Framework/releases.html" id="link_107" target="_self">
           Releases
          </a>
-         <a class="dars-link" href="https://dars-playground.vercel.app/" id="link_108" style="color: #a0cfc0;
-    text-decoration: none;
-    display: block;
-    padding: 18px 25px;
-    font-weight: 500;
-    font-size: 18px;
-    transition: all 0.3s ease;
-    border-bottom: 1px solid rgba(100,255,200,0.1);" target="_self">
+         <a class="dars-link dars-s-00267e9857" href="https://dars-playground.vercel.app/" id="link_108" target="_self">
           PlayGround
          </a>
-         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework" id="link_109" style="color: #a0cfc0;
-    text-decoration: none;
-    display: block;
-    padding: 18px 25px;
-    font-weight: 500;
-    font-size: 18px;
-    transition: all 0.3s ease;" target="_self">
+         <a class="dars-link dars-s-d4546045aa" href="https://github.com/ZtaMDev/Dars-Framework" id="link_109" target="_self">
           GitHub
          </a>
         </div>
@@ -2410,13 +2852,8 @@
             window.addEventListener('scroll', highlightActiveLink);
         });
    </script>
-   <div class="dars-container" id="container_110" style="margin-left: 280px;
-    min-height: 100vh;
-    background: linear-gradient(135deg, #0f1e1a 0%, #132d24 100%);
-    transition: margin-left 0.3s ease;">
-    <div class="dars-container" id="markdown-content-container" style="max-width: 800px;
-    margin: 0 auto;
-    padding: 40px 20px;">
+   <div class="dars-container dars-s-b781be11b3" id="container_110">
+    <div class="dars-container dars-s-c59e376995" id="markdown-content-container">
      <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet"/>
      <style>
       .dars-code-copy{position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.5);color:#fff;border:none;border-radius:6px;padding:4px 8px;font-size:12px;cursor:pointer;opacity:.0;transition:opacity .2s ease;}pre:hover .dars-code-copy{opacity:.9}.dars-code-copy.copied{background:#16a34a}
@@ -24878,146 +25315,69 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
       </p>
      </div>
     </div>
-    <div class="dars-container" id="footer-section" style="background: linear-gradient(135deg, #0a1512 0%, #0f1e1a 100%);
-    margin-top: auto;">
-     <div class="dars-container" id="container_111" style="background: rgba(10, 15, 13, 0.8);
-    backdrop-filter: blur(12px);
-    border-top: 1px solid rgba(100,255,200,0.15);">
-      <div class="dars-container" id="container_112" style="max-width: 1200px;
-    margin: 0 auto;
-    padding: 50px 20px;">
-       <div class="dars-container" id="container_113" style="display: flex;
-    align-items: center;
-    margin-bottom: 30px;">
-        <img alt="Dars Framework" class="dars-image" height="50px" id="image_114" src="Dars-logo.png" style="margin-right: 15px;
-    filter: drop-shadow(0 0 10px rgba(162, 255, 226, 0.4));" width="50px"/>
-        <div class="dars-container" id="container_115" style="text-align: left;">
-         <span class="dars-text" id="text_116" style="font-size: 24px;
-    font-weight: 700;
-    color: #a2ffe2;
-    margin-bottom: 5px;">
+    <div class="dars-container dars-s-2bf2b9dc50" id="footer-section">
+     <div class="dars-container dars-s-b9edec0647" id="container_111">
+      <div class="dars-container dars-s-ad051c31bc" id="container_112">
+       <div class="dars-container dars-s-32330b2fbf" id="container_113">
+        <img alt="Dars Framework" class="dars-image dars-s-9093a9afde" height="50px" id="image_114" src="Dars-logo.png" width="50px"/>
+        <div class="dars-container dars-s-3705a9abea" id="container_115">
+         <span class="dars-text dars-s-df9433d016" id="text_116">
           Dars Framework
          </span>
         </div>
        </div>
-       <div class="dars-container" id="container_117" style="display: flex;
-    flex-wrap: wrap;
-    gap: 40px;
-    justify-content: space-between;
-    margin-bottom: 30px;">
-        <div class="dars-container" id="container_118" style="flex: 1;
-    min-width: 150px;">
-         <span class="dars-text" id="text_119" style="font-size: 18px;
-    font-weight: 600;
-    color: #a2ffe2;
-    margin-bottom: 15px;">
+       <div class="dars-container dars-s-9ff400f3b3" id="container_117">
+        <div class="dars-container dars-s-fe64e3094d" id="container_118">
+         <span class="dars-text dars-s-8d9bf8c5ed" id="text_119">
           Quick Links
          </span>
-         <a class="dars-link" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_120" style="color: #a0cfc0;
-    text-decoration: none;
-    display: block;
-    margin-bottom: 8px;
-    transition: all 0.3s ease;
-    font-size: 14px;" target="_self">
+         <a class="dars-link dars-s-b5b74dba69" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_120" target="_self">
           Documentation
          </a>
-         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework" id="link_121" style="color: #a0cfc0;
-    text-decoration: none;
-    display: block;
-    margin-bottom: 8px;
-    transition: all 0.3s ease;
-    font-size: 14px;" target="_self">
+         <a class="dars-link dars-s-b5b74dba69" href="https://github.com/ZtaMDev/Dars-Framework" id="link_121" target="_self">
           GitHub
          </a>
-         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework/tree/CrystalMain/dars/templates/examples" id="link_122" style="color: #a0cfc0;
-    text-decoration: none;
-    display: block;
-    margin-bottom: 8px;
-    transition: all 0.3s ease;
-    font-size: 14px;" target="_self">
+         <a class="dars-link dars-s-b5b74dba69" href="https://github.com/ZtaMDev/Dars-Framework/tree/CrystalMain/dars/templates/examples" id="link_122" target="_self">
           Examples
          </a>
         </div>
-        <div class="dars-container" id="container_123" style="flex: 1;
-    min-width: 150px;">
-         <span class="dars-text" id="text_124" style="font-size: 18px;
-    font-weight: 600;
-    color: #a2ffe2;
-    margin-bottom: 15px;">
+        <div class="dars-container dars-s-fe64e3094d" id="container_123">
+         <span class="dars-text dars-s-8d9bf8c5ed" id="text_124">
           Resources
          </span>
-         <a class="dars-link" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_125" style="color: #a0cfc0;
-    text-decoration: none;
-    display: block;
-    margin-bottom: 8px;
-    transition: all 0.3s ease;
-    font-size: 14px;" target="_self">
+         <a class="dars-link dars-s-b5b74dba69" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_125" target="_self">
           Getting Started
          </a>
-         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework/releases.html" id="link_126" style="color: #a0cfc0;
-    text-decoration: none;
-    display: block;
-    margin-bottom: 8px;
-    transition: all 0.3s ease;
-    font-size: 14px;" target="_self">
+         <a class="dars-link dars-s-b5b74dba69" href="https://github.com/ZtaMDev/Dars-Framework/releases.html" id="link_126" target="_self">
           Releases
          </a>
         </div>
-        <div class="dars-container" id="container_127" style="flex: 2;
-    min-width: 200px;">
-         <span class="dars-text" id="text_128" style="font-size: 18px;
-    font-weight: 600;
-    color: #a2ffe2;
-    margin-bottom: 15px;">
+        <div class="dars-container dars-s-2196eb0df4" id="container_127">
+         <span class="dars-text dars-s-8d9bf8c5ed" id="text_128">
           Info:
          </span>
-         <span class="dars-text" id="text_129" style="color: #a0cfc0;
-    font-size: 14px;
-    line-height: 1.5;
-    margin-bottom: 15px;">
+         <span class="dars-text dars-s-474933a055" id="text_129">
           A modern Python framework for web and desktop applications
          </span>
         </div>
        </div>
-       <div class="dars-container" id="container_130" style="display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 20px;
-    border-top: 1px solid rgba(100,255,200,0.1);">
-        <div class="dars-container" id="container_131" style="flex: 1;">
-         <span class="dars-text" id="text_132" style="color: #a0cfc0;
-    font-size: 14px;
-    opacity: 0.7;">
+       <div class="dars-container dars-s-9a07c4617d" id="container_130">
+        <div class="dars-container dars-s-b531c31f9b" id="container_131">
+         <span class="dars-text dars-s-132d246545" id="text_132">
           © 2024 Dars Framework.
          </span>
         </div>
-        <div class="dars-container" id="container_133" style="flex: 1;
-    text-align: right;">
-         <span class="dars-text" id="text_134" style="color: #a0cfc0;
-    font-size: 14px;
-    opacity: 0.7;
-    display: inline;">
+        <div class="dars-container dars-s-b59da3237c" id="container_133">
+         <span class="dars-text dars-s-7c258fc573" id="text_134">
           Created with
          </span>
-         <a class="dars-link" href="https://github.com/ZtaMDev/Dars-Framework" id="link_135" style="color: #a2ffe2;
-    text-decoration: none;
-    font-weight: 600;
-    display: inline;
-    font-size: 14px;" target="_self">
+         <a class="dars-link dars-s-cb2830d9c8" href="https://github.com/ZtaMDev/Dars-Framework" id="link_135" target="_self">
           Dars Framework
          </a>
-         <span class="dars-text" id="text_136" style="color: #a0cfc0;
-    font-size: 14px;
-    opacity: 0.7;
-    display: inline;">
+         <span class="dars-text dars-s-7c258fc573" id="text_136">
           by
          </span>
-         <a class="dars-link" href="https://github.com/ZtaMDev" id="link_137" style="color: #a2ffe2;
-    text-decoration: none;
-    font-weight: 600;
-    display: inline;
-    font-size: 14px;" target="_self">
+         <a class="dars-link dars-s-cb2830d9c8" href="https://github.com/ZtaMDev" id="link_137" target="_self">
           ZtaDev
          </a>
         </div>
@@ -25027,7 +25387,7 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
     </div>
    </div>
   </div>
-  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1765322596" type="module">
+  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1765402428" type="module">
   </script>
   <script defer="" src="app_docs.js">
   </script>

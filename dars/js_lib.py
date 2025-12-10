@@ -1123,6 +1123,7 @@ async function _loadRoute(route, params){{
         route['events'] = routeData['events'] || {{}};
         route['vdom'] = routeData['vdom'] || {{}};
         route['states'] = routeData['states'] || [];
+        route['styles'] = routeData['styles'] || route['styles'] || '';
       }}catch(error){{
         console.error('[Dars Router] Error loading SSR route:', error);
         // On error stay on current page or redirect to index?
@@ -1209,6 +1210,7 @@ async function _loadRoute(route, params){{
         if(r['styles']) _injectStyles(r['name'], r['styles']);
         if(r['scripts']) _executeScripts(r['scripts'], r['name']);
         if(r['events']) _attachEventsMap(r['events']);
+        if(r['styles']) _injectStyles(r['name'], r['styles']);
         
         // Register states/hydrate
         if(r['states'] && Array.isArray(r['states'])){{ registerStates(r['states']); }}

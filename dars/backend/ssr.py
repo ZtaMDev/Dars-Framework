@@ -129,22 +129,59 @@ class SSRRenderer:
         if not metadata or metadata.route_type != RouteType.SSR:
             raise ValueError(f"Route '{route_name}' is not an SSR route")
         
-        # Create a copy of the app for this render
+        # Create a shallow copy of the app for this render
         route_app = copy.copy(self.app)
-        route_app.root = route.root
         if route.title:
             route_app.title = route.title
             
-        # Create a fresh exporter instance for this render to ensure clean state (IDs)
+        # Create a fresh exporter instance for this render to ensure clean state (IDs, style registry)
         exporter = HTMLCSSJSExporter()
-        
+        # Ensure fresh style registry for this render
+        try:
+            exporter._style_registry = {}
+        except Exception:
+            pass
+
+        # IMPORTANT: Work on a deep copy of route.root so we never mutate the original tree
+        from dars.components.basic.container import Container
+        try:
+            import copy as _cpy
+            working_root = _cpy.deepcopy(route.root)
+        except Exception:
+            working_root = route.root
+
+        # Normalize root (wrap list in Container) on the working copy
+        if isinstance(working_root, list):
+            working_root = Container(children=working_root)
+        route_app.root = working_root
+
+        # Phase 1 styles: collect static styles and replace inline with classes for SSR route
+        try:
+            exporter._collect_static_styles_from_tree(working_root)
+        except Exception:
+            pass
+
+        # Snapshot registry CSS immediately after collection (before further steps mutate state)
+        try:
+            _registry_css_snapshot = exporter._generate_style_registry_css()
+        except Exception:
+            _registry_css_snapshot = ""
+
         # Render component to HTML (body content only)
-        body_html = exporter.render_component(route.root)
+        body_html = exporter.render_component(working_root)
+
+        # Fallback: if snapshot was empty, attempt a second collection post-render
+        if not _registry_css_snapshot:
+            try:
+                exporter._collect_static_styles_from_tree(working_root)
+                _registry_css_snapshot = exporter._generate_style_registry_css()
+            except Exception:
+                _registry_css_snapshot = ""
         
         # Build VDOM and events
         try:
             vdom_builder = VDomBuilder(id_provider=exporter.get_component_id)
-            route_vdom = vdom_builder.build(route.root)
+            route_vdom = vdom_builder.build(working_root)
             route_events_map = vdom_builder.events_map
         except Exception as e:
             print(f"[SSR] Warning: VDOM build failed: {e}")
@@ -260,6 +297,71 @@ class SSRRenderer:
         # container so that the SPA router in dars.min.js can detect and
         # hydrate the already-rendered content instead of re-rendering it
         # from scratch on first load.
+        # Generate CSS for style registry for this SSR render (use early snapshot)
+        registry_css = _registry_css_snapshot
+        # Robust fallback: if still empty, extract from rendered HTML's inline styles
+        if not registry_css and body_html:
+            try:
+                from bs4 import BeautifulSoup
+                soup = BeautifulSoup(body_html, 'html.parser')
+                rules = {}
+
+                def parse_inline_style(s: str):
+                    out = {}
+                    for decl in s.split(';'):
+                        decl = decl.strip()
+                        if not decl:
+                            continue
+                        if ':' not in decl:
+                            continue
+                        k, v = decl.split(':', 1)
+                        k = k.strip()
+                        v = v.strip()
+                        if k and v:
+                            out[k] = v
+                    return out
+
+                # Find all elements with inline style
+                for el in soup.select('[style]'):
+                    style_text = el.get('style') or ''
+                    style_dict = parse_inline_style(style_text)
+                    if not style_dict:
+                        continue
+                    # Compute class via exporter helper
+                    try:
+                        class_name = exporter._style_fingerprint(style_dict)  # type: ignore[attr-defined]
+                    except Exception:
+                        continue
+                    rules[class_name] = style_dict
+                    # Prepend class and drop inline style
+                    existing = (el.get('class') or [])
+                    if class_name not in existing:
+                        el['class'] = [class_name] + list(existing)
+                    try:
+                        del el['style']
+                    except Exception:
+                        pass
+
+                # If we collected any rules, rebuild body_html and CSS
+                if rules:
+                    # Update body_html with classes
+                    body_html = str(soup)
+                    # Build CSS from rules
+                    blocks = []
+                    for cname, sdict in rules.items():
+                        # Serialize like exporter.render_styles (simple serializer)
+                        lines = []
+                        for k, v in sdict.items():
+                            lines.append(f"{k}: {v};")
+                        css_body = '\n    '.join(lines)
+                        blocks.append(f".{cname} {{\n    {css_body}\n}}")
+                    registry_css = '\n\n'.join(blocks)
+            except Exception:
+                registry_css = registry_css
+
+        # Always include the style tag (even if empty) so presence can be verified and updated later
+        registry_style_tag = f"\n    <style id=\"dars-style-registry\">\n{registry_css}\n    </style>\n    "
+        
         full_html = f"""<!DOCTYPE html>
 <html lang="{route_app.language if hasattr(route_app, 'language') else 'en'}">
 <head>
@@ -267,8 +369,7 @@ class SSRRenderer:
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {meta_tags_html}
     <title>{page_title}</title>
-    <link rel="stylesheet" href="/runtime_css.css">
-    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/runtime_css.css">{registry_style_tag}<link rel="stylesheet" href="/styles.css">
 </head>
 <body>
     <div id="__dars_spa_root__">
@@ -280,10 +381,21 @@ class SSRRenderer:
 </body>
 </html>"""
         
+        # Also attach styles to spa_config for the current route so client can inject when using JSON API
+        try:
+            for i, rc in enumerate(spa_config.get('routes', [])):
+                if rc and rc.get('name') == route_name:
+                    rc['styles'] = registry_css
+                elif rc and 'styles' not in rc:
+                    rc['styles'] = ''
+        except Exception:
+            pass
+
         return {
             "name": route_name,
             "html": body_html,  # Body HTML for SPA hydration
             "fullHtml": full_html,  # Complete HTML document with <head>
+            "styles": registry_css,
             "scripts": [
                 {"type": "core", "code": vdom_js},
                 {"type": "user", "src": f"/{script_fn}", "module": True}

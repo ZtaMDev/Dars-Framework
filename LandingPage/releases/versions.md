@@ -1,3 +1,81 @@
+# Release Notes v1.8.1
+
+> **Style System Optimization & SSR-Aware Registry**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### New Style Optimization Pipeline (Phase 1)
+
+v1.8.1 introduces the first phase of a new **style optimization system** focused on reducing inline CSS while keeping full compatibility with Dars reactivity and dynamic operations.
+
+- Static styles defined via `style={...}` or Tailwind-like strings in `style="..."` are now:
+  - Parsed into CSS dicts by the exporter.
+  - Fingerprinted and converted into generated classes: `.dars-s-<hash>`.
+  - Emitted once into a central style registry instead of repeating large inline `style` blocks.
+- The exporter automatically attaches the generated class to the component and clears the redundant inline style, resulting in:
+  - Smaller HTML output.
+  - Less DOM churn on updates.
+  - Better cacheability for repeated style patterns.
+
+The original `class_name` remains fully respected and is appended **after** the generated `dars-s-*` class, so user classes (and external CSS frameworks) retain override power.
+
+### Central Style Registry in the HTML Head
+
+The optimized styles are accumulated into a central registry and injected in the `<head>` as:
+
+```html
+<link rel="stylesheet" href="runtime_css.css">
+<style id="dars-style-registry">
+  /* .dars-s-* rules here */
+</style>
+<link rel="stylesheet" href="styles.css">
+```
+
+Order is carefully chosen so that:
+
+- `runtime_css.css` provides the base UI tokens and default component styling.
+- `#dars-style-registry` contains all extracted `.dars-s-*` rules (including those coming from `hover_style`/`active_style` phases on future releases).
+- `styles.css` (hover/active styles + `app.add_global_style()` + user CSS files) comes last, ensuring user styles can override the framework-generated ones.
+
+### Full Export Coverage: Single/Multi Page, SPA & SSR
+
+The new style pipeline now runs consistently across all export modes:
+
+- **Single page & multipage**:
+  - `HTMLCSSJSExporter.export` collects static styles from the component tree before rendering.
+  - The generated HTML includes the `#dars-style-registry` block in the head.
+
+- **SPA export (`_export_spa`)**:
+  - Each SPA route runs the same static-style collection before serializing its `html`.
+  - The per-route config in `__DARS_SPA_CONFIG__` now includes a `styles` field containing the CSS for that route.
+  - At runtime, the SPA router calls `_injectStyles(routeName, styles)` so that SSR/SPA navigations share the same optimized classes.
+
+- **SSR backend (`dars.backend.ssr`)**:
+  - `SSRRenderer.render_route` uses a **deep copy** of each route's root tree to avoid mutating the original components when collecting styles.
+  - Static styles are extracted to `.dars-s-*` classes, and the resulting CSS is injected into the SSR HTML head using `#dars-style-registry`.
+  - The SSR JSON API (`/api/ssr/<route>`) now returns a `styles` field alongside `html`, `vdom`, `events`, etc., so the SPA router can inject the same registry CSS on client-side navigations.
+
+### Runtime & Router Adjustments
+
+The embedded JS runtime (`dars/js_lib.py` → `DARS_MIN_JS`) has been updated to be style-optimization aware without breaking existing behavior:
+
+- `Dars.change({ id, dynamic: true, style: {...} })` and state rules that manipulate `attrs.style` continue to write directly to `el.style[...]`.
+  - They do **not** depend on an initial inline `style` attribute, so elements whose base styles were moved to `.dars-s-*` remain fully reactive.
+- Class updates via `attrs.class` preserve internal `dars-*` classes (including `.dars-s-*`) and only replace user classes, ensuring the optimization never gets wiped by state changes.
+- The SPA router:
+  - Loads SSR route data from `/api/ssr/...` and now respects the `styles` payload from the backend.
+  - Uses `_injectStyles(routeName, styles)` on every SSR navigation so that optimized classes stay active even after client-side route changes.
+
+These changes are designed to be **backwards compatible** for projects that used only `style`/`class_name` and dynamic state. The main effect you will notice in v1.8.1 is smaller, cleaner HTML with fewer repeated inline styles, especially for static or Tailwind-like styling.
+
+---
+
 # Release Notes v1.8.0
 
 > **Advanced Multimedia Components & Electron Security Baseline**
