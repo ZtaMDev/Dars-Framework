@@ -63,7 +63,7 @@ def create_hero():
             Container(
                 Text(
                     id="pip-command-text",
-                    text="pip install dars framework",
+                    text="pip install dars-framework",
                     style={
                         "font-family": "monospace",
                         "font-size": "18px",
