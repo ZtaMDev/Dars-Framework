@@ -44,6 +44,7 @@ docs = Page(
             }
         ),
         create_footer(),
+        id="markdown-layout",
         style={
             "margin-left": "280px",
             "min-height": "100vh",

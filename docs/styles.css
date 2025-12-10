@@ -1097,7 +1097,7 @@ html, body {
 
 /* ====== DOCS LAYOUT FIXES ====== */
 /* Asegurar que el contenido principal se ajuste correctamente */
-.dars-container[style*="margin-left: 280px"] {
+#markdown-layout {
     transition: margin-left 0.3s ease;
 }
 
@@ -1173,7 +1173,7 @@ html, body {
 
 /* ====== RESPONSIVE FIXES ====== */
 @media (max-width: 768px) {
-    .dars-container[style*="margin-left: 280px"] {
+    #markdown-layout {
         margin-left: 0 !important;
         transition: margin-left 0.3s ease;
     }
@@ -1185,7 +1185,7 @@ html, body {
     }
     
     /* Cuando el sidebar está abierto en móviles, desplazar el contenido */
-    .docs-sidebar.mobile-open ~ .dars-container .dars-container[style*="margin-left: 280px"] {
+    .docs-sidebar.mobile-open ~ .dars-container #markdown-layout {
         margin-left: 280px !important;
         position: fixed;
         width: calc(100% - 280px);
@@ -1216,7 +1216,7 @@ html, body {
     }
     
     /* Ajuste más específico para pantallas muy pequeñas */
-    .docs-sidebar.mobile-open ~ .dars-container .dars-container[style*="margin-left: 280px"] {
+    .docs-sidebar.mobile-open ~ .dars-container #markdown-layout {
         margin-left: 280px !important;
         width: calc(100vw - 280px);
         left: 280px;
@@ -1595,9 +1595,16 @@ html, body {
     }
     
     #mobile-menu a {
+        color: #a0cfc0 !important;
+        text-decoration: none !important;
         transition: all 0.3s ease !important;
         position: relative;
         overflow: hidden;
+    }
+
+    #mobile-menu a:visited {
+        color: #a0cfc0 !important;
+        text-decoration: none !important;
     }
     
     #mobile-menu a::before {
