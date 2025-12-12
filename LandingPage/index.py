@@ -1,10 +1,3 @@
-# Dars Framework - Core Source File
-#
-# This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
-# If a copy of the MPL was not distributed with this file, You can obtain one at
-# https://mozilla.org/MPL/2.0/.
-#
-# Copyright (c) 2025 ZtaDev
 from dars.all import *
 from herocomp import create_hero
 from featurescomp import create_features
@@ -21,6 +14,7 @@ app = App(
     author="ZMDev",
     description="Dars framework landing page for the UI multiplatform python framework",
     theme_color="#0d1513",
+    theme="dark",
     background_color="#0d1513",
     apple_mobile_web_app_capable=True,
     apple_mobile_web_app_status_bar_style="black-translucent",
