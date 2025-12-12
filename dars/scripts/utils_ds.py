@@ -643,7 +643,7 @@ def setTimeout(delay: int, code: dScript) -> dScript:
     Example:
         Button("Delayed Action", on_click=setTimeout(code=alert('Delayed!'), delay=2000))
     """
-    return dScript(f"const _self=this; const _ev=typeof event!=='undefined'?event:null; setTimeout(()=>{{ (function(event){{ {code.code} }}).call(_self, _ev); }}, {delay});")
+    return dScript(f"new Promise(resolve => {{ const _self=this; const _ev=typeof event!=='undefined'?event:null; setTimeout(() => {{ (function(event){{ {code.code} }}).call(_self, _ev); resolve(); }}, {delay}); }})")
 
 
 def getInputValue(input_id: str, parent_id: str = None) -> dScript:

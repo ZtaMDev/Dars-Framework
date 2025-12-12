@@ -132,7 +132,7 @@ def create_footer():
                                 "font-size": "18px",
                                 "font-weight": "600",
                                 "color": "#a2ffe2",
-                                "margin-bottom": "15px"
+                                "margin-bottom": "5px",
                             }
                         ),
                         Text(
@@ -144,7 +144,7 @@ def create_footer():
                                 "margin-bottom": "15px"
                             }
                         ),
-                        style={"flex": "2", "min-width": "200px"}
+                        style={"display": "flex", "min-width": "200px"}
                     ),
                     style={
                         "display": "flex",
@@ -158,7 +158,7 @@ def create_footer():
                 Container(
                     Container(
                         Text(
-                            "© 2024 Dars Framework.",
+                            "© 2025 Dars Framework.",
                             style={
                                 "color": "#a0cfc0",
                                 "font-size": "14px",

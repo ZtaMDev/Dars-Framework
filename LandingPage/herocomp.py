@@ -1,5 +1,6 @@
 from dars.all import *
 
+
 def create_hero():
     return Container(
         Image(
@@ -13,7 +14,7 @@ def create_hero():
                 "transform": "scale(0.8)",
                 "margin-bottom": "20px",
                 "transition": "all 0.7s cubic-bezier(0.4, 0, 0.2, 1)"
-            }
+            },
         ),
         Text(
             text="Dars Framework",

@@ -1,3 +1,29 @@
+# Release Notes v1.8.2
+
+> **Bug Fixes & Utility System Improvements**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Fixed setTimeout Promise Handling
+
+The `setTimeout` utility function in `utils_ds.py` has been updated to properly return a Promise, enabling correct chaining with `.then()` operations. This fixes JavaScript syntax errors that occurred when using sequential animations or delayed operations.
+
+### Enhanced Animation System
+
+Improved the animation chaining system to handle missing DOM elements gracefully, preventing runtime errors when referenced elements don't exist in the component tree.
+
+### Responsive Design Enhancements
+
+Updated CSS media queries for better handling of text overflow on small screens, ensuring content remains readable across all device sizes without cutting off important information.
+
+---
+
 # Release Notes v1.8.1
 
 > **Style System Optimization & SSR-Aware Registry**

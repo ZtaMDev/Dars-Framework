@@ -28,12 +28,26 @@ index = Page(
     create_features(),
     create_howitworks(),
     create_footer(),
+    style="bg-[#0d1513]"
 )
+
 app.set_theme("dark")
 app.add_global_style(file_path="index.css")
 app.add_script(dScript(file_path="script.js"))
+
+# Start Animations
+index.add_script(
+    setTimeout(5, addClass("hero-logo", "show"))
+    .then(setTimeout(350, addClass("hero-title", "show")))
+    .then(setTimeout(650, addClass("hero-description", "show")))
+    .then(setTimeout(950, addClass("pip-command", "show")))
+    .then(setTimeout(1250, addClass("get-started-btn", "show")))
+)
+
+#Pages
 app.add_page("index", index, title="Dars Framework", index=True)
 app.add_page("docs", docs, title="Dars Docs")
 app.add_page("releases", releases, title="Dars Versions")
+
 if __name__ == "__main__":
     app.rTimeCompile(add_file_types=".py, .js, .css, .md, .svg, .png")
