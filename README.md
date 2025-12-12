@@ -19,9 +19,9 @@
 Official [Website](https://ztamdev.github.io/Dars-Framework/) | 
 Documentation [Docs](https://ztamdev.github.io/Dars-Framework/docs.html) | 
 DeepWiki [here](https://deepwiki.com/ZtaMDev/Dars-Framework) |
+Extension for VSCode [here](https://marketplace.visualstudio.com/items?itemName=ZtaMDev.dars-framework) and OpenVSX version [here](https://open-vsx.org/extension/ztamdev/dars-framework)
 
 </div>
-
 
 ```bash
 pip install dars-framework

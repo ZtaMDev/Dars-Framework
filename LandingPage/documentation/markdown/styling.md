@@ -2,6 +2,11 @@
 
 Dars Framework introduces a powerful, Python-native utility class system inspired by Tailwind CSS. This system allows you to style your components using concise string utilities directly in your Python code, without needing Node.js, PostCSS, or any external build tools.
 
+> Tip: The official **Dars Framework** VS Code extension provides Tailwind-like utility style completions while editing `style="..."` strings in Python.
+> 
+> - VS Code Marketplace: https://marketplace.visualstudio.com/items?itemName=ZtaMDev.dars-framework
+> - Open VSX: https://open-vsx.org/extension/ztamdev/dars-framework
+
 ## Overview
 
 Instead of writing raw CSS dictionaries or separate CSS files, you can now use the `style`, `hover_style`, and `active_style` arguments with utility strings. These strings are parsed at runtime (and export time) into standard CSS dictionaries.

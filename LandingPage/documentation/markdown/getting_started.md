@@ -2,6 +2,13 @@
 
 Welcome to Dars, a modern Python framework for building web applications with reusable UI components.
 
+## VS Code Extension
+
+There is an official **Dars Framework** extension for VS Code to have the dars dev tools.
+
+- **VS Code Marketplace**: https://marketplace.visualstudio.com/items?itemName=ZtaMDev.dars-framework
+- **Open VSX**: https://open-vsx.org/extension/ztamdev/dars-framework
+
 ## Quick Start
 
 1. **Install Dars**  

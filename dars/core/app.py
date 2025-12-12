@@ -884,9 +884,9 @@ class App:
                 finally:
                     # Show stopped message IMMEDIATELY
                     if console:
-                        console.print("[green]✔ Preview stopped.[/green]")
+                        console.print("[green]OK Preview stopped.[/green]")
                     else:
-                        print("✔ Preview stopped.")
+                        print("OK Preview stopped.")
                     
                     # All cleanup in background thread
                     def _background_cleanup():
@@ -926,7 +926,7 @@ class App:
                             cleanup_thread = threading.Thread(target=_cleanup_preview, daemon=True)
                             cleanup_thread.start()
                             cleanup_thread.join(timeout=2.0)
-                        console.print("[green]✔ Preview files deleted.[/green]")
+                        console.print("[green]OK Preview files deleted.[/green]")
                     else:
                         cleanup_thread = threading.Thread(target=_cleanup_preview, daemon=True)
                         cleanup_thread.start()
@@ -986,7 +986,7 @@ class App:
             if console and Panel and Text:
                 panel = Panel(
                     Text(
-                        f"✔ App running successfully\n\nName: {app_title}\nPreview available at: {url}\n\nPress Ctrl+C to stop the server.",
+                        f"App running successfully\n\nName: {app_title}\nPreview available at: {url}\n\nPress Ctrl+C to stop the server.",
                         style="bold green", justify="center"),
                     title="Dars Preview", border_style="bold blue", expand=False)
                 console.print(panel)
@@ -1129,9 +1129,9 @@ class App:
             
             # Show stopped message IMMEDIATELY (before any cleanup)
             if console:
-                console.print("[green]✔ Preview stopped.[/green]")
+                console.print("[green]OK Preview stopped.[/green]")
             else:
-                print("✔ Preview stopped.")
+                print("OK Preview stopped.")
             
             # All cleanup in background thread
             def _background_cleanup():

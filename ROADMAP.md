@@ -88,13 +88,12 @@ This phase will focus on expanding Dars' capabilities to new platforms and build
 
 This phase will focus on mass adoption, long-term stability, and community growth.
 
-- [ ] **Ecosystem Development Tools**
-    - [ ] **VS Code Extension**: Develop a comprehensive extension for Visual Studio Code including:
-        - [ ] Syntax highlighting for Dars Python and dScript.
-        - [ ] Intelligent autocompletion for components, properties, and events.
-        - [ ] Real-time UI preview within the editor.
-        - [ ] Integrated debugging tools.
-        - [ ] Code snippet generation.
+- [x] **Ecosystem Development Tools**
+    - [x] **VS Code Extension**: Develop a comprehensive extension for Visual Studio Code including:
+        - [x] Intelligent autocompletion for components, properties, and events.
+        - [x] Real-time UI preview within the editor.
+        - [x] Integrated debugging tools.
+        - [x] Code snippet generation.
     - [ ] **IDE Integration**: Explore integration with other popular Python IDEs (PyCharm, etc.).
     - [x] **Automated Testing Tools**: An integrated testing framework that facilitates writing unit, integration, and end-to-end tests for Dars applications.
 

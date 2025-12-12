@@ -187,7 +187,7 @@ class PreviewServer:
             time.sleep(0.05)
             self._is_ready = True
 
-            console.print(f"[green]✓ Preview server started on http://{self.host}:{self.port}[/green]")
+            console.print(f"[green]OK Preview server started on http://{self.host}:{self.port}[/green]")
             return True
 
         except Exception as e:
@@ -259,7 +259,7 @@ def preview_app(directory: str, auto_open: bool = True, port: int = 8000, host: 
     # Show information
     panel = Panel(
         Text(
-            f"✓ Preview server running successfully\n\n"
+            f"Preview server running successfully\n\n"
             f"URL: {url}\n"
             f"Directory: {directory}\n"
             f"Port: {port}\n\n"
@@ -286,7 +286,7 @@ def preview_app(directory: str, auto_open: bool = True, port: int = 8000, host: 
         console.print(f"\n[yellow]Stopping preview server...[/yellow]")
         # Stop server immediately
         server.stop()
-        console.print(f"[green]✓ Preview server stopped successfully[/green]")
+        console.print(f"[green]OK Preview server stopped successfully[/green]")
         # Exit cleanly
         sys.exit(0)
 
