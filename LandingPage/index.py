@@ -30,8 +30,6 @@ index = Page(
     create_footer(),
     style="bg-[#0d1513]"
 )
-
-app.set_theme("dark")
 app.add_global_style(file_path="index.css")
 app.add_script(dScript(file_path="script.js"))
 
