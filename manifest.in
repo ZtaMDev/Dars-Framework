@@ -1,0 +1,9 @@
+include README.md
+include Dars-logo.png
+include LICENSE
+recursive-include dars/templates *
+recursive-include dars/docs *
+recursive-include dars *.json
+recursive-include dars *.md
+exclude LandingPage
+exclude tst

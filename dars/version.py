@@ -1,0 +1,10 @@
+# Dars Framework - Core Source File
+#
+# This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+# If a copy of the MPL was not distributed with this file, You can obtain one at
+# https://mozilla.org/MPL/2.0/.
+#
+# Copyright (c) 2025 ZtaDev
+
+__version__ = "1.8.5"
+__release_url__ = "https://github.com/ZtaMDev/Dars-Framework/releases/tag/1.8.5"

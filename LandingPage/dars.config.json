@@ -1,0 +1,19 @@
+{
+  "entry": "index.py",
+  "format": "web",
+  "outdir": "../docs",
+  "publicDir": null,
+  "include": [],
+  "exclude": [
+    "**/__pycache__",
+    ".git",
+    ".venv",
+    "node_modules"
+  ],
+  "bundle": true,
+  "defaultMinify": true,
+  "viteMinify": true,
+  "markdownHighlight": true,
+  "markdownHighlightTheme": "dark",
+  "targetPlatform": "auto"
+}
