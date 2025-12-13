@@ -126,17 +126,9 @@ def create_footer():
                     ),
                     # Columna de información
                     Container(
+
                         Text(
-                            "Info: ",
-                            style={
-                                "font-size": "18px",
-                                "font-weight": "600",
-                                "color": "#a2ffe2",
-                                "margin-bottom": "5px",
-                            }
-                        ),
-                        Text(
-                            "A modern Python framework for web and desktop applications",
+                            "A modern FullStack Python framework for web and desktop applications.",
                             style={
                                 "color": "#a0cfc0",
                                 "font-size": "14px",
@@ -144,7 +136,12 @@ def create_footer():
                                 "margin-bottom": "15px"
                             }
                         ),
-                        style={"display": "flex", "min-width": "200px"}
+                        style={
+                            "display": "flex",
+                            "flex-direction": "column",
+                            "align-items": "flex-start",
+                            "min-width": "200px"
+                        }
                     ),
                     style={
                         "display": "flex",
