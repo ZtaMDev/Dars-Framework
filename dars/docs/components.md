@@ -77,19 +77,85 @@ delete_btn = Button(
 )
 ```
 
-### Event Rehydration
+---
 
-- When a subtree is created with `createComp`, all events defined in its Python components are attached at runtime.
-- This includes nested children and multiple handlers per node.
+## Component Lifecycle Hooks (onMount, onUpdate, onUnmount)
 
-### Multiple Instances and CSS Class
+Dars components (including `@FunctionComponent`) support **lifecycle hooks** that run in the browser:
 
-- Elements get a helper class `dars-id-<id>` in addition to the DOM `id`.
-- This makes it easier to query duplicate instances when they exist.
+- `onMount`: runs once when the component is registered in the runtime and mounted into the DOM.
+- `onUpdate`: runs after dynamic changes that affect the component, for example:
+  - `Dars.change({ id, dynamic: true, ... })` (used internally by `updateComp`).
+  - VRef changes that affect its subtree (`updateVRef()` + `Dars.updateVRef`).
+- `onUnmount`: runs right before the component is removed from the DOM (for example, via `deleteComp`).
 
-### Notes
+Hooks accept `dScript` or inline JS strings and are passed as component props.
 
-- These APIs are for dynamic changes in the browser. For compile-time changes (before export/preview), use `App.create()` and `App.delete()` described in the App documentation.
+### Basic Usage
+
+```python
+from dars.all import *
+
+@route("/")
+def index():
+    counter_box = Container(
+        Text("Dynamic counter: ", id="dyn_label"),
+        Text(setVRef(0, ".dyn_count")),
+        id="dyn_box",
+        class_name="p-4 border rounded mb-2",
+        onMount=dScript("console.log('[Lifecycle] dyn_box mounted');"),
+        onUpdate=dScript("console.log('[Lifecycle] dyn_box updated');"),
+        onUnmount=dScript("console.log('[Lifecycle] dyn_box unmounted');"),
+    )
+
+    host_id = "dyn_host"
+
+    return Page(
+        Container(
+            Container(id=host_id),
+
+            # Dynamically create the component with lifecycle and VRefs
+            Button(
+                "Create",
+                on_click=createComp(counter_box, host_id, position="append"),
+            ),
+
+            # Update the value using V() + updateVRef (triggers onUpdate)
+            Button(
+                "Increment",
+                on_click=updateVRef(
+                    ".dyn_count",
+                    V(".dyn_count").int() + 1,
+                ),
+            ),
+
+            # Delete the component (triggers onUnmount)
+            Button(
+                "Delete",
+                on_click=deleteComp("dyn_box"),
+            ),
+        )
+    )
+```
+
+### Behavior in different flows
+
+- **Initial render / hydration**:
+  - The VDOM includes a `lifecycle` block per node with `onMount`, `onUpdate`, `onUnmount`.
+  - The runtime registers hooks during `DarsHydrate` and runs `onMount` once per id.
+
+- **createComp / deleteComp**:
+  - `createComp` uses `VDomBuilder` to include lifecycle and events in the dynamic VDOM.
+  - `runtime.createComponent` registers lifecycle for the subtree and runs `onMount` after inserting it into the DOM.
+  - `deleteComp` causes `runtime.deleteComponent` to run `onUnmount` before removing the node.
+
+- **Dynamic changes and VRefs**:
+  - `updateComp()` generates calls to `Dars.change({ id, dynamic: true, ... })`, which eventually call `onUpdate` for that id.
+  - `updateVRef(selector, ...)` updates DOM and VRefs, then calls `Dars.updateVRef(selector)`, which finds the nearest lifecycle-enabled ancestor for each affected element and runs its `onUpdate`.
+
+This allows you to attach side effects (logs, external integrations, controlled side-effects) to your components' lifecycle, both for static components and those created/removed at runtime.
+
+---
 
 ## dScript Basic Usage
 
@@ -153,10 +219,15 @@ input_field = Input(
 - [Base Component Class](#base-component-class)
 - [Component Search](#component-search-and-modification)
 - [Page](#page)
+- [Head](#head)
 - [Text](#text)
 - [Button](#button)
 - [Input](#input)
 - [Container](#container)
+- [Section](#section)
+- [Video](#video)
+- [Audio](#audio)
+- [FileUpload](#fileupload)
 - [Markdown](#markdown)
 - [Image](#image)
 - [Link](#link)
@@ -365,6 +436,46 @@ index.add_script(
     dScript(code="console.log('Hello world')")
 )
 ```
+
+### Head
+
+The `Head` component allows you to manage the `<head>` section of your page, including the title, meta tags, and links. It supports SEO metadata like Open Graph and Twitter Cards.
+
+#### Head Syntax
+
+```python
+from dars.components.advanced.head import Head
+
+head = Head(
+    title="My Page Title",
+    description="This is a description for SEO.",
+    keywords="dars, framework, python",
+    og_title="My Open Graph Title",
+    twitter_card="summary_large_image"
+)
+```
+
+#### Head Properties
+
+| Property | Type | Description |
+|-----------|------|-------------|
+| `title` | str | The page title (`<title>`) |
+| `description` | str | Meta description |
+| `keywords` | str/list | Meta keywords |
+| `author` | str | Meta author |
+| `robots` | str | Robots meta tag |
+| `canonical` | str | Canonical URL link |
+| `favicon` | str | Favicon URL link |
+| `og_title` | str | Open Graph title |
+| `og_description` | str | Open Graph description |
+| `og_image` | str | Open Graph image URL |
+| `og_type` | str | Open Graph type (default: "website") |
+| `twitter_card` | str | Twitter card type (default: "summary") |
+| `twitter_site` | str | Twitter site handle |
+| `twitter_creator` | str | Twitter creator handle |
+| `meta` | dict | Custom meta tags `{name: content}` |
+| `links` | list | Custom link tags `[{rel: ..., href: ...}]` |
+| `structured_data` | dict | JSON-LD structured data |
 
 ### Text
 
@@ -812,11 +923,193 @@ container.add_child(Button("Click me"))
 
 #### Section Properties
 
+
 | Property | Type | Description |
 |-----------|------|-------------|
 | `children` | tuple | Components passed as positional arguments |
 | `additional_children` | list | Optional list of additional components |
 
+
+### Video
+
+The `Video` component is an advanced wrapper over the HTML5 `<video>` element.
+It supports static usage and full reactivity via `State` + `useDynamic`.
+
+```python
+from dars.all import *
+from dars.hooks.value_helpers import V
+
+media_state = State(
+    "media",
+    current_video="/media/intro.mp4",
+    autoplay_video=False,
+    muted_video=True,
+)
+
+Video(
+    src=useDynamic("media.current_video"),
+    poster="/media/poster.jpg",
+    width="720",
+    controls=True,
+    autoplay=useDynamic("media.autoplay_video"),
+    muted=useDynamic("media.muted_video"),
+    preload="metadata",
+    class_name="rounded-[8px] shadow-[0_0_20px_rgba(0,0,0,0.4)] mb-[16px]",
+    attrs={
+        "controlsList": "nodownload",
+    },
+)
+```
+#### Video Properties
+
+| Property | Type | Description | Example |
+|----------|------|-------------|---------|
+| `src` | str / useDynamic | Video source URL (relative or absolute) | `"/media/intro.mp4"` |
+| `poster` | str | Poster image URL | `"/media/poster.jpg"` |
+| `width` | str | Width attribute | `"720"`, `"100%"` |
+| `height` | str | Height attribute | `"480"` |
+| `controls` | bool / useDynamic | Show native controls | `True`, `useDynamic("media.show_controls")` |
+| `autoplay` | bool / useDynamic | Autoplay video when ready | `False`, `useDynamic("media.autoplay_video")` |
+| `loop` | bool / useDynamic | Loop playback | `useDynamic("media.loop_video")` |
+| `muted` | bool / useDynamic | Start muted | `useDynamic("media.muted_video")` |
+| `preload` | str | Preload hint (`auto`, `metadata`, `none`) | `"metadata"` |
+| `plays_inline` | bool | Hint for inline playback on mobile | `True` |
+| `class_name` | str | CSS class name | `"my-video"` |
+| `style` | dict / str | Inline styles | `{ "max-width": "100%" }` |
+| `attrs` | dict | Extra raw attributes | `{ "controlsList": "nodownload" }` |
+
+#### Video Reactivity Notes
+
+- `src`, `autoplay`, `muted`, `loop`, `controls` and `plays_inline` support `useDynamic`.
+- When the associated `State` changes, the exporter generates bindings that:
+  - Update the `src` attribute directly.
+  - For booleans (`autoplay`, `muted`, `loop`, `controls`), add/remove the HTML attribute and sync the DOM property.
+- Defaults:
+  - `controls=True`, `plays_inline=True` by default.
+  - `autoplay`, `loop`, `muted` are **off** by default unless you pass `True` or a state value.
+
+#### Video Example with Toggles
+
+```python
+from dars.all import *
+from dars.hooks.value_helpers import V
+
+media_state = State(
+    "media",
+    current_video="/media/intro.mp4",
+    autoplay_video=False,
+    muted_video=True,
+)
+
+@route("/", index=True)
+def index():
+    return Page(
+        Container(
+            Video(
+                src=useDynamic("media.current_video"),
+                poster="/media/poster.jpg",
+                width="720",
+                controls=True,
+                autoplay=useDynamic("media.autoplay_video"),
+                muted=useDynamic("media.muted_video"),
+                preload="metadata",
+            ),
+            Button(
+                "Toggle Mute",
+                on_click=media_state.muted_video.set(
+                    (V("media.muted_video").bool() == True).then(False, True)
+                ),
+            ),
+            Button(
+                "Toggle Autoplay",
+                on_click=media_state.autoplay_video.set(
+                    (V("media.autoplay_video").bool() == True).then(False, True)
+                ),
+            ),
+        )
+    )
+```
+
+### Audio
+
+The `Audio` component wraps the HTML5 `<audio>` element and supports the same reactive model.
+
+```python
+from dars.all import *
+from dars.hooks.value_helpers import V
+
+media_state = State(
+    "media",
+    current_audio="/media/theme1.mp3",
+    loop_audio=True,
+)
+
+Audio(
+    src=useDynamic("media.current_audio"),
+    controls=True,
+    autoplay=False,
+    loop=useDynamic("media.loop_audio"),
+    preload="auto",
+    class_name="w-[100%] mb-[12px]",
+    attrs={"controlsList": "nodownload"},
+)
+```
+#### Audio Properties
+
+| Property | Type | Description | Example |
+|----------|------|-------------|---------|
+| `src` | str / useDynamic | Audio source URL | `"/media/theme1.mp3"` |
+| `controls` | bool / useDynamic | Show native controls | `True` |
+| `autoplay` | bool / useDynamic | Autoplay audio | `useDynamic("media.autoplay_audio")` |
+| `loop` | bool / useDynamic | Loop playback | `useDynamic("media.loop_audio")` |
+| `muted` | bool / useDynamic | Start muted | `True` |
+| `preload` | str | Preload hint (`auto`, `metadata`, `none`) | `"auto"` |
+| `class_name` | str | CSS class | `"audio-player"` |
+| `style` | dict / str | Inline styles | `{ "width": "100%" }` |
+| `attrs` | dict | Extra attributes | `{ "controlsList": "nodownload" }` |
+
+#### Audio Reactivity Notes
+
+- `src`, `loop`, `autoplay`, `muted`, `controls` support `useDynamic`.
+- Boolean props are wired to the same reactive mechanism que otros componentes built-in:
+  - El runtime añade/quita los atributos HTML y sincroniza las propiedades JS (`el.loop`, `el.muted`, etc.).
+- Es recomendable ubicar los ficheros dentro de `media/` en el root del proyecto y referenciarlos como `/media/...`.
+  El exporter copiará automáticamente esa carpeta al directorio de export.
+
+#### Audio Example with Track Switch
+
+```python
+@route("/audio-demo")
+def audio_demo():
+    return Page(
+        Container(
+            Text("Audio actual:"),
+            Text(useDynamic("media.current_audio")),
+            Audio(
+                src=useDynamic("media.current_audio"),
+                controls=True,
+                loop=useDynamic("media.loop_audio"),
+                preload="auto",
+            ),
+            Container(
+                Button(
+                    "Track 1",
+                    on_click=media_state.current_audio.set("/media/theme1.mp3"),
+                ),
+                Button(
+                    "Track 2",
+                    on_click=media_state.current_audio.set("/media/theme2.mp3"),
+                ),
+                Button(
+                    "Toggle Loop",
+                    on_click=media_state.loop_audio.set(
+                        (V("media.loop_audio").bool() == True).then(False, True)
+                    ),
+                ),
+            ),
+        )
+    )
+```
 
 ### Markdown
 
@@ -1073,6 +1366,40 @@ area_text = Textarea(
 | `readonly` | bool | Solo lectura | `True`, `False` |
 | `required` | bool | Campo obligatorio | `True`, `False` |
 | `max_length` | int | Longitud máxima | `500` |
+
+---
+
+### FileUpload
+
+The `FileUpload` component allows users to select files for uploading. It wraps a standard file input with a custom, styleable interface.
+
+#### FileUpload Syntax
+
+```python
+from dars.components.advanced.file_upload import FileUpload
+
+upload = FileUpload(
+    id="doc-upload",
+    label="Choose a file...",
+    accept=".pdf,.doc,.docx",
+    multiple=False,
+    disabled=False,
+    required=True,
+    on_change=log("File uploaded"),
+    style="m-0"
+)
+```
+
+#### FileUpload Properties
+
+| Property | Type | Description | Values |
+|-----------|------|-------------|---------|
+| `label` | str | Text displayed on the button | `"Upload"` |
+| `accept` | str | File types to accept | `".jpg,.png"` |
+| `multiple` | bool | Allow multiple files | `True`, `False` |
+| `disabled` | bool | Disable input | `True`, `False` |
+| `required` | bool | Mark as required | `True`, `False` |
+| `on_change` | Callable | Change handler | `log(...)` |
 
 ---
 

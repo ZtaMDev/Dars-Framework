@@ -1,4 +1,5 @@
 from dars.all import *
+from dars.env import DarsEnv
 
 def create_navbar():
     left_block = Container(
@@ -21,17 +22,17 @@ def create_navbar():
     right_block = Container(
         Link(
             "Home",
-            href="https://ztamdev.github.io/Dars-Framework/",
+            href="/" if DarsEnv.dev else "https://ztamdev.github.io/Dars-Framework/",
             style="text-[#a0cfc0] no-underline margin-[0_15px] font-medium fs-[16px] transition-all duration-300 ease-in-out padding-[8px_16px] rounded-[6px]"
         ),
         Link(
             "Documentation",
-            href="https://ztamdev.github.io/Dars-Framework/docs.html",
+            href="/docs.html" if DarsEnv.dev else "https://ztamdev.github.io/Dars-Framework/docs.html",
             style="text-[#a0cfc0] no-underline margin-[0_15px] font-medium fs-[16px] transition-all duration-300 ease-in-out padding-[8px_16px] rounded-[6px]"
         ),
         Link(
             "Releases",
-            href="https://ztamdev.github.io/Dars-Framework/releases.html",
+            href="/releases.html" if DarsEnv.dev else "https://ztamdev.github.io/Dars-Framework/releases.html",
             style="text-[#a0cfc0] no-underline margin-[0_15px] font-medium fs-[16px] transition-all duration-300 ease-in-out padding-[8px_16px] rounded-[6px]"
         ),
         Link(
@@ -66,17 +67,17 @@ def create_navbar():
         Container(
             Link(
                 "Home",
-                href="https://ztamdev.github.io/Dars-Framework/",
+                href="/" if DarsEnv.dev else "https://ztamdev.github.io/Dars-Framework/",
                 style="block text-[#a0cfc0] no-underline padding-[18px_25px] font-medium fs-[18px] transition-all duration-300 ease-in-out border-bottom-[1px_solid_rgba(100,_255,_200,_0.1)]"
             ),
             Link(
                 "Documentation",
-                href="https://ztamdev.github.io/Dars-Framework/docs.html",
+                href="/docs.html" if DarsEnv.dev else "https://ztamdev.github.io/Dars-Framework/docs.html",
                 style="block text-[#a0cfc0] no-underline padding-[18px_25px] font-medium fs-[18px] transition-all duration-300 ease-in-out border-bottom-[1px_solid_rgba(100,_255,_200,_0.1)]"
             ),
             Link(
                 "Releases",
-                href="https://ztamdev.github.io/Dars-Framework/releases.html",
+                href="/releases.html" if DarsEnv.dev else "https://ztamdev.github.io/Dars-Framework/releases.html",
                 style="block text-[#a0cfc0] no-underline padding-[18px_25px] font-medium fs-[18px] transition-all duration-300 ease-in-out border-bottom-[1px_solid_rgba(100,_255,_200,_0.1)]"
             ),
             Link(

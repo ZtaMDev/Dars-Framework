@@ -56,6 +56,8 @@ Open your terminal in your project directory and use any of the following comman
 | `dars build --no-minify`                | Build skipping default Python minifier      |
 | `dars init my_project --type ssr`       | Create a new Full-Stack SSR project        |
 | `dars init my_project`                  | Create a new Dars project (SPA Default)     |
+| `dars dev`                              | Run the configured entry file with hot preview (app.rTimeCompile) |
+| `dars dev --backend`                    | Run only the configured backendEntry (FastAPI/SSR backend) |
 | `dars info my_app.py`                   | Show info about your app                    |
 | `dars formats`                          | List supported export formats               |
 | `dars --help`                           | Show help and all CLI options               |
@@ -113,15 +115,16 @@ For more, see the [Getting Started](#getting-started-with-dars) guide and the ma
 
 When working with SSR (`dars init --type ssr`), the workflow involves two processes:
 
-1.  **Backend (`python backend/api.py`)**: Runs on port 8000. Handles API requests and initial HTML rendering.
-2.  **Frontend (`dars dev`)**: Runs on port 3000. Serves static assets, bundles scripts, and proxies to backend.
+1.  **Frontend (`dars dev`)**: Runs the Dars preview server on port `8000` using `app.rTimeCompile()`.
+2.  **Backend (`dars dev --backend`)**: Runs the FastAPI SSR backend on port `3000` using `backendEntry` from `dars.config.json`.
 
 **Common Commands:**
 
 | Command | Description |
 |---------|-------------|
 | `dars init --type ssr` | Scaffolds a project with `backend/` folder and SSR config. |
-| `dars dev` | Starts the hot-reload frontend server (requires backend running). |
+| `dars dev` | Starts the hot-reload frontend preview server. |
+| `dars dev --backend` | Starts the SSR/backend server defined by `backendEntry`. |
 | `dars build` | Builds static assets to `dist/` for production. |
 
 *Note: For production, you only need to run the backend (which serves the built assets).*

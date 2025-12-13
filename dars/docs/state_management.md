@@ -324,12 +324,6 @@ this().state(text=RawJS("someVar + ' processed'"))
 - Want quick reactive updates
 - Working with single components
 
-### Choose dState/cState When:
-- Building complex state machines
-- Need immutable default state (state 0)
-- Require cross-state calls
-- Managing multi-step workflows
-
 ### Use `this()` When:
 - Don't need state tracking
 - Making one-off updates

@@ -10,6 +10,13 @@ pip install dars-framework
 
 This will install Dars and all its dependencies automatically.
 
+## VS Code Extension
+
+You can install the official **Dars Framework** VS Code extension to have the dars dev tools.
+
+- **VS Code Marketplace**: https://marketplace.visualstudio.com/items?itemName=ZtaMDev.dars-framework
+- **Open VSX**: https://open-vsx.org/extension/ztamdev/dars-framework
+
 ## CLI Usage
 
 - [Dars CLI](#dars-cli-reference)

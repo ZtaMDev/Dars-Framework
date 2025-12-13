@@ -2,6 +2,11 @@
 
 Dars Framework introduces a powerful, Python-native utility class system inspired by Tailwind CSS. This system allows you to style your components using concise string utilities directly in your Python code, without needing Node.js, PostCSS, or any external build tools.
 
+> Tip: The official **Dars Framework** VS Code extension provides Tailwind-like utility style completions while editing `style="..."` strings in Python.
+> 
+> - VS Code Marketplace: https://marketplace.visualstudio.com/items?itemName=ZtaMDev.dars-framework
+> - Open VSX: https://open-vsx.org/extension/ztamdev/dars-framework
+
 ## Overview
 
 Instead of writing raw CSS dictionaries or separate CSS files, you can now use the `style`, `hover_style`, and `active_style` arguments with utility strings. These strings are parsed at runtime (and export time) into standard CSS dictionaries.
@@ -23,6 +28,41 @@ def MyComponent():
 ## Supported Utilities
 
 The system supports a comprehensive range of utilities covering layout, spacing, typography, colors, borders, effects, transforms, and more.
+
+### Arbitrary Properties (Tailwind-like)
+
+You can set **any CSS property** using the `prop-[value]` syntax.
+
+- Property names use standard CSS (with `-`). If you prefer, you can also write underscores (`_`) and Dars will convert them to dashes.
+- Inside `[value]`, underscores (`_`) are converted to spaces. This makes it easy to write complex CSS values inside a single class token.
+
+**Examples:**
+
+```python
+style="background-image-[linear-gradient(90deg,_rgba(0,0,0,.35),_#00ffcc)]"
+style="background-color-[rgba(10,20,30,.6)]"
+style="padding-[calc(1rem_+_2vw)]"
+style="color-[var(--brand-color)]"
+style="--brand-color-[#00ffcc]"
+```
+
+**Composable properties**
+
+Some properties are composable, meaning multiple utilities will be appended (instead of overwriting the previous value):
+
+- `filter`
+- `backdrop-filter`
+- `transform`
+
+```python
+style="filter-[blur(6px)] filter-[brightness(120%)]"
+```
+
+This produces:
+
+```css
+filter: blur(6px) brightness(120%);
+```
 
 ### Layout & Display
 
@@ -113,6 +153,11 @@ style="bg-amber-400 text-zinc-900"    # Amber background with dark zinc text
 ### Backgrounds
 
 - **Background Color**: `bg-{color}-{shade}`, `bg-[#f0f0f0]`
+- **Background Images & Gradients**:
+  - `bg-[linear-gradient(...)]` (automatically maps to `background-image`)
+  - `bg-[radial-gradient(...)]`
+  - `bg-[url(...)]`
+  - `bgimg-[...]` (direct `background-image` utility)
 - **Background Position**: `bg-bottom`, `bg-center`, `bg-left`, `bg-left-bottom`, `bg-left-top`, `bg-right`, `bg-right-bottom`, `bg-right-top`, `bg-top`
 - **Background Repeat**: `bg-repeat`, `bg-no-repeat`, `bg-repeat-x`, `bg-repeat-y`, `bg-repeat-round`, `bg-repeat-space`
 - **Background Size**: `bg-auto`, `bg-cover`, `bg-contain`

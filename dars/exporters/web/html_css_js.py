@@ -29,6 +29,7 @@ from dars.components.advanced.modal import Modal
 from dars.components.advanced.navbar import Navbar
 from dars.components.advanced.table import Table
 from dars.components.advanced.tabs import Tabs
+from dars.components.advanced.file_upload import FileUpload
 from dars.components.advanced.accordion import Accordion
 from dars.components.basic.progressbar import ProgressBar
 from dars.components.basic.spinner import Spinner
@@ -114,6 +115,15 @@ class HTMLCSSJSExporter(Exporter):
                 project_root = os.getcwd()
             else:
                 project_root = os.path.dirname(os.path.abspath(app_source))
+
+            # --- DarsEnv Integration ---
+            try:
+                from dars.env import DarsEnv
+                # If bundle is True (production), dev is False
+                # If bundle is False (development), dev is True
+                DarsEnv.set_dev_mode(not bundle)
+            except ImportError:
+                pass
 
             # --- Escribir librería de reactividad (dars.min.js) embebida ---
             # Optimization: Skip if file exists and content is identical (hot reload)
@@ -523,9 +533,10 @@ class HTMLCSSJSExporter(Exporter):
                 # Single-page clásico (solo si NO hay SPA routes)
                 # Generar VDOM y obtener eventos
                 page_events_map = {}
+                page_app = app
                 try:
                     import copy as _cpy
-                    page_app = copy.copy(app)
+                    page_app = _cpy.copy(app)
                     try:
                         page_app.root = _cpy.deepcopy(app.root)
                     except Exception:
@@ -539,7 +550,11 @@ class HTMLCSSJSExporter(Exporter):
                         vdom_dict = self._obfuscate_vdom(vdom_dict)
                     import json
                     vdom_js = "window.__DARS_VDOM__ = " + json.dumps(vdom_dict, ensure_ascii=False, separators=(",", ":"), cls=DarsJSONEncoder) + ";\n"
-                except Exception:
+                except Exception as e:
+                    print(f"Warning: Failed to copy app structure, using original. Error: {e}")
+                    # Fallback to safe defaults if copy fails
+                    if page_app is None:
+                        page_app = app
                     vdom_js = "window.__DARS_VDOM__ = { };\n"
                     page_events_map = {}
 
@@ -4156,7 +4171,7 @@ audio.dars-audio {
             Page, GridLayout, FlexLayout, Text, Button, Input, Container, Image, Link,
             Textarea, Card, Modal, Navbar, Checkbox, RadioButton, Select, Slider,
             DatePicker, Table, Tabs, Accordion, ProgressBar, Spinner, Tooltip, Markdown, Section,
-            Video, Audio,
+            Video, Audio, FileUpload,
         ]
         
         # Verificar si es un componente personalizado (no built-in)
@@ -4218,6 +4233,8 @@ audio.dars-audio {
             return self.render_datepicker(component)
         elif isinstance(component, Table):
             return self.render_table(component)
+        elif isinstance(component, FileUpload):
+            return self.render_file_upload(component)
         elif isinstance(component, Tabs):
             return self.render_tabs(component)
         elif isinstance(component, Accordion):
@@ -4451,6 +4468,67 @@ audio.dars-audio {
 
         return f'<button id="{component_id}" {class_attr} {style_attr} {type_attr} {disabled_attr} {vref_str}>{text_value}</button>'
         
+    def render_file_upload(self, file_upload: FileUpload) -> str:
+        """Renderiza un componente FileUpload"""
+        component_id = self.get_component_id(file_upload, prefix="file_upload")
+        class_attr = f'class="dars-file-upload {file_upload.class_name or ""}"'
+        style_attr = f'style="{self.render_styles(file_upload.style)}"' if file_upload.style else ""
+        
+        # Process useValue props FIRST
+        self._process_value_props(file_upload)
+        
+        # Then process dynamic props
+        dynamic_info = self._process_dynamic_props(file_upload)
+        
+        if dynamic_info['bindings']:
+            if not hasattr(self, '_built_in_bindings'):
+                self._built_in_bindings = []
+            self._built_in_bindings.extend(dynamic_info['bindings'])
+
+        # Process VRef props
+        vref_info = self._process_vref_props(file_upload)
+        vref_attrs = vref_info['attrs']
+        vref_str = ' '.join([f'{k}="{v}"' for k, v in vref_attrs.items()])
+        
+        # Attributes
+        accept_val = dynamic_info['initial_values'].get('accept', file_upload.accept)
+        if hasattr(accept_val, 'marker'): accept_val = ""
+        accept_attr = f'accept="{accept_val}"' if accept_val else ""
+        
+        multiple_val = dynamic_info['initial_values'].get('multiple', file_upload.multiple)
+        if hasattr(multiple_val, 'marker'): multiple_val = False
+        multiple_attr = "multiple" if multiple_val else ""
+        
+        disabled_val = dynamic_info['initial_values'].get('disabled', file_upload.disabled)
+        if hasattr(disabled_val, 'marker'): disabled_val = False
+        disabled_attr = "disabled" if disabled_val else ""
+        
+        required_val = dynamic_info['initial_values'].get('required', file_upload.required)
+        if hasattr(required_val, 'marker'): required_val = False
+        required_attr = "required" if required_val else ""
+
+        attrs = [accept_attr, multiple_attr, disabled_attr, required_attr]
+        attrs_str = " ".join(attr for attr in attrs if attr)
+        
+        # We render a hidden input for functionality and a label/container for styling
+        # The container has the main ID and class for layout/events
+        # The input has component_id + '_input'
+        
+        label_html = f'<label for="{component_id}_input" class="dars-file-upload-label">{file_upload.label}</label>'
+        name_span = f'<span class="dars-file-upload-name" id="{component_id}_name"></span>'
+        
+        # JS to update filename
+        js_handler = f"document.getElementById('{component_id}_name').textContent = this.files.length > 1 ? this.files.length + ' files' : (this.files[0] ? this.files[0].name : '');"
+        
+        return (
+            f'<div id="{component_id}" {class_attr} {style_attr} {vref_str} data-type="file-upload">'
+            f'  <input type="file" id="{component_id}_input" {attrs_str} '
+            f'   style="display:none;" onchange="{js_handler}" />'
+            f'  {label_html}'
+            f'  {name_span}'
+            f'</div>'
+        )
+
     def render_input(self, input_comp: Input) -> str:
         """Renderiza un componente Input"""
         component_id = self.get_component_id(input_comp, prefix="input")

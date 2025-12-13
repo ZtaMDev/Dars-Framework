@@ -26,6 +26,7 @@ from dars.exporters.desktop.electron import ElectronExporter
 from dars.cli.translations import translator
 from dars.config import load_config, resolve_paths, write_default_config, update_config
 from dars.cli.doctor.doctor import run_doctor, run_forcedev
+from dars.env import DarsEnv
 
 console = Console()
 
@@ -1373,6 +1374,8 @@ def main():
             sys.exit(1)
 
         # Load application
+        # Export defaults to production (bundle=True -> dev=False) unless otherwise specified (no CLI flag for bundle yet in export command)
+        DarsEnv.set_dev_mode(False)
         app = exporter.load_app_from_file(file_arg)
         if app is None:
             sys.exit(1)
@@ -1789,6 +1792,19 @@ def main():
         except Exception as e:
             console.print(f"[red]{translator.get('error_output_create')}: {outdir} -> {e}[/red]")
             sys.exit(1)
+
+        # Determine bundle flag EARLY to set environment before loading app
+        # Respect bundle flag for web; force bundle for desktop to generate source-electron
+        bundle_flag = True
+        try:
+            bundle_flag = bool(cfg.get('bundle', True))
+        except Exception:
+            bundle_flag = True
+        if format_name == 'desktop':
+            bundle_flag = True
+            
+        # Set DarsEnv mode
+        DarsEnv.set_dev_mode(not bundle_flag)
 
         app = exporter.load_app_from_file(entry)
         if app is None:
@@ -2233,9 +2249,9 @@ def main():
                 from urllib.parse import urlparse
 
                 api_cfg = importlib.import_module('backend.apiConfig')
-                DarsEnv = getattr(api_cfg, 'DarsEnv', None)
-                if DarsEnv is not None and hasattr(DarsEnv, 'get_urls') and callable(getattr(DarsEnv, 'get_urls')):
-                    urls = DarsEnv.get_urls()
+                ApiDarsEnv = getattr(api_cfg, 'DarsEnv', None)
+                if ApiDarsEnv is not None and hasattr(ApiDarsEnv, 'get_urls') and callable(getattr(ApiDarsEnv, 'get_urls')):
+                    urls = ApiDarsEnv.get_urls()
                     backend_url = urls.get('backend')
                     if isinstance(backend_url, str):
                         # Try stdlib parsing first

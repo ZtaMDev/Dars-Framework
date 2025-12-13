@@ -227,6 +227,7 @@ input_field = Input(
 - [Section](#section)
 - [Video](#video)
 - [Audio](#audio)
+- [FileUpload](#fileupload)
 - [Markdown](#markdown)
 - [Image](#image)
 - [Link](#link)
@@ -1365,6 +1366,40 @@ area_text = Textarea(
 | `readonly` | bool | Solo lectura | `True`, `False` |
 | `required` | bool | Campo obligatorio | `True`, `False` |
 | `max_length` | int | Longitud máxima | `500` |
+
+---
+
+### FileUpload
+
+The `FileUpload` component allows users to select files for uploading. It wraps a standard file input with a custom, styleable interface.
+
+#### FileUpload Syntax
+
+```python
+from dars.components.advanced.file_upload import FileUpload
+
+upload = FileUpload(
+    id="doc-upload",
+    label="Choose a file...",
+    accept=".pdf,.doc,.docx",
+    multiple=False,
+    disabled=False,
+    required=True,
+    on_change=log("File uploaded"),
+    style="m-0"
+)
+```
+
+#### FileUpload Properties
+
+| Property | Type | Description | Values |
+|-----------|------|-------------|---------|
+| `label` | str | Text displayed on the button | `"Upload"` |
+| `accept` | str | File types to accept | `".jpg,.png"` |
+| `multiple` | bool | Allow multiple files | `True`, `False` |
+| `disabled` | bool | Disable input | `True`, `False` |
+| `required` | bool | Mark as required | `True`, `False` |
+| `on_change` | Callable | Change handler | `log(...)` |
 
 ---
 

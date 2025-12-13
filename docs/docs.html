@@ -841,6 +841,35 @@
      <div class="sidebar-divider">
      </div>
      <div class="sidebar-category">
+      Env
+     </div>
+     <a class="sidebar-link sidebar-level-1" href="#environment-management-darsenv" style="margin-left: 0px">
+      Environment Management (DarsEnv)
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#why-use-darsenv" style="margin-left: 20px">
+      Why use DarsEnv?
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#darsenv-class" style="margin-left: 20px">
+      DarsEnv Class
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#properties" style="margin-left: 40px">
+      Properties
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#darsenvdev" style="margin-left: 60px">
+      `DarsEnv.dev`
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#examples" style="margin-left: 20px">
+      Examples
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#conditional-rendering" style="margin-left: 40px">
+      Conditional Rendering
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#conditional-configuration" style="margin-left: 40px">
+      Conditional Configuration
+     </a>
+     <div class="sidebar-divider">
+     </div>
+     <div class="sidebar-category">
       App
      </div>
      <a class="sidebar-link sidebar-level-1" href="#app-class-and-pwa-features-in-dars-framework" style="margin-left: 0px">
@@ -1138,6 +1167,15 @@
      </a>
      <a class="sidebar-link sidebar-level-4" href="#textarea-properties" style="margin-left: 60px">
       Textarea Properties
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#fileupload" style="margin-left: 40px">
+      FileUpload
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#fileupload-syntax" style="margin-left: 60px">
+      FileUpload Syntax
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#fileupload-properties" style="margin-left: 60px">
+      FileUpload Properties
      </a>
      <a class="sidebar-link sidebar-level-3" href="#chart" style="margin-left: 40px">
       Chart
@@ -2940,6 +2978,11 @@
         </a>
        </li>
        <li>
+        <a href="#environment-management-darsenv">
+         Environment Management
+        </a>
+       </li>
+       <li>
         <a href="#app-class-and-pwa-features-in-dars-framework">
          App class
         </a>
@@ -4305,6 +4348,138 @@ Desktop build target. Only effective when
        </li>
       </ul>
      </div>
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="md-env">
+      <h1 id="environment-management-darsenv">
+       Environment Management (DarsEnv)
+      </h1>
+      <p>
+       Dars provides a simple, built-in way to detect the current running environment (Development vs Production) through the
+       <code>
+        DarsEnv
+       </code>
+       class.
+      </p>
+      <h2 id="why-use-darsenv">
+       Why use DarsEnv?
+      </h2>
+      <p>
+       It is common to have logic that should only run during development (like showing debug tools, detailed logs, or specific navigation links) or only in production (like analytics scripts).
+      </p>
+      <h2 id="darsenv-class">
+       DarsEnv Class
+      </h2>
+      <p>
+       The
+       <code>
+        DarsEnv
+       </code>
+       class is available directly from
+       <code>
+        dars.env
+       </code>
+       :
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.env</span><span class="w"> </span><span class="kn">import</span> <span class="n">DarsEnv</span>
+</code></pre>
+      </div>
+      <h3 id="properties">
+       Properties
+      </h3>
+      <h4 id="darsenvdev">
+       <code>
+        DarsEnv.dev
+       </code>
+      </h4>
+      <p>
+       A boolean property that indicates if the application is running in development mode.
+      </p>
+      <ul>
+       <li>
+        <strong>
+         Returns
+         <code>
+          True
+         </code>
+        </strong>
+        : When running via
+        <code>
+         dars dev
+        </code>
+        (where bundling is disabled by default).
+       </li>
+       <li>
+        <strong>
+         Returns
+         <code>
+          False
+         </code>
+        </strong>
+        : When running via
+        <code>
+         dars build
+        </code>
+        or
+        <code>
+         dars export
+        </code>
+        (production builds).
+       </li>
+      </ul>
+      <h2 id="examples">
+       Examples
+      </h2>
+      <h3 id="conditional-rendering">
+       Conditional Rendering
+      </h3>
+      <p>
+       You can use
+       <code>
+        DarsEnv.dev
+       </code>
+       to conditionally render components:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dars.env</span><span class="w"> </span><span class="kn">import</span> <span class="n">DarsEnv</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">MyPage</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span>
+        <span class="n">Container</span><span class="p">(</span>
+            <span class="n">Text</span><span class="p">(</span><span class="s2">"Welcome to My App"</span><span class="p">),</span>
+
+            <span class="c1"># This link only appears in development</span>
+            <span class="n">Link</span><span class="p">(</span><span class="s2">"/debug-dashboard"</span><span class="p">,</span> <span class="s2">"Debug Tools"</span><span class="p">)</span> <span class="k">if</span> <span class="n">DarsEnv</span><span class="o">.</span><span class="n">dev</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+
+            <span class="c1"># Different footer for environments</span>
+            <span class="n">Text</span><span class="p">(</span><span class="s2">"Dev Mode: Active"</span> <span class="k">if</span> <span class="n">DarsEnv</span><span class="o">.</span><span class="n">dev</span> <span class="k">else</span> <span class="s2">"Production Build"</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="conditional-configuration">
+       Conditional Configuration
+      </h3>
+      <p>
+       You can also use it to toggle configuration values:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">api_url</span> <span class="o">=</span> <span class="s2">"http://localhost:3000"</span> <span class="k">if</span> <span class="n">DarsEnv</span><span class="o">.</span><span class="n">dev</span> <span class="k">else</span> <span class="s2">"https://api.myapp.com"</span>
+</code></pre>
+      </div>
+      <blockquote>
+       <p>
+        <strong>
+         Note
+        </strong>
+        :
+        <code>
+         DarsEnv
+        </code>
+        is initialized automatically by the Dars CLI tools. You do not need to configure it manually.
+       </p>
+      </blockquote>
+     </div>
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="md-app">
       <h1 id="app-class-and-pwa-features-in-dars-framework">
        App Class and PWA Features in Dars Framework
@@ -5588,6 +5763,11 @@ Desktop build target. Only effective when
        <li>
         <a href="#audio">
          Audio
+        </a>
+       </li>
+       <li>
+        <a href="#fileupload">
+         FileUpload
         </a>
        </li>
        <li>
@@ -9269,6 +9449,178 @@ def hello():
          <td>
           <code>
            500
+          </code>
+         </td>
+        </tr>
+       </tbody>
+      </table>
+      <hr/>
+      <h3 id="fileupload">
+       FileUpload
+      </h3>
+      <p>
+       The
+       <code>
+        FileUpload
+       </code>
+       component allows users to select files for uploading. It wraps a standard file input with a custom, styleable interface.
+      </p>
+      <h4 id="fileupload-syntax">
+       FileUpload Syntax
+      </h4>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.components.advanced.file_upload</span><span class="w"> </span><span class="kn">import</span> <span class="n">FileUpload</span>
+
+<span class="n">upload</span> <span class="o">=</span> <span class="n">FileUpload</span><span class="p">(</span>
+    <span class="nb">id</span><span class="o">=</span><span class="s2">"doc-upload"</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">"Choose a file..."</span><span class="p">,</span>
+    <span class="n">accept</span><span class="o">=</span><span class="s2">".pdf,.doc,.docx"</span><span class="p">,</span>
+    <span class="n">multiple</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">disabled</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">on_change</span><span class="o">=</span><span class="n">log</span><span class="p">(</span><span class="s2">"File uploaded"</span><span class="p">),</span>
+    <span class="n">style</span><span class="o">=</span><span class="s2">"m-0"</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h4 id="fileupload-properties">
+       FileUpload Properties
+      </h4>
+      <table>
+       <thead>
+        <tr>
+         <th>
+          Property
+         </th>
+         <th>
+          Type
+         </th>
+         <th>
+          Description
+         </th>
+         <th>
+          Values
+         </th>
+        </tr>
+       </thead>
+       <tbody>
+        <tr>
+         <td>
+          <code>
+           label
+          </code>
+         </td>
+         <td>
+          str
+         </td>
+         <td>
+          Text displayed on the button
+         </td>
+         <td>
+          <code>
+           "Upload"
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           accept
+          </code>
+         </td>
+         <td>
+          str
+         </td>
+         <td>
+          File types to accept
+         </td>
+         <td>
+          <code>
+           ".jpg,.png"
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           multiple
+          </code>
+         </td>
+         <td>
+          bool
+         </td>
+         <td>
+          Allow multiple files
+         </td>
+         <td>
+          <code>
+           True
+          </code>
+          ,
+          <code>
+           False
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           disabled
+          </code>
+         </td>
+         <td>
+          bool
+         </td>
+         <td>
+          Disable input
+         </td>
+         <td>
+          <code>
+           True
+          </code>
+          ,
+          <code>
+           False
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           required
+          </code>
+         </td>
+         <td>
+          bool
+         </td>
+         <td>
+          Mark as required
+         </td>
+         <td>
+          <code>
+           True
+          </code>
+          ,
+          <code>
+           False
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           on_change
+          </code>
+         </td>
+         <td>
+          Callable
+         </td>
+         <td>
+          Change handler
+         </td>
+         <td>
+          <code>
+           log(...)
           </code>
          </td>
         </tr>
@@ -25779,7 +26131,7 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
     </div>
    </div>
   </div>
-  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1765663004" type="module">
+  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1765670264" type="module">
   </script>
   <script defer="" src="app_docs.js">
   </script>

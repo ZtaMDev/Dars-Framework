@@ -6,9 +6,12 @@ Welcome to the official Dars Framework documentation. Here you will find detaile
 
 - [Installing Dars](#installation-guide-dars-framework)
 - [Getting Started with Dars](#getting-started-with-dars)
+- [CLI Usage and Commands](#dars-cli-reference)
 - [Dars Project Configuration](#dars-project-configuration)
+- [Environment Management](#environment-management-darsenv)
 - [App class](#app-class-and-pwa-features-in-dars-framework)
 - [SPA Routing](#spa-routing-in-dars-framework)
+- [SSR Routing](#server-side-rendering-in-dars-framework)
 - [Backend HTTP Utilities & API Communication](#backend-http-utilities)
 - [State Management](#state-management-in-dars)
 - [Components](#dars-components-documentation)

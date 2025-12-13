@@ -1,3 +1,49 @@
+# Release Notes v1.8.6
+
+> **Environment Management & File Upload Component**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### DarsEnv: Environment Awareness
+
+New `DarsEnv` class provides a standard way to check the current environment mode:
+
+- `DarsEnv.dev`: returns `True` during development (`dars dev`), and `False` during production builds (`dars build` / `dars export`).
+
+This allows you to write conditional logic in your components:
+
+```python
+from dars.env import DarsEnv
+
+Link(target="/docs" if DarsEnv.dev else "https://example.domain.com/env", text="Docs")
+```
+
+### FileUpload Component
+
+A new `FileUpload` component is now available in `dars.components.advanced`:
+
+- Wraps `<input type="file">` with a custom, styleable interface.
+- Supports `accept`, `multiple`, and hidden input handling.
+- Fully reactive `on_change` events.
+
+```python
+from dars.components.advanced import FileUpload
+
+FileUpload(
+    label="Upload Document",
+    accept=".pdf",
+    on_change=log("File uploaded")
+)
+```
+
+---
+
 # Release Notes v1.8.5
 
 > **Outlet improvements + SSR lazy-load placeholders + SPA router hardening**

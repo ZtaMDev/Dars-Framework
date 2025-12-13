@@ -8,8 +8,8 @@ This document outlines the development roadmap for Dars Framework, covering impl
 
 Based on the current analysis of the source code (Python, Markdown, JavaScript, CSS):
 
-*   **Total**: 22762 lines
-*   **Docs**:  7520 lines
+*   **Total**: 836931 lines
+*   **Docs**:  30021 lines
 
 ## Development Roadmap
 
@@ -71,11 +71,11 @@ This phase will focus on expanding Dars' capabilities to new platforms and build
     - [x] Handling bidirectional communication between the main Electron process (Node.js) and the rendering process (Python/JS).
     - [x] Tools and templates to facilitate the packaging and distribution of Electron applications.
 
-- [ ] **More Integrated Components**
+- [x] **More Integrated Components**
     - [x] **Data Visualization Components**: `Chart` (integration with libraries like Chart.js or D3.js), `Table` (with pagination, sorting, and filtering).
     - [x] **Multimedia Components**: `Video`, `Audio`.
-    - [x] **Advanced Navigation Components**: `Router` (for single-page application route management), `Tabs`, `Accordion`.
-    - [ ] **Advanced Form Components**: `Validation` (integration with form validation libraries), `FileUpload`.
+    - [x] **Advanced Navigation**: `Router` (for single-page application route management), `Tabs`, `Accordion`.
+    - [x] **Advanced Components**:`FileUpload`.
 
 - [ ] **Plugin and Extension System**
     - [ ] Develop a clear API for developers to create their own plugins and extensions for Dars, facilitating integration with third-party tools and framework customization.
@@ -135,7 +135,7 @@ This phase transforms Dars into a complete fullstack Python framework with enter
     - [ ] Frontend auth helpers (`login()`, `logout()`, `isAuthenticated()`)
     - [ ] Auth endpoints (`/api/auth/login`, `/api/auth/logout`, `/api/auth/refresh`)
 
-- [ ] **SSR Implementation**
+- [x] **SSR Implementation**
     - [x] Server-side rendering without middleware
     - [x] Direct backend integration for SSR
     - [x] Context injection

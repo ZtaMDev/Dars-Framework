@@ -22,14 +22,14 @@ app = App(
     ]
 )
 
-app.root = Container(
+app.add_page("home", Container(
     Text(text="¡Bienvenido a la PWA con iconos personalizados!"),
     Button(
         text="Haz clic aquí", 
-        on_click=this().state(text="¡Gracias!", style={'background-color': '#2ecc71', 'color': 'white'}),
+        on_click=this().state(text="Thanks!", style={'background-color': '#2ecc71', 'color': 'white'}),
         style={'padding': '10px 20px', 'border-radius': '5px', 'border': '1px solid #ccc'}
     ),
-)
+))
 
 if __name__ == '__main__':
     app.rTimeCompile(add_file_types=".js")

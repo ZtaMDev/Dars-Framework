@@ -334,7 +334,6 @@ useWatch(
 - Callbacks can access current state values using `V()` helper
 
 ---
-
 ## Pythonic Value Helpers
 
 Dars provides a set of helpers to make working with DOM values and reactive state completely Pythonic, eliminating the need for raw JavaScript.
@@ -415,7 +414,27 @@ calc.result.set(
 - Type safety (numeric ops require `.float()` or `.int()`)
 
 > [!TIP]
-> For complete documentation on mathematical operations, operator precedence, dynamic operators, and advanced examples, see [Mathematical Operations](operations.md).
+> For complete documentation on mathematical operations, operator precedence, dynamic operators, and advanced examples, see the Mathematical Operations docs.
+
+#### equal() helper
+
+Sometimes you want to normalize a value (literal or expression) to safely combine it within an expression with `V()` without worrying about precedence or operators:
+
+```python
+from dars.hooks.value_helpers import V, equal
+
+# Add 1 using V() + literal
+updateVRef(".dyn_count", V(".dyn_count").int() + 1)
+
+# Normalize a literal as a mathematical expression
+updateVRef(".dyn_count", equal(0))           # forces to 0
+
+# Combine with another expression based on V()
+expr = V(".a").int() + equal(V(".b").int())
+updateVRef(".result", expr)
+```
+
+- `equal(value)` wraps the value in a `MathExpression`, so it integrates into the same operation tree as `V()` and respects the async/NaN-safe semantics of the expression system.
 
 #### Complete Example
 

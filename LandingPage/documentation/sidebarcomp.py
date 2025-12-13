@@ -375,6 +375,7 @@ def create_sidebar():
         "./documentation/markdown/getting_started.md",
         "./documentation/markdown/cli.md",
         "./documentation/markdown/config.md",
+        "./documentation/markdown/env.md",
         "./documentation/markdown/app.md",
         "./documentation/markdown/components.md",
         "./documentation/markdown/styling.md",

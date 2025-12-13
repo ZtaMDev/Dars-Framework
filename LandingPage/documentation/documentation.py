@@ -13,6 +13,7 @@ docs = Page(
             Markdown(file_path="./documentation/markdown/getting_started.md", class_name="markdown_docs", dark_theme=True, id="md-getting_started"),
             Markdown(file_path="./documentation/markdown/cli.md", class_name="markdown_docs", dark_theme=True, id="md-cli"),
             Markdown(file_path="./documentation/markdown/config.md", class_name="markdown_docs", dark_theme=True, id="md-config"),
+            Markdown(file_path="./documentation/markdown/env.md", class_name="markdown_docs", dark_theme=True, id="md-env"),
             Markdown(file_path="./documentation/markdown/app.md", class_name="markdown_docs", dark_theme=True, id="md-app"),
             Markdown(file_path="./documentation/markdown/components.md", class_name="markdown_docs", dark_theme=True, id="md-components"),
             Markdown(file_path="./documentation/markdown/styling.md", class_name="markdown_docs", dark_theme=True, id="md-styling"),

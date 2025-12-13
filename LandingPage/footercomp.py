@@ -1,5 +1,5 @@
 from dars.all import *
-
+from dars.env import DarsEnv
 def create_footer():
     return Container(
         Container(
@@ -48,7 +48,7 @@ def create_footer():
                         ),
                         Link(
                             "Documentation",
-                            href="https://ztamdev.github.io/Dars-Framework/docs.html",
+                            href="/docs.html" if DarsEnv.dev else "https://ztamdev.github.io/Dars-Framework/docs.html",
                             style={
                                 "color": "#a0cfc0",
                                 "text-decoration": "none",
@@ -95,11 +95,10 @@ def create_footer():
                                 "margin-bottom": "15px"
                             }
                         ),
-                        #TODO  I NEED TO UPDATE THAT LINKS TO ITS FINAL VERSION WHEN I FINISH DOCS PAGE AND 
-                        # THIS NEEDS TO BE UPDATED TO #GETTING STARTED OR SIMILLAR
+
                         Link(
                             "Getting Started",
-                            href="https://ztamdev.github.io/Dars-Framework/docs.html",
+                            href="/docs.html" if DarsEnv.dev else "https://ztamdev.github.io/Dars-Framework/docs.html",
                             style={
                                 "color": "#a0cfc0",
                                 "text-decoration": "none",
@@ -109,10 +108,10 @@ def create_footer():
                                 "font-size": "14px"
                             }
                         ),
-                        #TODO  I NEED TO UPDATE THAT LINKS TO ITS FINAL VERSION WHEN I FINISH DOCS PAGE
+
                         Link(
                             "Releases",
-                            href="https://github.com/ZtaMDev/Dars-Framework/releases.html",
+                            href="/releases.html" if DarsEnv.dev else "https://github.com/ZtaMDev/Dars-Framework/releases.html",
                             style={
                                 "color": "#a0cfc0",
                                 "text-decoration": "none",
@@ -176,7 +175,7 @@ def create_footer():
                         ),
                         Link(
                             "Dars Framework",
-                            href="https://github.com/ZtaMDev/Dars-Framework",
+                            href="/" if DarsEnv.dev else "https://github.com/ZtaMDev/Dars-Framework",
                             style={
                                 "color": "#a2ffe2",
                                 "text-decoration": "none",

@@ -73,6 +73,44 @@ settings_page = Page(
 )
 ```
 
+The `Outlet` can also render an optional placeholder while the child route is still loading (SSR lazy-load or SPA navigation).
+If `placeholder` is not provided, nothing is rendered.
+
+```python
+from dars.components.advanced.outlet import Outlet
+
+dashboard_layout = Page(
+    Container(
+        Text("Dashboard Header"),
+        Outlet(
+            placeholder=Container(Text("Loading section..."))
+        ),
+        Text("Dashboard Footer")
+    )
+)
+```
+
+### Multiple Outlets (outlet_id)
+
+You can declare multiple outlets in the same layout by giving each `Outlet` an `outlet_id`.
+Child routes can then target a specific outlet via `app.add_page(..., outlet_id="...")`.
+
+```python
+from dars.components.advanced.outlet import Outlet
+
+dashboard_layout = Page(
+    Container(
+        Text("Dashboard Header"),
+        Container(
+            Outlet(outlet_id="main"),
+            Outlet(outlet_id="sidebar", placeholder=Text("Loading sidebar...")),
+            style={"display": "flex", "gap": "16px"}
+        ),
+        Text("Dashboard Footer")
+    )
+)
+```
+
 ### Configuring Nested Routes
 
 Use the `parent` parameter in `add_page` to define the hierarchy.
@@ -96,7 +134,34 @@ app.add_page(
 )
 ```
 
+If your parent layout contains multiple outlets, pass `outlet_id` in the child route to target the correct outlet:
+
+```python
+app.add_page(
+    name="dashboard",
+    root=dashboard_layout,
+    route="/dashboard",
+    title="Dashboard"
+)
+
+app.add_page(
+    name="settings",
+    root=settings_page,
+    route="/dashboard/settings",
+    title="Settings",
+    parent="dashboard",
+    outlet_id="main"
+)
+```
+
 When you navigate to `/dashboard/settings`, Dars will render the `dashboard` layout and place the `settings` content inside the `Outlet`.
+
+## Trailing Slashes
+
+The SPA router normalizes paths so that trailing slashes do not create false 404s:
+
+- `/dashboard` and `/dashboard/` are treated as the same route.
+- The root path `/` remains `/`.
 
 ## 404 Handling
 
@@ -164,18 +229,109 @@ The development server (`dars dev`) includes an intelligent hot reload system fo
 - **Retry Limit**: If the server goes down, the client stops polling after 10 consecutive errors to prevent browser lag.
 - **State Preservation**: When possible, navigation state is preserved across reloads.
 
+## SEO & Metadata
+
+Dars handles SEO automatically in Single Page Applications. The router intelligently updates the document metadata when navigating between routes.
+
+### Using the Head Component
+
+To control page metadata for each route, use the `Head` component:
+
+```python
+from dars.components.advanced.head import Head
+
+@app.route("/about")
+def about():
+    return Page(
+        Head(
+            title="About Us - My App",
+            description="Learn more about our company.",
+            og_image="/images/about-og.jpg"
+        ),
+        Container(Text("About Content"))
+    )
+```
+
+The router dynamically updates:
+- `<title>`
+- Meta tags (`description`, `keywords`, etc.)
+- Open Graph tags (`og:title`, `og:type`, etc.)
+- Twitter Cards
+
+This ensures that even client-side routes display the correct information in the browser tab and when shared on social media.
+
+
 ---
 
-## SSR & Hydration
+## Server-Side Rendering (SSR)
 
-Dars introduces a robust "Dual Hydration" system for Server-Side Rendering (SSR) routes.
+Dars Framework provides complete Server-Side Rendering support integrated with FastAPI, allowing you to build full-stack applications with both server-rendered and client-side pages.
 
-### How it Works
-1.  **Backend Rendering**: The server renders the initial HTML and injects a VDOM snapshot (`window.__ROUTE_VDOM__`) into the DOM.
-2.  **Script Injection**: The server checks if there is a corresponding client-side bundle for the route (e.g., `app_{slug}.js`) and injects a reference to it.
-3.  **Client Hydration**:
-    *   The `dars.min.js` runtime loads and checks for `__ROUTE_VDOM__`.
-    *   If found, it hydrates the DOM immediately without fetching data again.
-    *   The browser loads the injected `app_{slug}.js` bundle, which contains the interactive logic (event handlers, state).
+### Quick Overview
 
-This architecture prevents "Flash of Unstyled Content" (FOUC), race conditions, and double-rendering, ensuring that events function correctly even after a page reload.
+SSR routes are rendered on the server before being sent to the client, providing:
+- Faster initial page load
+- Progressive enhancement
+- Flexible architecture (mix SSR, SPA, and Static routes)
+
+### Basic SSR Route
+
+```python
+from dars.all import *
+from backend.apiConfig import DarsEnv
+
+# Configure SSR URL
+ssr_url = DarsEnv.get_urls()['backend']
+app = App(title="My App", ssr_url=ssr_url)
+
+# Define SSR route
+@route("/", route_type=RouteType.SSR)
+def home():
+    return Page(
+        Heading("Welcome!", level=1),
+        Text("This page is rendered on the server!")
+    )
+
+app.add_page("home", home(), title="Home")
+```
+
+### Dual Hydration System
+
+Dars uses a sophisticated "Dual Hydration" approach:
+
+1. **Server Side**: Renders component to HTML and builds VDOM snapshot
+2. **Client Side**: Displays server HTML immediately, then hydrates with JavaScript
+3. **Result**: No flickering, instant content, full interactivity
+
+This prevents Flash of Unstyled Content (FOUC), double rendering, and race conditions.
+
+### Creating an SSR Project
+
+Use the Dars CLI to scaffold a complete SSR project with FastAPI backend:
+
+```bash
+dars init my-ssr-app --type ssr
+cd my-ssr-app
+```
+
+This creates a full-stack project with:
+- Frontend Dars app (`main.py`)
+- FastAPI backend (`backend/api.py`)
+- Environment configuration
+- Development and production setup
+
+### Complete SSR Documentation
+
+For comprehensive SSR documentation including:
+- Architecture and how it works
+- Development workflow
+- API reference (`create_ssr_app`, `SSRRenderer`)
+- Mixing SSR, SPA, and Static routes
+- Deployment guide
+- Advanced features (authentication, custom endpoints)
+- Best practices and troubleshooting
+- Real-world examples
+
+**See the [Complete SSR Guide](#server-side-rendering-in-dars-framework)**
+
+---
