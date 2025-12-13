@@ -105,7 +105,7 @@ This phase will focus on mass adoption, long-term stability, and community growt
 - [x] **Continuous Performance and Scalability**
     - [x] **Benchmarking and Constant Optimization**: Conduct continuous performance testing and optimizations to ensure Dars remains competitive as applications grow in complexity.
 
-### Phase 2.5: Fullstack Framework & Security Architecture (v1.6.9 - v1.8.0)
+### Phase 2.5: Fullstack Framework & Security Architecture (v1.6.9 - v1.9.0)
 
 This phase transforms Dars into a complete fullstack Python framework with enterprise-grade security and automatic backend integration.
 
@@ -175,15 +175,6 @@ This phase transforms Dars into a complete fullstack Python framework with enter
     - [x] Clear console output with URLs
     - [x] Graceful shutdown
 
-- [ ] **Smart Build System**
-    - [ ] `dars build` detects backend presence
-    - [ ] Frontend build to `dist/` (or custom output from `dars.config.json`)
-    - [ ] Backend build to `{output}_backend/`
-    - [ ] Copy all backend files
-    - [ ] Auto-generate `requirements.txt`
-    - [ ] Auto-generate deployment README
-    - [ ] Environment variable replacement
-
 - [ ] **Fullstack Polish & Documentation**
     - [x] Unified CLI experience
     - [x] Fullstack tutorial
@@ -197,4 +188,4 @@ This phase transforms Dars into a complete fullstack Python framework with enter
 - Fullstack integration: 5 weeks
 - Polish & documentation: 2 weeks
 
-**Target**: v1.8.0 - Complete Fullstack Python Framework
+**Target**: v1.9.0 - Complete Fullstack Python Framework

@@ -146,7 +146,8 @@ class SPARoute:
         meta: dict = None, 
         preload: List[str] = None,
         index: bool = False,
-        parent: str = None
+        parent: str = None,
+        outlet_id: str = "main"
     ):
         """
         Initialize SPA route.
@@ -169,6 +170,10 @@ class SPARoute:
         self.preload = preload or []
         self.index = index
         self.parent = parent
+        try:
+            self.outlet_id = str(outlet_id or "main")
+        except Exception:
+            self.outlet_id = "main"
         
         # Parse route parameters and build pattern
         self.params = self._extract_params(route)

@@ -1,3 +1,47 @@
+# Release Notes v1.8.5
+
+> **Outlet improvements + SSR lazy-load placeholders + SPA router hardening**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Multiple Outlets via `outlet_id`
+
+Nested routing now supports targeting a specific outlet in a parent layout:
+
+- `Outlet(outlet_id="main" | "sidebar" | ...)`
+- `app.add_page(..., outlet_id="...")`
+- The SPA config includes `outletId` per route so the client router can mount the child route into the correct outlet.
+
+### Optional `Outlet(placeholder=...)`
+
+`Outlet` can render an optional placeholder while the child route region is empty (e.g. SSR lazy-load or SPA navigation).
+If `placeholder` is not provided, the outlet remains empty.
+
+### SSR lazy-load loading/error placeholders (SPA navigation)
+
+New API:
+
+- `app.set_loading_state(loadingComp, onErrorComp)`
+
+Exporters and the SSR backend render these as static HTML placeholders and expose them to the SPA router.
+This keeps state/events safe and avoids breaking hydration.
+
+### Trailing slash normalization
+
+The SPA router now treats paths with trailing slashes as equivalent:
+
+- `/dashboard` and `/dashboard/` match the same route
+
+This prevents incorrect 404 redirects when a user navigates to a valid route with a trailing slash.
+
+---
+
 # Release Notes v1.8.4
 
 > **Python-native minification + major Utility Styles upgrade**

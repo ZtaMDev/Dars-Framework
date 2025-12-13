@@ -225,6 +225,31 @@ class SSRRenderer:
         if getattr(self.app, "ssr_url", None):
             spa_config["backendUrl"] = self.app.ssr_url
 
+        # Loading/Error components for SSR lazy-load (static HTML placeholders)
+        try:
+            def _render_static_placeholder(comp):
+                if not comp:
+                    return ""
+                # Allow Page wrapper or raw Component
+                if hasattr(comp, 'root'):
+                    root0 = comp.root
+                else:
+                    root0 = comp
+                # If list, wrap without using children=
+                if isinstance(root0, list):
+                    from dars.components.basic.container import Container
+                    root0 = Container(*root0)
+                try:
+                    return exporter.render_component(root0)
+                except Exception:
+                    return ""
+
+            spa_config["loadingHtml"] = _render_static_placeholder(getattr(self.app, "_spa_loading_page", None))
+            spa_config["errorHtml"] = _render_static_placeholder(getattr(self.app, "_spa_error_page", None))
+        except Exception:
+            spa_config["loadingHtml"] = ""
+            spa_config["errorHtml"] = ""
+
         # Build per-route config based on the in-memory SPA routes
         for name, spa_route in self.app._spa_routes.items():  # type: ignore[attr-defined]
             r_meta = getattr(spa_route.root, "__dars_route_metadata__", None)
@@ -237,6 +262,7 @@ class SSRRenderer:
                 "title": getattr(spa_route, "title", None) or self.app.title,
                 "type": route_type_str,
                 "parent": getattr(spa_route, "parent", None),
+                "outletId": getattr(spa_route, "outlet_id", "main"),
             }
 
             if route_type_str == "ssr":

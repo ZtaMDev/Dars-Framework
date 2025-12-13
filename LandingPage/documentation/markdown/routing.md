@@ -73,6 +73,44 @@ settings_page = Page(
 )
 ```
 
+The `Outlet` can also render an optional placeholder while the child route is still loading (SSR lazy-load or SPA navigation).
+If `placeholder` is not provided, nothing is rendered.
+
+```python
+from dars.components.advanced.outlet import Outlet
+
+dashboard_layout = Page(
+    Container(
+        Text("Dashboard Header"),
+        Outlet(
+            placeholder=Container(Text("Loading section..."))
+        ),
+        Text("Dashboard Footer")
+    )
+)
+```
+
+### Multiple Outlets (outlet_id)
+
+You can declare multiple outlets in the same layout by giving each `Outlet` an `outlet_id`.
+Child routes can then target a specific outlet via `app.add_page(..., outlet_id="...")`.
+
+```python
+from dars.components.advanced.outlet import Outlet
+
+dashboard_layout = Page(
+    Container(
+        Text("Dashboard Header"),
+        Container(
+            Outlet(outlet_id="main"),
+            Outlet(outlet_id="sidebar", placeholder=Text("Loading sidebar...")),
+            style={"display": "flex", "gap": "16px"}
+        ),
+        Text("Dashboard Footer")
+    )
+)
+```
+
 ### Configuring Nested Routes
 
 Use the `parent` parameter in `add_page` to define the hierarchy.
@@ -96,7 +134,34 @@ app.add_page(
 )
 ```
 
+If your parent layout contains multiple outlets, pass `outlet_id` in the child route to target the correct outlet:
+
+```python
+app.add_page(
+    name="dashboard",
+    root=dashboard_layout,
+    route="/dashboard",
+    title="Dashboard"
+)
+
+app.add_page(
+    name="settings",
+    root=settings_page,
+    route="/dashboard/settings",
+    title="Settings",
+    parent="dashboard",
+    outlet_id="main"
+)
+```
+
 When you navigate to `/dashboard/settings`, Dars will render the `dashboard` layout and place the `settings` content inside the `Outlet`.
+
+## Trailing Slashes
+
+The SPA router normalizes paths so that trailing slashes do not create false 404s:
+
+- `/dashboard` and `/dashboard/` are treated as the same route.
+- The root path `/` remains `/`.
 
 ## 404 Handling
 

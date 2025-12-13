@@ -1672,8 +1672,14 @@
      <a class="sidebar-link sidebar-level-3" href="#the-outlet-component" style="margin-left: 40px">
       The Outlet Component
      </a>
+     <a class="sidebar-link sidebar-level-3" href="#multiple-outlets-outletid" style="margin-left: 40px">
+      Multiple Outlets (outlet_id)
+     </a>
      <a class="sidebar-link sidebar-level-3" href="#configuring-nested-routes" style="margin-left: 40px">
       Configuring Nested Routes
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#trailing-slashes" style="margin-left: 20px">
+      Trailing Slashes
      </a>
      <a class="sidebar-link sidebar-level-2" href="#404-handling" style="margin-left: 20px">
       404 Handling
@@ -1769,6 +1775,12 @@
      </a>
      <a class="sidebar-link sidebar-level-3" href="#2-spa-routes-routetypepublic-default" style="margin-left: 40px">
       2. SPA Routes (`RouteType.PUBLIC`) - Default
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#ssr-lazy-load-placeholders-spa-navigation" style="margin-left: 20px">
+      SSR Lazy-Load Placeholders (SPA Navigation)
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#nested-layouts-and-outletplaceholder" style="margin-left: 40px">
+      Nested Layouts and `Outlet(placeholder=...)`
      </a>
      <a class="sidebar-link sidebar-level-2" href="#development-workflow" style="margin-left: 20px">
       Development Workflow
@@ -16404,6 +16416,67 @@ def hello():
 <span class="p">)</span>
 </code></pre>
       </div>
+      <p>
+       The
+       <code>
+        Outlet
+       </code>
+       can also render an optional placeholder while the child route is still loading (SSR lazy-load or SPA navigation).
+If
+       <code>
+        placeholder
+       </code>
+       is not provided, nothing is rendered.
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.components.advanced.outlet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Outlet</span>
+
+<span class="n">dashboard_layout</span> <span class="o">=</span> <span class="n">Page</span><span class="p">(</span>
+    <span class="n">Container</span><span class="p">(</span>
+        <span class="n">Text</span><span class="p">(</span><span class="s2">"Dashboard Header"</span><span class="p">),</span>
+        <span class="n">Outlet</span><span class="p">(</span>
+            <span class="n">placeholder</span><span class="o">=</span><span class="n">Container</span><span class="p">(</span><span class="n">Text</span><span class="p">(</span><span class="s2">"Loading section..."</span><span class="p">))</span>
+        <span class="p">),</span>
+        <span class="n">Text</span><span class="p">(</span><span class="s2">"Dashboard Footer"</span><span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="multiple-outlets-outlet_id">
+       Multiple Outlets (outlet_id)
+      </h3>
+      <p>
+       You can declare multiple outlets in the same layout by giving each
+       <code>
+        Outlet
+       </code>
+       an
+       <code>
+        outlet_id
+       </code>
+       .
+Child routes can then target a specific outlet via
+       <code>
+        app.add_page(..., outlet_id="...")
+       </code>
+       .
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.components.advanced.outlet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Outlet</span>
+
+<span class="n">dashboard_layout</span> <span class="o">=</span> <span class="n">Page</span><span class="p">(</span>
+    <span class="n">Container</span><span class="p">(</span>
+        <span class="n">Text</span><span class="p">(</span><span class="s2">"Dashboard Header"</span><span class="p">),</span>
+        <span class="n">Container</span><span class="p">(</span>
+            <span class="n">Outlet</span><span class="p">(</span><span class="n">outlet_id</span><span class="o">=</span><span class="s2">"main"</span><span class="p">),</span>
+            <span class="n">Outlet</span><span class="p">(</span><span class="n">outlet_id</span><span class="o">=</span><span class="s2">"sidebar"</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="n">Text</span><span class="p">(</span><span class="s2">"Loading sidebar..."</span><span class="p">)),</span>
+            <span class="n">style</span><span class="o">=</span><span class="p">{</span><span class="s2">"display"</span><span class="p">:</span> <span class="s2">"flex"</span><span class="p">,</span> <span class="s2">"gap"</span><span class="p">:</span> <span class="s2">"16px"</span><span class="p">}</span>
+        <span class="p">),</span>
+        <span class="n">Text</span><span class="p">(</span><span class="s2">"Dashboard Footer"</span><span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
       <h3 id="configuring-nested-routes">
        Configuring Nested Routes
       </h3>
@@ -16438,6 +16511,31 @@ def hello():
 </code></pre>
       </div>
       <p>
+       If your parent layout contains multiple outlets, pass
+       <code>
+        outlet_id
+       </code>
+       in the child route to target the correct outlet:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">app</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">"dashboard"</span><span class="p">,</span>
+    <span class="n">root</span><span class="o">=</span><span class="n">dashboard_layout</span><span class="p">,</span>
+    <span class="n">route</span><span class="o">=</span><span class="s2">"/dashboard"</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">"Dashboard"</span>
+<span class="p">)</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">"settings"</span><span class="p">,</span>
+    <span class="n">root</span><span class="o">=</span><span class="n">settings_page</span><span class="p">,</span>
+    <span class="n">route</span><span class="o">=</span><span class="s2">"/dashboard/settings"</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">"Settings"</span><span class="p">,</span>
+    <span class="n">parent</span><span class="o">=</span><span class="s2">"dashboard"</span><span class="p">,</span>
+    <span class="n">outlet_id</span><span class="o">=</span><span class="s2">"main"</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
        When you navigate to
        <code>
         /dashboard/settings
@@ -16456,6 +16554,35 @@ def hello():
        </code>
        .
       </p>
+      <h2 id="trailing-slashes">
+       Trailing Slashes
+      </h2>
+      <p>
+       The SPA router normalizes paths so that trailing slashes do not create false 404s:
+      </p>
+      <ul>
+       <li>
+        <code>
+         /dashboard
+        </code>
+        and
+        <code>
+         /dashboard/
+        </code>
+        are treated as the same route.
+       </li>
+       <li>
+        The root path
+        <code>
+         /
+        </code>
+        remains
+        <code>
+         /
+        </code>
+        .
+       </li>
+      </ul>
       <h2 id="404-handling">
        404 Handling
       </h2>
@@ -17078,6 +17205,52 @@ Client Side:
 - Pages behind authentication
 - Real-time applications
       </p>
+      <h2 id="ssr-lazy-load-placeholders-spa-navigation">
+       SSR Lazy-Load Placeholders (SPA Navigation)
+      </h2>
+      <p>
+       When you navigate to an
+       <code>
+        RouteType.SSR
+       </code>
+       route from the SPA router, the client fetches route data from the backend (
+       <code>
+        /api/ssr/...
+       </code>
+       ).
+You can configure global loading and error placeholders for this lazy-load step:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">app</span><span class="o">.</span><span class="n">set_loading_state</span><span class="p">(</span>
+    <span class="n">loadingComp</span><span class="o">=</span><span class="n">Page</span><span class="p">(</span><span class="n">Container</span><span class="p">(</span><span class="n">Text</span><span class="p">(</span><span class="s2">"Loading..."</span><span class="p">))),</span>
+    <span class="n">onErrorComp</span><span class="o">=</span><span class="n">Page</span><span class="p">(</span><span class="n">Container</span><span class="p">(</span><span class="n">Text</span><span class="p">(</span><span class="s2">"Failed to load route"</span><span class="p">)))</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       These placeholders are rendered as static HTML (similar to SPA 404/403 pages), which means they do not register states/events and do not interfere with hydration.
+      </p>
+      <h3 id="nested-layouts-and-outletplaceholder">
+       Nested Layouts and
+       <code>
+        Outlet(placeholder=...)
+       </code>
+      </h3>
+      <p>
+       For nested routes, layouts typically include one or more
+       <code>
+        Outlet
+       </code>
+       placeholders. You can optionally render a layout-level placeholder inside an outlet:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">Outlet</span><span class="p">(</span><span class="n">outlet_id</span><span class="o">=</span><span class="s2">"main"</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="n">Container</span><span class="p">(</span><span class="n">Text</span><span class="p">(</span><span class="s2">"Loading section..."</span><span class="p">)))</span>
+</code></pre>
+      </div>
+      <p>
+       This is useful when the parent layout is already visible and you want a placeholder only for the child region.
+      </p>
+      <hr/>
       <h2 id="development-workflow">
        Development Workflow
       </h2>
@@ -25606,7 +25779,7 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
     </div>
    </div>
   </div>
-  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1765643013" type="module">
+  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1765663004" type="module">
   </script>
   <script defer="" src="app_docs.js">
   </script>

@@ -152,6 +152,8 @@ class App:
         self._spa_routes = {}
         self._spa_404_page = None
         self._spa_403_page = None
+        self._spa_loading_page = None
+        self._spa_error_page = None
         
         # Initialize default meta tags
         if "viewport" not in self.meta:
@@ -1319,6 +1321,8 @@ class App:
         self._spa_index_route: str = None      # Main SPA route
         self._spa_404_page: Optional[Page] = None  # Custom 404 page
         self._spa_403_page: Optional[Page] = None  # Custom 403 Forbidden page
+        self._spa_loading_page: Optional[Any] = None
+        self._spa_error_page: Optional[Any] = None
         
         self.scripts: List['Script'] = []
         self.global_styles: Dict[str, Any] = {}
@@ -1350,7 +1354,8 @@ class App:
         index: bool = False,
         route: str = None,
         preload: List[str] = None,
-        parent: str = None
+        parent: str = None,
+        outlet_id: str = "main"
     ):
         """
         Adds a page to the app. Can be traditional multipage or SPA route.
@@ -1439,7 +1444,8 @@ class App:
                 meta=meta,
                 preload=preload,
                 index=index,
-                parent=parent
+                parent=parent,
+                outlet_id=outlet_id
             )
             self._spa_routes[name] = spa_route
             
@@ -1546,6 +1552,15 @@ class App:
             app.set_403_page(forbidden_page)
         """
         self._spa_403_page = page
+
+    def set_loading_state(self, loadingComp: Any = None, onErrorComp: Any = None):
+        """Set custom loading and error components for SSR lazy-load in SPA.
+
+        This is rendered by exporters as static HTML (like 404/403 pages), and does
+        not register states or events.
+        """
+        self._spa_loading_page = loadingComp
+        self._spa_error_page = onErrorComp
         
     def add_script(self, script: 'Script'):
         """Adds a script to the app"""

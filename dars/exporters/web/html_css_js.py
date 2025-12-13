@@ -5788,7 +5788,7 @@ audio.dars-audio {
             route_app = copy.copy(app)
             route_app.root = spa_route.root
             if spa_route.title: route_app.title = spa_route.title
-            if isinstance(route_app.root, list): route_app.root = Container(children=route_app.root)
+            if isinstance(route_app.root, list): route_app.root = Container(*route_app.root)
 
             # Phase 1 styles: register static styles and replace inline with classes for SPA routes
             try:
@@ -5892,6 +5892,7 @@ audio.dars-audio {
                     'states': [], 
                     'preload': spa_route.preload or [],
                     'parent': spa_route.parent,
+                    'outletId': getattr(spa_route, 'outlet_id', 'main'),
                     'headMetadata': head_metadata  # Include for client-side updates
                 }
 
@@ -5905,6 +5906,7 @@ audio.dars-audio {
                     'type': 'ssr',
                     'ssr_endpoint': route_metadata.loader_endpoint if route_metadata else f"/api/ssr/{route_name}",
                     'parent': spa_route.parent,
+                    'outletId': getattr(spa_route, 'outlet_id', 'main'),
                     'headMetadata': head_metadata  # Include for client-side updates
                 }
                 
@@ -5925,6 +5927,7 @@ audio.dars-audio {
                     'states': [], 
                     'preload': spa_route.preload or [],
                     'parent': spa_route.parent,
+                    'outletId': getattr(spa_route, 'outlet_id', 'main'),
                     'headMetadata': head_metadata  # Include for client-side updates
                 }
                 
@@ -5945,7 +5948,7 @@ audio.dars-audio {
                 not_found_app.root = app._spa_404_page
             
             if isinstance(not_found_app.root, list): 
-                not_found_app.root = Container(children=not_found_app.root)
+                not_found_app.root = Container(*not_found_app.root)
             
             route_404 = {
                 'name': '__404__', 'path': '/404', 'title': '404 Not Found', 
@@ -5959,12 +5962,11 @@ audio.dars-audio {
             from dars.components.basic.text import Text
             
             default_404_root = Container(
-                Text("404 Page Not Found", style={"fontSize": "48px", "fontWeight": "bold", "marginBottom": "20px", "color": "#333"}),
-                Text(" The page you are looking for does not exist.", style={"fontSize": "18px", "color": "#666"}),
+                Text("404 Page Not Found", style={"font-size": "48px", "font-weight": "bold", "margin-bottom": "20px", "color": "#333"}),
+                Text("The page you are looking for does not exist.", style={"font-s ize": "18px", "color": "red", "margin-right":"10px"}),
                 style={
-                    "display": "flex", "flexDirection": "column", "alignItems": "center", 
-                    "justifyContent": "center", "height": "100vh", "fontFamily": "system-ui, -apple-system, sans-serif",
-                    "backgroundColor": "#f9f9f9", "margin": "0", "padding": "20px", "textAlign": "center"
+                    "display": "flex", "flex-direction": "column", "height": "100vh", "font-family": "system-ui, -apple-system, sans-serif",
+                    "background-color": "#f9f9f9", "margin": "0", "padding": "20px", "text-align": "center"
                 }
             )
             
@@ -5975,6 +5977,34 @@ audio.dars-audio {
             }
             spa_config['routes'].append(route_404)
             spa_config['notFoundPath'] = '/404'
+
+        # Loading/Error components for SSR lazy-load (static HTML placeholders)
+        try:
+            def _render_static_placeholder(comp):
+                if not comp:
+                    return ''
+                tmp_app = copy.copy(app)
+                # Allow Page wrapper or raw Component
+                if hasattr(comp, 'root'):
+                    tmp_app.root = comp.root
+                else:
+                    tmp_app.root = comp
+                # If list, wrap without using children=
+                if isinstance(tmp_app.root, list):
+                    tmp_app.root = Container(*tmp_app.root)
+                # Render as plain HTML; do not attach events/vdom/states
+                try:
+                    return self.render_component(tmp_app.root)
+                except Exception:
+                    return ''
+
+            loading_comp = getattr(app, '_spa_loading_page', None)
+            error_comp = getattr(app, '_spa_error_page', None)
+            spa_config['loadingHtml'] = _render_static_placeholder(loading_comp)
+            spa_config['errorHtml'] = _render_static_placeholder(error_comp)
+        except Exception:
+            spa_config['loadingHtml'] = ''
+            spa_config['errorHtml'] = ''
         
         # 403 Forbidden page (for unauthorized access to private routes)
         if hasattr(app, '_spa_403_page') and app._spa_403_page:
@@ -5987,7 +6017,7 @@ audio.dars-audio {
                 forbidden_app.root = app._spa_403_page
             
             if isinstance(forbidden_app.root, list):
-                forbidden_app.root = Container(children=forbidden_app.root)
+                forbidden_app.root = Container(*forbidden_app.root)
             
             route_403 = {
                 'name': '__403__', 'path': '/prohibited', 'title': '403 Forbidden',

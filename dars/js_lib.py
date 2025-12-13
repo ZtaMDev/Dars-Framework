@@ -825,6 +825,20 @@ let __spaCurrentParams = {{}};
 let __spaConfig = null;
 let __spa404Route = null;
 
+function _normalizePath(input){{
+  try{{
+    let p = String(input || '');
+    const hashIdx = p.indexOf('#');
+    if(hashIdx >= 0) p = p.slice(0, hashIdx);
+    const qIdx = p.indexOf('?');
+    if(qIdx >= 0) p = p.slice(0, qIdx);
+    if(!p) return '/';
+    if(!p.startsWith('/')) p = '/' + p;
+    while(p.length > 1 && p.endsWith('/')) p = p.slice(0, -1);
+    return p;
+  }}catch(e){{ return '/'; }}
+}}
+
 /**
  * Convert route pattern to regex (Vite-safe)
  * /user/:id -> /user/(?<id>[^/]+)
@@ -842,12 +856,13 @@ function _routeToRegex(pattern){{
  */
 function _matchRoute(path){{
   try{{
+    const normalized = _normalizePath(path);
     for(let i=0; i<__spaRoutes.length; i++){{
       const route = __spaRoutes[i];
       const regex = route['_regex'] || _routeToRegex(route['path']);
       if(regex){{ route['_regex'] = regex; }}  // Cache regex
       
-      const match = String(path).match(regex);
+      const match = String(normalized).match(regex);
       if(match){{
         const params = match['groups'] || {{}};
         return {{ 'route': route, 'params': params }};
@@ -923,7 +938,7 @@ function registerSPAConfig(config){{
 function _initializeRouter(){{
   try{{
     // Handle initial route
-    const initialPath = window.location.pathname;
+    const initialPath = _normalizePath(window.location.pathname);
     
     // Skip initial fetch if already hydrated (SSR)
     let skipInit = false;
@@ -961,7 +976,7 @@ function _initializeRouter(){{
     // Listen for popstate (browser back/forward)
     window.addEventListener('popstate', function(event){{
       try{{
-        const path = (event.state && event.state['path']) || window.location.pathname;
+        const path = _normalizePath((event.state && event.state['path']) || window.location.pathname);
         const params = (event.state && event.state['params']) || {{}};
         _navigateToRoute(path, {{ 'replace': true, 'skipPushState': true, 'params': params }});
       }}catch(e){{ }}
@@ -977,12 +992,14 @@ function _initializeRouter(){{
         if(!href || href.startsWith('http') || href.startsWith('//') || href.startsWith('#')){{
           return; // External link or anchor
         }}
+
+        const normalizedHref = _normalizePath(href);
         
         // Check if this matches any SPA route
-        const match = _matchRoute(href);
+        const match = _matchRoute(normalizedHref);
         if(match){{
           event.preventDefault();
-          navigateTo(href);
+          navigateTo(normalizedHref);
         }}
       }}catch(e){{ }}
     }});
@@ -994,7 +1011,7 @@ function _initializeRouter(){{
  */
 function navigateTo(path, params){{
   try{{
-    _navigateToRoute(path, {{ 'replace': false, 'params': params || {{}} }});
+    _navigateToRoute(_normalizePath(path), {{ 'replace': false, 'params': params || {{}} }});
   }}catch(e){{ console.error('[Dars Router] Navigate error:', e); }}
 }}
 
@@ -1004,6 +1021,8 @@ function navigateTo(path, params){{
 async function _navigateToRoute(path, options){{
   try{{
     options = options || {{}};
+
+    path = _normalizePath(path);
     
     // Match route (supports parameters)
     let match = _matchRoute(path);
@@ -1090,46 +1109,178 @@ async function _navigateToRoute(path, options){{
  */
 async function _loadRoute(route, params){{
   try{{
+    function _getLoadingHTML(r){{
+      try{{
+        // 1) Per-route loading override
+        if(r && r['loadingHtml']){{
+          const raw = String(r['loadingHtml']);
+          if(raw.includes('data-dars-ssr-loading="1"')) return raw;
+          return `<div data-dars-ssr-loading="1">${{raw}}</div>`;
+        }}
+        // 2) Global SPA config loading override
+        if(__spaConfig && __spaConfig['loadingHtml']){{
+          const raw = String(__spaConfig['loadingHtml']);
+          if(raw.includes('data-dars-ssr-loading="1"')) return raw;
+          return `<div data-dars-ssr-loading="1">${{raw}}</div>`;
+        }}
+      }}catch(e){{ }}
+      return '<div data-dars-ssr-loading="1" style="padding:24px;font-family:system-ui,-apple-system,sans-serif;opacity:.75">Loading...</div>';
+    }}
+
+    function _getErrorHTML(r){{
+      try{{
+        // 1) Per-route error override
+        if(r && r['errorHtml']){{
+          const raw = String(r['errorHtml']);
+          if(raw.includes('data-dars-ssr-error="1"')) return raw;
+          return `<div data-dars-ssr-error="1">${{raw}}</div>`;
+        }}
+        // 2) Global SPA config error override
+        if(__spaConfig && __spaConfig['errorHtml']){{
+          const raw = String(__spaConfig['errorHtml']);
+          if(raw.includes('data-dars-ssr-error="1"')) return raw;
+          return `<div data-dars-ssr-error="1">${{raw}}</div>`;
+        }}
+      }}catch(e){{ }}
+      return '<div data-dars-ssr-error="1" style="padding:24px;font-family:system-ui,-apple-system,sans-serif;opacity:.75">Failed to load page.</div>';
+    }}
+
+    function _getOutletEl(wrapper, outletId){{
+      try{{
+        if(!wrapper) return null;
+        const wanted = String(outletId || 'main');
+        // Prefer explicit id match
+        const sel = `[data-dars-outlet="true"][data-dars-outlet-id="${{wanted}}"]`;
+        const found = wrapper.querySelector(sel);
+        if(found) return found;
+        // Backward compat: first outlet
+        return wrapper.querySelector('[data-dars-outlet="true"]');
+      }}catch(e){{ return null; }}
+    }}
+
+    function _applyParamsToHTML(html, p){{
+      try{{
+        let out = String(html || '');
+        const pp = p || {{}};
+        for(const key in pp){{
+          try{{
+            const value = pp[key];
+            const regex = new RegExp(`\\{{\\{{${{key}}\\}}\\}}`, 'g');
+            out = out.replace(regex, String(value));
+          }}catch(e){{ }}
+        }}
+        return out;
+      }}catch(e){{ return String(html || ''); }}
+    }}
+
+    function _renderRouteInto(mountEl, r, p, isRootLevel){{
+      try{{
+        if(!mountEl) return null;
+
+        // Create wrapper for this route
+        const wrapper = document.createElement('div');
+        wrapper.setAttribute('data-dars-route-wrapper', r['name']);
+        wrapper.style.height = '100%';
+        wrapper.style.width = '100%';
+
+        // Fill HTML (with params)
+        const html = _applyParamsToHTML(r['html'] || '', p);
+        wrapper.innerHTML = html;
+
+        // Replace content
+        mountEl.innerHTML = '';
+        mountEl.appendChild(wrapper);
+
+        // Assets / hydration
+        if(r['title']) document.title = String(r['title']);
+        if(r['styles']) _injectStyles(r['name'], r['styles']);
+        if(r['scripts']) _executeScripts(r['scripts'], r['name']);
+        if(r['events']) _attachEventsMap(r['events']);
+
+        if(r['states'] && Array.isArray(r['states'])){{ registerStates(r['states']); }}
+        if(r['vdom']){{
+          try{{ if(typeof window['DarsHydrate'] === 'function') window['DarsHydrate'](wrapper); }}catch(e){{ }}
+        }}
+
+        if(isRootLevel) try{{ window.scrollTo(0, 0); }}catch(e){{ }}
+        return wrapper;
+      }}catch(e){{ return null; }}
+    }}
+
+    function _renderChain(chain, p){{
+      try{{
+        let container = document.getElementById('__dars_spa_root__');
+        if(!container) return;
+
+        // Cleanup assets for inactive routes BEFORE rendering new chain
+        const activeRouteNames = new Set(chain.map(r => r['name']));
+
+        const allScripts = document.querySelectorAll('.dars-route-script');
+        allScripts.forEach(script => {{
+          const scriptRoute = script.getAttribute('data-route');
+          if(scriptRoute && !activeRouteNames.has(scriptRoute)){{
+            try{{ script.remove(); }}catch(e){{ }}
+          }}
+        }});
+
+        const allStyles = document.querySelectorAll('style[id^="dars-route-styles-"]');
+        allStyles.forEach(style => {{
+          const styleId = style.id;
+          const routeName = styleId.replace('dars-route-styles-', '');
+          if(routeName && !activeRouteNames.has(routeName)){{
+            try{{ style.remove(); }}catch(e){{ }}
+          }}
+        }});
+
+        // Render each level into its mount
+        let lastWrapper = null;
+        for(let i=0; i<chain.length; i++){{
+          const r = chain[i];
+          const isRootLevel = (i === 0);
+
+          // Render this route into current container
+          lastWrapper = _renderRouteInto(container, r, p, isRootLevel);
+          if(!lastWrapper) return;
+
+          // Move container to next outlet
+          if(i < chain.length - 1){{
+            const nextOutletId = String(chain[i+1]['outletId'] || 'main');
+            const outlet = _getOutletEl(lastWrapper, nextOutletId);
+            if(!outlet){{
+              console.error('[Dars Router] Missing outlet in parent route:', r['name']);
+              return;
+            }}
+            container = outlet;
+          }}
+        }}
+
+        // Update page metadata (title, description, OG tags, etc.) if available
+        const leafRoute = chain[chain.length - 1];
+        if (leafRoute) {{
+          if (leafRoute['headMetadata']) {{
+            try {{
+              updatePageMetadata(leafRoute['headMetadata']);
+            }} catch(e) {{
+              console.error('[Dars Router] Error updating metadata:', e);
+            }}
+          }} else if (leafRoute['title']) {{
+            try {{ document.title = leafRoute['title']; }} catch(e) {{}}
+          }}
+        }}
+      }}catch(e){{ console.error('[Dars Router] Render chain error:', e); }}
+    }}
+
     // Check if route is SSR and needs lazy loading
     if(route['type'] === 'ssr' && !route['html']){{
-      
+      // Render placeholder first (so navigation feels instant)
       try{{
-        // Build backend URL
-        const backendUrl = (__spaConfig && __spaConfig['backendUrl']) || '';
-        const loaderUrl = route['ssr_endpoint'] || `/api/ssr/${{route['name']}}`;
-        let fullUrl = backendUrl ? `${{backendUrl}}${{loaderUrl}}` : loaderUrl;
-        
-        // Add cache buster for dev/hot reload
-        const sep = fullUrl.includes('?') ? '&' : '?';
-        fullUrl = fullUrl + sep + '_t=' + Date.now();
-        
-        // Fetch route data from backend
-        // Note: For SSR we don't send auth token by default as it's public facing usually
-        // If needed, we can add it back later
-        const response = await fetch(fullUrl, {{
-          headers: {{ 'Content-Type': 'application/json' }}
-        }});
-          
-        if(!response.ok){{
-          throw new Error(`Failed to load route: ${{response.status}}`);
-        }}
-          
-        // Parse route data
-        const routeData = await response.json();
-          
-        // Update route object with loaded data
-        route['html'] = routeData['html'] || '';
-        route['scripts'] = routeData['scripts'] || [];
-        route['events'] = routeData['events'] || {{}};
-        route['vdom'] = routeData['vdom'] || {{}};
-        route['states'] = routeData['states'] || [];
-        route['styles'] = routeData['styles'] || route['styles'] || '';
-      }}catch(error){{
-        console.error('[Dars Router] Error loading SSR route:', error);
-        // On error stay on current page or redirect to index?
-        // For now just log and return
-        return;
-      }}
+        route['html'] = _getLoadingHTML(route);
+        route['events'] = route['events'] || {{}};
+        route['vdom'] = route['vdom'] || {{}};
+        route['states'] = route['states'] || [];
+        route['scripts'] = route['scripts'] || [];
+        route['styles'] = route['styles'] || '';
+      }}catch(e){{ }}
     }}
     
     // 1. Build route chain [Root, ..., Parent, Child]
@@ -1140,119 +1291,56 @@ async function _loadRoute(route, params){{
       curr = curr['parent'] ? __spaRoutesMap.get(curr['parent']) : null;
     }}
 
-    let container = document.getElementById('__dars_spa_root__');
-    if(!container) return;
-    
-    // 2. Cleanup scripts and styles for routes NOT in the active chain (BEFORE rendering new route)
-    const activeRouteNames = new Set(chain.map(r =\u003e r['name']));
-    
-    // Remove old route scripts immediately
-    const allScripts = document.querySelectorAll('.dars-route-script');
-    allScripts.forEach(script =\u003e {{
-      const scriptRoute = script.getAttribute('data-route');
-      if(scriptRoute \u0026\u0026 !activeRouteNames.has(scriptRoute)){{
-        console.log('[Dars Router] Removing script for inactive route:', scriptRoute);
-        try{{ script.remove(); }}catch(e){{ }}
-      }}
-    }});
-    
-    // Remove old route styles immediately
-    const allStyles = document.querySelectorAll('style[id^="dars-route-styles-"]');
-    allStyles.forEach(style =\u003e {{
-      const styleId = style.id;
-      const routeName = styleId.replace('dars-route-styles-', '');
-      if(routeName \u0026\u0026 !activeRouteNames.has(routeName)){{
-        console.log('[Dars Router] Removing styles for inactive route:', routeName);
-        try{{ style.remove(); }}catch(e){{ }}
-      }}
-    }});
+    // First paint (may show placeholder for SSR routes)
+    _renderChain(chain, params);
 
-    // 3. Render chain
-    for(let i=0; i<chain.length; i++){{
-      const r = chain[i];
-      
-      // Check if this route level is already rendered
-      // We look for a wrapper with the specific route name
-      let wrapper = container.querySelector(`div[data-dars-route-wrapper="${{r['name']}}"]`);
-      
-      if(!wrapper){{
-        // Not found, render it!
-        
-        // If root level, clear everything first
-        if(i === 0){{
-           container.innerHTML = '';
-        }} else {{
-           // If nested, clear the outlet container
-           container.innerHTML = '';
+    // If SSR leaf route is still loading, fetch it now and re-render
+    if(route['type'] === 'ssr' && route['html'] && String(route['html']).includes('data-dars-ssr-loading="1"')){{
+      try{{
+        const backendUrl = (__spaConfig && __spaConfig['backendUrl']) || '';
+        const loaderUrl = route['ssr_endpoint'] || `/api/ssr/${{route['name']}}`;
+        let fullUrl = backendUrl ? `${{backendUrl}}${{loaderUrl}}` : loaderUrl;
+
+        const sep = fullUrl.includes('?') ? '&' : '?';
+        fullUrl = fullUrl + sep + '_t=' + Date.now();
+
+        const response = await fetch(fullUrl, {{
+          headers: {{ 'Content-Type': 'application/json' }}
+        }});
+
+        if(!response.ok){{
+          throw new Error(`Failed to load route: ${{response.status}}`);
         }}
 
-        // Create wrapper
-        wrapper = document.createElement('div');
-        wrapper.setAttribute('data-dars-route-wrapper', r['name']);
-        wrapper.style.height = '100%';
-        wrapper.style.width = '100%';
-        
-        // Prepare HTML with params
-        let html = r['html'] || '';
-        for(const key in params){{
-          try{{
-            const value = params[key];
-            const regex = new RegExp(`\\\\{{\\\\{{${{key}}\\\\}}\\\\}}`, 'g');
-            html = html.replace(regex, String(value));
-          }}catch(e){{ }}
-        }}
-        
-        wrapper.innerHTML = html;
-        container.appendChild(wrapper);
-        
-        // Execute assets
-        if(r['title']) document.title = String(r['title']);
-        if(r['styles']) _injectStyles(r['name'], r['styles']);
-        if(r['scripts']) _executeScripts(r['scripts'], r['name']);
-        if(r['events']) _attachEventsMap(r['events']);
-        if(r['styles']) _injectStyles(r['name'], r['styles']);
-        
-        // Register states/hydrate
-        if(r['states'] && Array.isArray(r['states'])){{ registerStates(r['states']); }}
-        if(r['vdom']){{
-          try{{ if(typeof window['DarsHydrate'] === 'function') window['DarsHydrate'](wrapper); }}catch(e){{ }}
-        }}
-        
-        // Scroll to top only if root changed
-        if(i === 0) try{{ window.scrollTo(0, 0); }}catch(e){{ }}
+        const routeData = await response.json();
+
+        route['html'] = routeData['html'] || '';
+        route['scripts'] = routeData['scripts'] || [];
+        route['events'] = routeData['events'] || {{}};
+        route['vdom'] = routeData['vdom'] || {{}};
+        route['states'] = routeData['states'] || [];
+        route['styles'] = routeData['styles'] || route['styles'] || '';
+        route['headMetadata'] = routeData['headMetadata'] || route['headMetadata'];
+      }}catch(error){{
+        console.error('[Dars Router] Error loading SSR route:', error);
+        try{{
+          route['html'] = _getErrorHTML(route);
+          route['events'] = {{}};
+          route['vdom'] = {{}};
+          route['states'] = [];
+          route['scripts'] = [];
+          route['styles'] = '';
+          _renderChain(chain, params);
+        }}catch(_e){{ }}
+        return;
       }}
-      
-      // Prepare for next level (find Outlet)
-      if(i < chain.length - 1){{
-        const outlet = wrapper.querySelector('[data-dars-outlet="true"]');
-        if(!outlet){{
-          console.error('[Dars Router] Missing outlet in parent route:', r['name']);
-          return; // Cannot render child
-        }}
-        container = outlet;
-      }}
-    }}
-    
-    // Update page metadata (title, description, OG tags, etc.) if available
-    const leafRoute = chain[chain.length - 1];
-    if (leafRoute) {{
-      if (leafRoute['headMetadata']) {{
-        try {{
-          updatePageMetadata(leafRoute['headMetadata']);
-        }} catch(e) {{
-          console.error('[Dars Router] Error updating metadata:', e);
-        }}
-      }} else if (leafRoute['title']) {{
-        // Fallback: update title only if no headMetadata
-        try {{
-          document.title = leafRoute['title'];
-        }} catch(e) {{}}
-      }}
+
+      // Second paint (real SSR content)
+      _renderChain(chain, params);
     }}
 
   }}catch(e){{ console.error('[Dars Router] Load error:', e); }}
 }}
-
 
 /**
  * Inject styles for a route

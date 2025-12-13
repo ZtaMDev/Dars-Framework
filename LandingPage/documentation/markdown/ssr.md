@@ -214,6 +214,32 @@ def settings():
 - Pages behind authentication
 - Real-time applications
 
+## SSR Lazy-Load Placeholders (SPA Navigation)
+
+When you navigate to an `RouteType.SSR` route from the SPA router, the client fetches route data from the backend (`/api/ssr/...`).
+You can configure global loading and error placeholders for this lazy-load step:
+
+```python
+app.set_loading_state(
+    loadingComp=Page(Container(Text("Loading..."))),
+    onErrorComp=Page(Container(Text("Failed to load route")))
+)
+```
+
+These placeholders are rendered as static HTML (similar to SPA 404/403 pages), which means they do not register states/events and do not interfere with hydration.
+
+### Nested Layouts and `Outlet(placeholder=...)`
+
+For nested routes, layouts typically include one or more `Outlet` placeholders. You can optionally render a layout-level placeholder inside an outlet:
+
+```python
+Outlet(outlet_id="main", placeholder=Container(Text("Loading section...")))
+```
+
+This is useful when the parent layout is already visible and you want a placeholder only for the child region.
+
+---
+
 ## Development Workflow
 
 ### Running in Development
