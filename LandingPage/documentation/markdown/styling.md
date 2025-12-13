@@ -29,6 +29,41 @@ def MyComponent():
 
 The system supports a comprehensive range of utilities covering layout, spacing, typography, colors, borders, effects, transforms, and more.
 
+### Arbitrary Properties (Tailwind-like)
+
+You can set **any CSS property** using the `prop-[value]` syntax.
+
+- Property names use standard CSS (with `-`). If you prefer, you can also write underscores (`_`) and Dars will convert them to dashes.
+- Inside `[value]`, underscores (`_`) are converted to spaces. This makes it easy to write complex CSS values inside a single class token.
+
+**Examples:**
+
+```python
+style="background-image-[linear-gradient(90deg,_rgba(0,0,0,.35),_#00ffcc)]"
+style="background-color-[rgba(10,20,30,.6)]"
+style="padding-[calc(1rem_+_2vw)]"
+style="color-[var(--brand-color)]"
+style="--brand-color-[#00ffcc]"
+```
+
+**Composable properties**
+
+Some properties are composable, meaning multiple utilities will be appended (instead of overwriting the previous value):
+
+- `filter`
+- `backdrop-filter`
+- `transform`
+
+```python
+style="filter-[blur(6px)] filter-[brightness(120%)]"
+```
+
+This produces:
+
+```css
+filter: blur(6px) brightness(120%);
+```
+
 ### Layout & Display
 
 - **Display**: `flex`, `inline-flex`, `grid`, `inline-grid`, `block`, `inline-block`, `inline`, `table`, `table-row`, `table-cell`, `hidden`, `contents`, `flow-root`
@@ -118,6 +153,11 @@ style="bg-amber-400 text-zinc-900"    # Amber background with dark zinc text
 ### Backgrounds
 
 - **Background Color**: `bg-{color}-{shade}`, `bg-[#f0f0f0]`
+- **Background Images & Gradients**:
+  - `bg-[linear-gradient(...)]` (automatically maps to `background-image`)
+  - `bg-[radial-gradient(...)]`
+  - `bg-[url(...)]`
+  - `bgimg-[...]` (direct `background-image` utility)
 - **Background Position**: `bg-bottom`, `bg-center`, `bg-left`, `bg-left-bottom`, `bg-left-top`, `bg-right`, `bg-right-bottom`, `bg-right-top`, `bg-top`
 - **Background Repeat**: `bg-repeat`, `bg-no-repeat`, `bg-repeat-x`, `bg-repeat-y`, `bg-repeat-round`, `bg-repeat-space`
 - **Background Size**: `bg-auto`, `bg-cover`, `bg-contain`

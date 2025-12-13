@@ -7,27 +7,14 @@ def create_navbar():
             src="Dars-logo.png",
             width="38px",
             height="38px",
-            style={
-                "object-fit": "contain",
-                "margin-right": "10px"
-            }
+            style="object-contain mr-[10px]"
         ),
         Text(
             text="Dars Framework",
-            style={
-                "font-size": "20px",
-                "font-weight": "700",
-                "color": "#a2ffe2",
-                "margin": "0"
-            }
+            style="fs-[20px] font-bold text-[#a2ffe2] m-[0]"
         ),
         id="navbar-left",
-        style={
-            "display": "flex",
-            "align-items": "center",
-            "justify-content": "flex-start",
-            "height": "100%"
-        }
+        style="flex items-center justify-start h-full"
     )
 
     # Botones para la parte derecha del navbar (desktop)
@@ -35,80 +22,30 @@ def create_navbar():
         Link(
             "Home",
             href="https://ztamdev.github.io/Dars-Framework/",
-            style={
-                "color": "#a0cfc0",
-                "text-decoration": "none",
-                "margin": "0 15px",
-                "font-weight": "500",
-                "font-size": "16px",
-                "transition": "all 0.3s ease",
-                "padding": "8px 16px",
-                "border-radius": "6px"
-            }
+            style="text-[#a0cfc0] no-underline margin-[0_15px] font-medium fs-[16px] transition-all duration-300 ease-in-out padding-[8px_16px] rounded-[6px]"
         ),
         Link(
             "Documentation",
             href="https://ztamdev.github.io/Dars-Framework/docs.html",
-            style={
-                "color": "#a0cfc0",
-                "text-decoration": "none",
-                "margin": "0 15px",
-                "font-weight": "500",
-                "font-size": "16px",
-                "transition": "all 0.3s ease",
-                "padding": "8px 16px",
-                "border-radius": "6px"
-            }
+            style="text-[#a0cfc0] no-underline margin-[0_15px] font-medium fs-[16px] transition-all duration-300 ease-in-out padding-[8px_16px] rounded-[6px]"
         ),
         Link(
             "Releases",
             href="https://ztamdev.github.io/Dars-Framework/releases.html",
-            style={
-                "color": "#a0cfc0",
-                "text-decoration": "none",
-                "margin": "0 15px",
-                "font-weight": "500",
-                "font-size": "16px",
-                "transition": "all 0.3s ease",
-                "padding": "8px 16px",
-                "border-radius": "6px"
-            }
+            style="text-[#a0cfc0] no-underline margin-[0_15px] font-medium fs-[16px] transition-all duration-300 ease-in-out padding-[8px_16px] rounded-[6px]"
         ),
         Link(
             "PlayGround",
             href="https://dars-playground.vercel.app/",
-            style={
-                "color": "#a0cfc0",
-                "text-decoration": "none",
-                "margin": "0 15px",
-                "font-weight": "500",
-                "font-size": "16px",
-                "transition": "all 0.3s ease",
-                "padding": "8px 16px",
-                "border-radius": "6px"
-            }
+            style="text-[#a0cfc0] no-underline margin-[0_15px] font-medium fs-[16px] transition-all duration-300 ease-in-out padding-[8px_16px] rounded-[6px]"
         ),
         Link(
             "GitHub",
             href="https://github.com/ZtaMDev/Dars-Framework",
-            style={
-                "color": "#a0cfc0",
-                "text-decoration": "none",
-                "margin": "0 15px",
-                "font-weight": "500",
-                "font-size": "16px",
-                "transition": "all 0.3s ease",
-                "padding": "8px 16px",
-                "border-radius": "6px"
-            }
+            style="text-[#a0cfc0] no-underline margin-[0_15px] font-medium fs-[16px] transition-all duration-300 ease-in-out padding-[8px_16px] rounded-[6px]"
         ),
         id="navbar-right",
-        style={
-            "display": "flex",
-            "align-items": "center",
-            "justify-content": "flex-end",
-            "height": "100%"
-        }
+        style="flex items-center justify-end h-full"
     )
 
     # Menú hamburguesa mejorado para móviles
@@ -116,55 +53,13 @@ def create_navbar():
         # Botón hamburguesa mejorado
         Container(
             Container(
-                Container(style={
-                    "width": "24px", 
-                    "height": "2px", 
-                    "background": "#a2ffe2", 
-                    "border-radius": "2px",
-                    "transition": "all 0.3s ease",
-                    "margin": "3px 0"
-                }),
-                Container(style={
-                    "width": "24px", 
-                    "height": "2px", 
-                    "background": "#a2ffe2", 
-                    "border-radius": "2px",
-                    "transition": "all 0.3s ease",
-                    "margin": "3px 0"
-                }),
-                Container(style={
-                    "width": "18px", 
-                    "height": "2px", 
-                    "background": "#a2ffe2", 
-                    "border-radius": "2px",
-                    "transition": "all 0.3s ease",
-                    "margin": "3px 0"
-                }),
-                style={
-                    "display": "flex",
-                    "flex-direction": "column",
-                    "align-items": "center",
-                    "justify-content": "center",
-                    "width": "44px",
-                    "height": "44px",
-                    "position": "relative"
-                }
+                Container(style="w-[24px] h-[2px] bg-[#a2ffe2] rounded-[2px] transition-all duration-300 ease-in-out margin-[3px_0]"),
+                Container(style="w-[24px] h-[2px] bg-[#a2ffe2] rounded-[2px] transition-all duration-300 ease-in-out margin-[3px_0]"),
+                Container(style="w-[18px] h-[2px] bg-[#a2ffe2] rounded-[2px] transition-all duration-300 ease-in-out margin-[3px_0]"),
+                style="flex flex-col items-center justify-center w-[44px] h-[44px] relative"
             ),
             id="hamburger-btn",
-            style={
-                "display": "none",
-                "background": "rgba(162, 255, 226, 0.1)",
-                "border": "1px solid rgba(162, 255, 226, 0.3)",
-                "border-radius": "10px",
-                "cursor": "pointer",
-                "padding": "0",
-                "z-index": "1000",
-                "transition": "all 0.3s ease",
-                "align-items": "center",
-                "justify-content": "center",
-                "backdrop-filter": "blur(10px)",
-                "box-shadow": "0 4px 15px rgba(0,0,0,0.2)"
-            }
+            style="hidden bg-[rgba(162,_255,_226,_0.1)] border-1 border-solid border-[rgba(162,_255,_226,_0.3)] rounded-[10px] cursor-pointer p-[0] z-1000 transition-all duration-300 ease-in-out items-center justify-center backdrop-filter-[blur(10px)] box-shadow-[0_4px_15px_rgba(0,0,0,0.2)]"
         ),
         
         # Menú desplegable
@@ -172,94 +67,33 @@ def create_navbar():
             Link(
                 "Home",
                 href="https://ztamdev.github.io/Dars-Framework/",
-                style={
-                    "color": "#a0cfc0",
-                    "text-decoration": "none",
-                    "display": "block",
-                    "padding": "18px 25px",
-                    "font-weight": "500",
-                    "font-size": "18px",
-                    "transition": "all 0.3s ease",
-                    "border-bottom": "1px solid rgba(100,255,200,0.1)"
-                }
+                style="block text-[#a0cfc0] no-underline padding-[18px_25px] font-medium fs-[18px] transition-all duration-300 ease-in-out border-bottom-[1px_solid_rgba(100,_255,_200,_0.1)]"
             ),
             Link(
                 "Documentation",
                 href="https://ztamdev.github.io/Dars-Framework/docs.html",
-                style={
-                    "color": "#a0cfc0",
-                    "text-decoration": "none",
-                    "display": "block",
-                    "padding": "18px 25px",
-                    "font-weight": "500",
-                    "font-size": "18px",
-                    "transition": "all 0.3s ease",
-                    "border-bottom": "1px solid rgba(100,255,200,0.1)"
-                }
+                style="block text-[#a0cfc0] no-underline padding-[18px_25px] font-medium fs-[18px] transition-all duration-300 ease-in-out border-bottom-[1px_solid_rgba(100,_255,_200,_0.1)]"
             ),
             Link(
                 "Releases",
                 href="https://ztamdev.github.io/Dars-Framework/releases.html",
-                style={
-                    "color": "#a0cfc0",
-                    "text-decoration": "none",
-                    "display": "block",
-                    "padding": "18px 25px",
-                    "font-weight": "500",
-                    "font-size": "18px",
-                    "transition": "all 0.3s ease",
-                    "border-bottom": "1px solid rgba(100,255,200,0.1)"
-                }
+                style="block text-[#a0cfc0] no-underline padding-[18px_25px] font-medium fs-[18px] transition-all duration-300 ease-in-out border-bottom-[1px_solid_rgba(100,_255,_200,_0.1)]"
             ),
             Link(
                 "PlayGround",
                 href="https://dars-playground.vercel.app/",
-                style={
-                    "color": "#a0cfc0",
-                    "text-decoration": "none",
-                    "display": "block",
-                    "padding": "18px 25px",
-                    "font-weight": "500",
-                    "font-size": "18px",
-                    "transition": "all 0.3s ease",
-                    "border-bottom": "1px solid rgba(100,255,200,0.1)"
-                }
+                style="block text-[#a0cfc0] no-underline padding-[18px_25px] font-medium fs-[18px] transition-all duration-300 ease-in-out border-bottom-[1px_solid_rgba(100,_255,_200,_0.1)]"
             ),
             Link(
                 "GitHub",
                 href="https://github.com/ZtaMDev/Dars-Framework",
-                style={
-                    "color": "#a0cfc0",
-                    "text-decoration": "none",
-                    "display": "block",
-                    "padding": "18px 25px",
-                    "font-weight": "500",
-                    "font-size": "18px",
-                    "transition": "all 0.3s ease"
-                }
+                style="block text-[#a0cfc0] no-underline padding-[18px_25px] font-medium fs-[18px] transition-all duration-300 ease-in-out"
             ),
             id="mobile-menu",
-            style={
-                "display": "none",
-                "position": "fixed",
-                "top": "64px",
-                "left": "0",
-                "width": "100%",
-                "background": "rgba(15, 25, 22, 0.98)",
-                "backdrop-filter": "blur(25px)",
-                "border-top": "1px solid rgba(100,255,200,0.15)",
-                "box-shadow": "0 8px 30px rgba(0,0,0,0.4)",
-                "z-index": "999",
-                "flex-direction": "column"
-            }
+            style="hidden fixed top-[64px] left-[0] w-full bg-[rgba(15,_25,_22,_0.98)] backdrop-filter-[blur(25px)] border-top-[1px_solid_rgba(100,_255,_200,_0.15)] box-shadow-[0_8px_30px_rgba(0,0,0,0.4)] z-999 flex-col"
         ),
         id="hamburger-menu",
-        style={
-            "display": "none",
-            "align-items": "center",
-            "justify-content": "flex-end",
-            "height": "100%"
-        }
+        style="hidden items-center justify-end h-full"
     )
 
     return Container(
@@ -268,29 +102,9 @@ def create_navbar():
             Container(
                 right_block,
                 hamburger_menu,
-                style={
-                    "display": "flex",
-                    "align-items": "center",
-                    "justify-content": "flex-end",
-                    "height": "100%",
-                    "gap": "15px"
-                }
+                style="flex items-center justify-end h-full gap-[15px]"
             ),
             id="dars-navbar",
-            style={
-                "display": "flex",
-                "align-items": "center",
-                "justify-content": "space-between",
-                "height": "64px",
-                "padding": "0 40px",
-                "position": "fixed",
-                "top": "0",
-                "width": "100%",
-                "z-index": "999",
-                "backdrop-filter": "blur(12px)",
-                "background": "rgba(20, 30, 27, 0.6)",
-                "border-bottom": "1px solid rgba(100,255,200,0.1)",
-                "box-shadow": "0 2px 10px rgba(0,0,0,0.2)"
-            }
+            style="flex items-center justify-between h-[64px] padding-[0_40px] fixed top-[0] w-full z-999 backdrop-filter-[blur(12px)] bg-[rgba(20,_30,_27,_0.6)] border-bottom-[1px_solid_rgba(100,_255,_200,_0.1)] box-shadow-[0_2px_10px_rgba(0,0,0,0.2)]"
         ),
     )

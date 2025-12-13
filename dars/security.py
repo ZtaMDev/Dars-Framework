@@ -38,19 +38,8 @@ def _should_skip(filename: str) -> bool:
     return False
 
 
-# --- Minifiers (conservative) ---
-_js_block_comments = re.compile(r"/\*.*?\*/", re.DOTALL)
-_js_line_comments = re.compile(r"(^|[^:\\])//.*?$", re.MULTILINE)
-_js_spaces = re.compile(r"\s+")
-_js_punct_spaces = re.compile(r"\s*([{}\[\](),;:<>+=\-*/%&|^!?])\s*")
-
-_css_comments = re.compile(r"/\*.*?\*/", re.DOTALL)
-_css_spaces = re.compile(r"\s+")
-_css_punct_spaces = re.compile(r"\s*([{}:;,>~+])\s*")
-
 _html_comments = re.compile(r"<!--(?!\s*\[if).*?-->", re.DOTALL)
 _html_between_tags = re.compile(r">\s+<")
-_js_string_splitter = re.compile(r'(".*?"|\'.*?\'|`.*?`)', re.DOTALL)
 
 
 _PROTECT_TAGS = ("pre", "code", "textarea", "script", "style")
@@ -78,8 +67,11 @@ def _restore_html_blocks(src: str, tokens):
 
 
 def minify_js(src: str) -> str:
-    """Minify a JS source string. Uses esbuild if available; otherwise Python fallback."""
-    # Fast path: dump to temp file and use Vite/esbuild when available
+    """Minify a JS source string.
+
+    Default: Python-native rjsmin.
+    Optional: when DARS_VITE_MINIFY=1 and the toolchain is available, use Vite/esbuild.
+    """
     _vite_enabled = os.getenv('DARS_VITE_MINIFY', '1') == '1'
 
     def _node_check_js(path: str) -> bool:
@@ -92,65 +84,54 @@ def minify_js(src: str) -> str:
         except Exception:
             return True
 
-    try:
-        import tempfile
-        with tempfile.NamedTemporaryFile('w', delete=False, suffix='.js', encoding='utf-8') as tf_in:
-            tf_in.write(src)
-            in_path = tf_in.name
-        with tempfile.NamedTemporaryFile('r', delete=False, suffix='.js', encoding='utf-8') as tf_out:
-            out_path = tf_out.name
+    if _vite_enabled:
+        try:
+            import tempfile
+            with tempfile.NamedTemporaryFile('w', delete=False, suffix='.js', encoding='utf-8') as tf_in:
+                tf_in.write(src)
+                in_path = tf_in.name
+            with tempfile.NamedTemporaryFile('r', delete=False, suffix='.js', encoding='utf-8') as tf_out:
+                out_path = tf_out.name
 
-        ok = False
-        # Prefer Vite when explicitly enabled and available.
-        # IMPORTANT: do not fall back to esbuild here to avoid double-tool minification and
-        # output format inconsistencies. If Vite is unavailable, we fall back to the
-        # conservative Python regex minifier below.
-        if _vite_enabled and _vite_available():
-            ok = _vite_minify_js(in_path, out_path)
+            ok = False
+            if _vite_available():
+                ok = _vite_minify_js(in_path, out_path)
+                if ok and not _node_check_js(out_path):
+                    ok = False
 
-            # Vite can occasionally emit invalid JS for large/generated bundles.
-            # Validate syntax and fall back to esbuild if necessary.
-            if ok and not _node_check_js(out_path):
-                ok = False
+            if not ok and _esbuild_available():
+                ok = _esbuild_minify_js(in_path, out_path)
 
-        # If Vite was enabled but produced invalid output, fall back to esbuild when available.
-        if _vite_enabled and not ok and _esbuild_available():
-            ok = _esbuild_minify_js(in_path, out_path)
-
-        if ok:
-            try:
-                with open(out_path, 'r', encoding='utf-8') as fr:
-                    return fr.read()
-            finally:
+            if ok:
                 try:
-                    os.remove(in_path)
-                except Exception:
-                    pass
-                try:
-                    os.remove(out_path)
-                except Exception:
-                    pass
-    except Exception:
-        # Fall back to conservative regex-based minifier below
-        pass
-    # Conservative regex fallback
+                    with open(out_path, 'r', encoding='utf-8') as fr:
+                        return fr.read()
+                finally:
+                    try:
+                        os.remove(in_path)
+                    except Exception:
+                        pass
+                    try:
+                        os.remove(out_path)
+                    except Exception:
+                        pass
+        except Exception:
+            pass
+
+    # Default Python-native minifier
     try:
-        s = _js_block_comments.sub("", src)
-        s = _js_line_comments.sub(lambda m: m.group(1), s)
-        parts = _js_string_splitter.split(s)
-        for i in range(0, len(parts), 2):
-            p = parts[i]
-            p = _js_punct_spaces.sub(r"\1", p)
-            p = _js_spaces.sub(" ", p)
-            parts[i] = p
-        s = "".join(parts)
-        return s.strip()
+        import rjsmin  # type: ignore
+        return rjsmin.jsmin(src)
     except Exception:
         return src
 
 
 def minify_css(src: str) -> str:
-    """Minify a CSS source string. Uses esbuild if available; otherwise Python fallback."""
+    """Minify a CSS source string.
+
+    Default: Python-native rcssmin.
+    Optional: when DARS_VITE_MINIFY=1 and esbuild is available, use esbuild.
+    """
     _vite_enabled = os.getenv('DARS_VITE_MINIFY', '1') == '1'
     if _vite_enabled and _esbuild_available():
         try:
@@ -171,17 +152,9 @@ def minify_css(src: str) -> str:
                     except Exception: pass
         except Exception:
             pass
-    # Prefer rcssmin if available
     try:
         import rcssmin  # type: ignore
         return rcssmin.cssmin(src)
-    except Exception:
-        pass
-    try:
-        s = _css_comments.sub("", src)
-        s = _css_punct_spaces.sub(r"\1", s)
-        s = _css_spaces.sub(" ", s)
-        return s.strip()
     except Exception:
         return src
 
@@ -298,15 +271,26 @@ def minify_output_dir(output_dir: str, extra_skip: Iterable[str] = None, progres
         if ext0 in SAFE_HTML_EXT:
             return False
 
-        # Embedded core runtime bundle: do NOT run Vite on it (can corrupt it / emit ESM exports).
-        # If esbuild is available, minify it safely in-place as an IIFE.
+        # Embedded core runtime bundle: never run Vite/esbuild on it.
+        # It is already minified and toolchains can corrupt it (e.g. emit ESM exports).
+        # If you still want to re-minify it, do it with Python-only rjsmin.
         base0 = os.path.basename(full_path)
         if ext0 in SAFE_JS_EXT and base0 == 'dars.min.js':
-            if _esbuild_available():
+            # Fall back to Python-only rjsmin (never run Vite on this file)
+            try:
+                with open(full_path, 'r', encoding='utf-8') as f:
+                    content0 = f.read()
                 try:
-                    return bool(_esbuild_minify_js(full_path, full_path))
+                    import rjsmin  # type: ignore
+                    new_content0 = rjsmin.jsmin(content0)
                 except Exception:
-                    return False
+                    new_content0 = content0
+                if new_content0 is not None and new_content0 != content0:
+                    with open(full_path, 'w', encoding='utf-8') as f:
+                        f.write(new_content0)
+                    return True
+            except Exception:
+                return False
             return False
 
         try:

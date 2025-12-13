@@ -1,3 +1,69 @@
+# Release Notes v1.8.4
+
+> **Python-native minification + major Utility Styles upgrade**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Python-native minification by default (no Node/Bun required)
+
+v1.8.4 upgrades the default minification pipeline to use real, battle-tested Python minifiers:
+
+- **JavaScript**: `rjsmin`
+- **CSS**: `rcssmin`
+
+This makes builds and exports work reliably in pure-Python environments.
+
+### Optional `viteMinify` mode preserved
+
+If you enable `viteMinify: true` in `dars.config.json`, Dars can still use Vite/esbuild **optionally** when available.
+When tools are not installed, Dars falls back to the Python minifiers automatically.
+
+### Runtime bundle safety: `dars.min.js`
+
+The embedded runtime bundle (`dars.min.js`) is now treated as a special case:
+
+- It is **never** passed through Vite/esbuild (to prevent corruption / ESM `export` output).
+- It is minified using **Python-only `rjsmin`**, regardless of `viteMinify`.
+
+### Utility Styles: Arbitrary Properties (`prop-[value]`)
+
+The utility system now supports Tailwind-like **arbitrary properties**:
+
+```python
+style="background-image-[linear-gradient(90deg,_rgba(0,0,0,.35),_#00ffcc)]"
+style="padding-[calc(1rem_+_2vw)]"
+style="color-[var(--brand-color)]"
+style="--brand-color-[#00ffcc]"
+```
+
+Also includes background gradient support via `bg-[linear-gradient(...)]` (maps to `background-image`).
+
+### Utility Styles: composable `filter` / `backdrop-filter` / `transform`
+
+Multiple filter/transform utilities now **compose** instead of overwriting:
+
+```python
+style="filter-[blur(6px)] filter-[brightness(120%)]"
+```
+
+### Bug fixes for utility parsing
+
+- Fixed `text-[#hex]` / `text-[rgba(...)]` being interpreted as `font-size` instead of `color`.
+- Fixed prefix collisions like `border-top-[...]` incorrectly becoming `border-color: top-[...]`.
+
+### LandingPage: navbar styles migrated to utility strings
+
+The LandingPage navbar now uses `style="..."` utility strings instead of large inline style dicts,
+improving consistency and providing a real-world example of the upgraded styling system.
+
+---
+
 # Release Notes v1.8.3
 
 > **Critical Build Fix**

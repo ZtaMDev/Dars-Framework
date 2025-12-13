@@ -33,6 +33,20 @@ def _fmt_rem(v: str) -> str:
     except:
         return v
 
+
+def _is_bg_image_value(v: str) -> bool:
+    try:
+        s = (v or "").strip().lower()
+        return (
+            "gradient(" in s
+            or s.startswith("url(")
+            or s.startswith("image(")
+            or s.startswith("image-set(")
+            or s.startswith("-webkit-image-set(")
+        )
+    except Exception:
+        return False
+
 # Mapping of prefixes/keywords to CSS properties
 UTILITY_PROPERTY_MAP = {
     # Layout
@@ -449,6 +463,7 @@ UTILITY_PREFIX_MAP = {
     
     # Background
     "bg-": ("background-color", lambda v: _get_color(v)),
+    "bgimg-": ("background-image", lambda v: v),
     
     # Border
     "border-": ("border-color", lambda v: _get_color(v)), # Simplified, assumes color
@@ -955,6 +970,8 @@ def parse_utility_string(utility_string: str) -> Dict[str, Any]:
         
     styles = {}
     classes = utility_string.split()
+
+    composable_props = {"filter", "backdrop-filter", "transform"}
     
     for cls in classes:
         # 0. Custom Utility Check
@@ -990,6 +1007,13 @@ def parse_utility_string(utility_string: str) -> Dict[str, Any]:
         for prefix, (prop, transformer) in UTILITY_PREFIX_MAP.items():
             if cls.startswith(prefix):
                 value_part = cls[len(prefix):]
+
+                # Avoid prefix collisions with arbitrary properties.
+                # Example: "border-top-[1px_solid_...]" should NOT match "border-".
+                # In those cases, the bracket appears later ("top-[...") and must be
+                # handled by the generic prop-[value] parser.
+                if '[' in value_part and not value_part.startswith('['):
+                    continue
                 
                 # Handle arbitrary values [value]
                 if value_part.startswith('[') and value_part.endswith(']'):
@@ -1003,16 +1027,62 @@ def parse_utility_string(utility_string: str) -> Dict[str, Any]:
                 if prefix == "text-" and value == "color":
                     prop = "color"
                     value = _get_color(value_part)
+
+                # Special case: text-[#hex] / text-[rgba(...)] / text-[var(...)]
+                # When using bracket values, interpret as color instead of font-size.
+                if prefix == "text-" and value_part.startswith('[') and value_part.endswith(']'):
+                    prop = "color"
+                    try:
+                        value = _get_color(value_part)
+                    except Exception:
+                        value = value
                 
+                # Special case: background arbitrary values for gradients/images.
+                # bg-[linear-gradient(...)] should become background-image, not background-color.
+                if prefix == "bg-" and value_part.startswith('[') and value_part.endswith(']'):
+                    if _is_bg_image_value(value):
+                        prop = "background-image"
+
+                def _assign_one(pname: str, pval: Any):
+                    if pname in composable_props and pname in styles and styles[pname]:
+                        styles[pname] = f"{styles[pname]} {pval}".strip()
+                    else:
+                        styles[pname] = pval
+
                 if isinstance(prop, list):
                     for p in prop:
-                        styles[p] = value
+                        _assign_one(p, value)
                 else:
-                    styles[prop] = value
+                    _assign_one(prop, value)
                 matched = True
                 break
         
         if not matched:
+            # 3. Arbitrary properties: prop-[value]
+            # Examples:
+            #   background-image-[linear-gradient(90deg,_#000,_rgba(0,0,0,.4))]
+            #   filter-[blur(4px)_brightness(120%)]
+            #   --brand-color-[#00ffcc]
+            try:
+                if '-[' in cls and cls.endswith(']'):
+                    prop_part, value_part = cls.split('-[', 1)
+                    if prop_part and value_part.endswith(']'):
+                        raw_value = value_part[:-1]
+                        raw_value = raw_value.replace('_', ' ')
+
+                        pname = prop_part.strip()
+                        # Allow python-style underscores for convenience
+                        pname = pname.replace('_', '-')
+
+                        if pname:
+                            if pname in composable_props and pname in styles and styles[pname]:
+                                styles[pname] = f"{styles[pname]} {raw_value}".strip()
+                            else:
+                                styles[pname] = raw_value
+                            continue
+            except Exception:
+                pass
+
             # Fallback: maybe it's a border-radius shorthand "rounded"
             if cls == "rounded":
                 styles["border-radius"] = "0.25rem"
