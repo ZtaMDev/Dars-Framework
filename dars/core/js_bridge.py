@@ -266,10 +266,10 @@ def esbuild_minify_js(src_path: str, out_path: Optional[str] = None) -> bool:
         return False
     out = out_path or src_path
     if has_bun():
-        code, _, _ = _run(["bun", "x", "esbuild", src_path, "--minify", "--legal-comments=none", "--platform=browser", "--format=esm", f"--outfile={out}"])
+        code, _, _ = _run(["bun", "x", "esbuild", src_path, "--minify", "--legal-comments=none", "--platform=browser", "--format=iife", f"--outfile={out}"])
         return code == 0
     # Node fallback via npx
-    code, _, _ = _run(["npx", "--yes", "esbuild", src_path, "--minify", "--legal-comments=none", "--platform=browser", "--format=esm", f"--outfile={out}"])
+    code, _, _ = _run(["npx", "--yes", "esbuild", src_path, "--minify", "--legal-comments=none", "--platform=browser", "--format=iife", f"--outfile={out}"])
     return code == 0
 
 
@@ -298,7 +298,7 @@ def vite_minify_js(src_path: str, out_path: Optional[str] = None) -> bool:
                 "  build: {\n"
                 "    minify: 'esbuild',\n"
                 "    sourcemap: false,\n"
-                "    rollupOptions: { input: ['" + abs_src.replace('\\', '\\\\') + "'] },\n"
+                "    rollupOptions: { input: ['" + abs_src.replace('\\', '\\\\') + "'], output: { format: 'iife' } },\n"
                 "    outDir: 'out',\n"
                 "    emptyOutDir: true\n"
                 "  }\n"

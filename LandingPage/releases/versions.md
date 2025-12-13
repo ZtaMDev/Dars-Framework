@@ -1,3 +1,25 @@
+# Release Notes v1.8.3
+
+> **Critical Build Fix**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Fixed production build crash: `Unexpected token 'export'`
+
+In some environments, the JS minification pipeline (Vite/esbuild) could emit ESM output ending with `export default ...` inside `app.js`. Since exported pages load `app.js` as a classic script, browsers would fail to parse it with:
+
+`Uncaught SyntaxError: Unexpected token 'export'`
+
+v1.8.3 fixes this by forcing the minifier output format to **IIFE** for browser scripts, preventing ESM `export` statements from being generated during build.
+
+---
+
 # Release Notes v1.8.2
 
 > **Bug Fixes & Utility System Improvements**

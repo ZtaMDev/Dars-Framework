@@ -7,6 +7,8 @@
 # Copyright (c) 2025 ZtaDev
 import os
 import re
+import shutil
+import subprocess
 from typing import Iterable, Set
 from dars.core.js_bridge import (
     esbuild_minify_js as _esbuild_minify_js,
@@ -79,6 +81,17 @@ def minify_js(src: str) -> str:
     """Minify a JS source string. Uses esbuild if available; otherwise Python fallback."""
     # Fast path: dump to temp file and use Vite/esbuild when available
     _vite_enabled = os.getenv('DARS_VITE_MINIFY', '1') == '1'
+
+    def _node_check_js(path: str) -> bool:
+        try:
+            node = shutil.which('node') or shutil.which('node.exe')
+            if not node:
+                return True
+            p = subprocess.run([node, '--check', path], capture_output=True, text=True)
+            return p.returncode == 0
+        except Exception:
+            return True
+
     try:
         import tempfile
         with tempfile.NamedTemporaryFile('w', delete=False, suffix='.js', encoding='utf-8') as tf_in:
@@ -88,12 +101,19 @@ def minify_js(src: str) -> str:
             out_path = tf_out.name
 
         ok = False
-        # 1) Prefer Vite when explicitly enabled and available
+        # Prefer Vite when explicitly enabled and available.
+        # IMPORTANT: do not fall back to esbuild here to avoid double-tool minification and
+        # output format inconsistencies. If Vite is unavailable, we fall back to the
+        # conservative Python regex minifier below.
         if _vite_enabled and _vite_available():
             ok = _vite_minify_js(in_path, out_path)
 
-        # 2) Solo usar esbuild cuando viteMinify está habilitado; si Vite falló pero
-        # esbuild está disponible, usarlo como backend de minificación para el modo Vite.
+            # Vite can occasionally emit invalid JS for large/generated bundles.
+            # Validate syntax and fall back to esbuild if necessary.
+            if ok and not _node_check_js(out_path):
+                ok = False
+
+        # If Vite was enabled but produced invalid output, fall back to esbuild when available.
         if _vite_enabled and not ok and _esbuild_available():
             ok = _esbuild_minify_js(in_path, out_path)
 
@@ -218,6 +238,22 @@ def minify_output_dir(output_dir: str, extra_skip: Iterable[str] = None, progres
     total = len(candidates)
     processed = 0
     written = 0
+
+    # Optional parallel minification (spawns external tools in parallel).
+    # Keep workers conservative to avoid saturating the system.
+    parallel_on = False
+    workers = 1
+    try:
+        parallel_on = os.environ.get('DARS_MINIFY_PARALLEL', '0') == '1'
+        workers = int(os.environ.get('DARS_MINIFY_WORKERS', '') or '0')
+    except Exception:
+        parallel_on = False
+        workers = 1
+    if workers <= 0:
+        try:
+            workers = max(1, min(4, (os.cpu_count() or 2)))
+        except Exception:
+            workers = 2
     
     # NUEVO: Priorizar archivos combinados (app.js) sobre archivos individuales
     # Cuando viteMinify está activado, solo minificar archivos app.js y ignorar los individuales
@@ -254,51 +290,86 @@ def minify_output_dir(output_dir: str, extra_skip: Iterable[str] = None, progres
         candidates = filtered_candidates
         total = len(candidates)
 
-    for full in candidates:
-        ext = os.path.splitext(full)[1].lower()
+    def _minify_one(full_path: str):
+        nonlocal written
+        ext0 = os.path.splitext(full_path)[1].lower()
+
+        # Skip HTML minification completely
+        if ext0 in SAFE_HTML_EXT:
+            return False
+
+        # Embedded core runtime bundle: do NOT run Vite on it (can corrupt it / emit ESM exports).
+        # If esbuild is available, minify it safely in-place as an IIFE.
+        base0 = os.path.basename(full_path)
+        if ext0 in SAFE_JS_EXT and base0 == 'dars.min.js':
+            if _esbuild_available():
+                try:
+                    return bool(_esbuild_minify_js(full_path, full_path))
+                except Exception:
+                    return False
+            return False
+
         try:
-            with open(full, 'r', encoding='utf-8') as f:
-                content = f.read()
+            with open(full_path, 'r', encoding='utf-8') as f:
+                content0 = f.read()
         except Exception:
-            processed += 1
-            if progress_cb:
-                try: progress_cb(processed, total)
-                except Exception: pass
-            continue
+            return False
 
-        new_content = None
-        if ext in SAFE_JS_EXT:
-            base = os.path.basename(full)
-            # Special handling for core runtime bundle: only allow Vite/esbuild, never default regex minifier
-            if base == 'dars.min.js':
-                if vite_on:
-                    new_content = minify_js(content)
-                else:
-                    new_content = None
-            else:
-                # JS: process if default_on or vite_on; tool usage is gated inside minify_js by vite flag
-                if default_on or vite_on:
-                    new_content = minify_js(content)
-        elif ext in SAFE_CSS_EXT:
+        new_content0 = None
+        if ext0 in SAFE_JS_EXT:
             if default_on or vite_on:
-                new_content = None
-        elif ext in SAFE_HTML_EXT:
-            # Skip HTML minification completely
-            new_content = None
+                new_content0 = minify_js(content0)
+        elif ext0 in SAFE_CSS_EXT:
+            if default_on or vite_on:
+                new_content0 = minify_css(content0)
 
-        if new_content is not None and new_content != content:
+        if new_content0 is not None and new_content0 != content0:
             try:
-                with open(full, 'w', encoding='utf-8') as f:
-                    f.write(new_content)
+                with open(full_path, 'w', encoding='utf-8') as f:
+                    f.write(new_content0)
+                return True
+            except Exception:
+                return False
+        return False
+
+    if parallel_on and total > 1:
+        import threading
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+
+        lock = threading.Lock()
+
+        with ThreadPoolExecutor(max_workers=workers) as ex:
+            futures = {ex.submit(_minify_one, p): p for p in candidates}
+            for fut in as_completed(futures):
+                changed = False
+                try:
+                    changed = bool(fut.result())
+                except Exception:
+                    changed = False
+                with lock:
+                    processed += 1
+                    if changed:
+                        written += 1
+                    if progress_cb:
+                        try:
+                            progress_cb(processed, total)
+                        except Exception:
+                            pass
+    else:
+        for full in candidates:
+            changed = False
+            try:
+                changed = _minify_one(full)
+            except Exception:
+                changed = False
+
+            processed += 1
+            if changed:
                 written += 1
-            except Exception:
-                pass
-
-        processed += 1
-        if progress_cb:
-            try:
-                progress_cb(processed, total)
-            except Exception:
-                pass
+            if progress_cb:
+                try:
+                    progress_cb(processed, total)
+                except Exception:
+                    pass
 
     return written
