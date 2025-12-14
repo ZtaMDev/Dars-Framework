@@ -43,6 +43,7 @@ from dars.components.advanced.head import Head
 from dars.components.advanced.outlet import Outlet
 from dars.components.basic.video import Video
 from dars.components.basic.audio import Audio
+from dars.components.advanced.file_upload import FileUpload
 # Layout
 from dars.components.layout.grid import GridLayout, LayoutBase
 # Core
@@ -84,6 +85,15 @@ from dars.backend.data import useData, DataAccessor
 from dars.backend.json_utils import stringify, parse, get_value
 from dars.backend.components import createComp, updateComp, deleteComp
 
+# Server Components (use_server=True)
+from dars.core.server_components import (
+    ServerComponentMarker,
+    register_server_component,
+    clear_server_component_registry,
+    get_server_component,
+    SERVER_COMPONENT_REGISTRY
+)
+
 # from dars.core.properties import *
 
 __all__ = [
@@ -91,6 +101,7 @@ __all__ = [
     'Button', 'Checkbox', 'Container', 'DatePicker', 'Image', 'Input', 'Link', 'Page', 'ProgressBar',
     'RadioButton', 'Select', 'Slider', 'Spinner', 'Text', 'Textarea', 'Tooltip',
     'Accordion', 'Card', 'Modal', 'Navbar', 'Table', 'Tabs', 'Section', 'Outlet', 'Head', 'Audio', 'Video',
+    'FileUpload',
     # Visualization
     'Chart', 'DataTable',
     'GridLayout', 'FlexLayout', 'LayoutBase', 'AnchorPoint',
@@ -147,4 +158,7 @@ __all__ = [
     'FormData', 'collect_form',
     # Secure Routing
     'RouteType', 'RouteMetadata',
+    # Server Components
+    'ServerComponentMarker', 'register_server_component', 
+    'clear_server_component_registry', 'get_server_component', 'SERVER_COMPONENT_REGISTRY',
 ]

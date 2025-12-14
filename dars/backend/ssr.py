@@ -436,6 +436,79 @@ class SSRRenderer:
         }
 
 
+def _register_server_components_from_app(dars_app: App) -> int:
+    """
+    Scan the entire Dars app component tree and register all server components.
+    
+    This ensures SERVER_COMPONENT_REGISTRY is populated when the backend starts,
+    allowing server component endpoints to find and render the components.
+    
+    Args:
+        dars_app: The Dars App instance to scan
+        
+    Returns:
+        Number of server components registered
+    """
+    from dars.core.server_components import register_server_component, clear_server_component_registry
+    from dars.core.component import Component
+    
+    # Clear existing registry to avoid duplicates on hot reload
+    clear_server_component_registry()
+    
+    count = 0
+    visited = set()
+    
+    def scan_component(comp):
+        nonlocal count
+        if comp is None or not isinstance(comp, Component):
+            return
+        
+        # Avoid cycles
+        comp_id_check = id(comp)
+        if comp_id_check in visited:
+            return
+        visited.add(comp_id_check)
+        
+        # Register if use_server=True
+        if getattr(comp, 'use_server', False):
+            # Ensure component has an ID
+            if not comp.id:
+                import uuid
+                comp.id = f"sc_{uuid.uuid4().hex[:8]}"
+            register_server_component(comp)
+            count += 1
+            print(f"[SSR] Registered server component: {comp.id} ({type(comp).__name__})")
+        
+        # Scan children
+        for child in getattr(comp, 'children', []) or []:
+            scan_component(child)
+        
+        # Scan loading/error components too
+        if hasattr(comp, '_loading_component') and comp._loading_component:
+            scan_component(comp._loading_component)
+        if hasattr(comp, '_error_component') and comp._error_component:
+            scan_component(comp._error_component)
+    
+    # Scan multipage pages
+    if hasattr(dars_app, 'pages'):
+        for page in dars_app.pages.values():
+            if hasattr(page, 'root'):
+                scan_component(page.root)
+    
+    # Scan SPA routes
+    if hasattr(dars_app, '_spa_routes'):
+        for route in dars_app._spa_routes.values():
+            if hasattr(route, 'root'):
+                scan_component(route.root)
+    
+    # Scan app root
+    if dars_app.root:
+        scan_component(dars_app.root)
+    
+    print(f"[SSR] Total server components registered: {count}")
+    return count
+
+
 def create_ssr_app(dars_app: App, prefix: str = "/api/ssr", streaming: bool = False) -> FastAPI:
     """
     Create a FastAPI app with automatic SSR endpoints for all SSR routes.
@@ -471,7 +544,12 @@ def create_ssr_app(dars_app: App, prefix: str = "/api/ssr", streaming: bool = Fa
         ```
     """
     fastapi_app = FastAPI(title=f"{dars_app.title} - SSR Backend")
+    
     renderer = SSRRenderer(dars_app)
+    
+    # IMPORTANT: Scan and register all server components from the app tree
+    # This populates SERVER_COMPONENT_REGISTRY so component endpoints work
+    _register_server_components_from_app(dars_app)
     
     # Find all SSR routes
     ssr_routes = []
@@ -556,6 +634,9 @@ def create_ssr_app(dars_app: App, prefix: str = "/api/ssr", streaming: bool = Fa
             fastapi_app.get(route.route)(create_html_endpoint(route_name))
             print(f"[SSR] Registered HTML endpoint: {route.route} -> {route_name}")
     
+    # Add server component routes for lazy hydration
+    create_server_component_routes(fastapi_app)
+    
     # Health check endpoint (only if root is not taken)
     root_taken = any(r.route == "/" for _, r in ssr_routes if hasattr(r, 'route'))
     if not root_taken:
@@ -567,3 +648,79 @@ def create_ssr_app(dars_app: App, prefix: str = "/api/ssr", streaming: bool = Fa
             }
     
     return fastapi_app
+
+
+def create_server_component_routes(fastapi_app: FastAPI, prefix: str = "/api/server-component") -> None:
+    """
+    Add endpoints for rendering individual server components.
+    
+    This enables the lazy hydration pattern where components with use_server=True
+    are initially rendered as placeholders, then fetched and hydrated on the client.
+    
+    Args:
+        fastapi_app: The FastAPI application to add routes to
+        prefix: URL prefix for server component endpoints (default: /api/server-component)
+    """
+    from dars.core.server_components import SERVER_COMPONENT_REGISTRY, get_server_component
+    from dars.exporters.web.vdom import VDomBuilder
+    from dars.exporters.web.html_css_js import HTMLCSSJSExporter, DarsJSONEncoder
+    from starlette.requests import Request
+    from starlette.responses import JSONResponse
+    import json
+    
+    @fastapi_app.get(f"{prefix}/{{component_id}}")
+    async def render_server_component(component_id: str, request: Request):
+        """
+        Render a registered server component and return HTML + VDOM for hydration.
+        
+        Response format:
+        {
+            "html": "<div>...</div>",
+            "vdom": {...},
+            "events": {...},
+            "componentId": "..."
+        }
+        """
+        component = get_server_component(component_id)
+        if component is None:
+            raise HTTPException(status_code=404, detail=f"Server component '{component_id}' not found")
+        
+        try:
+            # Create exporter instance
+            exporter = HTMLCSSJSExporter()
+            
+            # Temporarily disable use_server to render actual content
+            original_use_server = getattr(component, 'use_server', False)
+            component.use_server = False
+            
+            try:
+                # Render component to HTML
+                html = exporter.render_component(component)
+                
+                # Build VDOM
+                vdom_builder = VDomBuilder(id_provider=exporter.get_component_id)
+                vdom = vdom_builder.build(component)
+                events_map = vdom_builder.events_map
+            finally:
+                # Restore use_server
+                component.use_server = original_use_server
+            
+            return JSONResponse({
+                "html": html,
+                "vdom": vdom,
+                "events": events_map,
+                "componentId": component_id,
+            })
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error rendering component: {str(e)}")
+    
+    @fastapi_app.get(f"{prefix}")
+    async def list_server_components():
+        """List all registered server components (for debugging)."""
+        return {
+            "components": list(SERVER_COMPONENT_REGISTRY.keys()),
+            "count": len(SERVER_COMPONENT_REGISTRY),
+        }
+    
+    print(f"[SSR] Registered server component endpoints at {prefix}/{{id}}")
+

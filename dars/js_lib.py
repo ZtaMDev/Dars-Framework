@@ -236,8 +236,78 @@ const runtime = {{
       // hydrate newly created subtree if available
       try{{ if(typeof window.DarsHydrate === 'function') window.DarsHydrate(el); }}catch(_ ){{ }}
     }}catch(e){{ try{{ console.error(e); }}catch(_ ){{ }} }}
+  }},
+  // Server Components: lazy hydration from backend
+  async loadServerComponent(componentId, endpoint){{
+    try{{
+      const placeholder = $(componentId);
+      if(!placeholder) {{ console.warn('[Dars] Server component placeholder not found:', componentId); return; }}
+      
+      // Mark as loading
+      placeholder.classList.add('dars-sc-loading');
+      placeholder.classList.remove('dars-sc-error', 'dars-sc-loaded');
+      
+      // Fetch from backend
+      const response = await fetch(endpoint);
+      if(!response.ok) throw new Error(`HTTP ${{response.status}}`);
+      
+      const data = await response.json();
+      
+      // Replace placeholder content with rendered HTML
+      placeholder.innerHTML = data.html || '';
+      placeholder.classList.remove('dars-sc-loading');
+      placeholder.classList.add('dars-sc-loaded');
+      
+      // Store VDOM
+      if(data.vdom) _storeVNode(data.vdom);
+      
+      // Hydrate events
+      if(data.events){{
+        const mark = 'dars-sc-ev-' + Math.random().toString(36).slice(2);
+        try{{ placeholder.classList.add(mark); }}catch(_ ){{ }}
+        _attachEventsMap(data.events);
+      }}
+      
+      // Register lifecycle hooks
+      if(data.vdom && typeof data.vdom === 'object'){{
+        _registerLifecycleFromVNode(data.vdom);
+      }}
+      
+      // hydrate newly loaded subtree
+      try{{ if(typeof window.DarsHydrate === 'function') window.DarsHydrate(placeholder); }}catch(_ ){{ }}
+      
+    }}catch(error){{
+      console.error('[Dars] Server component load failed:', componentId, error);
+      const placeholder = $(componentId);
+      if(placeholder){{
+        placeholder.classList.remove('dars-sc-loading');
+        placeholder.classList.add('dars-sc-error');
+        // Check for error component in data attribute
+        const errorHtml = placeholder.dataset.scError;
+        if(errorHtml){{ placeholder.innerHTML = errorHtml; }}
+        else {{ placeholder.innerHTML = '<div class="dars-sc-error-default">Failed to load component</div>'; }}
+      }}
+    }}
   }}
 }};
+
+// Auto-load server components on DOMContentLoaded
+function _autoLoadServerComponents(){{
+  try{{
+    const serverComps = document.querySelectorAll('[data-server-component="true"]');
+    for(const el of serverComps){{
+      const endpoint = el.dataset.scEndpoint;
+      const id = el.id;
+      if(id && endpoint){{
+        runtime.loadServerComponent(id, endpoint);
+      }}
+    }}
+  }}catch(e){{ console.error('[Dars] Server component auto-load error:', e); }}
+}}
+
+if(typeof document !== 'undefined'){{
+  document.addEventListener('DOMContentLoaded', _autoLoadServerComponents);
+}}
 
 function registerState(name, cfg){{
   if(!name || !cfg || !cfg.id) return;
@@ -582,18 +652,28 @@ function change(opt){{
       if (el) {{
           // Apply text change
           if (opt.hasOwnProperty('text')) {{
-              const isFormElement = el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT';
+              // Handle Server Components: update child, not wrapper
+              let target = el;
+              if (el.hasAttribute('data-server-component') && el.firstElementChild) {{
+                   target = el.firstElementChild;
+              }}
+              
+              const isFormElement = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT';
               if (isFormElement) {{
-                  el.value = String(opt.text);
+                  target.value = String(opt.text);
               }} else {{
-                  el.textContent = String(opt.text);
+                  target.textContent = String(opt.text);
               }}
               notifyWatchers('text', opt.text);
           }}
           
           // Apply HTML change
           if (opt.hasOwnProperty('html')) {{
-              el.innerHTML = String(opt.html);
+              let target = el;
+              if (el.hasAttribute('data-server-component') && el.firstElementChild) {{
+                   target = el.firstElementChild;
+              }}
+              target.innerHTML = String(opt.html);
               notifyWatchers('html', opt.html);
           }}
 

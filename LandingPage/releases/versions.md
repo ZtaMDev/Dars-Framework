@@ -1,3 +1,49 @@
+# Release Notes v1.8.7
+
+> **Dars Server Components & FastAPI Integration**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Dars Server Components
+
+v1.8.7 introduces **first-class Server Components**, allowing individual components to be fully rendered on the server while maintaining client-side interactivity.
+
+- **Simple Usage**: Just add `use_server=True` to any component inheriting from the base `Component` class.
+- **Full Support**: All standard Dars components (Text, Button, Container, etc.) support server-side rendering out of the box.
+- **Seamless Hydration**: Components are rendered on the backend (FastAPI) and hydrated on the client, preserving events and state.
+
+```python
+Button("Server Rendered Button", use_server=True, on_click=...)
+```
+
+### FastAPI Integration Plugin
+
+The new version of `create_dars_app` plugin provides tight integration with FastAPI, making it easier than ever to build full-stack SSR applications.
+
+- **Backend-Driven**: The Dars frontend is served and managed by your FastAPI backend.
+- **API Co-location**: Define your API routes and your UI components in the same project structure.
+
+### SSR Project Template
+
+Scaffold a complete SSR project and then add Server Components support in seconds:
+
+```bash
+dars init my-app --type ssr
+```
+
+This template sets up:
+- A FastAPI backend using `create_dars_app`.
+- A Dars frontend configured for SSR.
+- Best practices for project structure and deployment.
+
+---
+
 # Release Notes v1.8.6
 
 > **Environment Management & File Upload Component**

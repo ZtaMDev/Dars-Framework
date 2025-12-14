@@ -39,6 +39,8 @@ class VNode:
         text: Optional[str] = None,
         is_island: bool = False,
         lifecycle: Optional[Dict[str, Any]] = None,
+        is_server_component: bool = False,
+        server_endpoint: Optional[str] = None,
     ) -> None:
         self.type = type_name
         self.id = id
@@ -53,6 +55,9 @@ class VNode:
         self.isIsland = is_island
         # Optional lifecycle hooks metadata (onMount/onUpdate/onUnmount)
         self.lifecycle = lifecycle or {}
+        # Server component metadata
+        self.isServerComponent = is_server_component
+        self.serverEndpoint = server_endpoint
 
     def to_dict(self) -> Dict[str, Any]:
         d: Dict[str, Any] = {
@@ -71,6 +76,10 @@ class VNode:
         d["isIsland"] = bool(self.isIsland)
         if self.lifecycle:
             d["lifecycle"] = self.lifecycle
+        # Server component metadata
+        if self.isServerComponent:
+            d["isServerComponent"] = True
+            d["serverEndpoint"] = self.serverEndpoint
         return d
 
 
@@ -375,7 +384,12 @@ class VDomBuilder:
         events_payload = self._serialize_events(component)
         
         comp_id = comp_id or stable_key  # usar stable_key como fallback
-        if comp_id and events_payload:
+        
+        # Skip event registration for server components (handled by hydration/SSR)
+        # preventing double execution of events (static runtime + dynamic hydration).
+        is_server = getattr(component, 'use_server', False)
+        
+        if comp_id and events_payload and not is_server:
             self.events_map[comp_id] = events_payload
 
         # Children
@@ -402,6 +416,12 @@ class VDomBuilder:
         except Exception:
             is_island = False
 
+        # Server component detection
+        is_server_comp = getattr(component, 'use_server', False)
+        server_endpoint = None
+        if is_server_comp and comp_id:
+            server_endpoint = f"/api/server-component/{comp_id}"
+
         vnode = VNode(
             type_name=comp_type,
             id=comp_id,
@@ -415,5 +435,7 @@ class VDomBuilder:
             text=text_value,
             is_island=is_island,
             lifecycle=lifecycle,
+            is_server_component=is_server_comp,
+            server_endpoint=server_endpoint,
         )
         return vnode

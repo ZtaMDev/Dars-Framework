@@ -6,6 +6,10 @@
 #
 # Copyright (c) 2025 ZtaDev
 from typing import Dict, Any, List, Optional, Callable, Union, Type
+from threading import Thread
+import inspect
+import hashlib
+import os
 from abc import ABC, abstractmethod
 from dars.core.events import EventTypes
 from dars.exporters.base import Exporter
@@ -93,6 +97,39 @@ class Component(ABC):
         self.id: Optional[str] = props.get('id')
         self.class_name: str = props.get("class_name", self.__class__.__name__)
         
+        # Server Component Configuration
+        self.use_server: bool = props.get('use_server', False)
+        
+        # Automatic Deterministic ID for Server Components (if no ID provided)
+        # This ensures IDs match between the Exporter process (frontend build) 
+        # and the SSR process (backend), even if they run separately.
+        if self.use_server and not self.id:
+            try:
+                # Get caller frame to identify where the component is instantiated
+                # We skip frames inside dars core to find user code
+                frame = inspect.currentframe()
+                while frame:
+                    if 'dars' in frame.f_code.co_filename and 'core' in frame.f_code.co_filename:
+                         frame = frame.f_back
+                         continue
+                    break
+                
+                if frame:
+                    finfo = inspect.getframeinfo(frame)
+                    # Create a stable hash based on filename (basename) and line number
+                    # We use basename because absolute paths might differ slightly in docker/env
+                    # but usually safest to include some path context if possible.
+                    # For local dev, basename + line is good enough collision resistance for typical pages.
+                    fname = os.path.basename(finfo.filename)
+                    seed = f"{fname}:{finfo.lineno}:{self.__class__.__name__}"
+                    h = hashlib.md5(seed.encode()).hexdigest()[:8]
+                    self.id = f"{self.__class__.__name__.lower()}_{h}"
+            except Exception:
+                pass
+
+        self._loading_component: Optional['Component'] = props.get('loading_comp')
+        self._error_component: Optional['Component'] = props.get('on_error_comp')
+        
         # Handle style parsing (str -> dict)
         _style = props.get('style', {})
         self.style: Dict[str, Any] = parse_utility_string(_style) if isinstance(_style, str) else _style
@@ -105,6 +142,7 @@ class Component(ABC):
 
         self.events: Dict[str, Callable] = {}
         self.key: Optional[str] = props.get('key')
+        
         
         if props:
             on_map = {
@@ -419,6 +457,33 @@ class Component(ABC):
 
     def mod(self, **attrs):
         return DeferredAttr(self, attrs)
+    
+    def set_loading_state(self, loading_comp: Optional['Component'] = None, 
+                          on_error_comp: Optional['Component'] = None) -> 'Component':
+        """
+        Configure loading and error placeholders for server components.
+        
+        When use_server=True, the component is rendered by the backend.
+        This method allows configuring what to show while loading and on error.
+        
+        Args:
+            loading_comp: Component to show while loading (e.g., Spinner())
+            on_error_comp: Component to show if loading fails (e.g., Text("Error"))
+            
+        Returns:
+            self for method chaining
+            
+        Example:
+            chart = Chart(data=data, use_server=True, id="my-chart").set_loading_state(
+                loading_comp=Container(Spinner(), Text("Loading chart...")),
+                on_error_comp=Text("Failed to load chart", style="color:red")
+            )
+        """
+        if loading_comp is not None:
+            self._loading_component = loading_comp
+        if on_error_comp is not None:
+            self._error_component = on_error_comp
+        return self
     
     def render_children(self, exporter: 'Exporter') -> str:
         """Render all children of the component using the exporter."""

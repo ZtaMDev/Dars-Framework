@@ -1108,6 +1108,7 @@ class Component(ABC):
 All components support these basic properties:
 
 - **id**: Unique component identifier
+- **use_server**: Set to \`True\` to render this component on the server (requires SSR backend(FastAPI with Dars.backend))
 - **class_name**: CSS class for additional styles
 - **style**: Dictionary of CSS styles
 - **hover_style**: Dictionary of CSS styles on hover
@@ -3956,6 +3957,45 @@ def blog_post():
     )
 \`\`\`
 
+## Dars Server Components
+
+Dars Introduces **Server Components**, a granular way to render individual components on the server within any application structure (even inside SPA routes).
+
+### Concept
+
+While traditional SSR renders entire pages, Server Components allow you to mark specific parts of your UI to be rendered by the backend. This is useful for:
+- Accessing database or file system directly from component logic.
+- Reducing client-side bundle size.
+- Dynamic content that updates on the server.
+
+### Usage
+
+To make any component a Server Component, simply set the \`use_server=True\` property:
+
+\`\`\`python
+from dars.all import *
+
+# This button is rendered on the server
+Button(
+    "Check Status", 
+    use_server=True,
+    on_click=dScript("alert('Clicked!')")
+)
+
+# This container and its children are rendered on the server
+Container(
+    Text(f"Server Time: {datetime.now()}"),
+    use_server=True
+)
+\`\`\`
+
+### Requirements
+
+Server Components require a running Dars FastAPI backend to handle the rendering requests.
+- **Development**: Run \`dars dev --backend\`.
+- **Production**: Deploy the full FastAPI application.
+The Dars runtime automatically handles fetching the server-rendered HTML and hydrating it with events, so from a developer perspective, they behave just like local components.
+
 ---
 
 ## Quick Start
@@ -4337,7 +4377,9 @@ if __name__ == "__main__":
 **Vercel / Netlify:**
 - Deploy FastAPI backend as serverless function
 - Serve static files from CDN
-- Configure environment variables`},{type:"T9",id:"md-state_management",key:"0/2/0/13",text:`# State Management in Dars
+- Configure environment variables
+
+---`},{type:"T9",id:"md-state_management",key:"0/2/0/13",text:`# State Management in Dars
 
 Dars Framework features **powerful state management systems**, designed for different use cases:
 

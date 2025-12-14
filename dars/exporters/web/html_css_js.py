@@ -102,6 +102,41 @@ class HTMLCSSJSExporter(Exporter):
             self._active_style_registry: Dict[str, Dict[str, Any]] = {}
             self.create_output_directory(output_path)
             self._current_output_path = output_path
+            self._current_app = app
+            
+            # Set SSR base URL for server components (used by placeholder generation)
+            try:
+                from dars.core.server_components import set_ssr_base_url
+                
+                # 1. Try explicit app.ssr_url
+                ssr_url = getattr(app, 'ssr_url', '') or ''
+                
+                # 2. Fallback to DarsEnv config (if available in user project)
+                if not ssr_url:
+                    try:
+                        import sys
+                        if os.getcwd() not in sys.path:
+                            sys.path.insert(0, os.getcwd())
+                        
+                        # Try importing backend.apiConfig
+                        try:
+                            from backend.apiConfig import DarsEnv
+                            urls = DarsEnv.get_urls()
+                            ssr_url = urls.get('backend', '')
+                        except ImportError:
+                            # Try alternative path (if backend is at root)
+                            try:
+                                from apiConfig import DarsEnv
+                                urls = DarsEnv.get_urls()
+                                ssr_url = urls.get('backend', '')
+                            except ImportError:
+                                pass
+                    except Exception:
+                        pass
+
+                set_ssr_base_url(ssr_url)
+            except Exception:
+                pass
 
             # --- Copiar recursos adicionales desde la carpeta del proyecto ---
             import inspect, shutil
@@ -3414,11 +3449,23 @@ audio.dars-audio {
                         lines.append(f"                            if ({var_name}) {{")
                         for target_prop in target_props:
                             if target_prop == 'text':
-                                lines.append(f"                                {var_name}.textContent = String(val_{state_prop});")
+                                lines.append(f"                                if ({var_name}.hasAttribute('data-server-component') && {var_name}.firstElementChild) {{")
+                                lines.append(f"                                    {var_name}.firstElementChild.textContent = String(val_{state_prop});")
+                                lines.append(f"                                }} else {{")
+                                lines.append(f"                                    {var_name}.textContent = String(val_{state_prop});")
+                                lines.append(f"                                }}")
                             elif target_prop == 'html':
-                                lines.append(f"                                {var_name}.innerHTML = String(val_{state_prop});")
+                                lines.append(f"                                if ({var_name}.hasAttribute('data-server-component') && {var_name}.firstElementChild) {{")
+                                lines.append(f"                                    {var_name}.firstElementChild.innerHTML = String(val_{state_prop});")
+                                lines.append(f"                                }} else {{")
+                                lines.append(f"                                    {var_name}.innerHTML = String(val_{state_prop});")
+                                lines.append(f"                                }}")
                             elif target_prop == 'value':
-                                lines.append(f"                                {var_name}.value = String(val_{state_prop});")
+                                lines.append(f"                                if ({var_name}.hasAttribute('data-server-component') && {var_name}.firstElementChild) {{")
+                                lines.append(f"                                    {var_name}.firstElementChild.value = String(val_{state_prop});")
+                                lines.append(f"                                }} else {{")
+                                lines.append(f"                                    {var_name}.value = String(val_{state_prop});")
+                                lines.append(f"                                }}")
                             elif target_prop == 'placeholder':
                                 lines.append(f"                                {var_name}.setAttribute('placeholder', String(val_{state_prop}));")
                             elif target_prop == 'style':
@@ -3741,6 +3788,61 @@ audio.dars-audio {
         obf = 'd' + h
         m[original] = obf
         return obf
+
+    def _render_server_component_placeholder(self, component: Component) -> str:
+        """
+        Render a placeholder for a server component.
+        
+        Components with use_server=True are rendered by the FastAPI backend.
+        This method generates placeholder HTML that will be replaced by
+        server-rendered content at runtime via the JS loadServerComponent() function.
+        
+        The placeholder:
+        - Has data-server-component="true" for JS detection
+        - Has data-sc-endpoint with the backend URL
+        - Contains loading component HTML if set
+        - Contains error component HTML (escaped) for failure handling
+        """
+        from dars.core.server_components import (
+            ServerComponentMarker,
+            register_server_component
+        )
+        
+        # Ensure component has an ID
+        comp_id = self.get_component_id(component, prefix='sc')
+        
+        # Register for backend access
+        register_server_component(component)
+        
+        # Get backend URL from app context if available
+        backend_url = ""
+        try:
+            app = getattr(self, '_current_app', None)
+            if app and hasattr(app, 'ssr_url'):
+                backend_url = app.ssr_url or ""
+        except Exception:
+            pass
+        
+        # Render loading component if set
+        loading_html = ""
+        if hasattr(component, '_loading_component') and component._loading_component:
+            try:
+                loading_html = self.render_component(component._loading_component)
+            except Exception:
+                loading_html = '<div class="dars-sc-loading-default">Loading...</div>'
+        
+        # Render error component if set (will be stored as data attribute)
+        error_html = ""
+        if hasattr(component, '_error_component') and component._error_component:
+            try:
+                error_html = self.render_component(component._error_component)
+            except Exception:
+                error_html = '<div class="dars-sc-error-default">Error loading component</div>'
+        
+        # Create marker and generate placeholder
+        marker = ServerComponentMarker(component, backend_url)
+        return marker.to_placeholder_html(loading_html, error_html)
+
     def render_function_component(self, component: Component) -> str:
         """
         Render a function component with automatic property injection.
@@ -4156,6 +4258,10 @@ audio.dars-audio {
             # Metadata already extracted in _scan_for_head_components
             # Head component renders nothing visible
             return ""
+        
+        # Server Component: render placeholder instead of full component
+        if getattr(component, 'use_server', False):
+            return self._render_server_component_placeholder(component)
             
         from dars.components.basic.page import Page
         from dars.components.layout.grid import GridLayout

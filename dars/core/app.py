@@ -143,11 +143,37 @@ class Page:
 
 class App:
     """Main class that represents a Dars application"""
-    
-    def __init__(self, title: str = "Dars App", meta: dict = None, ssr_url: str = None):
+
+    def __init__(
+        self,
+        title: str = "Dars App",
+        meta: dict = None,
+        description: str = "",
+        author: str = "",
+        version: str = "",
+        keywords: List[str] = None,
+        language: str = "en",
+        favicon: str = "",
+        icon: str = "",
+        apple_touch_icon: str = "",
+        apple_mobile_web_app_capable: bool = False,
+        apple_mobile_web_app_status_bar_style: str = "default",  # "default", "black", "black-translucent"
+        apple_mobile_web_app_title: str = "",
+        manifest: str = "",
+        theme_color: str = "#000000",
+        background_color: str = "#ffffff",
+        service_worker_path: str = "",
+        service_worker_enabled: bool = False,
+        desktop: bool = False,
+        devtools: bool = True,  # Auto-open DevTools in desktop dev mode
+        ssr_url: str = None,  # URL for SSR backend fetching
+        **config
+    ):
+
+        # Propiedades básicas de la aplicación
         self.title = title
         self.meta = meta or {}
-        self.pages = {}
+        self._pages = {}
         self.ssr_url = ssr_url  # URL for SSR backend fetching
         self._spa_routes = {}
         self._spa_404_page = None
@@ -160,6 +186,266 @@ class App:
             self.meta["viewport"] = "width=device-width, initial-scale=1.0"
         if "charset" not in self.meta:
             self.meta["charset"] = "utf-8"
+        self.description = description
+        self.author = author
+        # Optional app version (used for desktop package.json if present)
+        self.version = version
+        self.keywords = keywords or []
+        self.language = language
+        self.desktop = desktop
+        # Iconos y favicon
+        self.favicon = favicon
+        self.icon = icon  # Para PWA y meta tags
+        self.apple_touch_icon = apple_touch_icon
+        # Apple mobile web app properties
+        self.apple_mobile_web_app_capable = apple_mobile_web_app_capable
+        self.apple_mobile_web_app_status_bar_style = apple_mobile_web_app_status_bar_style
+        self.apple_mobile_web_app_title = apple_mobile_web_app_title or title
+        self.manifest = manifest  # Para PWA manifest.json
+        
+        # Colores para PWA y tema
+        self.icons = config.get('icons', [])
+        self.theme_color = theme_color
+        self.background_color = background_color
+        self.service_worker_path = service_worker_path
+        self.service_worker_enabled = service_worker_enabled
+        
+        # Desktop configuration
+        self.devtools = devtools  # Control DevTools auto-open in dev mode
+        self.ssr_url = ssr_url
+        
+        # Load project configuration and register custom utilities
+        try:
+            from dars.config import load_config
+            from dars.core.utilities import register_custom_utilities
+            
+            # Detect project root (similar to rTimeCompile)
+            import inspect
+            import sys
+            import os
+            
+            app_file = None
+            for frame in inspect.stack():
+                if frame.function == "<module>":
+                    app_file = frame.filename
+                    break
+            if not app_file:
+                app_file = sys.argv[0]
+            
+            project_root = os.path.dirname(os.path.abspath(app_file))
+            cfg, cfg_found = load_config(project_root)
+            
+            if cfg_found and 'utility_styles' in cfg:
+                register_custom_utilities(cfg['utility_styles'])
+                
+        except Exception:
+            # Fail silently if config loading fails during init
+            pass
+        
+        # Propiedades Open Graph (para redes sociales)
+
+        #
+        # [RECOMENDACIÓN DARS]
+        # Para lanzar la compilación/preview rápido de tu app, añade al final de tu archivo principal:
+        #   if __name__ == "__main__":
+        #       app.rTimeCompile()  # o app.timeCompile()
+        # Así tendrás preview instantáneo y control explícito, sin efectos colaterales.
+        #
+        self.og_title = config.get('og_title', title)
+        self.og_description = config.get('og_description', description)
+        self.og_image = config.get('og_image', '')
+        self.og_url = config.get('og_url', '')
+        self.og_type = config.get('og_type', 'website')
+        self.og_site_name = config.get('og_site_name', '')
+        
+        # Twitter Cards
+        self.twitter_card = config.get('twitter_card', 'summary')
+        self.twitter_site = config.get('twitter_site', '')
+        self.twitter_creator = config.get('twitter_creator', '')
+        
+        # SEO y robots
+        self.robots = config.get('robots', 'index, follow')
+        self.canonical_url = config.get('canonical_url', '')
+        
+        # PWA configuración
+        self.pwa_enabled = config.get('pwa_enabled', False)
+        self.pwa_name = config.get('pwa_name', title)
+        self.pwa_short_name = config.get('pwa_short_name', title[:12])
+        self.pwa_display = config.get('pwa_display', 'standalone')
+        self.pwa_orientation = config.get('pwa_orientation', 'portrait')
+        
+        # Propiedades del framework
+        self.root: Optional[Component] = None  # Single-page mode
+        self._pages: Dict[str, Page] = {}      # Traditional multipage mode
+        self._index_page: str = None           # Nombre de la página principal (si existe)
+        
+        # SPA Routing properties
+        self._spa_routes: Dict[str, 'SPARoute'] = {}  # SPA routes by name
+        self._spa_route_tree: Optional['RouteNode'] = None  # Tree structure for nested routes
+        self._spa_index_route: str = None      # Main SPA route
+        self._spa_404_page: Optional[Page] = None  # Custom 404 page
+        self._spa_403_page: Optional[Page] = None  # Custom 403 Forbidden page
+        self._spa_loading_page: Optional[Any] = None
+        self._spa_error_page: Optional[Any] = None
+        
+        self.scripts: List['Script'] = []
+        self.global_styles: Dict[str, Any] = {}
+        self.global_style_files: List[str] = []
+        self.event_manager = EventManager()
+        self.config = config
+        
+        # Configuración por defecto
+        self.config.setdefault('viewport', {
+            'width': 'device-width',
+            'initial_scale': 1.0,
+            'user_scalable': 'yes'
+        })
+        self.config.setdefault('theme', 'light')
+        self.config.setdefault('responsive', True)
+        self.config.setdefault('charset', 'UTF-8')
+        
+    def set_root(self, component: Component):
+        """Sets the root component of the application (backward-compatible single-page mode)."""
+        self.root = component
+
+
+    def add_page(
+        self, 
+        name: str, 
+        root: 'Component', 
+        title: str = None, 
+        meta: dict = None, 
+        index: bool = False,
+        route: str = None,
+        preload: List[str] = None,
+        parent: str = None,
+        outlet_id: str = "main"
+    ):
+        """
+        Adds a page to the app. Can be traditional multipage or SPA route.
+        
+        Args:
+            name: Page identifier/slug
+            root: Root component for the page
+            title: Page title
+            meta: Metadata dict
+            index: If True, this is the main/index page
+            route: SPA route path (e.g., "/home", "/user/:id"). If provided, page becomes SPA route
+            preload: List of route paths to preload (only valid with route parameter)
+            parent: Parent route name for nested routes (only valid with route parameter)
+        
+        Raises:
+            ValueError: If route is defined both via decorator and parameter
+            ValueError: If preload is used without route
+            ValueError: If parent is used without route
+            ValueError: If page name already exists
+        
+        Examples:
+            # Traditional multipage
+            app.add_page("about", about_page)
+            
+            # SPA route
+            app.add_page("home", home_page, route="/")
+            
+            # SPA route with parameters
+            app.add_page("user", user_page, route="/user/:id")
+            
+            # Nested SPA route
+            app.add_page("docs", docs_layout, route="/docs")
+            app.add_page("docs_start", getting_started, route="/docs/getting-started", parent="docs")
+        """
+        from dars.core.routing import get_route, SPARoute, RouteNode
+        
+        # Check for route from decorator
+        decorator_route = get_route(root)
+        
+        # Validate route definition (can't define in both places)
+        if decorator_route and route:
+            raise ValueError(
+                f"Route for page '{name}' is defined in both @route decorator "
+                f"('{decorator_route}') and route parameter ('{route}'). "
+                "Please use only one method."
+            )
+        
+        # Determine final route
+        final_route = route or decorator_route
+        
+        # Validate preload usage
+        if preload and not final_route:
+            raise ValueError(
+                f"preload parameter cannot be used without route definition for page '{name}'"
+            )
+        
+        # Validate parent usage
+        if parent and not final_route:
+            raise ValueError(
+                f"parent parameter cannot be used without route definition for page '{name}'"
+            )
+        
+        # Check if page already exists
+        if name in self._pages or name in self._spa_routes:
+            raise ValueError(f"Page already exists with this name: '{name}'")
+        
+        # Create SPA route or traditional page
+        if final_route:
+            # Validate parent exists if specified
+            if parent and parent not in self._spa_routes:
+                raise ValueError(
+                    f"Parent route '{parent}' does not exist for page '{name}'. "
+                    f"Add parent route before child routes."
+                )
+            
+            # Initialize route tree if needed
+            if self._spa_route_tree is None:
+                self._spa_route_tree = RouteNode()
+            
+            # Create SPA route
+            spa_route = SPARoute(
+                name=name,
+                root=root,
+                route=final_route,
+                title=title,
+                meta=meta,
+                preload=preload,
+                index=index,
+                parent=parent,
+                outlet_id=outlet_id
+            )
+            self._spa_routes[name] = spa_route
+            
+            # Build route tree
+            route_node = RouteNode(spa_route)
+            if parent:
+                # Add as child of parent
+                parent_node = self._find_route_node(self._spa_route_tree, parent)
+                if parent_node:
+                    parent_node.add_child(route_node)
+            else:
+                # Add as top-level route
+                self._spa_route_tree.add_child(route_node)
+            
+            if index:
+                self._spa_index_route = name
+        else:
+            # Traditional multipage
+            self._pages[name] = Page(name, root, title, meta, index=index)
+            if index:
+                self._index_page = name
+
+
+    def _find_route_node(self, node: 'RouteNode', route_name: str) -> Optional['RouteNode']:
+        """Helper to find a RouteNode by its route name in the SPA route tree."""
+        if node.route and node.route.name == route_name:
+            return node
+        for child in node.children:
+            found = self._find_route_node(child, route_name)
+            if found:
+                return found
+        return None
+
+    def get_page(self, name: str) -> 'Page':
+        """Obtain one registered page by name."""
+        return self._pages.get(name)
 
     def rTimeCompile(self, exporter=None, port=None, add_file_types=".py, .js, .css", watchfiledialog=False):
         """
@@ -1196,293 +1482,7 @@ class App:
                 cleanup_thread.start()
                 cleanup_thread.join(timeout=2.0)
                 print("Preview files deleted.")
-
     
-    def __init__(
-        self,
-        title: str = "Dars App",
-        description: str = "",
-        author: str = "",
-        version: str = "",
-        keywords: List[str] = None,
-        language: str = "en",
-        favicon: str = "",
-        icon: str = "",
-        apple_touch_icon: str = "",
-        apple_mobile_web_app_capable: bool = False,
-        apple_mobile_web_app_status_bar_style: str = "default",  # "default", "black", "black-translucent"
-        apple_mobile_web_app_title: str = "",
-        manifest: str = "",
-        theme_color: str = "#000000",
-        background_color: str = "#ffffff",
-        service_worker_path: str = "",
-        service_worker_enabled: bool = False,
-        desktop: bool = False,
-        devtools: bool = True,  # Auto-open DevTools in desktop dev mode
-        **config
-    ):
-        # Propiedades básicas de la aplicación
-        self.title = title
-        self.description = description
-        self.author = author
-        # Optional app version (used for desktop package.json if present)
-        self.version = version
-        self.keywords = keywords or []
-        self.language = language
-        self.desktop = desktop
-        # Iconos y favicon
-        self.favicon = favicon
-        self.icon = icon  # Para PWA y meta tags
-        self.apple_touch_icon = apple_touch_icon
-        # Apple mobile web app properties
-        self.apple_mobile_web_app_capable = apple_mobile_web_app_capable
-        self.apple_mobile_web_app_status_bar_style = apple_mobile_web_app_status_bar_style
-        self.apple_mobile_web_app_title = apple_mobile_web_app_title or title
-        self.manifest = manifest  # Para PWA manifest.json
-        
-        # Colores para PWA y tema
-        self.icons = config.get('icons', [])
-        self.theme_color = theme_color
-        self.background_color = background_color
-        self.service_worker_path = service_worker_path
-        self.service_worker_enabled = service_worker_enabled
-        
-        # Desktop configuration
-        self.devtools = devtools  # Control DevTools auto-open in dev mode
-        
-        # Load project configuration and register custom utilities
-        try:
-            from dars.config import load_config
-            from dars.core.utilities import register_custom_utilities
-            
-            # Detect project root (similar to rTimeCompile)
-            import inspect
-            import sys
-            import os
-            
-            app_file = None
-            for frame in inspect.stack():
-                if frame.function == "<module>":
-                    app_file = frame.filename
-                    break
-            if not app_file:
-                app_file = sys.argv[0]
-            
-            project_root = os.path.dirname(os.path.abspath(app_file))
-            cfg, cfg_found = load_config(project_root)
-            
-            if cfg_found and 'utility_styles' in cfg:
-                register_custom_utilities(cfg['utility_styles'])
-                
-        except Exception:
-            # Fail silently if config loading fails during init
-            pass
-        
-        # Propiedades Open Graph (para redes sociales)
-
-        #
-        # [RECOMENDACIÓN DARS]
-        # Para lanzar la compilación/preview rápido de tu app, añade al final de tu archivo principal:
-        #   if __name__ == "__main__":
-        #       app.rTimeCompile()  # o app.timeCompile()
-        # Así tendrás preview instantáneo y control explícito, sin efectos colaterales.
-        #
-        self.og_title = config.get('og_title', title)
-        self.og_description = config.get('og_description', description)
-        self.og_image = config.get('og_image', '')
-        self.og_url = config.get('og_url', '')
-        self.og_type = config.get('og_type', 'website')
-        self.og_site_name = config.get('og_site_name', '')
-        
-        # Twitter Cards
-        self.twitter_card = config.get('twitter_card', 'summary')
-        self.twitter_site = config.get('twitter_site', '')
-        self.twitter_creator = config.get('twitter_creator', '')
-        
-        # SEO y robots
-        self.robots = config.get('robots', 'index, follow')
-        self.canonical_url = config.get('canonical_url', '')
-        
-        # PWA configuración
-        self.pwa_enabled = config.get('pwa_enabled', False)
-        self.pwa_name = config.get('pwa_name', title)
-        self.pwa_short_name = config.get('pwa_short_name', title[:12])
-        self.pwa_display = config.get('pwa_display', 'standalone')
-        self.pwa_orientation = config.get('pwa_orientation', 'portrait')
-        
-        # Propiedades del framework
-        self.root: Optional[Component] = None  # Single-page mode
-        self._pages: Dict[str, Page] = {}      # Traditional multipage mode
-        self._index_page: str = None           # Nombre de la página principal (si existe)
-        
-        # SPA Routing properties
-        self._spa_routes: Dict[str, 'SPARoute'] = {}  # SPA routes by name
-        self._spa_route_tree: Optional['RouteNode'] = None  # Tree structure for nested routes
-        self._spa_index_route: str = None      # Main SPA route
-        self._spa_404_page: Optional[Page] = None  # Custom 404 page
-        self._spa_403_page: Optional[Page] = None  # Custom 403 Forbidden page
-        self._spa_loading_page: Optional[Any] = None
-        self._spa_error_page: Optional[Any] = None
-        
-        self.scripts: List['Script'] = []
-        self.global_styles: Dict[str, Any] = {}
-        self.global_style_files: List[str] = []
-        self.event_manager = EventManager()
-        self.config = config
-        
-        # Configuración por defecto
-        self.config.setdefault('viewport', {
-            'width': 'device-width',
-            'initial_scale': 1.0,
-            'user_scalable': 'yes'
-        })
-        self.config.setdefault('theme', 'light')
-        self.config.setdefault('responsive', True)
-        self.config.setdefault('charset', 'UTF-8')
-        
-    def set_root(self, component: Component):
-        """Sets the root component of the application (backward-compatible single-page mode)."""
-        self.root = component
-
-
-    def add_page(
-        self, 
-        name: str, 
-        root: 'Component', 
-        title: str = None, 
-        meta: dict = None, 
-        index: bool = False,
-        route: str = None,
-        preload: List[str] = None,
-        parent: str = None,
-        outlet_id: str = "main"
-    ):
-        """
-        Adds a page to the app. Can be traditional multipage or SPA route.
-        
-        Args:
-            name: Page identifier/slug
-            root: Root component for the page
-            title: Page title
-            meta: Metadata dict
-            index: If True, this is the main/index page
-            route: SPA route path (e.g., "/home", "/user/:id"). If provided, page becomes SPA route
-            preload: List of route paths to preload (only valid with route parameter)
-            parent: Parent route name for nested routes (only valid with route parameter)
-        
-        Raises:
-            ValueError: If route is defined both via decorator and parameter
-            ValueError: If preload is used without route
-            ValueError: If parent is used without route
-            ValueError: If page name already exists
-        
-        Examples:
-            # Traditional multipage
-            app.add_page("about", about_page)
-            
-            # SPA route
-            app.add_page("home", home_page, route="/")
-            
-            # SPA route with parameters
-            app.add_page("user", user_page, route="/user/:id")
-            
-            # Nested SPA route
-            app.add_page("docs", docs_layout, route="/docs")
-            app.add_page("docs_start", getting_started, route="/docs/getting-started", parent="docs")
-        """
-        from dars.core.routing import get_route, SPARoute, RouteNode
-        
-        # Check for route from decorator
-        decorator_route = get_route(root)
-        
-        # Validate route definition (can't define in both places)
-        if decorator_route and route:
-            raise ValueError(
-                f"Route for page '{name}' is defined in both @route decorator "
-                f"('{decorator_route}') and route parameter ('{route}'). "
-                "Please use only one method."
-            )
-        
-        # Determine final route
-        final_route = route or decorator_route
-        
-        # Validate preload usage
-        if preload and not final_route:
-            raise ValueError(
-                f"preload parameter cannot be used without route definition for page '{name}'"
-            )
-        
-        # Validate parent usage
-        if parent and not final_route:
-            raise ValueError(
-                f"parent parameter cannot be used without route definition for page '{name}'"
-            )
-        
-        # Check if page already exists
-        if name in self._pages or name in self._spa_routes:
-            raise ValueError(f"Page already exists with this name: '{name}'")
-        
-        # Create SPA route or traditional page
-        if final_route:
-            # Validate parent exists if specified
-            if parent and parent not in self._spa_routes:
-                raise ValueError(
-                    f"Parent route '{parent}' does not exist for page '{name}'. "
-                    f"Add parent route before child routes."
-                )
-            
-            # Initialize route tree if needed
-            if self._spa_route_tree is None:
-                self._spa_route_tree = RouteNode()
-            
-            # Create SPA route
-            spa_route = SPARoute(
-                name=name,
-                root=root,
-                route=final_route,
-                title=title,
-                meta=meta,
-                preload=preload,
-                index=index,
-                parent=parent,
-                outlet_id=outlet_id
-            )
-            self._spa_routes[name] = spa_route
-            
-            # Build route tree
-            route_node = RouteNode(spa_route)
-            if parent:
-                # Add as child of parent
-                parent_node = self._find_route_node(self._spa_route_tree, parent)
-                if parent_node:
-                    parent_node.add_child(route_node)
-            else:
-                # Add as top-level route
-                self._spa_route_tree.add_child(route_node)
-            
-            if index:
-                self._spa_index_route = name
-        else:
-            # Traditional multipage
-            self._pages[name] = Page(name, root, title, meta, index=index)
-            if index:
-                self._index_page = name
-
-
-    def _find_route_node(self, node: 'RouteNode', route_name: str) -> Optional['RouteNode']:
-        """Helper to find a RouteNode by its route name in the SPA route tree."""
-        if node.route and node.route.name == route_name:
-            return node
-        for child in node.children:
-            found = self._find_route_node(child, route_name)
-            if found:
-                return found
-        return None
-
-    def get_page(self, name: str) -> 'Page':
-        """Obtain one registered page by name."""
-        return self._pages.get(name)
-
     def get_index_page(self) -> 'Page':
         """
         Returns the index page from multipage, or None if none has index=True.
