@@ -8,17 +8,19 @@
   <img src="https://img.shields.io/pypi/v/dars-framework?color=brightgreen" alt="PyPI Version" />
   <img src="https://img.shields.io/pypi/pyversions/dars-framework?color=blue" alt="Python Versions" />
   <img src="https://img.shields.io/github/license/ZtaMDev/Dars-Framework" alt="License" />
+  <a href="https://deepwiki.com/ZtaMDev/Dars-Framework"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
 </p>
+
 
 <p align="center">
   <em>Dars is a Full-Stack multiplatform Python UI framework for building modern, interactive web and desktop apps with Python code. Seamlessly integrated with FastAPI, it allows you to build complete applications with Server-Side Rendering (SSR) and reactive SPA capabilities also classic multipage html and desktop apps in a single codebase.</em>
+
 </p>
 
 <div align="center">
 
 Official [Website](https://ztamdev.github.io/Dars-Framework/) | 
 Documentation [Docs](https://ztamdev.github.io/Dars-Framework/docs.html) | 
-DeepWiki [here](https://deepwiki.com/ZtaMDev/Dars-Framework) |
 Extension for VSCode [here](https://marketplace.visualstudio.com/items?itemName=ZtaMDev.dars-framework) and OpenVSX version [here](https://open-vsx.org/extension/ztamdev/dars-framework)
 
 </div>
