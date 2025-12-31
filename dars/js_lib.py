@@ -14,12 +14,20 @@ const DARS_RELEASE_URL = '{__release_url__}';
 const __registry = new Map();
 const __vdom = new Map();
 const __lifecycle = new Map(); // id -> lifecycle info (onMount/onUpdate/onUnmount)
+const __reactiveRegistry = []; 
+
+import DOMPurify from 'https://esm.sh/dompurify';
+const _sanitize = (html) => DOMPurify.sanitize(html);
 
 // Centralized eval helper with optional global error reporting hook
 function _safeEval(code, ctx){{
   if (code == null) return;
   try {{
-    return (0,eval)(code);
+    const res = (0,eval)(code);
+    if (res instanceof Promise) {{
+        res.catch(e => console.error('[Dars:Debug] Async eval error:', e));
+    }}
+    return res;
   }} catch (err) {{
     try {{ console.error('[Dars] Eval error:', err); }} catch(_ ){{}}
     try {{
@@ -42,22 +50,87 @@ function _cssEscape(s){{
   try{{ return String(s).replace(/[^a-zA-Z0-9_\\-]/g, '\\$&'); }}catch(_ ){{ return String(s); }}
 }}
 
+// --- DAP Dispatcher ---
+async function _dispatch(action, event, context) {{
+  if (!action || typeof action !== 'object') return;
+  
+  const op = action.op;
+  const args = action.args || {{}};
+  
+  if (window.Dars?.debug) console.log('[Dars:Dispatch]', op, args, event);
+
+  try {{
+    if (op === 'sequence') {{
+      if (Array.isArray(args)) {{
+        for (const subAction of args) {{
+          await _dispatch(subAction, event, context);
+        }}
+      }}
+    }} else if (op === 'change') {{
+      if (typeof window.Dars.change === 'function') {{
+        await window.Dars.change(args);
+      }} else {{
+        // Fallback or lazy load waiting not handled here, assumed loaded by exporter logic
+        if (typeof change === 'function') change(args);
+      }}
+    }} else if (op === 'call') {{
+        // Call another state change
+        // args: {{name, id, state, goto, ...}}
+        // Essentially same as 'change' but usually simpler arguments
+        if (typeof window.Dars.change === 'function') {{
+            await window.Dars.change(args);
+        }}
+    }} else if (['inc', 'dec', 'set', 'toggleClass', 'appendText', 'prependText'].includes(op)) {{
+        // Mod operations normally handled within change() logic via rules, 
+        // but if dispatched directly (e.g. from dScript manual construction)
+        // we can delegate to a mod handler if we expose it, or treat it as a state update 
+        // if we wrap it. For now, let's assume direct mods are rare outside cState rules.
+        // If we need to support direct DOM mods, we can implement it here.
+       console.warn('[Dars] Direct mod dispatch not fully implemented yet', op);
+    }} else if (op === 'setValue') {{
+        // Helper to set values on inputs
+        const target = $(args.target);
+        if (target) {{
+            if (args.hasOwnProperty('value')) target.value = args.value;
+            if (args.hasOwnProperty('checked')) target.checked = !!args.checked;
+            target.dispatchEvent(new Event('input', {{ bubbles: true }}));
+            target.dispatchEvent(new Event('change', {{ bubbles: true }}));
+        }}
+    }}
+  }} catch (e) {{
+    console.error('[Dars] Dispatch error:', e, action);
+  }}
+}}
+
 function _attachEventsForVNode(el, vnode, events, markClass){{
   try{{
     if(vnode && vnode.id && events && events[vnode.id]){{
       const evs = events[vnode.id] || {{}};
       for(const type in evs){{
         const handlers = evs[type];
-        const codes = [];
-        const push = (it)=>{{ if(typeof it==='string') codes.push(it); else if(it&&typeof it.code==='string') codes.push(it.code); }};
+        const actions = [];
+        
+        const push = (it)=>{{ 
+            if (it && typeof it === 'object' && it.type === 'action') {{
+                actions.push(it);
+            }} else if (it && typeof it === 'object' && it.type === 'inline') {{
+                actions.push(it);
+            }} else if (typeof it === 'string') {{
+                actions.push({{ type: 'inline', code: it }});
+            }} else if (it && typeof it.code === 'string') {{
+                actions.push({{ type: 'inline', code: it.code }});
+            }}
+        }};
+        
         if(Array.isArray(handlers)){{ handlers.forEach(push); }} else {{ push(handlers); }}
-        if(!codes.length) continue;
+        if(!actions.length) continue;
         
         // Parse event type for key filtering (e.g., "keydown.Enter")
         const [baseEvent, targetKey] = type.includes('.') ? type.split('.', 2) : [type, null];
         
         el.__darsEv = el.__darsEv || {{}};
         if(el.__darsEv[type]){{ try{{ el.removeEventListener(baseEvent, el.__darsEv[type], true); }}catch(_ ){{ }} try{{ el.removeEventListener(baseEvent, el.__darsEv[type], false); }}catch(_ ){{ }} }}
+        
         const handler = function(ev){{ 
           // Key filtering for keyboard events
           if(targetKey){{
@@ -65,8 +138,16 @@ function _attachEventsForVNode(el, vnode, events, markClass){{
             if(ev.key !== targetKey && ev.code !== targetKey) return; // Wrong key
           }}
           try{{ ev.stopImmediatePropagation(); ev.stopPropagation(); ev.preventDefault(); ev.cancelBubble = true; }}catch(_ ){{ }}
-          for(const c of codes){{ _safeEval(c, {{ type, event: ev, phase: 'event_handler' }}); }}
+          
+          for(const act of actions){{ 
+              if (act.type === 'action') {{
+                  _dispatch(act.data, ev);
+              }} else if (act.type === 'inline') {{
+                  _safeEval(act.code, {{ type, event: ev, phase: 'event_handler' }}); 
+              }}
+          }}
         }};
+        
         try{{ el.addEventListener(baseEvent, handler, {{ capture: true }}); }}catch(_ ){{ }}
         el.__darsEv[type] = handler;
         try{{ if(markClass) el.classList.add(markClass); }}catch(_ ){{ }}
@@ -169,20 +250,37 @@ function _attachEventsMap(events){{
   if(!events||typeof events!=='object') return;
   for(const cid in events){{
     try{{
-      const el = $(cid); if(!el) continue;
+      const el = $(cid); 
+      if(!el) {{
+          console.warn('[Dars:Debug] Element NOT found for ID:', cid);
+          continue;
+      }}
       const evs = events[cid] || {{}};
       for(const type in evs){{
         const handlers = evs[type];
-        const codes = [];
-        const push = (it)=>{{ if(typeof it==='string') codes.push(it); else if(it&&typeof it.code==='string') codes.push(it.code); }};
+        const actions = [];
+        
+        const push = (it)=>{{ 
+            if (it && typeof it === 'object' && it.type === 'action') {{
+                actions.push(it);
+            }} else if (it && typeof it === 'object' && it.type === 'inline') {{
+                actions.push(it);
+            }} else if (typeof it === 'string') {{
+                actions.push({{ type: 'inline', code: it }});
+            }} else if (it && typeof it.code === 'string') {{
+                actions.push({{ type: 'inline', code: it.code }});
+            }}
+        }};
+        
         if(Array.isArray(handlers)){{ handlers.forEach(push); }} else {{ push(handlers); }}
-        if(!codes.length) continue;
+        if(!actions.length) continue;
         
         // Parse event type for key filtering (e.g., "keydown.Enter")
         const [baseEvent, targetKey] = type.includes('.') ? type.split('.', 2) : [type, null];
         
         el.__darsEv = el.__darsEv || {{}};
         if(el.__darsEv[type]){{ try{{ el.removeEventListener(baseEvent, el.__darsEv[type], true); }}catch(_ ){{ }} try{{ el.removeEventListener(baseEvent, el.__darsEv[type], false); }}catch(_ ){{ }} }}
+        
         const handler = function(ev){{ 
           // Key filtering for keyboard events
           if(targetKey){{
@@ -190,9 +288,19 @@ function _attachEventsMap(events){{
             if(ev.key !== targetKey && ev.code !== targetKey) return; // Wrong key
           }}
           try{{ ev.stopImmediatePropagation(); ev.stopPropagation(); ev.preventDefault(); ev.cancelBubble = true; }}catch(_ ){{ }}
-          for(const c of codes){{ try{{ (0,eval)(c); }}catch(_ ){{ }} }}
+          
+          for(const act of actions){{ 
+              if (act.type === 'action') {{
+                  _dispatch(act.data, ev);
+              }} else if (act.type === 'inline') {{
+                  _safeEval(act.code, {{ type, event: ev, phase: 'event_handler' }}); 
+              }}
+          }}
         }};
-        try{{ el.addEventListener(baseEvent, handler, {{ capture: true }}); }}catch(_ ){{ }}
+        
+        try{{ 
+            el.addEventListener(baseEvent, handler, {{ capture: true }}); 
+        }}catch(err){{ console.error('[Dars] Failed to add listener', baseEvent, 'to', cid, err); }}
         el.__darsEv[type] = handler;
       }}
     }}catch(_ ){{ }}
@@ -237,78 +345,10 @@ const runtime = {{
       try{{ if(typeof window.DarsHydrate === 'function') window.DarsHydrate(el); }}catch(_ ){{ }}
     }}catch(e){{ try{{ console.error(e); }}catch(_ ){{ }} }}
   }},
-  // Server Components: lazy hydration from backend
-  async loadServerComponent(componentId, endpoint){{
-    try{{
-      const placeholder = $(componentId);
-      if(!placeholder) {{ console.warn('[Dars] Server component placeholder not found:', componentId); return; }}
-      
-      // Mark as loading
-      placeholder.classList.add('dars-sc-loading');
-      placeholder.classList.remove('dars-sc-error', 'dars-sc-loaded');
-      
-      // Fetch from backend
-      const response = await fetch(endpoint);
-      if(!response.ok) throw new Error(`HTTP ${{response.status}}`);
-      
-      const data = await response.json();
-      
-      // Replace placeholder content with rendered HTML
-      placeholder.innerHTML = data.html || '';
-      placeholder.classList.remove('dars-sc-loading');
-      placeholder.classList.add('dars-sc-loaded');
-      
-      // Store VDOM
-      if(data.vdom) _storeVNode(data.vdom);
-      
-      // Hydrate events
-      if(data.events){{
-        const mark = 'dars-sc-ev-' + Math.random().toString(36).slice(2);
-        try{{ placeholder.classList.add(mark); }}catch(_ ){{ }}
-        _attachEventsMap(data.events);
-      }}
-      
-      // Register lifecycle hooks
-      if(data.vdom && typeof data.vdom === 'object'){{
-        _registerLifecycleFromVNode(data.vdom);
-      }}
-      
-      // hydrate newly loaded subtree
-      try{{ if(typeof window.DarsHydrate === 'function') window.DarsHydrate(placeholder); }}catch(_ ){{ }}
-      
-    }}catch(error){{
-      console.error('[Dars] Server component load failed:', componentId, error);
-      const placeholder = $(componentId);
-      if(placeholder){{
-        placeholder.classList.remove('dars-sc-loading');
-        placeholder.classList.add('dars-sc-error');
-        // Check for error component in data attribute
-        const errorHtml = placeholder.dataset.scError;
-        if(errorHtml){{ placeholder.innerHTML = errorHtml; }}
-        else {{ placeholder.innerHTML = '<div class="dars-sc-error-default">Failed to load component</div>'; }}
-      }}
-    }}
-  }}
+  _dispatch, // Export dispatch for internal use
 }};
 
-// Auto-load server components on DOMContentLoaded
-function _autoLoadServerComponents(){{
-  try{{
-    const serverComps = document.querySelectorAll('[data-server-component="true"]');
-    for(const el of serverComps){{
-      const endpoint = el.dataset.scEndpoint;
-      const id = el.id;
-      if(id && endpoint){{
-        runtime.loadServerComponent(id, endpoint);
-      }}
-    }}
-  }}catch(e){{ console.error('[Dars] Server component auto-load error:', e); }}
-}}
-
-if(typeof document !== 'undefined'){{
-  document.addEventListener('DOMContentLoaded', _autoLoadServerComponents);
-}}
-
+// Register states config
 function registerState(name, cfg){{
   if(!name || !cfg || !cfg.id) return;
   const entry = {{
@@ -351,11 +391,7 @@ function registerStates(statesConfig) {{
 // (window.__DARS_STATE__), register it immediately so hydration can
 // reuse the existing DOM without requiring a separate static export
 // pipeline.
-try {{
-  if (typeof window !== 'undefined' && Array.isArray(window.__DARS_STATE__)) {{
-    registerStates(window.__DARS_STATE__);
-  }}
-}} catch(_) {{ }}
+// Hydration logic moved to end of file to ensure Dars is fully initialized
 
 function getState(name){{ return __registry.get(name); }}
 
@@ -363,81 +399,60 @@ function _restoreDefault(id, snap, vnode, eventsMap){{
   try{{
     const el = $(id);
     if(!el || !snap) return;
-    // Remove any dynamic event listeners we attached previously
+    
+    // 1. Remove any dynamic event listeners we attached previously
     try{{
       if(el.__darsEv){{
         for(const t in el.__darsEv){{
-          const fn = el.__darsEv[t];
-          try{{ el.removeEventListener(t, fn, true); }}catch(_){{ }}
-          try{{ el.removeEventListener(t, fn, false); }}catch(_){{ }}
+          try{{ el.removeEventListener(t.split('.')[0], el.__darsEv[t], true); }}catch(_){{ }}
+          try{{ el.removeEventListener(t.split('.')[0], el.__darsEv[t], false); }}catch(_){{ }}
         }}
         el.__darsEv = {{}};
       }}
     }}catch(_){{ }}
-    
-    // Restore attributes
+
+    // 2. Restore attributes
     try{{
-      const current = el.getAttributeNames ? el.getAttributeNames() : [];
-      const booleanAttrs = ['checked', 'disabled', 'readonly', 'required', 'selected', 'autofocus', 'autoplay', 'controls', 'loop', 'muted'];
-      
       // Remove all current attributes except 'id'
-      for(const n of current){{ 
+      const currentAttrs = el.getAttributeNames ? el.getAttributeNames() : [];
+      for(const n of currentAttrs){{ 
         if(n !== 'id') el.removeAttribute(n); 
       }}
       
-      // Restore attributes from snapshot
-      for(const k in snap.attrs){{ 
-        if(k !== 'id'){{
+      // Restore from snapshot
+      if(snap.attrs){{
+        const booleanAttrs = ['checked', 'disabled', 'readonly', 'required', 'selected', 'autofocus', 'autoplay', 'controls', 'loop', 'muted'];
+        for(const k in snap.attrs){{
           const val = snap.attrs[k];
-          // Handle boolean attributes
           if(booleanAttrs.includes(k)){{
-            if(val === true || val === 'true' || val === k || val === ''){{
-              el.setAttribute(k, '');
-              // Also set property for form elements
-              if(k in el) el[k] = true;
-            }} else {{
-              el.removeAttribute(k);
-              if(k in el) el[k] = false;
-            }}
+             if(val === true || val === 'true' || val === '' || val === k){{
+                 el.setAttribute(k, '');
+                 if(k in el) el[k] = true;
+             }} else {{
+                 if(k in el) el[k] = false;
+             }}
           }} else {{
-            el.setAttribute(k, String(val));
+             el.setAttribute(k, String(val));
           }}
         }}
       }}
-      
-      // CRITICAL: Ensure boolean attributes NOT in snapshot are removed and set to false
-      for(const boolAttr of booleanAttrs){{
-        if(!snap.attrs || !(boolAttr in snap.attrs)){{
-          el.removeAttribute(boolAttr);
-          if(boolAttr in el) el[boolAttr] = false;
-        }}
-      }}
     }}catch(_){{ }}
     
-    // Restore innerHTML
-    try{{ el.innerHTML = snap.html || ''; }}catch(_){{ }}
-    
-    // Restore value property for form elements
+    // 3. Restore Content
     try{{
-      if(snap.attrs && snap.attrs.value !== undefined){{
-        if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT'){{
-          el.value = String(snap.attrs.value);
+        if(snap.html !== undefined) el.innerHTML = snap.html;
+        
+        // Restore value for inputs if captured
+        if(snap.attrs && snap.attrs.value !== undefined && (el.tagName==='INPUT'||el.tagName==='TEXTAREA'||el.tagName==='SELECT')){{
+            el.value = String(snap.attrs.value);
         }}
-      }} else {{
-        // If no value in snapshot, clear it for form elements
-        if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT'){{
-          el.value = '';
-        }}
-      }}
     }}catch(_){{ }}
-    
-    // Re-attach original event handlers from vnode if available
-    try{{
-      if(vnode && eventsMap){{
-        _attachEventsForVNode(el, vnode, eventsMap);
-      }}
-    }}catch(_){{ }}
-  }}catch(_){{ }}
+
+    // 4. Re-attach original events if vnode exists
+    if(vnode && eventsMap){{
+       _attachEventsForVNode(el, vnode, eventsMap);
+    }}
+  }}catch(e){{ console.error(e); }}
 }}
 
 function _applyMods(defaultId, mods){{
@@ -464,7 +479,7 @@ function _applyMods(defaultId, mods){{
         for(const k in attrs){{
           try{{
             if(k === 'text') {{ el.textContent = String(attrs[k]); continue; }}
-            if(k === 'html') {{ el.innerHTML = String(attrs[k]); continue; }}
+            if(k === 'html') {{ el.innerHTML = _sanitize(String(attrs[k])); continue; }}
             if(k.startsWith('on_')){{
               const type = k.slice(3);
               const v = attrs[k];
@@ -625,14 +640,20 @@ function change(opt){{
   if(opt.useCustomRender && typeof opt.html === 'string'){{
     const el = $(opt.id);
     if(!el) return;
-    el.innerHTML = opt.html;
+    el.innerHTML = _sanitize(opt.html);
     if(typeof window.DarsHydrate === 'function'){{ try{{ window.DarsHydrate(el); }}catch(e){{}} }}
     return;
   }}
 
   // Dynamic state support
   if (opt.dynamic) {{
+      // Execute registered reactive bindings
+      __reactiveRegistry.forEach(fn => {{
+          try {{ fn(opt); }} catch(e) {{ console.error('[Dars] Reactive binding error:', e); }}
+      }});
+
       const el = $(opt.id);
+      if (!el) return;
       
       // Helper to trigger watchers for a property
       const notifyWatchers = (prop, val) => {{
@@ -652,28 +673,18 @@ function change(opt){{
       if (el) {{
           // Apply text change
           if (opt.hasOwnProperty('text')) {{
-              // Handle Server Components: update child, not wrapper
-              let target = el;
-              if (el.hasAttribute('data-server-component') && el.firstElementChild) {{
-                   target = el.firstElementChild;
-              }}
-              
-              const isFormElement = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT';
+              const isFormElement = el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT';
               if (isFormElement) {{
-                  target.value = String(opt.text);
+                  el.value = String(opt.text);
               }} else {{
-                  target.textContent = String(opt.text);
+                  el.textContent = String(opt.text);
               }}
               notifyWatchers('text', opt.text);
           }}
           
           // Apply HTML change
           if (opt.hasOwnProperty('html')) {{
-              let target = el;
-              if (el.hasAttribute('data-server-component') && el.firstElementChild) {{
-                   target = el.firstElementChild;
-              }}
-              target.innerHTML = String(opt.html);
+              el.innerHTML = _sanitize(String(opt.html));
               notifyWatchers('html', opt.html);
           }}
 
@@ -1263,9 +1274,9 @@ async function _loadRoute(route, params){{
         wrapper.style.height = '100%';
         wrapper.style.width = '100%';
 
-        // Fill HTML (with params)
+        // Fill HTML (with params) - Sanitized
         const html = _applyParamsToHTML(r['html'] || '', p);
-        wrapper.innerHTML = html;
+        wrapper.innerHTML = _sanitize(html);
 
         // Replace content
         mountEl.innerHTML = '';
@@ -1401,6 +1412,14 @@ async function _loadRoute(route, params){{
         route['states'] = routeData['states'] || [];
         route['styles'] = routeData['styles'] || route['styles'] || '';
         route['headMetadata'] = routeData['headMetadata'] || route['headMetadata'];
+        
+        // Execute reactive/vref bindings from SSR
+        if (routeData['reactiveBindings']) {{
+            _safeEval(routeData['reactiveBindings'], {{ phase: 'ssr_hydration', route: route['name'] }});
+        }}
+        if (routeData['vrefBindings']) {{
+            _safeEval(routeData['vrefBindings'], {{ phase: 'ssr_hydration', route: route['name'] }});
+        }}
       }}catch(error){{
         console.error('[Dars Router] Error loading SSR route:', error);
         try{{
@@ -1638,6 +1657,7 @@ const Dars = {{
     getState, 
     change, 
     watch,
+    addReactiveBinding(fn) {{ if(typeof fn === 'function') __reactiveRegistry.push(fn); }},
     updateVRef,
     $, 
     runtime,
@@ -1754,6 +1774,87 @@ function _updateLink(rel, href) {{
 }}
 
 try {{ window.Dars = window.Dars || Dars; }} catch(_) {{}}
+
+// ==================== DSP HYDRATION ====================
+try {{
+  const dspScript = document.getElementById('__DARS_DSP_DATA__');
+  if (dspScript) {{
+      if (dspScript.type === 'application/json') {{
+          try {{
+              const payload = JSON.parse(dspScript.textContent);
+              if (payload) {{
+                  if (!window.__DARS_SPA_CONFIG__ && payload.spaConfig) window.__DARS_SPA_CONFIG__ = payload.spaConfig;
+                  if (!window.__ROUTE_VDOM__ && payload.vdom) window.__ROUTE_VDOM__ = payload.vdom;
+                  if (!window.__DARS_STATE__ && payload.states) window.__DARS_STATE__ = payload.states;
+                  if (!window.__DARS_STATE_V2__ && payload.statesV2) window.__DARS_STATE_V2__ = payload.statesV2;
+                  
+                  // Register events map immediately if present
+                  if (payload.events) {{
+                      _attachEventsMap(payload.events);
+                  }}
+                  
+                  // Apply styles if present
+                  if (payload.styles) {{
+                      let styleReg = document.getElementById('dars-style-registry');
+                      if (!styleReg) {{
+                          styleReg = document.createElement('style');
+                          styleReg.id = 'dars-style-registry';
+                          document.head.appendChild(styleReg);
+                      }}
+                      styleReg.textContent = payload.styles;
+                  }}
+                  
+                  // Apply reactive bindings from SSR if present
+                  if (payload.reactiveBindings) {{
+                      try {{
+                          (0, eval)(payload.reactiveBindings);
+                      }} catch(e) {{ console.error('[Dars] Reactive bindings error:', e); }}
+                  }}
+                  
+                  // Apply VRef bindings from SSR if present
+                  if (payload.vrefBindings) {{
+                      try {{
+                          (0, eval)(payload.vrefBindings);
+                      }} catch(e) {{ console.error('[Dars] VRef bindings error:', e); }}
+                  }}
+                  
+                  // Apply meta tags if present
+                  if (payload.metaTags) {{
+                      const temp = document.createElement('div');
+                      temp.innerHTML = payload.metaTags;
+                      const newMetas = temp.childNodes;
+                      for (let i = 0; i < newMetas.length; i++) {{
+                          const node = newMetas[i];
+                          if (node.nodeType === 1) {{
+                              const tag = node.tagName.toLowerCase();
+                              const attr = node.getAttribute('name') || node.getAttribute('property');
+                              let existing = null;
+                              if (attr) {{
+                                  existing = document.head.querySelector(`${{tag}}[name="${{attr}}"], ${{tag}}[property="${{attr}}"]`);
+                              }}
+                              if (existing) {{
+                                  existing.content = node.getAttribute('content');
+                              }} else {{
+                                  document.head.appendChild(node.cloneNode(true));
+                              }}
+                          }}
+                      }}
+                  }}
+              }} else {{
+                  console.warn('[Dars:Hydration] Payload is empty or falsy');
+              }}
+          }} catch (e) {{
+              console.error('[Dars] Failed to parse DSP payload:', e);
+          }}
+      }}
+  }}
+
+  if (typeof window !== 'undefined' && Array.isArray(window.__DARS_STATE__)) {{
+    registerStates(window.__DARS_STATE__);
+  }}
+}} catch(err) {{ 
+    console.error('[Dars:Debug] Critical error during hydration block:', err);
+}}
 export {{ registerState, registerStates, getState, change, $ }};
 export default Dars;
 """

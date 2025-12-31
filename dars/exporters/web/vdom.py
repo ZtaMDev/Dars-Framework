@@ -39,8 +39,6 @@ class VNode:
         text: Optional[str] = None,
         is_island: bool = False,
         lifecycle: Optional[Dict[str, Any]] = None,
-        is_server_component: bool = False,
-        server_endpoint: Optional[str] = None,
     ) -> None:
         self.type = type_name
         self.id = id
@@ -55,9 +53,6 @@ class VNode:
         self.isIsland = is_island
         # Optional lifecycle hooks metadata (onMount/onUpdate/onUnmount)
         self.lifecycle = lifecycle or {}
-        # Server component metadata
-        self.isServerComponent = is_server_component
-        self.serverEndpoint = server_endpoint
 
     def to_dict(self) -> Dict[str, Any]:
         d: Dict[str, Any] = {
@@ -76,10 +71,6 @@ class VNode:
         d["isIsland"] = bool(self.isIsland)
         if self.lifecycle:
             d["lifecycle"] = self.lifecycle
-        # Server component metadata
-        if self.isServerComponent:
-            d["isServerComponent"] = True
-            d["serverEndpoint"] = self.serverEndpoint
         return d
 
 
@@ -182,24 +173,34 @@ class VDomBuilder:
                 
                 serialized_handlers = []
                 for handler in handler_list:
+                    action_data = None
                     code = None
-                    try:
-                        # MEJORADO: Manejo más robusto de diferentes tipos de handlers
-                        if hasattr(handler, 'get_code'):
-                            code = handler.get_code()
-                        elif isinstance(handler, dict):
-                            code = handler.get('code') or handler.get('value')
-                        elif isinstance(handler, str):
-                            code = handler
-                        else:
-                            # fallback mejorado
-                            code = str(handler) if handler else None
-                    except Exception as e:
-                        print(f"Warning: Error serializing event handler: {e}")
-                        code = None
                     
-                    # MEJORADO: Validar que el código no esté vacío
-                    if code and (isinstance(code, str) and code.strip()):
+                    # 1. Try DAP Action first
+                    if hasattr(handler, 'get_action'):
+                        action_data = handler.get_action()
+
+                    # 2. If no action, try code (Legacy/Fallback)
+                    if action_data is None:
+                        try:
+                            if hasattr(handler, 'get_code'):
+                                code = handler.get_code()
+                            elif isinstance(handler, dict):
+                                code = handler.get('code') or handler.get('value')
+                            elif isinstance(handler, str):
+                                code = handler
+                            else:
+                                code = str(handler) if handler else None
+                        except Exception as e:
+                            print(f"Warning: Error serializing event handler: {e}")
+                            code = None
+                    
+                    if action_data is not None:
+                        serialized_handlers.append({
+                            "type": "action",
+                            "data": action_data
+                        })
+                    elif code and (isinstance(code, str) and code.strip()):
                         serialized_handlers.append({
                             "type": "inline", 
                             "code": code.strip()
@@ -385,11 +386,7 @@ class VDomBuilder:
         
         comp_id = comp_id or stable_key  # usar stable_key como fallback
         
-        # Skip event registration for server components (handled by hydration/SSR)
-        # preventing double execution of events (static runtime + dynamic hydration).
-        is_server = getattr(component, 'use_server', False)
-        
-        if comp_id and events_payload and not is_server:
+        if comp_id and events_payload:
             self.events_map[comp_id] = events_payload
 
         # Children
@@ -416,12 +413,6 @@ class VDomBuilder:
         except Exception:
             is_island = False
 
-        # Server component detection
-        is_server_comp = getattr(component, 'use_server', False)
-        server_endpoint = None
-        if is_server_comp and comp_id:
-            server_endpoint = f"/api/server-component/{comp_id}"
-
         vnode = VNode(
             type_name=comp_type,
             id=comp_id,
@@ -435,7 +426,5 @@ class VDomBuilder:
             text=text_value,
             is_island=is_island,
             lifecycle=lifecycle,
-            is_server_component=is_server_comp,
-            server_endpoint=server_endpoint,
         )
         return vnode

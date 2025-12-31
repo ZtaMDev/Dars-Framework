@@ -169,6 +169,15 @@ class SSRRenderer:
 
         # Render component to HTML (body content only)
         body_html = exporter.render_component(working_root)
+        
+        # Capture bindings generated during this specific SSR render
+        # These will use the deterministic IDs generated for the SSR output
+        reactive_bindings_js = exporter._generate_reactive_bindings_js()
+        vref_bindings_js = exporter._generate_vref_bindings_js()
+        
+        print(f"[Dars:SSR] Rendering route: {route_name}")
+        print(f"[Dars:SSR] Reactive bindings length: {len(reactive_bindings_js)}")
+        print(f"[Dars:SSR] VRef bindings length: {len(vref_bindings_js)}")
 
         # Fallback: if snapshot was empty, attempt a second collection post-render
         if not _registry_css_snapshot:
@@ -288,47 +297,22 @@ class SSRRenderer:
                 "parent": None,
             })
 
-        spa_config_json = json.dumps(spa_config, ensure_ascii=False, separators=(",", ":"), cls=DarsJSONEncoder)
-
-        # Expose SPA config, VDOM and state snapshots on the window object so
-        # js_lib can hydrate without re-creating the DOM from scratch.
-        vdom_js = (
-            f"window.__DARS_SPA_CONFIG__ = {spa_config_json};\n"
-            f"window.__ROUTE_VDOM__ = {vdom_json};\n"
-            f"window.__DARS_STATE__ = {states_json};\n"
-            f"window.__DARS_STATE_V2__ = {states_v2_json};"
-        )
-
         # Only inject VDOM snapshot AND the bundled script for this page.
         # This matches the behavior of static HTML export where app_{slug}.js is included.
         script_fn = "app.js" if route_name == "index" else f"app_{route_name}.js"
-        
-        # Extract head metadata if Head component was used
-        head_metadata = getattr(exporter, '_page_head_metadata', {})
-        
-        # Generate meta tags HTML for SSR
-        if head_metadata:
-            # Use the exporter's method to generate meta tags
-            meta_tags_html = exporter._generate_page_meta_tags(head_metadata, route_app)
-            page_title = head_metadata.get('title', route_app.title)
-        else:
 
-            # No Head component - use minimal meta tags
-            meta_tags_html = f'<meta name="description" content="{route_app.description}">' if hasattr(route_app, 'description') and route_app.description else ''
-            page_title = route_app.title
-        
-        # Construct full HTML document with meta tags.
-        #
-        # IMPORTANT: wrap the rendered body inside the __dars_spa_root__
-        # container so that the SPA router in dars.min.js can detect and
-        # hydrate the already-rendered content instead of re-rendering it
-        # from scratch on first load.
+        # ---------------------------------------------------------------------
+        # CSS Registry Handling
+        # ---------------------------------------------------------------------
         # Generate CSS for style registry for this SSR render (use early snapshot)
         registry_css = _registry_css_snapshot
+        
         # Robust fallback: if still empty, extract from rendered HTML's inline styles
+        # This handles styles added dynamically during render_component
         if not registry_css and body_html:
             try:
                 from bs4 import BeautifulSoup
+                # Parse body fragment
                 soup = BeautifulSoup(body_html, 'html.parser')
                 rules = {}
 
@@ -336,29 +320,31 @@ class SSRRenderer:
                     out = {}
                     for decl in s.split(';'):
                         decl = decl.strip()
-                        if not decl:
-                            continue
-                        if ':' not in decl:
-                            continue
+                        if not decl: continue
+                        if ':' not in decl: continue
                         k, v = decl.split(':', 1)
-                        k = k.strip()
-                        v = v.strip()
-                        if k and v:
-                            out[k] = v
+                        if k.strip() and v.strip():
+                            out[k.strip()] = v.strip()
                     return out
 
                 # Find all elements with inline style
                 for el in soup.select('[style]'):
                     style_text = el.get('style') or ''
                     style_dict = parse_inline_style(style_text)
-                    if not style_dict:
-                        continue
+                    if not style_dict: continue
+                    
                     # Compute class via exporter helper
                     try:
-                        class_name = exporter._style_fingerprint(style_dict)  # type: ignore[attr-defined]
+                        # Access protected method if available, else skip
+                        if hasattr(exporter, '_style_fingerprint'):
+                             class_name = exporter._style_fingerprint(style_dict) 
+                        else:
+                             continue
                     except Exception:
                         continue
+                        
                     rules[class_name] = style_dict
+                    
                     # Prepend class and drop inline style
                     existing = (el.get('class') or [])
                     if class_name not in existing:
@@ -375,15 +361,57 @@ class SSRRenderer:
                     # Build CSS from rules
                     blocks = []
                     for cname, sdict in rules.items():
-                        # Serialize like exporter.render_styles (simple serializer)
                         lines = []
                         for k, v in sdict.items():
                             lines.append(f"{k}: {v};")
                         css_body = '\n    '.join(lines)
                         blocks.append(f".{cname} {{\n    {css_body}\n}}")
                     registry_css = '\n\n'.join(blocks)
+            except Exception as e:
+                # If extraction fails, keep original registry_css
+                print(f"[SSR] CSS extraction warning: {e}")
+                pass
+
+        # ---------------------------------------------------------------------
+        # Head Metadata & Meta Tags
+        # ---------------------------------------------------------------------
+        # Extract head metadata if Head component was used
+        head_metadata = getattr(exporter, '_page_head_metadata', {})
+        
+        # Generate meta tags HTML for SSR
+        if head_metadata:
+            try:
+                # Use the exporter's method to generate meta tags
+                meta_tags_html = exporter._generate_page_meta_tags(head_metadata, route_app)
+                page_title = head_metadata.get('title', route_app.title)
             except Exception:
-                registry_css = registry_css
+                meta_tags_html = ""
+                page_title = route_app.title
+        else:
+            # No Head component - use minimal meta tags
+            meta_tags_html = f'<meta name="description" content="{route_app.description}">' if hasattr(route_app, 'description') and route_app.description else ''
+            page_title = route_app.title
+
+        try:
+            # Build DSP Payload (Hydration Data)
+            dsp_payload = {
+                "spaConfig": spa_config,
+                "vdom": route_vdom,
+                "states": initial_states,
+                "statesV2": initial_states_v2,
+                "metaTags": meta_tags_html,
+                "styles": registry_css,
+                "events": route_events_map,
+                "reactiveBindings": reactive_bindings_js,
+                "vrefBindings": vref_bindings_js
+            }
+            
+            dsp_json = json.dumps(dsp_payload, ensure_ascii=False, cls=DarsJSONEncoder)
+        except Exception as e:
+            print(f"[Dars:SSR] Error building DSP payload: {e}")
+            import traceback
+            traceback.print_exc()
+            dsp_json = "{}"
 
         # Always include the style tag (even if empty) so presence can be verified and updated later
         registry_style_tag = f"\n    <style id=\"dars-style-registry\">\n{registry_css}\n    </style>\n    "
@@ -401,8 +429,11 @@ class SSRRenderer:
     <div id="__dars_spa_root__">
         {body_html}
     </div>
+    
+    <!-- Dars Server Protocol (DSP) Hydration Data -->
+    <script id="__DARS_DSP_DATA__" type="application/json">{dsp_json}</script>
+    
     <script type="module" src="/lib/dars.min.js" defer></script>
-    <script>{vdom_js}</script>
     <script type="module" src="/{script_fn}"></script>
 </body>
 </html>"""
@@ -417,310 +448,128 @@ class SSRRenderer:
         except Exception:
             pass
 
+        # Route rendered successfully
+
         return {
             "name": route_name,
             "html": body_html,  # Body HTML for SPA hydration
             "fullHtml": full_html,  # Complete HTML document with <head>
             "styles": registry_css,
             "scripts": [
-                {"type": "core", "code": vdom_js},
+                {"type": "lib", "src": "/lib/dars.min.js", "module": True, "defer": True},
                 {"type": "user", "src": f"/{script_fn}", "module": True}
             ],
             "events": route_events_map,
             "vdom": route_vdom,
-            # Provide initial state snapshot for dynamic loading/hydration.
             "states": initial_states,
             "statesV2": initial_states_v2,
             "spaConfig": spa_config,
-            "headMetadata": head_metadata  # Include for client hydration
+            "headMetadata": head_metadata,
+            "reactiveBindings": reactive_bindings_js,
+            "vrefBindings": vref_bindings_js
         }
 
 
-def _register_server_components_from_app(dars_app: App) -> int:
+class SSRApp:
     """
-    Scan the entire Dars app component tree and register all server components.
-    
-    This ensures SERVER_COMPONENT_REGISTRY is populated when the backend starts,
-    allowing server component endpoints to find and render the components.
-    
-    Args:
-        dars_app: The Dars App instance to scan
-        
-    Returns:
-        Number of server components registered
+    Wrapper around FastAPI to provide a dedicated Dars SSR Application.
+    Allows customization of the underlying FastAPI instance before starting.
     """
-    from dars.core.server_components import register_server_component, clear_server_component_registry
-    from dars.core.component import Component
-    
-    # Clear existing registry to avoid duplicates on hot reload
-    clear_server_component_registry()
-    
-    count = 0
-    visited = set()
-    
-    def scan_component(comp):
-        nonlocal count
-        if comp is None or not isinstance(comp, Component):
-            return
+    def __init__(self, dars_app: App, prefix: str = "/api/ssr", title: str = None):
+        self.dars_app = dars_app
+        self.prefix = prefix
+        self.fastapi_app = FastAPI(title=title or f"{dars_app.title} - SSR Backend")
+        self.renderer = SSRRenderer(dars_app)
+        self._setup_core_routes()
         
-        # Avoid cycles
-        comp_id_check = id(comp)
-        if comp_id_check in visited:
-            return
-        visited.add(comp_id_check)
+    def _setup_core_routes(self):
+        from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
         
-        # Register if use_server=True
-        if getattr(comp, 'use_server', False):
-            # Ensure component has an ID
-            if not comp.id:
-                import uuid
-                comp.id = f"sc_{uuid.uuid4().hex[:8]}"
-            register_server_component(comp)
-            count += 1
-            print(f"[SSR] Registered server component: {comp.id} ({type(comp).__name__})")
-        
-        # Scan children
-        for child in getattr(comp, 'children', []) or []:
-            scan_component(child)
-        
-        # Scan loading/error components too
-        if hasattr(comp, '_loading_component') and comp._loading_component:
-            scan_component(comp._loading_component)
-        if hasattr(comp, '_error_component') and comp._error_component:
-            scan_component(comp._error_component)
-    
-    # Scan multipage pages
-    if hasattr(dars_app, 'pages'):
-        for page in dars_app.pages.values():
-            if hasattr(page, 'root'):
-                scan_component(page.root)
-    
-    # Scan SPA routes
-    if hasattr(dars_app, '_spa_routes'):
-        for route in dars_app._spa_routes.values():
-            if hasattr(route, 'root'):
-                scan_component(route.root)
-    
-    # Scan app root
-    if dars_app.root:
-        scan_component(dars_app.root)
-    
-    print(f"[SSR] Total server components registered: {count}")
-    return count
-
-
-def create_ssr_app(dars_app: App, prefix: str = "/api/ssr", streaming: bool = False) -> FastAPI:
-    """
-    Create a FastAPI app with automatic SSR endpoints for all SSR routes.
-    
-    This function scans the Dars app for routes with RouteType.SSR and
-    automatically creates FastAPI endpoints to render them server-side.
-    
-    Args:
-        dars_app: Dars App instance
-        prefix: URL prefix for SSR endpoints (default: "/api/ssr")
-    
-    Returns:
-        FastAPI app with SSR endpoints
-    
-    Example:
-        ```python
-        from dars.all import *
-        from dars.backend.ssr import create_ssr_app
-        
-        # Define Dars app with SSR routes
-        app = App("My App")
-        
-        @route("/dashboard", route_type=RouteType.SSR)
-        def dashboard():
-            return Page(Text("Dashboard"))
-        
-        app.add_page("dashboard", dashboard())
-        
-        # Create FastAPI app
-        fastapi_app = create_ssr_app(app)
-        
-        # Run with: uvicorn server:fastapi_app --reload
-        ```
-    """
-    fastapi_app = FastAPI(title=f"{dars_app.title} - SSR Backend")
-    
-    renderer = SSRRenderer(dars_app)
-    
-    # IMPORTANT: Scan and register all server components from the app tree
-    # This populates SERVER_COMPONENT_REGISTRY so component endpoints work
-    _register_server_components_from_app(dars_app)
-    
-    # Find all SSR routes
-    ssr_routes = []
-    for name, route in dars_app._spa_routes.items():
-        metadata = getattr(route.root, '__dars_route_metadata__', None)
-        if metadata and metadata.route_type == RouteType.SSR:
-            ssr_routes.append((name, route))
-    
-    from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
-
-    # Create endpoints for each SSR route
-    for route_name, route in ssr_routes:
-        # 1. API Endpoint (JSON) - used by SPA hydration
-        def create_api_endpoint(name: str):
-            async def endpoint(request: Request):
-                try:
-                    params = dict(request.query_params)
-                    result = renderer.render_route(name, params)
-                    return JSONResponse(result)
-                except ValueError as e:
-                    raise HTTPException(status_code=404, detail=str(e))
-                except Exception as e:
-                    raise HTTPException(status_code=500, detail=f"SSR render error: {str(e)}")
-            return endpoint
-        
-        # Register API endpoint
-        api_path = f"{prefix}/{route_name}"
-        fastapi_app.get(api_path)(create_api_endpoint(route_name))
-        print(f"[SSR] Registered API endpoint: {api_path}")
-
-        # 2. HTML Endpoint - used by browser/crawlers (SEO)
-        # Only if the route has a defined path
-        if hasattr(route, 'route') and route.route:
-            def create_html_endpoint(name: str):
-                async def html_endpoint(request: Request):
-                    try:
-                        params = dict(request.query_params)
-                        result = renderer.render_route(name, params)
-                        full_html = result['fullHtml']
-
-                        if not streaming:
-                            # Classic non-streaming response
-                            return HTMLResponse(content=full_html, status_code=200)
-
-                        # Streaming mode: try to send <head> first, then body.
-                        # We do a simple split on the <body> tag; if it fails,
-                        # we fall back to a single-chunk streaming response.
-                        lower_html = full_html.lower()
-                        body_idx = lower_html.find("<body")
-                        if body_idx == -1:
-                            async def iter_single():
-                                yield full_html.encode("utf-8")
-                            return StreamingResponse(iter_single(), media_type="text/html")
-
-                        # Find the end of the opening <body> tag
-                        body_tag_end = lower_html.find('>', body_idx)
-                        if body_tag_end == -1:
-                            async def iter_single():
-                                yield full_html.encode("utf-8")
-                            return StreamingResponse(iter_single(), media_type="text/html")
-
-                        head_part = full_html[:body_tag_end + 1]
-                        body_part = full_html[body_tag_end + 1:]
-
-                        async def iter_html():
-                            # Send <html> + <head> + opening <body> first
-                            yield head_part.encode("utf-8")
-                            # Then the rest of the document
-                            yield body_part.encode("utf-8")
-
-                        return StreamingResponse(iter_html(), media_type="text/html")
-                    except ValueError as e:
-                         # Fallback to 404
-                        raise HTTPException(status_code=404, detail=str(e))
-                    except Exception as e:
-                         # In dev, show error. In prod, maybe fallback to SPA?
-                        raise HTTPException(status_code=500, detail=str(e))
-                return html_endpoint
-
-            # Register HTML endpoint
-            # We use the actual route path (e.g., "/" or "/blog")
-            fastapi_app.get(route.route)(create_html_endpoint(route_name))
-            print(f"[SSR] Registered HTML endpoint: {route.route} -> {route_name}")
-    
-    # Add server component routes for lazy hydration
-    create_server_component_routes(fastapi_app)
-    
-    # Health check endpoint (only if root is not taken)
-    root_taken = any(r.route == "/" for _, r in ssr_routes if hasattr(r, 'route'))
-    if not root_taken:
-        @fastapi_app.get("/")
-        async def root():
-            return {
-                "message": f"{dars_app.title} - SSR Backend",
-                "ssr_routes": [name for name, _ in ssr_routes],
-            }
-    
-    return fastapi_app
-
-
-def create_server_component_routes(fastapi_app: FastAPI, prefix: str = "/api/server-component") -> None:
-    """
-    Add endpoints for rendering individual server components.
-    
-    This enables the lazy hydration pattern where components with use_server=True
-    are initially rendered as placeholders, then fetched and hydrated on the client.
-    
-    Args:
-        fastapi_app: The FastAPI application to add routes to
-        prefix: URL prefix for server component endpoints (default: /api/server-component)
-    """
-    from dars.core.server_components import SERVER_COMPONENT_REGISTRY, get_server_component
-    from dars.exporters.web.vdom import VDomBuilder
-    from dars.exporters.web.html_css_js import HTMLCSSJSExporter, DarsJSONEncoder
-    from starlette.requests import Request
-    from starlette.responses import JSONResponse
-    import json
-    
-    @fastapi_app.get(f"{prefix}/{{component_id}}")
-    async def render_server_component(component_id: str, request: Request):
-        """
-        Render a registered server component and return HTML + VDOM for hydration.
-        
-        Response format:
-        {
-            "html": "<div>...</div>",
-            "vdom": {...},
-            "events": {...},
-            "componentId": "..."
-        }
-        """
-        component = get_server_component(component_id)
-        if component is None:
-            raise HTTPException(status_code=404, detail=f"Server component '{component_id}' not found")
-        
-        try:
-            # Create exporter instance
-            exporter = HTMLCSSJSExporter()
+        # Health check
+        @self.fastapi_app.get("/_dars/health")
+        async def health_check():
+            return {"status": "ok", "app": self.dars_app.title}
             
-            # Temporarily disable use_server to render actual content
-            original_use_server = getattr(component, 'use_server', False)
-            component.use_server = False
+        # Register SSR routes
+        ssr_routes = []
+        for name, route in self.dars_app._spa_routes.items():
+            metadata = getattr(route.root, '__dars_route_metadata__', None)
+            if metadata and metadata.route_type == RouteType.SSR:
+                ssr_routes.append((name, route))
+        
+        for route_name, route in ssr_routes:
+            # 1. API Endpoint (JSON)
+            self._register_api_endpoint(route_name)
             
+            # 2. HTML Endpoint (Browser)
+            if hasattr(route, 'route') and route.route:
+                 self._register_html_endpoint(route_name, route.route)
+                 
+        start_msg = f"[SSR] Initialized {len(ssr_routes)} server-side routes."
+        print(start_msg)
+
+    def _register_api_endpoint(self, route_name: str):
+        from fastapi.responses import JSONResponse
+        
+        api_path = f"{self.prefix}/{route_name}"
+        
+        @self.fastapi_app.get(api_path)
+        async def api_endpoint(request: Request):
             try:
-                # Render component to HTML
-                html = exporter.render_component(component)
-                
-                # Build VDOM
-                vdom_builder = VDomBuilder(id_provider=exporter.get_component_id)
-                vdom = vdom_builder.build(component)
-                events_map = vdom_builder.events_map
-            finally:
-                # Restore use_server
-                component.use_server = original_use_server
-            
-            return JSONResponse({
-                "html": html,
-                "vdom": vdom,
-                "events": events_map,
-                "componentId": component_id,
-            })
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Error rendering component: {str(e)}")
-    
-    @fastapi_app.get(f"{prefix}")
-    async def list_server_components():
-        """List all registered server components (for debugging)."""
-        return {
-            "components": list(SERVER_COMPONENT_REGISTRY.keys()),
-            "count": len(SERVER_COMPONENT_REGISTRY),
-        }
-    
-    print(f"[SSR] Registered server component endpoints at {prefix}/{{id}}")
+                params = dict(request.query_params)
+                result = self.renderer.render_route(route_name, params)
+                return JSONResponse(result)
+            except ValueError as e:
+                raise HTTPException(status_code=404, detail=str(e))
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
+                raise HTTPException(status_code=500, detail=f"SSR render error: {str(e)}")
+
+    def _register_html_endpoint(self, route_name: str, route_path: str):
+        from fastapi.responses import HTMLResponse, StreamingResponse
+        
+        @self.fastapi_app.get(route_path)
+        async def html_endpoint(request: Request):
+            try:
+                params = dict(request.query_params)
+                result = self.renderer.render_route(route_name, params)
+                full_html = result['fullHtml']
+                return HTMLResponse(content=full_html, status_code=200)
+            except ValueError as e:
+                raise HTTPException(status_code=404, detail=str(e))
+            except Exception as e:
+                print(f"Error rendering {route_path}: {e}")
+                import traceback
+                traceback.print_exc()
+                raise HTTPException(status_code=500, detail="Internal Server Error")
+
+    def add_middleware(self, middleware_class, **options):
+        """Add FastAPI middleware."""
+        self.fastapi_app.add_middleware(middleware_class, **options)
+        
+    def include_router(self, router, **kwargs):
+        """Include an external APIRouter."""
+        self.fastapi_app.include_router(router, **kwargs)
+        
+    def mount(self, path: str, app: Any, name: str = None):
+        """Mount another WSGI/ASGI app."""
+        self.fastapi_app.mount(path, app, name)
+
+    def run(self, host="0.0.0.0", port=8000, reload=False):
+        """Run the SSR server using Uvicorn."""
+        import uvicorn
+        uvicorn.run(self.fastapi_app, host=host, port=port, reload=reload)
+
+
+def create_ssr_app(dars_app: App, prefix: str = "/api/ssr", streaming: bool = False) -> Any:
+    """
+    Legacy factory function for backward compatibility.
+    Returns the underlying FastAPI app instance from the new SSRApp class.
+    """
+    ssr_instance = SSRApp(dars_app, prefix=prefix)
+    return ssr_instance.fastapi_app
+
+
+
 

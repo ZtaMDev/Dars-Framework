@@ -281,7 +281,6 @@ class Component(ABC):
 All components support these basic properties:
 
 - **id**: Unique component identifier
-- **use_server**: Set to `True` to render this component on the server (requires SSR backend(FastAPI with Dars.backend))
 - **class_name**: CSS class for additional styles
 - **style**: Dictionary of CSS styles
 - **hover_style**: Dictionary of CSS styles on hover

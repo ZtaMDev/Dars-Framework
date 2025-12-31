@@ -104,39 +104,7 @@ class HTMLCSSJSExporter(Exporter):
             self._current_output_path = output_path
             self._current_app = app
             
-            # Set SSR base URL for server components (used by placeholder generation)
-            try:
-                from dars.core.server_components import set_ssr_base_url
-                
-                # 1. Try explicit app.ssr_url
-                ssr_url = getattr(app, 'ssr_url', '') or ''
-                
-                # 2. Fallback to DarsEnv config (if available in user project)
-                if not ssr_url:
-                    try:
-                        import sys
-                        if os.getcwd() not in sys.path:
-                            sys.path.insert(0, os.getcwd())
-                        
-                        # Try importing backend.apiConfig
-                        try:
-                            from backend.apiConfig import DarsEnv
-                            urls = DarsEnv.get_urls()
-                            ssr_url = urls.get('backend', '')
-                        except ImportError:
-                            # Try alternative path (if backend is at root)
-                            try:
-                                from apiConfig import DarsEnv
-                                urls = DarsEnv.get_urls()
-                                ssr_url = urls.get('backend', '')
-                            except ImportError:
-                                pass
-                    except Exception:
-                        pass
 
-                set_ssr_base_url(ssr_url)
-            except Exception:
-                pass
 
             # --- Copiar recursos adicionales desde la carpeta del proyecto ---
             import inspect, shutil
@@ -2475,15 +2443,21 @@ audio.dars-audio {
             for child in component.children:
                 self._collect_component_types(child, types_set)
 
-    def generate_javascript(self, app: App, page_root: Component, events_map: Dict[str, Dict[str, Any]] = None) -> str:
+    def generate_javascript(self, app: App, page_root: Component, events_map: Dict[str, Dict[str, Any]] = None, ssr_mode: bool = False) -> str:
         """Genera un runtime modular con eventos integrados directamente en JS"""
         
         # Convertir events_map a código JS
         events_js_code = ""
-        if events_map:
+        if events_map and not ssr_mode:
             events_js_code = self._generate_events_js(events_map)
+        elif ssr_mode:
+            events_js_code = "    // Events managed by SSR hydration (DSP)"
             
-        states_js_code = self._generate_states_js()
+        states_js_code = self._generate_states_js() if not ssr_mode else "    // SSR Mode: States managed by hydration (DSP)"
+        
+        # Reactive bindings logic (Always needed for interactivity)
+        reactive_bindings_js = self._generate_reactive_bindings_js()
+        vref_bindings_js = self._generate_vref_bindings_js()
         
         # Collect used component types for conditional logic injection
         used_types = set()
@@ -2868,16 +2842,14 @@ audio.dars-audio {
     }}
 
     function _darsInit(){{
+
         initializeStates();
-        //Inicializar eventos antes de la hidratación
         initializeEvents();
                 
-        if(window.__DARS_VDOM__){{
-        hydrate(window.__DARS_VDOM__);
-        }} else if(window.__ROUTE_VDOM__){{
+        if(window.__ROUTE_VDOM__){{
         hydrate(window.__ROUTE_VDOM__);
-        }} else {{
-        console.warn('[Dars] No VDOM snapshot found for hydration');
+        }} else if(window.__DARS_VDOM__){{
+        hydrate(window.__DARS_VDOM__);
         }}
         // Activar hot-reload incremental en dev si hay URLs definidas (evitar múltiples pollers)
         if(window.__DARS_VERSION_URL && window.__DARS_SNAPSHOT_URL){{
@@ -2886,10 +2858,14 @@ audio.dars-audio {
         }}
 
         // Initialize reactive bindings for useDynamic
-        {self._generate_reactive_bindings_js()}
+        if (!window.__ROUTE_VDOM__) {{
+            {reactive_bindings_js}
+        }}
 
         // Initialize VRef bindings
-        {self._generate_vref_bindings_js()}
+        if (!window.__ROUTE_VDOM__) {{
+            {vref_bindings_js}
+        }}
     }}
 
     if(document.readyState === 'complete' || document.readyState === 'interactive'){{
@@ -3123,11 +3099,17 @@ audio.dars-audio {
             if state_path:
                 comp_id = self.get_component_id(component)
                 
-                bindings.append({
+                binding_data = {
                     'component_id': comp_id,
                     'property': prop_name,
                     'state_path': state_path
-                })
+                }
+                bindings.append(binding_data)
+                
+                # Centrally collect for reactive JS generation
+                if not hasattr(self, '_built_in_bindings'):
+                    self._built_in_bindings = []
+                self._built_in_bindings.append(binding_data)
                 
                 # Get initial value from state registry
                 initial_values[prop_name] = initial_val
@@ -3364,13 +3346,8 @@ audio.dars-audio {
         lines = []
         lines.append("    // Reactive bindings for useDynamic")
         lines.append("    try {")
-        lines.append("        // Hook into window.Dars.change to update reactive elements")
-        lines.append("        const originalChange = window.Dars && window.Dars.change;")
-        lines.append("        if (originalChange) {")
-        lines.append("            window.Dars.change = function(payload) {")
-        lines.append("                // Call original change")
-        lines.append("                const result = originalChange.call(this, payload);")
-        lines.append("                ")
+        lines.append("        if (window.Dars && typeof window.Dars.addReactiveBinding === 'function') {")
+        lines.append("            window.Dars.addReactiveBinding(function(payload) {")
         lines.append("                // Update reactive elements if this is a dynamic change")
         lines.append("                if (payload && payload.dynamic && payload.id) {")
         
@@ -3488,7 +3465,6 @@ audio.dars-audio {
                                     if unprefixed in boolean_attrs:
                                         actual_attr = unprefixed
                                         is_boolean = True
-                                
                                 if is_boolean:
                                     # Handle boolean attributes
                                     lines.append(f"                                if (val_{state_prop} === true || val_{state_prop} === 'true' || val_{state_prop} === '{actual_attr}' || val_{state_prop} === '') {{")
@@ -3505,10 +3481,11 @@ audio.dars-audio {
                     lines.append("                        }")
                 lines.append("                    }")
 
-        lines.append("                }")
-        lines.append("                return result;")
-        lines.append("            };")
-        lines.append("        }")
+                lines.append("                }")
+                lines.append("            });")
+            lines.append("        } else {")
+            lines.append("            console.warn('[Dars:Debug] window.Dars.addReactiveBinding NOT found. Skipping reactive bindings.');")
+            lines.append("        }")
         lines.append("    } catch(e) {")
         lines.append("        console.error('[Dars] Failed to initialize reactive bindings', e);")
         lines.append("    }")
@@ -3680,77 +3657,78 @@ audio.dars-audio {
     
     def _generate_events_js(self, events_map: Dict[str, Dict[str, Any]]) -> str:
         """Genera código JS para inicializar todos los eventos directamente en el runtime"""
+        import json
         lines = []
 
         for comp_id, events in events_map.items():
             for event_name, event_handlers in events.items():
-                # Soporte para arrays de handlers
+                # Soporte para arrays de handlers (ya serializados por VDomBuilder)
                 handlers_list = event_handlers if isinstance(event_handlers, list) else [event_handlers]
                 
-                valid_handlers = []
+                valid_handlers_js = []
+                
                 for handler_spec in handlers_list:
-                    code = None
+                    # handler_spec ya debería ser un dict { "type": ..., "data"/"code": ... }
+                    # si viene directo de vdom.py
                     
-                    # Extraer código del handler de manera más robusta
+                    if isinstance(handler_spec, dict):
+                        h_type = handler_spec.get('type')
+                        
+                        # CASO 1: DAP Action (Preferred)
+                        if h_type == 'action':
+                            data = handler_spec.get('data')
+                            if data:
+                                # Serializamos la acción a JSON string
+                                action_json = json.dumps(data, ensure_ascii=False)
+                                # Generamos la llamada al dispatcher
+                                # window.Dars._dispatch(action, event)
+                                js_call = f"if(window.Dars && window.Dars._dispatch) {{ window.Dars._dispatch({action_json}, event); }}"
+                                valid_handlers_js.append(js_call)
+                                continue
+                                
+                        # CASO 2: Legacy Inline Code
+                        elif h_type == 'inline':
+                            code = handler_spec.get('code')
+                            if code:
+                                valid_handlers_js.append(code)
+                                continue
+
+                    # FALLBACK: Intentar extraer código legacy si la estructura no es standard
+                    code = None
                     if hasattr(handler_spec, 'get_code'):
-                        # Para objetos dScript, InlineScript, etc.
-                        try:
-                            code = handler_spec.get_code()
-                        except Exception:
-                            continue
+                         code = handler_spec.get_code()
                     elif isinstance(handler_spec, dict):
-                        # Para diccionarios con código
-                        code = handler_spec.get('code') or handler_spec.get('value')
+                         code = handler_spec.get('code') or handler_spec.get('value')
                     elif isinstance(handler_spec, str):
-                        # Para strings directos
-                        code = handler_spec
+                         code = handler_spec
                     
                     if code and isinstance(code, str) and code.strip():
-                        valid_handlers.append(code.strip())
+                        valid_handlers_js.append(code.strip())
 
-                if valid_handlers:
+                if valid_handlers_js:
                     lines.append(f'    // Evento {event_name} para componente {comp_id}')
                     lines.append(f'    if (!eventMap.has("{comp_id}")) eventMap.set("{comp_id}", {{}});')
                     
-    # NUEVO: Ejecutar cada handler en su propio contexto
-                    if len(valid_handlers) == 1:
-                        # Caso único handler - mantener compatibilidad
-                        lines.append(f'    eventMap.get("{comp_id}")["{event_name}"] = async function(event) {{')
-                        # Robust loading logic start
-                        lines.append('        // Ensure runtime loaded')
-                        lines.append('        if (!window.Dars) {')
-                        lines.append("            try {")
-                        lines.append("                const m = await import('/lib/dars.min.js');")
-                        lines.append("                window.Dars = m.default || m;")
-                        lines.append("                if (!window.Dars.change && m.change) window.Dars.change = m.change;")
-                        lines.append("                if (!window.Dars.getState && m.getState) window.Dars.getState = m.getState;")
-                        lines.append("            } catch (e) { console.error('[Dars] Failed to lazy load runtime', e); }")
-                        lines.append('        }')
-                        # Robust loading logic end
-                        lines.append(f'        try {{ {valid_handlers[0]} }} catch(e) {{ console.error("Error en handler:", e); }}')
-                        lines.append(f'    }};')
-                    else:
-                        # Múltiples handlers - ejecutar cada uno individualmente
-                        lines.append(f'    eventMap.get("{comp_id}")["{event_name}"] = async function(event) {{')
-                        # Robust loading logic start
-                        lines.append('        // Ensure runtime loaded')
-                        lines.append('        if (!window.Dars) {')
-                        lines.append("            try {")
-                        lines.append("                const m = await import('/lib/dars.min.js');")
-                        lines.append("                window.Dars = m.default || m;")
-                        lines.append("                if (!window.Dars.change && m.change) window.Dars.change = m.change;")
-                        lines.append("                if (!window.Dars.getState && m.getState) window.Dars.getState = m.getState;")
-                        lines.append("            } catch (e) { console.error('[Dars] Failed to lazy load runtime', e); }")
-                        lines.append('        }')
-                        # Robust loading logic end
-                        for i, handler_code in enumerate(valid_handlers):
-                            lines.append(f'        // Handler {i+1}')
-                            lines.append(f'        try {{ {handler_code} }} catch(e) {{ console.error("Error en handler {i+1}:", e); }}')
-                        lines.append(f'    }};')
+                    # Generar función manejadora
+                    lines.append(f'    eventMap.get("{comp_id}")["{event_name}"] = async function(event) {{')
                     
-                    lines.append('')
+                    # Robust loading logic
+                    lines.append('        // Ensure runtime loaded')
+                    lines.append('        if (!window.Dars) {')
+                    lines.append("            try {")
+                    lines.append("                const m = await import('/lib/dars.min.js');")
+                    lines.append("                window.Dars = m.default || m;")
+                    lines.append("            } catch (e) { console.error('[Dars] Failed to lazy load runtime', e); }")
+                    lines.append('        }')
+                    
+                    # Ejecutar handlers
+                    for handler_js in valid_handlers_js:
+                        lines.append(f'        try {{ {handler_js} }} catch(e) {{ console.error("Error en handler:", e); }}')
+                        
+                    lines.append(f'    }};')
+                    lines.append('') # Add an empty line for separation, consistent with original
 
-        return '\n'.join(lines) if lines else '    // No hay eventos para esta página'
+        return "\n".join(lines) if lines else '    // No hay eventos para esta página'
 
     def get_component_id(self, component, prefix="comp"):
         """
@@ -3789,59 +3767,7 @@ audio.dars-audio {
         m[original] = obf
         return obf
 
-    def _render_server_component_placeholder(self, component: Component) -> str:
-        """
-        Render a placeholder for a server component.
-        
-        Components with use_server=True are rendered by the FastAPI backend.
-        This method generates placeholder HTML that will be replaced by
-        server-rendered content at runtime via the JS loadServerComponent() function.
-        
-        The placeholder:
-        - Has data-server-component="true" for JS detection
-        - Has data-sc-endpoint with the backend URL
-        - Contains loading component HTML if set
-        - Contains error component HTML (escaped) for failure handling
-        """
-        from dars.core.server_components import (
-            ServerComponentMarker,
-            register_server_component
-        )
-        
-        # Ensure component has an ID
-        comp_id = self.get_component_id(component, prefix='sc')
-        
-        # Register for backend access
-        register_server_component(component)
-        
-        # Get backend URL from app context if available
-        backend_url = ""
-        try:
-            app = getattr(self, '_current_app', None)
-            if app and hasattr(app, 'ssr_url'):
-                backend_url = app.ssr_url or ""
-        except Exception:
-            pass
-        
-        # Render loading component if set
-        loading_html = ""
-        if hasattr(component, '_loading_component') and component._loading_component:
-            try:
-                loading_html = self.render_component(component._loading_component)
-            except Exception:
-                loading_html = '<div class="dars-sc-loading-default">Loading...</div>'
-        
-        # Render error component if set (will be stored as data attribute)
-        error_html = ""
-        if hasattr(component, '_error_component') and component._error_component:
-            try:
-                error_html = self.render_component(component._error_component)
-            except Exception:
-                error_html = '<div class="dars-sc-error-default">Error loading component</div>'
-        
-        # Create marker and generate placeholder
-        marker = ServerComponentMarker(component, backend_url)
-        return marker.to_placeholder_html(loading_html, error_html)
+
 
     def render_function_component(self, component: Component) -> str:
         """
@@ -4259,10 +4185,6 @@ audio.dars-audio {
             # Head component renders nothing visible
             return ""
         
-        # Server Component: render placeholder instead of full component
-        if getattr(component, 'use_server', False):
-            return self._render_server_component_placeholder(component)
-            
         from dars.components.basic.page import Page
         from dars.components.layout.grid import GridLayout
         from dars.components.layout.flex import FlexLayout
@@ -6005,7 +5927,9 @@ audio.dars-audio {
             except: pass
             
             # Generate runtime JS with events/states for this route
-            runtime_js = self.generate_javascript(route_app, route_app.root, route_events_map)
+            # For SSR routes, we disable static event generation to avoid ID mismatches
+            is_ssr_route = (route_type == RouteType.SSR)
+            runtime_js = self.generate_javascript(route_app, route_app.root, route_events_map, ssr_mode=is_ssr_route)
             
             # Generate VDOM JS content
             vdom_json = json.dumps(route_vdom, ensure_ascii=False, separators=(",", ":"), cls=DarsJSONEncoder)

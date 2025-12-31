@@ -85,14 +85,7 @@ from dars.backend.data import useData, DataAccessor
 from dars.backend.json_utils import stringify, parse, get_value
 from dars.backend.components import createComp, updateComp, deleteComp
 
-# Server Components (use_server=True)
-from dars.core.server_components import (
-    ServerComponentMarker,
-    register_server_component,
-    clear_server_component_registry,
-    get_server_component,
-    SERVER_COMPONENT_REGISTRY
-)
+
 
 # from dars.core.properties import *
 
@@ -158,7 +151,4 @@ __all__ = [
     'FormData', 'collect_form',
     # Secure Routing
     'RouteType', 'RouteMetadata',
-    # Server Components
-    'ServerComponentMarker', 'register_server_component', 
-    'clear_server_component_registry', 'get_server_component', 'SERVER_COMPONENT_REGISTRY',
 ]

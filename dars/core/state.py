@@ -46,98 +46,76 @@ class DarsState:
     # state.py - Modificar el método state de DarsState
     def state(self, idx: Optional[int] = None, cComp: bool = False, render: Optional[Any] = None, goto: Optional[Any] = None, **kwargs) -> dScript:
         """
-        Convenience: returns an InlineScript that, when added to a page/app,
-        triggers a state change via the JS runtime. Intended for quick prototyping.
-
-        - idx: target state index/value
-        - cComp: if True, performs a full HTML replace (custom component flow)
-        - render: HTML string to inject when cComp=True
-        - kwargs: dynamic state updates (text, style, etc.)
+        Convenience: returns a dScript containing a DAP 'change' action.
+        The client-side DAP dispatcher will handle the logic securely without eval().
         """
         target_id = self.id or ""
 
-        def _escape_js_str(s: str) -> str:
-            # Escapar para JavaScript, incluyendo saltos de línea
-            return s.replace("\\", "\\\\").replace("'", "\\'").replace("\n", "\\n").replace("\r", "\\r")
+        # Construct basic action payload
+        action_args = {
+            "id": target_id,
+            "name": self.name
+        }
 
-        # Compute HTML if needed
-        html_val = None
-        if cComp and render is not None:
-            try:
-                # DeferredAttr -> clone component with attrs
+        if idx is not None:
+            action_args["state"] = idx
+            
+        if goto is not None:
+            action_args["goto"] = goto
+
+        # Handle Custom Component Rendering (cComp)
+        if cComp:
+            action_args["useCustomRender"] = True
+            html_val = None
+            if render is not None:
+                # Resolve deferred attributes first
                 if hasattr(render, 'clone_with') and callable(getattr(render, 'clone_with')):
                     render = render.clone_with()
-                # If it's a Component instance, render it to HTML
+                    
+                # Try to render fully if it's a Dars Component
                 try:
                     from dars.core.component import Component as _DarsComponent
                     if isinstance(render, _DarsComponent):
                         from dars.exporters.web.html_css_js import HTMLCSSJSExporter
                         _exp = HTMLCSSJSExporter()
+                        # NOTE: We create a temporary exporter instance. 
+                        # Ideally this should reuse a shared context if possible, but for static generation it's fine.
                         html_val = _exp.render_component(render)
                 except Exception:
                     html_val = None
-                if html_val is None and isinstance(render, str):
-                    html_val = render
-            except Exception:
-                html_val = None
-
-        # Build payload
-        parts = [f"id: '{_escape_js_str(target_id)}'", f"name: '{_escape_js_str(self.name)}'"]
-        if idx is not None:
-            parts.append(f"state: {idx}")
-        if goto is not None:
-            if isinstance(goto, str):
-                parts.append(f"goto: '{_escape_js_str(goto)}'")
-            else:
-                parts.append(f"goto: {goto}")
-        if cComp:
-            html_str = _escape_js_str(html_val or "")
-            parts.append("useCustomRender: true")
-            parts.append(f"html: '{html_str}'")
+                
+                # Fallback if it's just a string or couldn't be rendered
+                if html_val is None:
+                    html_val = str(render)
             
-        # Dynamic updates
+            action_args["html"] = html_val or ""
+
+        # Handle Dynamic Props (kwargs)
         if kwargs:
-            parts.append("dynamic: true")
+            action_args["dynamic"] = True
             for k, v in kwargs.items():
                 if isinstance(v, RawJS):
-                    parts.append(f"{k}: {v.code}")
+                    # WARNING: RawJS in DAP should be discouraged, but passing code for client to decide
+                    # Ideally the client uses setValue or similar ops instead of eval.
+                    # We pass it as a special value that the dispatcher *might* reject if strict CSP is on.
+                    action_args[k] = {"$code": v.code}
                 elif k == 'style':
                     val = v
                     if isinstance(val, str):
                         val = parse_utility_string(val)
-                    if isinstance(val, dict):
-                        parts.append(f"style: {json.dumps(val)}")
+                    action_args[k] = val
                 elif k == 'attrs' and isinstance(v, dict):
-                    parts.append(f"attrs: {json.dumps(v)}")
+                    action_args[k] = v
                 elif k == 'classes' and isinstance(v, dict):
-                    parts.append(f"classes: {json.dumps(v)}")
+                    action_args[k] = v
                 else:
-                    parts.append(f"{k}: {json.dumps(v)}")
+                    action_args[k] = v
 
-        payload = ", ".join(parts)
-
-        # Generar código JavaScript en una sola línea para compatibilidad con el nuevo sistema de eventos
-        code = (
-            "(async () => {"
-            "  try {"
-            "    let ch = window.__DARS_CHANGE_FN;"
-            "    if (!ch) {"
-            "      if (window.Dars && typeof window.Dars.change === 'function') {"
-            "        ch = window.Dars.change.bind(window.Dars);"
-            "      } else {"
-            "        const m = await import('/lib/dars.min.js');"
-            "        ch = (m.change || (m.default && m.default.change));"
-            "      }"
-            "      if (typeof ch === 'function') window.__DARS_CHANGE_FN = ch;"
-            "    }"
-            f"    if (typeof ch === 'function') ch({{{payload}}});"
-            "  } catch (e) { console.error('[Dars] State error:', e); }"
-            "})();"
-        )
-        
-        # Minificar el código removiendo espacios extra (pero manteniendo la estructura básica)
-        code = ' '.join(code.split())
-        return dScript(code)  # Changed to dScript for .then() chaining support
+        # Return dScript with structured data
+        return dScript(data={
+            "op": "change",
+            "args": action_args
+        })
 
     # --- cState: define rules/mods for a given state index ---
     def cState(self, idx: int, mods: Optional[List[Dict[str, Any]]] = None) -> 'CStateRuleBuilder':

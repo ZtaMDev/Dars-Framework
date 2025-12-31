@@ -1,3 +1,33 @@
+# Release Notes v1.8.8
+
+> **Critical Security Update: Dars Server Protocol (DSP) & SSR Hydration Fix**
+
+> [!CAUTION]
+> **SECURITY WARNING**: Versions <= v1.8.7 are considered deprecated and NOT recommended for production use. v1.8.8 addresses critical security surfaces by temporarily removing experimental Server Components. Upgrading is mandatory.
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Dars Server Protocol (DSP)
+Introduced a new unified protocol for transmitting VDOM snapshots, component states, and reactive bindings from the server to the client. This ensures that SSR-rendered pages are hydrated with full parity to client-side renders.
+
+### SSR Hydration & Interactivity Fixes
+Resolved critical issues where reactive bindings (`useDynamic`) and `VRef` bindings were not correctly executed after initial server rendering. 
+- **Unified Reactivity Registry**: Client-side bindings are now registered through a centralized mechanism, preventing ID mismatches.
+- **Improved SPA Routing**: The client-side router now natively supports DSP payloads, allowing seamless interactivity when navigating between SSR-rendered routes.
+
+### [IMPORTANT] Server Components Removal
+As part of security hardening, the experimental "Dars Server Components" feature (using `use_server=True`) has been removed from this version. 
+- Projects using this feature should transition to the standard **SSR Route** architecture, which now provides superior performance and security through the DSP.
+- This removal reduces the attack surface while we work on a more robust, sandboxed implementation for future releases.
+
+---
+
 # Release Notes v1.8.7
 
 > **Dars Server Components & FastAPI Integration**
