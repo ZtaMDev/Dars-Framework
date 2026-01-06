@@ -701,8 +701,8 @@
      <div class="sidebar-category">
       Index
      </div>
-     <a class="sidebar-link sidebar-level-1" href="#dars-framework-documentation" style="margin-left: 0px">
-      Dars Framework Documentation
+     <a class="sidebar-link sidebar-level-1" href="#dars-framework-documentation-dars-is-not-longer-maintained-due-to-critical-vulnerabilities-in-the-core-of-the-framework-please-leave-dars-and-use-the-new-alternative-that-is-being-developed-called-axiom-that-will-be-more-secure-and-modern" style="margin-left: 0px">
+      Dars Framework Documentation (Dars is not longer maintained due to critical vulnerabilities in the core of the framework please leave dars and use the new alternative that is being developed called "Axiom" that will be more secure and modern)
      </a>
      <a class="sidebar-link sidebar-level-2" href="#main-guides" style="margin-left: 20px">
       Main Guides
@@ -2947,8 +2947,8 @@
       (function(){window.DarsMarkdown={addCopyButtons:function(root){(root||document).querySelectorAll("pre code").forEach(function(code){var pre=code.parentElement;if(!pre||pre.querySelector(".dars-code-copy"))return;var btn=document.createElement("button");btn.className="dars-code-copy";btn.type="button";btn.textContent="Copy";btn.addEventListener("click",async function(e){e.stopPropagation();try{await navigator.clipboard.writeText(code.innerText);btn.textContent="Copied";btn.classList.add("copied");setTimeout(function(){btn.textContent="Copy";btn.classList.remove("copied")},1200)}catch(err){btn.textContent="Error";setTimeout(function(){btn.textContent="Copy"},1200)}});pre.appendChild(btn)})},guessLang:function(text){var t=text.trim();if(/^{[\s\S]*}$/.test(t)||/^\[/.test(t))return "json";if(/^(pip |python |python3 |dars |#|\$ )/m.test(t))return "bash";if(/\b(def |class |import |from |print\(|self\b)/.test(t))return "python";return null},stripPygments:function(code){if(code&&code.innerHTML&&code.innerHTML.indexOf("<span")!==-1){code.textContent=code.innerText}},highlight:function(root){var self=this;(root||document).querySelectorAll("pre code").forEach(function(code){self.stripPygments(code);if(!code.className||code.className.indexOf("language-")===-1){var g=self.guessLang(code.innerText);code.classList.add("language-"+(g||"none"))}if(window.Prism&&Prism.highlightElement){Prism.highlightElement(code)}});self.addCopyButtons(root)}};document.addEventListener("DOMContentLoaded",function(){try{window.DarsMarkdown.highlight()}catch(e){}});document.addEventListener("dars:content-loaded",function(e){if(e.detail&&e.detail.element){try{window.DarsMarkdown.highlight(e.detail.element)}catch(err){}}})})();
      </script>
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="md-index">
-      <h1 id="dars-framework-documentation">
-       Dars Framework Documentation
+      <h1 id="dars-framework-documentation-dars-is-not-longer-maintained-due-to-critical-vulnerabilities-in-the-core-of-the-framework-please-leave-dars-and-use-the-new-alternative-that-is-being-developed-called-axiom-that-will-be-more-secure-and-modern">
+       Dars Framework Documentation (Dars is not longer maintained due to critical vulnerabilities in the core of the framework please leave dars and use the new alternative that is being developed called "Axiom" that will be more secure and modern)
       </h1>
       <p>
        Welcome to the official Dars Framework documentation. Here you will find detailed guides and references to help you build modern web applications with Python.
@@ -26132,7 +26132,7 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
     </div>
    </div>
   </div>
-  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1767210369" type="module">
+  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1767742378" type="module">
   </script>
   <script defer="" src="app_docs.js">
   </script>
