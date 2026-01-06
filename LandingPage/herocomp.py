@@ -17,7 +17,7 @@ def create_hero():
             },
         ),
         Text(
-            text="Dars Framework",
+            text="Dars is no longer maintained due to critical Security reasons",
             id="hero-title",
             style={
                 "font-size": "64px",
