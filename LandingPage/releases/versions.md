@@ -1,5 +1,32 @@
-# Release Notes v1.8.9
+# Release Notes v1.8.9b
 
+> **State V2 Reactivity Hardening & FunctionComponent Fixes**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### State V2 Reactivity Decoupling
+
+The Dars runtime state manager has been decoupled from strict physical DOM bindings, enabling robust reactivity for headless and virtual components:
+
+- **State Registry Priority**: The `change()` handler now persists new state values to the internal `__reactiveRegistry` before attempting to locate a DOM element. This ensures that virtual states update reliably even when no matching element ID exists.
+- **Arithmetic State Operations**: Fixed a critical bug where `increment` and `decrement` methods would always evaluate from `0` when bound to headless states. The `startLoop()` runtime function now checks the state registry if a target element is not found, allowing seamless mathematical operations in the background.
+
+### FunctionComponent Reactivity Fixes
+
+Resolved multiple issues affecting `useDynamic` and reactive bindings inside `@FunctionComponent` trees:
+
+- **Binding Export Fix**: FunctionComponent templates are now correctly pre-rendered during multi-page (`app.add_page`) generation. This ensures that all `useDynamic` bindings nested inside FunctionComponents are successfully collected and exported into the reactive Javascript bundle.
+- **Runtime Generation Fix**: Repaired a syntax error in the internal reactive JavaScript generator (`_generate_reactive_bindings_js`) that caused silent failures (missing closing braces) when exporting a project containing exclusively FunctionComponent bindings without any standard built-in bindings.
+
+---
+
+# Release Notes v1.8.9
 > **Ultimate Security & Reactivity Hardening: Removal of Eval/New Function & Native JS Compilation**
 
 > [!IMPORTANT]

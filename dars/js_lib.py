@@ -335,8 +335,8 @@ function registerState(name, cfg){{
     isCustom: !!cfg.isCustom,
     rules: (cfg.rules && typeof cfg.rules === 'object') ? cfg.rules : {{}},
     defaultIndex: (typeof cfg.defaultIndex === 'number') ? cfg.defaultIndex : 0,
-    defaultValue: (cfg.hasOwnProperty('defaultValue') ? cfg.defaultValue : null),
-    values: (cfg.hasOwnProperty('defaultValue') ? Object.assign({{}}, cfg.defaultValue) : {{}}),
+    defaultValue: (cfg.hasOwnProperty('defaultValue') ? cfg.defaultValue : (cfg.hasOwnProperty('defaultProps') ? cfg.defaultProps : null)),
+    values: (cfg.hasOwnProperty('defaultValue') ? Object.assign({{}}, cfg.defaultValue) : (cfg.hasOwnProperty('defaultProps') ? Object.assign({{}}, cfg.defaultProps) : {{}})),
     __defaultSnapshot: null,
     __vnode: null  // Store vnode reference for event re-hydration
   }};
@@ -358,8 +358,9 @@ function registerState(name, cfg){{
 function registerStates(statesConfig) {{
   if (!Array.isArray(statesConfig)) return;
   for (const state of statesConfig) {{
-    if (state && state.name && state.id) {{
-      registerState(state.name, state);
+    if (state && state.id) {{
+      const name = state.name || state.id;
+      registerState(name, state);
     }}
   }}
 }}
@@ -484,29 +485,35 @@ function change(opt){{
 
   // Dynamic state support
   if (opt.dynamic) {{
-      // Execute registered reactive bindings
+      // 1. Update internal state registry (Persist state changes)
+      const st = __registry.get(opt.id);
+      if (st && st.values) {{
+          for (const k in opt) {{
+              if (k !== 'id' && k !== 'dynamic' && !k.startsWith('on_')) {{
+                  // Standard props are at top level, but some (like 'attrs') are nested
+                  // We update the registry with the new value
+                  st.values[k] = opt[k];
+                  
+                  // Notify path-based watchers (id.prop)
+                  const path = opt.id + '.' + k;
+                  if (__watchers.has(path)) {{
+                      __watchers.get(path).forEach(cb => {{
+                          try {{ cb(opt[k]); }} catch(e) {{ console.error('[Dars] Watcher error:', e); }}
+                      }});
+                  }}
+              }}
+          }}
+      }}
+
+      // 2. Execute registered reactive bindings (e.g. useDynamic spans)
+      // These usually use document.querySelectorAll and are independent of a single ID
       __reactiveRegistry.forEach(fn => {{
           try {{ fn(opt); }} catch(e) {{ console.error('[Dars] Reactive binding error:', e); }}
       }});
 
+      // 3. Update DOM element (if it exists)
       const el = $(opt.id);
-      if (!el) return;
       
-      // Helper to trigger watchers for a property
-      const notifyWatchers = (prop, val) => {{
-          const st = __registry.get(opt.id);
-          if (st && st.values) {{
-              st.values[prop] = val;
-          }}
-          
-          const path = opt.id + '.' + prop;
-          if (__watchers.has(path)) {{
-              __watchers.get(path).forEach(cb => {{
-                  try {{ cb(val); }} catch(e) {{ console.error('[Dars] Watcher error:', e); }}
-              }});
-          }}
-      }};
-
       if (el) {{
           // Apply text change
           if (opt.hasOwnProperty('text')) {{
@@ -516,13 +523,11 @@ function change(opt){{
               }} else {{
                   el.textContent = String(opt.text);
               }}
-              notifyWatchers('text', opt.text);
           }}
           
           // Apply HTML change
           if (opt.hasOwnProperty('html')) {{
               el.innerHTML = _sanitize(String(opt.html));
-              notifyWatchers('html', opt.html);
           }}
 
           // Apply Plotly figure update
@@ -534,7 +539,6 @@ function change(opt){{
               
               if (figData) {{
                  Plotly.react(el, figData.data || [], figData.layout || {{}}, figData.config || {{}});
-                 notifyWatchers('figure', figData);
               }}
           }}
           
@@ -543,7 +547,6 @@ function change(opt){{
               for (const k in opt.style) {{
                   try {{ el.style[k] = opt.style[k]; }} catch (_) {{}}
               }}
-              notifyWatchers('style', opt.style);
           }}
           
           // Apply attribute changes
@@ -605,7 +608,6 @@ function change(opt){{
                               }}
                           }}
                       }}
-                      notifyWatchers(k, opt.attrs[k]);
                   }} catch (_) {{}}
               }}
           }}
@@ -624,7 +626,6 @@ function change(opt){{
                   const toToggle = Array.isArray(opt.classes.toggle) ? opt.classes.toggle : [opt.classes.toggle];
                   toToggle.forEach(c => el.classList.toggle(c));
               }}
-              notifyWatchers('classes', opt.classes);
           }}
 
           // Apply event handlers
@@ -647,37 +648,10 @@ function change(opt){{
                   }}
               }}
           }}
-           
-           // Handle custom state properties (notify watchers for any property not in known list)
-           const knownProps = ['id', 'dynamic', 'text', 'html', 'style', 'attrs', 'classes', 'figure', 'useCustomRender'];
-           for (const k in opt) {{
-               if (!knownProps.includes(k) && !k.startsWith('on_')) {{
-                   notifyWatchers(k, opt[k]);
-               }}
-           }}
+          }}
 
-           // Lifecycle: notify onUpdate after dynamic changes for this id
-           _runLifecycle(opt.id, 'onUpdate');
-       }} else {{
-           // Element not found, but we should still notify watchers!
-           if (opt.hasOwnProperty('text')) notifyWatchers('text', opt.text);
-           if (opt.hasOwnProperty('html')) notifyWatchers('html', opt.html);
-           if (opt.style) notifyWatchers('style', opt.style);
-           if (opt.attrs) {{
-               for (const k in opt.attrs) notifyWatchers(k, opt.attrs[k]);
-           }}
-           // Also notify for custom properties
-           const knownProps = ['id', 'dynamic', 'text', 'html', 'style', 'attrs', 'classes', 'figure', 'useCustomRender'];
-           for (const k in opt) {{
-               if (!knownProps.includes(k) && !k.startsWith('on_')) {{
-                   notifyWatchers(k, opt[k]);
-               }}
-           }}
-
-           // Lifecycle: even if element not found, still allow logical onUpdate
-           _runLifecycle(opt.id, 'onUpdate');
-       }}
-      
+      // Lifecycle: even if element not found, still allow logical onUpdate
+      _runLifecycle(opt.id, 'onUpdate');
       return;
   }}
 
@@ -1695,6 +1669,9 @@ try {{
 
   if (typeof window !== 'undefined' && Array.isArray(window.__DARS_STATE__)) {{
     registerStates(window.__DARS_STATE__);
+  }}
+  if (typeof window !== 'undefined' && Array.isArray(window.__DARS_STATE_V2__)) {{
+    registerStates(window.__DARS_STATE_V2__);
   }}
 }} catch(err) {{ 
     console.error('[Dars:Debug] Critical error during hydration block:', err);

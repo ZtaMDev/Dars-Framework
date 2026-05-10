@@ -523,6 +523,7 @@ class State:
         """
         return {
             'id': self.component.id if hasattr(self.component, 'id') else None,
+            'name': self.component.id if hasattr(self.component, 'id') else None,
             'defaultProps': self._default_snapshot,
             'loops': self._loops,
             'transitions': [t.to_dict() for t in self._transitions]

@@ -419,11 +419,14 @@ class HTMLCSSJSExporter(Exporter):
                         page_events_map = {}
                     
                     # Collect bindings by traversing component tree (without rendering)
-                    # This avoids breaking Markdown script injection and other side effects
                     self._collect_bindings_from_tree(page_app.root)
                     
+                    # Pre-render components to populate FC bindings (useDynamic, etc.)
+                    # This is critical so that _generate_reactive_bindings_js has data
+                    self.render_component(page_app.root)
+                    
                     # Generar runtime JS con eventos
-                    runtime_js = self.generate_javascript(page_app, page.root, page_events_map)
+                    runtime_js = self.generate_javascript(page_app, page_app.root, page_events_map)
                     
                     # Scripts específicos de esta página
                     page_scripts = []
@@ -3188,11 +3191,12 @@ audio.dars-audio {
                     lines.append("                        }")
                 lines.append("                    }")
 
-                lines.append("                }")
-                lines.append("            });")
-            lines.append("        } else {")
-            lines.append("            console.warn('[Dars:Debug] window.Dars.addReactiveBinding NOT found. Skipping reactive bindings.');")
-            lines.append("        }")
+        # Close the shared structure: if(payload.dynamic), function(payload), addReactiveBinding()
+        lines.append("                }")
+        lines.append("            });")
+        lines.append("        } else {")
+        lines.append("            console.warn('[Dars:Debug] window.Dars.addReactiveBinding NOT found. Skipping reactive bindings.');")
+        lines.append("        }")
         lines.append("    } catch(e) {")
         lines.append("        console.error('[Dars] Failed to initialize reactive bindings', e);")
         lines.append("    }")

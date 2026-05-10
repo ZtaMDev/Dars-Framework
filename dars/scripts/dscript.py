@@ -152,7 +152,7 @@ def compile_val(v, is_async=False):
     if op in ('get_state', 'state_get', 'get_state_value'):
         sid = args.get('id') or args.get('state_id', '')
         prop = args.get('property') or args.get('prop_name', 'text')
-        return f"(window.Dars && window.Dars.getState('{sid}') && window.Dars.getState('{sid}').values ? window.Dars.getState('{sid}').values['{prop}'] : undefined)"
+        return f"((window.Dars && window.Dars.getState('{sid}') && window.Dars.getState('{sid}').values && window.Dars.getState('{sid}').values['{prop}'] !== undefined) ? window.Dars.getState('{sid}').values['{prop}'] : 0)"
     
     elif op == 'get_dom_value':
         sel = args.get('selector', '')
@@ -195,11 +195,11 @@ def compile_val(v, is_async=False):
         
         # Static operator
         if js_op == '+':
-            # Favor concatenation/native JS addition for flexibility
-            return f"({left} + {right})"
+            # Favor concatenation/native JS addition for flexibility, but ensure numeric fallback if possible
+            return f"((parseFloat({left}) || 0) + (parseFloat({right}) || 0))"
         
         # Use Number() for other arithmetic ops to ensure numeric results
-        return f"(Number({left}) {js_op} Number({right}))"
+        return f"(Number({left} || 0) {js_op} Number({right} || 0))"
     
     elif op == 'cond_expr':
         cond = compile_val(args.get('condition'), is_async=is_async)
