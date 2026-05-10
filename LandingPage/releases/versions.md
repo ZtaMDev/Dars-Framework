@@ -1,4 +1,4 @@
-# Release Notes v1.8.9b
+# Release Notes v1.8.10
 
 > **State V2 Reactivity Hardening & FunctionComponent Fixes**
 
@@ -27,6 +27,7 @@ Resolved multiple issues affecting `useDynamic` and reactive bindings inside `@F
 ---
 
 # Release Notes v1.8.9
+
 > **Ultimate Security & Reactivity Hardening: Removal of Eval/New Function & Native JS Compilation**
 
 > [!IMPORTANT]

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dars-framework"
-version = "1.8.9b"
+version = "1.8.10"
 description = "Dars is a Full-Stack multiplatform Python UI framework for building modern, interactive web and desktop apps with Python code. Seamlessly integrated with FastAPI, it allows you to build complete applications with Server-Side Rendering (SSR) and reactive SPA capabilities also classic multipage html and desktop apps in a single codebase."
 dependencies = [ "rich==15.0.0", "bs4==0.0.2", "uvicorn==0.46.0", "markdown2==2.5.5", "requests==2.33.1", "plotly==6.7.0", "fastapi==0.136.1", "rjsmin==1.2.5", "rcssmin==1.2.2",]
 license = "MPL-2.0"
