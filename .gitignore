@@ -25,6 +25,7 @@ dist/
 *.bak
 *.swp
 .idea/
+.kiro/
 .vscode/
 *.iml
 *.orig

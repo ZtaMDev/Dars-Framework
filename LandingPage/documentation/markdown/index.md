@@ -1,4 +1,4 @@
-# Dars Framework Documentation (Dars is not longer maintained due to critical vulnerabilities in the core of the framework please leave dars and use the new alternative that is being developed called "Axiom" that will be more secure and modern)
+# Dars Framework Documentation
 
 Welcome to the official Dars Framework documentation. Here you will find detailed guides and references to help you build modern web applications with Python.
 

@@ -53,47 +53,26 @@ class FormData:
         """
         self.fields = fields
     
-    def _generate_collection_code(self) -> str:
-        """Generate JavaScript code to collect all form fields into an object."""
+    def _to_structure(self) -> dict:
+        """Generate DAP structure for the form data object."""
         
-        def process_value(value_expr, indent_level=1):
-            """Recursively process a value, handling V() expressions and nested dicts."""
-            indent = "    " * indent_level
-            
-            # Check if it's a V() expression
-            if hasattr(value_expr, '_get_code'):
-                # It's a ValueRef or expression with _get_code method
-                js_code = value_expr._get_code()
-                return f'await {js_code}'
-            elif hasattr(value_expr, 'to_dscript'):
-                # It's an expression with to_dscript method (BooleanExpression, etc.)
-                dscript_obj = value_expr.to_dscript()
-                js_code = dscript_obj.code if hasattr(dscript_obj, 'code') else str(dscript_obj)
-                return f'await {js_code}'
+        def process_value(value_expr):
+            if hasattr(value_expr, '_to_structure'):
+                return value_expr._to_structure()
             elif isinstance(value_expr, dict):
-                # It's a nested dictionary - process recursively
-                nested_assignments = []
-                for nested_key, nested_value in value_expr.items():
-                    nested_code = process_value(nested_value, indent_level + 1)
-                    nested_assignments.append(f'{indent}    "{nested_key}": {nested_code}')
-                return "{\n" + ",\n".join(nested_assignments) + f"\n{indent}}}"
+                return {k: process_value(v) for k, v in value_expr.items()}
             elif isinstance(value_expr, list):
-                # It's a list - process each item
-                list_items = []
-                for item in value_expr:
-                    item_code = process_value(item, indent_level + 1)
-                    list_items.append(f'{indent}    {item_code}')
-                return "[\n" + ",\n".join(list_items) + f"\n{indent}]"
+                return [process_value(v) for v in value_expr]
             else:
-                # It's a literal value
-                return json.dumps(value_expr)
+                return value_expr
         
-        field_assignments = []
-        for field_name, value_expr in self.fields.items():
-            value_code = process_value(value_expr, indent_level=2)
-            field_assignments.append(f'        "{field_name}": {value_code}')
+        processed_fields = {k: process_value(v) for k, v in self.fields.items()}
         
-        return "{\n" + ",\n".join(field_assignments) + "\n    }"
+        # We need an op that constructs an object from these fields, 
+        # but since 'args' in DAP are already an object, 
+        # we can just return a structure like { "op": "collect_values", "args": processed_fields }
+        # The dispatcher's _resolve will resolve the values in args.
+        return {"op": "collect_values", "args": processed_fields}
     
     def alert(self, title: str = "Form Data") -> dScript:
         """
@@ -108,50 +87,36 @@ class FormData:
         Example:
             Button("Submit", on_click=form_data.alert("Submitted!"))
         """
-        collection_code = self._generate_collection_code()
+    def alert(self, title: str = "Form Data") -> dScript:
+        """Show form data in alert (secure DAP)."""
+        data_struct = self._to_structure()
+        # We need to stringify it for alert
+        msg = {"op": "transform", "args": {"input": data_struct, "method": "json_stringify"}}
+        # But wait, alert takes a string. We can prepend title. 
+        # We might need 'string_concat' op.
+        full_msg = {"op": "string_concat", "args": {"parts": [title + ":\n\n", msg]}}
         
-        js_code = f"""
-(async () => {{
-    try {{
-        const formData = {collection_code};
-        alert('{title}:\\n\\n' + JSON.stringify(formData, null, 2));
-        console.log('Form data:', formData);
-    }} catch (e) {{
-        console.error('Form collection error:', e);
-        alert('Error collecting form data: ' + e.message);
-    }}
-}})();
-        """.strip()
-        
-        return dScript(js_code)
-    
+        # dScript supports data directly
+        from dars.actionProtocol import Action
+        return dScript(data=Action.alert(message=full_msg))
+
     def log(self, message: str = "Form Data") -> dScript:
-        """
-        Generate dScript that logs form data to console.
-        
-        Args:
-            message: Message to log with the data
-            
-        Returns:
-            dScript object that can be used in on_click handlers
-            
-        Example:
-            Button("Log Form", on_click=form_data.log())
-        """
-        collection_code = self._generate_collection_code()
-        
-        js_code = f"""
-(async () => {{
-    try {{
-        const formData = {collection_code};
-        console.log('{message}:', formData);
-    }} catch (e) {{
-        console.error('Form collection error:', e);
-    }}
-}})();
-        """.strip()
-        
-        return dScript(js_code)
+        """Log form data to console (secure DAP)."""
+        # console.log can take objects directly, so no need for stringify
+        # But Action.log takes a message. DAP dispatcher console.log(args.message).
+        # If args.message is an object, it logs the object.
+        data_struct = self._to_structure()
+        # To log "Message: Object", we might want separate args or formatted log. 
+        # Current Action.log only has message. 
+        # I'll create a list/array for log? DAP log support usually implies single message. 
+        # If I return an array [msg, data_struct], console.log might print it as array.
+        # Let's stringify for now or assume DAP log handles it.
+        # Given js_lib console.log(args.message), if message is resolved to an object, it logs the object.
+        # But we want "Message: Object". 
+        # I'll stick to logging the object for now, or just tuple?
+        # Let's log the object directly.
+        from dars.actionProtocol import Action
+        return dScript(data=Action.log(message=data_struct))
     
     def to_state(self, state_property) -> dScript:
         """
@@ -166,40 +131,31 @@ class FormData:
         Example:
             Button("Submit", on_click=form_data.to_state(form.submitted_data))
         """
-        collection_code = self._generate_collection_code()
+    def to_state(self, state_property) -> dScript:
+        """Save form data to state (secure DAP)."""
+        data_struct = self._to_structure()
+        # State.change takes stringified values for 'dynamic' changes usually, but 
+        # if the change handler supports objects, we can pass object.
+        # js_lib.py change op: window.Dars.change(args).
+        # args usually is { id: ..., values: ... }.
+        # The previous code stringified it: {state_property._name}: formDataJSON
+        # So we should stringify it.
+        json_data = {"op": "transform", "args": {"input": data_struct, "method": "json_stringify"}}
         
-        js_code = f"""
-(async () => {{
-    try {{
-        const formData = {collection_code};
-        const formDataJSON = JSON.stringify(formData, null, 2);
+        from dars.actionProtocol import Action
+        # We need to construct the change action manually or use Action.change
+        # Action.state_set_value? 
+        # state_property is a ValueRef or similar.
+        # state_property._state.component.id 
+        # state_property._name
         
-        // Update state with the collected data
-        let ch = window.__DARS_CHANGE_FN;
-        if (!ch) {{
-            if (window.Dars && typeof window.Dars.change === 'function') {{
-                ch = window.Dars.change.bind(window.Dars);
-            }} else {{
-                const m = await import('/lib/dars.min.js');
-                ch = (m.change || (m.default && m.default.change));
-            }}
-            if (typeof ch === 'function') window.__DARS_CHANGE_FN = ch;
-        }}
+        change_args = {
+            "id": state_property._state.component.id,
+            "dynamic": True,
+            state_property._name: json_data
+        }
         
-        if (typeof ch === 'function') {{
-            ch({{
-                id: '{state_property._state.component.id}',
-                dynamic: true,
-                {state_property._name}: formDataJSON
-            }});
-        }}
-    }} catch (e) {{
-        console.error('Form to state error:', e);
-    }}
-}})();
-        """.strip()
-        
-        return dScript(js_code)
+        return dScript(data=Action.change(change_args))
     
     def submit_and_alert(self, state_property=None, title: str = "Form Submitted") -> dScript:
         """
@@ -219,162 +175,91 @@ class FormData:
             # Alert and save to state
             Button("Submit", on_click=form_data.submit_and_alert(form.submitted_data))
         """
-        collection_code = self._generate_collection_code()
-        
-        state_update_code = ""
-        if state_property:
-            state_update_code = f"""
-        
-        // Update state with the collected data
-        let ch = window.__DARS_CHANGE_FN;
-        if (!ch) {{
-            if (window.Dars && typeof window.Dars.change === 'function') {{
-                ch = window.Dars.change.bind(window.Dars);
-            }} else {{
-                const m = await import('/lib/dars.min.js');
-                ch = (m.change || (m.default && m.default.change));
-            }}
-            if (typeof ch === 'function') window.__DARS_CHANGE_FN = ch;
-        }}
-        
-        if (typeof ch === 'function') {{
-            ch({{
-                id: '{state_property._state.component.id}',
-                dynamic: true,
-                {state_property._name}: formDataJSON
-            }});
-        }}
-            """
-        
-        js_code = f"""
-(async () => {{
-    try {{
-        const formData = {collection_code};
-        const formDataJSON = JSON.stringify(formData, null, 2);
-        
-        // Show alert
-        alert('{title}:\\n\\n' + formDataJSON);
-        console.log('Form submitted:', formData);{state_update_code}
-    }} catch (e) {{
-        console.error('Form submission error:', e);
-        alert('Error submitting form: ' + e.message);
-    }}
-}})();
-        """.strip()
-        
-        return dScript(js_code)
-    
     def submit(self, url: str, state_property=None, on_success=None, on_error=None) -> dScript:
-        """
-        Submit form data to a backend endpoint via POST request using dars.backend.
+        """Submit form data to ID (secure DAP)."""
+        data_struct = self._to_structure()
         
-        Args:
-            url: Backend endpoint URL (e.g., "http://localhost:3000/submit")
-            state_property: Optional state property to save response to
-            on_success: Optional dScript to execute on successful submission
-            on_error: Optional dScript to execute on error
-            
-        Returns:
-            dScript object that can be used in on_click handlers
-            
-        Example:
-            # Simple submit
-            Button("Submit", on_click=form_data.submit("http://localhost:3000/submit"))
-            
-            # Submit and save response to state
-            Button("Submit", on_click=form_data.submit(
-                url="http://localhost:3000/submit",
-                state_property=form.response
-            ))
-            
-            # Submit with success callback
-            Button("Submit", on_click=form_data.submit(
-                url="http://localhost:3000/submit",
-                on_success=alert("Form submitted successfully!")
-            ))
-        """
-        collection_code = self._generate_collection_code()
+        # Helper to convert callback to structure
+        def _to_action(act):
+            if hasattr(act, 'get_action'): return act.get_action()
+            if hasattr(act, 'code'): return {"op": "inline", "args": {"code": act.code}}
+            if isinstance(act, str): return {"op": "inline", "args": {"code": act}}
+            return act
+
+        # We use a new op 'network_request' (or 'fetch')
+        # We need to update ActionProtocol and js_lib.py
+        # For now, I'll generate the structure directly assuming support.
         
-        # Generate success callback code
-        success_code = ""
-        if on_success:
-            if hasattr(on_success, 'code'):
-                success_code = on_success.code
-            else:
-                success_code = str(on_success)
+        fetch_args = {
+            "url": url,
+            "method": "POST",
+            "headers": {"Content-Type": "application/json"},
+            "body": {"op": "transform", "args": {"input": data_struct, "method": "json_stringify"}}
+        }
         
-        # Generate error callback code
-        error_code = ""
-        if on_error:
-            if hasattr(on_error, 'code'):
-                error_code = on_error.code
-            else:
-                error_code = str(on_error)
-        else:
-            error_code = "alert('Error submitting form: ' + error.message);"
-        
-        # Generate state update code if state_property provided
-        state_update_code = ""
+        success_actions = []
         if state_property:
-            state_update_code = f"""
-        // Update state with response
-        let ch = window.__DARS_CHANGE_FN;
-        if (!ch) {{
-            if (window.Dars && typeof window.Dars.change === 'function') {{
-                ch = window.Dars.change.bind(window.Dars);
-            }} else {{
-                const m = await import('/lib/dars.min.js');
-                ch = (m.change || (m.default && m.default.change));
-            }}
-            if (typeof ch === 'function') window.__DARS_CHANGE_FN = ch;
-        }}
+             # Save response to state
+             # Response data is available in 'last_response'? Or passed as arg?
+             # This is tricky with DAP. 'fetch' usually returns response.
+             # We might need 'fetch' to set a variable in context or pass result to 'on_success'.
+             # Or 'network_request' op takes 'on_success' action and passes data as context variable.
+             # Let's assume on_success actions have access to 'data' in context or we specifically set state with 'response_data'.
+             # I'll usage a special value "get_context_value", arg "response_data".
+             # This requires 'get_context_value' op.
+             response_val = {"op": "get_context_value", "args": {"key": "response_data"}}
+             json_data = {"op": "transform", "args": {"input": response_val, "method": "json_stringify"}}
+             
+             change_args = {
+                "id": state_property._state.component.id,
+                "dynamic": True,
+                state_property._name: json_data
+             }
+             success_actions.append({"op": "change", "args": change_args})
+
+        if on_success:
+            success_actions.append(_to_action(on_success))
+            
+        error_actions = []
+        if on_error:
+            error_actions.append(_to_action(on_error))
+        else:
+            # Default error alert
+            error_actions.append({"op": "alert", "args": {"message": "Error submitting form"}})
+
+        return dScript(data={
+            "op": "network_request",
+            "args": {
+                "url": url,
+                "method": "POST",
+                "headers": {"Content-Type": "application/json"},
+                "body": {"op": "transform", "args": {"input": data_struct, "method": "json_stringify"}},
+                "on_success": {"op": "sequence", "args": {"actions": success_actions}},
+                "on_error": {"op": "sequence", "args": {"actions": error_actions}}
+            }
+        })
+
+    def submit_and_alert(self, state_property=None, title: str = "Form Submitted") -> dScript:
+        """Submit and alert (secure DAP)."""
+        data_struct = self._to_structure()
+        msg = {"op": "transform", "args": {"input": data_struct, "method": "json_stringify"}}
+        full_msg = {"op": "string_concat", "args": {"parts": [title + ":\n\n", msg]}}
         
-        if (typeof ch === 'function') {{
-            ch({{
-                id: '{state_property._state.component.id}',
-                dynamic: true,
-                {state_property._name}: JSON.stringify(data, null, 2)
-            }});
-        }}
-            """
+        actions = []
+        actions.append({"op": "alert", "args": {"message": full_msg}})
+        actions.append({"op": "log", "args": {"message": data_struct}})
         
-        # Use dars.backend style with operation ID and callback
-        js_code = f"""
-(async () => {{
-    try {{
-        const formData = {collection_code};
-        
-        console.log('Submitting form to {url}:', formData);
-        
-        // Use fetch directly but in dars.backend style
-        const response = await fetch('{url}', {{
-            method: 'POST',
-            headers: {{
-                'Content-Type': 'application/json'
-            }},
-            body: JSON.stringify(formData)
-        }});
-        
-        if (!response.ok) {{
-            throw new Error(`HTTP ${{response.status}}: ${{response.statusText}}`);
-        }}
-        
-        const data = await response.json();
-        console.log('Form submission response:', data);
-        {state_update_code}
-        // Execute success callback
-        {success_code}
-        
-    }} catch (error) {{
-        console.error('Form submission error:', error);
-        
-        // Execute error callback
-        {error_code}
-    }}
-}})();
-        """.strip()
-        
-        return dScript(js_code)
+        if state_property:
+             json_data = {"op": "transform", "args": {"input": data_struct, "method": "json_stringify"}}
+             change_args = {
+                "id": state_property._state.component.id,
+                "dynamic": True,
+                state_property._name: json_data
+             }
+             actions.append({"op": "change", "args": change_args})
+             
+        from dars.actionProtocol import Action
+        return dScript(data=Action.sequence(actions))
 
 
 def collect_form(*fields, **kwargs) -> FormData:

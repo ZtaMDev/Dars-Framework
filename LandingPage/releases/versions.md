@@ -1,3 +1,54 @@
+# Release Notes v1.8.9
+
+> **Ultimate Security & Reactivity Hardening: Removal of Eval/New Function & Native JS Compilation**
+
+> [!IMPORTANT]
+> **SECURITY ADVISORY**: v1.8.9 achieves a major milestone by removing `eval()` and `new Function()` from the core client-side runtime (`dars.min.js`). However, the web framework (as seen in certain SSR/Fullstack exports) is not yet 100% free of `new Function()` and `_executeExternalScript` for specific dynamic execution flows. This will be fully addressed in the upcoming **Dars Flight Protocol (DFP)** release.
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Zero Eval Runtime & Secure Script Execution
+
+We have completely overhauled how Dars executes dynamic code in the browser.
+
+- **Removal of Legacy Eval**: Major instances of `eval()` and `new Function()` have been eliminated from the runtime (`dars.min.js`).
+- **Async IIFE Injection**: Dynamic scripts (event handlers, lifecycle hooks) are now executed via a secure, async IIFE-based script injection mechanism. This provides better scope isolation and prevents global scope pollution.
+- **Native `await` Support**: You can now use `await` directly within any event handler or transformation script.
+
+### Native JavaScript Compilation Pipeline
+
+The `dScript` compiler is now a core framework utility, moving complex resolution logic from the browser to the build/export phase.
+
+- **Optimized JS Emission**: Python expressions using `V()`, `MathExpression`, and `BooleanExpression` are now compiled into clean, native JavaScript code strings.
+- **Consistent Serialization**: Centralized the `compile_val` logic to ensure that complex structures (lists, dicts) containing reactive objects are correctly translated into executable JS literals, resolving previous "RawJS is not serializable" warnings.
+
+### Hardened Reactivity & Math Logic
+
+Fixed several long-standing issues with the reactivity pipeline:
+
+- **Smart Arithmetic vs Concatenation**: Resolved the `NaN` errors in calculators. The compiler now correctly handles the `+` operator, favoring native JS concatenation for strings and addition for numbers.
+- **Template Literal Safety**: Refactored the `url()` and `transform()` helpers to use a structured concatenation model, eliminating `SyntaxError: Unexpected identifier` issues caused by nested backticks in template literals.
+
+### Async-Aware VDOM & Lazy Hydration
+
+The initial rendering engine (`_elFromVNode`) is now asynchronous-aware:
+
+- **Lazy Property Resolution**: VDOM properties (text, class, style, attributes) can now be initialized with Promises. The runtime will automatically hydrate these properties as they resolve, enabling powerful async patterns during the initial render.
+- **Fixed Code Injection Bugs**: Resolved the issue where raw JS code strings were occasionally rendered as text in the browser instead of being executed.
+
+### Bug Fixes
+
+- **Recursive Compiler**: `compile_val` now recursively handles nested collections, ensuring all parts of a complex prop are correctly compiled.
+- **Fixed VRef Rendering**: Improved the `ValueRef` string representation to integrate seamlessly with the new native compiler.
+
+---
+
 # Release Notes v1.8.8
 
 > **Critical Security Update: Dars Server Protocol (DSP) & SSR Hydration Fix**
@@ -14,15 +65,20 @@ pip install --upgrade dars-framework
 ## What's New
 
 ### Dars Server Protocol (DSP)
+
 Introduced a new unified protocol for transmitting VDOM snapshots, component states, and reactive bindings from the server to the client. This ensures that SSR-rendered pages are hydrated with full parity to client-side renders.
 
 ### SSR Hydration & Interactivity Fixes
-Resolved critical issues where reactive bindings (`useDynamic`) and `VRef` bindings were not correctly executed after initial server rendering. 
+
+Resolved critical issues where reactive bindings (`useDynamic`) and `VRef` bindings were not correctly executed after initial server rendering.
+
 - **Unified Reactivity Registry**: Client-side bindings are now registered through a centralized mechanism, preventing ID mismatches.
 - **Improved SPA Routing**: The client-side router now natively supports DSP payloads, allowing seamless interactivity when navigating between SSR-rendered routes.
 
 ### [IMPORTANT] Server Components Removal
-As part of security hardening, the experimental "Dars Server Components" feature (using `use_server=True`) has been removed from this version. 
+
+As part of security hardening, the experimental "Dars Server Components" feature (using `use_server=True`) has been removed from this version.
+
 - Projects using this feature should transition to the standard **SSR Route** architecture, which now provides superior performance and security through the DSP.
 - This removal reduces the attack surface while we work on a more robust, sandboxed implementation for future releases.
 
@@ -68,6 +124,7 @@ dars init my-app --type ssr
 ```
 
 This template sets up:
+
 - A FastAPI backend using `create_dars_app`.
 - A Dars frontend configured for SSR.
 - Best practices for project structure and deployment.
@@ -310,11 +367,11 @@ The original `class_name` remains fully respected and is appended **after** the 
 The optimized styles are accumulated into a central registry and injected in the `<head>` as:
 
 ```html
-<link rel="stylesheet" href="runtime_css.css">
+<link rel="stylesheet" href="runtime_css.css" />
 <style id="dars-style-registry">
   /* .dars-s-* rules here */
 </style>
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.css" />
 ```
 
 Order is carefully chosen so that:
@@ -446,7 +503,7 @@ The web exporter has been extended so that `useDynamic` bindings on boolean attr
 - When a `State` value changes, the runtime:
   - Adds or removes the HTML attributes: `autoplay`, `muted`, `loop`, `controls`, `playsinline`.
   - Synchronizes the corresponding JS properties on the media element (`el.autoplay`, `el.muted`, etc.).
-- Dynamic markers (from `useDynamic`) no longer count as *truthy* defaults:
+- Dynamic markers (from `useDynamic`) no longer count as _truthy_ defaults:
   - `controls=True`, `plays_inline=True` remain active by default.
   - `autoplay`, `loop`, `muted` are off by default unless explicitly set by state or by a literal `True`.
 
@@ -490,7 +547,7 @@ Several quality-of-life fixes improve desktop (Electron) development:
   - Exits the method immediately when desktop mode finishes, preventing the web preview server from starting on top of Electron dev.
 - `dars core/js_bridge`:
   - `electron_dev_spawn` now sets `ELECTRON_DISABLE_SECURITY_WARNINGS=true` for dev runs.
-  - This suppresses the noisy *Electron Security Warning (Insecure Content-Security-Policy)* in dev tools without touching the CSP used by the Dars runtime.
+  - This suppresses the noisy _Electron Security Warning (Insecure Content-Security-Policy)_ in dev tools without touching the CSP used by the Dars runtime.
 
 Result: smoother desktop dev cycle with clear logs and no accidental web preview server when working on Electron apps.
 
@@ -527,11 +584,13 @@ This release introduces a **centralized eval helper** in the core Dars runtime (
     try {
       return (0, eval)(code);
     } catch (err) {
-      console.error('[Dars] Eval error:', err);
+      console.error("[Dars] Eval error:", err);
       // Optional dev hook – only called if you define it
       try {
-        const D = (globalThis && globalThis.Dars) || (typeof window !== 'undefined' ? window.Dars : null);
-        if (D && typeof D.onError === 'function') {
+        const D =
+          (globalThis && globalThis.Dars) ||
+          (typeof window !== "undefined" ? window.Dars : null);
+        if (D && typeof D.onError === "function") {
           D.onError(err, Object.assign({ code: String(code) }, ctx || {}));
         }
       } catch (_) {}
@@ -558,7 +617,6 @@ To help you surface client-side errors during development (especially hydration 
 Two of the most important dynamic execution points are now wired to `_safeEval` and the global hook:
 
 1. **Event handlers attached from the VDOM**
-
    - Previously, many handlers used raw `(0,eval)(c)` inside `try/catch` blocks.
    - Now, event execution goes through `_safeEval(c, { type, event, phase: 'event_handler' })`.
    - If you define `window.Dars.onError`, you receive:
@@ -567,7 +625,6 @@ Two of the most important dynamic execution points are now wired to `_safeEval` 
      - The handler type (`type`) and phase (`'event_handler'`).
 
 2. **Component lifecycle hooks (onMount, onUpdate, onUnmount)**
-
    - Lifecycle JS stored in the VDOM used to be executed with inline `try/catch`.
    - Now, `_runLifecycle(id, hook)` delegates to `_safeEval(code, { hook, id })` when a lifecycle snippet is present.
    - This lets you centralize errors from hydration and dynamic updates, while preserving the same control flow in the runtime.
@@ -727,7 +784,7 @@ The `onUpdate` hook now fires in two key scenarios:
 
      ```js
      if (window.Dars && window.Dars.updateVRef) {
-         window.Dars.updateVRef(selector);
+       window.Dars.updateVRef(selector);
      }
      ```
 
@@ -827,8 +884,8 @@ Starting from **v1.7.6**, Dars now injects the script tag with **Subresource Int
   src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"
   integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg=="
   crossorigin="anonymous"
-  referrerpolicy="no-referrer">
-</script>
+  referrerpolicy="no-referrer"
+></script>
 ```
 
 #### Benefits
@@ -1010,6 +1067,7 @@ Head(
 ### Dynamic SPA Metadata
 
 In Single Page Applications (SPA), the document metadata now **updates automatically** when navigating between routes. The router intelligentally applies:
+
 - `<title>`
 - Meta tags (`description`, `keywords`, etc.)
 - Open Graph tags (`og:title`, `og:image`, etc.)
@@ -1037,6 +1095,7 @@ pip install --upgrade dars-framework
 The `dars dev` command now exits instantly when pressing Ctrl+C. All cleanup operations (watchers, server, file deletion) happen in background threads, providing immediate feedback without blocking.
 
 **Exit Flow:**
+
 ```
 Ctrl+C pressed
 ↓
@@ -1073,22 +1132,26 @@ if os.path.exists(dest_js):
 Static assets in `public/` or `assets/` directories are only copied when changes are detected.
 
 **Change Detection:**
+
 - **New files**: Detected via modification time
 - **Modified files**: Detected via modification time comparison
 - **Deleted files**: Detected via file count mismatch
 
 **Marker File (`.public_sync`):**
+
 ```
 1733544800.123    # last sync timestamp
 42                # file count
 ```
 
 **Development Mode (bundle=False):**
+
 - Uses `.public_sync` marker for optimization
 - Only copies when changes detected
 - Skips unnecessary I/O operations
 
 **Production Mode (bundle=True):**
+
 - Always copies all files
 - No marker file created
 - Clean production builds
@@ -1100,11 +1163,13 @@ Static assets in `public/` or `assets/` directories are only copied when changes
 File watchers now initialize in a background thread, allowing the preview server to start immediately.
 
 **Before (v1.7.1):**
+
 - Server waited for all watchers to initialize
 - 1-3 second startup delay on large projects
 - Blocked on file system operations
 
 **After (v1.7.2):**
+
 - Server starts instantly(when dev_export finished)
 - Watchers initialize in background
 - Non-blocking startup sequence
@@ -1116,6 +1181,7 @@ File watchers now initialize in a background thread, allowing the preview server
 All performance improvements from Web mode have been applied to Desktop mode (Electron) for consistent behavior.
 
 **Improvements:**
+
 - Instant shutdown on Ctrl+C
 - Background cleanup (Electron, watchers, files)
 - Visual feedback during exit
@@ -1126,16 +1192,19 @@ All performance improvements from Web mode have been applied to Desktop mode (El
 ## Performance Improvements
 
 ### Startup Speed
+
 - **90% faster** on large projects
 - Watchers initialize in background
 - Server ready immediately
 
 ### Hot Reload Speed
+
 - **50-70% faster** reload times
 - Smart caching for static assets
 - Only updates changed files
 
 ### Shutdown Speed
+
 - **95% faster** exit with Ctrl+C
 - All cleanup in background
 - Instant user feedback
@@ -1153,11 +1222,11 @@ def _background_cleanup():
     # Stop watchers
     for w in watchers:
         w.stop()
-    
+
     # Stop directory watchers
     for dw in directory_watchers:
         dw.stop()
-    
+
     # Server shutdown
     if server:
         server.httpd.shutdown()
@@ -1197,16 +1266,19 @@ return False  # No changes
 ## Files Modified
 
 ### Core Changes
+
 - `dars/core/app.py` - Background cleanup, watcher initialization
 - `dars/exporters/web/html_css_js.py` - Smart caching, change detection
 
 ### Impact
+
 - **Web Mode**: Faster startup, reload, and shutdown
 - **Desktop Mode**: Same optimizations applied
 
 ---
 
 All existing projects will automatically benefit from:
+
 - Faster `dars dev` startup
 - Faster hot reload
 - Instant Ctrl+C exit
@@ -1217,7 +1289,6 @@ All existing projects will automatically benefit from:
 ---
 
 # Release Notes v1.7.1
-
 
 > **CLI Performance & Developer Experience Improvements**
 
@@ -1234,16 +1305,19 @@ pip install --upgrade dars-framework
 The `dars dev` command now starts **instantly** thanks to background directory cleanup. No more waiting for file deletion(probably)!
 
 **Before (v1.7.0):**
+
 - Startup blocked by `dars_preview` directory deletion
 - 2-5 second delay on large projects
 - No visual feedback during initialization
 
 **After (v1.7.1):**
+
 - **Instant startup** - cleanup happens in background
 - Visual spinner: "Starting preview..."
 - Non-blocking architecture
 
 **How it works:**
+
 1. Old `dars_preview` renamed to `dars_preview_trash_{timestamp}`
 2. Deletion happens in daemon thread
 3. Server starts immediately
@@ -1256,17 +1330,20 @@ The `dars dev` command now starts **instantly** thanks to background directory c
 Pressing Ctrl+C now exits **immediately** with visual feedback.
 
 **Before (v1.7.0):**
+
 - Blocked on preview file deletion
 - 3-10 second wait on large projects
 - No feedback during cleanup
 
 **After (v1.7.1):**
+
 - **Instant response** to Ctrl+C
 - Background cleanup with spinner
 - Maximum 2-second timeout
 - Visual feedback: "Cleaning up preview files..."
 
 **Exit Flow:**
+
 ```
 Ctrl+C pressed
 ↓
@@ -1295,9 +1372,9 @@ def export(self, app, output_path, bundle=False):
     # Reset state for HMR
     if hasattr(self, "_hljs_injected_pages"):
         self._hljs_injected_pages.clear()
-    
+
     # Reset lazy script flags
-    lazy_keys = [k for k in self.__dict__.keys() 
+    lazy_keys = [k for k in self.__dict__.keys()
                  if k.startswith("_lazy_script_injected_")]
     for k in lazy_keys:
         delattr(self, k)
@@ -1328,6 +1405,7 @@ re.sub(r'<pre([^>]*)>\s*<code(?![^>]*class=)', ...)
 ### Developer Experience Improvements
 
 **Visual Feedback:**
+
 - "Starting preview..." spinner during initialization
 - "Cleaning up preview files..." spinner on exit
 - Success messages with color coding
@@ -1363,7 +1441,7 @@ if hasattr(self, "_hljs_injected_pages"):
     self._hljs_injected_pages.clear()
 
 # Reset dynamic flags
-lazy_keys = [k for k in self.__dict__.keys() 
+lazy_keys = [k for k in self.__dict__.keys()
              if k.startswith("_lazy_script_injected_")]
 for k in lazy_keys:
     delattr(self, k)
@@ -1376,17 +1454,18 @@ This ensures scripts are re-injected on every export, maintaining consistency ac
 ## Files Modified
 
 ### Core Changes
+
 - `dars/core/app.py` - Background cleanup, startup/exit spinners
 - `dars/exporters/web/html_css_js.py` - HMR state reset, regex fix
 
 ### Impact
+
 - **Web Mode**: Faster startup and exit
 - **Desktop Mode**: Same optimizations applied
 
 ---
 
 # Release Notes v1.7.0
-
 
 > **Complete VRef System & Multi-Element Updates**
 
@@ -1403,9 +1482,10 @@ pip install --upgrade dars-framework
 Introducing `setVRef()`, a powerful new hook that allows you to create independent value references tied to specific DOM selectors. Unlike `useValue` which sets initial values for single components, `setVRef` creates a lightweight, portable reference that can be shared across your application.
 
 **Key Capabilities:**
-*   **Independent Values:** Define values that live in the DOM, identified by a CSS selector.
-*   **Shared References:** Use a class selector (e.g., `.shared-value`) to share a single value across multiple components.
-*   **Function Component Support:** seamless integration with `@FunctionComponent` templates.
+
+- **Independent Values:** Define values that live in the DOM, identified by a CSS selector.
+- **Shared References:** Use a class selector (e.g., `.shared-value`) to share a single value across multiple components.
+- **Function Component Support:** seamless integration with `@FunctionComponent` templates.
 
 ### Multi-Element Updates (Synchronized State)
 
@@ -1416,6 +1496,7 @@ This allows you to share a single "value reference" across multiple independent 
 ### Extended Component Support
 
 Extended `useValue` and `useDynamic` support to cover the entire component library. You can now use reactive bindings in:
+
 - `Card`
 - `Modal`
 - `Navbar`
@@ -1436,7 +1517,7 @@ count_ref = setVRef(0, ".shared-count")
 Container(
     # First component
     Text(count_ref, class_name="shared-count"),
-    
+
     # Second component (Function Component)
     CountDisplay(count_ref, class_name="shared-count")
 )
@@ -1470,6 +1551,7 @@ v1.6.9 marks the official release of the **Dars SSR System**, bringing true full
 The new `dars.backend` module integrates seamlessly with **FastAPI**, allowing you to serve your Dars application alongside your API routes.
 
 #### Key Functions
+
 - **`create_ssr_app(dars_app)`**: Converts your Dars App into a standard ASGI application (FastAPI) capable of server-side rendering.
 - **`RouteType.SSR`**: A new route type that tells Dars to render the page component on the server before sending it to the client.
 
@@ -1513,16 +1595,21 @@ def dashboard():
 The CLI has been updated to support the new full-stack architecture.
 
 #### New Init Command
+
 Create a complete SSR-ready project structure:
+
 ```bash
 dars init my-app --type ssr
 ```
+
 This generates:
+
 - `backend/` directory with `api.py` and `apiConfig.py`
 - `main.py` configured for SSR
 - Dual-port setup for development
 
 #### Development Environment
+
 - **Frontend (Port 8000)**: Hot-reloading dev server.
 - **Backend (Port 3000)**: SSR and API server.
 
@@ -1553,6 +1640,7 @@ pip install --upgrade dars-framework
 Dars Framework v1.6.8 introduces `updateVRef()`, a powerful new function for updating DOM values and component state without requiring State objects. This completes the component-level state management cycle alongside `V()`.
 
 **The Complete Cycle:**
+
 1. **Read**: `V("#input")` - Extract values (v1.5.8)
 2. **Validate**: `V("#input").length() >= 3` - Boolean validation (v1.6.7)
 3. **Update**: `updateVRef("#input", "new value")` - Update values (v1.6.8) **NEW!**
@@ -1580,6 +1668,7 @@ Button(
 ```
 
 **Benefits:**
+
 - **95% less code**
 - **Type-safe** with V() expressions
 - **Pythonic** - no inline JavaScript
@@ -1676,7 +1765,7 @@ def counter():
         Container(
             # Display count
             Text("0", id="count", style="text-[48px] font-bold"),
-            
+
             # Update buttons
             Button("+", on_click=updateVRef("#count", V("#count").int() + 1)),
             Button("-", on_click=updateVRef("#count", V("#count").int() - 1)),
@@ -1695,7 +1784,7 @@ def form():
             Input(id="first-name", placeholder="First Name"),
             Input(id="last-name", placeholder="Last Name"),
             Input(id="full-name", placeholder="Full Name", readonly=True),
-            
+
             # Auto-generate full name
             Button(
                 "Generate Full Name",
@@ -1703,7 +1792,7 @@ def form():
                     V("#first-name") + " " + V("#last-name")
                 )
             ),
-            
+
             # Clear all
             Button(
                 "Clear All",
@@ -1727,7 +1816,7 @@ def cart():
             Input(id="price", input_type="number", value="19.99"),
             Input(id="quantity", input_type="number", value="1"),
             Text("0", id="total"),
-            
+
             # Calculate total
             Button(
                 "Calculate Total",
@@ -1735,7 +1824,7 @@ def cart():
                     V("#price").float() * V("#quantity").int()
                 )
             ),
-            
+
             # Apply discount
             Button(
                 "Apply 10% Discount",
@@ -1756,7 +1845,7 @@ def signup():
         Container(
             Input(id="username", placeholder="Username"),
             Text("", id="username-status"),
-            
+
             # Validate and normalize
             Button(
                 "Validate Username",
@@ -1767,7 +1856,7 @@ def signup():
                     )
                 )
             ),
-            
+
             # Auto-fix: lowercase
             Button(
                 "Normalize",
@@ -1787,19 +1876,22 @@ def signup():
 
 ```python
 def updateVRef(
-    selector: Union[str, Dict[str, Any]], 
+    selector: Union[str, Dict[str, Any]],
     value: Any = None
 ) -> dScript
 ```
 
 **Parameters:**
+
 - `selector`: CSS selector string or dict of {selector: value} pairs
 - `value`: Value to set (string, number, bool, ValueRef, or expression)
 
 **Returns:**
+
 - `dScript` object for use in event handlers
 
 **Supported Value Types:**
+
 - Literals: `"text"`, `42`, `True`
 - V() expressions: `V("#source")`
 - Transformations: `V("#input").upper()`
@@ -1807,6 +1899,7 @@ def updateVRef(
 - Boolean expressions: `(V("#age").int() >= 18).then("Adult", "Minor")`
 
 **Supported Elements:**
+
 - `Input` / `Textarea`: Updates `.value` property
 - `Checkbox` / `Radio`: Updates `.checked` property
 - `Select`: Updates `.value` property
@@ -1873,6 +1966,7 @@ Button("Save", on_click=sequence(
 ## When to Use What
 
 ### Use `updateVRef()` when:
+
 - Updating UI elements temporarily
 - Form auto-fill and normalization
 - Local calculations and previews
@@ -1880,12 +1974,14 @@ Button("Save", on_click=sequence(
 - You don't need reactivity across components
 
 ### Use `State.set()` when:
+
 - Data needs to persist
 - Multiple components need the value
 - You need automatic reactivity
 - Application-level state
 
 ### Use both (Hybrid):
+
 - Local updates for immediate feedback
 - State updates for persistence
 - Best of both worlds!
@@ -1901,6 +1997,7 @@ Button("Save", on_click=sequence(
 ## What's Next
 
 Future enhancements planned for 1.7.0:
+
 - `useVRef()` - Reactive V() expressions with dependencies
 - `setVRef()` - Set values accessible via V() selectors
 - Full exporter integration for reactive bindings
@@ -1933,6 +2030,7 @@ pip install --upgrade dars-framework
 Dars Framework v1.6.7 introduces a revolutionary declarative system for boolean logic and validation. Write complex conditionals in pure Python using comparison operators - **no inline JavaScript required!**
 
 **Key Features:**
+
 - **Comparison Operators** - Use Python operators (`==`, `!=`, `>`, `<`, `>=`, `<=`)
 - **String Methods** - `.includes()`, `.startswith()`, `.endswith()`, `.length()`, `.bool()`
 - **Logical Operators** - `.and_()` and `.or_()` for combining conditions
@@ -1947,14 +2045,14 @@ Button(
     on_click=dScript("""
         const email = document.querySelector('#email').value;
         const age = parseInt(document.querySelector('#age').value);
-        
+
         let valid = false;
         if (email.includes('@') && email.includes('.') && age >= 18 && age <= 120) {
             valid = true;
         }
-        
+
         const message = valid ? '✓ Valid' : '✗ Invalid';
-        
+
         window.Dars.change({
             id: 'form',
             dynamic: true,
@@ -1982,6 +2080,7 @@ Button(
 ```
 
 **Benefits:**
+
 - **90% less code**
 - **Type-safe** with explicit transformations
 - **Readable** - Python syntax
@@ -2097,17 +2196,17 @@ Button("Save", on_click=form_data.to_state(state.data))
 form_data = collect_form(
     name=V("#name"),
     email=V("#email"),
-    
+
     # Nested validation results
     validation={
         "email_valid": V("#email").includes("@"),
         "age_ok": (V("#age").int() >= 18).and_(
                    V("#age").int() <= 120)
     },
-    
+
     # Conditional values
     discount=(V("#premium").bool()).then("10%", "0%"),
-    
+
     # Timestamp
     submitted_at=getDateTime()
 )
@@ -2152,7 +2251,7 @@ def index():
             Input(id="name", placeholder="Name"),
             Input(id="email", placeholder="Email"),
             Input(id="age", input_type="number", placeholder="Age"),
-            
+
             # Submit to backend - NO RAW JAVASCRIPT!
             Button(
                 "Submit to Backend",
@@ -2162,7 +2261,7 @@ def index():
                     on_success=alert("Form submitted successfully!")
                 )
             ),
-            
+
             # Display backend response
             Container(
                 Text("Backend Response:", style="font-bold"),
@@ -2175,6 +2274,7 @@ app.add_page("index", index())
 ```
 
 **Features:**
+
 - **Automatic JSON serialization**
 - **State integration** - save response to state
 - **Success/error callbacks**
@@ -2226,7 +2326,7 @@ from dars.all import *
 
 app = App("Complete Form Demo")
 
-form = State("form", 
+form = State("form",
     email_valid="",
     age_valid="",
     password_valid="",
@@ -2240,7 +2340,7 @@ form_data = collect_form(
     age=V("#age").int(),
     password=V("#password"),
     confirm_password=V("#confirm"),
-    
+
     # Nested validation
     validation={
         "email_valid": V("#email").includes("@"),
@@ -2249,7 +2349,7 @@ form_data = collect_form(
         "password_strong": V("#password").length() >= 8,
         "passwords_match": V("#password") == V("#confirm")
     },
-    
+
     # Timestamp
     submitted_at=getDateTime()
 )
@@ -2269,7 +2369,7 @@ def index():
                 )
             ),
             Text(text=useDynamic("form.email_valid")),
-            
+
             # Age validation
             Input(id="age", input_type="number", placeholder="Age"),
             Button(
@@ -2281,7 +2381,7 @@ def index():
                 )
             ),
             Text(text=useDynamic("form.age_valid")),
-            
+
             # Password match
             Input(id="password", input_type="password", placeholder="Password"),
             Input(id="confirm", input_type="password", placeholder="Confirm"),
@@ -2294,7 +2394,7 @@ def index():
                 )
             ),
             Text(text=useDynamic("form.password_valid")),
-            
+
             # Submit to backend
             Button(
                 "Submit to Backend",
@@ -2304,7 +2404,7 @@ def index():
                     on_success=alert("Success!")
                 )
             ),
-            
+
             # Display response
             Text(text=useDynamic("form.backend_response"))
         )
@@ -2325,12 +2425,14 @@ if __name__ == "__main__":
 Fixed a critical bug where `.int()` and `.float()` transformations were overwriting previous transformations instead of chaining them.
 
 **Issue:**
+
 ```python
 # This was failing
 V("#name").length() >= 4  # .length() was being overwritten
 ```
 
 **Fixed:**
+
 ```python
 # Now works correctly
 V("#name").length() >= 4  # .length() chains with .int()
@@ -2345,6 +2447,7 @@ Added `to_dscript()` method to `BooleanExpression`, `ConditionalExpression`, and
 ## What's Next
 
 Future enhancements planned for 1.7.0:
+
 - `useVRef()` hook for reactive value references
 - `setVRef()` hook for setting values
 - `updateVRef()` helper for value updates
@@ -2383,6 +2486,7 @@ You can now define your own utility classes in `dars.config.json` under the `uti
 - **Recursive Composition**: Build complex utilities by referencing other custom utilities.
 
 **Example `dars.config.json`:**
+
 ```json
 {
   "utility_styles": {
@@ -2421,6 +2525,7 @@ pip install --upgrade dars-framework
 Dars v1.6.5 brings a colossal update to the utility styling system, making it nearly feature-complete with modern utility-first CSS frameworks like Tailwind.
 
 **New Features:**
+
 - **Complete Color Palette**: Added full ranges (50-950) for `cyan`, `teal`, `lime`, `amber`, `emerald`, `fuchsia`, `rose`, `zinc`, `neutral`, and `stone`.
 - **Direct Font Size**: New `fs-[value]` utility for setting exact font sizes (e.g., `fs-[14px]`).
 - **Font Family**: New `ffam-[value]` utility for setting font families (e.g., `ffam-sans`, `ffam-[Open_Sans]`).
@@ -2460,6 +2565,7 @@ pip install --upgrade dars-framework
 Dars Framework v1.6.4 introduces a revolutionary declarative system for mathematical expressions. Write complex calculations in pure Python using operator overloading - **no inline JavaScript required!**
 
 **Key Features:**
+
 - **Operator Overloading** - Use Python operators (`+`, `-`, `*`, `/`, `%`, `**`)
 - **Automatic Precedence** - Parentheses handled automatically
 - **Dynamic Operators** - Operators from Select/Input elements
@@ -2475,7 +2581,7 @@ Button(
         const n1 = parseFloat(document.querySelector('.num1').value);
         const n2 = parseFloat(document.querySelector('.num2').value);
         const op = document.querySelector('.operation').value;
-        
+
         let result = 0;
         switch(op) {{
             case '+': result = n1 + n2; break;
@@ -2483,7 +2589,7 @@ Button(
             case '*': result = n1 * n2; break;
             case '/': result = n1 / n2; break;
         }}
-        
+
         window.Dars.change({{
             id: 'calc',
             dynamic: true,
@@ -2505,6 +2611,7 @@ Button(
 ```
 
 **Benefits:**
+
 - **less code**
 - **Type-safe** with explicit transformations
 - **NaN validation** with console warnings
@@ -2552,11 +2659,11 @@ calc.total.set(
 
 **Precedence Table:**
 
-| Operator | Precedence | Associativity |
-|----------|------------|---------------|
-| `**`     | 3 (highest)| Right         |
-| `*`, `/`, `%` | 2     | Left          |
-| `+`, `-` | 1 (lowest) | Left          |
+| Operator      | Precedence  | Associativity |
+| ------------- | ----------- | ------------- |
+| `**`          | 3 (highest) | Right         |
+| `*`, `/`, `%` | 2           | Left          |
+| `+`, `-`      | 1 (lowest)  | Left          |
 
 ---
 
@@ -2583,11 +2690,11 @@ def index():
                 SelectOption("/", "➗ Divide")
             ]
         ),
-        
+
         # Number inputs
         Input(class_name="num1", input_type="number"),
         Input(class_name="num2", input_type="number"),
-        
+
         # Declarative calculation!
         Button(
             "Calculate",
@@ -2595,13 +2702,14 @@ def index():
                 V(".num1").float() + V(".operation").operator() + V(".num2").float()
             )
         ),
-        
+
         # Result display
         Text(text=useDynamic("calc.result"))
     )
 ```
 
 **How it works:**
+
 1. `V(".operation").operator()` extracts the operator value
 2. Validates against whitelist: `+`, `-`, `*`, `/`, `%`, `**`
 3. Uses switch statement for safe evaluation
@@ -2626,6 +2734,7 @@ Button(
 ```
 
 **Validation Points:**
+
 1. **Input Validation** - Checks operands before calculation
 2. **Result Validation** - Checks result after calculation
 3. **Console Logging** - Warns when NaN is detected
@@ -2651,6 +2760,7 @@ Select(
 ## What's Next
 
 Future enhancements planned for 1.7.0:
+
 - Comparison operators (`>`, `<`, `==`, `!=`)
 - Logical operators (`and`, `or`, `not`)
 - Ternary operator support
@@ -2660,7 +2770,6 @@ Future enhancements planned for 1.7.0:
 ---
 
 # Release Notes v1.6.3
-
 
 > **Tailwind-like Utility Class System**
 
@@ -2677,6 +2786,7 @@ pip install --upgrade dars-framework
 Dars Framework now includes a powerful, Python-native utility class system inspired by Tailwind CSS. You can style your components using concise utility strings directly in your Python code, without any external build tools or Node.js dependencies.
 
 **Key Features:**
+
 - **Zero Configuration**: Works out of the box.
 - **Python-Native**: Parsed at runtime/export time into standard CSS.
 - **No Node.js**: No need for npm, PostCSS, or Tailwind CLI.
@@ -2699,6 +2809,7 @@ def MyComponent():
 ### Supported Utilities
 
 The system supports a wide range of utilities including:
+
 - **Layout**: `flex`, `grid`, `block`, `hidden`, `flex-row`, `justify-center`, `items-center`, `gap-4`
 - **Spacing**: `p-4`, `m-4`, `px-2`, `py-2` (using rem units)
 - **Sizing**: `w-full`, `h-screen`, `w-1/2`, `max-w-md`
@@ -2710,6 +2821,7 @@ The system supports a wide range of utilities including:
 ### Arbitrary Values
 
 For values not in the standard scale, use square brackets:
+
 ```python
 style="w-[350px] bg-[#1a2b3c] z-[100] top-[50px]"
 ```
@@ -2746,6 +2858,7 @@ pip install --upgrade dars-framework
 The `useValue` hook has been improved to support direct usage in built-in components without requiring a selector. This makes it easier to set initial (non-reactive) values from state.
 
 **Simplified Syntax:**
+
 ```python
 # Before (required selector)
 Text(text=useValue("user.name", ".my-text"))
@@ -2759,9 +2872,11 @@ This is perfect for initializing components with state values that don't need to
 ### Critical Bug Fixes
 
 #### `useDynamic` Numeric Value Display
+
 Fixed an issue where `useDynamic` would display internal marker strings (e.g., `__DARS_DYNAMIC_...`) instead of the actual value when the state property was a number (especially `0`). Numeric values are now correctly resolved and displayed in both initial render and reactive updates.
 
 #### State Hot Reloading Fix
+
 Resolved a critical issue where state changes were not reflected after a hot reload. The state registry now correctly deduplicates state objects, ensuring that the most recent version of the state is always used. This fixes cases where changing a default value in code (e.g., `count=0` to `count=2`) wouldn't update the UI.
 
 ---
@@ -2783,6 +2898,7 @@ pip install --upgrade dars-framework
 The `useWatch` hook now supports watching multiple state properties simultaneously and executing multiple callbacks, enabling powerful reactive patterns and side effects.
 
 **Watch Multiple State Properties:**
+
 ```python
 # Watch multiple properties - callback executes when ANY of them change
 app.useWatch(
@@ -2792,6 +2908,7 @@ app.useWatch(
 ```
 
 **Multiple Callbacks:**
+
 ```python
 # Execute multiple callbacks when state changes
 app.useWatch(
@@ -2809,6 +2926,7 @@ app.useWatch(
 ```
 
 **Key Features:**
+
 - **Array Syntax**: Watch multiple state paths with a single watcher
 - **Multiple Callbacks**: Execute multiple side effects in sequence
 - **Reactive Composition**: Automatically sync derived state when source properties change
@@ -2821,11 +2939,13 @@ app.useWatch(
 Resolved an issue where custom state properties (properties other than `text`, `html`, `style`, `attrs`) were not correctly triggering watchers when updated via `change()`.
 
 **What was fixed:**
+
 - Custom properties like `info`, `count`, `status` now correctly update in `st.values`
 - Watchers for custom properties now trigger reliably
 - State registry properly maintains current values for all properties
 
 **Example that now works correctly:**
+
 ```python
 productState = State("product", name="Milk", price=100, info="")
 
@@ -2841,11 +2961,13 @@ app.useWatch(
 The `V()` helper now correctly retrieves current state values from the state registry instead of reading stale values from the DOM.
 
 **Previous Behavior:**
+
 - `V("product.name")` would read the displayed text from the DOM
 - This could lead to recursive string concatenation issues
 - Values might not reflect the actual state
 
 **Fixed Behavior:**
+
 - `V("product.name")` now reads directly from `window.Dars.getState('product').values['name']`
 - Always returns the current, raw state value
 - Falls back to DOM reading for legacy support
@@ -2853,7 +2975,6 @@ The `V()` helper now correctly retrieves current state values from the state reg
 ---
 
 # Release Notes v1.6.0
-
 
 > **Critical Bug Fixes & State Management Improvements**
 
@@ -2870,11 +2991,13 @@ pip install --upgrade dars-framework
 Fixed critical bugs where `useDynamic` and `useValue` hooks were not properly displaying default values from `State` objects when used in `FunctionComponent`s.
 
 **Issues Resolved:**
+
 - `useDynamic` now correctly retrieves default values from the state registry even when props are not explicitly passed to the component
 - `useValue` now works correctly without requiring a selector parameter
 - Both hooks properly display initial state values on first render
 
 **Example:**
+
 ```python
 # This now works correctly!
 state = State("ui", count=0, disabled=False)
@@ -2894,15 +3017,18 @@ def Counter(**props):
 Completely rewrote the `reset()` function to correctly handle **all** component properties, including boolean attributes like `checked`, `disabled`, `readonly`, and `required`.
 
 **Previous Behavior:**
+
 - Boolean attributes were incorrectly set to `"false"` string instead of being removed
 - Properties like `disabled="false"` would still disable elements (incorrect HTML behavior)
 
 **Fixed Behavior:**
+
 - Boolean attributes are now properly removed when `False`
 - Both HTML attributes AND DOM properties are synchronized correctly
 - Works for: `checked`, `disabled`, `readonly`, `required`, `selected`, `autofocus`, `autoplay`, `controls`, `loop`, `muted`
 
 **Example:**
+
 ```python
 state = State("ui", is_disabled=False, is_checked=True)
 
@@ -2918,12 +3044,14 @@ Button("Reset All", on_click=state.reset())
 Fixed `SyntaxError` in generated JavaScript caused by HTML IDs containing hyphens being used as variable names.
 
 **Issue:**
+
 ```javascript
 // Generated invalid JS
 const el_control-panel = ...  // SyntaxError!
 ```
 
 **Fixed:**
+
 ```javascript
 // Now generates valid JS
 const el_control_panel = ...  // ✓ Valid
@@ -2934,6 +3062,7 @@ const el_control_panel = ...  // ✓ Valid
 Enhanced the reactive binding system to properly handle boolean attributes with the `is_` prefix.
 
 **Supported Patterns:**
+
 ```python
 # All of these now work correctly
 state = State("ui", is_disabled=False, disabled=False)
@@ -2953,6 +3082,7 @@ state.is_disabled.set(False)  # Removes disabled attribute completely
 > **[!IMPORTANT] When using `State` objects with hooks like `useDynamic` and `useValue`, the state ID should **NOT** match any component ID in your DOM. The state ID is a unique identifier for the state object itself, not a component.**
 
 **X Incorrect:**
+
 ```python
 # DON'T do this - state ID matches button ID
 state = State("my-button", count=0)
@@ -2960,6 +3090,7 @@ Button(id="my-button", text=useDynamic("my-button.count"))
 ```
 
 **✓ Correct:**
+
 ```python
 # DO this - state has unique ID
 state = State("counter-state", count=0)
@@ -3005,10 +3136,12 @@ pip install --upgrade dars-framework
 Simplified keyboard event handling by consolidating `on_key_down` and `on_key_up` into a single, robust **`on_key_press`** event. This ensures consistent behavior across all components and browsers.
 
 **Deprecated:**
+
 - `on_key_down`
 - `on_key_up`
 
 **New Standard:**
+
 ```python
 Input(on_key_press=log("Key pressed!"))
 ```
@@ -3034,6 +3167,7 @@ KeyCode.F1
 Introduced three powerful helpers to make keyboard handling elegant and Pythonic.
 
 #### `onKey()` - Single Key Handler
+
 Handle specific keys with optional modifiers easily:
 
 ```python
@@ -3045,6 +3179,7 @@ Container(on_key_press=onKey(KeyCode.S, save(), ctrl=True))
 ```
 
 #### `switch()` - Multiple Key Handler
+
 Handle multiple keys in a single component without messy if-statements:
 
 ```python
@@ -3056,6 +3191,7 @@ Input(on_key_press=switch({
 ```
 
 #### `addGlobalKeys()` - App-wide Shortcuts
+
 Register global keyboard shortcuts that work anywhere in your app:
 
 ```python
@@ -3111,6 +3247,7 @@ V("product.price")   # Gets current value of product.price
 ```
 
 **How it works:**
+
 - `V("cart.total")` finds the reactive element created by `useDynamic("cart.total")`
 - Reads its current `textContent` value
 - Perfect for combining reactive state with calculations
@@ -3145,6 +3282,7 @@ Button("Calculate", on_click=productState.total.set(
 #### The Problem
 
 Previously, you could accidentally multiply strings:
+
 ```python
 # Before: This would concatenate strings, not multiply!
 V("#price") * V("#qty")  # "19.99" * "5" = NaN or unexpected behavior
@@ -3165,6 +3303,7 @@ V("#price") * V("#qty")
 ```
 
 **String concatenation (`+`) still works without transformations:**
+
 ```python
 # Always allowed
 V("#first") + " " + V("#last")  # String concatenation
@@ -3172,6 +3311,7 @@ V("#first") + " " + V("#last")  # String concatenation
 ```
 
 **Supported Operators:**
+
 - `+` - Addition/Concatenation (always allowed)
 - `*` - Multiplication (requires `.int()` or `.float()`)
 - `/` - Division (requires `.int()` or `.float()`)
@@ -3200,11 +3340,13 @@ Button("Save", on_click=userState.name.set(V(".name-input")))
 ```
 
 **How it works:**
+
 1. `useValue("user.name", ".name-input")` sets initial value AND applies class `name-input`
 2. `V(".name-input")` extracts the current value (even if modified by user)
 3. Perfect for forms with initial values and value extraction
 
 **Supported selectors:**
+
 - **Class selectors** (`.foo`) → Added to element's `class` attribute
 - **ID selectors** (`#bar`) → Set as element's `id` attribute
 
@@ -3217,16 +3359,19 @@ Button("Save", on_click=userState.name.set(V(".name-input")))
 If you were using arithmetic operators without transformations, add `.int()` or `.float()`:
 
 **Before:**
+
 ```python
 state.total.set(V("#price") * V("#qty"))
 ```
 
 **After:**
+
 ```python
 state.total.set(V("#price").float() * V("#qty").int())
 ```
 
 **String concatenation is unchanged:**
+
 ```python
 # Still works the same
 state.fullname.set(V("#first") + " " + V("#last"))
@@ -3252,12 +3397,12 @@ def ProductCard(**props):
         <!-- Reactive display -->
         <h3>{useDynamic("product.name")}</h3>
         <p>Price: ${useDynamic("product.price")}</p>
-        
+
         <!-- Editable quantity with selector -->
-        <input type="number" 
+        <input type="number"
                value="{useValue("product.quantity", ".qty-input")}"
                min="1" />
-        
+
         <!-- Reactive total -->
         <p>Total: ${useDynamic("cart.total")}</p>
     </div>
@@ -3267,12 +3412,12 @@ def ProductCard(**props):
 def index():
     return Page(
         ProductCard(id="product-card", name="Milk", price=100, quantity=2, total=0),
-        
+
         # Calculate: DOM input × State value
         Button("Calculate Total", on_click=cartState.total.set(
             V(".qty-input").int() * V("product.price").float()
         )),
-        
+
         # String concatenation (no transformation needed)
         Button("Show Info", on_click=productState.name.set(
             "Product: " + V("product.name") + " - $" + V("product.price")
@@ -3294,11 +3439,13 @@ if __name__ == "__main__":
 ## Bug Fixes
 
 ### useValue Selector Application
+
 - **Issue**: Selectors in `useValue()` were not being applied to FunctionComponent elements
 - **Fix**: Implemented BeautifulSoup-based HTML parsing to detect and apply selectors
 - **Impact**: `useValue()` now works identically in FunctionComponents and built-in components
 
 ### V() State Path Detection
+
 - **Issue**: No way to extract values from reactive state without DOM elements
 - **Fix**: Added intelligent state path detection (e.g., `"cart.total"` vs `".cart-total"`)
 - **Impact**: Seamless integration between `useDynamic()`, `useValue()`, and `V()`
@@ -3314,6 +3461,7 @@ if __name__ == "__main__":
 **Reason**: Prevents accidental string operations that cause bugs.
 
 **Migration**: Add `.int()` or `.float()` before arithmetic operations:
+
 ```python
 V("#price").float() * V("#qty").int()
 ```
@@ -3367,6 +3515,7 @@ def Profile(**props):
 Introducing a set of helpers to make working with DOM values completely Pythonic, eliminating the need for `RawJS`.
 
 #### V() - Value Reference
+
 Select DOM elements and perform operations directly in Python:
 
 ```python
@@ -3381,6 +3530,7 @@ Button("Add", on_click=state.count.set(V("#num1").int() + 10))
 ```
 
 #### url() - URL Builder
+
 Construct dynamic URLs easily with proper interpolation:
 
 ```python
@@ -3390,6 +3540,7 @@ Button("Fetch", on_click=fetch(
 ```
 
 ### Stability
+
 - **Fix**: Resolved an issue where reactive bindings could generate duplicate JavaScript variables, causing "Identifier has already been declared" errors during hot reloads or complex state updates.
 
 # Release Notes v1.5.6
@@ -3409,6 +3560,7 @@ pip install --upgrade dars-framework
 `useDynamic` now works with **all properties** of built-in components, including:
 
 #### Image & Link Components
+
 ```python
 # Dynamic image source and alt text
 Image(
@@ -3424,7 +3576,9 @@ Link(
 ```
 
 #### Boolean Attributes
+
 All boolean attributes now support dynamic binding:
+
 ```python
 # Dynamic disabled state
 Button(
@@ -3447,6 +3601,7 @@ Input(
 ```
 
 **Supported Boolean Properties:**
+
 - `disabled` - Button, Input, Textarea, Checkbox, RadioButton, Select, Slider
 - `checked` - Checkbox, RadioButton
 - `readonly` - Input, Textarea
@@ -3457,6 +3612,7 @@ Input(
 Fixed critical issues with `StateV2` reactive operations:
 
 #### Fixed Validation Error
+
 Previously, `increment()` and `decrement()` only worked on properties named `text`. Now they work on **any numeric property**:
 
 ```python
@@ -3470,6 +3626,7 @@ Button("Increment", on_click=state.count.increment(by=1))  # ✅ Works!
 ```
 
 #### Fixed Persistence Issue
+
 Increment/decrement operations now correctly persist across multiple clicks:
 
 ```python
@@ -3482,6 +3639,7 @@ Button("Decrement", on_click=state.count.decrement(by=1))
 ```
 
 **Technical Details:**
+
 - Implemented client-side state value tracking in `window.Dars.getState()`
 - State registry now maintains current values for all properties
 - `increment()`/`decrement()` use `window.Dars.change()` for proper state updates
@@ -3490,13 +3648,16 @@ Button("Decrement", on_click=state.count.decrement(by=1))
 ### 3. Documentation Updates
 
 #### Enhanced Hooks Documentation
+
 - Added comprehensive "Supported Properties" table showing which properties work with `useDynamic` for each component type
 - Documented boolean attribute support
 
 #### New Component Documentation
+
 Added documentation for visualization components in `components.md`:
 
 **Chart Component:**
+
 ```python
 import plotly.graph_objects as go
 
@@ -3505,6 +3666,7 @@ Chart(figure=fig, width="100%", height="400px")
 ```
 
 **DataTable Component:**
+
 ```python
 import pandas as pd
 
@@ -3518,11 +3680,13 @@ DataTable(data=df, theme="striped", page_size=10)
 ## Bug Fixes
 
 ### StateV2 Increment/Decrement
+
 - **Issue**: `increment()` raised `ValueError` for non-`text` properties
 - **Fix**: Validation now checks if value is numeric (`int` or `float`) instead of checking property name
 - **Impact**: All numeric state properties can now use `increment()` and `decrement()`
 
 ### StateV2 State Persistence
+
 - **Issue**: Increment operations stuck at first value (0→1, then stayed at 1)
 - **Fix**: Implemented proper client-side state tracking and payload structuring
 - **Impact**: Reactive operations now work correctly across multiple invocations
@@ -3533,7 +3697,6 @@ None.
 
 ---
 
-
 ## What's Next
 
 The enhanced `useDynamic` system and robust StateV2 operations pave the way for more advanced reactive patterns and state management features in future releases.
@@ -3541,7 +3704,6 @@ The enhanced `useDynamic` system and robust StateV2 operations pave the way for 
 ---
 
 # Release Notes v1.5.5
-
 
 > **Hooks System Enhanced**: `useDynamic` for built-in components and new `useWatch` hook.
 
@@ -3567,6 +3729,7 @@ Button(text=useDynamic("user.status"))
 This works for `Text`, `Button`, `Input`, `Textarea`, and more.
 
 ### 2. New `useWatch` Hook
+
 Monitor state changes and execute side effects with `useWatch`.
 
 ```python
@@ -3641,7 +3804,7 @@ app.add_script(userState.name.set("Jane Doe"))  # UI updates instantly
 
 #### Key Features
 
-- **Zero boilerplate** - Just use `useDynamic("state.property")  in templates
+- **Zero boilerplate** - Just use `useDynamic("state.property") in templates
 - **Automatic updates** - No manual DOM manipulation needed
 - **Multiple bindings** - Multiple components can bind to the same state
 - **State V2 integration** - Works seamlessly with dynamic state system
@@ -3662,12 +3825,14 @@ Button("Save", on_click=[
 ```
 
 **Features:**
+
 - Returns input value as JavaScript expression
 - Works with `State.set()` and other dynamic operations
 - Optional `parent_id` parameter for scoped searches
 - Complements existing `getValue()` for assignments
 
 **Difference from `getValue()`:**
+
 - `getValue(input_id, target_id)` - Performs assignment (sets textContent)
 - `getInputValue(input_id)` - Returns value expression (for State.set())
 
@@ -3746,7 +3911,7 @@ from dars.all import *
 app = App("Reactive Profile")
 
 # State for user data
-userState = State("user", 
+userState = State("user",
     name="John Doe",
     email="john@example.com"
 )
@@ -3795,6 +3960,7 @@ if __name__ == "__main__":
 No migration needed! Add `useDynamic()` to new or existing FunctionComponents:
 
 **Before (static):**
+
 ```python
 @FunctionComponent
 def UserCard(name, email, **props):
@@ -3802,6 +3968,7 @@ def UserCard(name, email, **props):
 ```
 
 **After (reactive):**
+
 ```python
 @FunctionComponent
 def UserCard(**props):
@@ -3830,7 +3997,6 @@ Visit the [Dars Documentation](https://ztamdev.github.io/Dars-Framework/docs.htm
 ## What's Next
 
 The hooks system opens the door for more reactive features...
-
 
 # Release Notes v1.5.3
 
@@ -3883,7 +4049,7 @@ app.add_script(userState.name.set("Jane Doe"))  # UI updates instantly
 
 #### Key Features
 
-- **Zero boilerplate** - Just use `useDynamic("state.property")  in templates
+- **Zero boilerplate** - Just use `useDynamic("state.property") in templates
 - **Automatic updates** - No manual DOM manipulation needed
 - **Multiple bindings** - Multiple components can bind to the same state
 - **State V2 integration** - Works seamlessly with dynamic state system
@@ -3904,12 +4070,14 @@ Button("Save", on_click=[
 ```
 
 **Features:**
+
 - Returns input value as JavaScript expression
 - Works with `State.set()` and other dynamic operations
 - Optional `parent_id` parameter for scoped searches
 - Complements existing `getValue()` for assignments
 
 **Difference from `getValue()`:**
+
 - `getValue(input_id, target_id)` - Performs assignment (sets textContent)
 - `getInputValue(input_id)` - Returns value expression (for State.set())
 
@@ -3988,7 +4156,7 @@ from dars.all import *
 app = App("Reactive Profile")
 
 # State for user data
-userState = State("user", 
+userState = State("user",
     name="John Doe",
     email="john@example.com"
 )
@@ -4037,6 +4205,7 @@ if __name__ == "__main__":
 No migration needed! Add `useDynamic()` to new or existing FunctionComponents:
 
 **Before (static):**
+
 ```python
 @FunctionComponent
 def UserCard(name, email, **props):
@@ -4044,6 +4213,7 @@ def UserCard(name, email, **props):
 ```
 
 **After (reactive):**
+
 ```python
 @FunctionComponent
 def UserCard(**props):
@@ -4094,6 +4264,7 @@ Dars Framework now features **Function Components** as the primary and recommend
 Function Components allow you to create reusable UI elements using simple Python functions with f-string templates. The framework automatically handles IDs, styling, events, and other properties.
 
 **Key Benefits:**
+
 - **Simple & Pythonic**: Just write a function that returns an HTML string
 - **No Boilerplate**: No need to inherit from Component class or implement render methods
 - **Automatic Property Injection**: Framework handles `id`, `class_name`, `style`, and `children` automatically
@@ -4124,6 +4295,7 @@ card = UserCard("John Doe", "john@example.com", id="user-1", style={"padding": "
 #### Two Supported Patterns
 
 **Option 1: Using Props Helper (Recommended)**
+
 ```python
 @FunctionComponent
 def MyComponent(**props):
@@ -4135,6 +4307,7 @@ def MyComponent(**props):
 ```
 
 **Option 2: Explicit Arguments**
+
 ```python
 @FunctionComponent
 def MyComponent(id, class_name, style, children, **props):
@@ -4165,6 +4338,7 @@ These resolve to the correct placeholders that the framework replaces during ren
 **Important Concept:** State V2 updates DOM properties, not arbitrary component arguments.
 
 **Correct Usage:**
+
 ```python
 @FunctionComponent
 def Counter(**props):
@@ -4200,6 +4374,7 @@ pip install --upgrade dars-framework
 Dars now includes a comprehensive **Pythonic system** for HTTP requests and API communication without writing any JavaScript. The new `dars.backend` module enables you to fetch data, bind it to components, and create reactive UIs entirely in Python.
 
 **Key Features:**
+
 - HTTP functions (get, post, put, delete, patch, fetch)
 - `useData()` with dot notation for nested data access
 - Seamless StateV2 integration
@@ -4328,6 +4503,7 @@ increment_btn.on_click = dynamic_state.text.increment(by=1)
 ```
 
 **Use Cases:**
+
 - Components created with `createComp()`
 - Dynamically generated UIs
 - Conditional component rendering
@@ -4338,6 +4514,7 @@ increment_btn.on_click = dynamic_state.text.increment(by=1)
 ### DataAccessor Class
 
 New `DataAccessor` class with:
+
 - `__getattr__` for dot notation support
 - `.code` property for RawJS generation
 - `.bind()` method for StateV2 integration
@@ -4346,6 +4523,7 @@ New `DataAccessor` class with:
 ### StateV2 Enhancements
 
 Updated `StateV2._generate_change_call()` to handle `DataAccessor` objects:
+
 - Automatically detects `DataAccessor` instances
 - Extracts `.code` property for JavaScript generation
 - Seamless integration with existing state management
@@ -4355,6 +4533,7 @@ Updated `StateV2._generate_change_call()` to handle `DataAccessor` objects:
 ### New Documentation
 
 **`backend_api.md`** - Comprehensive guide (500+ lines) covering:
+
 - Quick Start examples
 - HTTP Functions reference
 - Data Binding with useData()
@@ -4475,8 +4654,9 @@ button_state.update(on_click=dScript("console.log('clicked')"))
 ```
 
 **Implementation:**
+
 - Automatic detection of `on_*` properties
-- Extracts `.code` from dScript objects  
+- Extracts `.code` from dScript objects
 - Handles arrays of event handlers
 - Gracefully skips non-serializable values
 
@@ -4485,10 +4665,12 @@ button_state.update(on_click=dScript("console.log('clicked')"))
 Documentation now presents **two coexisting state management systems**:
 
 **State V2 (Dynamic)**
+
 - Auto-increment/decrement built-in
 - Best for: counters, timers, simple updates
 
 **dState/cState (Indexed)**
+
 - Full state machine support
 - Immutable state 0
 - Cross-state calls with `Mod.call()`
@@ -4511,7 +4693,6 @@ Comprehensive comparison table and use case guidance added to state management d
 ---
 
 # Release Notes v1.4.8
-
 
 > **Critical Fix**: State V2 now properly supports all component properties including `class_name`, `style`, `attrs`, and more.
 
@@ -4546,7 +4727,7 @@ state.text.set("New text")
 state.class_name.set("active")
 state.style.set({"color": "red"})
 state.attrs.set({"title": "Tooltip"})
-state.html.set("<strong>Bold</strong>") 
+state.html.set("<strong>Bold</strong>")
 ```
 
 ### Unified Property Handling
@@ -4583,11 +4764,12 @@ counter.class_name.increment(by=1)
 
 ### Technical Details
 
-**Root Cause:** 
+**Root Cause:**
 State V2 methods were directly manipulating `el.textContent` instead of using the framework's `change()` function, which properly routes updates based on property type.
 
 **Solution:**
 Created `_generate_change_call()` helper that generates proper `change()` payloads:
+
 - `text` → `{text: value}`
 - `html` → `{html: value}`
 - `style` → `{style: object}`
@@ -4606,7 +4788,7 @@ from dars.all import *
 display = Container(Text("Example"), id="demo")
 
 # Create state with multiple properties
-state = State(display, 
+state = State(display,
     text="Hello",
     class_name="",
     style={"background": "#333"}
@@ -4664,6 +4846,7 @@ success_btn.on_click = state.update(
 **No breaking changes** - all existing code continues to work. However, if you tried using non-`text` properties in v1.4.7 and they didn't work, they will now work correctly in v1.4.8.
 
 **If you worked around the limitation:**
+
 ```python
 # Old workaround (v1.4.7)
 from dars.core.state import this
@@ -4679,6 +4862,7 @@ button.on_click = state.class_name.set("active")  # ✅ Works!
 - **Removed**: `fastapi` dependency (not used in framework)
 
 JS/CSS minification now uses:
+
 1. Vite (if available)
 2. esbuild (if available)
 3. Regex fallback (always available, no external dependencies)
@@ -4697,7 +4881,6 @@ JS/CSS minification now uses:
 ---
 
 # Release Notes v1.4.7
-
 
 > Introducing State V2 and comprehensive animation system. This is the biggest update to Dars state management, bringing a pure Pythonic API and 15+ built-in animations.
 
@@ -4718,6 +4901,7 @@ pip install dars-framework==1.4.7
 ### State V2 - Pure Pythonic State Management
 
 **New `State` Class:**
+
 - Pure Python API - no more verbose dState syntax
 - Direct property access with reactive operations
 - Built-in auto-increment/auto-decrement operations
@@ -4725,6 +4909,7 @@ pip install dars-framework==1.4.7
 - Seamless animation integration
 
 **Before (dState - deprecated):**
+
 ```python
 from dars.core.state import dState, Mod
 
@@ -4735,6 +4920,7 @@ button.on_click = st.state(1)
 ```
 
 **After (State V2 - recommended):**
+
 ```python
 from dars.all import State
 
@@ -4744,12 +4930,14 @@ button.on_click = counter.text.increment(by=1)
 ```
 
 **Key Features:**
+
 - **Reactive Properties**: Direct access with `state.property.operation()`
 - **Auto Operations**: Continuous operations with `auto_increment()`, `auto_decrement()`
 - **Reset**: Simple `state.reset()` to restore initial values
 - **Intuitive**: Pythonic API that feels natural
 
 **Usage:**
+
 ```python
 from dars.all import *
 
@@ -4766,6 +4954,7 @@ reset_btn.on_click = timer.reset()
 ### Comprehensive Animation System
 
 **15+ Built-in Animations:**
+
 - `fadeIn` / `fadeOut` - Opacity transitions
 - `slideIn` / `slideOut` - Position-based slides (8 directions)
 - `scaleIn` / `scaleOut` - Size transformations
@@ -4779,6 +4968,7 @@ reset_btn.on_click = timer.reset()
 - `sequence` - Chain multiple animations
 
 **Animation Chaining:**
+
 ```python
 from dars.all import *
 
@@ -4790,6 +4980,7 @@ button.on_click = sequence(
 ```
 
 **Integration with State V2:**
+
 ```python
 button.on_click = sequence(
     counter.text.increment(by=1),
@@ -4801,6 +4992,7 @@ button.on_click = sequence(
 ```
 
 **All Animations:**
+
 - Return `dScript` objects for chaining
 - Customizable duration, easing, and parameters
 - Proper async completion handling
@@ -4809,6 +5001,7 @@ button.on_click = sequence(
 ### Professional State V2 Template
 
 **New Example Template:**
+
 - Located in `dars/templates/examples/advanced/StateV2/`
 - Professional, production-ready demonstration
 - Function component pattern (LandingPage style)
@@ -4821,6 +5014,7 @@ button.on_click = sequence(
 - Complete documentation and code examples
 
 **Template Structure:**
+
 ```
 dars/templates/examples/advanced/StateV2/
 ├── index.py                 # Main application
@@ -4835,6 +5029,7 @@ dars/templates/examples/advanced/StateV2/
 ## Breaking Changes
 
 **dState/cState Deprecation:**
+
 - `dState` and `cState` are now deprecated
 - All functionality replaced by State V2
 - Legacy code still works for backward compatibility
@@ -4844,6 +5039,7 @@ dars/templates/examples/advanced/StateV2/
 ## Documentation Updates
 
 **Updated Files:**
+
 - `state_management.md` - Completely rewritten for State V2
 - `scripts.md` - Added comprehensive animation system documentation
 - All dState/cState references removed from active docs
@@ -4852,6 +5048,7 @@ dars/templates/examples/advanced/StateV2/
 ## Bug Fixes
 
 **Animation System:**
+
 - Fixed animation chaining with proper Promise handling
 - Fixed initial state rendering with `transition='none'` pattern
 - Fixed `sequence()` function trailing semicolon issue
@@ -4859,6 +5056,7 @@ dars/templates/examples/advanced/StateV2/
 - Animations use `setTimeout(20ms)` for reliable state application
 
 **State Operations:**
+
 - `auto_increment` and `auto_decrement` now return proper `dScript` objects
 - Client-side loop management with `startLoop` and `stopLoop`
 - Proper cleanup of active loops
@@ -4879,6 +5077,7 @@ dars/templates/examples/advanced/StateV2/
 ### From dState to State V2
 
 **1. Import Changes:**
+
 ```python
 # Old
 from dars.core.state import dState, Mod
@@ -4888,6 +5087,7 @@ from dars.all import State
 ```
 
 **2. State Creation:**
+
 ```python
 # Old
 counter_state = dState("counter", component=display, states=[0, 1, 2])
@@ -4898,6 +5098,7 @@ counter = State(display, text=0)
 ```
 
 **3. Event Handlers:**
+
 ```python
 #Old
 button.on_click = counter_state.state(1)
@@ -4907,6 +5108,7 @@ button.on_click = counter.text.increment(by=1)
 ```
 
 **4.Auto Operations (New Feature):**
+
 ```python
 # Only available in State V2
 start_btn.on_click = timer.text.auto_increment(by=1, interval=1000)
@@ -4946,7 +5148,7 @@ app = App("Counter Demo")
 
 # Create display with state
 counter_display = Text("0", id="counter", style={
-    "font-size": "48px", 
+    "font-size": "48px",
     "color": "#2563eb"
 })
 counter = State(counter_display, text=0)
@@ -4993,7 +5195,6 @@ app.rTimeCompile()
 
 # Release Notes v1.4.6
 
-
 > **Major Feature Release**: Introduces Single Page Application (SPA) support and a powerful client-side routing system.
 
 ## Installation
@@ -5013,17 +5214,20 @@ pip install dars-framework==1.4.5
 ### Single Page Application (SPA) Support
 
 **New Routing System:**
+
 - **Client-Side Routing**: Build fast, responsive SPAs with Python.
 - **Nested Routes & Layouts**: Create complex UI hierarchies using the `parent` parameter and the new `Outlet` component.
 - **Persistent Layouts**: Keep headers, sidebars, and navigation bars active while content changes dynamically.
 
 **Robust Error Handling:**
+
 - **Automatic 404 Handling**: Dars now automatically redirects invalid routes to a 404 page.
 - **Default & Custom 404**: Includes a built-in clean 404 page, or define your own with `app.set_404_page()`.
 
 ### Developer Experience
 
 **Hot Reload Stability:**
+
 - **Intelligent Polling**: New hot reload system for SPAs that detects changes without spamming logs.
 - **Auto-Stop**: Prevents browser lag by stopping polling after 10 consecutive connection failures.
 
@@ -5034,7 +5238,6 @@ pip install dars-framework==1.4.5
 - **Assets**: Enforced absolute paths for SPA assets to ensure correct loading from any depth.
 
 ---
-
 
 # Release Notes v1.4.4
 
@@ -5143,24 +5346,30 @@ pip install dars-framework==1.4.1
 ### Automatic Favicon MIME Type Detection
 
 **Smart Icon Type Recognition:**
+
 - Favicon links now automatically detect and use the correct MIME type based on file extension
 - Supports PNG, ICO, SVG, JPG/JPEG, WebP, and GIF formats
 - No manual type specification needed
 - Eliminates incorrect `image/x-icon` type for PNG files
 
 **Before (v1.4.0):**
+
 ```html
-<link rel="icon" href="logo.png" type="image/x-icon">  <!-- Incorrect! -->
+<link rel="icon" href="logo.png" type="image/x-icon" />
+<!-- Incorrect! -->
 ```
 
 **After (v1.4.1):**
+
 ```html
-<link rel="icon" href="logo.png" type="image/png">  <!-- Correct! -->
+<link rel="icon" href="logo.png" type="image/png" />
+<!-- Correct! -->
 ```
 
 ### Enhanced Apple Device Support
 
 **New App Properties:**
+
 - `apple_mobile_web_app_capable` - Enable fullscreen mode when added to home screen
 - `apple_mobile_web_app_status_bar_style` - Control status bar appearance:
   - `"default"` - Standard iOS status bar
@@ -5169,6 +5378,7 @@ pip install dars-framework==1.4.1
 - `apple_mobile_web_app_title` - Custom title for home screen icon
 
 **Usage:**
+
 ```python
 app = App(
     title="My App",
@@ -5183,40 +5393,54 @@ app = App(
 ### Safari 15+ Theme Color Enhancements
 
 **Adaptive Theme Colors:**
+
 - Theme color now includes media query variants for light/dark mode
 - Proper integration with iOS system appearance settings
 - **Fixes Safari iOS 16+ transparency issues** where solid colors blocked background visibility
 
 **Generated Meta Tags:**
+
 ```html
-<meta name="theme-color" content="#0d1513">
-<meta name="theme-color" media="(prefers-color-scheme: light)" content="#0d1513">
-<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0d1513">
+<meta name="theme-color" content="#0d1513" />
+<meta
+  name="theme-color"
+  media="(prefers-color-scheme: light)"
+  content="#0d1513"
+/>
+<meta
+  name="theme-color"
+  media="(prefers-color-scheme: dark)"
+  content="#0d1513"
+/>
 ```
 
 ### Improved Apple Touch Icon
 
 **Multiple Size Specifications:**
+
 - Apple touch icon now includes size attribute for better iOS home screen quality
 - Generates both standard and 180x180 sized icon links
 
 **Generated Links:**
+
 ```html
-<link rel="apple-touch-icon" href="logo.png">
-<link rel="apple-touch-icon" sizes="180x180" href="logo.png">
+<link rel="apple-touch-icon" href="logo.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="logo.png" />
 ```
 
 ### Modern Mobile Web App Meta Tag
 
 **Standards Compliance:**
+
 - Added `mobile-web-app-capable` meta tag alongside `apple-mobile-web-app-capable`
 - Eliminates deprecation warnings in modern browsers
 - Maintains backward compatibility with older iOS versions
 
 **Generated Meta Tags:**
+
 ```html
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
 ```
 
 ## Technical Improvements
@@ -5238,12 +5462,14 @@ app = App(
 ### For Existing Projects
 
 **Automatic Upgrade:**
+
 - No configuration changes required
 - Favicons automatically get correct MIME types
 - Theme colors automatically include light/dark variants
 - All new features are opt-in
 
 **Optional iOS Enhancement:**
+
 ```python
 # Add to your App initialization
 app = App(
@@ -5309,6 +5535,7 @@ pip install dars-framework==1.3.9
 ### Desktop File System API - `list_directory`
 
 **Comprehensive Directory Listing:**
+
 - New `list_directory()` function for browsing files and folders
 - Optional glob pattern filtering (e.g., `"*.py"` for Python files only)
 - Optional `include_size` parameter (default: False) to show/hide file sizes
@@ -5317,12 +5544,13 @@ pip install dars-framework==1.3.9
 - Returns array of `{name, isDirectory, size?}` objects
 
 **Usage:**
+
 ```python
 from dars.desktop import list_directory, get_value
 from dars.core.state import this
 
 # Simple directory listing
-Button("List", 
+Button("List",
     on_click=list_directory(get_value("path")).then(
         this().state(id="output", html=RawJS("value.map(f => f.name).join('<br>')"))
     )
@@ -5342,6 +5570,7 @@ list_directory(".", "*", include_size=True)
 ### Pythonic `Arg` Helper
 
 **Cleaner dScript.ARG Access:**
+
 - New `Arg` singleton for Pythonic access to `dScript.ARG`
 - More readable than `RawJS("dScript.ARG")`
 - Provides helper methods like `.map()`, `.join()`, `.length`, etc.
@@ -5349,6 +5578,7 @@ list_directory(".", "*", include_size=True)
 - Exported in `dars.all` for easy access
 
 **Usage:**
+
 ```python
 from dars.scripts.dscript import Arg
 
@@ -5370,6 +5600,7 @@ Arg.filter("x => x > 0")  # -> "dScript.ARG.filter(x => x > 0)"
 ### Enhanced Keyboard Event Filtering
 
 **Specific Key Event Handlers:**
+
 - New keyboard event constants for specific keys (e.g., `KEY_DOWN_ENTER`, `KEY_DOWN_ESCAPE`)
 - Event type parsing with `.` delimiter for key filtering (e.g., `"keydown.Enter"`)
 - Proper event delegation with key matching
@@ -5377,6 +5608,7 @@ Arg.filter("x => x > 0")  # -> "dScript.ARG.filter(x => x > 0)"
 - Backward compatible with existing keyboard events
 
 **New Event Constants:**
+
 ```python
 from dars.core.events import EventTypes
 
@@ -5384,7 +5616,7 @@ from dars.core.events import EventTypes
 on_keydown_enter    # Triggered only when Enter is pressed
 on_keyup_enter      # Triggered only when Enter is released
 
-# Specific Escape key events  
+# Specific Escape key events
 on_keydown_escape   # Triggered only when Escape is pressed
 on_keyup_escape     # Triggered only when Escape is released
 
@@ -5399,6 +5631,7 @@ Input(
 ### Configurable DevTools
 
 **Electron DevTools Control:**
+
 - New `devtools` parameter in `App` class (default: `True`)
 - Respects `DARS_DEV` and `DARS_DEVTOOLS` environment variables
 - DevTools only open when both conditions met: dev mode + devtools enabled
@@ -5406,6 +5639,7 @@ Input(
 - Applies to all Electron generation methods
 
 **Usage:**
+
 ```python
 # Disable DevTools even in dev mode
 app = App(
@@ -5424,6 +5658,7 @@ app = App(
 ### Dynamic Form Element Updates
 
 **Fixed `change` Function:**
+
 - Corrected dynamic text updates for form elements
 - Uses `.value` for `Input`, `Textarea`, `Select`
 - Uses `.textContent` for other elements (Text, Button, etc.)
@@ -5433,6 +5668,7 @@ app = App(
 ### Improved Event Delegation
 
 **Keyboard Event Fix:**
+
 - Fixed event delegation for key-filtered keyboard events
 - Properly checks both base event name and filtered event name in eventMap
 - Ensures `keydown.Enter` and similar events work correctly
@@ -5464,23 +5700,26 @@ pip install --upgrade dars-framework
 **Optional: Use new features**
 
 1. **Use `list_directory` for file browsing:**
+
 ```python
 from dars.desktop import list_directory, get_value
 
-Button("Browse", 
+Button("Browse",
     on_click=list_directory(get_value("dir")).then(...)
 )
 ```
 
 2. **Use `Arg` helper for cleaner code:**
+
 ```python
 from dars.scripts.dscript import Arg
 
-# Instead of RawJS("dScript.ARG.map(...)") 
+# Instead of RawJS("dScript.ARG.map(...)")
 text=Arg.map("x => x.name").join("\\n")
 ```
 
 3. **Use specific keyboard events:**
+
 ```python
 Input(
     on_keydown_enter=submit_action,
@@ -5515,12 +5754,14 @@ pip install dars-framework==1.3.8
 ### Dynamic State Updates with `this()`
 
 **Effortless Component Updates:**
+
 - New `this()` helper for direct, event-time component updates without pre-registering states
 - Update any component property: `text`, `html`, `style`, `attrs`, `classes`
 - Works in both desktop and web exports
 - Perfect for async operations and file I/O
 
 **Usage:**
+
 ```python
 from dars.core.state import this
 
@@ -5538,11 +5779,13 @@ inc_btn = Button("+1", on_click=this().state(text=Mod.inc("count")))
 ### Raw JavaScript Injection with `RawJS`
 
 **Dynamic Value Passing:**
+
 - New `RawJS` class for injecting raw JavaScript variables into state updates
 - Essential for passing values from async operations
 - Use `dScript.ARG` as a placeholder for chained script results
 
 **Usage:**
+
 ```python
 from dars.scripts.dscript import RawJS, dScript
 from dars.desktop import read_text
@@ -5558,12 +5801,14 @@ read_btn = Button("Load",
 ### Script Chaining with `dScript.then()`
 
 **Sequential Async Operations:**
+
 - New `.then()` method for chaining `dScript` objects
 - Pass results between scripts using `dScript.ARG` (resolves to `value`)
 - Built-in error handling and logging for debugging
 - Enables complex workflows like read → process → update → write
 
 **Usage:**
+
 ```python
 # Chain file operations
 Button("Process",
@@ -5577,6 +5822,7 @@ Button("Process",
 ### Event Handler Assignment Fix
 
 **Fixed Critical Bug:**
+
 - Event handlers can now be assigned via attribute assignment: `btn.on_click = handler`
 - Previously only constructor assignment worked: `Button(on_click=handler)`
 - Added `__setattr__` override to properly register events in all cases
@@ -5585,6 +5831,7 @@ Button("Process",
 ### Enhanced Electron Dev Mode
 
 **Improved Development Experience:**
+
 - Filtered harmless Chrome DevTools warnings (Autofill.enable, etc.)
 - Fixed double Electron window bug on file save/reload
 - Added debounce logic to prevent concurrent restarts
@@ -5592,6 +5839,7 @@ Button("Process",
 - Chrome DevTools auto-open in dev mode for easier debugging
 
 **Better Logging:**
+
 - Error-only stderr filtering (no more noise)
 - Color-coded messages for different log levels
 - Stack traces properly displayed for JavaScript errors
@@ -5599,21 +5847,25 @@ Button("Process",
 ## Technical Improvements
 
 ### State System Enhancements
+
 - **Dynamic Updates**: New `change({dynamic: true, ...})` path in `dars/js_lib.py`
 - **RawJS Support**: State methods now detect and preserve `RawJS` values
 - **this() Proxy**: Clean API for self-referential component updates
 
 ### Script System Improvements
+
 - **Chaining Infrastructure**: Robust async IIFE wrapping for sequential execution
 - **Value Passing**: Standardized `value` variable for inter-script communication
 - **Debug Logging**: Verbose console output for troubleshooting chains
 
 ### Component System Fixes
+
 - **Event Collection**: `VDomBuilder` now correctly serializes all event handlers
 - **Attribute Interception**: `__setattr__` catches `on_*` assignments
 - **Backward Compatible**: All existing event patterns continue working
 
 ### Dev Mode Stability
+
 - **Debounce**: 300ms consolidation window for file change events
 - **State Management**: Proper `restart_triggered` flag handling
 - **Process Cleanup**: Reliable Electron termination before restart
@@ -5621,6 +5873,7 @@ Button("Process",
 ## Documentation Updates
 
 **Comprehensive Coverage:**
+
 - New `this()` section in README with quick examples
 - Expanded `state_management.md` with complete file operations guide
 - Enhanced `exporters.md` with desktop API examples and chaining patterns
@@ -5631,6 +5884,7 @@ Button("Process",
 ### For Existing Projects
 
 **Seamless Upgrade:**
+
 - No breaking changes - all existing code remains compatible
 - New features are opt-in and additive
 - Event handlers work with both constructor and attribute assignment
@@ -5638,6 +5892,7 @@ Button("Process",
 ## Desktop Exporter Status
 
 **Still in BETA:**
+
 - File operations (`read_text`, `write_text`, `read_file`, `write_file`) are stable
 - Dev mode with hot reload is fully functional
 - Production packaging continues in experimental status
@@ -5653,7 +5908,6 @@ Button("Process",
 ---
 
 **Upgrade Highly Recommended** for all desktop projects and applications requiring dynamic, event-driven UI updates.
-
 
 # Release Notes v1.3.6
 
@@ -5700,7 +5954,6 @@ pip install dars-framework==1.3.6
 
 - `from dars.all import *` now includes `createComp` and `deleteComp` from `dars.backend`.
 
-
 # Release Notes v1.3.5
 
 > Enhanced styling and development experience update featuring active styles, improved preview system, and advanced file monitoring. Delivers better visual feedback and faster development workflow.
@@ -5722,11 +5975,13 @@ pip install dars-framework==1.3.5
 ### Active Styles Support
 
 **Complete Component Styling System:**
+
 - New `active_style` attribute for all components, providing visual feedback during user interaction
 - Completes the styling triad: `style`, `hover_style`, and `active_style`
 - Works seamlessly with existing hover styles introduced in v1.3.4
 
 **Usage:**
+
 ```python
 Button("Click it",
         id="btn1",
@@ -5740,6 +5995,7 @@ Button("Click it",
 ### Enhanced Preview System
 
 **Optimized Development Server:**
+
 - Completely redesigned preview system with faster load times
 - Improved hot reload support for instant code changes
 - Better error handling and cleanup processes
@@ -5748,6 +6004,7 @@ Button("Click it",
 ### Advanced File Watcher
 
 **Comprehensive Project Monitoring:**
+
 - New file watching system monitors file creation, deletion, and modification
 - Automatic detection of new files in the project directory
 - Supports multiple file extensions (.py, .js, .css, etc.)
@@ -5756,12 +6013,14 @@ Button("Click it",
 ## Fixed Issues
 
 ### Responsiveness Improvements
+
 - **Landing Page**: Fixed responsiveness issues on smaller screens
 - **Mobile Compatibility**: Enhanced display and interaction on mobile devices
 
 ## Technical Improvements
 
 ### Development Experience
+
 - **Faster Hot Reload**: Reduced reload intervals and improved change detection
 - **Better Error Recovery**: Enhanced error handling during file changes
 - **Clean Shutdown**: Improved server termination and resource cleanup
@@ -5771,6 +6030,7 @@ Button("Click it",
 ### For Existing Projects
 
 **Seamless Upgrade:**
+
 - No breaking changes - all existing code remains compatible
 - Active styles can be added incrementally to enhance user interaction
 
@@ -5799,12 +6059,14 @@ pip install dars-framework==1.3.4
 ### Hover Styles Support
 
 **Enhanced Component Interactivity:**
+
 - New `hover_style` attribute for all components, allowing dynamic styling on mouse hover
 - Styles are automatically generated with higher specificity to ensure proper application
 
 ### Multi-Handler Event System
 
 **Flexible Event Management:**
+
 - Components now support arrays of event handlers for the same event type
 - Multiple `dScript`, inline JavaScript, or mixed handlers can be assigned to single events
 - Handlers execute in sequence with individual error handling
@@ -5813,12 +6075,14 @@ pip install dars-framework==1.3.4
 ### Runtime Versioning
 
 **Enhanced Debugging & Tracking:**
+
 - JavaScript runtime now includes version information accessible via `Dars.version`
 - Release URL exposed through `Dars.releaseUrl` for quick reference
 - Better debugging and environment identification
 - Framework version tracking in deployed applications
 
 **Usage:**
+
 ```javascript
 // Access version information
 console.log(`Using Dars v${Dars.version}`);
@@ -5828,11 +6092,13 @@ console.log(`Release: ${Dars.releaseUrl}`);
 ## Technical Improvements
 
 ### Web Exporter Enhancements
+
 - **Improved Style Application**: Fixed CSS generation to ensure all component styles render correctly
 - **Robust Event Serialization**: Enhanced handler extraction and code generation for reliable event execution
 - **Better Error Handling**: Individual error catching for multi-handler events prevents cascade failures
 
 ### Component System
+
 - **Backward Compatibility**: All existing single-handler events continue working unchanged
 - **Enhanced Flexibility**: Mix and match handler types (dScript, strings, arrays) with consistent behavior
 - **Cleaner Code Generation**: Improved JavaScript output with proper handler separation and error boundaries
@@ -5842,6 +6108,7 @@ console.log(`Release: ${Dars.releaseUrl}`);
 ### For Existing Projects
 
 **Automatic Upgrade:**
+
 - No breaking changes - existing code works identically
 - Hover styles can be incrementally added to enhance existing components
 - Multi-handler events are optional - single handlers remain fully supported
@@ -5882,12 +6149,14 @@ pip install dars-framework==1.3.3
 ### Section Component
 
 **Semantic HTML Container:**
+
 - New `Section` component that renders as `<section></section>` instead of generic `<div>`
 - Maintains all functionality of Container component (children, styles, etc.)
 - Improves HTML readability and semantic structure for debugging
 - Better accessibility and SEO through proper sectioning elements
 
 **Usage:**
+
 ```python
 # Creates <section> with all container capabilities
 Section(Button("HI"), styles={...})
@@ -5896,12 +6165,14 @@ Section(Button("HI"), styles={...})
 ### Enhanced State & Event Serialization
 
 **Complete JavaScript Migration:**
+
 - States are now fully serialized in JavaScript and no longer exposed in HTML
 - Final migration of both state and event systems to pure JavaScript
 - Eliminates need for state/event data in VDOM structure
 - Improved security and cleaner HTML output
 
 **Benefits:**
+
 - More secure: State data hidden from direct HTML inspection
 - Cleaner markup: Reduced data attributes in rendered HTML
 - Better performance: Streamlined state management
@@ -5924,11 +6195,13 @@ Section(Button("HI"), styles={...})
 ### For Existing Projects
 
 **Automatic Upgrade:**
+
 - No configuration changes required
 - Existing container components remain unchanged
 - State management automatically uses new serialization
 
 **Optional Section Component Adoption:**
+
 ```python
 # Old way (still works)
 Container(children=[...])
@@ -5969,18 +6242,21 @@ pip install dars-framework==1.3.2
 ### Enhanced Minification System
 
 **Combined JavaScript Bundles:**
+
 - When `viteMinify: true` and `bundle: true` are enabled, the exporter now combines all JavaScript files into single optimized bundles
 - Single-page apps: All JS combined into `app.js`
 - Multi-page apps: Each page gets its own `app_{slug}.js` bundle
 - Eliminates reference issues between separate files during minification
 
 **Optimized Event Handling:**
+
 - Events are no longer stored in VDOM tree
 - Event handlers are now generated as valid JavaScript directly in runtime
 - Improved compatibility with Vite minification and obfuscation
 - Better performance and smaller bundle sizes
 
 **Smart File Management:**
+
 - When using combined bundles, individual files (`runtime_dars.js`, `script.js`, `vdom_tree.js`) are not generated
 - HTML files are updated to reference only the combined bundle
 - Backward compatible - falls back to separate files when `viteMinify: false`
@@ -6023,6 +6299,7 @@ While the web exporter is now stable and production-ready, the Electron desktop 
 - Advanced IPC and system integration features still in development
 
 **Current Desktop Capabilities:**
+
 - Basic file system operations (`read_text`, `write_text`)
 - Development mode with hot reload
 - Production packaging still experimental
@@ -6034,6 +6311,7 @@ While the web exporter is now stable and production-ready, the Electron desktop 
 **No breaking changes** - existing configurations continue to work. To benefit from the new minification:
 
 1. Update your `dars.config.json`:
+
 ```json
 {
   "viteMinify": true,
@@ -6058,6 +6336,7 @@ While the web exporter is now stable and production-ready, the Electron desktop 
 ## Next Steps
 
 We're working on:
+
 - **v1.4.0**: Production-ready Electron desktop exporter
 - **v1.5.0**: Advanced native desktop APIs and system integrations
 - **Future**: Plugin system and extended component library
@@ -6092,9 +6371,10 @@ from dars.desktop import *
 
 With this module you can acces for now 2 main functions:
 
-```python 
+```python
 write_text("./app/lib/hello.txt", "Hello Text")
 ```
+
 and
 
 ```python
@@ -6114,7 +6394,6 @@ Also you can use dScripts to run custom javascript code in the desktop app. and 
 - This feature set is **BETA**. Many options (signing, advanced IPC, updates, and deeper configuration) are still evolving.
 - Usable for internal tools and early testing. Not recommended for production deployment yet.
 - Expect changes to configuration keys and defaults in future versions.
-
 
 # Release Notes v1.3.0 BETA
 

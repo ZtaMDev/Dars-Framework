@@ -43,8 +43,7 @@ class DarsState:
             d["rules"] = self.rules
         return d
 
-    # state.py - Modificar el método state de DarsState
-    def state(self, idx: Optional[int] = None, cComp: bool = False, render: Optional[Any] = None, goto: Optional[Any] = None, **kwargs) -> dScript:
+    def state(self, idx: Optional[int] = None, cComp: bool = False, render: Optional[Any] = None, goto: Optional[Any] = None, **kwargs) -> RawJS:
         """
         Convenience: returns a dScript containing a DAP 'change' action.
         The client-side DAP dispatcher will handle the logic securely without eval().
@@ -94,12 +93,7 @@ class DarsState:
         if kwargs:
             action_args["dynamic"] = True
             for k, v in kwargs.items():
-                if isinstance(v, RawJS):
-                    # WARNING: RawJS in DAP should be discouraged, but passing code for client to decide
-                    # Ideally the client uses setValue or similar ops instead of eval.
-                    # We pass it as a special value that the dispatcher *might* reject if strict CSP is on.
-                    action_args[k] = {"$code": v.code}
-                elif k == 'style':
+                if k == 'style':
                     val = v
                     if isinstance(val, str):
                         val = parse_utility_string(val)
@@ -111,11 +105,10 @@ class DarsState:
                 else:
                     action_args[k] = v
 
-        # Return dScript with structured data
-        return dScript(data={
-            "op": "change",
-            "args": action_args
-        })
+        # Return RawJS
+        import json
+        payload_js = json.dumps(action_args)
+        return RawJS(code=f"if (window.Dars && typeof window.Dars.change === 'function') window.Dars.change({payload_js}); else if (typeof change === 'function') change({payload_js});")
 
     # --- cState: define rules/mods for a given state index ---
     def cState(self, idx: int, mods: Optional[List[Dict[str, Any]]] = None) -> 'CStateRuleBuilder':
@@ -154,7 +147,10 @@ class Mod:
     @staticmethod
     def inc(target: Any, prop: str = 'text', by: int = 1) -> Dict[str, Any]:
         tid = getattr(target, 'id', None) or str(target)
-        return {"op": "inc", "target": tid, "prop": prop, "by": by}
+        if prop == 'text':
+            return {"$code": f"function() {{ var el = document.getElementById('{tid}'); if(el) el.textContent = String((parseFloat(el.textContent||'0')||0) + {by}); }}"}
+        else:
+            return {"$code": f"function() {{ var el = document.getElementById('{tid}'); if(el) el.setAttribute('{prop}', String((parseFloat(el.getAttribute('{prop}')||'0')||0) + {by})); }}"}
 
     @staticmethod
     def dec(target: Any, prop: str = 'text', by: int = 1) -> Dict[str, Any]:
@@ -163,61 +159,80 @@ class Mod:
     @staticmethod
     def set(target: Any, **attrs) -> Dict[str, Any]:
         tid = getattr(target, 'id', None) or str(target)
-        if 'style' in attrs and isinstance(attrs['style'], str):
-            attrs['style'] = parse_utility_string(attrs['style'])
-        return {"op": "set", "target": tid, "attrs": attrs}
+        import json
+        lines = [f"function() {{ var _el = document.getElementById('{tid}');", "if(_el) {"]
+        for k, v in attrs.items():
+            if k == 'style':
+                if isinstance(v, str): v = parse_utility_string(v)
+                for sk, sv in v.items():
+                    lines.append(f"  _el.style[{json.dumps(sk)}] = {json.dumps(sv)};")
+            elif k == 'text':
+                lines.append(f"  _el.textContent = {json.dumps(v)};")
+            elif k == 'html':
+                # No DOMPurify check needed for static generation if trusted or simple? Let's use simple assignment.
+                lines.append(f"  _el.innerHTML = typeof _sanitize === 'function' ? _sanitize({json.dumps(v)}) : {json.dumps(v)};")
+            elif k == 'value':
+                lines.append(f"  _el.value = {json.dumps(v)};")
+            elif k in ['checked', 'disabled', 'readonly', 'required', 'selected', 'autofocus', 'autoplay', 'controls', 'loop', 'muted']:
+                # Boolean attributes
+                if v is True or str(v).lower() == 'true':
+                    lines.append(f"  _el.setAttribute('{k}', ''); if('{k}' in _el) _el['{k}'] = true;")
+                else:
+                    lines.append(f"  _el.removeAttribute('{k}'); if('{k}' in _el) _el['{k}'] = false;")
+            else:
+                lines.append(f"  _el.setAttribute({json.dumps(k)}, {json.dumps(v)});")
+        lines.append("} }")
+        return {"$code": " ".join(lines)}
 
     @staticmethod
     def toggle_class(target: Any, name: str, on: Optional[bool] = None) -> Dict[str, Any]:
         tid = getattr(target, 'id', None) or str(target)
-        d: Dict[str, Any] = {"op": "toggleClass", "target": tid, "name": name}
-        if on is not None:
-            d['on'] = bool(on)
-        return d
+        import json
+        name_js = json.dumps(name)
+        if on is None:
+            return {"$code": f"function() {{ var el = document.getElementById('{tid}'); if(el) el.classList.toggle({name_js}); }}"}
+        elif on is True:
+            return {"$code": f"function() {{ var el = document.getElementById('{tid}'); if(el) el.classList.add({name_js}); }}"}
+        else:
+            return {"$code": f"function() {{ var el = document.getElementById('{tid}'); if(el) el.classList.remove({name_js}); }}"}
 
     @staticmethod
     def append_text(target: Any, value: str) -> Dict[str, Any]:
         tid = getattr(target, 'id', None) or str(target)
-        return {"op": "appendText", "target": tid, "value": value}
+        import json
+        return {"$code": f"function() {{ var el = document.getElementById('{tid}'); if(el) el.textContent = String(el.textContent||'') + {json.dumps(value)}; }}"}
 
     @staticmethod
     def prepend_text(target: Any, value: str) -> Dict[str, Any]:
         tid = getattr(target, 'id', None) or str(target)
-        return {"op": "prependText", "target": tid, "value": value}
+        import json
+        return {"$code": f"function() {{ var el = document.getElementById('{tid}'); if(el) el.textContent = {json.dumps(value)} + String(el.textContent||''); }}"}
 
     @staticmethod
     def call(target: Any, state: Any = None, goto: Any = None) -> Dict[str, Any]:
-        """Invoke another dState's state change.
-        - target: DarsState instance or state name string; if a component is passed, use its id.
-        - state: target state index/value.
-        - goto: relative/absolute goto directive (e.g., '+1').
-        The runtime will resolve the state by name first (registry), falling back to id.
-        """
+        """Invoke another dState's state change via the JS change() endpoint."""
         name: Optional[str] = None
         sid: Optional[str] = None
         try:
-            # DarsState instance
             if hasattr(target, 'name') and hasattr(target, 'id'):
                 name = getattr(target, 'name', None)
                 sid = getattr(target, 'id', None)
             elif isinstance(target, str):
                 name = target
             else:
-                # Maybe a component; try id
                 sid = getattr(target, 'id', None) or str(target)
         except Exception:
-            name = None
-            sid = None
-        d: Dict[str, Any] = {"op": "call"}
-        if name:
-            d['name'] = name
-        if sid:
-            d['id'] = sid
-        if state is not None:
-            d['state'] = state
-        if goto is not None:
-            d['goto'] = goto
-        return d
+            pass
+        
+        args = {}
+        if name: args['name'] = name
+        if sid: args['id'] = sid
+        if state is not None: args['state'] = state
+        if goto is not None: args['goto'] = goto
+        
+        import json
+        payload_js = json.dumps(args)
+        return {"$code": f"function() {{ if (window.Dars && typeof window.Dars.change === 'function') window.Dars.change({payload_js}); else if (typeof change === 'function') change({payload_js}); }}"}
 
 
 class CStateRuleBuilder:
@@ -337,64 +352,31 @@ class ThisProxy:
     """
     Helper class to generate dynamic state changes for 'this' component.
     """
-    def state(self, **kwargs) -> dScript:
+    def state(self, **kwargs) -> RawJS:
         """
-        Generate JS to update 'this' component's state dynamically.
+        Generate DAP action to update 'this' component's state dynamically.
         """
-        parts = ["dynamic: true", "id: (this && this.id) ? this.id : (event && event.target && event.target.id) ? event.target.id : null"]
-        
+        import json
+        action_args = { "dynamic": True }
         for k, v in kwargs.items():
-            if isinstance(v, RawJS):
-                parts.append(f"{k}: {v.code}")
-            elif k == 'style':
+            if k == 'style':
                 val = v
-                if isinstance(val, str):
-                    val = parse_utility_string(val)
-                if isinstance(val, dict):
-                    parts.append(f"style: {json.dumps(val)}")
+                if isinstance(val, str): val = parse_utility_string(val)
+                action_args[k] = val
             elif k == 'attrs' and isinstance(v, dict):
-                parts.append(f"attrs: {json.dumps(v)}")
+                action_args[k] = v
             elif k == 'classes' and isinstance(v, dict):
-                parts.append(f"classes: {json.dumps(v)}")
+                action_args[k] = v
             else:
-                parts.append(f"{k}: {json.dumps(v)}")
+                action_args[k] = v
                 
-        payload = ", ".join(parts)
-        
-        code = (
-            "(async () => {"
-            "  try {"
-            "    let ch = window.__DARS_CHANGE_FN;"
-            "    if (!ch) {"
-            "      if (window.Dars && typeof window.Dars.change === 'function') {"
-            "        ch = window.Dars.change.bind(window.Dars);"
-            "      } else {"
-            "        const m = await import('/lib/dars.min.js');"
-            "        ch = (m.change || (m.default && m.default.change));"
-            "      }"
-            "      if (typeof ch === 'function') window.__DARS_CHANGE_FN = ch;"
-            "    }"
-            f"    if (typeof ch === 'function') ch({{{payload}}});"
-            "  } catch (e) { console.error('[Dars] State error:', e); }"
-            "})();"
-        )
-        return dScript(' '.join(code.split()))  # Changed to dScript for .then() chaining support
+        payload_js = json.dumps(action_args)
+        code = f"var _opts = {payload_js}; _opts.id = event.currentTarget ? event.currentTarget.id : (event.target ? event.target.id : ''); if (window.Dars && typeof window.Dars.change === 'function') window.Dars.change(_opts); else if (typeof change === 'function') change(_opts);"
+        return RawJS(code=code)
 
-    def goto(self, idx: int, _component_id: Optional[str] = None) -> dScript:
+    def goto(self, idx: int, _component_id: Optional[str] = None) -> RawJS:
         """
         Navigate to a specific state index for this component.
-        Requires a dState to be defined for the component.
-        
-        Args:
-            idx: The state index to navigate to (must exist in the component's dState)
-            _component_id: Internal - component ID for compile-time validation
-            
-        Raises:
-            ValueError: At compile-time if validation fails
-            JavaScript Error: At runtime if no dState is registered for the component
-            JavaScript Error: At runtime if the index is out of bounds
-        
-        Note: Compile-time validation is advisory only. Full validation happens at runtime.
         """
         # Check if component ID was set via this_for() or passed directly
         cid = _component_id or getattr(self, '_cid', None)
@@ -402,78 +384,24 @@ class ThisProxy:
         # Compile-time validation (when component ID is known)
         if cid and cid in _COMPONENT_TO_STATE_MAP:
             state_name, states_list = _COMPONENT_TO_STATE_MAP[cid]
-            # Validate index is within bounds
             if not isinstance(states_list, list) or len(states_list) == 0:
                 raise ValueError(
                     f"[Dars Compile Error] Component '{cid}' has dState '{state_name}' "
-                    f"but no states list defined. Define states parameter in dState()."
+                    f"but no states list defined."
                 )
             if idx < 0 or idx >= len(states_list):
                 raise ValueError(
                     f"[Dars Compile Error] this().goto({idx}) - Index {idx} out of bounds for component '{cid}'. "
-                    f"State '{state_name}' has {len(states_list)} states (valid indices: 0-{len(states_list)-1})."
+                    f"Valid indices: 0-{len(states_list)-1}."
                 )
         elif cid and cid not in _COMPONENT_TO_STATE_MAP:
-            # Component ID is known but no dState registered
-            raise ValueError(
+             raise ValueError(
                 f"[Dars Compile Error] this().goto({idx}) used on component '{cid}' "
-                f"but no dState is defined for this component. "
-                f"You must create a dState for this component before using goto().\n"
-                f"Example: my_state = dState('state_name', component=your_component, states=[0, 1, 2])"
+                f"but no dState is defined for this component."
             )
         
-        # Generate JavaScript code (runtime validation)
-        code = (
-            "(async () => {"
-            "  try {"
-            "    const compId = (this && this.id) ? this.id : "
-            "                    (event && event.target && event.target.id) ? event.target.id : null;"
-            "    if (!compId) throw new Error('[Dars.goto] Cannot resolve component ID');"
-            "    "
-            "    let ch = window.__DARS_CHANGE_FN;"
-            "    if (!ch) {"
-            "      if (window.Dars && typeof window.Dars.change === 'function') {"
-            "        ch = window.Dars.change.bind(window.Dars);"
-            "      } else {"
-            "        const m = await import('/lib/dars.min.js');"
-            "        ch = (m.change || (m.default && m.default.change));"
-            "      }"
-            "      if (typeof ch === 'function') window.__DARS_CHANGE_FN = ch;"
-            "    }"
-            "    "
-            "    const registry = (window.Dars && window.Dars._stateRegistry) || {};"
-            "    let stateName = null;"
-            "    for (const [name, stateObj] of Object.entries(registry)) {"
-            "      if (stateObj.id === compId) {"
-            "        stateName = name;"
-            "        break;"
-            "      }"
-            "    }"
-            "    "
-            "    if (!stateName) {"
-            "      throw new Error(`[Dars.goto] No dState found for component ${compId}. Define a dState for this component first.`);"
-            "    }"
-            "    "
-            "    const stateObj = registry[stateName];"
-            f"    const targetIdx = {idx};"
-            "    "
-            "    if (!stateObj.states || !Array.isArray(stateObj.states)) {"
-            "      throw new Error(`[Dars.goto] State '${stateName}' has no states array`);"
-            "    }"
-            "    if (targetIdx < 0 || targetIdx >= stateObj.states.length) {"
-            "      throw new Error(`[Dars.goto] Index " + str(idx) + " out of bounds for state '${stateName}' (valid: 0-${stateObj.states.length - 1})`);"
-            "    }"
-            "    "
-            "    if (typeof ch === 'function') {"
-            f"      ch({{id: compId, name: stateName, state: {idx}}});"
-            "    }"
-            "  } catch (e) {"
-            "    console.error('[Dars.goto]', e);"
-            "    throw e;"
-            "  }"
-            "})();"
-        )
-        return dScript(' '.join(code.split()), module=True)  # Changed to dScript for .then() chaining support
+        code = f"var _opts = {{ state: {idx} }}; _opts.id = event.currentTarget ? event.currentTarget.id : (event.target ? event.target.id : ''); if (window.Dars && typeof window.Dars.change === 'function') window.Dars.change(_opts); else if (typeof change === 'function') change(_opts);"
+        return RawJS(code=code)
 
 def this() -> ThisProxy:
     """

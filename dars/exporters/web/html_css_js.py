@@ -7,8 +7,8 @@
 # Copyright (c) 2025 ZtaDev
 from dars.components.basic.section import Section
 from dars.exporters.base import Exporter
-from dars.scripts.dscript import dScript
 from dars.core.app import App
+from dars.scripts.dscript import dScript, compile_val
 from dars.core.component import Component
 from dars.components.basic.text import Text
 from dars.components.basic.button import Button
@@ -47,6 +47,16 @@ import json
 
 class DarsJSONEncoder(json.JSONEncoder):
     def default(self, obj):
+        # Handle RawJS objects - serialize as the code string
+        if type(obj).__name__ == 'RawJS' and hasattr(obj, 'code'):
+            return obj.code
+
+        # Handle objects with _to_structure or to_dict methods
+        if hasattr(obj, '_to_structure'):
+            return obj._to_structure()
+        if hasattr(obj, 'to_dict'):
+            return obj.to_dict()
+
         # Handle DynamicBinding objects by resolving to their initial value
         if hasattr(obj, 'is_dynamic') or type(obj).__name__ == 'DynamicBinding':
             if hasattr(obj, 'get_initial_value'):
@@ -56,10 +66,16 @@ class DarsJSONEncoder(json.JSONEncoder):
         # Handle sets by converting to list
         if isinstance(obj, set):
             return list(obj)
-            
-        # Handle other types that might have a to_dict method
-        if hasattr(obj, 'to_dict'):
-            return obj.to_dict()
+
+        # Handle callables (lambdas/functions stored in state attrs)
+        if callable(obj):
+            return None
+
+        # Fallback to string representation for unknown complex objects
+        try:
+            return super().default(obj)
+        except TypeError:
+            return str(obj)
             
         return super().default(obj)
 
@@ -396,11 +412,10 @@ class HTMLCSSJSExporter(Exporter):
                         page_events_map = vdom_builder.events_map
                         
                         if bundle:
-                            vdom_dict = self._obfuscate_vdom(vdom_dict)
-                        import json
-                        vdom_js = "window.__DARS_VDOM__ = " + json.dumps(vdom_dict, ensure_ascii=False, separators=(",", ":"), cls=DarsJSONEncoder) + ";\n"
+                            self._obfuscate_vdom(vdom_dict) # Still run for potential side effects? No, we can just skip it.
+                        vdom_js = ""
                     except Exception:
-                        vdom_js = "window.__DARS_VDOM__ = { };\n"
+                        vdom_js = ""
                         page_events_map = {}
                     
                     # Collect bindings by traversing component tree (without rendering)
@@ -550,15 +565,14 @@ class HTMLCSSJSExporter(Exporter):
                     page_events_map = vdom_builder.events_map
                     
                     if bundle:
-                        vdom_dict = self._obfuscate_vdom(vdom_dict)
-                    import json
-                    vdom_js = "window.__DARS_VDOM__ = " + json.dumps(vdom_dict, ensure_ascii=False, separators=(",", ":"), cls=DarsJSONEncoder) + ";\n"
+                        pass
+                    vdom_js = ""
                 except Exception as e:
                     print(f"Warning: Failed to copy app structure, using original. Error: {e}")
                     # Fallback to safe defaults if copy fails
                     if page_app is None:
                         page_app = app
-                    vdom_js = "window.__DARS_VDOM__ = { };\n"
+                    vdom_js = ""
                     page_events_map = {}
 
                 # Fase 1 estilos: registrar estilos estáticos en la copia y reemplazar inline por clases
@@ -635,7 +649,8 @@ class HTMLCSSJSExporter(Exporter):
                 # Fase 2: snapshot/version para single-page (solo en dev, no bundle)
                 if not bundle:
                     try:
-                        vdom_json = self.generate_vdom_snapshot(app.root)
+                        # VDOM is no longer needed on dev for HMR with the new stateless DOM strategy, or requires a different approach
+                        vdom_json = '{}'
                     except Exception:
                         vdom_json = '{}'
                     self.write_file(os.path.join(output_path, "snapshot.json"), vdom_json)
@@ -669,6 +684,8 @@ class HTMLCSSJSExporter(Exporter):
 
             return True
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             print(f"Error at export time: {e}")
             return False
 
@@ -1022,8 +1039,13 @@ self.addEventListener('fetch', event => {
 
                 def _ser(v):
                     try:
+                        # Handle RawJS objects
+                        if type(v).__name__ == 'RawJS' and hasattr(v, 'code'):
+                            return v.code
                         if _Script and isinstance(v, _Script):
                             return {"code": v.get_code()}
+                        if callable(v) and not isinstance(v, type):
+                            return None
                         if isinstance(v, dict):
                             return {k: _ser(val) for k, val in v.items()}
                         if isinstance(v, list):
@@ -1111,7 +1133,7 @@ self.addEventListener('fetch', event => {
             runtime_script_tag = ''
         else:
             # Comportamiento original: archivos separados
-            vdom_script_tag = f'<script src="{vdom_script}"></script>' if vdom_script else ''
+            vdom_script_tag = ""
             runtime_script_tag = f'<script src="{runtime_file}"{" type=\"module\"" if script_is_module else ""} defer></script>' if runtime_file else ''
             main_script_tag = f'<script src="{script_file}"{" type=\"module\"" if script_is_module else ""}></script>' if script_file else ''
         
@@ -1152,7 +1174,6 @@ self.addEventListener('fetch', event => {
         {og_tags_html if not page_metadata else ''}
         {twitter_tags_html if not page_metadata else ''}
         <link rel=\"stylesheet\" href=\"runtime_css.css\">{registry_style_tag}<link rel=\"stylesheet\" href=\"{css_file}\">
-        {vdom_script_tag}
     </head>
     <body>
         {body_content}
@@ -2444,9 +2465,9 @@ audio.dars-audio {
                 self._collect_component_types(child, types_set)
 
     def generate_javascript(self, app: App, page_root: Component, events_map: Dict[str, Dict[str, Any]] = None, ssr_mode: bool = False) -> str:
-        """Genera un runtime modular con eventos integrados directamente en JS"""
+        """Genera un runtime modular nativo sin engine de VDOM."""
         
-        # Convertir events_map a código JS
+        # Convertir events_map a código JS usando native addEventListener
         events_js_code = ""
         if events_map and not ssr_mode:
             events_js_code = self._generate_events_js(events_map)
@@ -2505,8 +2526,6 @@ audio.dars-audio {
     // Modal (Close on overlay click)
     document.addEventListener('click', function(e) {
         if (e.target && e.target.matches && e.target.matches('.dars-modal')) {
-            // Only close if clicking the overlay itself, not the content
-            // Check if the modal is currently visible (flex/block)
             const style = window.getComputedStyle(e.target);
             if (style.display !== 'none') {
                 e.target.style.display = 'none';
@@ -2533,339 +2552,25 @@ audio.dars-audio {
 """
         
         runtime = f"""// Dars Runtime
-    (function(){{
-    const eventMap = new Map();
-    let currentSnapshot = null;
-    let currentVersion = null;
-
+(function(){{
     function initializeEvents() {{
-    {events_js_code}
+{events_js_code}
     
     // --- Default Logic for Advanced Components ---
-    {default_logic_js}
+{default_logic_js}
     }}
     
     function initializeStates() {{
-    {states_js_code}
-    }}
-
-    function walk(v, fn){{
-        if(!v) return;
-        fn(v);
-        const ch = v.children || [];
-        for(let i=0;i<ch.length;i++){{ walk(ch[i], fn); }}
-    }}
-
-    // Utilities
-    function setProps(el, props){{
-        if(!el || !props) return;
-        for(const [k,v] of Object.entries(props)){{
-        try {{
-            if(v === false || v === null || typeof v === 'undefined'){{
-            el.removeAttribute(k);
-            }} else {{
-            el.setAttribute(k, String(v));
-            }}
-        }} catch(err) {{ /* ignore */ }}
-        }}
-    }}
-    function diffProps(el, oldP={{}}, newP={{}}){{
-        // remove
-        for(const k in oldP){{ if(!(k in newP)){{ try{{ el.removeAttribute(k); }}catch{{}} }} }}
-        // add/update
-        for(const k in newP){{ const v=newP[k]; try{{ if(v===false||v===null||typeof v==='undefined'){{ el.removeAttribute(k);}} else {{ el.setAttribute(k, String(v)); }} }}catch{{}} }}
-    }}
-    function diffStyles(el, oldS={{}}, newS={{}}){{
-        for(const k in oldS){{ if(!(k in newS)){{ try{{ el.style.removeProperty(k.replace(/_/g,'-')); }}catch{{}} }} }}
-        for(const k in newS){{ const v=newS[k]; try{{ el.style.setProperty(k.replace(/_/g,'-'), String(v)); }}catch{{}} }}
-    }}
-
-    function delegate(eventName, root){{
-        (root||document).addEventListener(eventName, function(e){{
-        let node = e.target;
-        const boundary = root||document;
-        while(node && node !== boundary){{
-            const id = node.id;
-            if(id && eventMap.has(id)){{
-            const handlers = eventMap.get(id);
-            
-            // Check __darsEv first (these are from js_lib.py event attachment)
-            if(node && node.__darsEv && node.__darsEv[eventName]){{
-                return;
-            }}
-            
-            // Try exact match first
-            let h = handlers[eventName];
-            
-            // For keyboard events, also check for key-filtered version
-            if(!h && (eventName === 'keydown' || eventName === 'keyup' || eventName === 'keypress')){{
-                // Check if there's a filtered handler for this specific key
-                const key = e.key || e.code;
-                if(key){{
-                const filteredEvent = eventName + '.' + key;
-                h = handlers[filteredEvent];
-                }}
-            }}
-            
-            if(typeof h === 'function'){{
-                try {{ h.call(node, e); }} catch(err){{ console.error('[Dars] handler error', err); }}
-                return;
-            }}
-            }}
-            node = node.parentNode;
-        }}
-        }}, true);
-    }}
-
-    function typesDiffer(a,b){{ return (a && b) ? a.type !== b.type : a!==b; }}
-
-    function removeSubtree(v){{
-        if(!v) return;
-        // eliminar hijos primero (postorden)
-        const ch = (v.children||[]);
-        for(let i=0;i<ch.length;i++){{ removeSubtree(ch[i]); }}
-        // limpiar handlers
-        if(v.id){{ eventMap.delete(v.id); }}
-        // quitar elemento del DOM
-        if(v.id){{ const el = document.getElementById(v.id); if(el && el.parentNode){{ try{{ el.parentNode.removeChild(el); }}catch(_){{}} }} }}
-    }}
-
-    function updateNode(oldV, newV){{
-        if(!newV || !newV.id){{ return {{ ok:false, reason:'missing-new' }}; }}
-        let el = document.getElementById(newV.id);
-        if(!el){{
-        const oldEl = (oldV && oldV.id) ? document.getElementById(oldV.id) : null;
-        if(oldEl){{ try {{ oldEl.id = newV.id; el = oldEl; }} catch(_){{}} }}
-        }}
-        if(!el){{ return {{ ok:false, reason:'missing-el' }}; }}
-
-        if(typesDiffer(oldV, newV)){{
-        return {{ ok:false, reason:'type-changed' }};
-        }}
-
-        const isIsland = !!newV.isIsland;
-
-        // class -> atributo className
-        if(!isIsland && newV.class){{ el.className = newV.class; }}
-
-        // props
-        if(!isIsland){{ diffProps(el, (oldV&&oldV.props)||{{}}, newV.props||{{}}); }}
-
-        // styles
-        if(!isIsland){{ diffStyles(el, (oldV&&oldV.style)||{{}}, newV.style||{{}}); }}
-
-        // text
-        if(!isIsland && Object.prototype.hasOwnProperty.call(newV, 'text')){{
-        if(el.textContent !== String(newV.text||'')){{
-            el.textContent = String(newV.text||'');
-        }}
-        }}
-
-        if(isIsland){{ return {{ ok:true }}; }}
-
-        const oldC = (oldV && oldV.children) ? oldV.children : [];
-        const newC = (newV.children) ? newV.children : [];
-
-        const oldIndex = new Map(); // clave -> vnode viejo
-        for(let i=0;i<oldC.length;i++){{
-        const k = (oldC[i] && (oldC[i].id || oldC[i].key)) || null;
-        if(k){{ oldIndex.set(String(k), oldC[i]); }}
-        }}
-
-        const seenOld = new Set();
-
-        for(let i=0;i<newC.length;i++){{
-        const newChild = newC[i];
-        const k = (newChild && (newChild.id || newChild.key)) || null;
-        if(!k){{
-            if(i < oldC.length){{
-            const r = updateNode(oldC[i], newChild);
-            if(!r.ok){{ return r; }}
-            seenOld.add(oldC[i]);
-            continue;
-            }} else {{
-            return {{ ok:false, reason:'children-added' }};
-            }}
-        }}
-        const oldChild = oldIndex.get(String(k));
-        if(oldChild){{
-            const r = updateNode(oldChild, newChild);
-            if(!r.ok){{ return r; }}
-            seenOld.add(oldChild);
-        }} else {{
-            if(i < oldC.length){{
-            const candidate = oldC[i];
-            if(!typesDiffer(candidate, newChild)){{
-                const r = updateNode(candidate, newChild);
-                if(!r.ok){{ return r; }}
-                seenOld.add(candidate);
-                continue;
-            }}
-            }}
-            const subtree = createSubtree(newChild);
-            if(subtree){{
-            const refChildVNode = (i < oldC.length) ? oldC[i] : null;
-            if(refChildVNode && refChildVNode.id){{
-                const refEl = document.getElementById(refChildVNode.id);
-                if(refEl && refEl.parentNode){{ refEl.parentNode.insertBefore(subtree, refEl); }}
-                else {{ el.appendChild(subtree); }}
-            }} else {{
-                el.appendChild(subtree);
-            }}
-            continue;
-            }}
-            return {{ ok:false, reason:'children-added' }};
-        }}
-        }}
-
-        for(let i=0;i<oldC.length;i++){{
-        const v = oldC[i];
-        if(!seenOld.has(v)){{
-            removeSubtree(v);
-        }}
-        }}
-        return {{ ok:true }};
-    }}
-
-    function schedule(fn){{
-        if(typeof requestAnimationFrame === 'function'){{
-        requestAnimationFrame(fn);
-        }} else {{ setTimeout(fn, 16); }}
-    }}
-
-    function update(newSnapshot){{
-        const old = currentSnapshot;
-        if(!old){{
-        currentSnapshot = newSnapshot;
-        try{{ window.__DARS_VDOM__ = newSnapshot; }}catch(_){{ /* ignore */ }}
-        return;
-        }}
-        schedule(()=>{{
-        const res = updateNode(old, newSnapshot);
-        if(!res.ok){{
-            console.warn('[Dars] Structural change detected (', res.reason, '), reloading...');
-            try {{ location.reload(); }} catch(e) {{ /* ignore */ }}
-            return;
-        }}
-        currentSnapshot = newSnapshot;
-        try{{ window.__DARS_VDOM__ = newSnapshot; }}catch(_){{ /* ignore */ }}
-        }});
-    }}
-
-    function hydrate(snapshot){{
-        currentSnapshot = snapshot;
-        try{{ window.__DARS_VDOM__ = snapshot; }}catch(_){{ /* ignore */ }}
-        const delegated = [
-        'click','dblclick',
-        'mousedown','mouseup','mouseenter','mouseleave','mousemove',
-        'keydown','keyup','keypress',
-        'change','input','submit',
-        'focus','blur'
-        ];
-        delegated.forEach(ev => delegate(ev, document));
-    }}
-
-    function startHotReload(){{
-        try{{ if (window.__DARS_HOTRELOAD_DISABLED__) return ()=>{{}}; }}catch(_ ){{ }}
-        const vurl = (window.__DARS_VERSION_URL || 'version.txt');
-        let timer = null;
-        let warnedVersionMissing = false;
-        let failCount = 0;
-        const maxFails = 10;
-        let stopped = false;
-
-        function httpGet(url, onSuccess, onError, responseType){{
-        try{{
-            const xhr = new XMLHttpRequest();
-            if(responseType){{ xhr.responseType = responseType; }}
-            xhr.open('GET', url, true);
-            xhr.timeout = 5000;
-            xhr.onreadystatechange = function(){{
-            if(xhr.readyState === 4){{
-                if(xhr.status >= 200 && xhr.status < 300){{
-                onSuccess(xhr.response);
-                }} else {{
-                onError();
-                }}
-            }}
-            }};
-            xhr.onerror = onError;
-            xhr.ontimeout = onError;
-            xhr.setRequestHeader('Cache-Control', 'no-store');
-            xhr.send();
-        }}catch(e){{ onError(); }}
-        }}
-
-        function tick(){{
-        if(stopped) return;
-        httpGet(vurl, function(text){{
-            let ver = (text || '').toString().trim();
-            // Treat '0' or empty as missing
-            if(!ver || ver === '0'){{
-            failCount += 1;
-            if(failCount >= maxFails){{
-                console.warn('[Dars] version file not found after', maxFails, 'attempts. Hot reload disabled for this session.');
-                stopped = true;
-                try{{ window.__DARS_HOTRELOAD_DISABLED__ = true; window.__DARS_STOP_HOTRELOAD = null; }}catch(_ ){{ }}
-                if(timer) try{{ clearTimeout(timer); }}catch(_ ){{ }}
-                return;
-            }}
-            if(!warnedVersionMissing){{ console.warn('[Dars] waiting for version file...'); warnedVersionMissing = true; }}
-            timer = setTimeout(tick, 600);
-            return;
-            }}
-            // Reset fail counter on valid version
-            failCount = 0;
-            warnedVersionMissing = false;
-            if(!currentVersion){{ currentVersion = ver; }}
-            if(ver && ver !== currentVersion){{
-            currentVersion = ver;
-            try {{ location.reload(); }} catch(_) {{}}
-            return;
-            }}
-            timer = setTimeout(tick, 600);
-        }}, function(){{
-            failCount += 1;
-            if(failCount >= maxFails){{
-            console.warn('[Dars] version file not reachable after', maxFails, 'attempts. Hot reload disabled for this session.');
-            stopped = true;
-            try{{ window.__DARS_HOTRELOAD_DISABLED__ = true; window.__DARS_STOP_HOTRELOAD = null; }}catch(_ ){{ }}
-            if(timer) try{{ clearTimeout(timer); }}catch(_ ){{ }}
-            return;
-            }}
-            if(!warnedVersionMissing){{ console.warn('[Dars] waiting for version file...'); warnedVersionMissing = true; }}
-            timer = setTimeout(tick, 600);
-        }}, 'text');
-        }}
-        tick();
-        return ()=>{{ try{{ stopped = true; if(timer) clearTimeout(timer); window.__DARS_STOP_HOTRELOAD = null; }}catch(_ ){{ }} }};
+{states_js_code}
     }}
 
     function _darsInit(){{
-
         initializeStates();
         initializeEvents();
-                
-        if(window.__ROUTE_VDOM__){{
-        hydrate(window.__ROUTE_VDOM__);
-        }} else if(window.__DARS_VDOM__){{
-        hydrate(window.__DARS_VDOM__);
-        }}
-        // Activar hot-reload incremental en dev si hay URLs definidas (evitar múltiples pollers)
-        if(window.__DARS_VERSION_URL && window.__DARS_SNAPSHOT_URL){{
-        try{{ if (typeof window.__DARS_STOP_HOTRELOAD === 'function') {{ window.__DARS_STOP_HOTRELOAD(); }} }}catch(_){{ }}
-        try{{ window.__DARS_STOP_HOTRELOAD = startHotReload(); }}catch(_){{ }}
-        }}
-
-        // Initialize reactive bindings for useDynamic
-        if (!window.__ROUTE_VDOM__) {{
-            {reactive_bindings_js}
-        }}
-
-        // Initialize VRef bindings
-        if (!window.__ROUTE_VDOM__) {{
-            {vref_bindings_js}
-        }}
+        
+        {reactive_bindings_js}
+        
+        {vref_bindings_js}
     }}
 
     if(document.readyState === 'complete' || document.readyState === 'interactive'){{
@@ -2994,6 +2699,8 @@ audio.dars-audio {
             items = [self._value_to_js(item) for item in value]
             return '[' + ', '.join(items) + ']'
         elif isinstance(value, dict):
+            if len(value) == 1 and "$code" in value:
+                return value["$code"]
             parts = []
             for k, v in value.items():
                 js_key = f'"{k}"' if isinstance(k, str) else str(k)
@@ -3656,79 +3363,59 @@ audio.dars-audio {
 
     
     def _generate_events_js(self, events_map: Dict[str, Dict[str, Any]]) -> str:
-        """Genera código JS para inicializar todos los eventos directamente en el runtime"""
-        import json
+        """Genera código JS nativo para inicializar todos los eventos directamente adjuntos a los dom nodes"""
         lines = []
 
         for comp_id, events in events_map.items():
             for event_name, event_handlers in events.items():
-                # Soporte para arrays de handlers (ya serializados por VDomBuilder)
                 handlers_list = event_handlers if isinstance(event_handlers, list) else [event_handlers]
                 
                 valid_handlers_js = []
-                
                 for handler_spec in handlers_list:
-                    # handler_spec ya debería ser un dict { "type": ..., "data"/"code": ... }
-                    # si viene directo de vdom.py
-                    
-                    if isinstance(handler_spec, dict):
-                        h_type = handler_spec.get('type')
-                        
-                        # CASO 1: DAP Action (Preferred)
-                        if h_type == 'action':
-                            data = handler_spec.get('data')
-                            if data:
-                                # Serializamos la acción a JSON string
-                                action_json = json.dumps(data, ensure_ascii=False)
-                                # Generamos la llamada al dispatcher
-                                # window.Dars._dispatch(action, event)
-                                js_call = f"if(window.Dars && window.Dars._dispatch) {{ window.Dars._dispatch({action_json}, event); }}"
-                                valid_handlers_js.append(js_call)
-                                continue
-                                
-                        # CASO 2: Legacy Inline Code
-                        elif h_type == 'inline':
-                            code = handler_spec.get('code')
-                            if code:
-                                valid_handlers_js.append(code)
-                                continue
-
-                    # FALLBACK: Intentar extraer código legacy si la estructura no es standard
+                    # En la nueva arquitectura todo es código JS raw o dicts devueltos por ActionBuilder
                     code = None
-                    if hasattr(handler_spec, 'get_code'):
-                         code = handler_spec.get_code()
-                    elif isinstance(handler_spec, dict):
-                         code = handler_spec.get('code') or handler_spec.get('value')
+                    if isinstance(handler_spec, dict):
+                        code = handler_spec.get('code') or handler_spec.get('value')
+                    elif hasattr(handler_spec, 'get_code'):
+                        code = handler_spec.get_code()
                     elif isinstance(handler_spec, str):
-                         code = handler_spec
+                        code = handler_spec
                     
                     if code and isinstance(code, str) and code.strip():
                         valid_handlers_js.append(code.strip())
 
                 if valid_handlers_js:
+                    safe_id = comp_id.replace('-', '_')
                     lines.append(f'    // Evento {event_name} para componente {comp_id}')
-                    lines.append(f'    if (!eventMap.has("{comp_id}")) eventMap.set("{comp_id}", {{}});')
+                    lines.append(f'    var __el_{safe_id} = document.getElementById("{comp_id}");')
+                    lines.append(f'    if (__el_{safe_id}) {{')
                     
-                    # Generar función manejadora
-                    lines.append(f'    eventMap.get("{comp_id}")["{event_name}"] = async function(event) {{')
-                    
-                    # Robust loading logic
-                    lines.append('        // Ensure runtime loaded')
-                    lines.append('        if (!window.Dars) {')
-                    lines.append("            try {")
-                    lines.append("                const m = await import('/lib/dars.min.js');")
-                    lines.append("                window.Dars = m.default || m;")
-                    lines.append("            } catch (e) { console.error('[Dars] Failed to lazy load runtime', e); }")
-                    lines.append('        }')
+                    # Keyboard events specific parsing '.Enter', etc.
+                    if '.' in event_name and event_name.startswith(('key', 'mouse')):
+                        base_event, key_modifier = event_name.split('.', 1)
+                        lines.append(f'        __el_{safe_id}.addEventListener("{base_event}", async function(event) {{')
+                        lines.append(f'            if (event.key !== "{key_modifier}" && event.code !== "{key_modifier}") return;')
+                    else:
+                        lines.append(f'        __el_{safe_id}.addEventListener("{event_name}", async function(event) {{')
+
+                    # Robust library loading fallback just in case
+                    lines.append('            // Ensure runtime loaded if used')
+                    lines.append('            if (!window.Dars) {')
+                    lines.append("                try {")
+                    lines.append("                    const m = await import('/lib/dars.min.js');")
+                    lines.append("                    window.Dars = m.default || m;")
+                    lines.append("                } catch (e) { }")
+                    lines.append('            }')
                     
                     # Ejecutar handlers
                     for handler_js in valid_handlers_js:
-                        lines.append(f'        try {{ {handler_js} }} catch(e) {{ console.error("Error en handler:", e); }}')
+                        lines.append(f'            try {{ {handler_js} }} catch(e) {{ console.error("Error en handler:", e); }}')
                         
-                    lines.append(f'    }};')
-                    lines.append('') # Add an empty line for separation, consistent with original
+                    lines.append(f'        }});')
+                    lines.append(f'    }}')
+                    lines.append('')
 
-        return "\n".join(lines) if lines else '    // No hay eventos para esta página'
+        return "\n".join(lines) if lines else '    // No hay eventos estáticos para esta página'
 
     def get_component_id(self, component, prefix="comp"):
         """
@@ -5932,8 +5619,9 @@ audio.dars-audio {
             runtime_js = self.generate_javascript(route_app, route_app.root, route_events_map, ssr_mode=is_ssr_route)
             
             # Generate VDOM JS content
-            vdom_json = json.dumps(route_vdom, ensure_ascii=False, separators=(",", ":"), cls=DarsJSONEncoder)
-            vdom_js_content = f"window.__DARS_VDOM__ = {vdom_json};\n"
+            # Generate VDOM JS content using native compiler to support reactive props
+            vdom_js_literal = compile_val(route_vdom)
+            vdom_js_content = f"window.__DARS_VDOM__ = {vdom_js_literal};\n"
 
             # Collect scripts for this route (app scripts + page scripts)
             route_scripts = []
@@ -6225,7 +5913,8 @@ audio.dars-audio {
                 # Use the same method that generates meta tags for multipage
                 initial_meta_tags = self._generate_page_meta_tags(head_metadata, app)
         
-        spa_html = f'''<!DOCTYPE html><html lang="{getattr(app, "language", "en")}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">{initial_meta_tags}<title>{initial_title}</title><link rel="stylesheet" href="/runtime_css.css"><link rel="stylesheet" href="/styles.css"></head><body><div id="__dars_spa_root__"></div><script type="module" src="/lib/dars.min.js"></script><script>const __DARS_SPA_CONFIG__ = {json.dumps(spa_config, ensure_ascii=False, separators=(",", ":"), cls=DarsJSONEncoder)};window.addEventListener("DOMContentLoaded", function() {{ if (window.Dars && window.Dars.router) window.Dars.router.registerConfig(__DARS_SPA_CONFIG__);else console.error("[Dars SPA] Router not available");}});</script>{hot_reload_script}</body></html>'''
+        spa_config_literal = compile_val(spa_config)
+        spa_html = f'''<!DOCTYPE html><html lang="{getattr(app, "language", "en")}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">{initial_meta_tags}<title>{initial_title}</title><link rel="stylesheet" href="/runtime_css.css"><link rel="stylesheet" href="/styles.css"></head><body><div id="__dars_spa_root__"></div><script type="module" src="/lib/dars.min.js"></script><script>const __DARS_SPA_CONFIG__ = {spa_config_literal};window.addEventListener("DOMContentLoaded", function() {{ if (window.Dars && window.Dars.router) window.Dars.router.registerConfig(__DARS_SPA_CONFIG__);else console.error("[Dars SPA] Router not available");}});</script>{hot_reload_script}</body></html>'''
         try:
             soup = BeautifulSoup(spa_html, "html.parser")
             spa_html = soup.prettify()

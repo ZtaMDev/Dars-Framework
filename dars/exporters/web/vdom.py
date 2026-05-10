@@ -173,34 +173,26 @@ class VDomBuilder:
                 
                 serialized_handlers = []
                 for handler in handler_list:
-                    action_data = None
                     code = None
                     
-                    # 1. Try DAP Action first
-                    if hasattr(handler, 'get_action'):
-                        action_data = handler.get_action()
-
-                    # 2. If no action, try code (Legacy/Fallback)
-                    if action_data is None:
-                        try:
-                            if hasattr(handler, 'get_code'):
-                                code = handler.get_code()
-                            elif isinstance(handler, dict):
-                                code = handler.get('code') or handler.get('value')
-                            elif isinstance(handler, str):
-                                code = handler
-                            else:
-                                code = str(handler) if handler else None
-                        except Exception as e:
-                            print(f"Warning: Error serializing event handler: {e}")
-                            code = None
+                    # Always compile to inline JS code (no more _dispatch)
+                    try:
+                        if hasattr(handler, 'get_code'):
+                            code = handler.get_code()
+                        elif hasattr(handler, 'code') and isinstance(getattr(handler, 'code', None), str):
+                            # RawJS objects
+                            code = handler.code
+                        elif isinstance(handler, dict):
+                            code = handler.get('code') or handler.get('value')
+                        elif isinstance(handler, str):
+                            code = handler
+                        else:
+                            code = str(handler) if handler else None
+                    except Exception as e:
+                        print(f"Warning: Error serializing event handler: {e}")
+                        code = None
                     
-                    if action_data is not None:
-                        serialized_handlers.append({
-                            "type": "action",
-                            "data": action_data
-                        })
-                    elif code and (isinstance(code, str) and code.strip()):
+                    if code and (isinstance(code, str) and code.strip()):
                         serialized_handlers.append({
                             "type": "inline", 
                             "code": code.strip()
@@ -358,22 +350,38 @@ class VDomBuilder:
             for hook_name in ('onMount', 'onUpdate', 'onUnmount'):
                 if hook_name in base_props and base_props[hook_name] is not None:
                     raw = base_props[hook_name]
+                    
+                    action_data = None
                     code = None
-                    kind = 'inline'
-                    try:
-                        if hasattr(raw, 'get_code'):
-                            code = raw.get_code()
-                            kind = 'dscript'
-                        elif isinstance(raw, dict):
-                            code = raw.get('code') or raw.get('value')
-                        elif isinstance(raw, str):
-                            code = raw
-                        else:
-                            code = str(raw)
-                    except Exception:
-                        code = None
-
-                    if isinstance(code, str) and code.strip():
+                    kind = 'inline' # Default
+                    
+                    # 1. Try DAP Action
+                    if hasattr(raw, 'get_action'):
+                        action_data = raw.get_action()
+                        if action_data:
+                            kind = 'action'
+                    
+                    # 2. Fallback to Code
+                    if not action_data:
+                        try:
+                            if hasattr(raw, 'get_code'):
+                                code = raw.get_code()
+                                kind = 'dscript'
+                            elif isinstance(raw, dict):
+                                code = raw.get('code') or raw.get('value')
+                            elif isinstance(raw, str):
+                                code = raw
+                            else:
+                                code = str(raw)
+                        except Exception:
+                            code = None
+                    
+                    if kind == 'action' and action_data:
+                        lifecycle[hook_name] = {
+                            'type': 'action',
+                            'data': action_data
+                        }
+                    elif isinstance(code, str) and code.strip():
                         lifecycle[hook_name] = {
                             'type': kind,
                             'code': code.strip(),

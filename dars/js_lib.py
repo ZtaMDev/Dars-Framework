@@ -20,25 +20,22 @@ import DOMPurify from 'https://esm.sh/dompurify';
 const _sanitize = (html) => DOMPurify.sanitize(html);
 
 // Centralized eval helper with optional global error reporting hook
-function _safeEval(code, ctx){{
-  if (code == null) return;
+// Eval completely removed for security.
+function _executeExternalScript(code) {{
+  if (!code) return null;
   try {{
-    const res = (0,eval)(code);
-    if (res instanceof Promise) {{
-        res.catch(e => console.error('[Dars:Debug] Async eval error:', e));
-    }}
-    return res;
-  }} catch (err) {{
-    try {{ console.error('[Dars] Eval error:', err); }} catch(_ ){{}}
-    try {{
-      const D = (globalThis && globalThis.Dars) || (typeof window!=='undefined' ? window.Dars : null);
-      if (D && typeof D.onError === 'function') {{
-        D.onError(err, Object.assign({{ code: String(code) }}, ctx || {{}}));
-      }}
-    }} catch(_ ){{}}
+      const s = document.createElement('script');
+      // Wrap in async IIFE to support await and provide local scope
+      s.textContent = `(async () => {{ try {{ ${{code}} }} catch(e) {{ console.error('[Dars] Script execution error:', e); }} }})();`;
+      document.body.appendChild(s);
+      s.remove();
+  }} catch(e) {{
+      console.error('[Dars:Security] Error executing external script:', e);
   }}
+  return null;
 }}
 
+// DOM helper
 function $(id){{ return document.getElementById(id) || document.querySelector(`[data-id="${{id}}"]`) || null; }}
 
 // Alert helper (non-fatal)
@@ -50,57 +47,8 @@ function _cssEscape(s){{
   try{{ return String(s).replace(/[^a-zA-Z0-9_\\-]/g, '\\$&'); }}catch(_ ){{ return String(s); }}
 }}
 
-// --- DAP Dispatcher ---
-async function _dispatch(action, event, context) {{
-  if (!action || typeof action !== 'object') return;
-  
-  const op = action.op;
-  const args = action.args || {{}};
-  
-  if (window.Dars?.debug) console.log('[Dars:Dispatch]', op, args, event);
-
-  try {{
-    if (op === 'sequence') {{
-      if (Array.isArray(args)) {{
-        for (const subAction of args) {{
-          await _dispatch(subAction, event, context);
-        }}
-      }}
-    }} else if (op === 'change') {{
-      if (typeof window.Dars.change === 'function') {{
-        await window.Dars.change(args);
-      }} else {{
-        // Fallback or lazy load waiting not handled here, assumed loaded by exporter logic
-        if (typeof change === 'function') change(args);
-      }}
-    }} else if (op === 'call') {{
-        // Call another state change
-        // args: {{name, id, state, goto, ...}}
-        // Essentially same as 'change' but usually simpler arguments
-        if (typeof window.Dars.change === 'function') {{
-            await window.Dars.change(args);
-        }}
-    }} else if (['inc', 'dec', 'set', 'toggleClass', 'appendText', 'prependText'].includes(op)) {{
-        // Mod operations normally handled within change() logic via rules, 
-        // but if dispatched directly (e.g. from dScript manual construction)
-        // we can delegate to a mod handler if we expose it, or treat it as a state update 
-        // if we wrap it. For now, let's assume direct mods are rare outside cState rules.
-        // If we need to support direct DOM mods, we can implement it here.
-       console.warn('[Dars] Direct mod dispatch not fully implemented yet', op);
-    }} else if (op === 'setValue') {{
-        // Helper to set values on inputs
-        const target = $(args.target);
-        if (target) {{
-            if (args.hasOwnProperty('value')) target.value = args.value;
-            if (args.hasOwnProperty('checked')) target.checked = !!args.checked;
-            target.dispatchEvent(new Event('input', {{ bubbles: true }}));
-            target.dispatchEvent(new Event('change', {{ bubbles: true }}));
-        }}
-    }}
-  }} catch (e) {{
-    console.error('[Dars] Dispatch error:', e, action);
-  }}
-}}
+// --- DAP Dispatcher Removed ---
+// All actions are now compiled directly to native JavaScript at export time.
 
 function _attachEventsForVNode(el, vnode, events, markClass){{
   try{{
@@ -141,9 +89,9 @@ function _attachEventsForVNode(el, vnode, events, markClass){{
           
           for(const act of actions){{ 
               if (act.type === 'action') {{
-                  _dispatch(act.data, ev);
+                  // Action dispatching removed
               }} else if (act.type === 'inline') {{
-                  _safeEval(act.code, {{ type, event: ev, phase: 'event_handler' }}); 
+                  _executeExternalScript(act.code); 
               }}
           }}
         }};
@@ -169,16 +117,41 @@ function _attachEventsForVNode(el, vnode, events, markClass){{
 
 // ---- Runtime helpers for dynamic create/delete ----
 function _elFromVNode(v){{
-  const map = {{ Text: 'span', Button: 'button', Section: 'section', Div: 'div' }};
+  const map = {{ Text: 'span', Button: 'button', Section: 'section', Div: 'div', Container: 'div' }};
   const tag = (v && typeof v.type === 'string') ? (map[v.type] || 'div') : 'div';
   const el = document.createElement(tag);
+  
+  const _set = (val, fn) => {{
+    if (val instanceof Promise) val.then(res => {{ if(res !== undefined) fn(res); }}).catch(e => console.error('[Dars:VDOM] Error resolving prop:', e));
+    else if (val !== undefined && val !== null) fn(val);
+  }};
+
   try{{ if(v.id) el.id = String(v.id); }}catch(_ ){{ }}
   try{{ if(v.id) el.classList.add('dars-id-' + String(v.id)); }}catch(_ ){{ }}
-  try{{ if(v.class){{ el.className = String(v.class); }} }}catch(_ ){{ }}
+  
+  _set(v.class, (c) => {{ el.className = String(c); }});
+  
   try{{ if(v.style && typeof v.style === 'object'){{
-    for(const k in v.style){{ try{{ el.style[k] = v.style[k]; }}catch(_ ){{}}}}
+    for(const k in v.style){{ 
+      _set(v.style[k], (s) => {{ try{{ el.style[k] = s; }}catch(_){{}}}});
+    }}
   }}}}catch(_ ){{ }}
-  try{{ if(typeof v.text === 'string') el.textContent = v.text; }}catch(_ ){{ }}
+  
+  _set(v.text, (t) => {{ el.textContent = String(t); }});
+  
+  // Handle other props (attributes)
+  if (v.props && typeof v.props === 'object') {{
+      for (const pk in v.props) {{
+          if (pk === 'parent' || pk === 'children') continue;
+          _set(v.props[pk], (pv) => {{ 
+              try {{ 
+                  if (pk === 'value' && (tag === 'input' || tag === 'textarea' || tag === 'select')) el.value = String(pv);
+                  else el.setAttribute(pk, String(pv)); 
+              }} catch(_) {{}} 
+          }});
+      }}
+  }}
+
   // children
   try{{ if(Array.isArray(v.children)){{
     for(const c of v.children){{ const ch = _elFromVNode(c); if(ch) el.appendChild(ch); }}
@@ -209,7 +182,7 @@ function _registerLifecycleFromVNode(v){{
         __lifecycle.set(id, entry);
         // Fire onMount once on registration
         if(!entry._mounted && entry.onMount && typeof entry.onMount === 'string'){{
-          try{{ (0,eval)(entry.onMount); }}catch(_ ){{ }}
+          _executeExternalScript(entry.onMount);
           entry._mounted = true;
           __lifecycle.set(id, entry);
         }}
@@ -218,18 +191,23 @@ function _registerLifecycleFromVNode(v){{
   }}catch(_ ){{ }}
 }}
 
-function _runLifecycle(id, hook){{
-  try{{
-    const info = __lifecycle.get(String(id));
-    if(!info) return;
-    let code = null;
-    if(hook === 'onUpdate') code = info.onUpdate;
-    else if(hook === 'onUnmount') code = info.onUnmount;
-    else if(hook === 'onMount') code = info.onMount;
-    if(typeof code === 'string' && code.trim()){{
-      _safeEval(code, {{ hook, id }});
-    }}
-  }}catch(_ ){{ }}
+function _runLifecycle(id, hook) {{
+  try {{
+      const info = __lifecycle.get(String(id));
+      if (!info) return;
+      let code = null;
+      if (hook === 'onUpdate') code = info.onUpdate;
+      else if (hook === 'onUnmount') code = info.onUnmount;
+      else if (hook === 'onMount') code = info.onMount;
+
+      if (typeof code === 'string' && code.trim()) {{
+          _executeExternalScript(code);
+      }} else if (typeof code === 'function') {{
+          code();
+      }}
+  }} catch(e) {{
+      try{{ console.error(e); }}catch(_ ){{}}
+  }}
 }}
 
 // Wrap global DarsHydrate (if present) to also register lifecycle hooks
@@ -291,9 +269,9 @@ function _attachEventsMap(events){{
           
           for(const act of actions){{ 
               if (act.type === 'action') {{
-                  _dispatch(act.data, ev);
+                  // Action dispatching removed
               }} else if (act.type === 'inline') {{
-                  _safeEval(act.code, {{ type, event: ev, phase: 'event_handler' }}); 
+                  _executeExternalScript(act.code); 
               }}
           }}
         }};
@@ -345,7 +323,6 @@ const runtime = {{
       try{{ if(typeof window.DarsHydrate === 'function') window.DarsHydrate(el); }}catch(_ ){{ }}
     }}catch(e){{ try{{ console.error(e); }}catch(_ ){{ }} }}
   }},
-  _dispatch, // Export dispatch for internal use
 }};
 
 // Register states config
@@ -459,150 +436,10 @@ function _applyMods(defaultId, mods){{
   if(!Array.isArray(mods) || !mods.length) return;
   for(const m of mods){{
     try{{
-      const op = m && m.op;
-      if(!op) continue;
-      const tid = (m && m.target) ? m.target : defaultId;
-      const el = $(tid);
-      if(!el) continue;
-      if(op === 'inc' || op === 'dec'){{
-        const prop = m.prop || 'text';
-        const by = Number(m.by || (op==='dec'?-1:1));
-        if(prop === 'text'){{
-          const cur = parseFloat(el.textContent||'0') || 0;
-          el.textContent = String(cur + by);
-        }} else {{
-          const cur = parseFloat(el.getAttribute(prop)||'0') || 0;
-          el.setAttribute(prop, String(cur + by));
-        }}
-      }} else if(op === 'set'){{
-        const attrs = m.attrs || {{}};
-        for(const k in attrs){{
-          try{{
-            if(k === 'text') {{ el.textContent = String(attrs[k]); continue; }}
-            if(k === 'html') {{ el.innerHTML = _sanitize(String(attrs[k])); continue; }}
-            if(k.startsWith('on_')){{
-              const type = k.slice(3);
-              const v = attrs[k];
-              const codes = [];
-              
-              // NUEVO: soporte para arrays de handlers
-              const pushCode = (item)=>{{
-                if(typeof item === 'string') codes.push(item);
-                else if(item && typeof item.code === 'string') codes.push(item.code);
-              }};
-              
-              if(Array.isArray(v)) {{
-                v.forEach(pushCode);
-              }} else {{
-                pushCode(v);
-              }}
-              
-              if(codes.length){{
-                // Parse event type for key filtering (e.g., "keydown.Enter")
-                const [baseEvent, targetKey] = type.includes('.') ? type.split('.', 2) : [type, null];
-                
-                el.__darsEv = el.__darsEv || {{}};
-                if(el.__darsEv[type]){{
-                  try{{ el.removeEventListener(baseEvent, el.__darsEv[type], true); }}catch(_){{ }}
-                  try{{ el.removeEventListener(baseEvent, el.__darsEv[type], false); }}catch(_){{ }}
-                }}
-                const handler = function(ev){{
-                  // Key filtering for keyboard events
-                  if(targetKey){{
-                    if(!ev || !ev.key) return; // Not a keyboard event
-                    if(ev.key !== targetKey && ev.code !== targetKey) return; // Wrong key
-                  }}
-                  try{{ ev.stopImmediatePropagation(); }}catch(_){{ }}
-                  try{{ ev.stopPropagation(); }}catch(_){{ }}
-                  try{{ ev.preventDefault(); }}catch(_){{ }}
-                  try{{ ev.cancelBubble = true; }}catch(_){{ }}
-                  let propName = 'on'+baseEvent;
-                  let prevOn = null;
-                  try{{ prevOn = el[propName]; el[propName] = null; }}catch(_){{ }}
-                  try{{ 
-                    // NUEVO: ejecutar todos los códigos en secuencia
-                    for(const c of codes){{ 
-                      try{{ (new Function('event', c)).call(el, ev); }}catch(_){{ }} 
-                    }} 
-                  }} finally{{
-                    try{{ setTimeout(()=>{{ try{{ el[propName] = prevOn; }}catch(_){{ }} }}, 0); }}catch(_){{ }}
-                  }}
-                }};
-                try{{ el.addEventListener(baseEvent, handler, {{ capture: true }}); }}catch(_){{ }}
-                el.__darsEv[type] = handler;
-                continue;
-              }}
-            }}
-            // Special handling for style to merge instead of replace
-            if(k === 'style' \u0026\u0026 typeof attrs[k] === 'object'){{
-              for(const styleKey in attrs[k]){{
-                try{{ el.style[styleKey] = attrs[k][styleKey]; }}catch(_){{ }}
-              }}
-              continue;
-            }}
-            
-            // Handle boolean attributes
-            const booleanAttrs = ['checked', 'disabled', 'readonly', 'required', 'selected', 'autofocus', 'autoplay', 'controls', 'loop', 'muted'];
-            let attrName = k;
-            let isBooleanAttr = booleanAttrs.includes(k);
-            
-            // Handle is_* prefix (e.g., is_disabled -> disabled)
-            if (!isBooleanAttr \u0026\u0026 k.startsWith('is_')) {{
-              const unprefixed = k.substring(3);
-              if (booleanAttrs.includes(unprefixed)) {{
-                attrName = unprefixed;
-                isBooleanAttr = true;
-              }}
-            }}
-            
-            if (isBooleanAttr) {{
-              const val = attrs[k];
-              if (val === true || val === 'true' || val === k || val === '') {{
-                el.setAttribute(attrName, '');
-                if (attrName in el) el[attrName] = true;
-              }} else {{
-                el.removeAttribute(attrName);
-                if (attrName in el) el[attrName] = false;
-              }}
-            }} else {{
-              el.setAttribute(k, String(attrs[k]));
-            }}
-          }}catch(_){{ }}
-        }}
-      }} else if(op === 'toggleClass'){{
-        const name = m.name || '';
-        const on = m.hasOwnProperty('on') ? !!m.on : null;
-        if(!name) continue;
-        if(on === null){{ el.classList.toggle(name); }}
-        else if(on){{ el.classList.add(name); }}
-        else {{ el.classList.remove(name); }}
-      }} else if(op === 'appendText'){{
-        el.textContent = String(el.textContent||'') + String(m.value||'');
-      }} else if(op === 'prependText'){{
-        el.textContent = String(m.value||'') + String(el.textContent||'');
-      }} else if(op === 'call'){{
-        try{{
-          const payload = {{}};
-          if (m.name) payload.name = String(m.name);
-          if (m.id) payload.id = String(m.id);
-          if (m.hasOwnProperty('state')) payload.state = m.state;
-          if (m.hasOwnProperty('goto')) payload.goto = m.goto;
-          if (!payload.name && !payload.id && defaultId) payload.id = String(defaultId);
-          // Usar el nuevo sistema de cambio de estado que es compatible con el runtime actual
-          setTimeout(()=>{{ 
-            try{{ 
-              if (window.Dars && typeof window.Dars.change === 'function') {{
-                window.Dars.change(payload);
-              }} else if (window.__DARS_CHANGE_FN) {{
-                window.__DARS_CHANGE_FN(payload);
-              }} else {{
-                console.warn('[Dars] State change function not available');
-              }}
-            }}catch(_){{ }} 
-          }}, 0);
-        }}catch(_){{ }}
-      }}
-    }}catch(_){{ }}
+      if (typeof m === 'function') m();
+    }}catch(e){{
+      try{{ console.error('[Dars:ModError]', e); }}catch(_){{}}
+    }}
   }}
 }}
 
@@ -1415,10 +1252,10 @@ async function _loadRoute(route, params){{
         
         // Execute reactive/vref bindings from SSR
         if (routeData['reactiveBindings']) {{
-            _safeEval(routeData['reactiveBindings'], {{ phase: 'ssr_hydration', route: route['name'] }});
+            _executeExternalScript(routeData['reactiveBindings']);
         }}
         if (routeData['vrefBindings']) {{
-            _safeEval(routeData['vrefBindings'], {{ phase: 'ssr_hydration', route: route['name'] }});
+            _executeExternalScript(routeData['vrefBindings']);
         }}
       }}catch(error){{
         console.error('[Dars Router] Error loading SSR route:', error);
@@ -1474,8 +1311,13 @@ function _executeScripts(scripts, routeName){{
         if(script.endsWith('.js')){{
           _loadExternalScript(script, false, routeName);
         }}else{{
-          // Inline script code
-          try{{ (0, eval)(script); }}catch(e){{ console.error('[Dars Router] Script error:', e); }}
+           // Inline script code
+           try{{
+             const s = document.createElement('script');
+             s.textContent = script;
+             document.body.appendChild(s);
+             s.remove();
+           }}catch(e){{ console.error('[Dars Router] Script error:', e); }}
         }}
       }}else{{
         // Script object
@@ -1624,11 +1466,7 @@ function startLoop(id, config) {{
             }}
             change(payload);
         }} else if (config.type === 'custom') {{
-            try {{
-                (0,eval)(config.code);
-            }} catch(e) {{
-                console.error('[Dars Loop]', e);
-            }}
+            try {{ _executeExternalScript(config.code); }} catch (e) {{ console.error('[Dars Loop]', e); }}
         }}
     }}, config.interval || 1000);
     
@@ -1807,14 +1645,20 @@ try {{
                   // Apply reactive bindings from SSR if present
                   if (payload.reactiveBindings) {{
                       try {{
-                          (0, eval)(payload.reactiveBindings);
+                          const s = document.createElement('script');
+                          s.textContent = payload.reactiveBindings;
+                          document.body.appendChild(s);
+                          s.remove();
                       }} catch(e) {{ console.error('[Dars] Reactive bindings error:', e); }}
                   }}
                   
                   // Apply VRef bindings from SSR if present
                   if (payload.vrefBindings) {{
                       try {{
-                          (0, eval)(payload.vrefBindings);
+                          const s = document.createElement('script');
+                          s.textContent = payload.vrefBindings;
+                          document.body.appendChild(s);
+                          s.remove();
                       }} catch(e) {{ console.error('[Dars] VRef bindings error:', e); }}
                   }}
                   

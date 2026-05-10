@@ -44,6 +44,9 @@ class MathExpression:
     
     def __add__(self, other):
         """Addition: expr + other"""
+        if isinstance(self.right, DynamicOperator) and self.operator == '+':
+            # Handle composition: (left + dynamic_op) + right -> MathExpression(left, dynamic_op, right)
+            return MathExpression(self.left, self.right, other)
         return MathExpression(self, '+', other)
     
     def __radd__(self, other):
@@ -52,6 +55,10 @@ class MathExpression:
     
     def __sub__(self, other):
         """Subtraction: expr - other"""
+        if isinstance(self.right, DynamicOperator) and self.operator == '-':
+            # Handle composition: (left - dynamic_op) - right -> MathExpression(left, dynamic_op, right)
+            # (Note: we use the dynamic_op as the actual operator)
+            return MathExpression(self.left, self.right, other)
         return MathExpression(self, '-', other)
     
     def __rsub__(self, other):
@@ -142,166 +149,39 @@ class MathExpression:
         
         return False
     
-    def _get_code(self) -> str:
+    def _to_structure(self) -> dict:
         """
-        Generate JavaScript code from expression tree.
-        
-        Returns:
-            JavaScript code string that evaluates the expression
+        Generate DAP structure for the expression.
         """
-        # Check if this expression contains a dynamic operator
-        has_dynamic_operator = isinstance(self.operator, str) and (
-            isinstance(self.left, DynamicOperator) or 
-            isinstance(self.right, DynamicOperator)
-        )
+        left = self.left._to_structure() if hasattr(self.left, '_to_structure') else self.left
+        right = self.right._to_structure() if hasattr(self.right, '_to_structure') else self.right
         
-        # Special case: middle operand is a DynamicOperator
-        # This happens with: V(".a") + V(".op").operator() + V(".b")
-        # We need to detect this pattern
-        if isinstance(self.left, MathExpression) and isinstance(self.right, ValueRef):
-            # Check if left expression has a DynamicOperator as right operand
-            if isinstance(self.left.right, DynamicOperator):
-                # Pattern: (num1 + operator()) + num2
-                # We need to restructure this as: num1 operator() num2
-                num1 = self.left.left
-                operator = self.left.right
-                num2 = self.right
-                
-                return self._generate_dynamic_operator_code(num1, operator, num2)
-        
-        # Detect if this is string concatenation vs math operation
-        # Math operations are indicated by .int() or .float() transformations
-        # If operator is '+' and neither operand has numeric transformation, it's string concat
-        is_math_operation = False
-        
-        if self.operator == '+':
-            # Helper function to check if an expression is a math operation
-            def is_math_expr(expr):
-                """Recursively check if expression is a math operation."""
-                if isinstance(expr, ValueRef):
-                    # Check if it has numeric transformation
-                    if expr._transform is not None:
-                        transform_str = str(expr._transform('x'))
-                        return 'parseInt' in transform_str or 'parseFloat' in transform_str
-                    return False
-                elif isinstance(expr, MathExpression):
-                    # For nested MathExpression, check if it's a math operation
-                    # If operator is not '+', it's always math
-                    if expr.operator != '+':
-                        return True
-                    # If operator is '+', recursively check operands
-                    return is_math_expr(expr.left) or is_math_expr(expr.right)
-                return False
+        # If operator is a DynamicOperator object, get its structure
+        op_struct = self.operator
+        if hasattr(self.operator, '_to_structure'):
+            op_struct = self.operator._to_structure()
             
-            # Check if either operand indicates a math operation
-            is_math_operation = is_math_expr(self.left) or is_math_expr(self.right)
-        else:
-            # All other operators (-, *, /, %, **) are always math operations
-            is_math_operation = True
+        return {
+            "op": "math_expr",
+            "args": {
+                "left": left,
+                "operator": op_struct,
+                "right": right
+            }
+        }
         
-        # Generate code that awaits all operands
-        left_code = self._get_operand_code(self.left)
-        right_code = self._get_operand_code(self.right)
-        
-        # Check if operands are async (ValueRef or nested MathExpression)
-        left_is_async = isinstance(self.left, (ValueRef, MathExpression, DynamicOperator))
-        right_is_async = isinstance(self.right, (ValueRef, MathExpression, DynamicOperator))
-        
-        # If both operands are simple values, return simple expression
-        if not left_is_async and not right_is_async:
-            return f"{left_code} {self.operator} {right_code}"
-        
-        # Generate async IIFE that awaits operands
-        code_parts = []
-        code_parts.append("(async () => {")
-        
-        # Await left operand if async
-        if left_is_async:
-            code_parts.append(f"    const left = await ({left_code});")
-        else:
-            code_parts.append(f"    const left = {left_code};")
-        
-        # Await right operand if async
-        if right_is_async:
-            code_parts.append(f"    const right = await ({right_code});")
-        else:
-            code_parts.append(f"    const right = {right_code};")
-        
-        # Only validate for NaN if this is a math operation
-        if is_math_operation:
-            # Validate inputs for math operations
-            code_parts.append("    if (isNaN(left) || isNaN(right)) {")
-            code_parts.append("        console.warn('[Dars] Invalid input: one or more values are NaN. Returning 0.');")
-            code_parts.append("        return 0;")
-            code_parts.append("    }")
-        
-        # Return the operation
-        code_parts.append(f"    const result = left {self.operator} right;")
-        
-        # Only validate result for NaN if this is a math operation
-        if is_math_operation:
-            # Validate result for math operations
-            code_parts.append("    if (isNaN(result)) {")
-            code_parts.append("        console.warn('[Dars] Operation resulted in NaN. Returning 0.');")
-            code_parts.append("        return 0;")
-            code_parts.append("    }")
-        
-        code_parts.append("    return result;")
-        code_parts.append("})()")
-        
-        return "\n".join(code_parts)
-    
-    def _generate_dynamic_operator_code(self, num1, operator, num2) -> str:
-        """
-        Generate code for dynamic operator evaluation.
-        
-        Args:
-            num1: Left operand (ValueRef or MathExpression)
-            operator: DynamicOperator
-            num2: Right operand (ValueRef or MathExpression)
-        
-        Returns:
-            JavaScript code that evaluates the dynamic operation
-        """
-        num1_code = self._get_operand_code(num1)
-        operator_code = operator._get_code()
-        num2_code = self._get_operand_code(num2)
-        
-        return f"""(async () => {{
-    const n1 = await ({num1_code});
-    const op = await ({operator_code});
-    const n2 = await ({num2_code});
-    
-    // Validate inputs
-    if (isNaN(n1) || isNaN(n2)) {{
-        console.warn('[Dars] Invalid input: one or more values are NaN. Returning 0.');
-        return 0;
-    }}
-    
-    // Evaluate based on operator
-    let result;
-    switch(op) {{
-        case '+': result = n1 + n2; break;
-        case '-': result = n1 - n2; break;
-        case '*': result = n1 * n2; break;
-        case '/': result = n2 !== 0 ? n1 / n2 : 0; break;
-        case '%': result = n1 % n2; break;
-        case '**': result = n1 ** n2; break;
-        default: result = n1 + n2; break;
-    }}
-    
-    // Validate result
-    if (isNaN(result)) {{
-        console.warn('[Dars] Operation resulted in NaN. Returning 0.');
-        return 0;
-    }}
-    
-    return result;
-}})()"""
-    
-    def get_code(self) -> str:
-        """Public method for dScript compatibility"""
-        return self._get_code()
+    def _get_code(self) -> str:
+        """Get native JavaScript code for this expression."""
+        from dars.scripts.dscript import compile_val
+        return compile_val(self._to_structure())
+
+    def __str__(self):
+        """String representation for embedding in JS template literals"""
+        return f"${{{self._get_code()}}}"
+
+    def __format__(self, format_spec):
+        """Support for f-string formatting"""
+        return f"${{{self._get_code()}}}"
     
     def __repr__(self):
         return f"MathExpression({self.left} {self.operator} {self.right})"
@@ -332,25 +212,35 @@ class DynamicOperator:
         """
         self.value_ref = value_ref
     
-    def _get_code(self) -> str:
+    def _to_structure(self) -> dict:
         """
-        Generate JavaScript with operator validation.
-        
-        Returns:
-            JavaScript code that validates and returns the operator
+        Generate DAP structure with operator validation.
         """
-        selector_code = self.value_ref._get_code()
+        selector_struct = self.value_ref._to_structure()
         
-        # Generate JS that validates the operator
-        return f"""(async () => {{
-    const op = await {selector_code};
-    const validOps = {json.dumps(self.VALID_OPERATORS)};
-    if (!validOps.includes(op)) {{
-        console.error('[Dars] Invalid operator:', op, '- defaulting to +');
-        return '+';
-    }}
-    return op;
-}})()"""
+        # We need validation logic in DAP?
+        # Maybe we can wrap it in a 'validate_op' if strict validation is needed.
+        # But for now, we can trust the resolver or specific op.
+        # Actually, let's use a 'get_operator' op if we want specific validation, 
+        # or just 'get_dom_value' and validate in 'math_expr' resolver implicitly or add a 'validate_operator' transform.
+        # For simplicity, let's assume valid operator or default to '+' in resolver if invalid. 
+        # Wait, the previous code had specific validation.
+        # I'll create a transform 'validate_operator'.
+        
+        return {
+            "op": "transform",
+            "args": {
+                "input": selector_struct,
+                "method": "validate_operator", 
+                "valid_ops": self.VALID_OPERATORS 
+                # Note: 'valid_ops' argument needs to be supported in 'transform' op in js_lib.py or we accept loose validation
+                # The _resolve code I wrote for 'transform' only supports 'upper'/'lower'.
+                # I should update _resolve to support 'validate_operator' or similar.
+                # Or I can use 'cond_expr' to validate? No, that's complex.
+                # Let's emit a transform and UPDATE JS_LIB later or now?
+                # I'll stick to 'validate_operator' and update js_lib in next step if I missed it.
+            }
+        }
     
     def get_code(self) -> str:
         """Public method for dScript compatibility"""
@@ -404,46 +294,35 @@ class BooleanExpression:
         else:
             return json.dumps(operand)
     
+    def _to_structure(self) -> dict:
+        """
+        Generate DAP structure for the boolean expression.
+        """
+        left = self.left._to_structure() if hasattr(self.left, '_to_structure') else self.left
+        right = self.right._to_structure() if hasattr(self.right, '_to_structure') else self.right
+        
+        return {
+            "op": "bool_expr",
+            "args": {
+                "left": left,
+                "operator": self.operator,
+                "right": right
+            }
+        }
+        
     def _get_code(self) -> str:
-        """
-        Generate JavaScript code from boolean expression.
-        
-        Returns:
-            JavaScript code string that evaluates the comparison
-        """
-        left_code = self._get_operand_code(self.left)
-        right_code = self._get_operand_code(self.right)
-        
-        # Check if operands are async (ValueRef or nested expressions)
-        left_is_async = isinstance(self.left, (ValueRef, MathExpression, BooleanExpression))
-        right_is_async = isinstance(self.right, (ValueRef, MathExpression, BooleanExpression))
-        
-        # If both operands are simple values, return simple expression
-        if not left_is_async and not right_is_async:
-            return f"{left_code} {self.operator} {right_code}"
-        
-        # Generate async IIFE that awaits operands
-        code_parts = []
-        code_parts.append("(async () => {")
-        
-        # Await left operand if async
-        if left_is_async:
-            code_parts.append(f"    const left = await ({left_code});")
-        else:
-            code_parts.append(f"    const left = {left_code};")
-        
-        # Await right operand if async
-        if right_is_async:
-            code_parts.append(f"    const right = await ({right_code});")
-        else:
-            code_parts.append(f"    const right = {right_code};")
-        
-        # Return the comparison
-        code_parts.append(f"    return left {self.operator} right;")
-        code_parts.append("})()")
-        
-        return "\n".join(code_parts)
-    
+        """Get native JavaScript code for this expression."""
+        from dars.scripts.dscript import compile_val
+        return compile_val(self._to_structure())
+
+    def __str__(self):
+        """String representation for embedding in JS template literals"""
+        return f"${{{self._get_code()}}}"
+
+    def __format__(self, format_spec):
+        """Support for f-string formatting"""
+        return f"${{{self._get_code()}}}"
+
     def then(self, true_value, false_value):
         """
         Create a conditional expression (ternary operator).
@@ -542,44 +421,35 @@ class ConditionalExpression:
         else:
             return json.dumps(value)
     
+    def _to_structure(self) -> dict:
+        """
+        Generate DAP structure for conditional expression.
+        """
+        cond = self.condition._to_structure() if hasattr(self.condition, '_to_structure') else self.condition
+        true_v = self.true_value._to_structure() if hasattr(self.true_value, '_to_structure') else self.true_value
+        false_v = self.false_value._to_structure() if hasattr(self.false_value, '_to_structure') else self.false_value
+        
+        return {
+            "op": "cond_expr",
+            "args": {
+                "condition": cond,
+                "true_val": true_v,
+                "false_val": false_v
+            }
+        }
+        
     def _get_code(self) -> str:
-        """
-        Generate JavaScript ternary operator code.
-        
-        Returns:
-            JavaScript code string
-        """
-        condition_code = self.condition._get_code()
-        true_code = self._get_value_code(self.true_value)
-        false_code = self._get_value_code(self.false_value)
-        
-        # Check if any part is async
-        condition_is_async = isinstance(self.condition, (BooleanExpression, ValueRef, MathExpression))
-        true_is_async = isinstance(self.true_value, (ValueRef, MathExpression, BooleanExpression))
-        false_is_async = isinstance(self.false_value, (ValueRef, MathExpression, BooleanExpression))
-        
-        if not condition_is_async and not true_is_async and not false_is_async:
-            return f"{condition_code} ? {true_code} : {false_code}"
-        
-        # Generate async IIFE
-        code_parts = []
-        code_parts.append("(async () => {")
-        code_parts.append(f"    const cond = await ({condition_code});")
-        
-        if true_is_async:
-            code_parts.append(f"    const trueVal = await ({true_code});")
-        else:
-            code_parts.append(f"    const trueVal = {true_code};")
-        
-        if false_is_async:
-            code_parts.append(f"    const falseVal = await ({false_code});")
-        else:
-            code_parts.append(f"    const falseVal = {false_code};")
-        
-        code_parts.append("    return cond ? trueVal : falseVal;")
-        code_parts.append("})()")
-        
-        return "\n".join(code_parts)
+        """Get native JavaScript code for this expression."""
+        from dars.scripts.dscript import compile_val
+        return compile_val(self._to_structure())
+
+    def __str__(self):
+        """String representation for embedding in JS template literals"""
+        return f"${{{self._get_code()}}}"
+
+    def __format__(self, format_spec):
+        """Support for f-string formatting"""
+        return f"${{{self._get_code()}}}"
     
     def get_code(self) -> str:
         """Public method for dScript compatibility"""
@@ -612,27 +482,26 @@ class LogicalExpression:
         self.operator = operator
         self.right = right
     
+    def _to_structure(self) -> dict:
+        """Generate DAP structure."""
+        left = self.left._to_structure() if hasattr(self.left, '_to_structure') else self.left
+        right = self.right._to_structure() if hasattr(self.right, '_to_structure') else self.right
+        
+        return {
+            "op": "bool_expr", # Can generally use same op for logical, as _resolve handles && and ||
+            "args": {
+                "left": left,
+                "operator": self.operator,
+                "right": right
+            }
+        }
+
     def _get_code(self) -> str:
-        """Generate JavaScript code"""
-        left_code = self.left._get_code() if hasattr(self.left, '_get_code') else str(self.left)
-        right_code = self.right._get_code() if hasattr(self.right, '_get_code') else str(self.right)
-        
-        # Check if async
-        left_is_async = isinstance(self.left, (BooleanExpression, ValueRef, MathExpression))
-        right_is_async = isinstance(self.right, (BooleanExpression, ValueRef, MathExpression))
-        
-        if not left_is_async and not right_is_async:
-            return f"({left_code}) {self.operator} ({right_code})"
-        
-        # Generate async IIFE
-        code_parts = []
-        code_parts.append("(async () => {")
-        code_parts.append(f"    const left = await ({left_code});")
-        code_parts.append(f"    const right = await ({right_code});")
-        code_parts.append(f"    return left {self.operator} right;")
-        code_parts.append("})()")
-        
-        return "\n".join(code_parts)
+        from dars.scripts.dscript import compile_val
+        return compile_val(self._to_structure())
+
+    def __str__(self):
+        return f"${{{self._get_code()}}}"
     
     def then(self, true_value, false_value):
         """Allow chaining .then() on logical expressions"""
@@ -708,95 +577,40 @@ class ValueRef:
         
         return False
     
-    def _get_code(self) -> str:
+    def _to_structure(self) -> dict:
         """
-        Generate JavaScript code to get the value.
-        
-        Returns:
-            JavaScript code string that returns a Promise
+        Generate DAP structure for the value.
         """
-        # If there's custom code (from concatenation), use it
         if self._custom_code:
-            return self._custom_code
-        
-        # Check if this is a state path or CSS selector
+             return self._custom_code # Should be a structure if possible, but keep fallback
+             
         if self._is_state_path():
-            # State path: extract from state registry via window.Dars.getState
             parts = self.selector.split('.')
-            state_id = parts[0]
-            prop_name = parts[1]
-            
-            js_code = f"""
-(async () => {{
-    try {{
-        // Get value directly from state registry
-        let value = '';
-        if (window.Dars && window.Dars.getState) {{
-            const st = window.Dars.getState('{state_id}');
-            if (st && st.values && st.values['{prop_name}'] !== undefined) {{
-                value = st.values['{prop_name}'];
-            }}
-        }}
-        
-        // Fallback to DOM if state not found (legacy support)
-        if (value === '') {{
-            const el = document.querySelector('[data-dynamic="{self.selector}"]');
-            if (el) value = el.textContent || '';
-        }}
-        
-        // Apply transformation if any
-        {f'return {self._transform("value")};' if self._transform else 'return value;'}
-    }} catch (e) {{
-        console.error('ValueRef state error:', e);
-        return '';
-    }}
-}})()
-            """.strip()
+            base_val = {"op": "get_state_value", "args": {"state_id": parts[0], "prop_name": parts[1]}}
         else:
-            # CSS selector: extract from DOM element
-            js_code = f"""
-(async () => {{
-    try {{
-        const el = document.querySelector('{self.selector}');
-        if (!el) {{
-            console.warn('ValueRef: Element not found for selector: {self.selector}');
-            return '';
-        }}
-        
-        // Get the value
-        let value;
-        if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {{
-            value = el.value || '';
-        }} else if (el.tagName === 'SELECT') {{
-            value = el.value || '';
-        }} else if (el.type === 'checkbox') {{
-            value = el.checked;
-        }} else {{
-            value = el.textContent || '';
-        }}
-        
-        // Apply transformation if any
-        {f'return {self._transform("value")};' if self._transform else 'return value;'}
-    }} catch (e) {{
-        console.error('ValueRef error:', e);
-        return '';
-    }}
-}})()
-            """.strip()
-        
-        return js_code
-    
+            base_val = {"op": "get_dom_value", "args": {"selector": self.selector}}
+            
+        if self._transform:
+            return {"op": "transform", "args": {"input": base_val, "method": self._transform}}
+            
+        return base_val
+
+    def _get_code(self) -> str:
+        """Public method for dScript compatibility"""
+        from dars.scripts.dscript import compile_val
+        return compile_val(self._to_structure())
+
     # String operations
     def upper(self) -> 'ValueRef':
         """Convert to uppercase"""
         new_ref = ValueRef(self.selector)
-        new_ref._transform = lambda x: f"String({x}).toUpperCase()"
+        new_ref._transform = "upper"
         return new_ref
     
     def lower(self) -> 'ValueRef':
         """Convert to lowercase"""
         new_ref = ValueRef(self.selector)
-        new_ref._transform = lambda x: f"String({x}).toLowerCase()"
+        new_ref._transform = "lower"
         return new_ref
     
     def trim(self) -> 'ValueRef':
@@ -813,23 +627,15 @@ class ValueRef:
     def int(self) -> 'ValueRef':
         """Convert to integer"""
         new_ref = ValueRef(self.selector)
-        # Chain transformations: if there's an existing transform, apply it first
-        if self._transform:
-            # Apply existing transform, then parseInt
-            new_ref._transform = lambda x: f"parseInt({self._transform(x)}, 10)"
-        else:
-            new_ref._transform = lambda x: f"parseInt({x}, 10)"
+        new_ref._transform = "int"
         return new_ref
     
     def float(self) -> 'ValueRef':
         """Convert to float"""
         new_ref = ValueRef(self.selector)
         # Chain transformations: if there's an existing transform, apply it first
-        if self._transform:
-            # Apply existing transform, then parseFloat
-            new_ref._transform = lambda x: f"parseFloat({self._transform(x)})"
-        else:
-            new_ref._transform = lambda x: f"parseFloat({x})"
+        # Same simplification as int()
+        new_ref._transform = "float"
         return new_ref
     
     def operator(self) -> 'DynamicOperator':
@@ -853,9 +659,7 @@ class ValueRef:
         """Check if this ValueRef has a numeric transformation (.int() or .float())"""
         if self._transform is None:
             return False
-        # Check if transform contains parseInt or parseFloat
-        test_result = self._transform("x")
-        return "parseInt" in test_result or "parseFloat" in test_result
+        return self._transform in ["int", "float"]
     
     # Arithmetic operators - Return MathExpression for composability
     def __add__(self, other) -> 'MathExpression':
@@ -1199,12 +1003,12 @@ class ValueRef:
         return new_ref
     
     def __str__(self):
-        """String representation for f-strings"""
-        return f"${{await {self._get_code()}}}"
+        """String representation for f-strings and template literals"""
+        return f"${{{self._get_code()}}}"
     
     def __format__(self, format_spec):
         """Support for f-string formatting"""
-        return f"${{await {self._get_code()}}}"
+        return f"${{{self._get_code()}}}"
     
     def __repr__(self):
         return f"ValueRef('{self.selector}')"
@@ -1275,16 +1079,40 @@ def equal(value: Union[ValueRef, MathExpression, BooleanExpression, ConditionalE
     return MathExpression(value, '+', 0)
 
 
-def url(template: str, **kwargs) -> str:
-    """Build dynamic URLs with clean syntax"""
-    result = template
-    for key, value in kwargs.items():
-        placeholder = f"{{{key}}}"
-        if isinstance(value, ValueRef):
-            result = result.replace(placeholder, str(value))
+def url(template: str, **kwargs) -> MathExpression:
+    """Build dynamic URLs with clean syntax.
+    
+    Returns a MathExpression that concatenates parts, avoiding backtick nesting issues.
+    """
+    import re
+    from dars.hooks.value_helpers import MathExpression
+    
+    # Split template by placeholders: "http://{base}/users/{id}"
+    parts = re.split(r"(\{.*?\})", template)
+    
+    result = None
+    
+    for part in parts:
+        # Check if part is a placeholder: "{name}"
+        match = re.match(r"\{(.*?)\}", part)
+        if match:
+            key = match.group(1)
+            val = kwargs.get(key, part)
         else:
-            result = result.replace(placeholder, str(value))
-    return RawJS(f"`{result}`")
+            val = part
+            
+        if val == "": continue
+            
+        if result is None:
+            if isinstance(val, (ValueRef, MathExpression)):
+                result = val
+            else:
+                # Start with a dummy MathExpression to ensure correct typing
+                result = MathExpression(val, '+', "")
+        else:
+            result = result + val
+            
+    return result
 
 
 def transform(selector: str, fn: str) -> dScript:

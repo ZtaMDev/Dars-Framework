@@ -1,4 +1,4 @@
-<h1 align="center">Dars Framework(Caution No longer mantained due to critical security vulneravilities on the core of the framework) </h1>
+<h1 align="center">Dars Framework</h1>
  
 <p align="center">
   <img src="https://raw.githubusercontent.com/ZtaMDev/Dars-Framework/CrystalMain/Dars-logo.png" alt="Dars Framework Logo" width="200" />

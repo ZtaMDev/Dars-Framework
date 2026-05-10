@@ -2,6 +2,9 @@ from dars.core.component import Component
 from dars.core.properties import StyleProps
 from typing import Optional, Union, Dict, Any
 
+"""
+Simple easy to use text component, with support for styles ids and classes
+"""
 class Text(Component):
     def __init__(
         self, 
@@ -17,7 +20,6 @@ class Text(Component):
     def render(self, exporter: Any) -> str:
         # El método render será implementado por cada exportador
         # para generar el código específico de la plataforma.
-        # Por ahora, solo definimos la interfaz.
         raise NotImplementedError("El método render debe ser implementado por el exportador")
 
 

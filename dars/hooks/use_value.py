@@ -144,7 +144,12 @@ class UseValueSelector:
 }})()
         """
         
-        return dScript(js_code.strip())
+        # return dScript(js_code.strip())
+        # Use secure DAP action
+        return dScript(data={
+            "op": "get_dom_value",
+            "args": {"selector": selector}
+        })
 
 
 def useValue(state_path: str, selector: str = None) -> ValueMarker:

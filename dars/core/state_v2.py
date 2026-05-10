@@ -67,260 +67,122 @@ class ReactiveProperty:
         # This will be collected during export and injected as event handlers
         pass
     
-    def _generate_change_call(self, **props) -> str:
+    def _generate_change_action(self, **props) -> dict:
         """
-        Generate JS code to call window.Dars.change() with proper payload.
-        This handles all property types including events (dScript objects).
+        Generate DAP change action dictionary.
         """
-        from dars.scripts.dscript import dScript, RawJS
-        
         component_id = self._state.component.id
         
-        # Build payload parts
-        parts = [f"id: '{component_id}'", "dynamic: true"]
+        args = {
+            "id": component_id,
+            "dynamic": True
+        }
         
         for k, v in props.items():
-            # Helper to get JS code or JSON string
-            def to_js_value(val):
-                # Import DataAccessor locally to avoid circular imports
-                try:
-                    from dars.backend.data import DataAccessor
-                    if isinstance(val, DataAccessor):
-                        return val.code
-                except ImportError:
-                    pass
-                
-                # Support for ValueRef and other objects with to_dscript
-                if hasattr(val, 'to_dscript'):
-                    val = val.to_dscript()
-                
-                if isinstance(val, (dScript, RawJS)):
-                    code = val.code if hasattr(val, 'code') else str(val)
-                    # Check if it's an async IIFE (starts with "(async")
-                    code_stripped = code.strip()
-                    if code_stripped.startswith('(async'):
-                        # It's an async IIFE, wrap it in await
-                        return f"(await {code_stripped})"
-                    return code
-                return json.dumps(val)
+            # Helper to get structural value
+            def to_structure(val):
+                if hasattr(val, '_to_structure'):
+                    return val._to_structure()
+                if hasattr(val, 'to_dict'):
+                    return val.to_dict()
+                if isinstance(val, (list, tuple)):
+                    return [to_structure(x) for x in val]
+                if isinstance(val, dict):
+                    return {sk: to_structure(sv) for sk, sv in val.items()}
+                return val
 
             # Handle events (on_click, on_change, etc.)
             if k.startswith('on_'):
-                if isinstance(v, dScript):
-                    # Extract JS code from dScript object
-                    event_code = v.code if hasattr(v, 'code') else str(v)
-                    parts.append(f"{k}: {json.dumps(event_code)}")
-                elif isinstance(v, (list, tuple)):
-                    # Handle array of event handlers
-                    codes = []
-                    for handler in v:
-                        if isinstance(handler, dScript):
-                            codes.append(handler.code if hasattr(handler, 'code') else str(handler))
-                        elif isinstance(handler, str):
-                            codes.append(handler)
-                    parts.append(f"{k}: {json.dumps(codes)}")
-                elif isinstance(v, str):
-                    # Raw JS string
-                    parts.append(f"{k}: {json.dumps(v)}")
-                else:
-                    # Skip unsupported event types
-                    continue
+                 # Events are essentially lists of actions or a single action
+                 # dScript.get_action() returns the action dict if available
+                 if hasattr(v, 'get_action'):
+                     action = v.get_action()
+                     if action:
+                         args[k] = action
+                     else:
+                         pass
+                 elif isinstance(v, list):
+                     actions = []
+                     for handler in v:
+                         if hasattr(handler, 'get_action'):
+                             act = handler.get_action()
+                             if act: actions.append(act)
+                     if actions:
+                         args[k] = {"op": "sequence", "args": actions}
             # Handle regular properties
             elif k == 'text':
-                parts.append(f"text: {to_js_value(v)}")
+                args['text'] = to_structure(v)
             elif k == 'html':
-                parts.append(f"html: {to_js_value(v)}")
+                args['html'] = to_structure(v)
             elif k == 'style':
-                val = v
-                if isinstance(val, str):
-                    val = parse_utility_string(val)
-                if isinstance(val, dict):
-                    # Handle style dict where values might be RawJS
-                    style_parts = []
-                    for sk, sv in val.items():
-                        style_parts.append(f"{json.dumps(sk)}: {to_js_value(sv)}")
-                    parts.append(f"style: {{{', '.join(style_parts)}}}")
+                args['style'] = to_structure(v)
             elif k == 'class_name':
-                # Map class_name to classes object
-                if isinstance(v, str):
-                    # Setting a single class - we should replace all classes
-                    parts.append(f"attrs: {{class: {json.dumps(v)}}}")
-                elif isinstance(v, (dScript, RawJS)):
-                     parts.append(f"attrs: {{class: {v.code}}}")
+                # Map class_name to class attribute or specialized 'classes' dict
+                # If v is a string, it replaces the class attribute?
+                # The runtime change() function handles 'classes' dict for granular updates,
+                # or 'attrs.class' for full replacement.
+                # Use attrs.class for simple string to match previous behavior
+                if isinstance(v, str) or hasattr(v, '_to_structure'):
+                     if 'attrs' not in args: args['attrs'] = {}
+                     args['attrs']['class'] = to_structure(v)
                 elif isinstance(v, dict):
-                    # Advanced class manipulation
-                    parts.append(f"classes: {json.dumps(v)}")
+                     args['classes'] = to_structure(v)
             elif k == 'attrs' and isinstance(v, dict):
-                attrs_parts = []
-                for ak, av in v.items():
-                    attrs_parts.append(f"{json.dumps(ak)}: {to_js_value(av)}")
-                parts.append(f"attrs: {{{', '.join(attrs_parts)}}}")
+                comp_attrs = args.get('attrs', {})
+                comp_attrs.update(to_structure(v))
+                args['attrs'] = comp_attrs
             elif k == 'classes' and isinstance(v, dict):
-                parts.append(f"classes: {json.dumps(v)}")
+                args['classes'] = to_structure(v)
             else:
-                # For custom state properties, add directly to payload (not in attrs)
-                # This allows state properties like 'info', 'count', etc. to work correctly
-                try:
-                    parts.append(f"{json.dumps(k)}: {to_js_value(v)}")
-                except (TypeError, ValueError):
-                    # Skip non-JSON-serializable values
-                    continue
+                # Custom properties or unmapped attrs
+                # Add directly to args, similar to previous behavior
+                # But typically only text/html/style/attrs/classes are supported by change() runtime efficiently.
+                # However, previous code allowed custom props.
+                args[k] = to_structure(v)
         
-        payload = "{" +  ", ".join(parts) + "}"
-        
-        code = f"""
-(async () => {{
-    try {{
-        let ch = window.__DARS_CHANGE_FN;
-        if (!ch) {{
-            if (window.Dars && typeof window.Dars.change === 'function') {{
-                ch = window.Dars.change.bind(window.Dars);
-            }} else {{
-                const m = await import('/lib/dars.min.js');
-                ch = (m.change || (m.default && m.default.change));
-            }}
-            if (typeof ch === 'function') window.__DARS_CHANGE_FN = ch;
-        }}
-        if (typeof ch === 'function') ch({payload});
-    }} catch (e) {{ console.error('[Dars] State error:', e); }}
-}})();
-""".strip()
-        
-        return code
+        return {
+            "op": "change",
+            "args": args
+        }
 
     
     def increment(self, by: int = 1) -> Callable:
-        """
-        Returns an event handler function that increments this property.
-        
-        Args:
-            by: Amount to increment (default: 1)
-            
-        Example:
-            button.on_click = counter_state.text.increment(by=1)
-        """
+        """Increment value action"""
         from dars.scripts.dscript import dScript
         
-        # Only numeric properties can be incremented
         if not isinstance(self._value, (int, float)):
-            raise ValueError(f"Cannot increment non-numeric property '{self._name}' (value: {self._value}). Use .set() instead.")
-        
-        component_id = self._state.component.id
-        
-        code = f"""
-(async () => {{
-    try {{
-        // Get current value from state registry
-        let current = 0;
-        if (window.Dars && window.Dars.getState) {{
-            const st = window.Dars.getState('{component_id}');
-            if (st && st.values) {{
-                current = parseFloat(st.values['{self._name}'] || 0);
-            }}
-        }}
-        
-        const newValue = current + {by};
-        
-        // Update state via window.Dars.change
-        // This handles DOM updates, watchers, and state registry update
-        const payload = {{
-            id: '{component_id}',
-            dynamic: true
-        }};
-        
-        // Correctly structure payload based on property name
-        if ('{self._name}' === 'text' || '{self._name}' === 'html') {{
-            payload['{self._name}'] = newValue;
-        }} else {{
-            payload.attrs = {{}};
-            payload.attrs['{self._name}'] = newValue;
-        }}
-        
-        if (window.Dars && window.Dars.change) {{
-            window.Dars.change(payload);
-        }} else if (window.__DARS_CHANGE_FN) {{
-            window.__DARS_CHANGE_FN(payload);
-        }}
-    }} catch (e) {{ console.error('[Dars] Increment error:', e); }}
-}})();
-""".strip()
-        
-        return dScript(code)
+             # Allow if initial value is numeric string? No, enforce cleaner types.
+             pass
+
+        action = self._generate_change_action(**{
+            self._name: {
+                "op": "math_expr",
+                "args": {
+                    "left": {
+                        "op": "get_state_value", 
+                        "args": {"state_id": self._state.component.id, "prop_name": self._name}
+                    },
+                    "operator": "+",
+                    "right": by
+                }
+            }
+        })
+        return dScript(data=action)
     
     def decrement(self, by: int = 1) -> Callable:
-        """
-        Returns an event handler that decrements this property.
-        
-        Args:
-            by: Amount to decrement (default: 1)
-            
-        Example:
-            button.on_click = counter_state.text.decrement(by=1)
-        """
+        """Decrement value action"""
         return self.increment(by=-by)
     
     def set(self, value: Any) -> Callable:
-        """
-        Returns an event handler that sets this property to a specific value.
-        
-        Works with any property type: text, html, style, class_name, attrs, etc.
-        Also supports MathExpression for declarative mathematical operations.
-        
-        Args:
-            value: The value to set (can be a primitive, dict, or MathExpression)
-            
-        Example:
-            button.on_click = status_state.text.set("Loading...")
-            button.on_click = state.class_name.set("active")
-            button.on_click = state.style.set({"color": "red"})
-            
-            # With MathExpression (declarative math)
-            button.on_click = calc.result.set(
-                V(".num1").float() + V(".num2").float()
-            )
-        """
+        """Set value action"""
         from dars.scripts.dscript import dScript
-        
-        # Check if value is a MathExpression
-        try:
-            from dars.hooks.value_helpers import MathExpression
-            if isinstance(value, MathExpression):
-                # Generate async code to evaluate the expression
-                expr_code = value._get_code()
-                code = f"""(async () => {{
-    try {{
-        const result = await ({expr_code});
-        window.Dars.change({{
-            id: '{self._state.component.id}',
-            dynamic: true,
-            {self._name}: result
-        }});
-    }} catch (e) {{
-        console.error('[Dars] MathExpression error:', e);
-    }}
-}})();"""
-                return dScript(code)
-        except ImportError:
-            pass
-        
-        # Use the change() function to properly handle different property types
-        code = self._generate_change_call(**{self._name: value})
-        return dScript(code)
+        # _generate_change_action handles MathExpression because of to_structure helper recursively calling _to_structure
+        action = self._generate_change_action(**{self._name: value})
+        return dScript(data=action)
     
     def auto_increment(self, by: int = 1, interval: int = 1000, max: Optional[int] = None) -> Callable:
-        """
-        Start continuous auto-increment operation.
-        
-        Args:
-            by: Amount to increment each interval
-            interval: Time between increments in milliseconds
-            max: Maximum value (stops when reached)
-            
-        Example:
-            timer_state.text.auto_increment(by=1, interval=1000)
-        """
+        """Auto-increment loop action"""
         from dars.scripts.dscript import dScript
-        import json
         
         config = {
             'type': 'auto_increment',
@@ -331,32 +193,18 @@ class ReactiveProperty:
         }
         self._loop_config = config
         
-        component_id = self._state.component.id
-        config_json = json.dumps(config)
-        
-        code = f"""
-(async () => {{
-if (window.Dars && window.Dars.startLoop) {{
-    window.Dars.startLoop('{component_id}', {config_json});
-}}
-}})();
-""".strip()
-        return dScript(code)
+        action = {
+            "op": "start_loop",
+            "args": {
+                "id": self._state.component.id,
+                "config": config
+            }
+        }
+        return dScript(data=action)
     
     def auto_decrement(self, by: int = 1, interval: int = 1000, min: Optional[int] = None) -> Callable:
-        """
-        Start continuous auto-decrement operation.
-        
-        Args:
-            by: Amount to decrement each interval
-            interval: Time between decrements in milliseconds
-            min: Minimum value (stops when reached)
-            
-        Example:
-            countdown_state.text.auto_decrement(by=1, interval=1000, min=0)
-        """
+        """Auto-decrement loop action"""
         from dars.scripts.dscript import dScript
-        import json
         
         config = {
             'type': 'auto_decrement',
@@ -367,38 +215,26 @@ if (window.Dars && window.Dars.startLoop) {{
         }
         self._loop_config = config
         
-        component_id = self._state.component.id
-        config_json = json.dumps(config)
-        
-        code = f"""
-(async () => {{
-if (window.Dars && window.Dars.startLoop) {{
-    window.Dars.startLoop('{component_id}', {config_json});
-}}
-}})();
-""".strip()
-        return dScript(code)
+        action = {
+            "op": "start_loop",
+            "args": {
+                "id": self._state.component.id,
+                "config": config
+            }
+        }
+        return dScript(data=action)
     
     def stop_auto(self) -> Callable:
-        """
-        Returns an event handler that stops any auto-increment/decrement loop.
-        
-        Example:
-            stop_btn.on_click = timer_state.text.stop_auto()
-        """
+        """Stop loop action"""
         from dars.scripts.dscript import dScript
         
-        component_id = self._state.component.id
-        
-        code = f"""
-(async () => {{
-if (window.Dars && window.Dars.stopLoop) {{
-    window.Dars.stopLoop('{component_id}');
-}}
-}})();
-""".strip()
-        
-        return dScript(code)
+        action = {
+            "op": "stop_loop",
+            "args": {
+                "id": self._state.component.id
+            }
+        }
+        return dScript(data=action)
     
     # Magic methods for Pythonic operations
     def __iadd__(self, other):
@@ -539,181 +375,104 @@ class State:
         return DefaultSnapshot(self._default_snapshot)
     
     def reset(self) -> Callable:
-        """
-        Returns an event handler that resets all properties to their default values.
-        
-        Example:
-            reset_btn.on_click = counter_state.reset()
-        """
+        """Reset state to default action"""
         from dars.scripts.dscript import dScript
         
         component_id = self.component.id
+        args = {"id": component_id, "dynamic": True}
         
-        # Build payload with all default properties
-        parts = [f"id: '{component_id}'", "dynamic: true"]
-        attrs_dict = {}  # Collect all attrs in a single object
-        
+        # Helper to get structural value (allows list/dict recursion)
+        def to_structure(val):
+            if hasattr(val, '_to_structure'): return val._to_structure()
+            if hasattr(val, 'to_dict'): return val.to_dict()
+            if isinstance(val, (list, tuple)): return [to_structure(x) for x in val]
+            if isinstance(val, dict): return {sk: to_structure(sv) for sk, sv in val.items()}
+            return val
+
         for k, v in self._default_snapshot.items():
-            # Handle events (on_click, on_change, etc.)
+            # Handle events
             if k.startswith('on_'):
-                if isinstance(v, dScript):
-                    # Extract JS code from dScript object
-                    event_code = v.code if hasattr(v, 'code') else str(v)
-                    parts.append(f"{k}: {json.dumps(event_code)}")
-                elif isinstance(v, (list, tuple)):
-                    # Handle array of event handlers
-                    codes = []
-                    for handler in v:
-                        if isinstance(handler, dScript):
-                            codes.append(handler.code if hasattr(handler, 'code') else str(handler))
-                        elif isinstance(handler, str):
-                            codes.append(handler)
-                    parts.append(f"{k}: {json.dumps(codes)}")
-                elif isinstance(v, str):
-                    # Raw JS string
-                    parts.append(f"{k}: {json.dumps(v)}")
-                else:
-                    # Skip unsupported event types
-                    continue
-            elif k == 'text':
-                parts.append(f"text: {json.dumps(v)}")
-            elif k == 'html':
-                parts.append(f"html: {json.dumps(v)}")
-            elif k == 'style':
-                val = v
-                if isinstance(val, str):
-                    val = parse_utility_string(val)
-                if isinstance(val, dict):
-                    parts.append(f"style: {json.dumps(val)}")
+                if hasattr(v, 'get_action'):
+                     act = v.get_action()
+                     if act: args[k] = act
+                elif isinstance(v, list):
+                     actions = []
+                     for handler in v:
+                         if hasattr(handler, 'get_action'):
+                             act = handler.get_action()
+                             if act: actions.append(act)
+                     if actions: args[k] = {"op": "sequence", "args": actions}
+                continue
+
+            # Handle properties logic (duplicated from ReactiveProperty for independence)
+            if k == 'text': args['text'] = to_structure(v)
+            elif k == 'html': args['html'] = to_structure(v)
+            elif k == 'style': args['style'] = to_structure(v)
             elif k == 'class_name':
-                if isinstance(v, str):
-                    attrs_dict['class'] = v
-                elif isinstance(v, dict):
-                    parts.append(f"classes: {json.dumps(v)}")
+                 if isinstance(v, str) or hasattr(v, '_to_structure'):
+                     if 'attrs' not in args: args['attrs'] = {}
+                     args['attrs']['class'] = to_structure(v)
+                 elif isinstance(v, dict):
+                     args['classes'] = to_structure(v)
             elif k == 'attrs' and isinstance(v, dict):
-                # Merge attrs dict
-                attrs_dict.update(v)
+                comp_attrs = args.get('attrs', {})
+                comp_attrs.update(to_structure(v))
+                args['attrs'] = comp_attrs
+            elif k == 'classes' and isinstance(v, dict):
+                args['classes'] = to_structure(v)
             else:
-                # Add to attrs dict
-                try:
-                    attrs_dict[k] = v
-                except (TypeError, ValueError):
-                    continue
-        
-        # Add attrs as a single object if there are any
-        if attrs_dict:
-            parts.append(f"attrs: {json.dumps(attrs_dict)}")
-        
-        payload = "{" + ", ".join(parts) + "}"
-        
-        code = f"""
-(async () => {{
-    try {{
-        let ch = window.__DARS_CHANGE_FN;
-        if (!ch) {{
-            if (window.Dars && typeof window.Dars.change === 'function') {{
-                ch = window.Dars.change.bind(window.Dars);
-            }} else {{
-                const m = await import('/lib/dars.min.js');
-                ch = (m.change || (m.default && m.default.change));
-            }}
-            if (typeof ch === 'function') window.__DARS_CHANGE_FN = ch;
-        }}
-        if (typeof ch === 'function') ch({payload});
-    }} catch (e) {{ console.error('[Dars] State reset error:', e); }}
-}})();
-""".strip()
-        
-        return dScript(code)
+                args[k] = to_structure(v)
+
+        return dScript(data={"op": "change", "args": args})
     
     def update(self, **props) -> Callable:
-        """
-        Returns an event handler that updates multiple properties at once.
-        
-        Supports all property types: text, html, style, class_name, attrs, etc.
-        
-        Args:
-            **props: Properties to update
-            
-        Example:
-            button.on_click = state.update(text="New", style={'color': 'red'})
-            button.on_click = state.update(class_name="active", style={'opacity': '1'})
-        """
+        """Update multiple properties action"""
         from dars.scripts.dscript import dScript
         
         component_id = self.component.id
+        args = {"id": component_id, "dynamic": True}
         
-        # Build payload with proper property mapping
-        parts = [f"id: '{component_id}'", "dynamic: true"]
-        
+        # Helper to get structural value
+        def to_structure(val):
+            if hasattr(val, '_to_structure'): return val._to_structure()
+            if hasattr(val, 'to_dict'): return val.to_dict()
+            if isinstance(val, (list, tuple)): return [to_structure(x) for x in val]
+            if isinstance(val, dict): return {sk: to_structure(sv) for sk, sv in val.items()}
+            return val
+
         for k, v in props.items():
-            # Handle events (on_click, on_change, etc.)
             if k.startswith('on_'):
-                if isinstance(v, dScript):
-                    # Extract JS code from dScript object
-                    event_code = v.code if hasattr(v, 'code') else str(v)
-                    parts.append(f"{k}: {json.dumps(event_code)}")
-                elif isinstance(v, (list, tuple)):
-                    # Handle array of event handlers
-                    codes = []
-                    for handler in v:
-                        if isinstance(handler, dScript):
-                            codes.append(handler.code if hasattr(handler, 'code') else str(handler))
-                        elif isinstance(handler, str):
-                            codes.append(handler)
-                    parts.append(f"{k}: {json.dumps(codes)}")
-                elif isinstance(v, str):
-                    # Raw JS string
-                    parts.append(f"{k}: {json.dumps(v)}")
-                else:
-                    # Skip unsupported event types
-                    continue
-            elif k == 'text':
-                parts.append(f"text: {json.dumps(v)}")
-            elif k == 'html':
-                parts.append(f"html: {json.dumps(v)}")
-            elif k == 'style':
-                val = v
-                if isinstance(val, str):
-                    val = parse_utility_string(val)
-                if isinstance(val, dict):
-                    parts.append(f"style: {json.dumps(val)}")
+                if hasattr(v, 'get_action'):
+                     act = v.get_action()
+                     if act: args[k] = act
+                elif isinstance(v, list):
+                     actions = []
+                     for handler in v:
+                         if hasattr(handler, 'get_action'):
+                             act = handler.get_action()
+                             if act: actions.append(act)
+                     if actions: args[k] = {"op": "sequence", "args": actions}
+                continue
+
+            if k == 'text': args['text'] = to_structure(v)
+            elif k == 'html': args['html'] = to_structure(v)
+            elif k == 'style': args['style'] = to_structure(v)
             elif k == 'class_name':
-                if isinstance(v, str):
-                    parts.append(f"attrs: {{class: {json.dumps(v)}}}")
-                elif isinstance(v, dict):
-                    parts.append(f"classes: {json.dumps(v)}")
+                 if isinstance(v, str) or hasattr(v, '_to_structure'):
+                     if 'attrs' not in args: args['attrs'] = {}
+                     args['attrs']['class'] = to_structure(v)
+                 elif isinstance(v, dict):
+                     args['classes'] = to_structure(v)
             elif k == 'attrs' and isinstance(v, dict):
-                parts.append(f"attrs: {json.dumps(v)}")
+                comp_attrs = args.get('attrs', {})
+                comp_attrs.update(to_structure(v))
+                args['attrs'] = comp_attrs
             elif k == 'classes' and isinstance(v, dict):
-                parts.append(f"classes: {json.dumps(v)}")
+                args['classes'] = to_structure(v)
             else:
-                try:
-                    parts.append(f"attrs: {{{json.dumps(k)}: {json.dumps(v)}}}")
-                except (TypeError, ValueError):
-                    continue
+                args[k] = to_structure(v)
         
-        payload = "{" + ", ".join(parts) + "}"
-        
-        code = f"""
-(async () => {{
-    try {{
-        let ch = window.__DARS_CHANGE_FN;
-        if (!ch) {{
-            if (window.Dars && typeof window.Dars.change === 'function') {{
-                ch = window.Dars.change.bind(window.Dars);
-            }} else {{
-                const m = await import('/lib/dars.min.js');
-                ch = (m.change || (m.default && m.default.change));
-            }}
-            if (typeof ch === 'function') window.__DARS_CHANGE_FN = ch;
-        }}
-        if (typeof ch === 'function') ch({payload});
-    }} catch (e) {{ console.error('[Dars] State update error:', e); }}
-}})();
-""".strip()
-        
-        return dScript(code)
+        return dScript(data={"op": "change", "args": args})
     
     def when(self, condition: Callable) -> StateTransition:
         """

@@ -64,73 +64,49 @@ def updateVRef(
         ```
     """
     
-    def _generate_value_code(val: Any) -> str:
-        """Generate JavaScript code for a value."""
-        if isinstance(val, (ValueRef, MathExpression, BooleanExpression, ConditionalExpression, LogicalExpression)):
-            return f"await ({val._get_code()})"
-        elif isinstance(val, bool):
-            return "true" if val else "false"
-        elif isinstance(val, str):
-            # Check if it's already a V() expression code
-            if val.startswith("await ("):
-                return val
-            return f"'{val}'"
-        elif isinstance(val, (int, float)):
-            return str(val)
-        else:
-            return f"'{str(val)}'"
     
-    def _generate_update_code(sel: str, val: Any) -> str:
-        """Generate JavaScript code to update one or more elements."""
-        value_code = _generate_value_code(val)
-        
-        return f"""
-    // Update {sel}
-    (async () => {{
-        const selector = '{sel}';
-        const value = {value_code};
-        
-        // Update VRef value if exists
-        if (window.__DARS_VREF_VALUES__ && selector in window.__DARS_VREF_VALUES__) {{
-            window.__DARS_VREF_VALUES__[selector] = value;
-        }}
-        
-        // Update DOM elements
-        const elements = document.querySelectorAll(selector);
-        elements.forEach(el => {{
-            // Handle different element types
-            if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {{
-                if (el.type === 'checkbox' || el.type === 'radio') {{
-                    el.checked = Boolean(value);
-                }} else {{
-                    el.value = value;
-                }}
-            }} else if (el.tagName === 'SELECT') {{
-                el.value = value;
-            }} else {{
-                el.textContent = value;
-            }}
-        }});
-        
-        // Trigger VRef bindings update
-        if (window.Dars && window.Dars.updateVRef) {{
-            window.Dars.updateVRef(selector);
-        }}
-    }})();
-        """.strip()
-    
+    def _to_structure(val):
+        if hasattr(val, '_to_structure'):
+            return val._to_structure()
+        elif hasattr(val, 'data') and isinstance(val.data, dict):
+            # If it's a dScript with data (action), we might treat it as a value?
+            # Actions usually return void. But if it's an expression action (like get_dom_value), it returns value.
+            # My current dScript logic differentiates actions vs values only by OP context.
+            # Here we expect a VALUE.
+            return val.data
+        elif hasattr(val, 'get_action'): # dScript
+             # If dScript has an action, assume it returns a value?
+             act = val.get_action()
+             if act: return act
+             # If inline code, we can't use it easily in DAP unless we wrap in 'inline' op that returns value?
+             # But we want to avoid inline.
+             # If user passes dScript(code="..."), we fallback to legacy?
+             # Ideally avoid.
+             return getattr(val, 'code', str(val))
+        return val
+
     # Handle batch updates (dict)
     if isinstance(selector, dict):
-        update_codes = []
+        actions = []
         for sel, val in selector.items():
-            update_codes.append(_generate_update_code(sel, val))
-        
-        js_code = "\n".join(update_codes)
-        return dScript(js_code)
+            actions.append({
+                "op": "vref_update", 
+                "args": {
+                    "selector": sel, 
+                    "value": _to_structure(val)
+                }
+            })
+        from dars.actionProtocol import Action
+        return dScript(data=Action.sequence(actions))
     
     # Handle single update
     if value is None:
         raise ValueError("value parameter is required when selector is a string")
     
-    js_code = _generate_update_code(selector, value)
-    return dScript(js_code)
+    return dScript(data={
+        "op": "vref_update",
+        "args": {
+            "selector": selector,
+            "value": _to_structure(value)
+        }
+    })

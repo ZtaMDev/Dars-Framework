@@ -166,56 +166,25 @@ class KeyCode(metaclass=KeyCodeMeta):
 
 def onKey(key_code: str, action, ctrl: bool = False, shift: bool = False, alt: bool = False, meta: bool = False):
     """
-    Create a keyboard event handler for a specific key with optional modifiers.
-    
-    This is the RECOMMENDED way to handle keyboard events in Dars.
-    
-    Args:
-        key_code: Key code to listen for (use KeyCode constants)
-        action: dScript action to execute (must return dScript)
-        ctrl: Require Ctrl key
-        shift: Require Shift key
-        alt: Require Alt key
-        meta: Require Meta/Command key
-    
-    Returns:
-        dScript for event handler
-    
-    Example:
-        # Simple key
-        Input(on_key_down=onKey(KeyCode.ENTER, log("Enter pressed")))
-        
-        # With Ctrl modifier
-        Container(on_key_down=onKey(KeyCode.S, save_document(), ctrl=True))
-        
-        # Multiple modifiers
-        Container(on_key_down=onKey(KeyCode.Z, undo(), ctrl=True, shift=True))
+    Create a keyboard event handler for a specific key (secure DAP).
     """
-    from dars.scripts.dscript import dScript
-    
-    # Get action code
-    if hasattr(action, 'code'):
-        action_code = action.code
-    elif hasattr(action, 'get_code'):
-        action_code = action.get_code()
-    else:
-        action_code = str(action)
-    
-    # Build condition with modifiers
-    conditions = [f"event.key === '{key_code}'"]
-    
-    if ctrl:
-        conditions.append("event.ctrlKey")
-    if shift:
-        conditions.append("event.shiftKey")
-    if alt:
-        conditions.append("event.altKey")
-    if meta:
-        conditions.append("event.metaKey")
-    
-    condition = " && ".join(conditions)
-    
-    return dScript(f"if ({condition}) {{ event.preventDefault(); {action_code} }}")
+    def _to_action(act):
+        if hasattr(act, 'get_action'): return act.get_action() or {"op": "inline", "args": {"code": act.get_code()}}
+        if isinstance(act, str): return {"op": "inline", "args": {"code": act}}
+        return act
+
+    return dScript(data={
+        "op": "key_event",
+        "args": {
+            "key": key_code,
+            "ctrl": ctrl,
+            "shift": shift,
+            "alt": alt,
+            "meta": meta,
+            "action": _to_action(action),
+            "preventDefault": True
+        }
+    })
 
 
 def addGlobalKeys(app: 'App', key_handlers: dict):
