@@ -1,3 +1,25 @@
+# Release Notes v1.8.11
+
+> **Native String Concatenation & Math Fixes**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Restored Native String Concatenation
+
+Fixed a major regression in `MathExpression` where using the `+` operator aggressively coerced all operands into `parseFloat()`. This behavior broke string concatenation, resulting in `0` or `NaN` when attempting to combine strings and `ValueRef` values.
+
+- The compiler now generates native JavaScript addition `(left + right)`.
+- JavaScript handles type inference automatically: combining strings will safely concatenate them, and combining numeric values will add them.
+- If strict numeric addition is required from a DOM input (which usually returns strings), developers must explicitly use `.float()` or `.int()` on the `ValueRef` (e.g. `V(".num1").float() + V(".num2").float()`).
+
+---
+
 # Release Notes v1.8.10
 
 > **State V2 Reactivity Hardening & FunctionComponent Fixes**

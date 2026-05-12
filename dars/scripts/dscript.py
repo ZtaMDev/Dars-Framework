@@ -195,8 +195,9 @@ def compile_val(v, is_async=False):
         
         # Static operator
         if js_op == '+':
-            # Favor concatenation/native JS addition for flexibility, but ensure numeric fallback if possible
-            return f"((parseFloat({left}) || 0) + (parseFloat({right}) || 0))"
+            # We use native JS `+` so that string concatenation works correctly.
+            # If the user wants strict numeric addition from a DOM string, they must use `.float()` or `.int()`.
+            return f"({left} + {right})"
         
         # Use Number() for other arithmetic ops to ensure numeric results
         return f"(Number({left} || 0) {js_op} Number({right} || 0))"
