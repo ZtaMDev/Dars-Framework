@@ -136,6 +136,7 @@ class SSRRenderer:
             
         # Create a fresh exporter instance for this render to ensure clean state (IDs, style registry)
         exporter = HTMLCSSJSExporter()
+        exporter._current_page_id = route_name
         # Ensure fresh style registry for this render
         try:
             exporter._style_registry = {}
@@ -154,6 +155,9 @@ class SSRRenderer:
         if isinstance(working_root, list):
             working_root = Container(children=working_root)
         route_app.root = working_root
+
+        # Ensure deterministic IDs for this SSR render before any processing
+        exporter.ensure_ids_assigned(working_root)
 
         # Phase 1 styles: collect static styles and replace inline with classes for SSR route
         try:
@@ -174,6 +178,26 @@ class SSRRenderer:
         # These will use the deterministic IDs generated for the SSR output
         reactive_bindings_js = exporter._generate_reactive_bindings_js()
         vref_bindings_js = exporter._generate_vref_bindings_js()
+        
+        # Collect scripts from Markdown components (populated during render_component)
+        route_markdown_scripts = []
+        md_scripts = getattr(exporter, '_markdown_scripts', {}).get(route_name, [])
+        for script_obj in md_scripts:
+            if not isinstance(script_obj, dict):
+                route_markdown_scripts.append(str(script_obj))
+                continue
+                
+            stype = script_obj.get('type')
+            if stype == 'file' or 'path' in script_obj:
+                path = script_obj.get('path') or script_obj.get('src')
+                is_mod = ' type="module"' if script_obj.get('module') else ''
+                route_markdown_scripts.append(f'<script src="{path}"{is_mod}></script>')
+            elif 'code' in script_obj:
+                code = script_obj['code']
+                is_mod = ' type="module"' if script_obj.get('module') else ''
+                route_markdown_scripts.append(f'<script{is_mod}>{code}</script>')
+        
+        markdown_scripts_html = "".join(route_markdown_scripts)
         
         print(f"[Dars:SSR] Rendering route: {route_name}")
         print(f"[Dars:SSR] Reactive bindings length: {len(reactive_bindings_js)}")
@@ -280,10 +304,16 @@ class SSRRenderer:
                 rcfg["ssr_endpoint"] = loader_endpoint
 
             spa_config["routes"].append(rcfg)
-
-            # Index route
+            
+            # Index route detection
             if getattr(spa_route, "index", False):
                 spa_config["index"] = name
+
+        # Add markdown scripts to the current route's config in the SPA config
+        # so they can be loaded by the client router
+        for r in spa_config["routes"]:
+            if r["name"] == route_name:
+                r["scripts"] = md_scripts
 
         # Derive a simple 404 route if the SPA app has one configured
         not_found_page = getattr(self.app, "_spa_404_page", None)
@@ -401,9 +431,10 @@ class SSRRenderer:
                 "statesV2": initial_states_v2,
                 "metaTags": meta_tags_html,
                 "styles": registry_css,
-                "events": route_events_map,
-                "reactiveBindings": reactive_bindings_js,
-                "vrefBindings": vref_bindings_js
+                # Removed events and bindings. Handled natively by app_{route}.js
+                "events": {},
+                "reactiveBindings": "",
+                "vrefBindings": ""
             }
             
             dsp_json = json.dumps(dsp_payload, ensure_ascii=False, cls=DarsJSONEncoder)
@@ -415,7 +446,11 @@ class SSRRenderer:
 
         # Always include the style tag (even if empty) so presence can be verified and updated later
         registry_style_tag = f"\n    <style id=\"dars-style-registry\">\n{registry_css}\n    </style>\n    "
-        
+
+        # Collect additional HTML assets (like Prism CSS links)
+        md_html_assets = getattr(exporter, '_markdown_html_assets', {}).get(route_name, [])
+        markdown_head_assets = "".join(md_html_assets)
+
         full_html = f"""<!DOCTYPE html>
 <html lang="{route_app.language if hasattr(route_app, 'language') else 'en'}">
 <head>
@@ -423,12 +458,15 @@ class SSRRenderer:
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {meta_tags_html}
     <title>{page_title}</title>
-    <link rel="stylesheet" href="/runtime_css.css">{registry_style_tag}<link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/runtime_css.css">{registry_style_tag}<link rel="stylesheet" href="/styles.css">{markdown_head_assets}
 </head>
 <body>
     <div id="__dars_spa_root__">
-        {body_html}
+        <div data-dars-route-wrapper="{route_name}" style="height: 100%; width: 100%;">
+            {body_html}
+        </div>
     </div>
+    {markdown_scripts_html}
     
     <!-- Dars Server Protocol (DSP) Hydration Data -->
     <script id="__DARS_DSP_DATA__" type="application/json">{dsp_json}</script>
@@ -459,14 +497,14 @@ class SSRRenderer:
                 {"type": "lib", "src": "/lib/dars.min.js", "module": True, "defer": True},
                 {"type": "user", "src": f"/{script_fn}", "module": True}
             ],
-            "events": route_events_map,
+            "events": {}, # Removed, using native JS
             "vdom": route_vdom,
             "states": initial_states,
             "statesV2": initial_states_v2,
             "spaConfig": spa_config,
             "headMetadata": head_metadata,
-            "reactiveBindings": reactive_bindings_js,
-            "vrefBindings": vref_bindings_js
+            "reactiveBindings": "",
+            "vrefBindings": ""
         }
 
 

@@ -98,6 +98,55 @@ class Exporter(ABC):
 
         return unique
 
+    def ensure_ids_assigned(self, component: 'Component', path: str = "0"):
+        """
+        Recursively ensures all components in the tree have an ID.
+        If a component lacks an ID, it assigns one based on its structural path.
+        This ensures deterministic IDs between export-time and SSR-time.
+        """
+        if component is None:
+            return
+            
+        # 1. Handle ID assignment for current component
+        current_id = getattr(component, "id", None)
+        if not current_id:
+            # Use user-provided key if available
+            if getattr(component, "key", None):
+                new_id = str(component.key)
+            else:
+                # Generate prefix based on class name
+                try:
+                    prefix = component.__class__.__name__.lower()
+                    if prefix == 'component': prefix = 'comp'
+                except:
+                    prefix = 'comp'
+                
+                # Path-based ID: comp_0_1_2
+                clean_path = path.replace("/", "_").replace(".", "_")
+                new_id = f"{prefix}_{clean_path}"
+            
+            try:
+                component.id = new_id
+            except:
+                pass
+        
+        # 2. Recurse children
+        try:
+            children = getattr(component, "children", [])
+            if children:
+                for i, child in enumerate(children):
+                    from dars.core.component import Component as DarsComp
+                    if isinstance(child, DarsComp):
+                        self.ensure_ids_assigned(child, f"{path}_{i}")
+                    elif isinstance(child, list):
+                        # Handle list of children (e.g. fragments)
+                        for j, subchild in enumerate(child):
+                            if isinstance(subchild, DarsComp):
+                                self.ensure_ids_assigned(subchild, f"{path}_{i}_{j}")
+        except Exception:
+            pass
+
+
 
 
 

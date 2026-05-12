@@ -47,8 +47,6 @@ function _cssEscape(s){{
   try{{ return String(s).replace(/[^a-zA-Z0-9_\\-]/g, '\\$&'); }}catch(_ ){{ return String(s); }}
 }}
 
-// --- DAP Dispatcher Removed ---
-// All actions are now compiled directly to native JavaScript at export time.
 
 function _attachEventsForVNode(el, vnode, events, markClass){{
   try{{
@@ -724,6 +722,7 @@ const __spaRoutesMap = new Map();  // name -> route config
 const __spaPreloaded = new Set();  // preloaded routes
 let __spaCurrentRoute = null;
 let __spaCurrentParams = {{}};
+window.__DARS_INITIAL_LOAD__ = true;
 let __spaConfig = null;
 let __spa404Route = null;
 
@@ -1079,19 +1078,28 @@ async function _loadRoute(route, params){{
       try{{
         if(!mountEl) return null;
 
-        // Create wrapper for this route
-        const wrapper = document.createElement('div');
-        wrapper.setAttribute('data-dars-route-wrapper', r['name']);
-        wrapper.style.height = '100%';
-        wrapper.style.width = '100%';
+        let wrapper = null;
+        if (window.__DARS_INITIAL_LOAD__) {{
+            wrapper = mountEl.querySelector(`[data-dars-route-wrapper="${{r['name']}}"]`);
+        }}
 
-        // Fill HTML (with params) - Sanitized
-        const html = _applyParamsToHTML(r['html'] || '', p);
-        wrapper.innerHTML = _sanitize(html);
+        if (wrapper) {{
+            // Real SSR: HTML is already there. Just hydrate it.
+        }} else {{
+            // Create wrapper for this route
+            wrapper = document.createElement('div');
+            wrapper.setAttribute('data-dars-route-wrapper', r['name']);
+            wrapper.style.height = '100%';
+            wrapper.style.width = '100%';
 
-        // Replace content
-        mountEl.innerHTML = '';
-        mountEl.appendChild(wrapper);
+            // Fill HTML (with params) - Sanitized
+            const html = _applyParamsToHTML(r['html'] || '', p);
+            wrapper.innerHTML = _sanitize(html);
+
+            // Replace content
+            mountEl.innerHTML = '';
+            mountEl.appendChild(wrapper);
+        }}
 
         // Assets / hydration
         if(r['title']) document.title = String(r['title']);
@@ -1103,6 +1111,11 @@ async function _loadRoute(route, params){{
         if(r['vdom']){{
           try{{ if(typeof window['DarsHydrate'] === 'function') window['DarsHydrate'](wrapper); }}catch(e){{ }}
         }}
+
+        // Dispatch content-loaded event for external highlighters (e.g. Markdown)
+        document.dispatchEvent(new CustomEvent('dars:content-loaded', {{ 
+            detail: {{ element: wrapper, route: r['name'] }} 
+        }}));
 
         if(isRootLevel) try{{ window.scrollTo(0, 0); }}catch(e){{ }}
         return wrapper;
@@ -1172,32 +1185,8 @@ async function _loadRoute(route, params){{
       }}catch(e){{ console.error('[Dars Router] Render chain error:', e); }}
     }}
 
-    // Check if route is SSR and needs lazy loading
+    // If route is SSR and needs fetching, wait for it BEFORE rendering to avoid suspense flashes
     if(route['type'] === 'ssr' && !route['html']){{
-      // Render placeholder first (so navigation feels instant)
-      try{{
-        route['html'] = _getLoadingHTML(route);
-        route['events'] = route['events'] || {{}};
-        route['vdom'] = route['vdom'] || {{}};
-        route['states'] = route['states'] || [];
-        route['scripts'] = route['scripts'] || [];
-        route['styles'] = route['styles'] || '';
-      }}catch(e){{ }}
-    }}
-    
-    // 1. Build route chain [Root, ..., Parent, Child]
-    const chain = [];
-    let curr = route;
-    while(curr){{
-      chain.unshift(curr);
-      curr = curr['parent'] ? __spaRoutesMap.get(curr['parent']) : null;
-    }}
-
-    // First paint (may show placeholder for SSR routes)
-    _renderChain(chain, params);
-
-    // If SSR leaf route is still loading, fetch it now and re-render
-    if(route['type'] === 'ssr' && route['html'] && String(route['html']).includes('data-dars-ssr-loading="1"')){{
       try{{
         const backendUrl = (__spaConfig && __spaConfig['backendUrl']) || '';
         const loaderUrl = route['ssr_endpoint'] || `/api/ssr/${{route['name']}}`;
@@ -1210,9 +1199,7 @@ async function _loadRoute(route, params){{
           headers: {{ 'Content-Type': 'application/json' }}
         }});
 
-        if(!response.ok){{
-          throw new Error(`Failed to load route: ${{response.status}}`);
-        }}
+        if(!response.ok) throw new Error(`Failed to load route: ${{response.status}}`);
 
         const routeData = await response.json();
 
@@ -1224,30 +1211,26 @@ async function _loadRoute(route, params){{
         route['styles'] = routeData['styles'] || route['styles'] || '';
         route['headMetadata'] = routeData['headMetadata'] || route['headMetadata'];
         
-        // Execute reactive/vref bindings from SSR
-        if (routeData['reactiveBindings']) {{
-            _executeExternalScript(routeData['reactiveBindings']);
-        }}
-        if (routeData['vrefBindings']) {{
-            _executeExternalScript(routeData['vrefBindings']);
-        }}
+        // Native scripts will execute automatically when scripts are appended
       }}catch(error){{
         console.error('[Dars Router] Error loading SSR route:', error);
-        try{{
-          route['html'] = _getErrorHTML(route);
-          route['events'] = {{}};
-          route['vdom'] = {{}};
-          route['states'] = [];
-          route['scripts'] = [];
-          route['styles'] = '';
-          _renderChain(chain, params);
-        }}catch(_e){{ }}
-        return;
+        route['html'] = _getErrorHTML(route);
       }}
-
-      // Second paint (real SSR content)
-      _renderChain(chain, params);
     }}
+
+    // 1. Build route chain [Root, ..., Parent, Child]
+    const chain = [];
+    let curr = route;
+    while(curr){{
+      chain.unshift(curr);
+      curr = curr['parent'] ? __spaRoutesMap.get(curr['parent']) : null;
+    }}
+
+    // Single paint with real content (no suspense flash)
+    _renderChain(chain, params);
+    
+    // After the first render chain is complete, unset initial load flag
+    window.__DARS_INITIAL_LOAD__ = false;
 
   }}catch(e){{ console.error('[Dars Router] Load error:', e); }}
 }}

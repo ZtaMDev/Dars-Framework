@@ -113,6 +113,39 @@ class HTMLCSSJSExporter(Exporter):
             # Initialize style registry for this export (Phase 1 of style optimization)
             # Maps generated class name -> dict(style)
             self._style_registry: Dict[str, Dict[str, Any]] = {}
+            self._global_css_blocks: List[str] = ["""
+/* Dars Markdown Copy Button Styles */
+.dars-code-copy {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0,0,0,0.6);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.2s ease;
+    z-index: 10;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+pre:hover .dars-code-copy {
+    opacity: 1;
+}
+.dars-code-copy:hover {
+    background: rgba(0,0,0,0.8);
+    transform: translateY(-1px);
+}
+.dars-code-copy.copied {
+    background: #16a34a !important;
+    opacity: 1 !important;
+}
+"""]
+            self._markdown_html_assets = {} # route_name -> list of html strings
             # Separate registries for hover/active variants (class -> dict(style))
             self._hover_style_registry: Dict[str, Dict[str, Any]] = {}
             self._active_style_registry: Dict[str, Dict[str, Any]] = {}
@@ -367,8 +400,10 @@ class HTMLCSSJSExporter(Exporter):
                 if hasattr(app, "has_spa_routes") and app.has_spa_routes():
                     spa_has_index = app.get_spa_index() is not None
                 
-                # Exportar cada página
                 for slug, page in app.pages.items():
+                    # Ensure deterministic IDs for this page before rendering
+                    self.ensure_ids_assigned(page.root)
+                    
                     # Track current page for per-page markdown highlight injection
                     self._current_page_id = slug
                     
@@ -441,6 +476,11 @@ class HTMLCSSJSExporter(Exporter):
                     # Scripts de componentes dentro de la página
                     if hasattr(page_app.root, 'get_scripts'):
                         page_scripts.extend(page_app.root.get_scripts())
+                    
+                    # Collect scripts from Markdown components (populated during render_component)
+                    md_scripts = getattr(self, '_markdown_scripts', {}).get(slug, [])
+                    if md_scripts:
+                        page_scripts.extend(md_scripts)
 
                     # Incluir scripts automáticos generados por helpers de escritorio
                     try:
@@ -1167,6 +1207,11 @@ self.addEventListener('fetch', event => {
         if registry_css:
             registry_style_tag = f"\n        <style id=\"dars-style-registry\">\n{registry_css}\n        </style>\n    "
 
+        # Collect additional HTML assets (like Prism CSS links)
+        current_page_id = getattr(self, '_current_page_id', 'default')
+        md_html_assets = getattr(self, '_markdown_html_assets', {}).get(current_page_id, [])
+        markdown_head_assets = "".join(md_html_assets)
+
         html_template = f"""<!DOCTYPE html>
     <html lang="{app.language}">
     <head>
@@ -1176,7 +1221,7 @@ self.addEventListener('fetch', event => {
         {links_html if not page_metadata else ''}
         {og_tags_html if not page_metadata else ''}
         {twitter_tags_html if not page_metadata else ''}
-        <link rel=\"stylesheet\" href=\"runtime_css.css\">{registry_style_tag}<link rel=\"stylesheet\" href=\"{css_file}\">
+        <link rel=\"stylesheet\" href=\"runtime_css.css\">{registry_style_tag}<link rel=\"stylesheet\" href=\"{css_file}\">{markdown_head_assets}
     </head>
     <body>
         {body_content}
@@ -1234,7 +1279,7 @@ self.addEventListener('fetch', event => {
 
     def generate_custom_css(self, app: App) -> str:
         """Genera solo los estilos personalizados de la aplicación"""
-        css_content = ""
+        css_content = self._generate_style_registry_css() + "\n\n"
         
         # Generar estilos hover PRIMERO para que tengan prioridad
         css_content += self._generate_hover_styles(app)
@@ -1409,6 +1454,11 @@ self.addEventListener('fetch', event => {
             return ""
 
         blocks: List[str] = []
+        
+        # Add raw global blocks first
+        if hasattr(self, "_global_css_blocks"):
+            blocks.extend(self._global_css_blocks)
+            
         for class_name, style_dict in self._style_registry.items():
             try:
                 css_body = self.render_styles(style_dict)
@@ -2472,12 +2522,12 @@ audio.dars-audio {
         
         # Convertir events_map a código JS usando native addEventListener
         events_js_code = ""
-        if events_map and not ssr_mode:
+        # Always generate events natively, even in SSR mode, to avoid eval()
+        events_js_code = ""
+        if events_map:
             events_js_code = self._generate_events_js(events_map)
-        elif ssr_mode:
-            events_js_code = "    // Events managed by SSR hydration (DSP)"
             
-        states_js_code = self._generate_states_js() if not ssr_mode else "    // SSR Mode: States managed by hydration (DSP)"
+        states_js_code = self._generate_states_js()
         
         # Reactive bindings logic (Always needed for interactivity)
         reactive_bindings_js = self._generate_reactive_bindings_js()
@@ -5314,16 +5364,96 @@ audio.dars-audio {
                     '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" media="(prefers-color-scheme: light)">\n'
                     '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" media="(prefers-color-scheme: dark)">\n'
                 )
+            
+            # Register Global CSS for Copy Button (if not already registered)
+            if not hasattr(self, '_markdown_styles_registered'):
+                self._markdown_styles_registered = True
+                if not hasattr(self, '_global_css_blocks'):
+                    self._global_css_blocks = []
+                self._global_css_blocks.append("""
+.dars-code-copy {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0,0,0,0.6);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.2s ease;
+    z-index: 10;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+pre:hover .dars-code-copy {
+    opacity: 1;
+}
+.dars-code-copy:hover {
+    background: rgba(0,0,0,0.8);
+    transform: translateY(-1px);
+}
+.dars-code-copy.copied {
+    background: #16a34a;
+    opacity: 1;
+}
+""")
+            
             parts = []
             parts.append(css_links)
-            parts.append('<style>.dars-code-copy{position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.5);color:#fff;border:none;border-radius:6px;padding:4px 8px;font-size:12px;cursor:pointer;opacity:.0;transition:opacity .2s ease;}pre:hover .dars-code-copy{opacity:.9}.dars-code-copy.copied{background:#16a34a}</style>\n')
             parts.append('<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n')
             parts.append('<script>window.Prism=window.Prism||{};Prism.plugins=Prism.plugins||{};Prism.plugins.autoloader=Prism.plugins.autoloader||{};Prism.plugins.autoloader.languages_path="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/";</script>\n')
             parts.append('<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-SkmBfuA2hqjzEVpmnMt/LINrjop3GKWqsuLSSB3e7iBmYK7JuWw4ldmmxwD9mdm2IRTTi0OxSAfEGvgEi0i2Kw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>\n')
-            # Improved script that exposes functions globally
-            parts.append('<script>(function(){window.DarsMarkdown={addCopyButtons:function(root){(root||document).querySelectorAll("pre code").forEach(function(code){var pre=code.parentElement;if(!pre||pre.querySelector(".dars-code-copy"))return;var btn=document.createElement("button");btn.className="dars-code-copy";btn.type="button";btn.textContent="Copy";btn.addEventListener("click",async function(e){e.stopPropagation();try{await navigator.clipboard.writeText(code.innerText);btn.textContent="Copied";btn.classList.add("copied");setTimeout(function(){btn.textContent="Copy";btn.classList.remove("copied")},1200)}catch(err){btn.textContent="Error";setTimeout(function(){btn.textContent="Copy"},1200)}});pre.appendChild(btn)})},guessLang:function(text){var t=text.trim();if(/^{[\\s\\S]*}$/.test(t)||/^\\[/.test(t))return "json";if(/^(pip |python |python3 |dars |#|\\$ )/m.test(t))return "bash";if(/\\b(def |class |import |from |print\\(|self\\b)/.test(t))return "python";return null},stripPygments:function(code){if(code&&code.innerHTML&&code.innerHTML.indexOf("<span")!==-1){code.textContent=code.innerText}},highlight:function(root){var self=this;(root||document).querySelectorAll("pre code").forEach(function(code){self.stripPygments(code);if(!code.className||code.className.indexOf("language-")===-1){var g=self.guessLang(code.innerText);code.classList.add("language-"+(g||"none"))}if(window.Prism&&Prism.highlightElement){Prism.highlightElement(code)}});self.addCopyButtons(root)}};document.addEventListener("DOMContentLoaded",function(){try{window.DarsMarkdown.highlight()}catch(e){}});document.addEventListener("dars:content-loaded",function(e){if(e.detail&&e.detail.element){try{window.DarsMarkdown.highlight(e.detail.element)}catch(err){}}})})();</script>')
-            assets = ''.join(parts)
+            parts.append('<script>(function(){window.DarsMarkdown={_retries:0,addCopyButtons:function(root){(root||document).querySelectorAll("pre code").forEach(function(code){var pre=code.parentElement;if(!pre||pre.querySelector(".dars-code-copy"))return;if(getComputedStyle(pre).position==="static")pre.style.position="relative";var btn=document.createElement("button");btn.className="dars-code-copy";btn.type="button";btn.textContent="Copy";btn.addEventListener("click",async function(e){e.stopPropagation();try{await navigator.clipboard.writeText(code.innerText);btn.textContent="Copied";btn.classList.add("copied");setTimeout(function(){btn.textContent="Copy";btn.classList.remove("copied")},1200)}catch(err){btn.textContent="Error";setTimeout(function(){btn.textContent="Copy"},1200)}});pre.appendChild(btn)})},guessLang:function(text){var t=text.trim();if(/^{[\\s\\S]*}$/.test(t)||/^\\[/.test(t))return "json";if(/^(pip |python |python3 |dars |#|\\$ )/m.test(t))return "bash";if(/\\b(def |class |import |from |print\\(|self\\b)/.test(t))return "python";return null},stripPygments:function(code){if(code&&code.innerHTML&&code.innerHTML.indexOf("<span")!==-1){code.textContent=code.innerText}},highlight:function(root){var self=this;if(!window.Prism||!Prism.highlightElement){if(self._retries<20){self._retries++;setTimeout(function(){self.highlight(root)},150)}return}(root||document).querySelectorAll("pre code").forEach(function(code){self.stripPygments(code);if(!code.className||code.className.indexOf("language-")===-1){var g=self.guessLang(code.innerText);code.classList.add("language-"+(g||"none"))}Prism.highlightElement(code)});self.addCopyButtons(root)}};if(document.readyState==="complete")window.DarsMarkdown.highlight();else window.addEventListener("load",function(){window.DarsMarkdown.highlight()});document.addEventListener("DOMContentLoaded",function(){window.DarsMarkdown.highlight()});document.addEventListener("dars:content-loaded",function(e){if(e.detail&&e.detail.element){window.DarsMarkdown.highlight(e.detail.element)}})})();</script>')
+            
+            # Separate HTML assets from JS scripts
+            html_assets = []
+            js_scripts = []
+            
+            for part in parts:
+                if '<link' in part or '<style' in part:
+                    html_assets.append(part)
+                elif '<script src="' in part:
+                    # Extract src
+                    src_match = re.search(r'src="([^"]+)"', part)
+                    if src_match:
+                        src = src_match.group(1)
+                        is_mod = 'type="module"' in part
+                        js_scripts.append({'type': 'file', 'path': src, 'module': is_mod})
+                elif '<script>' in part or '<script ' in part:
+                    # Extract code
+                    code_match = re.search(r'<script[^>]*>(.*?)</script>', part, re.DOTALL)
+                    if code_match:
+                        code = code_match.group(1)
+                        is_mod = 'type="module"' in part
+                        js_scripts.append({'type': 'inline', 'code': code, 'module': is_mod})
+                else:
+                    # Fallback for plain strings
+                    if part.strip():
+                        js_scripts.append({'type': 'inline', 'code': part})
+            
+            # Store JS in registry
+            if not hasattr(self, '_markdown_scripts'):
+                self._markdown_scripts = {}
+            if current_page_id not in self._markdown_scripts:
+                self._markdown_scripts[current_page_id] = []
+            
+            self._markdown_scripts[current_page_id].extend(js_scripts)
+            
+            # Store HTML assets in registry for SSR/Head injection
+            if not hasattr(self, '_markdown_html_assets'):
+                self._markdown_html_assets = {}
+            if current_page_id not in self._markdown_html_assets:
+                self._markdown_html_assets[current_page_id] = []
+            self._markdown_html_assets[current_page_id].extend(html_assets)
+            
             self._hljs_injected_pages.add(current_page_id)
+            
+            # HTML assets (links/styles) stay in assets to be prepended to the div
+            assets = "".join(html_assets)
 
         # Add stable theme class
         theme_tag = hl_theme if hl_theme in ('light','dark') else 'auto'
@@ -5335,12 +5465,10 @@ audio.dars-audio {
             template_id = f"tpl_{component_id}"
             
             # Inject Lazy Loader Script (Once per page/export)
-            # Use a unique ID for the script to avoid duplication in DOM if rendered multiple times
-            lazy_script_tag = ""
             if not hasattr(self, f"_lazy_script_injected_{current_page_id}"):
                 setattr(self, f"_lazy_script_injected_{current_page_id}", True)
-                lazy_script_tag = """
-<script>
+                
+                lazy_js_code = """
 (function() {
     if (window.__DARS_LAZY_TEMPLATE__) return;
     window.__DARS_LAZY_TEMPLATE__ = true;
@@ -5379,9 +5507,6 @@ audio.dars-audio {
                     el.removeAttribute('data-lazy-template');
                     el.classList.remove('dars-lazy-markdown');
                     document.dispatchEvent(new CustomEvent('dars:content-loaded', { detail: { element: el } }));
-                    
-                    // Remove hydrated IDs from map to keep index clean (optional)
-                    // hiddenIdMap.forEach((val, key) => { if(val === el) hiddenIdMap.delete(key); });
                 }
             }
         }
@@ -5411,43 +5536,31 @@ audio.dars-audio {
         }
         
         // --- Navigation Interceptor ---
-        
         async function handleHash(hash) {
             if (!hash) return;
             const id = hash.slice(1);
-            
-            // 1. Check if element exists in live DOM
             let target = document.getElementById(id);
             if (target) {
                 target.scrollIntoView({behavior: 'smooth', block: 'start'});
                 return;
             }
-            
-            // 2. Check if it's hidden in a template
             const placeholder = hiddenIdMap.get(id);
             if (placeholder && placeholder.hasAttribute('data-lazy-template')) {
-                // Force hydrate
                 hydrate(placeholder);
-                
-                // Wait for DOM
                 requestAnimationFrame(() => {
                     requestAnimationFrame(() => {
                         target = document.getElementById(id);
-                        if (target) {
-                            target.scrollIntoView({behavior: 'smooth', block: 'start'});
-                        }
+                        if (target) target.scrollIntoView({behavior: 'smooth', block: 'start'});
                     });
                 });
             }
         }
         
-        // Intercept Clicks
         document.addEventListener('click', (e) => {
             const link = e.target.closest('a[href^="#"]');
             if (link) {
                 const hash = link.getAttribute('href');
                 if (hash && hash.length > 1) {
-                    // Check if we need to intervene
                     const id = hash.slice(1);
                     if (!document.getElementById(id) && hiddenIdMap.has(id)) {
                         e.preventDefault();
@@ -5458,25 +5571,17 @@ audio.dars-audio {
             }
         });
         
-        // Handle Initial Hydration
         window.addEventListener('load', () => {
-             // Initial Scan
             scan();
-            // Check Hash
-            if (window.location.hash) {
-                // Timeout to ensure index is built and layout settled
-                setTimeout(() => handleHash(window.location.hash), 50);
-            }
+            if (window.location.hash) setTimeout(() => handleHash(window.location.hash), 50);
         });
         
-        // Mutation Observer for dynamic content
         let mutationTimeout;
         new MutationObserver(() => {
             if (mutationTimeout) clearTimeout(mutationTimeout);
             mutationTimeout = setTimeout(scan, 100);
         }).observe(document.body, { childList: true, subtree: true });
         
-        // Global API
         window.Dars = window.Dars || {};
         window.Dars.forceCheckLazy = scan;
         window.Dars.hydrate = hydrate;
@@ -5486,9 +5591,14 @@ audio.dars-audio {
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initLazy);
     else initLazy();
 })();
-</script>
 """
-                assets += lazy_script_tag
+                # Store in registry
+                if not hasattr(self, '_markdown_scripts'):
+                    self._markdown_scripts = {}
+                if current_page_id not in self._markdown_scripts:
+                    self._markdown_scripts[current_page_id] = []
+                
+                self._markdown_scripts[current_page_id].append({'type': 'inline', 'code': lazy_js_code})
 
             # Return placeholder + hidden template
             # Ensure placeholder has dimension so IO triggers correctly
@@ -5504,7 +5614,7 @@ audio.dars-audio {
             
             template_html = f'<template id="{template_id}">{html_content}</template>'
             
-            return f'{assets}{template_html}<div id="{component_id}" {class_attr} style="{style_str}" data-lazy-template="{template_id}" {vref_str}></div>'
+            return f'<div id="{component_id}" {class_attr} style="{style_str}" data-lazy-template="{template_id}" {vref_str}>{assets}{template_html}</div>'
 
         # Normal Render
         class_attr = f'class="{class_name.strip()}"'
@@ -5523,7 +5633,7 @@ audio.dars-audio {
             except ImportError:
                 html_content = self._basic_markdown_to_html(resolved_content)
 
-        return f'{assets}<div id="{component_id}" {class_attr} {style_attr} {vref_str}>{html_content}</div>'
+        return f'<div id="{component_id}" {class_attr} {style_attr} {vref_str}>{assets}{html_content}</div>'
 
     def _basic_markdown_to_html(self, markdown_text: str) -> str:
         """Basic markdown to HTML conversion as fallback"""
@@ -5582,6 +5692,10 @@ audio.dars-audio {
             'backendUrl': getattr(app, 'ssr_url', 'http://localhost:3000') or 'http://localhost:3000'
         }
         for route_name, spa_route in app._spa_routes.items():
+            self._current_page_id = route_name
+            # Ensure deterministic IDs for this route before rendering
+            self.ensure_ids_assigned(spa_route.root)
+            
             route_app = copy.copy(app)
             route_app.root = spa_route.root
             if spa_route.title: route_app.title = spa_route.title
@@ -5632,6 +5746,11 @@ audio.dars-audio {
             route_scripts.extend(getattr(app, 'scripts', []))
             if hasattr(route_app.root, 'get_scripts'):
                 route_scripts.extend(route_app.root.get_scripts())
+                
+            # Collect scripts from Markdown components (populated during render_component)
+            md_scripts = getattr(self, '_markdown_scripts', {}).get(route_name, [])
+            if md_scripts:
+                route_scripts.extend(md_scripts)
             
             # Process scripts using _prepare_page_scripts
             combined_js, external_srcs, is_module = self._prepare_page_scripts(
@@ -5658,6 +5777,11 @@ audio.dars-audio {
 """
             self.write_file(os.path.join(output_path, app_js_filename), combined_all_js)
             scripts_array = [f"/{app_js_filename}"]
+            
+            # Include external scripts (URLs) from Markdown and other sources
+            if external_srcs:
+                for src, is_mod in external_srcs:
+                    scripts_array.append({'src': src, 'module': is_mod})
 
 
 
@@ -5687,7 +5811,7 @@ audio.dars-audio {
                     'html': route_html, 
                     'styles': route_styles_css,
                     'scripts': scripts_array,
-                    'events': route_events_map,
+                    'events': {}, # rely on native app_{route}.js
                     'vdom': route_vdom,
                     'states': [], 
                     'preload': spa_route.preload or [],
@@ -5722,7 +5846,7 @@ audio.dars-audio {
                     'html': route_html, 
                     'styles': route_styles_css,
                     'scripts': scripts_array,
-                    'events': route_events_map,
+                    'events': {}, # rely on native app_{route}.js
                     'vdom': route_vdom,
                     'states': [], 
                     'preload': spa_route.preload or [],

@@ -19,7 +19,7 @@ Once installed, the `dars` command will be available in your terminal. You can u
 ### Export Applications
 
 ```bash
-dars export my_app.py --format html --output ./my_app_web
+dars build
 ```
 
 ### Preview Applications
@@ -94,7 +94,6 @@ dars export my_first_app.py --format html --output ./my_app
 dars preview ./my_app
 ```
 
-
 ### Useful Commands
 
 ```bash
@@ -153,5 +152,6 @@ dars build
 ```
 
 Notes:
+
 - Desktop support is under active development; configuration keys and defaults may change.
 - Some platform targets (like macOS) require building on that OS for signing.
