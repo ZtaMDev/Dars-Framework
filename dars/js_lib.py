@@ -19,14 +19,289 @@ const __reactiveRegistry = [];
 import DOMPurify from 'https://esm.sh/dompurify';
 const _sanitize = (html) => DOMPurify.sanitize(html);
 
-// Centralized eval helper with optional global error reporting hook
-// Eval completely removed for security.
-function _executeExternalScript(code) {{
+// ==================== DARS ACTION PROTOCOL (DAP) ====================
+const __commandRegistry = new Map();
+const __darsConfig = {{
+    allowInlineJS: true, 
+    strictMode: false,   // If true, allowInlineJS becomes false automatically
+    debug: false
+}};
+
+/**
+ * Execute a DAP action securely using the Command Registry.
+ */
+function dispatch(action, context) {{
+  if (!action || typeof action !== 'object') return null;
+  
+  const op = action.op;
+  const args = action.args || action.data || action;
+  
+  if (__darsConfig.strictMode) __darsConfig.allowInlineJS = false;
+  if (__darsConfig.debug) console.log('[Dars:DAP] Dispatching:', op, args);
+  
+  const handler = __commandRegistry.get(op);
+  if (handler) {{
+    try {{
+      return handler(args, context);
+    }} catch (e) {{
+      console.error(`[Dars:DAP] Error executing command '${{op}}':`, e);
+    }}
+  }} else {{
+    console.warn(`[Dars:DAP] Unknown command: ${{op}}`);
+  }}
+  return null;
+}}
+
+// Internal command registration
+function _registerCommand(op, fn) {{
+    __commandRegistry.set(op, fn);
+}}
+
+// Initialize core commands
+_registerCommand('change', (args) => change(args));
+_registerCommand('navigate', (args) => {{ window.location.href = args.path || args; }});
+_registerCommand('navigate_new', (args) => {{ window.open(args.path || args, '_blank'); }});
+_registerCommand('reload', () => {{ window.location.reload(); }});
+_registerCommand('history_back', () => {{ window.history.back(); }});
+_registerCommand('history_forward', () => {{ window.history.forward(); }});
+
+_registerCommand('alert', (args) => _alert(args.message || args));
+_registerCommand('confirm', (args, ctx) => {{
+    if (confirm(args.message || args)) {{
+        if (args.on_ok) dispatch(args.on_ok, ctx);
+    }} else {{
+        if (args.on_cancel) dispatch(args.on_cancel, ctx);
+    }}
+}});
+_registerCommand('log', (args) => console.log(args.message || args));
+
+_registerCommand('sequence', (args, ctx) => {{
+    const actions = Array.isArray(args) ? args : (args.actions || []);
+    actions.forEach(a => dispatch(a, ctx));
+}});
+_registerCommand('delay', (args, ctx) => {{
+    setTimeout(() => dispatch(args.action, ctx), args.ms || 0);
+}});
+
+_registerCommand('dom_show', (args) => {{
+    const el = $(args.id || args);
+    if(el) el.style.display = args.display || 'block';
+}});
+_registerCommand('dom_hide', (args) => {{
+    const el = $(args.id || args);
+    if(el) el.style.display = 'none';
+}});
+_registerCommand('dom_toggle', (args) => {{
+    const el = $(args.id || args);
+    if(el) el.style.display = (el.style.display === 'none' ? (args.display || 'block') : 'none');
+}});
+_registerCommand('dom_set_text', (args) => {{
+    const el = $(args.id);
+    if(el) el.textContent = String(args.text);
+}});
+_registerCommand('dom_set_html', (args) => {{
+    const el = $(args.id);
+    if(el) el.innerHTML = _sanitize(String(args.html));
+}});
+_registerCommand('dom_set_style', (args) => {{
+    const el = $(args.id);
+    if(el && args.style) {{
+        for(const k in args.style) el.style[k] = args.style[k];
+    }}
+}});
+_registerCommand('dom_set_value', (args) => {{
+    const el = $(args.id);
+    if(el) el.value = args.value;
+}});
+_registerCommand('dom_set_attr', (args) => {{
+    const el = $(args.id);
+    if(el) el.setAttribute(args.name, String(args.value));
+}});
+_registerCommand('dom_remove_attr', (args) => {{
+    const el = $(args.id);
+    if(el) el.removeAttribute(args.name);
+}});
+_registerCommand('dom_focus', (args) => {{
+    const el = $(args.id || args);
+    if(el) el.focus();
+}});
+_registerCommand('dom_blur', (args) => {{
+    const el = $(args.id || args);
+    if(el) el.blur();
+}});
+
+_registerCommand('class_add', (args) => {{
+    const el = $(args.id);
+    if(el) el.classList.add(args.className);
+}});
+_registerCommand('class_remove', (args) => {{
+    const el = $(args.id);
+    if(el) el.classList.remove(args.className);
+}});
+_registerCommand('class_toggle', (args) => {{
+    const el = $(args.id);
+    if(el) el.classList.toggle(args.className);
+}});
+
+_registerCommand('scroll_to', (args) => {{
+    window.scrollTo({{ top: args.y || 0, left: args.x || 0, behavior: args.behavior || 'auto' }});
+}});
+_registerCommand('scroll_top', (args) => {{
+    window.scrollTo({{ top: 0, behavior: args.behavior || 'smooth' }});
+}});
+_registerCommand('scroll_bottom', (args) => {{
+    window.scrollTo({{ top: document.body.scrollHeight, behavior: args.behavior || 'smooth' }});
+}});
+_registerCommand('scroll_to_element', (args) => {{
+    const el = $(args.id || args);
+    if(el) el.scrollIntoView({{ behavior: args.behavior || 'smooth' }});
+}});
+
+_registerCommand('form_submit', (args) => {{
+    const el = $(args.id || args);
+    if(el && el.tagName === 'FORM') el.submit();
+}});
+_registerCommand('form_reset', (args) => {{
+    const el = $(args.id || args);
+    if(el && el.tagName === 'FORM') el.reset();
+}});
+_registerCommand('input_clear', (args) => {{
+    const el = $(args.id || args);
+    if(el) {{
+        el.value = '';
+        el.dispatchEvent(new Event('input', {{ bubbles: true }}));
+    }}
+}});
+
+_registerCommand('storage_set', (args) => {{
+    localStorage.setItem(args.key, String(args.value));
+}});
+_registerCommand('storage_remove', (args) => {{
+    localStorage.removeItem(args.key);
+}});
+_registerCommand('storage_clear', () => {{
+    localStorage.clear();
+}});
+
+_registerCommand('modal_show', (args) => {{
+    if (window.DarsModal) window.DarsModal.show(args.id || args);
+}});
+_registerCommand('modal_hide', (args) => {{
+    if (window.DarsModal) window.DarsModal.hide(args.id || args);
+}});
+
+_registerCommand('clipboard_write', (args) => {{
+    navigator.clipboard.writeText(String(args.text || args));
+}});
+_registerCommand('clipboard_copy_element', (args) => {{
+    const el = $(args.id || args);
+    if(el) navigator.clipboard.writeText(el.textContent || '');
+}});
+
+_registerCommand('comp_create', (args) => {{
+    if (typeof createComponent === 'function') createComponent(args.root_id, args.vdom, args.position);
+}});
+_registerCommand('comp_delete', (args) => {{
+    const el = $(args.id || args);
+    if(el && el.parentNode) el.parentNode.removeChild(el);
+}});
+_registerCommand('storage_get', (args) => {{
+    const val = localStorage.getItem(args.key);
+    if(args.target_state) {{
+        change({{ id: args.target_id, [args.target_prop]: val }});
+    }}
+}});
+
+_registerCommand('dom_reflow', (args) => {{
+    const el = $(args.id || args);
+    if(el) void el.offsetWidth;
+}});
+
+_registerCommand('dom_animate', (args) => {{
+    const el = $(args.id);
+    if(el && args.keyframes) el.animate(args.keyframes, args.options || {{}});
+}});
+
+_registerCommand('conditional', (args, ctx) => {{
+    const cond = args.condition;
+    // Note: conditions might still need evaluation if they are strings,
+    // but in DAP they should be pre-evaluated or use a mini-DSL.
+    // For now, support basic equality check if args.left/right provided.
+    let result = false;
+    if(args.left !== undefined && args.right !== undefined) {{
+        if(args.op === '==') result = (args.left == args.right);
+        else if(args.op === '!=') result = (args.left != args.right);
+        else if(args.op === '>') result = (args.left > args.right);
+        else if(args.op === '<') result = (args.left < args.right);
+    }}
+    
+    if(result) {{
+        if(args.on_true) dispatch(args.on_true, ctx);
+    }} else {{
+        if(args.on_false) dispatch(args.on_false, ctx);
+    }}
+}});
+
+_registerCommand('comp_update', (args) => change(args));
+
+_registerCommand('fetch', async (args, ctx) => {{
+    try {{
+        const resp = await fetch(args.url, args.options || {{}});
+        const data = await resp.json();
+        if(args.on_success) dispatch(args.on_success, {{ ...ctx, response: data }});
+    }} catch(e) {{
+        if(args.on_error) dispatch(args.on_error, {{ ...ctx, error: e }});
+    }}
+}});
+
+_registerCommand('vref_update', (args) => {{
+    if (typeof _updateVRef === 'function') _updateVRef(args.selector, args.value);
+}});
+
+_registerCommand('vref_get', (args) => {{
+    if (typeof _getVRef === 'function') {{
+        const val = _getVRef(args.selector);
+        if(args.target_id) change({{ id: args.target_id, [args.target_prop]: val }});
+    }}
+}});
+
+_registerCommand('input_set', (args) => {{
+    const el = $(args.id);
+    if(el) {{
+        el.value = args.value;
+        el.dispatchEvent(new Event('input', {{ bubbles: true }}));
+    }}
+}});
+
+_registerCommand('animate', (args) => {{
+    const el = $(args.id);
+    if(el && window.Dars && window.Dars.animate) window.Dars.animate(args);
+}});
+_registerCommand('dom_set_html', (args) => {{
+    const el = $(args.id);
+    if (el) el.innerHTML = _sanitize(args.html);
+}});
+
+
+function _executeExternalScript(code, context) {{
   if (!code) return null;
   try {{
       const s = document.createElement('script');
-      // Wrap in async IIFE to support await and provide local scope
-      s.textContent = `(async () => {{ try {{ ${{code}} }} catch(e) {{ console.error('[Dars] Script execution error:', e); }} }})();`;
+      const ctxId = '__dars_ctx_' + Math.random().toString(36).substr(2, 9);
+      if (context) window[ctxId] = context;
+      
+      // Provide local 'event' and 'element' (this) to the script
+      const setup = context ? `const event = window["${{ctxId}}"].event; const element = window["${{ctxId}}"].element; delete window["${{ctxId}}"];` : "";
+      
+      s.textContent = `(async () => {{ 
+          ${{setup}}
+          try {{ 
+              ${{code}} 
+          }} catch(e) {{ 
+              console.error('[Dars] Script execution error:', e); 
+          }} 
+      }})();`;
+      
       document.body.appendChild(s);
       s.remove();
   }} catch(e) {{
@@ -87,9 +362,13 @@ function _attachEventsForVNode(el, vnode, events, markClass){{
           
           for(const act of actions){{ 
               if (act.type === 'action') {{
-                  // Action dispatching removed
+                  dispatch(act.data, {{ event: ev, element: this }}); 
               }} else if (act.type === 'inline') {{
-                  _executeExternalScript(act.code); 
+                  if (__darsConfig.allowInlineJS) {{
+                      _executeExternalScript(act.code, {{ event: ev, element: this }}); 
+                  }} else {{
+                      console.error('[Dars:Security] Inline JS execution blocked by configuration.');
+                  }}
               }}
           }}
         }};
@@ -267,9 +546,13 @@ function _attachEventsMap(events){{
           
           for(const act of actions){{ 
               if (act.type === 'action') {{
-                  // Action dispatching removed
+                  dispatch(act.data, {{ event: ev, element: this }}); 
               }} else if (act.type === 'inline') {{
-                  _executeExternalScript(act.code); 
+                  if (__darsConfig.allowInlineJS) {{
+                      _executeExternalScript(act.code, {{ event: ev, element: this }}); 
+                  }} else {{
+                      console.error('[Dars:Security] Inline JS execution blocked by configuration.');
+                  }}
               }}
           }}
         }};
@@ -627,24 +910,18 @@ function change(opt){{
           }}
 
           // Apply event handlers
+          const dynamicEvents = {{}};
+          let hasEvents = false;
           for (const k in opt) {{
               if (k.startsWith('on_')) {{
-                  const eventName = k.substring(3);
-                  const code = opt[k];
-                  let handler = null;
-                  if (Array.isArray(code)) {{
-                      handler = function(e) {{
-                          code.forEach(c => {{
-                              try {{ new Function('event', c).call(this, e); }} catch(err) {{ console.error('[Dars] Event error:', err); }}
-                          }});
-                      }};
-                  }} else if (typeof code === 'string') {{
-                      try {{ handler = new Function('event', code); }} catch(e) {{ console.error('[Dars] Event compilation error:', e); }}
-                  }}
-                  if (handler) {{
-                      el['on' + eventName] = handler;
-                  }}
+                  dynamicEvents[k.substring(3)] = opt[k];
+                  hasEvents = true;
               }}
+          }}
+          if (hasEvents) {{
+              const eventsMap = {{}};
+              eventsMap[opt.id] = dynamicEvents;
+              _attachEventsMap(eventsMap);
           }}
           }}
 
@@ -776,8 +1053,13 @@ function _matchRoute(path){{
 /**
  * Register SPA routing configuration (Vite-safe)
  */
-function registerSPAConfig(config){{
-  try{{
+function registerSPAConfig(config){{ 
+  try {{
+    if(config.strictMode !== undefined) __darsConfig.strictMode = config.strictMode;
+    if(config.allowInlineJS !== undefined) __darsConfig.allowInlineJS = config.allowInlineJS;
+    if(__darsConfig.strictMode) __darsConfig.allowInlineJS = false;
+
+    if(config.routes) {{
     __spaConfig = config;
     if(!config || !Array.isArray(config['routes'])) return;
     
@@ -830,7 +1112,10 @@ function registerSPAConfig(config){{
         }}
       }});
     }}
-  }}catch(e){{ console.error('[Dars Router] Config error:', e); }}
+    }}
+  }} catch (e) {{
+    console.error('[Dars Router] Config error:', e);
+  }}
 }}
 
 /**

@@ -27,7 +27,71 @@
   <meta content="summary" name="twitter:card"/>
   <link href="runtime_css.css" rel="stylesheet"/>
   <style id="dars-style-registry">
-   .dars-s-44d5f1e73b {
+   /* Dars Markdown Copy Button Styles */
+.dars-code-copy {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0,0,0,0.6);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.2s ease;
+    z-index: 10;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+pre:hover .dars-code-copy {
+    opacity: 1;
+}
+.dars-code-copy:hover {
+    background: rgba(0,0,0,0.8);
+    transform: translateY(-1px);
+}
+.dars-code-copy.copied {
+    background: #16a34a !important;
+    opacity: 1 !important;
+}
+
+
+
+.dars-code-copy {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0,0,0,0.6);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.2s ease;
+    z-index: 10;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+pre:hover .dars-code-copy {
+    opacity: 1;
+}
+.dars-code-copy:hover {
+    background: rgba(0,0,0,0.8);
+    transform: translateY(-1px);
+}
+.dars-code-copy.copied {
+    background: #16a34a;
+    opacity: 1;
+}
+
+
+.dars-s-44d5f1e73b {
     background-color: #0d1513;
 }
 
@@ -628,61 +692,62 @@
 }
   </style>
   <link href="styles.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet"/>
  </head>
  <body>
-  <div class="dars-page dars-s-87ae4f7f12" id="page_90">
-   <div class="dars-container" id="container_91">
+  <div class="dars-page dars-s-87ae4f7f12" id="page_0">
+   <div class="dars-container" id="container_0_0">
     <nav class="dars-navbar dars-s-7b86d29f10" id="dars-navbar">
      <div class="dars-navbar-nav">
       <div class="dars-container dars-s-e367a650f8" id="navbar-left">
-       <img alt="Logo" class="dars-image dars-s-1c61bda2a5" height="38px" id="image_92" src="Dars-logo.png" width="38px"/>
-       <span class="dars-text dars-s-46b1b7db03" id="text_93">
+       <img alt="Logo" class="dars-image dars-s-1c61bda2a5" height="38px" id="image_0_0_0_0_0" src="Dars-logo.png" width="38px"/>
+       <span class="dars-text dars-s-46b1b7db03" id="text_0_0_0_0_1">
         Dars Framework
        </span>
       </div>
-      <div class="dars-container dars-s-40ffeb2872" id="container_94">
+      <div class="dars-container dars-s-40ffeb2872" id="container_0_0_0_1">
        <div class="dars-container dars-s-9d1280a5f9" id="navbar-right">
-        <a class="dars-link dars-s-773260a4c6" href="https://ztamdev.github.io/Dars-Framework/" id="link_95" target="_self">
+        <a class="dars-link dars-s-773260a4c6" href="https://ztamdev.github.io/Dars-Framework/" id="link_0_0_0_1_0_0" target="_self">
          Home
         </a>
-        <a class="dars-link dars-s-773260a4c6" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_96" target="_self">
+        <a class="dars-link dars-s-773260a4c6" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_0_0_0_1_0_1" target="_self">
          Documentation
         </a>
-        <a class="dars-link dars-s-773260a4c6" href="https://ztamdev.github.io/Dars-Framework/releases.html" id="link_97" target="_self">
+        <a class="dars-link dars-s-773260a4c6" href="https://ztamdev.github.io/Dars-Framework/releases.html" id="link_0_0_0_1_0_2" target="_self">
          Releases
         </a>
-        <a class="dars-link dars-s-773260a4c6" href="https://dars-playground.vercel.app/" id="link_98" target="_self">
+        <a class="dars-link dars-s-773260a4c6" href="https://dars-playground.vercel.app/" id="link_0_0_0_1_0_3" target="_self">
          PlayGround
         </a>
-        <a class="dars-link dars-s-773260a4c6" href="https://github.com/ZtaMDev/Dars-Framework" id="link_99" target="_self">
+        <a class="dars-link dars-s-773260a4c6" href="https://github.com/ZtaMDev/Dars-Framework" id="link_0_0_0_1_0_4" target="_self">
          GitHub
         </a>
        </div>
        <div class="dars-container dars-s-a7fb8b47dc" id="hamburger-menu">
         <div class="dars-container dars-s-7acb553963" id="hamburger-btn">
-         <div class="dars-container dars-s-a523e4c679" id="container_100">
-          <div class="dars-container dars-s-bd25a63519" id="container_101">
+         <div class="dars-container dars-s-a523e4c679" id="container_0_0_0_1_1_0_0">
+          <div class="dars-container dars-s-bd25a63519" id="container_0_0_0_1_1_0_0_0">
           </div>
-          <div class="dars-container dars-s-bd25a63519" id="container_102">
+          <div class="dars-container dars-s-bd25a63519" id="container_0_0_0_1_1_0_0_1">
           </div>
-          <div class="dars-container dars-s-122e9d8767" id="container_103">
+          <div class="dars-container dars-s-122e9d8767" id="container_0_0_0_1_1_0_0_2">
           </div>
          </div>
         </div>
         <div class="dars-container dars-s-bb0b285d8a" id="mobile-menu">
-         <a class="dars-link dars-s-8f3a8c1621" href="https://ztamdev.github.io/Dars-Framework/" id="link_104" target="_self">
+         <a class="dars-link dars-s-8f3a8c1621" href="https://ztamdev.github.io/Dars-Framework/" id="link_0_0_0_1_1_1_0" target="_self">
           Home
          </a>
-         <a class="dars-link dars-s-8f3a8c1621" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_105" target="_self">
+         <a class="dars-link dars-s-8f3a8c1621" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_0_0_0_1_1_1_1" target="_self">
           Documentation
          </a>
-         <a class="dars-link dars-s-8f3a8c1621" href="https://ztamdev.github.io/Dars-Framework/releases.html" id="link_106" target="_self">
+         <a class="dars-link dars-s-8f3a8c1621" href="https://ztamdev.github.io/Dars-Framework/releases.html" id="link_0_0_0_1_1_1_2" target="_self">
           Releases
          </a>
-         <a class="dars-link dars-s-8f3a8c1621" href="https://dars-playground.vercel.app/" id="link_107" target="_self">
+         <a class="dars-link dars-s-8f3a8c1621" href="https://dars-playground.vercel.app/" id="link_0_0_0_1_1_1_3" target="_self">
           PlayGround
          </a>
-         <a class="dars-link dars-s-f7e6391ca1" href="https://github.com/ZtaMDev/Dars-Framework" id="link_108" target="_self">
+         <a class="dars-link dars-s-f7e6391ca1" href="https://github.com/ZtaMDev/Dars-Framework" id="link_0_0_0_1_1_1_4" target="_self">
           GitHub
          </a>
         </div>
@@ -26050,65 +26115,65 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
      </div>
     </div>
     <div class="dars-container dars-s-2bf2b9dc50" id="footer-section">
-     <div class="dars-container dars-s-b9edec0647" id="container_109">
-      <div class="dars-container dars-s-ad051c31bc" id="container_110">
-       <div class="dars-container dars-s-32330b2fbf" id="container_111">
-        <img alt="Dars Framework" class="dars-image dars-s-9093a9afde" height="50px" id="image_112" src="Dars-logo.png" width="50px"/>
-        <div class="dars-container dars-s-3705a9abea" id="container_113">
-         <span class="dars-text dars-s-df9433d016" id="text_114">
+     <div class="dars-container dars-s-b9edec0647" id="container_0_2_1_0">
+      <div class="dars-container dars-s-ad051c31bc" id="container_0_2_1_0_0">
+       <div class="dars-container dars-s-32330b2fbf" id="container_0_2_1_0_0_0">
+        <img alt="Dars Framework" class="dars-image dars-s-9093a9afde" height="50px" id="image_0_2_1_0_0_0_0" src="Dars-logo.png" width="50px"/>
+        <div class="dars-container dars-s-3705a9abea" id="container_0_2_1_0_0_0_1">
+         <span class="dars-text dars-s-df9433d016" id="text_0_2_1_0_0_0_1_0">
           Dars Framework
          </span>
         </div>
        </div>
-       <div class="dars-container dars-s-9ff400f3b3" id="container_115">
-        <div class="dars-container dars-s-fe64e3094d" id="container_116">
-         <span class="dars-text dars-s-8d9bf8c5ed" id="text_117">
+       <div class="dars-container dars-s-9ff400f3b3" id="container_0_2_1_0_0_1">
+        <div class="dars-container dars-s-fe64e3094d" id="container_0_2_1_0_0_1_0">
+         <span class="dars-text dars-s-8d9bf8c5ed" id="text_0_2_1_0_0_1_0_0">
           Quick Links
          </span>
-         <a class="dars-link dars-s-b5b74dba69" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_118" target="_self">
+         <a class="dars-link dars-s-b5b74dba69" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_0_2_1_0_0_1_0_1" target="_self">
           Documentation
          </a>
-         <a class="dars-link dars-s-b5b74dba69" href="https://github.com/ZtaMDev/Dars-Framework" id="link_119" target="_self">
+         <a class="dars-link dars-s-b5b74dba69" href="https://github.com/ZtaMDev/Dars-Framework" id="link_0_2_1_0_0_1_0_2" target="_self">
           GitHub
          </a>
-         <a class="dars-link dars-s-b5b74dba69" href="https://github.com/ZtaMDev/Dars-Framework/tree/CrystalMain/dars/templates/examples" id="link_120" target="_self">
+         <a class="dars-link dars-s-b5b74dba69" href="https://github.com/ZtaMDev/Dars-Framework/tree/CrystalMain/dars/templates/examples" id="link_0_2_1_0_0_1_0_3" target="_self">
           Examples
          </a>
         </div>
-        <div class="dars-container dars-s-fe64e3094d" id="container_121">
-         <span class="dars-text dars-s-8d9bf8c5ed" id="text_122">
+        <div class="dars-container dars-s-fe64e3094d" id="container_0_2_1_0_0_1_1">
+         <span class="dars-text dars-s-8d9bf8c5ed" id="text_0_2_1_0_0_1_1_0">
           Resources
          </span>
-         <a class="dars-link dars-s-b5b74dba69" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_123" target="_self">
+         <a class="dars-link dars-s-b5b74dba69" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_0_2_1_0_0_1_1_1" target="_self">
           Getting Started
          </a>
-         <a class="dars-link dars-s-b5b74dba69" href="https://github.com/ZtaMDev/Dars-Framework/releases.html" id="link_124" target="_self">
+         <a class="dars-link dars-s-b5b74dba69" href="https://github.com/ZtaMDev/Dars-Framework/releases.html" id="link_0_2_1_0_0_1_1_2" target="_self">
           Releases
          </a>
         </div>
-        <div class="dars-container dars-s-8161a2a3ff" id="container_125">
-         <span class="dars-text dars-s-474933a055" id="text_126">
+        <div class="dars-container dars-s-8161a2a3ff" id="container_0_2_1_0_0_1_2">
+         <span class="dars-text dars-s-474933a055" id="text_0_2_1_0_0_1_2_0">
           A modern FullStack Python framework for web and desktop applications.
          </span>
         </div>
        </div>
-       <div class="dars-container dars-s-9a07c4617d" id="container_127">
-        <div class="dars-container dars-s-b531c31f9b" id="container_128">
-         <span class="dars-text dars-s-132d246545" id="text_129">
+       <div class="dars-container dars-s-9a07c4617d" id="container_0_2_1_0_0_2">
+        <div class="dars-container dars-s-b531c31f9b" id="container_0_2_1_0_0_2_0">
+         <span class="dars-text dars-s-132d246545" id="text_0_2_1_0_0_2_0_0">
           © 2025 Dars Framework.
          </span>
         </div>
-        <div class="dars-container dars-s-b59da3237c" id="container_130">
-         <span class="dars-text dars-s-7c258fc573" id="text_131">
+        <div class="dars-container dars-s-b59da3237c" id="container_0_2_1_0_0_2_1">
+         <span class="dars-text dars-s-7c258fc573" id="text_0_2_1_0_0_2_1_0">
           Created with
          </span>
-         <a class="dars-link dars-s-cb2830d9c8" href="https://github.com/ZtaMDev/Dars-Framework" id="link_132" target="_self">
+         <a class="dars-link dars-s-cb2830d9c8" href="https://github.com/ZtaMDev/Dars-Framework" id="link_0_2_1_0_0_2_1_1" target="_self">
           Dars Framework
          </a>
-         <span class="dars-text dars-s-7c258fc573" id="text_133">
+         <span class="dars-text dars-s-7c258fc573" id="text_0_2_1_0_0_2_1_2">
           by
          </span>
-         <a class="dars-link dars-s-cb2830d9c8" href="https://github.com/ZtaMDev" id="link_134" target="_self">
+         <a class="dars-link dars-s-cb2830d9c8" href="https://github.com/ZtaMDev" id="link_0_2_1_0_0_2_1_3" target="_self">
           ZtaDev
          </a>
         </div>
@@ -26118,7 +26183,11 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
     </div>
    </div>
   </div>
-  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1778624237" type="module">
+  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1778633389" type="module">
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js">
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js">
   </script>
   <script defer="" src="app_docs.js">
   </script>

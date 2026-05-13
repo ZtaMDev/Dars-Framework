@@ -1,3 +1,49 @@
+# Release Notes v1.9.0
+
+> **Secure Action Protocol (DAP) & Zero-Eval Runtime Hardening**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Definitive Removal of `new Function()`
+
+Building on the milestone of v1.8.9, v1.9.0 achieves a 100% "Zero-Eval" runtime for all dynamic event execution.
+
+- **Context-Aware Script Injection**: Dynamic scripts (event handlers, lifecycle hooks) are now executed via a secure script injection mechanism that natively propagates `event` and `element` (the `this` context) without using `eval()` or `new Function()`.
+
+### Dars Action Protocol (DAP) v2: Command Registry
+
+Introduced a centralized **Command Registry** in the browser runtime (`dars.min.js`). This moves the framework from "sending code strings" to "sending structured commands".
+
+- **Pre-defined Operations**: All common UI tasks (navigation, state changes, modal control, DOM updates) are now registered as secure, pre-defined operations.
+- **Protocol-Driven Execution**: The `dispatch(action, context)` function ensures that actions are processed as structured data objects `{op, args}`, eliminating the risk of arbitrary code execution.
+- **Advanced Control Flow**: Support for sequences, delays, and conditional logic within the protocol itself.
+
+### Expanded DAP Command Library
+
+The browser runtime now includes a comprehensive library of registered commands, covering almost all utility functions in `utils_ds.py`:
+
+- **Interactive Dialogs**: `alert`, `confirm` (with DAP-driven `on_ok`/`on_cancel` callbacks), and `log`.
+- **Navigation & History**: `navigate`, `reload`, `history_back`, `history_forward`.
+- **DOM & Visibility**: `dom_show`, `dom_hide`, `dom_toggle`, `dom_focus`, `dom_blur`, `dom_reflow`.
+- **Content & Styles**: `dom_set_text`, `dom_set_html` (sanitized via DOMPurify), `dom_set_style`, `dom_set_attr`, `class_add`, `class_remove`, `class_toggle`.
+- **Storage & State**: `storage_set`, `storage_remove`, `storage_clear`, and `storage_get` (with direct state-update mapping).
+- **Network**: Native `fetch` support with success and error handlers.
+- **VRefs**: `vref_update` and `vref_get`.
+
+### Reliable Markdown Highlighting & Assets
+
+Fixed several long-standing issues with Prism.js integration and global asset management:
+
+- **SSR Highlight Consistency**: Ensured that syntax highlighting works reliably in SSR, static exports, and SPA transitions using a robust retry-based initialization and a centralized asset registry.
+
+---
+
 # Release Notes v1.8.11
 
 > **Native String Concatenation & Math Fixes**

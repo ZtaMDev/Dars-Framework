@@ -27,7 +27,71 @@
   <meta content="summary" name="twitter:card"/>
   <link href="runtime_css.css" rel="stylesheet"/>
   <style id="dars-style-registry">
-   .dars-s-44d5f1e73b {
+   /* Dars Markdown Copy Button Styles */
+.dars-code-copy {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0,0,0,0.6);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.2s ease;
+    z-index: 10;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+pre:hover .dars-code-copy {
+    opacity: 1;
+}
+.dars-code-copy:hover {
+    background: rgba(0,0,0,0.8);
+    transform: translateY(-1px);
+}
+.dars-code-copy.copied {
+    background: #16a34a !important;
+    opacity: 1 !important;
+}
+
+
+
+.dars-code-copy {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0,0,0,0.6);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.2s ease;
+    z-index: 10;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+pre:hover .dars-code-copy {
+    opacity: 1;
+}
+.dars-code-copy:hover {
+    background: rgba(0,0,0,0.8);
+    transform: translateY(-1px);
+}
+.dars-code-copy.copied {
+    background: #16a34a;
+    opacity: 1;
+}
+
+
+.dars-s-44d5f1e73b {
     background-color: #0d1513;
 }
 
@@ -628,61 +692,62 @@
 }
   </style>
   <link href="styles.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet"/>
  </head>
  <body>
-  <div class="dars-page dars-s-87ae4f7f12" id="page_135">
-   <div class="dars-container" id="container_136">
+  <div class="dars-page dars-s-87ae4f7f12" id="page_0">
+   <div class="dars-container" id="container_0_0">
     <nav class="dars-navbar dars-s-7b86d29f10" id="dars-navbar">
      <div class="dars-navbar-nav">
       <div class="dars-container dars-s-e367a650f8" id="navbar-left">
-       <img alt="Logo" class="dars-image dars-s-1c61bda2a5" height="38px" id="image_137" src="Dars-logo.png" width="38px"/>
-       <span class="dars-text dars-s-46b1b7db03" id="text_138">
+       <img alt="Logo" class="dars-image dars-s-1c61bda2a5" height="38px" id="image_0_0_0_0_0" src="Dars-logo.png" width="38px"/>
+       <span class="dars-text dars-s-46b1b7db03" id="text_0_0_0_0_1">
         Dars Framework
        </span>
       </div>
-      <div class="dars-container dars-s-40ffeb2872" id="container_139">
+      <div class="dars-container dars-s-40ffeb2872" id="container_0_0_0_1">
        <div class="dars-container dars-s-9d1280a5f9" id="navbar-right">
-        <a class="dars-link dars-s-773260a4c6" href="https://ztamdev.github.io/Dars-Framework/" id="link_10" target="_self">
+        <a class="dars-link dars-s-773260a4c6" href="https://ztamdev.github.io/Dars-Framework/" id="link_0_0_0_1_0_0" target="_self">
          Home
         </a>
-        <a class="dars-link dars-s-773260a4c6" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="image_32" target="_self">
+        <a class="dars-link dars-s-773260a4c6" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_0_0_0_1_0_1" target="_self">
          Documentation
         </a>
-        <a class="dars-link dars-s-773260a4c6" href="https://ztamdev.github.io/Dars-Framework/releases.html" id="image_28" target="_self">
+        <a class="dars-link dars-s-773260a4c6" href="https://ztamdev.github.io/Dars-Framework/releases.html" id="link_0_0_0_1_0_2" target="_self">
          Releases
         </a>
-        <a class="dars-link dars-s-773260a4c6" href="https://dars-playground.vercel.app/" id="image_24" target="_self">
+        <a class="dars-link dars-s-773260a4c6" href="https://dars-playground.vercel.app/" id="link_0_0_0_1_0_3" target="_self">
          PlayGround
         </a>
-        <a class="dars-link dars-s-773260a4c6" href="https://github.com/ZtaMDev/Dars-Framework" id="image_40" target="_self">
+        <a class="dars-link dars-s-773260a4c6" href="https://github.com/ZtaMDev/Dars-Framework" id="link_0_0_0_1_0_4" target="_self">
          GitHub
         </a>
        </div>
        <div class="dars-container dars-s-a7fb8b47dc" id="hamburger-menu">
         <div class="dars-container dars-s-7acb553963" id="hamburger-btn">
-         <div class="dars-container dars-s-a523e4c679" id="container_13">
-          <div class="dars-container dars-s-bd25a63519" id="container_140">
+         <div class="dars-container dars-s-a523e4c679" id="container_0_0_0_1_1_0_0">
+          <div class="dars-container dars-s-bd25a63519" id="container_0_0_0_1_1_0_0_0">
           </div>
-          <div class="dars-container dars-s-bd25a63519" id="container_14">
+          <div class="dars-container dars-s-bd25a63519" id="container_0_0_0_1_1_0_0_1">
           </div>
-          <div class="dars-container dars-s-122e9d8767" id="container_141">
+          <div class="dars-container dars-s-122e9d8767" id="container_0_0_0_1_1_0_0_2">
           </div>
          </div>
         </div>
         <div class="dars-container dars-s-bb0b285d8a" id="mobile-menu">
-         <a class="dars-link dars-s-8f3a8c1621" href="https://ztamdev.github.io/Dars-Framework/" id="image_36" target="_self">
+         <a class="dars-link dars-s-8f3a8c1621" href="https://ztamdev.github.io/Dars-Framework/" id="link_0_0_0_1_1_1_0" target="_self">
           Home
          </a>
-         <a class="dars-link dars-s-8f3a8c1621" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="image_67" target="_self">
+         <a class="dars-link dars-s-8f3a8c1621" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_0_0_0_1_1_1_1" target="_self">
           Documentation
          </a>
-         <a class="dars-link dars-s-8f3a8c1621" href="https://ztamdev.github.io/Dars-Framework/releases.html" id="link_142" target="_self">
+         <a class="dars-link dars-s-8f3a8c1621" href="https://ztamdev.github.io/Dars-Framework/releases.html" id="link_0_0_0_1_1_1_2" target="_self">
           Releases
          </a>
-         <a class="dars-link dars-s-8f3a8c1621" href="https://dars-playground.vercel.app/" id="image_3" target="_self">
+         <a class="dars-link dars-s-8f3a8c1621" href="https://dars-playground.vercel.app/" id="link_0_0_0_1_1_1_3" target="_self">
           PlayGround
          </a>
-         <a class="dars-link dars-s-f7e6391ca1" href="https://github.com/ZtaMDev/Dars-Framework" id="image_61" target="_self">
+         <a class="dars-link dars-s-f7e6391ca1" href="https://github.com/ZtaMDev/Dars-Framework" id="link_0_0_0_1_1_1_4" target="_self">
           GitHub
          </a>
         </div>
@@ -693,14 +758,14 @@
    </div>
    <div class="dars-container dars-s-b781be11b3" id="markdown-layout">
     <div class="dars-container dars-s-c59e376995" id="markdown-content-container">
-     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_143">
-      <h1 id="release-notes-v1811">
-       Release Notes v1.8.11
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_0_1_0_0">
+      <h1 id="release-notes-v190">
+       Release Notes v1.9.0
       </h1>
       <blockquote>
        <p>
         <strong>
-         Native String Concatenation &amp; Math Fixes
+         Secure Action Protocol (DAP) &amp; Zero-Eval Runtime Hardening
         </strong>
        </p>
       </blockquote>
@@ -712,6 +777,306 @@
 </code></pre>
       </div>
       <h2 id="whats-new">
+       What's New
+      </h2>
+      <h3 id="definitive-removal-of-new-function">
+       Definitive Removal of
+       <code>
+        new Function()
+       </code>
+      </h3>
+      <p>
+       Building on the milestone of v1.8.9, v1.9.0 achieves a 100% "Zero-Eval" runtime for all dynamic event execution.
+      </p>
+      <ul>
+       <li>
+        <strong>
+         Context-Aware Script Injection
+        </strong>
+        : Dynamic scripts (event handlers, lifecycle hooks) are now executed via a secure script injection mechanism that natively propagates
+        <code>
+         event
+        </code>
+        and
+        <code>
+         element
+        </code>
+        (the
+        <code>
+         this
+        </code>
+        context) without using
+        <code>
+         eval()
+        </code>
+        or
+        <code>
+         new Function()
+        </code>
+        .
+       </li>
+      </ul>
+      <h3 id="dars-action-protocol-dap-v2-command-registry">
+       Dars Action Protocol (DAP) v2: Command Registry
+      </h3>
+      <p>
+       Introduced a centralized
+       <strong>
+        Command Registry
+       </strong>
+       in the browser runtime (
+       <code>
+        dars.min.js
+       </code>
+       ). This moves the framework from "sending code strings" to "sending structured commands".
+      </p>
+      <ul>
+       <li>
+        <strong>
+         Pre-defined Operations
+        </strong>
+        : All common UI tasks (navigation, state changes, modal control, DOM updates) are now registered as secure, pre-defined operations.
+       </li>
+       <li>
+        <strong>
+         Protocol-Driven Execution
+        </strong>
+        : The
+        <code>
+         dispatch(action, context)
+        </code>
+        function ensures that actions are processed as structured data objects
+        <code>
+         {op, args}
+        </code>
+        , eliminating the risk of arbitrary code execution.
+       </li>
+       <li>
+        <strong>
+         Advanced Control Flow
+        </strong>
+        : Support for sequences, delays, and conditional logic within the protocol itself.
+       </li>
+      </ul>
+      <h3 id="expanded-dap-command-library">
+       Expanded DAP Command Library
+      </h3>
+      <p>
+       The browser runtime now includes a comprehensive library of registered commands, covering almost all utility functions in
+       <code>
+        utils_ds.py
+       </code>
+       :
+      </p>
+      <ul>
+       <li>
+        <strong>
+         Interactive Dialogs
+        </strong>
+        :
+        <code>
+         alert
+        </code>
+        ,
+        <code>
+         confirm
+        </code>
+        (with DAP-driven
+        <code>
+         on_ok
+        </code>
+        /
+        <code>
+         on_cancel
+        </code>
+        callbacks), and
+        <code>
+         log
+        </code>
+        .
+       </li>
+       <li>
+        <strong>
+         Navigation &amp; History
+        </strong>
+        :
+        <code>
+         navigate
+        </code>
+        ,
+        <code>
+         reload
+        </code>
+        ,
+        <code>
+         history_back
+        </code>
+        ,
+        <code>
+         history_forward
+        </code>
+        .
+       </li>
+       <li>
+        <strong>
+         DOM &amp; Visibility
+        </strong>
+        :
+        <code>
+         dom_show
+        </code>
+        ,
+        <code>
+         dom_hide
+        </code>
+        ,
+        <code>
+         dom_toggle
+        </code>
+        ,
+        <code>
+         dom_focus
+        </code>
+        ,
+        <code>
+         dom_blur
+        </code>
+        ,
+        <code>
+         dom_reflow
+        </code>
+        .
+       </li>
+       <li>
+        <strong>
+         Content &amp; Styles
+        </strong>
+        :
+        <code>
+         dom_set_text
+        </code>
+        ,
+        <code>
+         dom_set_html
+        </code>
+        (sanitized via DOMPurify),
+        <code>
+         dom_set_style
+        </code>
+        ,
+        <code>
+         dom_set_attr
+        </code>
+        ,
+        <code>
+         class_add
+        </code>
+        ,
+        <code>
+         class_remove
+        </code>
+        ,
+        <code>
+         class_toggle
+        </code>
+        .
+       </li>
+       <li>
+        <strong>
+         Storage &amp; State
+        </strong>
+        :
+        <code>
+         storage_set
+        </code>
+        ,
+        <code>
+         storage_remove
+        </code>
+        ,
+        <code>
+         storage_clear
+        </code>
+        , and
+        <code>
+         storage_get
+        </code>
+        (with direct state-update mapping).
+       </li>
+       <li>
+        <strong>
+         Network
+        </strong>
+        : Native
+        <code>
+         fetch
+        </code>
+        support with success and error handlers.
+       </li>
+       <li>
+        <strong>
+         VRefs
+        </strong>
+        :
+        <code>
+         vref_update
+        </code>
+        and
+        <code>
+         vref_get
+        </code>
+        .
+       </li>
+      </ul>
+      <h3 id="reliable-markdown-highlighting-assets">
+       Reliable Markdown Highlighting &amp; Assets
+      </h3>
+      <p>
+       Fixed several long-standing issues with Prism.js integration and global asset management:
+      </p>
+      <ul>
+       <li>
+        <strong>
+         SSR Highlight Consistency
+        </strong>
+        : Ensured that syntax highlighting works reliably in SSR, static exports, and SPA transitions using a robust retry-based initialization and a centralized asset registry.
+       </li>
+       <li>
+        <strong>
+         CSS Registry Injection
+        </strong>
+        : Optimized how Prism themes and custom styles (like code copy buttons) are injected into the
+        <code>
+         &lt;head&gt;
+        </code>
+        to prevent layout shifts and ensure consistency across all rendering modes.
+       </li>
+       <li>
+        <strong>
+         Native Copy Button
+        </strong>
+        : A high-performance, style-consistent "Copy" button for code blocks, managed through the framework's internal asset system.
+       </li>
+      </ul>
+      <hr/>
+      <h1 id="release-notes-v1811">
+       Release Notes v1.8.11
+      </h1>
+      <blockquote>
+       <p>
+        <strong>
+         Native String Concatenation &amp; Math Fixes
+        </strong>
+       </p>
+      </blockquote>
+      <h2 id="installation-2">
+       Installation
+      </h2>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
+</code></pre>
+      </div>
+      <h2 id="whats-new-2">
        What's New
       </h2>
       <h3 id="restored-native-string-concatenation">
@@ -786,14 +1151,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-2">
+      <h2 id="installation-3">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-2">
+      <h2 id="whats-new-3">
        What's New
       </h2>
       <h3 id="state-v2-reactivity-decoupling">
@@ -924,14 +1289,14 @@
         release.
        </p>
       </blockquote>
-      <h2 id="installation-3">
+      <h2 id="installation-4">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-3">
+      <h2 id="whats-new-4">
        What's New
       </h2>
       <h3 id="zero-eval-runtime-secure-script-execution">
@@ -1129,14 +1494,14 @@
         : Versions &lt;= v1.8.7 are considered deprecated and NOT recommended for production use. v1.8.8 addresses critical security surfaces by temporarily removing experimental Server Components. Upgrading is mandatory.
        </p>
       </blockquote>
-      <h2 id="installation-4">
+      <h2 id="installation-5">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-4">
+      <h2 id="whats-new-5">
        What's New
       </h2>
       <h3 id="dars-server-protocol-dsp">
@@ -1206,14 +1571,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-5">
+      <h2 id="installation-6">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-5">
+      <h2 id="whats-new-6">
        What's New
       </h2>
       <h3 id="dars-server-components">
@@ -1321,14 +1686,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-6">
+      <h2 id="installation-7">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-6">
+      <h2 id="whats-new-7">
        What's New
       </h2>
       <h3 id="darsenv-environment-awareness">
@@ -1440,14 +1805,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-7">
+      <h2 id="installation-8">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-7">
+      <h2 id="whats-new-8">
        What's New
       </h2>
       <h3 id="multiple-outlets-via-outlet_id">
@@ -1544,14 +1909,14 @@ This keeps state/events safe and avoids breaking hydration.
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-8">
+      <h2 id="installation-9">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-8">
+      <h2 id="whats-new-9">
        What's New
       </h2>
       <h3 id="python-native-minification-by-default-no-nodebun-required">
@@ -1760,14 +2125,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-9">
+      <h2 id="installation-10">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-9">
+      <h2 id="whats-new-10">
        What's New
       </h2>
       <h3 id="fixed-production-build-crash-unexpected-token-export">
@@ -1818,14 +2183,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-10">
+      <h2 id="installation-11">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-10">
+      <h2 id="whats-new-11">
        What's New
       </h2>
       <h3 id="fixed-settimeout-promise-handling">
@@ -1869,14 +2234,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-11">
+      <h2 id="installation-12">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-11">
+      <h2 id="whats-new-12">
        What's New
       </h2>
       <h3 id="new-style-optimization-pipeline-phase-1">
@@ -2246,14 +2611,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-12">
+      <h2 id="installation-13">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-12">
+      <h2 id="whats-new-13">
        What's New
       </h2>
       <h3 id="new-advanced-multimedia-components-video-audio">
@@ -2739,14 +3104,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-13">
+      <h2 id="installation-14">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-13">
+      <h2 id="whats-new-14">
        What's New
       </h2>
       <h3 id="centralized-safeeval-for-runtime-generated-js">
@@ -3029,14 +3394,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-14">
+      <h2 id="installation-15">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-14">
+      <h2 id="whats-new-15">
        What's New
       </h2>
       <h3 id="automatic-backendentry-for-ssr-projects">
@@ -3289,14 +3654,14 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-15">
+      <h2 id="installation-16">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-15">
+      <h2 id="whats-new-16">
        What's New
       </h2>
       <h3 id="component-lifecycle-hooks-onmount-onupdate-onunmount">
@@ -3919,14 +4284,14 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-16">
+      <h2 id="installation-17">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-16">
+      <h2 id="whats-new-17">
        What's New
       </h2>
       <h3 id="safer-cdn-loading-for-syntax-highlighting">
@@ -4011,14 +4376,14 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-17">
+      <h2 id="installation-18">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-17">
+      <h2 id="whats-new-18">
        What's New
       </h2>
       <h3 id="faster-more-helpful-dars-doctor">
@@ -4408,14 +4773,14 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-18">
+      <h2 id="installation-19">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-18">
+      <h2 id="whats-new-19">
        What's New
       </h2>
       <h3 id="real-ssr-hydration-spa-integration">
@@ -4637,14 +5002,14 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-19">
+      <h2 id="installation-20">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-19">
+      <h2 id="whats-new-20">
        What's New
       </h2>
       <h3 id="complete-head-component-support">
@@ -4736,14 +5101,14 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-20">
+      <h2 id="installation-21">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-20">
+      <h2 id="whats-new-21">
        What's New
       </h2>
       <h3 id="instant-server-shutdown">
@@ -5142,14 +5507,14 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-21">
+      <h2 id="installation-22">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-21">
+      <h2 id="whats-new-22">
        What's New
       </h2>
       <h3 id="instant-server-startup">
@@ -5506,14 +5871,14 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-22">
+      <h2 id="installation-23">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-22">
+      <h2 id="whats-new-23">
        What's New
       </h2>
       <h3 id="new-hook-setvref">
@@ -5684,14 +6049,14 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-23">
+      <h2 id="installation-24">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-23">
+      <h2 id="whats-new-24">
        What's New
       </h2>
       <h3 id="dars-server-side-rendering-ssr">
@@ -5856,14 +6221,14 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-24">
+      <h2 id="installation-25">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-24">
+      <h2 id="whats-new-25">
        What's New
       </h2>
       <h3 id="updatevref-pythonic-component-level-state">
@@ -6524,14 +6889,14 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-25">
+      <h2 id="installation-26">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-25">
+      <h2 id="whats-new-26">
        What's New
       </h2>
       <h3 id="boolean-comparison-operators-for-v">
@@ -7288,14 +7653,14 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-26">
+      <h2 id="installation-27">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-26">
+      <h2 id="whats-new-27">
        What's New
       </h2>
       <h3 id="custom-utility-styles">
@@ -7427,14 +7792,14 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-27">
+      <h2 id="installation-28">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-27">
+      <h2 id="whats-new-28">
        What's New
       </h2>
       <h3 id="massive-styling-system-expansion">
@@ -7680,14 +8045,14 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-28">
+      <h2 id="installation-29">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-28">
+      <h2 id="whats-new-29">
        What's New
       </h2>
       <h3 id="pythonic-expression-system-with-v">
@@ -8209,14 +8574,14 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-29">
+      <h2 id="installation-30">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-29">
+      <h2 id="whats-new-30">
        What's New
       </h2>
       <h3 id="tailwind-like-utility-class-system">
@@ -8473,14 +8838,14 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-30">
+      <h2 id="installation-31">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-30">
+      <h2 id="whats-new-31">
        What's New
       </h2>
       <h3 id="enhanced-usevalue-hook-simplified-usage">
@@ -8562,14 +8927,14 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-31">
+      <h2 id="installation-32">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-31">
+      <h2 id="whats-new-32">
        What's New
       </h2>
       <h3 id="enhanced-usewatch-hook-array-syntax-multiple-callbacks">
@@ -8784,7 +9149,7 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-32">
+      <h2 id="installation-33">
        Installation
       </h2>
       <div class="codehilite">
@@ -9195,14 +9560,14 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-33">
+      <h2 id="installation-34">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-32">
+      <h2 id="whats-new-33">
        What's New
       </h2>
       <h3 id="1-unified-keyboard-events-on_key_press">
@@ -9403,14 +9768,14 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-34">
+      <h2 id="installation-35">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-33">
+      <h2 id="whats-new-34">
        What's New
       </h2>
       <h3 id="1-v-helper-state-path-support">
@@ -10047,14 +10412,14 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-35">
+      <h2 id="installation-36">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-34">
+      <h2 id="whats-new-35">
        What's New
       </h2>
       <h3 id="1-usevalue-hook">
@@ -10161,14 +10526,14 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-36">
+      <h2 id="installation-37">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-35">
+      <h2 id="whats-new-36">
        What's New
       </h2>
       <h3 id="1-expanded-usedynamic-support-for-built-in-components">
@@ -10529,14 +10894,14 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         hook.
        </p>
       </blockquote>
-      <h2 id="installation-37">
+      <h2 id="installation-38">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-36">
+      <h2 id="whats-new-37">
        What's New
       </h2>
       <h3 id="1-usedynamic-for-built-in-components">
@@ -10639,14 +11004,14 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         relaunch with correct license.
        </p>
       </blockquote>
-      <h2 id="installation-38">
+      <h2 id="installation-39">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-37">
+      <h2 id="whats-new-38">
        What's New
       </h2>
       <h3 id="hooks-system-usedynamic">
@@ -11084,14 +11449,14 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-39">
+      <h2 id="installation-40">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-38">
+      <h2 id="whats-new-39">
        What's New
       </h2>
       <h3 id="hooks-system-usedynamic-2">
@@ -11529,14 +11894,14 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-40">
+      <h2 id="installation-41">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-39">
+      <h2 id="whats-new-40">
        What's New
       </h2>
       <h3 id="function-components-system">
@@ -11744,14 +12109,14 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-41">
+      <h2 id="installation-42">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-40">
+      <h2 id="whats-new-41">
        What's New
       </h2>
       <h3 id="backend-http-utilities-system">
@@ -12193,14 +12558,14 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-42">
+      <h2 id="installation-43">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-41">
+      <h2 id="whats-new-42">
        What's New
       </h2>
       <h3 id="animation-system-stability">
@@ -12311,14 +12676,14 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-43">
+      <h2 id="installation-44">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-42">
+      <h2 id="whats-new-43">
        What's New
       </h2>
       <h3 id="state-v2-event-handler-support">
@@ -12482,7 +12847,7 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         , and more.
        </p>
       </blockquote>
-      <h2 id="installation-44">
+      <h2 id="installation-45">
        Installation
       </h2>
       <div class="codehilite">
@@ -12952,7 +13317,7 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         Introducing State V2 and comprehensive animation system. This is the biggest update to Dars state management, bringing a pure Pythonic API and 15+ built-in animations.
        </p>
       </blockquote>
-      <h2 id="installation-45">
+      <h2 id="installation-46">
        Installation
       </h2>
       <div class="codehilite">
@@ -12966,7 +13331,7 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.7
 </code></pre>
       </div>
-      <h2 id="whats-new-43">
+      <h2 id="whats-new-44">
        What's New
       </h2>
       <h3 id="state-v2-pure-pythonic-state-management">
@@ -13641,7 +14006,7 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         : Introduces Single Page Application (SPA) support and a powerful client-side routing system.
        </p>
       </blockquote>
-      <h2 id="installation-46">
+      <h2 id="installation-47">
        Installation
       </h2>
       <div class="codehilite">
@@ -13655,7 +14020,7 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.5
 </code></pre>
       </div>
-      <h2 id="whats-new-44">
+      <h2 id="whats-new-45">
        What's New
       </h2>
       <h3 id="single-page-application-spa-support">
@@ -13771,7 +14136,7 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         Critical bug fix release. Removes non-functional features, fixes style merge, and improves state restoration.
        </p>
       </blockquote>
-      <h2 id="installation-47">
+      <h2 id="installation-48">
        Installation
       </h2>
       <div class="codehilite">
@@ -13837,7 +14202,7 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         State management enhancements with compile-time validation, component self-navigation, and critical style merge fix. Improves developer experience and fixes property replacement bug.
        </p>
       </blockquote>
-      <h2 id="installation-48">
+      <h2 id="installation-49">
        Installation
       </h2>
       <div class="codehilite">
@@ -13851,7 +14216,7 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.3
 </code></pre>
       </div>
-      <h2 id="whats-new-45">
+      <h2 id="whats-new-46">
        What's New
       </h2>
       <ul>
@@ -13901,7 +14266,7 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         for enhanced client-side interactions.
        </p>
       </blockquote>
-      <h2 id="installation-49">
+      <h2 id="installation-50">
        Installation
       </h2>
       <div class="codehilite">
@@ -13915,7 +14280,7 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.2
 </code></pre>
       </div>
-      <h2 id="whats-new-46">
+      <h2 id="whats-new-47">
        What's New
       </h2>
       <h3 id="utility-functions-utils_ds">
@@ -14105,7 +14470,7 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         SEO and Apple device optimizations. Enhanced metadata generation with automatic MIME type detection for favicons and comprehensive iOS/Safari support.
        </p>
       </blockquote>
-      <h2 id="installation-50">
+      <h2 id="installation-51">
        Installation
       </h2>
       <div class="codehilite">
@@ -14119,7 +14484,7 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.4.1
 </code></pre>
       </div>
-      <h2 id="whats-new-47">
+      <h2 id="whats-new-48">
        What's New
       </h2>
       <h3 id="automatic-favicon-mime-type-detection">
@@ -14495,7 +14860,7 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         Simple Template update.
        </p>
       </blockquote>
-      <h2 id="installation-51">
+      <h2 id="installation-52">
        Installation
       </h2>
       <div class="codehilite">
@@ -14523,7 +14888,7 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         Desktop File System API, Pythonic Arg helper, keyboard event filtering, and comprehensive template synchronization. Major enhancements to desktop capabilities with improved developer experience.
        </p>
       </blockquote>
-      <h2 id="installation-52">
+      <h2 id="installation-53">
        Installation
       </h2>
       <div class="codehilite">
@@ -14537,7 +14902,7 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.9
 </code></pre>
       </div>
-      <h2 id="whats-new-48">
+      <h2 id="whats-new-49">
        What's New
       </h2>
       <h3 id="desktop-file-system-api-list_directory">
@@ -15060,7 +15425,7 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         for async chaining.
        </p>
       </blockquote>
-      <h2 id="installation-53">
+      <h2 id="installation-54">
        Installation
       </h2>
       <div class="codehilite">
@@ -15074,7 +15439,7 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.8
 </code></pre>
       </div>
-      <h2 id="whats-new-49">
+      <h2 id="whats-new-50">
        What's New
       </h2>
       <h3 id="dynamic-state-updates-with-this">
@@ -15608,7 +15973,7 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         for dynamic DOM operations with safe event hydration.
        </p>
       </blockquote>
-      <h2 id="installation-54">
+      <h2 id="installation-55">
        Installation
       </h2>
       <div class="codehilite">
@@ -15622,7 +15987,7 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.6
 </code></pre>
       </div>
-      <h2 id="whats-new-50">
+      <h2 id="whats-new-51">
        What's New
       </h2>
       <h3 id="compile-time-component-manipulation">
@@ -15785,7 +16150,7 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         Enhanced styling and development experience update featuring active styles, improved preview system, and advanced file monitoring. Delivers better visual feedback and faster development workflow.
        </p>
       </blockquote>
-      <h2 id="installation-55">
+      <h2 id="installation-56">
        Installation
       </h2>
       <div class="codehilite">
@@ -15799,7 +16164,7 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.5
 </code></pre>
       </div>
-      <h2 id="whats-new-51">
+      <h2 id="whats-new-52">
        What's New
       </h2>
       <h3 id="active-styles-support">
@@ -15976,7 +16341,7 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         Enhanced interactivity update featuring hover styles, multi-handler events, and runtime versioning. Improves component styling and event handling flexibility.
        </p>
       </blockquote>
-      <h2 id="installation-56">
+      <h2 id="installation-57">
        Installation
       </h2>
       <div class="codehilite">
@@ -15990,7 +16355,7 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.4
 </code></pre>
       </div>
-      <h2 id="whats-new-52">
+      <h2 id="whats-new-53">
        What's New
       </h2>
       <h3 id="hover-styles-support">
@@ -16203,7 +16568,7 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         Minor update featuring new semantic Section component and enhanced state serialization. Continues JavaScript migration improvements from v1.3.2.
        </p>
       </blockquote>
-      <h2 id="installation-57">
+      <h2 id="installation-58">
        Installation
       </h2>
       <div class="codehilite">
@@ -16217,7 +16582,7 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>dars-framework<span class="o">==</span><span class="m">1</span>.3.3
 </code></pre>
       </div>
-      <h2 id="whats-new-53">
+      <h2 id="whats-new-54">
        What's New
       </h2>
       <h3 id="section-component">
@@ -16405,7 +16770,7 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         Major minification improvements with combined JS files and optimized event handling. Electron desktop exporter remains in beta.
        </p>
       </blockquote>
-      <h2 id="installation-58">
+      <h2 id="installation-59">
        Installation
       </h2>
       <div class="codehilite">
@@ -16742,7 +17107,7 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         Native desktop functions and DX improved with dev mode and file system integration.
        </p>
       </blockquote>
-      <h2 id="installation-59">
+      <h2 id="installation-60">
        Installation
       </h2>
       <div class="codehilite">
@@ -16827,7 +17192,7 @@ dars<span class="w"> </span>dev<span class="w"> </span>--backend
         Native desktop export (BETA), improved CLI and doctor integration, and metadata fixes for packaging. This is a BETA release: usable for testing, not recommended for production.
        </p>
       </blockquote>
-      <h2 id="installation-60">
+      <h2 id="installation-61">
        Installation
       </h2>
       <div class="codehilite">
@@ -17110,7 +17475,7 @@ dars<span class="w"> </span>build
         Optional default minification, precise CLI control, faster builds, and clearer minification status.
        </p>
       </blockquote>
-      <h2 id="installation-61">
+      <h2 id="installation-62">
        Installation
       </h2>
       <div class="codehilite">
@@ -17346,65 +17711,65 @@ dars<span class="w"> </span>build
      </div>
     </div>
     <div class="dars-container dars-s-2bf2b9dc50" id="footer-section">
-     <div class="dars-container dars-s-b9edec0647" id="container_71">
-      <div class="dars-container dars-s-ad051c31bc" id="container_80">
-       <div class="dars-container dars-s-32330b2fbf" id="container_70">
-        <img alt="Dars Framework" class="dars-image dars-s-9093a9afde" height="50px" id="image_51" src="Dars-logo.png" width="50px"/>
-        <div class="dars-container dars-s-3705a9abea" id="container_82">
-         <span class="dars-text dars-s-df9433d016" id="text_144">
+     <div class="dars-container dars-s-b9edec0647" id="container_0_1_1_0">
+      <div class="dars-container dars-s-ad051c31bc" id="container_0_1_1_0_0">
+       <div class="dars-container dars-s-32330b2fbf" id="container_0_1_1_0_0_0">
+        <img alt="Dars Framework" class="dars-image dars-s-9093a9afde" height="50px" id="image_0_1_1_0_0_0_0" src="Dars-logo.png" width="50px"/>
+        <div class="dars-container dars-s-3705a9abea" id="container_0_1_1_0_0_0_1">
+         <span class="dars-text dars-s-df9433d016" id="text_0_1_1_0_0_0_1_0">
           Dars Framework
          </span>
         </div>
        </div>
-       <div class="dars-container dars-s-9ff400f3b3" id="container_85">
-        <div class="dars-container dars-s-fe64e3094d" id="container_145">
-         <span class="dars-text dars-s-8d9bf8c5ed" id="text_146">
+       <div class="dars-container dars-s-9ff400f3b3" id="container_0_1_1_0_0_1">
+        <div class="dars-container dars-s-fe64e3094d" id="container_0_1_1_0_0_1_0">
+         <span class="dars-text dars-s-8d9bf8c5ed" id="text_0_1_1_0_0_1_0_0">
           Quick Links
          </span>
-         <a class="dars-link dars-s-b5b74dba69" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_147" target="_self">
+         <a class="dars-link dars-s-b5b74dba69" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_0_1_1_0_0_1_0_1" target="_self">
           Documentation
          </a>
-         <a class="dars-link dars-s-b5b74dba69" href="https://github.com/ZtaMDev/Dars-Framework" id="image_44" target="_self">
+         <a class="dars-link dars-s-b5b74dba69" href="https://github.com/ZtaMDev/Dars-Framework" id="link_0_1_1_0_0_1_0_2" target="_self">
           GitHub
          </a>
-         <a class="dars-link dars-s-b5b74dba69" href="https://github.com/ZtaMDev/Dars-Framework/tree/CrystalMain/dars/templates/examples" id="link_148" target="_self">
+         <a class="dars-link dars-s-b5b74dba69" href="https://github.com/ZtaMDev/Dars-Framework/tree/CrystalMain/dars/templates/examples" id="link_0_1_1_0_0_1_0_3" target="_self">
           Examples
          </a>
         </div>
-        <div class="dars-container dars-s-fe64e3094d" id="container_23">
-         <span class="dars-text dars-s-8d9bf8c5ed" id="text_149">
+        <div class="dars-container dars-s-fe64e3094d" id="container_0_1_1_0_0_1_1">
+         <span class="dars-text dars-s-8d9bf8c5ed" id="text_0_1_1_0_0_1_1_0">
           Resources
          </span>
-         <a class="dars-link dars-s-b5b74dba69" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_150" target="_self">
+         <a class="dars-link dars-s-b5b74dba69" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_0_1_1_0_0_1_1_1" target="_self">
           Getting Started
          </a>
-         <a class="dars-link dars-s-b5b74dba69" href="https://github.com/ZtaMDev/Dars-Framework/releases.html" id="link_151" target="_self">
+         <a class="dars-link dars-s-b5b74dba69" href="https://github.com/ZtaMDev/Dars-Framework/releases.html" id="link_0_1_1_0_0_1_1_2" target="_self">
           Releases
          </a>
         </div>
-        <div class="dars-container dars-s-8161a2a3ff" id="container_83">
-         <span class="dars-text dars-s-474933a055" id="text_152">
+        <div class="dars-container dars-s-8161a2a3ff" id="container_0_1_1_0_0_1_2">
+         <span class="dars-text dars-s-474933a055" id="text_0_1_1_0_0_1_2_0">
           A modern FullStack Python framework for web and desktop applications.
          </span>
         </div>
        </div>
-       <div class="dars-container dars-s-9a07c4617d" id="container_153">
-        <div class="dars-container dars-s-b531c31f9b" id="container_27">
-         <span class="dars-text dars-s-132d246545" id="text_154">
+       <div class="dars-container dars-s-9a07c4617d" id="container_0_1_1_0_0_2">
+        <div class="dars-container dars-s-b531c31f9b" id="container_0_1_1_0_0_2_0">
+         <span class="dars-text dars-s-132d246545" id="text_0_1_1_0_0_2_0_0">
           © 2025 Dars Framework.
          </span>
         </div>
-        <div class="dars-container dars-s-b59da3237c" id="container_155">
-         <span class="dars-text dars-s-7c258fc573" id="text_156">
+        <div class="dars-container dars-s-b59da3237c" id="container_0_1_1_0_0_2_1">
+         <span class="dars-text dars-s-7c258fc573" id="text_0_1_1_0_0_2_1_0">
           Created with
          </span>
-         <a class="dars-link dars-s-cb2830d9c8" href="https://github.com/ZtaMDev/Dars-Framework" id="link_157" target="_self">
+         <a class="dars-link dars-s-cb2830d9c8" href="https://github.com/ZtaMDev/Dars-Framework" id="link_0_1_1_0_0_2_1_1" target="_self">
           Dars Framework
          </a>
-         <span class="dars-text dars-s-7c258fc573" id="text_158">
+         <span class="dars-text dars-s-7c258fc573" id="text_0_1_1_0_0_2_1_2">
           by
          </span>
-         <a class="dars-link dars-s-cb2830d9c8" href="https://github.com/ZtaMDev" id="link_159" target="_self">
+         <a class="dars-link dars-s-cb2830d9c8" href="https://github.com/ZtaMDev" id="link_0_1_1_0_0_2_1_3" target="_self">
           ZtaDev
          </a>
         </div>
@@ -17423,6 +17788,27 @@ dars<span class="w"> </span>build
      <div class="sidebar-category">
       Versions
      </div>
+     <a class="sidebar-link sidebar-level-1" href="#release-notes-v190" style="margin-left: 0px">
+      Release Notes v1.9.0
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#installation" style="margin-left: 20px">
+      Installation
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#whats-new" style="margin-left: 20px">
+      What's New
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#definitive-removal-of-new-function" style="margin-left: 40px">
+      Definitive Removal of `new Function()`
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#dars-action-protocol-dap-v2-command-registry" style="margin-left: 40px">
+      Dars Action Protocol (DAP) v2: Command Registry
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#expanded-dap-command-library" style="margin-left: 40px">
+      Expanded DAP Command Library
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#reliable-markdown-highlighting-assets" style="margin-left: 40px">
+      Reliable Markdown Highlighting &amp; Assets
+     </a>
      <a class="sidebar-link sidebar-level-1" href="#release-notes-v1811" style="margin-left: 0px">
       Release Notes v1.8.11
      </a>
@@ -19427,7 +19813,11 @@ dars<span class="w"> </span>build
         });
    </script>
   </div>
-  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1778624244" type="module">
+  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1778633394" type="module">
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js">
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js">
   </script>
   <script defer="" src="app_releases.js">
   </script>
