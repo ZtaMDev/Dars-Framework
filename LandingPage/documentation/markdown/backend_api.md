@@ -268,7 +268,7 @@ from dars.backend import updateComp
 update_btn.on_click = updateComp(
     "my-component-id",
     text="Updated!",
-    style={"color": "red"}
+    style="text-red-500"
 )
 ```
 

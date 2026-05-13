@@ -216,10 +216,12 @@ The desktop module provides async file operations that return `dScript` objects,
 
 **Reading Text Files**
 ```python
-# Simple read - button updates itself with file content
+# Simple read - button updates itself with file content using the Arg helper
+from dars.scripts.dscript import Arg
+
 read_btn = Button("Load Config",
     on_click=read_text("config.txt").then(
-        this().state(text=RawJS(dScript.ARG))
+        this().state(text=Arg)
     )
 )
 
@@ -227,7 +229,7 @@ read_btn = Button("Load Config",
 display = Text("", id="display")
 load_btn = Button("Load Data",
     on_click=read_text("data.txt").then(
-        update_component("display", text=RawJS(dScript.ARG))
+        update_component("display", text=Arg)
     )
 )
 ```
@@ -237,7 +239,7 @@ load_btn = Button("Load Data",
 
 save_btn = Button("Save",
     on_click=write_text("output.txt", "Hello Dars!").then(
-        this().state(text="Saved!", style={"color": "green"})
+        this().state(text="Saved!", style="text-green-500")
     )
 )
 ```
@@ -261,7 +263,7 @@ Button("Browse",
 
 Button("Python Files",
     on_click=list_directory(".", "*.py").then(
-        this().state(id="count", text=RawJS("`Found ${value.length} files`"))
+        this().state(id="count", text=RawJS("`Found ${Arg.length} files`"))
     )
 )
 

@@ -89,6 +89,7 @@ filter: blur(6px) brightness(120%);
 - **Grid Auto Columns**: `auto-cols-auto`, `auto-cols-min`, `auto-cols-max`, `auto-cols-fr`
 - **Grid Auto Rows**: `auto-rows-auto`, `auto-rows-min`, `auto-rows-max`, `auto-rows-fr`
 - **Gap**: `gap-{n}`, `gap-x-{n}`, `gap-y-{n}`
+- **Divide**: `divide-x-{n}`, `divide-y-{n}`, `divide-{color}` (adds borders between children)
 
 ### Spacing (Padding & Margin)
 
@@ -128,6 +129,9 @@ filter: blur(6px) brightness(120%);
 - **Letter Spacing**: `tracking-tighter`, `tracking-tight`, `tracking-normal`, `tracking-wide`, `tracking-wider`, `tracking-widest`
 - **Text Indent**: `indent-{n}`
 
+**Smart Property Switching:**
+The `text-` prefix is smart. If you provide a size (e.g., `text-xl`), it sets `font-size`. If you provide a color (e.g., `text-white`), it automatically switches to set the `color` property.
+
 ### Colors
 
 **Complete Palette** (50-950 shades for each):
@@ -141,6 +145,13 @@ filter: blur(6px) brightness(120%);
 - **Purples**: `violet`, `purple`, `fuchsia`
 - **Pinks**: `pink`
 - **Special**: `black`, `white`, `transparent`, `current`
+
+**Opacities:**
+You can set opacity for background, text, border, and rings:
+- `bg-opacity-{n}` (0-100)
+- `text-opacity-{n}` (0-100)
+- `border-opacity-{n}` (0-100)
+- `ring-opacity-{n}` (0-100)
 
 **Usage Examples:**
 ```python
@@ -164,6 +175,17 @@ style="bg-amber-400 text-zinc-900"    # Amber background with dark zinc text
 - **Background Attachment**: `bg-fixed`, `bg-local`, `bg-scroll`
 - **Background Clip**: `bg-clip-border`, `bg-clip-padding`, `bg-clip-content`, `bg-clip-text`
 - **Background Origin**: `bg-origin-border`, `bg-origin-padding`, `bg-origin-content`
+- **Gradients**:
+  - `bg-gradient-to-{t|tr|r|br|b|bl|l|tl}`: Sets the gradient direction.
+  - `from-{color}`: Sets the start color.
+  - `via-{color}`: Sets an intermediate color.
+  - `to-{color}`: Sets the end color.
+
+**Gradient Example:**
+```python
+style="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"
+```
+Dars uses a modern CSS variable architecture for gradients (`--tw-gradient-stops`), ensuring they are performant and easy to manipulate.
 - **Background Blend Mode**: `bg-blend-normal`, `bg-blend-multiply`, `bg-blend-screen`, `bg-blend-overlay`, `bg-blend-darken`, `bg-blend-lighten`, `bg-blend-color-dodge`, `bg-blend-color-burn`, `bg-blend-hard-light`, `bg-blend-soft-light`, `bg-blend-difference`, `bg-blend-exclusion`, `bg-blend-hue`, `bg-blend-saturation`, `bg-blend-color`, `bg-blend-luminosity`
 
 ### Borders & Radius
@@ -180,6 +202,16 @@ style="bg-amber-400 text-zinc-900"    # Amber background with dark zinc text
 
 - **Box Shadow**: `shadow-sm`, `shadow`, `shadow-md`, `shadow-lg`, `shadow-xl`, `shadow-2xl`, `shadow-inner`, `shadow-none`
 - **Opacity**: `opacity-0`, `opacity-25`, `opacity-50`, `opacity-75`, `opacity-100`
+- **Rings**: 
+  - `ring`, `ring-{n}`: Adds an outer ring (box-shadow) with a specific width (e.g., `ring-4`).
+  - `ring-{color}`: Sets the color of the ring (e.g., `ring-blue-500`).
+  - `ring-offset-{n}`: Adds a white offset between the element and the ring.
+  - `ring-opacity-{n}`: Sets the transparency of the ring.
+
+**Ring Example:**
+```python
+style="ring-4 ring-indigo-500 ring-opacity-50 ring-offset-2"
+```
 - **Mix Blend Mode**: `mix-blend-normal`, `mix-blend-multiply`, `mix-blend-screen`, `mix-blend-overlay`, `mix-blend-darken`, `mix-blend-lighten`, `mix-blend-color-dodge`, `mix-blend-color-burn`, `mix-blend-hard-light`, `mix-blend-soft-light`, `mix-blend-difference`, `mix-blend-exclusion`, `mix-blend-hue`, `mix-blend-saturation`, `mix-blend-color`, `mix-blend-luminosity`
 
 ### Filters
@@ -227,6 +259,8 @@ style="bg-amber-400 text-zinc-900"    # Amber background with dark zinc text
 - **Top/Right/Bottom/Left**: `top-{n}`, `right-{n}`, `bottom-{n}`, `left-{n}`
 - **Inset**: `inset-{n}`, `inset-x-{n}`, `inset-y-{n}`
 - **Z-Index**: `z-{n}` (e.g., `z-10`, `z-50`)
+- **Outline**: `outline-{n}`, `outline-{color}`, `outline-offset-{n}`, `outline-dashed`, `outline-dotted`
+- **Accent & Caret**: `accent-{color}`, `caret-{color}`
 
 ### Overflow
 

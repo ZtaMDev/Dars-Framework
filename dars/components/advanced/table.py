@@ -3,10 +3,33 @@ from typing import List, Dict, Any, Optional
 
 class Table(Component):
     """
-    Component to display tabular data with columns, data, pagination, sorting, and filtering.
-    columns: List of dictionaries with keys 'title', 'field', 'sortable', 'width', etc.
-    data: List of dictionaries (each one is a row)
-    page_size: Number of rows per page (optional)
+    Component for displaying structured data in a tabular format with support for sorting and pagination.
+    
+    Props:
+    - **columns** (list): List of dictionaries defining columns (e.g., `[{"title": "Name", "field": "name", "sortable": True}]`).
+    - **data** (list): List of row dictionaries where keys match the `field` defined in `columns`.
+    - **page_size** (int): Number of rows to display per page (optional).
+    - **id** (str): Unique identifier for the component.
+    - **class_name** (str): String containing CSS utility classes (e.g., `"w-full text-left border-collapse border border-slate-200"`).
+    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **children** (list): List of child components.
+    - **Events**: Handlers for sorting, filtering, and row clicks.
+    
+    Example:
+    ```python
+    Table(
+        columns=[
+            {"title": "User", "field": "user"},
+            {"title": "Status", "field": "status"}
+        ],
+        data=[
+            {"user": "John Doe", "status": "Active"},
+            {"user": "Jane Smith", "status": "Pending"}
+        ],
+        page_size=10,
+        class_name="min-w-full divide-y divide-slate-200 shadow-sm rounded-lg overflow-hidden"
+    )
+    ```
     """
 
     def __init__(self, columns: List[Dict[str, Any]], data: List[Dict[str, Any]], page_size: Optional[int]=None, **props):

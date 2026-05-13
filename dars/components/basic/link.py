@@ -2,7 +2,28 @@ from dars.core.component import Component
 from typing import Optional, Dict, Any
 
 class Link(Component):
-    """Component to create links."""
+    """
+    Hyperlink component for navigation between pages or external URLs.
+    
+    Props:
+    - **text** (str): The clickable text to display.
+    - **href** (str): The URL or path to navigate to.
+    - **target** (str): Where to open the link (e.g., `"_self"`, `"_blank"`).
+    - **id** (str): Unique identifier for the component.
+    - **class_name** (str): String containing CSS utility classes (e.g., `"text-indigo-600 hover:underline font-medium"`).
+    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **children** (list): List of child components.
+    - **Events**: Handlers like `on_click`, `on_mouse_enter`, etc.
+    
+    Example:
+    ```python
+    Link(
+        text="Visit Documentation",
+        href="/docs",
+        class_name="text-indigo-500 hover:text-indigo-700 font-semibold transition-colors"
+    )
+    ```
+    """
     def __init__(
         self,
         text: str,

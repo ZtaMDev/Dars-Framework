@@ -4,9 +4,34 @@ from dars.core.component import Component
 
 
 class Video(Component):
-    """Advanced HTML5 video component.
-
-    Highly customizable wrapper around the <video> element.
+    """
+    Advanced HTML5 video component for embedding and controlling video content.
+    
+    Props:
+    - **src** (str): URL or path to the video source.
+    - **poster** (str): URL of an image to be shown while the video is downloading.
+    - **width** (str): Width of the video player.
+    - **height** (str): Height of the video player.
+    - **controls** (bool): Whether to display video controls.
+    - **autoplay** (bool): If True, the video starts playing automatically.
+    - **loop** (bool): If True, the video plays in a loop.
+    - **muted** (bool): If True, the audio is muted by default.
+    - **preload** (str): Preload strategy (`"auto"`, `"metadata"`, `"none"`).
+    - **plays_inline** (bool): If True, the video plays inline on mobile browsers.
+    - **id** (str): Unique identifier for the component.
+    - **class_name** (str): String containing CSS utility classes (e.g., `"rounded-xl shadow-lg w-full"`).
+    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **children** (list): List of child components.
+    - **Events**: Handlers like `on_play`, `on_pause`, `on_ended`, etc.
+    
+    Example:
+    ```python
+    Video(
+        src="https://example.com/demo.mp4",
+        poster="https://example.com/thumb.jpg",
+        class_name="w-full max-w-4xl rounded-2xl shadow-xl border-4 border-white"
+    )
+    ```
     """
 
     def __init__(

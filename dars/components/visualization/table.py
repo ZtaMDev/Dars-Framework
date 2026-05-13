@@ -3,46 +3,37 @@ import uuid
 
 class DataTable(Component):
     """
-    Professional HTML table component with pandas DataFrame support.
+    Professional data table component with support for Pandas DataFrames and advanced formatting.
     
-    Features:
-    - Pandas DataFrame or list of dicts
-    - Auto-infers columns from data
-    - Custom column definitions with formatters
-    - Built-in themes (light, dark, custom)
-    - Striped rows, hover effects, borders
-    - Responsive design
+    Props:
+    - **data** (DataFrame/list): The data to display (Pandas DataFrame, list of dicts, or list of lists).
+    - **columns** (list): Custom column definitions (e.g., `[{"key": "id", "label": "ID", "align": "center"}]`).
+    - **index** (bool): Whether to show the DataFrame index.
+    - **header** (bool): Whether to show the table header row.
+    - **striped** (bool): Enable alternating row colors.
+    - **hover** (bool): Enable hover effects on rows.
+    - **bordered** (bool): Enable borders around cells.
+    - **compact** (bool): Reduce cell padding for a denser look.
+    - **theme** (str/dict): Predefined theme (`"light"`, `"dark"`) or a custom color dictionary.
+    - **formatters** (dict): Custom value formatters for specific columns.
+    - **id** (str): Unique identifier for the component.
+    - **class_name** (str): String containing CSS utility classes.
+    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **children** (list): List of child components (not rendered).
+    - **Events**: Handlers (not typical for static DataTable).
     
-    Args:
-        data: pandas.DataFrame, list[dict], or list[list]
-        columns (list): Column definitions [{'key': str, 'label': str, 'align': str, 'formatter': callable}]
-        index (bool): Show DataFrame index column
-        header (bool): Show header row
-        striped (bool): Alternating row colors
-        hover (bool): Hover effects
-        bordered (bool): Cell borders
-        compact (bool): Compact spacing
-        theme (str|dict): 'light', 'dark', or custom theme dict
-        formatters (dict): Column formatters {column_key: callable}
-        id (str): Component ID
-        style (dict): CSS styles
-        **props: Additional properties
+    Example:
+    ```python
+    import pandas as pd
+    df = pd.DataFrame({"Name": ["Alice", "Bob"], "Score": [95, 88]})
     
-    Examples:
-        # Pandas DataFrame
-        import pandas as pd
-        df = pd.DataFrame({'name': ['Alice', 'Bob'], 'age': [30, 25]})
-        table = DataTable(df, theme='dark')
-        
-        # List of dicts with formatters
-        data = [{'price': 99.99, 'qty': 5}]
-        table = DataTable(
-            data,
-            columns=[
-                {'key': 'price', 'label': 'Price', 'formatter': lambda x: f'${x:.2f}'},
-                {'key': 'qty', 'label': 'Quantity', 'align': 'center'}
-            ]
-        )
+    DataTable(
+        data=df,
+        theme="light",
+        striped=True,
+        class_name="rounded-xl shadow-lg border border-slate-200 overflow-hidden"
+    )
+    ```
     """
     
     THEMES = {

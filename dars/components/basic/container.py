@@ -3,6 +3,26 @@ from dars.core.properties import StyleProps
 from typing import Optional, Union, Dict, Any, List
 
 class Container(Component):
+    """
+    Versatile container component (div) to wrap and organize other components.
+    
+    Props:
+    - ***children** (Component): Positional arguments for child components.
+    - **additional_children** (list): Optional list of additional child components.
+    - **id** (str): Unique identifier for the component.
+    - **class_name** (str): String containing CSS utility classes (e.g., `"flex flex-row justify-between p-4 bg-white shadow"`).
+    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **Events**: Handlers like `on_click`, `on_mouse_enter`, etc.
+    
+    Example:
+    ```python
+    Container(
+        Text("Title"),
+        Button("Click me"),
+        class_name="flex flex-col gap-4 p-6 bg-slate-50 rounded-2xl"
+    )
+    ```
+    """
     def __init__(
         self,
         *children: Component,

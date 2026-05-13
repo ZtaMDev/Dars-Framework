@@ -4,6 +4,35 @@ from dars.core.events import EventTypes
 from typing import Optional, Union, Dict, Any, Callable
 
 class Slider(Component):
+    """
+    Interactive range slider component for numeric input.
+    
+    Props:
+    - **min_value** (int/float): Minimum allowed value.
+    - **max_value** (int/float): Maximum allowed value.
+    - **value** (int/float): Current slider value.
+    - **step** (int/float): Increment step.
+    - **label** (str): Descriptive label for the slider.
+    - **show_value** (bool): Whether to display the current numeric value.
+    - **orientation** (str): `"horizontal"` or `"vertical"`.
+    - **disabled** (bool): If True, the slider is not interactive.
+    - **id** (str): Unique identifier for the component.
+    - **class_name** (str): String containing CSS utility classes.
+    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **children** (list): List of child components.
+    - **Events**: Handlers like `on_change`, `on_input`.
+    
+    Example:
+    ```python
+    Slider(
+        min_value=0,
+        max_value=100,
+        value=50,
+        label="Brightness",
+        class_name="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+    )
+    ```
+    """
     def __init__(
         self,
         min_value: Union[int, float] = 0,

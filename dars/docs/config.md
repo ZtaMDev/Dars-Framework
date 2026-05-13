@@ -1,18 +1,22 @@
 # Dars Project Configuration
 
-The file (dars.config.json) configures how Dars exports and builds your project. It is created by `dars init <name>` for new projects and can be merged/updated in existing projects with `dars init --update`.
+The `dars.config.json` file is the central nervous system of your Dars project. it defines how your application is compiled, optimized, and prepared for deployment.
 
-## Example
+---
+
+## Configuration Overview
+
+A standard configuration file looks like this:
 
 ```json
 {
   "entry": "main.py",
   "format": "html",
   "outdir": "dist",
-  "publicDir": null,
+  "publicDir": "public",
   "include": [],
   "exclude": ["**/__pycache__", ".git", ".venv", "node_modules"],
-  "bundle": false,
+  "bundle": true,
   "defaultMinify": true,
   "viteMinify": true,
   "markdownHighlight": true,
@@ -22,75 +26,84 @@ The file (dars.config.json) configures how Dars exports and builds your project.
 }
 ```
 
-## Fields
+---
 
-- entry
-  Python entry file for your app. Used by `dars build` and by `dars export config`.
+## Core Fields
 
-- format
-  Export format. Supported: `html` and `desktop` (BETA). When set to `desktop`, the build command will produce native desktop artifacts.
+### 1. Build & Path Configuration
+- **`entry`** (string): The Python entry point of your application. Defaults to `main.py`.
+- **`format`** (string): Target deployment format. 
+  - `html`: Standard web application (SPA/MPA/SSR).
+  - `desktop`: Native desktop application (Electron-based, BETA).
+- **`outdir`** (string): The directory where compiled assets will be saved. Defaults to `dist`.
+- **`publicDir`** (string): Directory for static assets (images, fonts, etc.) that will be copied directly to the output.
 
-- outdir
-  Directory where the exported files are written.
+### 2. File Filtering
+- **`include`** (list): List of glob patterns or substrings to include from the public directory.
+- **`exclude`** (list): List of patterns to ignore during the build process.
 
-- publicDir
-  Directory whose contents are copied as-is into the output (e.g. `public/` or `assets/`). If `null`, Dars will try to autodetect common locations.
+### 3. Optimization & Minification
+Dars features a multi-stage minification pipeline to ensure the smallest possible production bundle.
 
-- include / exclude
-  Simple filters (by substring) applied when copying from `publicDir`.
+- **`defaultMinify`** (boolean): Controls the internal Python-side HTML/CSS minifier.
+- **`viteMinify`** (boolean): Enables advanced JavaScript minification using Vite/esbuild. Recommended for production.
+- **`bundle`** (boolean): Ensures all internal dependencies are bundled into the final distribution.
 
-- bundle
-  Reserved for future use. Current exporters already produce a bundled output.
+### 4. Features & Integrations
+- **`markdownHighlight`** (boolean): Automatically injects Prism.js for syntax highlighting in Markdown components.
+- **`backendEntry`** (string): Import path for your FastAPI backend (e.g., `"backend.api:app"`). Required for SSR projects.
 
-- defaultMinify
-  Toggle the built-in Python minifier (safe and conservative). Controls HTML minification and provides JS/CSS fallback when advanced tools are unavailable.
-  - `true` (default): run the default Python-side minifier.
-  - `false`: skip the default minifier. You can still use Vite/esbuild via `viteMinify`.
+---
 
-- viteMinify
-  Toggle the advanced JS minifier.
-  - `true` (default): prefer the advanced minifier; fall back to the secondary minifier; if neither is available, a conservative built-in fallback is used.
-  - `false`: skip the advanced minifier and use the secondary minifier directly; fall back to the conservative built-in if not available.
+## Custom Utility Styles
 
-- utility_styles
-  Dictionary defining custom utility classes. Keys are class names, values are lists of utility strings or raw CSS properties.
-  Example: `"btn-primary": ["bg-blue-500", "text-white"]`
+One of Dars' most powerful features is the ability to define custom utility classes directly in the configuration. This allows you to create reusable design tokens.
 
-- markdownHighlight
-  Auto-inject a client-side syntax highlighter for fenced code blocks in Markdown.
-  - `true` (default): injects Prism.js assets once per page and highlights `pre code` blocks.
-  - `false`: no assets injected; you can include your own highlighter or none at all.
+```json
+{
+  "utility_styles": {
+    "btn-primary": [
+      "bg-blue-600",
+      "text-white",
+      "px-4",
+      "py-2",
+      "rounded-lg",
+      "hover:bg-blue-700",
+      "transition-all"
+    ],
+    "card-glass": [
+      "bg-white/30",
+      "backdrop-blur-md",
+      "border",
+      "border-white/20",
+      "rounded-2xl",
+      "shadow-xl"
+    ]
+  }
+}
+```
 
-- backendEntry
-  Python import path for your FastAPI/SSR backend application (e.g. `"backend.api:app"`).
-  - Used by tools like `dars dev --backend` to start the backend server.
-  - When your app defines routes with `RouteType.SSR`, `dars config validate` will require this field to be present.
+Usage in Python:
+```python
+Button("Click Me", style="btn-primary")
+Container(style="card-glass")
+```
 
-## Desktop-specific (BETA)
+---
 
-- targetPlatform
-  Desktop build target. Only effective when `format` is `desktop`.
-  - Values: `auto` (default), `windows`, `linux`, `macos`.
-  - Note: macOS targets must be built on macOS for signing.
+## Deployment Targets
 
-> Desktop export is BETA: suitable for testing, not recommended for production yet. Configuration keys and defaults may change.
+### Web (HTML)
+The standard format for deploying to the web. When `format` is `html`, Dars generates optimized HTML, CSS, and JS files compatible with any static host or FastAPI server.
 
-## Behavior and defaults
+### Desktop (BETA)
+When `format` is `desktop`, Dars produces native desktop artifacts.
+- **`targetPlatform`** (string): Specifies the target OS (`auto`, `windows`, `linux`, `macos`).
 
-- `dars init --update` merges your existing config with Dars defaults and writes the result back, adding any new keys (like `defaultMinify`, `viteMinify`) without removing your current settings.
-- During `dars export` and `dars build`, Dars reads this file and configures the minification pipeline accordingly.
-- If advanced minifiers are not available, builds still complete with a conservative fallback. On `dars build`, a small notice may appear indicating that a less powerful minifier was used.
-- You can force-skip the default Python minifier per run with `--no-minify` (does not affect `viteMinify`).
+---
 
-## Tips
+## Best Practices
 
-- To add or refresh the config in an existing project:
-  ```bash
-  dars init --update
-  ```
-- To review optional tooling that can enhance bundling/minification, run:
-  ```bash
-  dars doctor
-  ```
-- If you want to force using only the secondary minifier, set `"viteMinify": false`.
- - To disable the default minifier by config, set `"defaultMinify": false`; to disable it per-run use `--no-minify`.
+1. **Keep it minimal**: Only include necessary files in your `publicDir` to speed up build times.
+2. **Environment Variables**: Use the `dars env` system to manage different configurations for development and production.
+3. **Validate often**: Use `dars config validate` to ensure your configuration matches the requirements of your chosen route types (especially for SSR).

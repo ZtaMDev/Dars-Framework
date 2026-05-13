@@ -3,6 +3,28 @@ import os
 from dars.core.component import Component
 
 class Markdown(Component):
+    """
+    Component for rendering Markdown content into HTML using the Dars engine.
+    
+    Props:
+    - **content** (str): Raw markdown string to be rendered.
+    - **file_path** (str): Path to a `.md` file to load content from (cannot be used with `content`).
+    - **dark_theme** (bool): Whether to apply dark theme styles to the markdown container.
+    - **lazy** (bool): Enable lazy loading for content that only fetches when visible.
+    - **id** (str): Unique identifier for the component.
+    - **class_name** (str): String containing CSS utility classes (e.g., `"prose lg:prose-xl max-w-none"`).
+    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **children** (list): List of child components (not typically used for Markdown).
+    - **Events**: Handlers like `on_click`, `on_mouse_enter`, etc.
+    
+    Example:
+    ```python
+    Markdown(
+        content="# Hello Dars\nThis is **markdown** content.",
+        class_name="p-6 bg-white rounded-xl shadow-sm border border-slate-200"
+    )
+    ```
+    """
     def __init__(
         self,
         content: Optional[str] = None,
@@ -14,18 +36,7 @@ class Markdown(Component):
         lazy: bool = False,
         **kwargs
     ):
-        """
-        Markdown component that converts markdown content to HTML.
-        
-        Args:
-            content: String with markdown content
-            file_path: Path to a .md file to load content from
-            id: Component ID
-            class_name: CSS class name
-            style: CSS styles
-            dark_theme: Enable dark theme styling
-            lazy: Enable lazy loading (fetches content only when visible)
-        """
+    
         super().__init__(id=id, class_name=class_name, style=style, **kwargs)
         
         if content and file_path:

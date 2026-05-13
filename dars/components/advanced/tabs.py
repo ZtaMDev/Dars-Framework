@@ -3,10 +3,31 @@ from typing import List, Optional
 
 class Tabs(Component):
     """
-    Tab navigation component.
-    tabs: List of tab titles
-    panels: List of components or strings (content of each tab)
-    selected: Index of the active tab (optional)
+    Tabbed navigation component for switching between multiple content panels in the same space.
+    
+    Props:
+    - **tabs** (list): List of strings for the tab headers.
+    - **panels** (list): List of components or strings representing the content of each tab.
+    - **selected** (int): Index of the initially active tab (defaults to 0).
+    - **id** (str): Unique identifier for the component.
+    - **class_name** (str): String containing CSS utility classes (e.g., `"flex flex-col w-full"`).
+    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **children** (list): List of child components.
+    - **Events**: Handlers like `on_change` when the active tab is switched.
+    
+    Example:
+    ```python
+    Tabs(
+        tabs=["General", "Security", "Notifications"],
+        panels=[
+            Container(Text("General settings...")),
+            Container(Text("Security settings...")),
+            Container(Text("Notification settings..."))
+        ],
+        selected=0,
+        class_name="bg-white rounded-xl shadow-sm border border-slate-100"
+    )
+    ```
     """
 
     def __init__(self, tabs: List[str], panels: List[Component], selected: Optional[int]=0, minimum_logic: bool = True, **props):

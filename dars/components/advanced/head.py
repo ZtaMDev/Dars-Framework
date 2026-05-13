@@ -12,44 +12,37 @@ from dars.core.component import Component
 
 class Head(Component):
     """
-    Define SEO metadata for a page. This component does not render visible content.
+    Component for managing document metadata in the HTML `<head>` section, essential for SEO and social sharing.
     
-    The Head component allows you to customize HTML <head> metadata on a per-page basis,
-    which is essential for SEO, social sharing, and proper page indexing.
-    
-    Features:
-    - Basic SEO (title, description, keywords, author)
-    - Open Graph tags for social sharing (Facebook, LinkedIn)
-    - Twitter Card tags
-    - Canonical URLs
-    - Robots directives
-    - Custom meta and link tags
-    - JSON-LD structured data
-    - Per-page favicon override
+    Props:
+    - **title** (str): Page title displayed in the browser tab.
+    - **description** (str): Meta description for search engines.
+    - **keywords** (list): List of keywords for indexing.
+    - **author** (str): Metadata for the page author.
+    - **robots** (str): Robots directive (e.g., `"index, follow"`, `"noindex, nofollow"`).
+    - **canonical** (str): Canonical URL for the page to avoid duplicate content.
+    - **favicon** (str): URL to override the site-wide favicon.
+    - **og_*** (str): Open Graph metadata for social media sharing (title, description, image, etc.).
+    - **twitter_*** (str): Twitter Card metadata.
+    - **meta** (list): List of dictionaries for custom `<meta>` tags.
+    - **links** (list): List of dictionaries for custom `<link>` tags.
+    - **structured_data** (dict): JSON-LD dictionary for structured data.
+    - **id** (str): Unique identifier for the component (not rendered).
+    - **class_name** (str): CSS utility classes (not rendered).
+    - **style** (dict): Optional dictionary for direct inline styles (not rendered).
+    - **children** (list): List of child components (not rendered).
+    - **Events**: Handlers (not typical for Head).
     
     Example:
-        ```python
-        from dars.all import *
-        
-        @route("/blog/post", route_type=RouteType.SSR)
-        def blog_post():
-            return Page(
-                Head(
-                    title="My Blog Post - My Site",
-                    description="An amazing blog post about Python",
-                    keywords=["python", "web", "framework"],
-                    og_image="https://example.com/image.jpg",
-                    og_type="article"
-                ),
-                Heading("My Blog Post", level=1),
-                Text("Content here...")
-            )
-        ```
-    
-    Note:
-        - This component does NOT handle CSS or JavaScript (handled by exporter)
-        - It only manages metadata in the HTML <head> section
-        - Multiple Head components: last one wins (or merge strategy)
+    ```python
+    Head(
+        title="Dars Framework - Python Web Development",
+        description="Build premium web applications with Python and modern design.",
+        og_image="https://dars.dev/og-image.png",
+        twitter_card="summary_large_image",
+        keywords=["python", "framework", "web", "frontend"]
+    )
+    ```
     """
     
     def __init__(

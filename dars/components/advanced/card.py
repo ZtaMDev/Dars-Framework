@@ -2,7 +2,26 @@ from dars.core.component import Component
 from typing import Optional, Dict, Any, List
 
 class Card(Component):
-    """Component to display content in a card."""
+    """
+    Card component for grouping related information in a visually distinct container.
+    
+    Props:
+    - **children** (list): List of child components to render inside the card.
+    - **title** (str): Optional title displayed at the top of the card.
+    - **id** (str): Unique identifier for the component.
+    - **class_name** (str): String containing CSS utility classes (e.g., `"p-6 bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-shadow"`).
+    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **Events**: Handlers like `on_click`, `on_mouse_enter`, etc.
+    
+    Example:
+    ```python
+    Card(
+        Text("Card content goes here..."),
+        title="Featured Post",
+        class_name="max-w-sm border border-slate-100 bg-gradient-to-br from-white to-slate-50"
+    )
+    ```
+    """
     def __init__(
         self,
         children: Optional[List[Component]] = None,

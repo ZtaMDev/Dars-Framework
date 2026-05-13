@@ -412,6 +412,20 @@ UTILITY_PROPERTY_MAP = {
     "will-change-scroll": "will-change: scroll-position",
     "will-change-contents": "will-change: contents",
     "will-change-transform": "will-change: transform",
+
+    # Gradients
+    "bg-gradient-to-t": "background-image: linear-gradient(to top, var(--tw-gradient-stops))",
+    "bg-gradient-to-tr": "background-image: linear-gradient(to top right, var(--tw-gradient-stops))",
+    "bg-gradient-to-r": "background-image: linear-gradient(to right, var(--tw-gradient-stops))",
+    "bg-gradient-to-br": "background-image: linear-gradient(to bottom right, var(--tw-gradient-stops))",
+    "bg-gradient-to-b": "background-image: linear-gradient(to bottom, var(--tw-gradient-stops))",
+    "bg-gradient-to-bl": "background-image: linear-gradient(to bottom left, var(--tw-gradient-stops))",
+    "bg-gradient-to-l": "background-image: linear-gradient(to left, var(--tw-gradient-stops))",
+    "bg-gradient-to-tl": "background-image: linear-gradient(to top left, var(--tw-gradient-stops))",
+
+    # Border Collapse
+    "border-collapse": "border-collapse: collapse",
+    "border-separate": "border-collapse: separate",
 }
 
 # Prefix-based utilities that take values
@@ -488,8 +502,7 @@ UTILITY_PREFIX_MAP = {
     "outline-offset-": ("outline-offset", lambda v: f"{v}px"),
     
     # Ring (simplified as box-shadow)
-    "ring-": ("box-shadow", lambda v: f"0 0 0 {v}px rgba(59, 130, 246, 0.5)"),
-    "ring-offset-": ("box-shadow", lambda v: f"0 0 0 {v}px #fff, 0 0 0 calc({v}px + 3px) rgba(59, 130, 246, 0.5)"),
+    # Ring (handled via variables in UTILITY_PREFIX_MAP)
     
     # Grid
     "grid-cols-": ("grid-template-columns", lambda v: f"repeat({v}, minmax(0, 1fr))" if v.isdigit() else v),
@@ -518,6 +531,7 @@ UTILITY_PREFIX_MAP = {
     "inset-x-": (["left", "right"], _fmt_rem),
     "inset-y-": (["top", "bottom"], _fmt_rem),
     "z-": ("z-index", lambda v: v),
+    "outline-": ("outline-width", _fmt_rem),
     
     # Effects
     "opacity-": ("opacity", lambda v: str(float(v)/100) if v.isdigit() else v),
@@ -595,6 +609,45 @@ UTILITY_PREFIX_MAP = {
     "scroll-pr-": ("scroll-padding-right", _fmt_rem),
     "scroll-pb-": ("scroll-padding-bottom", _fmt_rem),
     "scroll-pl-": ("scroll-padding-left", _fmt_rem),
+
+    # Opacities (Longer prefixes first!)
+    "bg-opacity-": ("--tw-bg-opacity", lambda v: str(float(v)/100) if v.isdigit() else v),
+    "text-opacity-": ("--tw-text-opacity", lambda v: str(float(v)/100) if v.isdigit() else v),
+    "border-opacity-": ("--tw-border-opacity", lambda v: str(float(v)/100) if v.isdigit() else v),
+    "ring-opacity-": ("--tw-ring-opacity", lambda v: str(float(v)/100) if v.isdigit() else v),
+
+    # Ring Offset
+    "ring-offset-": (["--tw-ring-offset-width", "--tw-ring-offset-color", "box-shadow"], lambda v, prop=None: 
+        _get_color(v) if prop == "--tw-ring-offset-color" and (v.startswith('[') or not v[0].isdigit()) else (
+            _fmt_rem(v) if prop == "--tw-ring-offset-width" and v[0].isdigit() else (
+                f"0 0 0 {v}px #fff, 0 0 0 calc({v}px + 3px) var(--tw-ring-color, rgba(59, 130, 246, 0.5))" if prop == "box-shadow" and v[0].isdigit() else None
+            )
+        )
+    ),
+    "ring-": (["--tw-ring-width", "--tw-ring-color", "box-shadow"], lambda v, prop=None: 
+        _get_color(v) if prop == "--tw-ring-color" and (v.startswith('[') or not v[0].isdigit()) else (
+            _fmt_rem(v) if prop == "--tw-ring-width" and v[0].isdigit() else (
+                f"0 0 0 {v}px var(--tw-ring-color, rgba(59, 130, 246, 0.5))" if prop == "box-shadow" and v[0].isdigit() else None
+            )
+        )
+    ),
+
+    # Divide
+    "divide-x-": ("border-left-width", _fmt_rem),
+    "divide-y-": ("border-top-width", _fmt_rem),
+    "divide-": ("border-color", lambda v: _get_color(v)),
+
+    # Accent & Caret
+    "accent-": ("accent-color", lambda v: _get_color(v)),
+    "caret-": ("caret-color", lambda v: _get_color(v)),
+
+    # Line Clamp
+    "line-clamp-": ("-webkit-line-clamp", lambda v: v),
+
+    # Gradient Stops
+    "from-": (["--tw-gradient-from", "--tw-gradient-to", "--tw-gradient-stops"], lambda v, prop=None: _get_color(v) if prop != "--tw-gradient-stops" else f"var(--tw-gradient-from), var(--tw-gradient-to)"),
+    "to-": ("--tw-gradient-to", lambda v: _get_color(v)),
+    "via-": ("--tw-gradient-stops", lambda v: f"var(--tw-gradient-from), {_get_color(v)}, var(--tw-gradient-to)"),
 }
 
 def _get_max_width(v: str) -> str:
@@ -1017,31 +1070,9 @@ def parse_utility_string(utility_string: str) -> Dict[str, Any]:
                 
                 # Handle arbitrary values [value]
                 if value_part.startswith('[') and value_part.endswith(']'):
-                    value = value_part[1:-1]
-                    # Replace underscores with spaces in arbitrary values
-                    value = value.replace('_', ' ')
+                    value = value_part[1:-1].replace('_', ' ')
                 else:
-                    value = transformer(value_part)
-                
-                # Special case: text-red-500 returns "color" as value to signal property change
-                if prefix == "text-" and value == "color":
-                    prop = "color"
-                    value = _get_color(value_part)
-
-                # Special case: text-[#hex] / text-[rgba(...)] / text-[var(...)]
-                # When using bracket values, interpret as color instead of font-size.
-                if prefix == "text-" and value_part.startswith('[') and value_part.endswith(']'):
-                    prop = "color"
-                    try:
-                        value = _get_color(value_part)
-                    except Exception:
-                        value = value
-                
-                # Special case: background arbitrary values for gradients/images.
-                # bg-[linear-gradient(...)] should become background-image, not background-color.
-                if prefix == "bg-" and value_part.startswith('[') and value_part.endswith(']'):
-                    if _is_bg_image_value(value):
-                        prop = "background-image"
+                    value = None # Will be calculated by transformer or special cases
 
                 def _assign_one(pname: str, pval: Any):
                     if pname in composable_props and pname in styles and styles[pname]:
@@ -1051,9 +1082,24 @@ def parse_utility_string(utility_string: str) -> Dict[str, Any]:
 
                 if isinstance(prop, list):
                     for p in prop:
-                        _assign_one(p, value)
+                        val = value if value is not None else (transformer(value_part, prop=p) if transformer.__code__.co_argcount > 1 else transformer(value_part))
+                        if val is not None: _assign_one(p, val)
                 else:
-                    _assign_one(prop, value)
+                    # Special cases for single properties
+                    if prefix == "text-":
+                        # If arbitrary value or transformer says it's a color
+                        if value is not None or transformer(value_part) == "color":
+                            prop = "color"
+                            val = value if value is not None else _get_color(value_part)
+                        else:
+                            val = transformer(value_part)
+                    elif prefix == "bg-" and value is not None and _is_bg_image_value(value):
+                        prop = "background-image"
+                        val = value
+                    else:
+                        val = value if value is not None else (transformer(value_part, prop=prop) if transformer.__code__.co_argcount > 1 else transformer(value_part))
+                    
+                    if val is not None: _assign_one(prop, val)
                 matched = True
                 break
         
@@ -1092,6 +1138,21 @@ def parse_utility_string(utility_string: str) -> Dict[str, Any]:
                 suffix = cls[7:] # remove "border-"
                 if suffix.isdigit():
                     styles["border-width"] = f"{suffix}px"
+                elif suffix in ("t", "r", "b", "l", "x", "y"):
+                    # border-t, border-r, etc. (1px default)
+                    prop_map = {"t": "border-top-width", "r": "border-right-width", "b": "border-bottom-width", "l": "border-left-width", "x": ["border-left-width", "border-right-width"], "y": ["border-top-width", "border-bottom-width"]}
+                    p = prop_map[suffix]
+                    if isinstance(p, list):
+                        for pp in p: styles[pp] = "1px"
+                    else: styles[p] = "1px"
+                elif suffix.startswith("t-") and suffix[2:].isdigit():
+                    styles["border-top-width"] = f"{suffix[2:]}px"
+                elif suffix.startswith("r-") and suffix[2:].isdigit():
+                    styles["border-right-width"] = f"{suffix[2:]}px"
+                elif suffix.startswith("b-") and suffix[2:].isdigit():
+                    styles["border-bottom-width"] = f"{suffix[2:]}px"
+                elif suffix.startswith("l-") and suffix[2:].isdigit():
+                    styles["border-left-width"] = f"{suffix[2:]}px"
                 else:
                     styles["border-color"] = _get_color(suffix)
             elif cls == "border":

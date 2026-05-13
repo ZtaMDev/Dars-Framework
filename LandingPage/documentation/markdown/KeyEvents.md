@@ -370,19 +370,19 @@ docState = State("document",
 def index():
     return Page(
         Container(
-            Text("Document Editor", style={"font-size": "24px", "font-weight": "bold"}),
-            Text(useDynamic("document.message"), style={"color": "#666"}),
+            Text("Document Editor", style="text-2xl font-bold"),
+            Text(useDynamic("document.message"), style="text-slate-500"),
             
             Input(
                 id="editor",
                 placeholder="Start typing...",
-                style={"width": "100%", "min-height": "200px"}
+                style="w-full min-h-[200px]"
             ),
             
             Container(
-                style={"margin-top": "20px", "padding": "15px", "background": "#f5f5f5"},
+                style="mt-5 p-4 bg-slate-100",
                 children=[
-                    Text("Global Shortcuts:", style={"font-weight": "bold"}),
+                    Text("Global Shortcuts:", style="font-bold"),
                     Text("• Ctrl+S - Save"),
                     Text("• Ctrl+Z - Undo"),
                     Text("• Ctrl+Shift+Z - Redo"),

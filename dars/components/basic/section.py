@@ -3,6 +3,26 @@ from typing import Optional, Dict, Any, List
 from dars.core.component import Component
 
 class Section(Component):
+    """
+    Semantic section component (`<section>`) for grouping related content and defining page structure.
+    
+    Props:
+    - ***children** (Component): Positional arguments for child components.
+    - **additional_children** (list): Optional list of additional child components.
+    - **id** (str): Unique identifier for the component.
+    - **class_name** (str): String containing CSS utility classes (e.g., `"py-12 bg-slate-50 border-b border-slate-200"`).
+    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **Events**: Handlers like `on_click`, `on_mouse_enter`, etc.
+    
+    Example:
+    ```python
+    Section(
+        Text("Our Services", class_name="text-3xl font-bold mb-8 text-center"),
+        Container(class_name="grid grid-cols-1 md:grid-cols-3 gap-8"),
+        class_name="container mx-auto px-4 py-16"
+    )
+    ```
+    """
     def __init__(
         self,
         *children: Component,

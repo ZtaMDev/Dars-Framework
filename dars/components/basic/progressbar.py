@@ -3,9 +3,25 @@ from typing import Optional
 
 class ProgressBar(Component):
     """
-    Visual progress bar.
-    value: current value (0-100)
-    max_value: maximum value (default 100)
+    Visual progress bar component to indicate completion of a task.
+    
+    Props:
+    - **value** (int): Current progress value (from 0 to `max_value`).
+    - **max_value** (int): Maximum value representing 100% (defaults to 100).
+    - **id** (str): Unique identifier for the component.
+    - **class_name** (str): String containing CSS utility classes (e.g., `"h-4 bg-slate-200 rounded-full overflow-hidden"`).
+    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **children** (list): List of child components.
+    - **Events**: Handlers like `on_click`, `on_mouse_enter`, etc.
+    
+    Example:
+    ```python
+    ProgressBar(
+        value=75,
+        class_name="w-full bg-indigo-100 rounded-lg shadow-inner",
+        id="loading-bar"
+    )
+    ```
     """
 
     def __init__(self, value: int, max_value: int = 100, **props):

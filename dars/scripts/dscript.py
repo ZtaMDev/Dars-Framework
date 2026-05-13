@@ -346,7 +346,7 @@ def compile_action(action):
     else:
         # Fallback for unknown actions
         action_json = json.dumps(action, ensure_ascii=False, default=str)
-        return f"if (window.Dars && typeof window.Dars.change === 'function') window.Dars.change({action_json});"
+        return f"if (window.Dars && typeof window.Dars.dispatch === 'function') window.Dars.dispatch({action_json});"
 
 class RawJS:
     """
@@ -395,7 +395,7 @@ class RawJS:
         return self.code
 
 # Pythonic helper for dScript.ARG access
-class _ArgHelper:
+class _ArgHelper(RawJS):
     """Pythonic wrapper for dScript.ARG to avoid raw JS strings.
     
     Usage:
@@ -403,14 +403,11 @@ class _ArgHelper:
         Arg.value -> RawJS("dScript.ARG.value")
         Arg -> RawJS("dScript.ARG")
     """
+    def __init__(self):
+        super().__init__("dScript.ARG")
+
     def __getattr__(self, name: str):
         return RawJS(f"dScript.ARG.{name}")
-    
-    def __str__(self):
-        return "dScript.ARG"
-    
-    def __repr__(self):
-        return "Arg (dScript.ARG accessor)"
 
 # Singleton instance
 Arg = _ArgHelper()

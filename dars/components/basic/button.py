@@ -5,6 +5,28 @@ from dars.scripts.script import Script
 from typing import Optional, Union, Dict, Any, Callable
 
 class Button(Component):
+    """
+    Interactive button component that triggers actions when clicked.
+    
+    Props:
+    - **text** (str): The label text displayed on the button.
+    - **disabled** (bool): Whether the button is interactive or not.
+    - **button_type** (str): HTML type of the button ('button', 'submit', 'reset').
+    - **id** (str): Unique identifier for the component.
+    - **class_name** (str): String containing CSS utility classes (e.g., `"bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"`).
+    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **children** (list): List of child components to render inside the button.
+    - **Events**: Handlers like `on_click`, `on_double_click`, `on_mouse_enter`, `on_mouse_leave`, `on_mouse_down`, `on_mouse_up`, `on_key_down`, `on_key_up`.
+    
+    Example:
+    ```python
+    Button(
+        text="Click me!",
+        class_name="bg-indigo-600 text-white px-4 py-2 rounded shadow-md hover:shadow-lg transition-all",
+        on_click=lambda: print("Button clicked!")
+    )
+    ```
+    """
     def __init__(
         self, 
         text: str = "Button", 

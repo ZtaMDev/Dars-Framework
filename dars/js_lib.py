@@ -254,15 +254,114 @@ _registerCommand('fetch', async (args, ctx) => {{
     }}
 }});
 
-_registerCommand('vref_update', (args) => {{
-    if (typeof _updateVRef === 'function') _updateVRef(args.selector, args.value);
+async function _resolveVal(val, ctx) {{
+    if (val && typeof val === 'object' && val.op) {{
+        return await dispatch(val, ctx);
+    }}
+    return val;
+}}
+
+_registerCommand('get_dom_value', (args) => {{
+    const el = document.querySelector(args.selector);
+    if (!el) return null;
+    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT') {{
+        if (el.type === 'checkbox' || el.type === 'radio') return el.checked ? true : false;
+        return el.value;
+    }}
+    return el.textContent;
 }});
 
-_registerCommand('vref_get', (args) => {{
-    if (typeof _getVRef === 'function') {{
-        const val = _getVRef(args.selector);
-        if(args.target_id) change({{ id: args.target_id, [args.target_prop]: val }});
+_registerCommand('get_state_value', (args) => {{
+    const st = __registry.get(args.state_id);
+    if (st && st.values) return st.values[args.prop_name];
+    return null;
+}});
+
+_registerCommand('transform', async (args, ctx) => {{
+    const input = await _resolveVal(args.input, ctx);
+    if (args.method === 'int') return parseInt(input, 10);
+    if (args.method === 'float') return parseFloat(input);
+    if (args.method === 'upper') return String(input).toUpperCase();
+    if (args.method === 'lower') return String(input).toLowerCase();
+    if (args.method === 'validate_operator') return ['+', '-', '*', '/', '%', '**'].includes(input) ? input : '+';
+    return input;
+}});
+
+_registerCommand('math_expr', async (args, ctx) => {{
+    const left = parseFloat(await _resolveVal(args.left, ctx)) || 0;
+    const right = parseFloat(await _resolveVal(args.right, ctx)) || 0;
+    const op = await _resolveVal(args.operator, ctx);
+    if (op === '+') return left + right;
+    if (op === '-') return left - right;
+    if (op === '*') return left * right;
+    if (op === '/') return left / right;
+    if (op === '%') return left % right;
+    if (op === '**') return left ** right;
+    return 0;
+}});
+
+_registerCommand('bool_expr', async (args, ctx) => {{
+    const left = await _resolveVal(args.left, ctx);
+    const right = await _resolveVal(args.right, ctx);
+    const op = args.operator;
+    if (op === '==') return left == right;
+    if (op === '!=') return left != right;
+    if (op === '>') return left > right;
+    if (op === '<') return left < right;
+    if (op === '>=') return left >= right;
+    if (op === '<=') return left <= right;
+    if (op === '&&') return Boolean(left) && Boolean(right);
+    if (op === '||') return Boolean(left) || Boolean(right);
+    return false;
+}});
+
+_registerCommand('cond_expr', async (args, ctx) => {{
+    const cond = await _resolveVal(args.condition, ctx);
+    if (cond) return await _resolveVal(args.true_val, ctx);
+    return await _resolveVal(args.false_val, ctx);
+}});
+
+_registerCommand('vref_update', async (args, ctx) => {{
+    const val = await _resolveVal(args.value, ctx);
+    const selector = args.selector;
+    
+    // 1. Update global vref registry if it exists
+    if (window.__DARS_VREF_VALUES__ && typeof selector === 'string' && selector in window.__DARS_VREF_VALUES__) {{
+        window.__DARS_VREF_VALUES__[selector] = val;
     }}
+    
+    // 2. Update DOM elements
+    if (typeof selector === 'string') {{
+        const els = document.querySelectorAll(selector);
+        els.forEach(el => {{
+            if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {{
+                if (el.type === 'checkbox' || el.type === 'radio') {{
+                    el.checked = Boolean(val);
+                }} else {{
+                    el.value = val;
+                }}
+            }} else if (el.tagName === 'SELECT') {{
+                el.value = val;
+            }} else {{
+                el.textContent = val;
+            }}
+        }});
+        
+        // 3. Trigger lifecycles using updateVRef
+        if (typeof updateVRef === 'function') updateVRef(selector);
+    }}
+}});
+
+_registerCommand('vref_get', async (args, ctx) => {{
+    let val = null;
+    if (window.__DARS_VREF_VALUES__ && args.selector in window.__DARS_VREF_VALUES__) {{
+        val = window.__DARS_VREF_VALUES__[args.selector];
+    }} else {{
+        // Fallback to DOM
+        val = await dispatch({{op: 'get_dom_value', args: {{selector: args.selector}}}}, ctx);
+    }}
+    if (args.target_id) change({{ id: args.target_id, [args.target_prop]: val }});
+    return val;
 }});
 
 _registerCommand('input_set', (args) => {{
@@ -1739,6 +1838,7 @@ const Dars = {{
     watch,
     addReactiveBinding(fn) {{ if(typeof fn === 'function') __reactiveRegistry.push(fn); }},
     updateVRef,
+    dispatch,
     $, 
     runtime,
     // Loop support for State V2

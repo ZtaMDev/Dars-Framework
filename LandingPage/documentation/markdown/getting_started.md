@@ -36,7 +36,7 @@ state = State("app", title_val="Simple Counter", count=0)
 
 # 2. Define Route
 @route("/")
-def index(): 
+def index():
     return Page(
         # 3. Use useValue for app text
         Text(
@@ -76,26 +76,17 @@ def index():
         ),
         style="flex flex-col items-center justify-center h-[100vh] ffam-[Arial] bg-[#f0f2f5]",
 
-    ) 
+    )
 
 # 8. Add page
 app.add_page("index", index(), title="index")
 
-# 9. Run app with preview
 if __name__ == "__main__":
-    app.rTimeCompile()
+    app.rTimeCompile(add_file_types=".js,.css")
 
 ```
 
-7.  **Adding Custom File Types**
-
-```python
-
-app.rTimeCompile().add_file_types = ".js,.css"
-
-```
-
-* Include any extension your project uses beyond default Python files.
+- Include any extension your project uses beyond default Python files.
 
 ## Need More Help?
 

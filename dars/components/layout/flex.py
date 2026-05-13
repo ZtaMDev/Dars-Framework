@@ -10,7 +10,31 @@ from typing import List, Optional
 
 class FlexLayout(LayoutBase):
     """
-    Responsive flexbox layout component. Allows direction, wrap, justify, align, and anchor points for children.
+    Layout component based on CSS Flexbox for organizing child components in rows or columns.
+    
+    Props:
+    - **direction** (str): Flex direction (`"row"`, `"row-reverse"`, `"column"`, `"column-reverse"`).
+    - **wrap** (str): Flex wrap behavior (`"nowrap"`, `"wrap"`, `"wrap-reverse"`).
+    - **justify** (str): Main axis alignment (`"flex-start"`, `"center"`, `"flex-end"`, `"space-between"`, `"space-around"`).
+    - **align** (str): Cross axis alignment (`"stretch"`, `"center"`, `"flex-start"`, `"flex-end"`, `"baseline"`).
+    - **gap** (str): Space between child components (e.g., `"16px"`, `"1rem"`).
+    - **id** (str): Unique identifier for the component.
+    - **class_name** (str): String containing CSS utility classes (e.g., `"w-full h-full p-4 bg-white"`).
+    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **children** (list): List of child components.
+    - **Events**: Handlers like `on_click`, `on_mouse_enter`, etc.
+    
+    Example:
+    ```python
+    FlexLayout(
+        Button("Cancel"),
+        Button("Save", class_name="bg-indigo-600 text-white"),
+        direction="row",
+        justify="flex-end",
+        gap="12px",
+        class_name="w-full p-4 border-t border-slate-100"
+    )
+    ```
     """
     def __init__(self, 
                  children: Optional[List[object]] = None,

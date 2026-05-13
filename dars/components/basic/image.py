@@ -2,7 +2,29 @@ from dars.core.component import Component
 from typing import Optional, Dict, Any
 
 class Image(Component):
-    """Component to display images."""
+    """
+    Component for displaying images with support for dimensions and styling.
+    
+    Props:
+    - **src** (str): URL or path to the image source.
+    - **alt** (str): Alternative text for accessibility.
+    - **width** (str): Width of the image (e.g., `"100px"`, `"50%"`).
+    - **height** (str): Height of the image.
+    - **id** (str): Unique identifier for the component.
+    - **class_name** (str): String containing CSS utility classes (e.g., `"rounded-full object-cover shadow-lg"`).
+    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **children** (list): List of child components.
+    - **Events**: Handlers like `on_click`, `on_load`, etc.
+    
+    Example:
+    ```python
+    Image(
+        src="https://example.com/logo.png",
+        alt="Dars Logo",
+        class_name="w-32 h-32 rounded-xl"
+    )
+    ```
+    """
     def __init__(
         self,
         src: str,

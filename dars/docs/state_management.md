@@ -38,7 +38,7 @@ counter_state = State(display, text=0)
 
 **Constructor Parameters:**
 - `component`: The component to manage (can be a component object or string ID)
-- `**default_props`: Default property values (e.g., `text=0`, `style={...}`)
+- `**default_props`: Default property values (e.g., `text=0`, `style="..."`)
 
 ### State with String IDs (for Dynamic Components)
 
@@ -95,7 +95,7 @@ counter.text.stop_auto()  # Stop auto operations
 The `reset()` method restores all properties to their initial values:
 
 ```python
-state = State(display, text=0, style={"color": "blue"})
+state = State(display, text=0, style="text-blue-500")
 
 # ... user modifies the component ...
 
@@ -140,13 +140,13 @@ state.html.set("<strong>Bold text</strong>")
 
 **CSS Styles:**
 ```python
-state.style.set({"color": "red", "fontSize": "24px"})
+state.style.set("text-red-500 fs-[24px]")
 ```
 
 **CSS Classes:**
 ```python
 # Set class name
-state.class_name.set("active")
+state.style.set("active")
 ```
 
 **Event Handlers:**
@@ -156,15 +156,14 @@ state.update(on_click=alert("New handler!"))
 
 # Or with dScript
 from dars.scripts.dscript import dScript
-state.update(on_click=dScript("console.log('clicked')"))
+state.update(on_click=log('clicked'))
 ```
 
 **Multiple Properties at Once:**
 ```python
 state.update(
     text="Updated!",
-    class_name="success",
-    style={"color": "green"},
+    style="text-green-500",
     on_click=alert("Done!")
 )
 ```
@@ -236,12 +235,12 @@ from dars.all import *
 app = App("State V2 Demo")
 
 # Timer display
-timer_display = Text("0", id="timer", style={"font-size": "36px"})
+timer_display = Text("0", id="timer", style="text-4xl")
 timer = State(timer_display, text=0)
 
 # Status display
 status = Text("Paused", id="status")
-status_state = State(status, text="Paused", class_name="paused")
+status_state = State(status, text="Paused", style="paused")
 
 # Control buttons
 start_btn = Button("Start",
@@ -250,7 +249,7 @@ start_btn = Button("Start",
 stop_btn = Button("Stop", 
     on_click=[
         timer.text.stop_auto(),
-        status_state.update(text="Paused", class_name="paused")
+        status_state.update(text="Paused", style="paused")
     ]
 )
 reset_btn = Button("Reset",
@@ -279,7 +278,7 @@ The `this()` helper allows a component to refer to itself in an event handler an
 ```python
 from dars.core.state import this
 
-btn = Button("Click me", on_click=this().state(text="Clicked!", style={"color": "red"}))
+btn = Button("Click me", on_click=this().state(text="Clicked!", style="text-red-500"))
 ```
 
 Supported dynamic properties:
@@ -292,7 +291,7 @@ Supported dynamic properties:
 ```python
 this().state(
     text="Updated",
-    style={"backgroundColor": "#f0f0f0"},
+    style="bg-slate-100",
     classes={"add": ["active"], "remove": ["inactive"]}
 )
 ```
@@ -305,10 +304,14 @@ You can pass raw JavaScript variables to dynamic updates using `RawJS`. This is 
 - Using `dScript.ARG` to reference values from previous scripts
 
 ```python
-from dars.scripts.dscript import RawJS, dScript
+from dars.scripts.dscript import RawJS, Arg
+from dars.desktop import read_text
 
-# Using dScript.ARG placeholder for chained values
-this().state(text=RawJS(dScript.ARG))
+# Read file -> Update component with result using the Arg helper
+read_op = read_text("data.txt")
+update_op = this().state(text=Arg)
+
+chained = read_op.then(update_op)
 
 # Using custom JavaScript expressions
 this().state(text=RawJS("someVar + ' processed'"))

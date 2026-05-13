@@ -9,7 +9,29 @@ from dars.core.component import Component
 from typing import Optional, Dict, Any, List
 
 class Page(Component):
-    """Root component for pages in Dars multipage apps. Allows passing children as positional arguments and scripts per page."""
+    """
+    Root component for individual pages in a Dars application.
+    
+    Props:
+    - ***children** (Component): Positional arguments for child components to be rendered in the page.
+    - **id** (str): Unique identifier for the component.
+    - **class_name** (str): String containing CSS utility classes (e.g., `"min-h-screen bg-slate-50 p-8"`).
+    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **Events**: Handlers like `on_click`, `on_mouse_enter`, etc.
+    
+    Example:
+    ```python
+    Page(
+        Navbar(),
+        Container(
+            Text("Home Page", class_name="text-4xl font-bold"),
+            class_name="max-w-7xl mx-auto py-12"
+        ),
+        Footer(),
+        class_name="bg-white"
+    )
+    ```
+    """
     def __init__(self, *children: Component, id: Optional[str] = None, class_name: Optional[str] = None, style: Optional[Dict[str, Any]] = None, **props):
         super().__init__(id=id, class_name=class_name, style=style, **props)
         self.scripts = []

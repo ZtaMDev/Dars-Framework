@@ -28,7 +28,7 @@ def UserCard(name, email, **props):
     """
 
 # Usage
-card = UserCard("John Doe", "john@example.com", id="user-1", style={"padding": "20px"})
+card = UserCard("John Doe", "john@example.com", id="user-1", style="p-5")
 ```
 
 #### Option 2: Explicit Arguments
@@ -269,7 +269,7 @@ class CustomComponent(Component):
         self.title = title
         self.id = id
         # Manual event attachment
-        self.set_event(EventTypes.CLICK, dScript("console.log('click')"))
+        self.set_event(EventTypes.CLICK, log('click'))
 
     def render(self, exporter: 'Exporter') -> str:
         # Manual children rendering

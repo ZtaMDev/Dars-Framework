@@ -26,7 +26,27 @@ class LayoutBase(Component):
 
 class GridLayout(LayoutBase):
     """
-    Responsive grid layout component. Supports rows/columns and anchor points for children.
+    Layout component based on CSS Grid for complex 2D arrangements of components.
+    
+    Props:
+    - **rows** (int): Number of grid rows.
+    - **cols** (int): Number of grid columns.
+    - **gap** (str): Space between grid cells (e.g., `"20px"`, `"1.5rem"`).
+    - **id** (str): Unique identifier for the component.
+    - **class_name** (str): String containing CSS utility classes (e.g., `"grid grid-cols-3 gap-6 p-8"`).
+    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **children** (list): List of child components.
+    - **Events**: Handlers like `on_click`, `on_mouse_enter`, etc.
+    
+    Example:
+    ```python
+    GridLayout(
+        rows=2,
+        cols=3,
+        gap="24px",
+        class_name="container mx-auto p-12 bg-slate-50 rounded-3xl"
+    )
+    ```
     """
     def __init__(self, rows: int = 1, cols: int = 1, children: Optional[List[Component]] = None, anchors: Optional[Dict[str, Any]] = None, gap: str = "16px", **kwargs):
         super().__init__(children=children, anchors=anchors, **kwargs)

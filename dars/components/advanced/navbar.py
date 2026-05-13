@@ -2,7 +2,28 @@ from dars.core.component import Component
 from typing import Optional, Dict, Any, List
 
 class Navbar(Component):
-    """Component to create navigation bars."""
+    """
+    Navigation bar component for page headers, supporting branding and navigation links.
+    
+    Props:
+    - ***children** (Component): Positional arguments for navigation links or other components.
+    - **brand** (str): Text or logo component for the site branding area.
+    - **id** (str): Unique identifier for the component.
+    - **class_name** (str): String containing CSS utility classes (e.g., `"bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-slate-100"`).
+    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **children** (list): List of child components.
+    - **Events**: Handlers like `on_click`, `on_mouse_enter`, etc.
+    
+    Example:
+    ```python
+    Navbar(
+        Link("Home", href="/", class_name="px-4 py-2 hover:text-indigo-600"),
+        Link("Services", href="/services", class_name="px-4 py-2 hover:text-indigo-600"),
+        brand="Dars Framework",
+        class_name="px-8 py-4 shadow-sm flex items-center justify-between"
+    )
+    ```
+    """
     def __init__(
         self,
         *children,

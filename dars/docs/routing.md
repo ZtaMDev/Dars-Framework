@@ -104,7 +104,7 @@ dashboard_layout = Page(
         Container(
             Outlet(outlet_id="main"),
             Outlet(outlet_id="sidebar", placeholder=Text("Loading sidebar...")),
-            style={"display": "flex", "gap": "16px"}
+            style="flex gap-4"
         ),
         Text("Dashboard Footer")
     )
@@ -181,7 +181,7 @@ You can customize the 404 page using `app.set_404_page()`.
 # Create your custom 404 page
 not_found_page = Page(
     Container(
-        Text("Oops! Page not found 😢", style={"fontSize": "32px"}),
+        Text("Oops! Page not found 😢", style="text-3xl"),
         Link("Go Home", href="/")
     )
 )
@@ -208,7 +208,7 @@ You can customize the 403 page using `app.set_403_page()`.
 # Create your custom 403 page
 forbidden_page = Page(
     Container(
-        Text("⛔ Access Denied", style={"fontSize": "32px", "color": "red"}),
+        Text("⛔ Access Denied", style="text-3xl text-red-500"),
         Text("You do not have permission to view this page."),
         Link("Go to Login", href="/login")
     )
@@ -288,7 +288,7 @@ app = App(title="My App", ssr_url=ssr_url)
 @route("/", route_type=RouteType.SSR)
 def home():
     return Page(
-        Heading("Welcome!", level=1),
+        Text("Welcome!", style="text-3xl font-bold"),
         Text("This page is rendered on the server!")
     )
 

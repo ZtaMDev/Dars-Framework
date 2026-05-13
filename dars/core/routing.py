@@ -32,7 +32,7 @@ def route(
     loader_endpoint: Optional[str] = None
 ):
     """
-    Decorator to define a route for a page function with security options.
+    Decorator to define a route for a page function with PUBLIC/SSRoptions.
     
     Usage:
         # Public route (default)
@@ -40,22 +40,14 @@ def route(
         def homepage():
             return Page(...)
         
-        # Private route (requires authentication)
-        @route("/admin", route_type=RouteType.PRIVATE, requires_auth=True)
-        def admin():
-            return Page(...)
-        
-        # Protected route (custom middleware)
-        @route("/dashboard", route_type=RouteType.PROTECTED, middleware=[AuthMiddleware()])
+        # SSR route
+        @route("/dashboard", route_type=RouteType.SSR)
         def dashboard():
             return Page(...)
     
     Args:
         path: Route path (e.g., "/home", "/user/:id")
-        route_type: Type of route (PUBLIC, PRIVATE, PROTECTED)
-        requires_auth: Whether route requires authentication
-        middleware: List of middleware to apply
-        loader_endpoint: Custom backend loader endpoint
+        route_type: Type of route (PUBLIC, SSR)
     
     Returns:
         Decorator function

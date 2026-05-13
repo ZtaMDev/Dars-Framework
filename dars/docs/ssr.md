@@ -184,7 +184,7 @@ Server-rendered on every request.
 @route("/dashboard", route_type=RouteType.SSR)
 def dashboard():
     return Page(
-        Text("Dashboard", level=1),
+        Text("Dashboard", style="text-3xl font-bold"),
         Text(f"Rendered at: {datetime.now()}")
     )
 ```
@@ -444,3 +444,5 @@ if __name__ == "__main__":
 - Deploy FastAPI backend as serverless function
 - Serve static files from CDN
 - Configure environment variables
+
+---

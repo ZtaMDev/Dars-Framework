@@ -5,6 +5,38 @@ from typing import Optional, Union, Dict, Any, Callable
 from datetime import datetime, date
 
 class DatePicker(Component):
+    """
+    Advanced date and time picker component for selecting dates with custom formats.
+    
+    Props:
+    - **value** (str/date/datetime): Initial date value.
+    - **min_date** (str/date/datetime): Minimum selectable date.
+    - **max_date** (str/date/datetime): Maximum selectable date.
+    - **placeholder** (str): Hint text when no date is selected.
+    - **format** (str): Date format (e.g., `"YYYY-MM-DD"`, `"DD/MM/YYYY"`, `"MM/DD/YYYY"`, `"DD-MM-YYYY"`).
+    - **locale** (str): Language for the picker (e.g., `"es"`, `"en"`, `"fr"`, `"de"`, `"it"`, `"pt"`).
+    - **show_time** (bool): Whether to include a time selector.
+    - **inline** (bool): If True, shows the picker inline instead of a popup.
+    - **disabled_dates** (list): List of dates to be disabled.
+    - **disabled** (bool): If True, the component is not interactive.
+    - **required** (bool): If True, a date must be selected.
+    - **readonly** (bool): If True, the field is read-only.
+    - **id** (str): Unique identifier for the component.
+    - **class_name** (str): String containing CSS utility classes.
+    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **children** (list): List of child components.
+    - **Events**: Handlers like `on_change`, `on_open`, `on_close`.
+    
+    Example:
+    ```python
+    DatePicker(
+        placeholder="Select your birthday",
+        format="DD/MM/YYYY",
+        locale="es",
+        class_name="border p-2 rounded shadow-sm focus:ring-2 focus:ring-indigo-500"
+    )
+    ```
+    """
     def __init__(
         self,
         value: Optional[Union[str, date, datetime]] = None,

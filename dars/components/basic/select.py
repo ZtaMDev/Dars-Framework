@@ -11,6 +11,33 @@ class SelectOption:
         self.disabled = disabled
 
 class Select(Component):
+    """
+    Dropdown selection component for choosing one or multiple options.
+    
+    Props:
+    - **options** (list): List of `SelectOption` objects, dicts, or strings.
+    - **value** (str): Current selected value(s).
+    - **placeholder** (str): Text to show when no value is selected.
+    - **multiple** (bool): If True, multiple options can be selected.
+    - **size** (int): Number of visible options in a multi-select.
+    - **disabled** (bool): If True, the select is not interactive.
+    - **required** (bool): If True, a selection is mandatory.
+    - **id** (str): Unique identifier for the component.
+    - **class_name** (str): String containing CSS utility classes.
+    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **children** (list): List of child components.
+    - **Events**: Handlers like `on_change`, `on_focus`, `on_blur`.
+    
+    Example:
+    ```python
+    Select(
+        options=["Red", "Green", "Blue"],
+        placeholder="Choose a color",
+        on_change=lambda val: print(f"Selected: {val}"),
+        class_name="w-64 border-slate-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-200"
+    )
+    ```
+    """
     def __init__(
         self,
         options: List[Union[SelectOption, Dict[str, Any], str]] = None,

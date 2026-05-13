@@ -4,24 +4,31 @@ import uuid
 
 class Chart(Component):
     """
-    Chart component supporting Plotly (interactive).
+    Interactive chart component powered by Plotly.js for high-performance visualizations.
     
-    **Plotly**: Embeds Plotly.js and renders interactive charts from figure JSON
+    Props:
+    - **figure** (plotly.Figure): Plotly figure object (created with `go.Figure` or `px.scatter`, etc.).
+    - **width** (int/str): Width of the chart container (e.g., `800`, `"100%"`).
+    - **height** (int/str): Height of the chart container (defaults to `400px`).
+    - **config** (dict): Plotly configuration options (e.g., `{'responsive': True}`).
+    - **id** (str): Unique identifier for the component.
+    - **class_name** (str): String containing CSS utility classes (e.g., `"rounded-xl shadow-lg border p-4"`).
+    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **children** (list): List of child components (not typical for Chart).
+    - **Events**: Handlers (not typical for Chart).
     
-    Args:
-        figure: plotly.graph_objects.Figure
-        width (int/str): Width in pixels or CSS value
-        height (int/str): Height in pixels or CSS value
-        config (dict): Plotly configuration options
-        id (str): Component ID
-        style (dict): CSS styles
-        **props: Additional properties
+    Example:
+    ```python
+    import plotly.graph_objects as go
+    fig = go.Figure(data=[go.Bar(x=['A', 'B'], y=[10, 20])])
     
-    Examples:
-        # Plotly
-        import plotly.graph_objects as go
-        fig = go.Figure(data=[go.Bar(x=['A', 'B'], y=[10, 20])])
-        chart = Chart(fig, width=800, height=400)
+    Chart(
+        figure=fig,
+        width="100%",
+        height=500,
+        class_name="bg-white rounded-2xl shadow-xl p-6 border border-slate-100"
+    )
+    ```
     """
     
     def __init__(self, figure, width=None, height=None, config=None, id=None, style=None, **props):

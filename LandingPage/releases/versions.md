@@ -1,3 +1,39 @@
+# Release Notes v1.9.1
+
+> **Premium Utility Styles, DAP Reactivity Fixes & Documentation Overhaul**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Utility Style System
+
+We've significantly expanded the utility-first styling system to bring it closer to a better developer experience, adding many features:
+
+- **Advanced Gradients**: Full support for multi-stop gradients using `bg-gradient-to-{dir}`, `from-{color}`, `via-{color}`, and `to-{color}`. Internally uses a modern CSS variable architecture (`--tw-gradient-stops`).
+- **Ring System**: New utilities for outer rings and focus indicators: `ring`, `ring-{n}`, `ring-{color}`, `ring-opacity-{n}`, and `ring-offset-{n}`.
+- **Smart Property Switching**: The `text-` prefix is now intelligent. It automatically switches between `font-size` and `color` based on the provided value (e.g., `text-xl` vs `text-indigo-500`).
+- **Divide Utilities**: Added `divide-x` and `divide-y` to easily add borders between child elements.
+- **New UI Utilities**: Added `accent-{color}`, `caret-{color}`, `line-clamp-{n}`, and expanded support for specific border sides (e.g., `border-t-2`, `border-x-4`).
+- **Shadow Colors**: Support for colored shadows via `shadow-{color}`.
+
+### DAP & Reactivity Hardening
+
+- **Fixed `updateVRef` Reactivity**: Resolved a critical issue where components using `ValueRef` (via `setVRef`) were not consistently re-rendering when updated through Dars Action Protocol (DAP) scripts.
+
+### Documentation
+
+- **Complete Documentation**: All guides in the landing page have been restructured for better flow and clarity.
+- **Standardized Docstrings**: Every core component and utility function now features a complete Python docstring, including:
+  - Detailed property descriptions.
+  - Standard global props list.
+
+---
+
 # Release Notes v1.9.0
 
 > **Secure Action Protocol (DAP) & Zero-Eval Runtime Hardening**

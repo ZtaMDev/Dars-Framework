@@ -178,7 +178,7 @@ userState = State("user", name="John Doe", status="Active", is_admin=False)
 # Bind directly to props
 card = Container(
     # Bind text property
-    Text(text=useDynamic("user.name"), style={"font-weight": "bold"}),
+    Text(text=useDynamic("user.name"), style="font-bold"),
     
     # Bind input value
     Input(value=useDynamic("user.name"), placeholder="Edit name"),

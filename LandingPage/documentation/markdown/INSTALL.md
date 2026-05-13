@@ -1,4 +1,4 @@
-# Installation Guide - Dars Framework
+# Installation Guide
 
 ## Quick Installation
 
@@ -77,8 +77,8 @@ from dars.components.basic.text import Text
 from dars.components.basic.container import Container
 
 app = App(title="My First App")
-container = Container(style={'padding': '20px'}) # Use ' to escape quotes
-text = Text(text="Hello Dars!", style={'font-size': '24px'}) # Use ' to escape quotes
+container = Container(style="p-5") # Use ' to escape quotes
+text = Text(text="Hello Dars!", style="text-2xl") # Use ' to escape quotes
 
 container.add_child(text)
 app.set_root(container)
@@ -100,7 +100,6 @@ dars export my_first_app.py --format html --output ./my_app
 ```bash
 dars preview ./my_app
 ```
-
 
 ### Useful Commands
 
@@ -160,5 +159,6 @@ dars build
 ```
 
 Notes:
+
 - Desktop support is under active development; configuration keys and defaults may change.
 - Some platform targets (like macOS) require building on that OS for signing.

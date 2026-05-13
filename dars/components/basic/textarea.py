@@ -2,7 +2,33 @@ from dars.core.component import Component
 from typing import Optional, Dict, Any
 
 class Textarea(Component):
-    """Component for multiline text areas."""
+    """
+    Multiline text input component for longer messages or data entry.
+    
+    Props:
+    - **value** (str): Initial text content.
+    - **placeholder** (str): Hint text displayed when empty.
+    - **rows** (int): Number of visible text lines (defaults to 4).
+    - **cols** (int): Visible width in characters (defaults to 50).
+    - **disabled** (bool): If True, the textarea is not interactive.
+    - **readonly** (bool): If True, the content cannot be modified.
+    - **required** (bool): If True, the field must be filled.
+    - **max_length** (int): Maximum number of characters allowed.
+    - **id** (str): Unique identifier for the component.
+    - **class_name** (str): String containing CSS utility classes (e.g., `"w-full p-4 border rounded-xl focus:ring-2 focus:ring-indigo-500"`).
+    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **children** (list): List of child components.
+    - **Events**: Handlers like `on_change`, `on_input`, `on_focus`, `on_blur`.
+    
+    Example:
+    ```python
+    Textarea(
+        placeholder="Tell us about yourself...",
+        rows=5,
+        class_name="w-full bg-slate-50 border-slate-200 rounded-lg p-3 outline-none focus:border-indigo-500 transition-all"
+    )
+    ```
+    """
     def __init__(
         self,
         value: str = "",

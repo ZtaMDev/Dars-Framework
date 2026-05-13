@@ -17,7 +17,6 @@ The following features and components have been successfully implemented in Dars
 
 - [x] **Framework Core**
   - [x] Base `Component` class for all UI elements.
-  - [x] Property system (`properties.py`) for validation and autocompletion.
   - [x] Main `App` class for application management.
 - [x] **Component System**
   - [x] **Basic Components**: `Text`, `Button`, `Input`, `Container`, `Page` (with support for per-page scripts in multipage), `Checkbox`, `RadioButton`, `Select`, `Slider`, `DatePicker`, `Image`, `Link`, `Textarea`, `ProgressBar`, `Tooltip`.
@@ -77,8 +76,8 @@ This phase will focus on expanding Dars' capabilities to new platforms and build
   - [x] **Advanced Navigation**: `Router` (for single-page application route management), `Tabs`, `Accordion`.
   - [x] **Advanced Components**:`FileUpload`.
 
-- [ ] **Plugin and Extension System**
-  - [ ] Develop a clear API for developers to create their own plugins and extensions for Dars, facilitating integration with third-party tools and framework customization.
+- [x] **Plugin and Extension System**
+  - [x] Develop a clear API for developers to create their own plugins and extensions for Dars, facilitating integration with third-party tools and framework customization.
 
 - [x] **dScript Enhancements**
   - [x] **dScript Modules**: Allow importing and exporting modules within dScript to better organize JavaScript logic.
@@ -97,13 +96,9 @@ This phase will focus on mass adoption, long-term stability, and community growt
   - [x] **IDE Integration**: Explore integration with other popular Python IDEs (PyCharm, etc.).
   - [x] **Automated Testing Tools**: An integrated testing framework that facilitates writing unit, integration, and end-to-end tests for Dars applications.
 
-- [ ] **Documentation and Community Resources**
+- [x] **Documentation and Community Resources**
   - [x] **Interactive Tutorials and Advanced Examples**: Create a series of step-by-step tutorials and complete application examples for different use cases.
   - [x] **Contribution Guides**: Facilitate contribution to the Dars codebase and its documentation.
-  - [ ] **Forums and Support Channels**: Establish active communication channels for the community (Discord, Stack Overflow, etc.).
-
-- [x] **Continuous Performance and Scalability**
-  - [x] **Benchmarking and Constant Optimization**: Conduct continuous performance testing and optimizations to ensure Dars remains competitive as applications grow in complexity.
 
 ### Phase 2.5: Fullstack Framework & Security Architecture (v1.6.9 - v1.9.0)
 
@@ -149,7 +144,7 @@ This phase transforms Dars into a complete fullstack Python framework with enter
 - [ ] **Production Hardening**
   - [ ] HTTPS enforcement
   - [ ] CSRF protection
-  - [ ] XSS prevention
+  - [x] XSS prevention
   - [ ] Security headers
   - [ ] Audit logging
 
@@ -158,7 +153,7 @@ This phase transforms Dars into a complete fullstack Python framework with enter
 - [x] **Backend Auto-Detection**
   - [x] Automatic detection of `/backend` or `/darsBackend` directories
   - [x] Detection of `api.py` and `apiConfig.py`
-  - [ ] Desktop mode support (Electron with `/darsBackend`)
+  - [x] Desktop mode support (Electron)
 
 - [x] **apiConfig.py System**
   - [x] Centralized URL configuration
@@ -182,4 +177,4 @@ This phase transforms Dars into a complete fullstack Python framework with enter
   - [x] Deployment guide
   - [x] Best practices documentation
 
-**Target**: v1.9.0 - Complete Fullstack Python Framework
+**Target**: v2.0.0 - Complete Fullstack Python Framework

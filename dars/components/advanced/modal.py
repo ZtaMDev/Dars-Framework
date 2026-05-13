@@ -2,7 +2,28 @@ from dars.core.component import Component
 from typing import Optional, Dict, Any, List
 
 class Modal(Component):
-    """Component to display content in a modal."""
+    """
+    Dialog component that appears on top of the main content, used for important actions or information.
+    
+    Props:
+    - **children** (list): List of child components to be displayed inside the modal content area.
+    - **title** (str): Optional title displayed in the modal header.
+    - **is_open** (bool): Whether the modal is currently visible (defaults to False).
+    - **id** (str): Unique identifier for the component.
+    - **class_name** (str): String containing CSS utility classes for the modal overlay.
+    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **Events**: Handlers like `on_click` (can be used to close the modal by clicking the backdrop).
+    
+    Example:
+    ```python
+    Modal(
+        Text("Your changes have been saved successfully."),
+        title="Success",
+        is_open=True,
+        class_name="bg-white rounded-3xl shadow-2xl p-10 max-w-lg"
+    )
+    ```
+    """
     def __init__(
         self,
         children: Optional[List[Component]] = None,

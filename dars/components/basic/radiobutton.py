@@ -4,6 +4,33 @@ from dars.core.events import EventTypes
 from typing import Optional, Union, Dict, Any, Callable
 
 class RadioButton(Component):
+    """
+    Radio button component for selecting one option from a group.
+    
+    Props:
+    - **label** (str): Text label to display next to the radio button.
+    - **value** (str): Value associated with the radio button.
+    - **name** (str): Name of the radio group (used to link related buttons).
+    - **checked** (bool): Current state of the radio button.
+    - **disabled** (bool): If True, the radio button is not interactive.
+    - **required** (bool): If True, the radio button must be selected.
+    - **id** (str): Unique identifier for the component.
+    - **class_name** (str): String containing CSS utility classes.
+    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **children** (list): List of child components.
+    - **Events**: Handlers like `on_change`, `on_click`, etc.
+    
+    Example:
+    ```python
+    RadioButton(
+        label="Option A",
+        name="my-group",
+        value="a",
+        checked=True,
+        class_name="text-indigo-600 focus:ring-indigo-500"
+    )
+    ```
+    """
     def __init__(
         self,
         label: str = "",
