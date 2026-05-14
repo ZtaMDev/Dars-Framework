@@ -33,8 +33,8 @@ class GridLayout(LayoutBase):
     - **cols** (int): Number of grid columns.
     - **gap** (str): Space between grid cells (e.g., `"20px"`, `"1.5rem"`).
     - **id** (str): Unique identifier for the component.
-    - **class_name** (str): String containing CSS utility classes (e.g., `"grid grid-cols-3 gap-6 p-8"`).
-    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **class_name** (str): String containing regular CSS class names.
+    - **style** (dict): Optional dictionary for CSS utility classes (prefer `style`).
     - **children** (list): List of child components.
     - **Events**: Handlers like `on_click`, `on_mouse_enter`, etc.
     

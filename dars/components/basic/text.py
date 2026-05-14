@@ -9,8 +9,8 @@ class Text(Component):
     Props:
     - **text** (str): The text content to display.
     - **id** (str): Unique identifier for the component.
-    - **class_name** (str): String containing CSS utility classes (e.g., `"text-2xl font-bold text-slate-800"`).
-    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **class_name** (str): String containing regular CSS class names.
+    - **style** (dict): Optional dictionary for CSS utility classes (prefer `style`).
     - **children** (list): List of child components.
     - **Events**: Handlers like `on_click`, `on_mouse_enter`, etc.
     

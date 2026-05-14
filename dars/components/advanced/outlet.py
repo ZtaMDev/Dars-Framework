@@ -10,8 +10,8 @@ class Outlet(Container):
     - **placeholder** (Component): Component to display while the route content is being loaded.
     - ***children** (Component): Initial content for the outlet if no route is matched.
     - **id** (str): Unique identifier for the component.
-    - **class_name** (str): String containing CSS utility classes (e.g., `"flex-1 p-6 bg-slate-50 min-h-screen overflow-y-auto"`).
-    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **class_name** (str): String containing regular CSS class names.
+    - **style** (dict): Optional dictionary for CSS utility classes (prefer `style`).
     - **Events**: Handlers for navigation and lifecycle events.
     
     Example:

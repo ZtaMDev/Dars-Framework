@@ -10,8 +10,8 @@ class Tooltip(Component):
     - **child** (Component): The component that will trigger the tooltip.
     - **position** (str): Tooltip placement relative to the child (`"top"`, `"right"`, `"bottom"`, `"left"`).
     - **id** (str): Unique identifier for the component.
-    - **class_name** (str): String containing CSS utility classes (e.g., `"bg-slate-800 text-white text-xs p-2 rounded"`).
-    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **class_name** (str): String containing regular CSS class names.
+    - **style** (dict): Optional dictionary for CSS utility classes (prefer `style`).
     - **children** (list): List of child components.
     - **Events**: Handlers for mouse events.
     

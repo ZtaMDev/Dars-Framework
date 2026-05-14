@@ -1,3 +1,33 @@
+# Release Notes v1.9.2
+
+> **Documentation Corrections & Complete App Class Docstring**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Standardized Component Docstrings
+
+Fixed documentation inconsistencies across all component modules:
+
+- **`class_name` Documentation**: Corrected to reflect that it contains **regular CSS class names** (not utility classes) for standard HTML class attributes.
+- **`style` Documentation**: Updated to clarify that it contains **CSS utility classes** (Tailwind-like syntax) for convenience styling.
+
+### Complete App Class Docstring
+
+Added a comprehensive docstring to the `App` class with:
+
+- Detailed description of SPA, MPA, and Desktop modes.
+- Complete property documentation for all constructor parameters.
+- SEO and PWA configuration details.
+- Usage examples for each mode.
+
+---
+
 # Release Notes v1.9.1
 
 > **Premium Utility Styles, DAP Reactivity Fixes & Documentation Overhaul**

@@ -15,8 +15,8 @@ class Page(Component):
     Props:
     - ***children** (Component): Positional arguments for child components to be rendered in the page.
     - **id** (str): Unique identifier for the component.
-    - **class_name** (str): String containing CSS utility classes (e.g., `"min-h-screen bg-slate-50 p-8"`).
-    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **class_name** (str): String containing regular CSS class names.
+    - **style** (dict): Optional dictionary for CSS utility classes (prefer `style`).
     - **Events**: Handlers like `on_click`, `on_mouse_enter`, etc.
     
     Example:

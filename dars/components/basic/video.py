@@ -19,8 +19,8 @@ class Video(Component):
     - **preload** (str): Preload strategy (`"auto"`, `"metadata"`, `"none"`).
     - **plays_inline** (bool): If True, the video plays inline on mobile browsers.
     - **id** (str): Unique identifier for the component.
-    - **class_name** (str): String containing CSS utility classes (e.g., `"rounded-xl shadow-lg w-full"`).
-    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **class_name** (str): String containing regular CSS class names.
+    - **style** (dict): Optional dictionary for CSS utility classes (prefer `style`).
     - **children** (list): List of child components.
     - **Events**: Handlers like `on_play`, `on_pause`, `on_ended`, etc.
     

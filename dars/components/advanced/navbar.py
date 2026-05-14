@@ -9,8 +9,8 @@ class Navbar(Component):
     - ***children** (Component): Positional arguments for navigation links or other components.
     - **brand** (str): Text or logo component for the site branding area.
     - **id** (str): Unique identifier for the component.
-    - **class_name** (str): String containing CSS utility classes (e.g., `"bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-slate-100"`).
-    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **class_name** (str): String containing regular CSS class names.
+    - **style** (dict): Optional dictionary for CSS utility classes (prefer `style`).
     - **children** (list): List of child components.
     - **Events**: Handlers like `on_click`, `on_mouse_enter`, etc.
     

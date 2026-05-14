@@ -36,7 +36,7 @@ def create_hero():
         ),
         Text(
             text=(
-                "Dynamic Application Rendering System is a modern Python framework for web and desktop apps development. "
+                "Dynamic Application Rendering System is a modern Full-Stack Python framework for web and desktop apps development. "
                 "Dars is designed to make web and desktop apps development simple, fast, and enjoyable. "
                 "With an intuitive API and powerful features, you can build modern web and desktop apps in record time using Python."
             ),

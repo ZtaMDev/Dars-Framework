@@ -23,8 +23,8 @@ class Select(Component):
     - **disabled** (bool): If True, the select is not interactive.
     - **required** (bool): If True, a selection is mandatory.
     - **id** (str): Unique identifier for the component.
-    - **class_name** (str): String containing CSS utility classes.
-    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **class_name** (str): String containing regular CSS class names.
+    - **style** (dict): Optional dictionary for CSS utility classes (prefer `style`).
     - **children** (list): List of child components.
     - **Events**: Handlers like `on_change`, `on_focus`, `on_blur`.
     

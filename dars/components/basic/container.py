@@ -10,8 +10,8 @@ class Container(Component):
     - ***children** (Component): Positional arguments for child components.
     - **additional_children** (list): Optional list of additional child components.
     - **id** (str): Unique identifier for the component.
-    - **class_name** (str): String containing CSS utility classes (e.g., `"flex flex-row justify-between p-4 bg-white shadow"`).
-    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **class_name** (str): String containing regular CSS class names.
+    - **style** (dict): Optional dictionary for CSS utility classes (prefer `style`).
     - **Events**: Handlers like `on_click`, `on_mouse_enter`, etc.
     
     Example:

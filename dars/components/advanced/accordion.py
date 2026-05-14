@@ -9,8 +9,8 @@ class Accordion(Component):
     - **sections** (list): List of tuples containing `(title, content)`.
     - **open_indices** (list): Optional list of indices that should be open by default.
     - **id** (str): Unique identifier for the component.
-    - **class_name** (str): String containing CSS utility classes (e.g., `"divide-y divide-slate-200 border rounded-xl overflow-hidden"`).
-    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **class_name** (str): String containing regular CSS class names.
+    - **style** (dict): Optional dictionary for CSS utility classes (prefer `style`).
     - **children** (list): List of child components.
     - **Events**: Handlers like `on_click`, etc.
     

@@ -9,8 +9,8 @@ class Card(Component):
     - **children** (list): List of child components to render inside the card.
     - **title** (str): Optional title displayed at the top of the card.
     - **id** (str): Unique identifier for the component.
-    - **class_name** (str): String containing CSS utility classes (e.g., `"p-6 bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-shadow"`).
-    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **class_name** (str): String containing regular CSS class names.
+    - **style** (dict): Optional dictionary for CSS utility classes (prefer `style`).
     - **Events**: Handlers like `on_click`, `on_mouse_enter`, etc.
     
     Example:

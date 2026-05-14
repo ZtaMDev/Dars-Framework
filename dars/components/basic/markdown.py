@@ -12,8 +12,8 @@ class Markdown(Component):
     - **dark_theme** (bool): Whether to apply dark theme styles to the markdown container.
     - **lazy** (bool): Enable lazy loading for content that only fetches when visible.
     - **id** (str): Unique identifier for the component.
-    - **class_name** (str): String containing CSS utility classes (e.g., `"prose lg:prose-xl max-w-none"`).
-    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **class_name** (str): String containing regular CSS class names.
+    - **style** (dict): Optional dictionary for CSS utility classes (prefer `style`).
     - **children** (list): List of child components (not typically used for Markdown).
     - **Events**: Handlers like `on_click`, `on_mouse_enter`, etc.
     

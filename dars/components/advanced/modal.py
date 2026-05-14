@@ -10,8 +10,8 @@ class Modal(Component):
     - **title** (str): Optional title displayed in the modal header.
     - **is_open** (bool): Whether the modal is currently visible (defaults to False).
     - **id** (str): Unique identifier for the component.
-    - **class_name** (str): String containing CSS utility classes for the modal overlay.
-    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **class_name** (str): String containing regular CSS class names for the modal overlay.
+    - **style** (dict): Optional dictionary for CSS utility classes (prefer `style`).
     - **Events**: Handlers like `on_click` (can be used to close the modal by clicking the backdrop).
     
     Example:

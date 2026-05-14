@@ -12,8 +12,8 @@ class Chart(Component):
     - **height** (int/str): Height of the chart container (defaults to `400px`).
     - **config** (dict): Plotly configuration options (e.g., `{'responsive': True}`).
     - **id** (str): Unique identifier for the component.
-    - **class_name** (str): String containing CSS utility classes (e.g., `"rounded-xl shadow-lg border p-4"`).
-    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **class_name** (str): String containing regular CSS class names.
+    - **style** (dict): Optional dictionary for CSS utility classes (prefer `style`).
     - **children** (list): List of child components (not typical for Chart).
     - **Events**: Handlers (not typical for Chart).
     

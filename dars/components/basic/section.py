@@ -10,8 +10,8 @@ class Section(Component):
     - ***children** (Component): Positional arguments for child components.
     - **additional_children** (list): Optional list of additional child components.
     - **id** (str): Unique identifier for the component.
-    - **class_name** (str): String containing CSS utility classes (e.g., `"py-12 bg-slate-50 border-b border-slate-200"`).
-    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **class_name** (str): String containing regular CSS class names.
+    - **style** (dict): Optional dictionary for CSS utility classes (prefer `style`).
     - **Events**: Handlers like `on_click`, `on_mouse_enter`, etc.
     
     Example:

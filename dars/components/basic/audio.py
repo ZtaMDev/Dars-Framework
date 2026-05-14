@@ -15,8 +15,8 @@ class Audio(Component):
     - **muted** (bool): If True, the audio will be muted by default.
     - **preload** (str): Strategy for preloading ('auto', 'metadata', 'none').
     - **id** (str): Unique identifier for the component.
-    - **class_name** (str): String containing CSS utility classes.
-    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **class_name** (str): String containing regular CSS class names.
+    - **style** (dict): Optional dictionary for CSS utility classes (prefer `style`).
     - **children** (list): List of child components.
     - **Events**: Handlers like `on_play`, `on_pause`, `on_ended`, etc.
     

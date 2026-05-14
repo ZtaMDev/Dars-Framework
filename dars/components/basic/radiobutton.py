@@ -15,8 +15,8 @@ class RadioButton(Component):
     - **disabled** (bool): If True, the radio button is not interactive.
     - **required** (bool): If True, the radio button must be selected.
     - **id** (str): Unique identifier for the component.
-    - **class_name** (str): String containing CSS utility classes.
-    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **class_name** (str): String containing regular CSS class names.
+    - **style** (dict): Optional dictionary for CSS utility classes (prefer `style`).
     - **children** (list): List of child components.
     - **Events**: Handlers like `on_change`, `on_click`, etc.
     

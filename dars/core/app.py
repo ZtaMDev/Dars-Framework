@@ -7,6 +7,7 @@
 # Copyright (c) 2025 ZtaDev
 from typing import Optional, List, Dict, Any
 
+from dars.core.routing import RouteNode, SPARoute
 from dars.exporters.base import Exporter
 from dars.scripts.script import Script
 from .component import Component
@@ -142,7 +143,117 @@ class Page:
             return {'type': 'dscript', 'value': obj, **kwargs}
 
 class App:
-    """Main class that represents a Dars application"""
+    """
+    Main application class for building Dars web and desktop applications.
+    
+    This class represents the root container for a Dars application and handles all
+    application-level configuration, routing, pages, and metadata. It supports both
+    Single-Page Application (SPA) and Multi-Page Application (MPA) modes.
+    
+    **Modes of Operation:**
+    
+    - **Single-Page App (SPA)**: Set a root Component for client-side routing.
+    - **Multi-Page App (MPA)**: Add multiple pages with the `add_page()` method.
+    - **Desktop App**: Deploy as a desktop application using Electron or similar.
+    
+    **Props:**
+    
+    - **title** (str): Application title (default: "Dars App").
+    - **description** (str): Meta description for SEO.
+    - **author** (str): Author name for meta tags.
+    - **version** (str): Application version (used in package.json for desktop).
+    - **keywords** (list): List of SEO keywords.
+    - **language** (str): Document language code (default: "en").
+    - **favicon** (str): Path to favicon file.
+    - **icon** (str): Path to app icon (used for PWA and meta tags).
+    - **apple_touch_icon** (str): Path to Apple touch icon.
+    - **apple_mobile_web_app_capable** (bool): Enable Apple mobile web app mode.
+    - **apple_mobile_web_app_status_bar_style** (str): Status bar style for Apple devices ("default", "black", "black-translucent").
+    - **apple_mobile_web_app_title** (str): Title for Apple home screen.
+    - **manifest** (str): Path to PWA manifest.json file.
+    - **theme_color** (str): Primary theme color for PWA (default: "#000000").
+    - **background_color** (str): Background color for PWA splash screen (default: "#ffffff").
+    - **service_worker_path** (str): Path to service worker file.
+    - **service_worker_enabled** (bool): Enable service worker registration.
+    - **desktop** (bool): Flag for desktop application mode.
+    - **devtools** (bool): Auto-open DevTools in desktop development mode (default: True).
+    - **ssr_url** (str): URL for Server-Side Rendering backend (optional).
+    - **meta** (dict): Custom meta tags and attributes.
+    
+    **Internal Attributes:**
+    
+    - **root** (Component): Root component for SPA mode.
+    - **_pages** (dict): Dictionary of pages for MPA mode.
+    - **_spa_routes** (dict): SPA route definitions.
+    - **_spa_404_page** (Page): Custom 404 error page.
+    - **_spa_403_page** (Page): Custom 403 forbidden page.
+    - **_spa_loading_page** (Component): Loading page during route transitions.
+    - **_spa_error_page** (Component): Error page for runtime errors.
+    - **scripts** (list): Global scripts to inject into the app.
+    - **global_styles** (dict): Global CSS styles.
+    - **event_manager** (EventManager): Application-wide event manager.
+    
+    **SEO & Social Media:**
+    
+    - **og_title, og_description, og_image, og_url**: Open Graph meta tags.
+    - **twitter_card, twitter_site, twitter_creator**: Twitter Card meta tags.
+    - **robots**: Robots meta tag for search engines.
+    - **canonical_url**: Canonical URL for SEO.
+    
+    **PWA Configuration:**
+    
+    - **pwa_enabled** (bool): Enable Progressive Web App support.
+    - **pwa_name** (str): PWA display name.
+    - **pwa_short_name** (str): PWA short name (max 12 chars).
+    - **pwa_display** (str): PWA display mode ("standalone", "fullscreen", "minimal-ui", "browser").
+    - **pwa_orientation** (str): PWA orientation ("portrait", "landscape", "portrait-primary", etc.).
+    
+    **Examples:**
+    
+    Single-Page Application (SPA):
+    ```python
+    from dars.all import *
+    
+    @route("/")
+    def home():
+        return Container(
+            Text("Welcome to Dars!", class_name="text-4xl font-bold"),
+            class_name="flex flex-col items-center justify-center min-h-screen"
+        )
+    
+    app = App(
+        title="My Dars App",
+        description="A beautiful Dars application",
+        icon="public/icon.png"
+    )
+    
+    app.add_page("home", home()) = home()
+    
+    if __name__ == "__main__":
+        app.rTimeCompile()
+    ```
+    
+    Multi-Page Application (MPA):
+    ```python
+    app = App(title="My Multi-Page App")
+    
+    app.add_page("home", Page("home", home_component, title="Home"))
+    app.add_page("about", Page("about", about_component, title="About Us"))
+    app.add_page("contact", Page("contact", contact_component, title="Contact"))
+    
+    if __name__ == "__main__":
+        app.rTimeCompile()
+    ```
+    
+    Desktop Application:
+    ```python
+    app = App(
+        title="My Desktop App",
+        desktop=True,
+        devtools=True
+    )
+    ```
+    """
 
     def __init__(
         self,

@@ -15,8 +15,8 @@ class Textarea(Component):
     - **required** (bool): If True, the field must be filled.
     - **max_length** (int): Maximum number of characters allowed.
     - **id** (str): Unique identifier for the component.
-    - **class_name** (str): String containing CSS utility classes (e.g., `"w-full p-4 border rounded-xl focus:ring-2 focus:ring-indigo-500"`).
-    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **class_name** (str): String containing regular CSS class names.
+    - **style** (dict): Optional dictionary for CSS utility classes (prefer `style`).
     - **children** (list): List of child components.
     - **Events**: Handlers like `on_change`, `on_input`, `on_focus`, `on_blur`.
     

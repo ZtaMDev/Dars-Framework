@@ -16,8 +16,8 @@ class Input(Component):
     - **required** (bool): If True, the field must be filled.
     - **max_length** (int): Maximum number of characters allowed.
     - **id** (str): Unique identifier for the component.
-    - **class_name** (str): String containing CSS utility classes (e.g., `"border-2 border-slate-200 focus:border-indigo-500 p-2 rounded"`).
-    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **class_name** (str): String containing regular CSS class names.
+    - **style** (dict): Optional dictionary for CSS utility classes (prefer `style`).
     - **children** (list): List of child components.
     - **Events**: Handlers like `on_change`, `on_input`, `on_focus`, `on_blur`, `on_key_down`, `on_key_up`.
     

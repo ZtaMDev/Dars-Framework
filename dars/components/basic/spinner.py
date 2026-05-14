@@ -6,8 +6,8 @@ class Spinner(Component):
     
     Props:
     - **id** (str): Unique identifier for the component.
-    - **class_name** (str): String containing CSS utility classes (e.g., `"w-8 h-8 border-4 border-indigo-500 border-t-transparent animate-spin rounded-full"`).
-    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **class_name** (str): String containing regular CSS class names.
+    - **style** (dict): Optional dictionary for CSS utility classes (prefer `style`).
     - **children** (list): List of child components.
     - **Events**: Handlers like `on_click`, `on_mouse_enter`, etc.
     

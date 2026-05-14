@@ -28,8 +28,8 @@ class Head(Component):
     - **links** (list): List of dictionaries for custom `<link>` tags.
     - **structured_data** (dict): JSON-LD dictionary for structured data.
     - **id** (str): Unique identifier for the component (not rendered).
-    - **class_name** (str): CSS utility classes (not rendered).
-    - **style** (dict): Optional dictionary for direct inline styles (not rendered).
+    - **class_name** (str): String containing regular CSS class names (not rendered).
+    - **style** (dict): Optional dictionary for CSS utility classes (prefer `style`) (not rendered).
     - **children** (list): List of child components (not rendered).
     - **Events**: Handlers (not typical for Head).
     

@@ -11,8 +11,8 @@ class Image(Component):
     - **width** (str): Width of the image (e.g., `"100px"`, `"50%"`).
     - **height** (str): Height of the image.
     - **id** (str): Unique identifier for the component.
-    - **class_name** (str): String containing CSS utility classes (e.g., `"rounded-full object-cover shadow-lg"`).
-    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **class_name** (str): String containing regular CSS class names.
+    - **style** (dict): Optional dictionary for CSS utility classes (prefer `style`).
     - **children** (list): List of child components.
     - **Events**: Handlers like `on_click`, `on_load`, etc.
     

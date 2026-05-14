@@ -19,8 +19,8 @@ class FlexLayout(LayoutBase):
     - **align** (str): Cross axis alignment (`"stretch"`, `"center"`, `"flex-start"`, `"flex-end"`, `"baseline"`).
     - **gap** (str): Space between child components (e.g., `"16px"`, `"1rem"`).
     - **id** (str): Unique identifier for the component.
-    - **class_name** (str): String containing CSS utility classes (e.g., `"w-full h-full p-4 bg-white"`).
-    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **class_name** (str): String containing regular CSS class names.
+    - **style** (dict): Optional dictionary for CSS utility classes (prefer `style`).
     - **children** (list): List of child components.
     - **Events**: Handlers like `on_click`, `on_mouse_enter`, etc.
     

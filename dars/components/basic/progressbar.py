@@ -9,8 +9,8 @@ class ProgressBar(Component):
     - **value** (int): Current progress value (from 0 to `max_value`).
     - **max_value** (int): Maximum value representing 100% (defaults to 100).
     - **id** (str): Unique identifier for the component.
-    - **class_name** (str): String containing CSS utility classes (e.g., `"h-4 bg-slate-200 rounded-full overflow-hidden"`).
-    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **class_name** (str): String containing regular CSS class names.
+    - **style** (dict): Optional dictionary for CSS utility classes (prefer `style`).
     - **children** (list): List of child components.
     - **Events**: Handlers like `on_click`, `on_mouse_enter`, etc.
     

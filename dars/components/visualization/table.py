@@ -17,8 +17,8 @@ class DataTable(Component):
     - **theme** (str/dict): Predefined theme (`"light"`, `"dark"`) or a custom color dictionary.
     - **formatters** (dict): Custom value formatters for specific columns.
     - **id** (str): Unique identifier for the component.
-    - **class_name** (str): String containing CSS utility classes.
-    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **class_name** (str): String containing regular CSS class names.
+    - **style** (dict): Optional dictionary for CSS utility classes (prefer `style`).
     - **children** (list): List of child components (not rendered).
     - **Events**: Handlers (not typical for static DataTable).
     

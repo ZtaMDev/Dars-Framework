@@ -10,8 +10,8 @@ class Table(Component):
     - **data** (list): List of row dictionaries where keys match the `field` defined in `columns`.
     - **page_size** (int): Number of rows to display per page (optional).
     - **id** (str): Unique identifier for the component.
-    - **class_name** (str): String containing CSS utility classes (e.g., `"w-full text-left border-collapse border border-slate-200"`).
-    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **class_name** (str): String containing regular CSS class names.
+    - **style** (dict): Optional dictionary for CSS utility classes (prefer `style`).
     - **children** (list): List of child components.
     - **Events**: Handlers for sorting, filtering, and row clicks.
     

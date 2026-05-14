@@ -17,8 +17,8 @@ class Slider(Component):
     - **orientation** (str): `"horizontal"` or `"vertical"`.
     - **disabled** (bool): If True, the slider is not interactive.
     - **id** (str): Unique identifier for the component.
-    - **class_name** (str): String containing CSS utility classes.
-    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **class_name** (str): String containing regular CSS class names.
+    - **style** (dict): Optional dictionary for CSS utility classes (prefer `style`).
     - **children** (list): List of child components.
     - **Events**: Handlers like `on_change`, `on_input`.
     

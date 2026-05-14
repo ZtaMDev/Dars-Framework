@@ -10,8 +10,8 @@ class Tabs(Component):
     - **panels** (list): List of components or strings representing the content of each tab.
     - **selected** (int): Index of the initially active tab (defaults to 0).
     - **id** (str): Unique identifier for the component.
-    - **class_name** (str): String containing CSS utility classes (e.g., `"flex flex-col w-full"`).
-    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **class_name** (str): String containing regular CSS class names.
+    - **style** (dict): Optional dictionary for CSS utility classes (prefer `style`).
     - **children** (list): List of child components.
     - **Events**: Handlers like `on_change` when the active tab is switched.
     

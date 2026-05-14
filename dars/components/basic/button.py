@@ -13,8 +13,8 @@ class Button(Component):
     - **disabled** (bool): Whether the button is interactive or not.
     - **button_type** (str): HTML type of the button ('button', 'submit', 'reset').
     - **id** (str): Unique identifier for the component.
-    - **class_name** (str): String containing CSS utility classes (e.g., `"bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"`).
-    - **style** (dict): Optional dictionary for direct inline styles (prefer `class_name`).
+    - **class_name** (str): String containing regular CSS class names.
+    - **style** (dict): Optional dictionary for CSS utility classes (prefer `style`).
     - **children** (list): List of child components to render inside the button.
     - **Events**: Handlers like `on_click`, `on_double_click`, `on_mouse_enter`, `on_mouse_leave`, `on_mouse_down`, `on_mouse_up`, `on_key_down`, `on_key_up`.
     
