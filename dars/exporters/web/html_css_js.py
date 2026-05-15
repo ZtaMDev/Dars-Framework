@@ -44,6 +44,8 @@ from bs4 import BeautifulSoup
 from dars.exporters.web.vdom import VDomBuilder
 from dars.config import load_config, resolve_paths, copy_public_dir
 import json
+import shutil
+import inspect
 
 class DarsJSONEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -113,38 +115,7 @@ class HTMLCSSJSExporter(Exporter):
             # Initialize style registry for this export (Phase 1 of style optimization)
             # Maps generated class name -> dict(style)
             self._style_registry: Dict[str, Dict[str, Any]] = {}
-            self._global_css_blocks: List[str] = ["""
-/* Dars Markdown Copy Button Styles */
-.dars-code-copy {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: rgba(0,0,0,0.6);
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    padding: 5px 10px;
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    opacity: 0;
-    transition: all 0.2s ease;
-    z-index: 10;
-    backdrop-filter: blur(4px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-pre:hover .dars-code-copy {
-    opacity: 1;
-}
-.dars-code-copy:hover {
-    background: rgba(0,0,0,0.8);
-    transform: translateY(-1px);
-}
-.dars-code-copy.copied {
-    background: #16a34a !important;
-    opacity: 1 !important;
-}
-"""]
+            self._global_css_blocks: List[str] = []
             self._markdown_html_assets = {} # route_name -> list of html strings
             # Separate registries for hover/active variants (class -> dict(style))
             self._hover_style_registry: Dict[str, Dict[str, Any]] = {}
@@ -178,30 +149,25 @@ pre:hover .dars-code-copy {
                 pass
 
             # --- Escribir librería de reactividad (dars.min.js) embebida ---
-            # Optimization: Skip if file exists and content is identical (hot reload)
+            # --- Runtime Assets (lib/) ---
             try:
                 lib_dir = os.path.join(output_path, 'lib')
                 os.makedirs(lib_dir, exist_ok=True)
-                dest_js = os.path.join(lib_dir, 'dars.min.js')
                 
-                # Check if file exists and content matches
-                should_write = True
-                if os.path.exists(dest_js):
-                    try:
-                        with open(dest_js, 'r', encoding='utf-8') as f:
-                            existing_content = f.read()
-                        from dars.js_lib import DARS_MIN_JS
-                        if existing_content == DARS_MIN_JS:
-                            should_write = False  # Skip write, already up to date
-                    except Exception:
-                        pass  # If read fails, write anyway
+                # Copy all resources from dars/exporters/web/resources/
+                # This includes dars.min.js, dap.js, router.js, ssr.js, dompurify.js
+                exporter_dir = os.path.dirname(os.path.abspath(inspect.getfile(self.__class__)))
+                resources_dir = os.path.join(exporter_dir, 'resources')
                 
-                if should_write:
-                    from dars.js_lib import DARS_MIN_JS
-                    with open(dest_js, 'w', encoding='utf-8') as f:
-                        f.write(DARS_MIN_JS)
-            except Exception:
-                pass
+                if os.path.exists(resources_dir):
+                    for filename in os.listdir(resources_dir):
+                        if filename.endswith('.js') or filename.endswith('.js.map'):
+                            src = os.path.join(resources_dir, filename)
+                            dst = os.path.join(lib_dir, filename)
+                            # Copy fresh every time to ensure updates are reflected
+                            shutil.copy2(src, dst)
+            except Exception as e:
+                print(f"[Dars] Error copying runtime resources: {e}")
 
             # --- Cargar configuración si existe y copiar public/assets ---
             try:
@@ -1279,7 +1245,7 @@ self.addEventListener('fetch', event => {
 
     def generate_custom_css(self, app: App) -> str:
         """Genera solo los estilos personalizados de la aplicación"""
-        css_content = self._generate_style_registry_css() + "\n\n"
+        css_content = ""
         
         # Generar estilos hover PRIMERO para que tengan prioridad
         css_content += self._generate_hover_styles(app)
@@ -2236,6 +2202,37 @@ body {
 }
 
 /* Markdown */
+/* Dars Markdown Copy Button Styles */
+.dars-code-copy {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0,0,0,0.6);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.2s ease;
+    z-index: 10;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+pre:hover .dars-code-copy {
+    opacity: 1;
+}
+.dars-code-copy:hover {
+    background: rgba(0,0,0,0.8);
+    transform: translateY(-1px);
+}
+.dars-code-copy.copied {
+    background: #16a34a !important;
+    opacity: 1 !important;
+}
+
 .dars-markdown {
     font-family: var(--dars-font-family);
     line-height: 1.6;
@@ -5365,42 +5362,8 @@ audio.dars-audio {
                     '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" media="(prefers-color-scheme: dark)">\n'
                 )
             
-            # Register Global CSS for Copy Button (if not already registered)
-            if not hasattr(self, '_markdown_styles_registered'):
-                self._markdown_styles_registered = True
-                if not hasattr(self, '_global_css_blocks'):
-                    self._global_css_blocks = []
-                self._global_css_blocks.append("""
-.dars-code-copy {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: rgba(0,0,0,0.6);
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    padding: 5px 10px;
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    opacity: 0;
-    transition: all 0.2s ease;
-    z-index: 10;
-    backdrop-filter: blur(4px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-pre:hover .dars-code-copy {
-    opacity: 1;
-}
-.dars-code-copy:hover {
-    background: rgba(0,0,0,0.8);
-    transform: translateY(-1px);
-}
-.dars-code-copy.copied {
-    background: #16a34a;
-    opacity: 1;
-}
-""")
+            # Copy Button styles are now in runtime_css.css
+            pass
             
             parts = []
             parts.append(css_links)

@@ -1,5 +1,5 @@
 from dars.all import *
-
+from dars.env import DarsEnv
 
 def create_hero():
     return Container(
@@ -134,7 +134,7 @@ def create_hero():
         Button(
             text="Get Started",
             id="get-started-btn",
-            on_click=goToNew("https://ztamdev.github.io/Dars-Framework/docs.html"),
+            on_click=goToNew("/docs.html" if DarsEnv.dev else "https://ztamdev.github.io/Dars-Framework/docs.html"),
             style={
                 "margin-top": "25px",
                 "margin-bottom": "20px",

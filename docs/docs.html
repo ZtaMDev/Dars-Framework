@@ -27,71 +27,7 @@
   <meta content="summary" name="twitter:card"/>
   <link href="runtime_css.css" rel="stylesheet"/>
   <style id="dars-style-registry">
-   /* Dars Markdown Copy Button Styles */
-.dars-code-copy {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: rgba(0,0,0,0.6);
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    padding: 5px 10px;
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    opacity: 0;
-    transition: all 0.2s ease;
-    z-index: 10;
-    backdrop-filter: blur(4px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-pre:hover .dars-code-copy {
-    opacity: 1;
-}
-.dars-code-copy:hover {
-    background: rgba(0,0,0,0.8);
-    transform: translateY(-1px);
-}
-.dars-code-copy.copied {
-    background: #16a34a !important;
-    opacity: 1 !important;
-}
-
-
-
-.dars-code-copy {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: rgba(0,0,0,0.6);
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    padding: 5px 10px;
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    opacity: 0;
-    transition: all 0.2s ease;
-    z-index: 10;
-    backdrop-filter: blur(4px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-pre:hover .dars-code-copy {
-    opacity: 1;
-}
-.dars-code-copy:hover {
-    background: rgba(0,0,0,0.8);
-    transform: translateY(-1px);
-}
-.dars-code-copy.copied {
-    background: #16a34a;
-    opacity: 1;
-}
-
-
-.dars-s-44d5f1e73b {
+   .dars-s-44d5f1e73b {
     background-color: #0d1513;
 }
 
@@ -3369,6 +3305,16 @@ dars<span class="w"> </span>build
         <tr>
          <td>
           <code>
+           dars dev --port 9000
+          </code>
+         </td>
+         <td>
+          Run the dev server on a custom port
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
            dars dev --backend
           </code>
          </td>
@@ -3578,7 +3524,11 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
         <code>
          8000
         </code>
-        using
+        (or the one set in
+        <code>
+         dars.config.json
+        </code>
+        ) using
         <code>
          app.rTimeCompile()
         </code>
@@ -3715,6 +3665,7 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
 <span class="w">  </span><span class="nt">"viteMinify"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">"markdownHighlight"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">"markdownHighlightTheme"</span><span class="p">:</span><span class="w"> </span><span class="s2">"auto"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"port"</span><span class="p">:</span><span class="w"> </span><span class="mi">8000</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">"utility_styles"</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
 <span class="w">  </span><span class="nt">"backendEntry"</span><span class="p">:</span><span class="w"> </span><span class="s2">"backend.api:app"</span>
 <span class="p">}</span>
@@ -3859,6 +3810,18 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
          "backend.api:app"
         </code>
         ). Required for SSR projects.
+       </li>
+       <li>
+        <strong>
+         <code>
+          port
+         </code>
+        </strong>
+        (number): The port for the development preview server. Defaults to
+        <code>
+         8000
+        </code>
+        .
        </li>
       </ul>
       <hr/>
@@ -18388,7 +18351,7 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
     </div>
    </div>
   </div>
-  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1778718774" type="module">
+  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1778816526" type="module">
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js">
   </script>

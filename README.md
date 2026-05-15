@@ -442,6 +442,7 @@ For complete documentation, see the [Backend API Guide](https://ztamdev.github.i
 | `dars info my_app.py`                    | Show info about your app                      |
 | `dars formats`                           | List supported export formats                 |
 | `dars dev`                               | Run the configured entry file with hot preview (app.rTimeCompile) |
+| `dars dev --port 9000`                   | Run dev server on a custom port (overrides config) |
 | `dars dev --backend`                     | Run only the configured backendEntry (FastAPI/SSR backend) |
 | `dars --help`                            | Show help and all CLI options                 |
 
@@ -475,7 +476,7 @@ Then run your file directly:
 python my_app.py
 ```
 
-This will start a local server at http://localhost:8000 so you can view your app in the browser—no manual export needed. You can change the port with:
+This will start a local server at the port specified in your `dars.config.json` (defaults to http://localhost:8000) so you can view your app in the browser—no manual export needed. You can override the port with:
 
 ```bash
 python my_app.py --port 8088
@@ -513,6 +514,7 @@ Example default:
   "utility_styles": {},
   "markdownHighlight": true,
   "markdownHighlightTheme": "auto",
+  "port": 8000,
   "backendEntry": "backend.api:app"
 }
 ```
@@ -528,6 +530,7 @@ Example default:
 - `utility_styles`: Dictionary defining custom utility classes. Keys are class names, values are lists of utility strings or raw CSS properties.
 - `markdownHighlight`: Auto-inject a client-side syntax highlighter for fenced code blocks in Markdown. Default `true`.
  - `backendEntry`: Python import path for your SSR/backend app (e.g. `"backend.api:app"`). Required when your app uses `RouteType.SSR` routes. Used by `dars dev --backend`.
+- `port`: The port for the development preview server. Default `8000`.
 
 Validate your config:
 

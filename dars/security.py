@@ -275,7 +275,7 @@ def minify_output_dir(output_dir: str, extra_skip: Iterable[str] = None, progres
         # It is already minified and toolchains can corrupt it (e.g. emit ESM exports).
         # If you still want to re-minify it, do it with Python-only rjsmin.
         base0 = os.path.basename(full_path)
-        if ext0 in SAFE_JS_EXT and base0 == 'dars.min.js':
+        if ext0 in SAFE_JS_EXT and (base0 in ('dars.min.js', 'dompurify.js') or 'lib' in full_path.split(os.sep)):
             # Fall back to Python-only rjsmin (never run Vite on this file)
             try:
                 with open(full_path, 'r', encoding='utf-8') as f:

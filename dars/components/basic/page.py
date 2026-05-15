@@ -39,6 +39,73 @@ class Page(Component):
             self.add_child(child)
 
     def add_script(self, script):
+        """
+        Adds a script to this page.
+        
+        Supports multiple script types:
+        
+        - **DScript**: Direct Python function compilation to JavaScript
+        - **String**: Inline JavaScript code
+        - **Dictionary**: Raw script object (fallback)
+        - **Utility Chains**: DAP utility functions with promise-based chaining
+        
+        **Script Types:**
+        
+        1. **DScript** - Compile Python to JavaScript:
+           ```python
+           page.add_script(dScript(file_path="script.js"))
+           ```
+        
+        2. **Inline JavaScript**:
+           ```python
+           page.add_script("console.log('Page loaded');")
+           ```
+        
+        3. **Utility Functions** - Chain DAP commands:
+           ```python
+           from dars.scripts.utils_ds import setTimeout, addClass, log
+           
+           # Sequential animations with promise chaining
+           page.add_script(
+               setTimeout(5, addClass("logo", "show"))
+               .then(setTimeout(350, addClass("title", "show")))
+               .then(setTimeout(650, addClass("description", "show")))
+           )
+           ```
+        
+        4. **useWatch** - React to state changes:
+           ```python
+           page.add_script(
+               useWatch("user.name", log("Name changed!"))
+           )
+           ```
+        
+        **Common Utilities:**
+        
+        - **setTimeout(ms, action)**: Execute action after delay (returns Promise)
+        - **addClass(id, class)**: Add CSS class to element
+        - **removeClass(id, class)**: Remove CSS class
+        - **toggleClass(id, class)**: Toggle CSS class
+        - **log(msg)**: Log to console
+        - **navigate(url)**: Navigate to URL
+        - **createComp(target, root)**: Dynamically create components
+        - **updateComp(id, props)**: Update component properties
+        - **deleteComp(id)**: Remove component from DOM
+        
+        **Promise Chaining:**
+        
+        All timeout/async utilities return Promises, allowing sequential execution:
+        
+        ```python
+        page.add_script(
+            setTimeout(100, log("Step 1"))
+            .then(setTimeout(200, log("Step 2")))
+            .then(setTimeout(300, log("Step 3")))
+        )
+        ```
+        
+        Returns self to allow method chaining.
+        """
         self.scripts.append(script)
 
     def useWatch(self, state_path: str, *js_helpers):

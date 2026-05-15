@@ -1206,6 +1206,7 @@ def create_parser(include_hidden: bool = True) -> argparse.ArgumentParser:
     # Dev command (run entry in dev mode)
     dev_parser = subparsers.add_parser('dev', help='Run the configured entry file in development mode')
     dev_parser.add_argument('--project', '-p', default='.', help='Project root where dars.config.json resides (default: .)')
+    dev_parser.add_argument('--port', '-P', type=int, help='Port to run the dev server on (overrides config)')
     dev_parser.add_argument('--backend', action='store_true', help='Run only the configured backendEntry (SSR/API) instead of the frontend entry')
     # English-only: no language option on subparsers
     
@@ -2296,7 +2297,16 @@ def main():
         # Backend/SSR server can be started in a separate terminal with `dars dev --backend` if needed.
         process = None
         try:
-            process = subprocess.Popen([sys.executable, entry], cwd=os.path.dirname(entry))
+            cmd = [sys.executable, entry]
+            # Prioritize CLI arg, then config, then fallback to 8000
+            port_to_pass = getattr(args, 'port', None)
+            if port_to_pass is None and found and "port" in cfg:
+                port_to_pass = cfg["port"]
+            
+            if port_to_pass:
+                cmd.extend(['--port', str(port_to_pass)])
+            
+            process = subprocess.Popen(cmd, cwd=os.path.dirname(entry))
             process.wait()
             sys.exit(process.returncode or 0)
         except KeyboardInterrupt:

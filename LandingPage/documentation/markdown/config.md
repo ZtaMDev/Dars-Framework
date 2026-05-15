@@ -21,6 +21,7 @@ A standard configuration file looks like this:
   "viteMinify": true,
   "markdownHighlight": true,
   "markdownHighlightTheme": "auto",
+  "port": 8000,
   "utility_styles": {},
   "backendEntry": "backend.api:app"
 }
@@ -52,6 +53,7 @@ Dars features a multi-stage minification pipeline to ensure the smallest possibl
 ### 4. Features & Integrations
 - **`markdownHighlight`** (boolean): Automatically injects Prism.js for syntax highlighting in Markdown components.
 - **`backendEntry`** (string): Import path for your FastAPI backend (e.g., `"backend.api:app"`). Required for SSR projects.
+- **`port`** (number): The port for the development preview server. Defaults to `8000`.
 
 ---
 

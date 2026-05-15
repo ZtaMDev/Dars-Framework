@@ -1,3 +1,47 @@
+# Release Notes v1.9.3
+
+> **Configurable Dev Port, Local DOMPurify & Runtime Resource Optimization**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Configurable Development Port
+
+You can now customize the port used by the `dars dev` preview server directly in your project configuration or via CLI:
+
+- **`dars.config.json`**: Added a new `"port"` field (default: `8000`).
+- **CLI Override**: Use `--port` or `-P` to override the configuration at runtime.
+  ```bash
+  dars dev --port 4000
+  ```
+- **Automatic Propagation**: The CLI now correctly propagates the port setting to the underlying application process.
+
+### Localized Runtime Dependencies (CDN-Free)
+
+To improve load times and reliability, especially in offline or restricted environments, we have moved core runtime dependencies from CDNs to local assets:
+
+- **Local DOMPurify**: The framework now includes and uses a local version of `dompurify.js`.
+- **Resource Management**: Core runtime resources are now managed within a dedicated `resources/` directory in the web exporter and copied to the `/lib` directory of the final export.
+
+### Python-Native Resource Minification
+
+The minification pipeline has been extended to ensure all runtime assets are as lean as possible:
+
+- **`rjsmin` Integration**: All JavaScript resources, including `dompurify.js` and the Dars runtime, are now minified using the Python-native `rjsmin` during the export process.
+- **Improved Build Speed**: By avoiding external tools like Vite for core library minification, we maintain a fast and stable build process.
+
+### Runtime Architecture Improvements
+
+- **Resource Decoupling**: The legacy `js_lib.py` has been retired in favor of a file-based resource system. This allows for better code splitting and easier maintenance of the Dars runtime components.
+- **Port Detection Hardening**: Improved the `rTimeCompile` logic to reliably detect the project root and configuration, ensuring that custom settings are respected even when starting the app from different working directories.
+
+---
+
 # Release Notes v1.9.2
 
 > **Documentation Corrections & Complete App Class Docstring**

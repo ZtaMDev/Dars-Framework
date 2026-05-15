@@ -46,11 +46,73 @@ class Page:
     # Métodos para manejar scripts
     # -----------------------------
     def add_script(self, script: Any):
-        """Adds a script to this page.  
-        - If 'script' is an instance (e.g., InlineScript/FileScript/DScript), it is added as is.  
-        - If 'script' is a string, it is interpreted as an InlineScript (code).  
-        - If 'script' is a dict, it is added as is (fallback).  
-        Returns self to allow call chaining."""  
+        """
+        Adds a script to this page.
+        
+        Supports multiple script types:
+        
+        - **DScript**: Direct Python function compilation to JavaScript
+        - **String**: Inline JavaScript code
+        - **Dictionary**: Raw script object (fallback)
+        - **Utility Chains**: DAP utility functions with promise-based chaining
+        
+        **Script Types:**
+        
+        1. **DScript** - Compile Python to JavaScript:
+           ```python
+           page.add_script(dScript(file_path="script.js"))
+           ```
+        
+        2. **Inline JavaScript**:
+           ```python
+           page.add_script("console.log('Page loaded');")
+           ```
+        
+        3. **Utility Functions** - Chain DAP commands:
+           ```python
+           from dars.scripts.utils_ds import setTimeout, addClass, log
+           
+           # Sequential animations with promise chaining
+           page.add_script(
+               setTimeout(5, addClass("logo", "show"))
+               .then(setTimeout(350, addClass("title", "show")))
+               .then(setTimeout(650, addClass("description", "show")))
+           )
+           ```
+        
+        4. **useWatch** - React to state changes:
+           ```python
+           page.add_script(
+               useWatch("user.name", log("Name changed!"))
+           )
+           ```
+        
+        **Common Utilities:**
+        
+        - **setTimeout(ms, action)**: Execute action after delay (returns Promise)
+        - **addClass(id, class)**: Add CSS class to element
+        - **removeClass(id, class)**: Remove CSS class
+        - **toggleClass(id, class)**: Toggle CSS class
+        - **log(msg)**: Log to console
+        - **navigate(url)**: Navigate to URL
+        - **createComp(target, root)**: Dynamically create components
+        - **updateComp(id, props)**: Update component properties
+        - **deleteComp(id)**: Remove component from DOM
+        
+        **Promise Chaining:**
+        
+        All timeout/async utilities return Promises, allowing sequential execution:
+        
+        ```python
+        page.add_script(
+            setTimeout(100, log("Step 1"))
+            .then(setTimeout(200, log("Step 2")))
+            .then(setTimeout(300, log("Step 3")))
+        )
+        ```
+        
+        Returns self to allow method chaining.
+        """
 
         # si es str => interpretarlo como inline
         if isinstance(script, str):
@@ -614,15 +676,6 @@ class App:
             except Exception:
                 console = None
 
-        # ---- PORT ----
-        if port is None:
-            port = 8000
-            for i, arg in enumerate(sys.argv):
-                if arg in ('--port', '-p') and i + 1 < len(sys.argv):
-                    try:
-                        port = int(sys.argv[i + 1])
-                    except:
-                        pass
 
         # ---- NORMALIZE EXTENSIONS ----
         def _normalize_exts(exts):
@@ -777,6 +830,27 @@ class App:
         # Fix logic: Use self.desktop attribute if available, regardless of config
         is_desktop = bool(getattr(self, 'desktop', False) or fmt == 'desktop')
 
+        # ---- PORT (CONFIG DRIVEN) ----
+        if port is None:
+            # 1. Try to get port from config
+            if cfg_found and "port" in cfg:
+                try:
+                    port = int(cfg["port"])
+                except:
+                    pass
+            
+            # 2. Default if not in config
+            if port is None:
+                port = 8000
+                
+            # 3. CLI override always takes precedence
+            for i, arg in enumerate(sys.argv):
+                if arg in ('--port', '-p') and i + 1 < len(sys.argv):
+                    try:
+                        port = int(sys.argv[i + 1])
+                    except:
+                        pass
+        
         # ---- STARTUP SPINNER ----
         startup_status = None
         if console:
@@ -1674,7 +1748,61 @@ class App:
         self._spa_error_page = onErrorComp
         
     def add_script(self, script: 'Script'):
-        """Adds a script to the app"""
+        """
+        Adds a global script to the application (runs on every page).
+        
+        Global scripts are injected into every page of your application and can be used for:
+        - Global utilities and helpers
+        - Application-wide event listeners
+        - Initialization code
+        - Analytics and tracking
+        - Feature detection
+        
+        **Supported Script Types:**
+        
+        1. **DScript** - Compiled Python functions:
+           ```python
+           app.add_script(dScript(file_path="global.js"))
+           ```
+        
+        2. **Inline JavaScript**:
+           ```python
+           app.add_script("window.appVersion = '1.0.0';")
+           ```
+        
+        3. **Utility Chains** - Global DAP utilities:
+           ```python
+           from dars.scripts.utils_ds import setTimeout, addClass, log
+           
+           # Global theme initialization with animations
+           app.add_script(
+               setTimeout(100, addClass("app-container", "initialized"))
+               .then(setTimeout(500, log("App ready!")))
+           )
+           ```
+        
+        4. **useWatch** - Global state monitoring:
+           ```python
+           app.add_script(
+               useWatch("theme", log("Theme changed!"))
+           )
+           ```
+        
+        **Example: Global animations on page load**
+        
+        ```python
+        from dars.scripts.utils_ds import setTimeout, addClass
+        
+        # Add fade-in animation for all pages
+        app.add_script(
+            setTimeout(5, addClass("app-content", "fade-in"))
+            .then(setTimeout(500, addClass("app-content", "show")))
+        )
+        ```
+        
+        **Note:** Global scripts are included in every page and should be lightweight.
+        For page-specific scripts, use `page.add_script()` instead.
+        """
         self.scripts.append(script)
 
     def useWatch(self, state_path: str, *js_helpers):

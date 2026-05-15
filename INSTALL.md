@@ -1,4 +1,4 @@
-# Installation Guide - Dars Framework
+# Installation Guide
 
 ## Quick Installation
 
@@ -10,6 +10,13 @@ pip install dars-framework
 
 This will install Dars and all its dependencies automatically.
 
+## VS Code Extension
+
+You can install the official **Dars Framework** VS Code extension to have the dars dev tools.
+
+- **VS Code Marketplace**: https://marketplace.visualstudio.com/items?itemName=ZtaMDev.dars-framework
+- **Open VSX**: https://open-vsx.org/extension/ztamdev/dars-framework
+
 ## CLI Usage
 
 - [Dars CLI](#dars-cli-reference)
@@ -19,7 +26,7 @@ Once installed, the `dars` command will be available in your terminal. You can u
 ### Export Applications
 
 ```bash
-dars build
+dars export my_app.py --format html --output ./my_app_web
 ```
 
 ### Preview Applications
@@ -70,8 +77,8 @@ from dars.components.basic.text import Text
 from dars.components.basic.container import Container
 
 app = App(title="My First App")
-container = Container(style={'padding': '20px'}) # Use ' to escape quotes
-text = Text(text="Hello Dars!", style={'font-size': '24px'}) # Use ' to escape quotes
+container = Container(style="p-5") # Use ' to escape quotes
+text = Text(text="Hello Dars!", style="text-2xl") # Use ' to escape quotes
 
 container.add_child(text)
 app.set_root(container)
