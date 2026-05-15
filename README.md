@@ -11,7 +11,6 @@
   <a href="https://deepwiki.com/ZtaMDev/Dars-Framework"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
 </p>
 
-
 <p align="center">
   <em>Dars is a Full-Stack multiplatform Python UI framework for building modern, interactive web and desktop apps with Python code. Seamlessly integrated with FastAPI, it allows you to build complete applications with Server-Side Rendering (SSR) and reactive SPA capabilities also classic multipage html and desktop apps in a single codebase.</em>
 
@@ -19,8 +18,9 @@
 
 <div align="center">
 
-Official [Website](https://ztamdev.github.io/Dars-Framework/) | 
-Documentation [Docs](https://ztamdev.github.io/Dars-Framework/docs.html) | 
+Official [Website](https://ztamdev.github.io/Dars-Framework/) |
+Documentation [Docs](https://ztamdev.github.io/Dars-Framework/docs.html) |
+Official [Roadmap](https://ztamdev.github.io/Dars-Framework/roadmap.html) |
 Extension for VSCode [here](https://marketplace.visualstudio.com/items?itemName=ZtaMDev.dars-framework) and OpenVSX version [here](https://open-vsx.org/extension/ztamdev/dars-framework)
 
 </div>
@@ -32,6 +32,7 @@ pip install dars-framework
 Try dars without installing nothing just visit the [Dars Playground](https://dars-playground.vercel.app/)
 
 ## How It Works
+
 - Build your UI using Python classes and components (like Text, Button, Container, Page, etc).
 - Preview instantly with hot-reload using `app.rTimeCompile()`.
 - Export your app to static/dynamic/ssr web files with a single CLI command.
@@ -40,6 +41,7 @@ Try dars without installing nothing just visit the [Dars Playground](https://dar
 - For more information visit the [Documentation](https://ztamdev.github.io/Dars-Framework/docs.html)
 
 ## Quick Example: Your First App
+
 ```python
 from dars.all import *
 
@@ -50,7 +52,7 @@ state = State("app", title_val="Simple Counter", count=0)
 
 # 2. Define Route
 @route("/")
-def index(): 
+def index():
     return Page(
         # 3. Use useValue for app text
         Text(
@@ -90,7 +92,7 @@ def index():
         ),
         style="flex flex-col items-center justify-center h-[100vh] ffam-[Arial] bg-[#f0f2f5]",
 
-    ) 
+    )
 
 # 8. Add page
 app.add_page("index", index(), title="index")
@@ -107,9 +109,11 @@ if __name__ == "__main__":
 Dars Framework features **powerful state management system**, designed for different use cases.
 
 ### State V2
+
 Modern, Pythonic state management for reactive updates. Best for counters, timers, and component interactions using hooks.
 
 **Hooks System:**
+
 - `useDynamic()`: Reactive state binding for automatic UI updates.
 - `useValue()`: Set initial values from state (non-reactive).
 - `useWatch()`: Monitor state changes and trigger side effects.
@@ -127,7 +131,7 @@ def index():
     return Page(
         # Bind to state with useDynamic
         Text(text=useDynamic("counter.count"), style={"font-size": "24px"}),
-        
+
         # Update state on click
         Button("Increment", on_click=state.count.increment(1)),
         Button("Decrement", on_click=state.count.decrement(1)),
@@ -140,7 +144,7 @@ if __name__ == "__main__":
     app.rTimeCompile()
 ```
 
-**String ID Support:** `State()` can accept a string ID (e.g., `State("my-state", ...)`). 
+**String ID Support:** `State()` can accept a string ID (e.g., `State("my-state", ...)`).
 
 > [!WARNING]
 > **Important:** When using hooks, the State ID is used for binding. **Do not use an ID that belongs to another unrelated component**, as hooks use this ID as the State ID. Using a conflicting ID may cause unexpected behavior or state collisions.
@@ -174,6 +178,7 @@ button.on_click = sequence(
 ```
 
 **Available Animations:**
+
 - **Opacity:** `fadeIn`, `fadeOut`
 - **Movement:** `slideIn`, `slideOut` (up, down, left, right)
 - **Scaling:** `scaleIn`, `scaleOut`, `pulse`
@@ -215,7 +220,6 @@ button.on_click = sequence(
 ```
 
 ---
-
 
 ## Routing System (SPA & SSR)
 
@@ -280,7 +284,7 @@ def dashboard():
             Link("Settings", href="/dashboard/settings"),
             Link("Profile", href="/dashboard/profile"),
             id="nav",
-            
+
         ),
         Outlet(),  # Child routes render here
         style={"padding": "20px"}
@@ -315,6 +319,7 @@ app.set_404_page(custom_404)
 ### Hot Reload for SPAs
 
 The development preview server includes intelligent hot reload:
+
 - Detects changes and reloads automatically
 - Stops polling after 10 errors to prevent browser lag
 - Clean console output without spam
@@ -417,10 +422,10 @@ callback=(
 
 ### Available HTTP Methods
 
-- **`get(id, url, **options)`** - GET request
-- **`post(id, url, body, **options)`** - POST request  
-- **`put(id, url, body, **options)`** - PUT request
-- **`delete(id, url, **options)`** - DELETE request
+- **`get(id, url, **options)`\*\* - GET request
+- **`post(id, url, body, **options)`\*\* - POST request
+- **`put(id, url, body, **options)`\*\* - PUT request
+- **`delete(id, url, **options)`\*\* - DELETE request
 
 For complete documentation, see the [Backend API Guide](https://ztamdev.github.io/Dars-Framework/docs.html#backend-http-utilities).
 
@@ -428,23 +433,23 @@ For complete documentation, see the [Backend API Guide](https://ztamdev.github.i
 
 ## CLI Usage
 
-| Command                                   | What it does                                 |
-|-------------------------------------------|----------------------------------------------|
-| `dars export my_app.py --format html`     | Export app to HTML/CSS/JS in `./my_app_web`   |
-| `dars init --type desktop`               | Scaffold desktop-capable project (BETA)       |
-| `dars init --type ssr`                   | Scaffold full-stack SSR project (SSR + API)   |
-| `dars build` (desktop config)            | Build desktop app artifacts (BETA)            |
-| `dars preview ./my_app_web`              | Preview exported app locally                  |
-| `dars init my_project`                   | Create a new Dars project (also creates dars.config.json) |
-| `dars init --update`                     | Create/Update dars.config.json in current dir |
-| `dars build`                             | Build using dars.config.json (entry/outdir/format) |
-| `dars config validate`                   | Validate dars.config.json and print report    |
-| `dars info my_app.py`                    | Show info about your app                      |
-| `dars formats`                           | List supported export formats                 |
-| `dars dev`                               | Run the configured entry file with hot preview (app.rTimeCompile) |
-| `dars dev --port 9000`                   | Run dev server on a custom port (overrides config) |
-| `dars dev --backend`                     | Run only the configured backendEntry (FastAPI/SSR backend) |
-| `dars --help`                            | Show help and all CLI options                 |
+| Command                               | What it does                                                      |
+| ------------------------------------- | ----------------------------------------------------------------- |
+| `dars export my_app.py --format html` | Export app to HTML/CSS/JS in `./my_app_web`                       |
+| `dars init --type desktop`            | Scaffold desktop-capable project (BETA)                           |
+| `dars init --type ssr`                | Scaffold full-stack SSR project (SSR + API)                       |
+| `dars build` (desktop config)         | Build desktop app artifacts (BETA)                                |
+| `dars preview ./my_app_web`           | Preview exported app locally                                      |
+| `dars init my_project`                | Create a new Dars project (also creates dars.config.json)         |
+| `dars init --update`                  | Create/Update dars.config.json in current dir                     |
+| `dars build`                          | Build using dars.config.json (entry/outdir/format)                |
+| `dars config validate`                | Validate dars.config.json and print report                        |
+| `dars info my_app.py`                 | Show info about your app                                          |
+| `dars formats`                        | List supported export formats                                     |
+| `dars dev`                            | Run the configured entry file with hot preview (app.rTimeCompile) |
+| `dars dev --port 9000`                | Run dev server on a custom port (overrides config)                |
+| `dars dev --backend`                  | Run only the configured backendEntry (FastAPI/SSR backend)        |
+| `dars --help`                         | Show help and all CLI options                                     |
 
 Tip: use `dars doctor` to review optional tooling that can enhance bundling/minification.
 
@@ -529,7 +534,7 @@ Example default:
 - `viteMinify`: Toggle the Vite/esbuild minifier for JS/CSS. Default `true`.
 - `utility_styles`: Dictionary defining custom utility classes. Keys are class names, values are lists of utility strings or raw CSS properties.
 - `markdownHighlight`: Auto-inject a client-side syntax highlighter for fenced code blocks in Markdown. Default `true`.
- - `backendEntry`: Python import path for your SSR/backend app (e.g. `"backend.api:app"`). Required when your app uses `RouteType.SSR` routes. Used by `dars dev --backend`.
+- `backendEntry`: Python import path for your SSR/backend app (e.g. `"backend.api:app"`). Required when your app uses `RouteType.SSR` routes. Used by `dars dev --backend`.
 - `port`: The port for the development preview server. Default `8000`.
 
 Validate your config:

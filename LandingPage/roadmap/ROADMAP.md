@@ -4,7 +4,6 @@ This document outlines the development roadmap for Dars Framework. The goal is t
 
 ## Project Metrics
 
-- **Total LOC**: ~836,931 lines
 - **Current Version**: v1.9.3
 - **Target**: v2.0.0 — Complete Production-Grade Fullstack Python Framework
 

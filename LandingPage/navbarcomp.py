@@ -36,6 +36,11 @@ def create_navbar():
             style="text-[#a0cfc0] no-underline margin-[0_15px] font-medium fs-[16px] transition-all duration-300 ease-in-out padding-[8px_16px] rounded-[6px]"
         ),
         Link(
+            "Roadmap",
+            href="/roadmap.html" if DarsEnv.dev else "https://ztamdev.github.io/Dars-Framework/roadmap.html",
+            style="text-[#a0cfc0] no-underline margin-[0_15px] font-medium fs-[16px] transition-all duration-300 ease-in-out padding-[8px_16px] rounded-[6px]"
+        ),
+        Link(
             "PlayGround",
             href="https://dars-playground.vercel.app/",
             style="text-[#a0cfc0] no-underline margin-[0_15px] font-medium fs-[16px] transition-all duration-300 ease-in-out padding-[8px_16px] rounded-[6px]"

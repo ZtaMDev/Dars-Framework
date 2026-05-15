@@ -1,0 +1,2423 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="Dars framework landing page for the UI multiplatform python framework" name="description"/>
+  <meta content="ZMDev" name="author"/>
+  <meta content="framework, python, python framework, dars, dars framework, ui components, declarative UI" name="keywords"/>
+  <meta content="index, follow" name="robots"/>
+  <meta content="width=device-width, initial-scale=1.0, user-scalable=yes" name="viewport"/>
+  <meta content="#0d1513" name="theme-color"/>
+  <meta content="yes" name="mobile-web-app-capable"/>
+  <meta content="yes" name="apple-mobile-web-app-capable"/>
+  <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
+  <meta content="Dars Framework" name="apple-mobile-web-app-title"/>
+  <meta content="#0d1513" name="theme-color"/>
+  <meta content="#0d1513" media="(prefers-color-scheme: light)" name="theme-color"/>
+  <meta content="#0d1513" media="(prefers-color-scheme: dark)" name="theme-color"/>
+  <title>
+   Dars Roadmap
+  </title>
+  <link href="Dars-logo.png" rel="icon" type="image/png"/>
+  <link href="Dars-logo.png" rel="apple-touch-icon"/>
+  <link href="Dars-logo.png" rel="apple-touch-icon" sizes="180x180"/>
+  <meta content="Dars Framework" property="og:title"/>
+  <meta content="Dars framework landing page for the UI multiplatform python framework" property="og:description"/>
+  <meta content="website" property="og:type"/>
+  <meta content="summary" name="twitter:card"/>
+  <link href="runtime_css.css" rel="stylesheet"/>
+  <style id="dars-style-registry">
+   .dars-s-44d5f1e73b {
+    background-color: #0d1513;
+}
+
+.dars-s-7b86d29f10 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    padding: 0 40px;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 999;
+    backdrop-filter: blur(12px);
+    background-color: rgba(20, 30, 27, 0.6);
+    border-bottom: 1px solid rgba(100, 255, 200, 0.1);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.dars-s-e367a650f8 {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    height: 100%;
+}
+
+.dars-s-1c61bda2a5 {
+    object-fit: contain;
+    margin-right: 10px;
+}
+
+.dars-s-46b1b7db03 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #a2ffe2;
+    margin: 0;
+}
+
+.dars-s-40ffeb2872 {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+    gap: 15px;
+}
+
+.dars-s-9d1280a5f9 {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+}
+
+.dars-s-773260a4c6 {
+    color: #a0cfc0;
+    text-decoration: none;
+    margin: 0 15px;
+    font-weight: 500;
+    font-size: 16px;
+    transition-property: all;
+    transition-duration: 300ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 8px 16px;
+    border-radius: 6px;
+}
+
+.dars-s-a7fb8b47dc {
+    display: none;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+}
+
+.dars-s-7acb553963 {
+    display: none;
+    background-color: rgba(162, 255, 226, 0.1);
+    border-color: rgba(162, 255, 226, 0.3);
+    border-style: solid;
+    border-radius: 10px;
+    cursor: pointer;
+    padding: 0;
+    z-index: 1000;
+    transition-property: all;
+    transition-duration: 300ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.dars-s-a523e4c679 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    position: relative;
+}
+
+.dars-s-bd25a63519 {
+    width: 24px;
+    height: 2px;
+    background-color: #a2ffe2;
+    border-radius: 2px;
+    transition-property: all;
+    transition-duration: 300ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    margin: 3px 0;
+}
+
+.dars-s-122e9d8767 {
+    width: 18px;
+    height: 2px;
+    background-color: #a2ffe2;
+    border-radius: 2px;
+    transition-property: all;
+    transition-duration: 300ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    margin: 3px 0;
+}
+
+.dars-s-bb0b285d8a {
+    display: none;
+    position: fixed;
+    top: 64px;
+    left: 0;
+    width: 100%;
+    background-color: rgba(15, 25, 22, 0.98);
+    backdrop-filter: blur(25px);
+    border-top: 1px solid rgba(100, 255, 200, 0.15);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    z-index: 999;
+    flex-direction: column;
+}
+
+.dars-s-8f3a8c1621 {
+    display: block;
+    color: #a0cfc0;
+    text-decoration: none;
+    padding: 18px 25px;
+    font-weight: 500;
+    font-size: 18px;
+    transition-property: all;
+    transition-duration: 300ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    border-bottom: 1px solid rgba(100, 255, 200, 0.1);
+}
+
+.dars-s-f7e6391ca1 {
+    display: block;
+    color: #a0cfc0;
+    text-decoration: none;
+    padding: 18px 25px;
+    font-weight: 500;
+    font-size: 18px;
+    transition-property: all;
+    transition-duration: 300ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dars-s-491b197b83 {
+    min-height: 100vh;
+    display: flex;
+    height: auto;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: linear-gradient(135deg, #0f1e1a 0%, #132d24 100%);
+    position: relative;
+    padding-top: 80px;
+    padding: 80px 20px 40px;
+}
+
+.dars-s-331ccf4d1c {
+    opacity: 0;
+    transform: scale(0.8);
+    margin-bottom: 20px;
+    transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dars-s-17903ced0e {
+    font-size: 64px;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(90deg, #92ffe5, #38c49f, #7dfdd8, #92ffe5);
+    background-size: 300% 300%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.8s ease-out;
+    animation: colorCycle 6s ease-in-out infinite alternate;
+}
+
+.dars-s-8082a84e13 {
+    font-size: 20px;
+    color: #a0cfc0;
+    max-width: 800px;
+    text-align: center;
+    margin-top: 20px;
+    opacity: 0;
+    line-height: 1.6;
+    transform: translateY(10px);
+    transition: all 0.9s ease-out;
+}
+
+.dars-s-1d3d8d0500 {
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.9s ease-out;
+}
+
+.dars-s-3af8eaf383 {
+    display: flex;
+    align-items: center;
+    background: rgba(20, 30, 27, 0.6);
+    border: 1px solid rgba(100,255,200,0.1);
+    border-radius: 8px;
+    padding: 0px;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    max-width: fit-content;
+}
+
+.dars-s-6d6cbe40e8 {
+    font-family: monospace;
+    font-size: 18px;
+    color: #92ffe5;
+    background: rgba(20, 30, 27, 0.6);
+    padding: 12px 20px;
+    border-radius: 8px;
+    border: 1px solid rgba(100,255,200,0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    margin-right: 0px;
+    flex: 1;
+}
+
+.dars-s-fed6e6fe34 {
+    background: rgba(20, 30, 27, 0.9);
+    border: 1px solid rgba(100,255,200,0.3);
+    color: #92ffe5;
+    padding: 12px 5px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    opacity: 0;
+    width: 0px;
+    overflow: hidden;
+    white-space: nowrap;
+    margin-left: 0px;
+    flex-shrink: 0;
+}
+
+.dars-s-99e81f041c {
+    margin-top: 25px;
+    margin-bottom: 20px;
+    padding: 14px 42px;
+    font-size: 18px;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    opacity: 0;
+}
+
+.dars-s-7896c298b1 {
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #0a1512 0%, #0f1e1a 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.dars-s-255b435bbe {
+    font-size: 48px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 20px;
+    background: linear-gradient(90deg, #92ffe5, #38c49f, #7dfdd8, #92ffe5);
+    background-size: 300% 300%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    animation: colorCycle 6s ease-in-out infinite alternate;
+}
+
+.dars-s-2e8c681a45 {
+    font-size: 20px;
+    color: #a0cfc0;
+    text-align: center;
+    margin-bottom: 60px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.dars-s-e60bd1be03 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.dars-s-7e9087e9c6 {
+    background: rgba(20, 30, 27, 0.6);
+    border: 1px solid rgba(100,255,200,0.1);
+    border-radius: 16px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: translateY(40px) rotateX(10deg);
+    transition: all 0.6s ease 0.0s;
+}
+
+.dars-s-e7fb390cb3 {
+    text-align: center;
+    padding: 40px 30px;
+}
+
+.dars-s-fe3e68b908 {
+    margin-bottom: 20px;
+    filter: drop-shadow(0 0 10px rgba(162, 255, 226, 0.3));
+    transition: all 0.3s ease;
+}
+
+.dars-s-0f56c0815d {
+    font-size: 24px;
+    font-weight: 700;
+    color: #a2ffe2;
+    margin-bottom: 12px;
+}
+
+.dars-s-e6dba9fc54 {
+    font-size: 16px;
+    color: #a0cfc0;
+    line-height: 1.5;
+}
+
+.dars-s-80f5590a9b {
+    background: rgba(20, 30, 27, 0.6);
+    border: 1px solid rgba(100,255,200,0.1);
+    border-radius: 16px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: translateY(40px) rotateX(10deg);
+    transition: all 0.6s ease 0.1s;
+}
+
+.dars-s-b352dabad1 {
+    background: rgba(20, 30, 27, 0.6);
+    border: 1px solid rgba(100,255,200,0.1);
+    border-radius: 16px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: translateY(40px) rotateX(10deg);
+    transition: all 0.6s ease 0.2s;
+}
+
+.dars-s-8b69500417 {
+    background: rgba(20, 30, 27, 0.6);
+    border: 1px solid rgba(100,255,200,0.1);
+    border-radius: 16px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: translateY(40px) rotateX(10deg);
+    transition: all 0.6s ease 0.3s;
+}
+
+.dars-s-618fc3e02f {
+    background: rgba(20, 30, 27, 0.6);
+    border: 1px solid rgba(100,255,200,0.1);
+    border-radius: 16px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: translateY(40px) rotateX(10deg);
+    transition: all 0.6s ease 0.4s;
+}
+
+.dars-s-72a307dcd3 {
+    background: rgba(20, 30, 27, 0.6);
+    border: 1px solid rgba(100,255,200,0.1);
+    border-radius: 16px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: translateY(40px) rotateX(10deg);
+    transition: all 0.6s ease 0.5s;
+}
+
+.dars-s-c41e03322a {
+    padding: 50px 40px;
+    background: linear-gradient(135deg, #0f1e1a 0%, #132d24 100%);
+    min-height: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.dars-s-fcfe6da3b4 {
+    font-size: 20px;
+    color: #a0cfc0;
+    text-align: center;
+    margin-bottom: 40px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.dars-s-205029c095 {
+    background: rgba(20, 30, 27, 0.6);
+    border: 1px solid rgba(100,255,200,0.1);
+    border-radius: 16px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    transition: all 0.6s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.dars-s-0f852a3959 {
+    margin-bottom: 20px;
+    filter: drop-shadow(0 0 10px rgba(162, 255, 226, 0.4));
+    transition: all 0.3s ease;
+}
+
+.dars-s-eecfabddad {
+    font-size: 16px;
+    color: #a0cfc0;
+    line-height: 1.5;
+    display: inline;
+}
+
+.dars-s-a4b4b8d262 {
+    font-size: 16px;
+    color: #92ffe5;
+    font-weight: 600;
+    font-family: monospace;
+    background: rgba(162, 255, 226, 0.1);
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline;
+    line-height: 1.5;
+}
+
+.dars-s-2bf2b9dc50 {
+    background: linear-gradient(135deg, #0a1512 0%, #0f1e1a 100%);
+    margin-top: auto;
+}
+
+.dars-s-b9edec0647 {
+    background: rgba(10, 15, 13, 0.8);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(100,255,200,0.15);
+}
+
+.dars-s-ad051c31bc {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 50px 20px;
+}
+
+.dars-s-32330b2fbf {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.dars-s-9093a9afde {
+    margin-right: 15px;
+    filter: drop-shadow(0 0 10px rgba(162, 255, 226, 0.4));
+}
+
+.dars-s-3705a9abea {
+    text-align: left;
+}
+
+.dars-s-df9433d016 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #a2ffe2;
+    margin-bottom: 5px;
+}
+
+.dars-s-9ff400f3b3 {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
+    justify-content: space-between;
+    margin-bottom: 30px;
+}
+
+.dars-s-fe64e3094d {
+    flex: 1;
+    min-width: 150px;
+}
+
+.dars-s-8d9bf8c5ed {
+    font-size: 18px;
+    font-weight: 600;
+    color: #a2ffe2;
+    margin-bottom: 15px;
+}
+
+.dars-s-b5b74dba69 {
+    color: #a0cfc0;
+    text-decoration: none;
+    display: block;
+    margin-bottom: 8px;
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+.dars-s-8161a2a3ff {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 200px;
+}
+
+.dars-s-474933a055 {
+    color: #a0cfc0;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 15px;
+}
+
+.dars-s-9a07c4617d {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 20px;
+    border-top: 1px solid rgba(100,255,200,0.1);
+}
+
+.dars-s-b531c31f9b {
+    flex: 1;
+}
+
+.dars-s-132d246545 {
+    color: #a0cfc0;
+    font-size: 14px;
+    opacity: 0.7;
+}
+
+.dars-s-b59da3237c {
+    flex: 1;
+    text-align: right;
+}
+
+.dars-s-7c258fc573 {
+    color: #a0cfc0;
+    font-size: 14px;
+    opacity: 0.7;
+    display: inline;
+}
+
+.dars-s-cb2830d9c8 {
+    color: #a2ffe2;
+    text-decoration: none;
+    font-weight: 600;
+    display: inline;
+    font-size: 14px;
+}
+
+.dars-s-87ae4f7f12 {
+    background: linear-gradient(135deg, #0f1e1a 0%, #132d24 100%);
+}
+
+.dars-s-b781be11b3 {
+    margin-left: 280px;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0f1e1a 0%, #132d24 100%);
+    transition: margin-left 0.3s ease;
+}
+
+.dars-s-bd33f94e8d {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    padding: 28px 32px;
+    border-bottom: 1px solid rgba(146, 255, 229, 0.06);
+}
+
+.dars-s-cbf41fcd38 {
+    filter: drop-shadow(0 0 16px rgba(146, 255, 229, 0.25));
+}
+
+.dars-s-35c17a2b7e {
+    display: flex;
+    flex-direction: column;
+}
+
+.dars-s-2218751734 {
+    font-size: 32px;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(90deg, #92ffe5, #38c49f);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    letter-spacing: -0.3px;
+}
+
+.dars-s-d08abf7286 {
+    font-size: 15px;
+    color: rgba(160, 207, 192, 0.7);
+    margin: 4px 0 0 0;
+}
+
+.dars-s-c59e376995 {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.dars-s-824bf405dd {
+    font-size: 32px;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(90deg, #7dfdd8, #38c49f, #92ffe5);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    letter-spacing: -0.3px;
+}
+
+.dars-s-37463ec281 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 100px 20px 40px;
+    background: linear-gradient(135deg, #0f1e1a 0%, #132d24 100%);
+    border-bottom: 1px solid rgba(146, 255, 229, 0.08);
+}
+
+.dars-s-4d96099fc3 {
+    margin-bottom: 16px;
+    filter: drop-shadow(0 0 20px rgba(146, 255, 229, 0.3));
+}
+
+.dars-s-abb275b647 {
+    font-size: 42px;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(90deg, #92ffe5, #38c49f, #7dfdd8);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    letter-spacing: -0.5px;
+}
+
+.dars-s-3723e9a52b {
+    font-size: 17px;
+    color: #a0cfc0;
+    max-width: 600px;
+    text-align: center;
+    margin-top: 12px;
+    line-height: 1.6;
+    opacity: 0.85;
+}
+
+.dars-s-6b1dbd1ddb {
+    width: 280px;
+    height: 8px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 6px;
+    margin-top: 20px;
+    overflow: hidden;
+}
+
+.dars-s-271988dc7d {
+    height: 100%;
+    border-radius: 6px;
+    background: linear-gradient(90deg, #10b981, #38c49f, #92ffe5);
+    width: 0%;
+    transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+}
+
+.dars-s-18d5394e24 {
+    font-size: 13px;
+    color: rgba(160, 207, 192, 0.6);
+    margin-top: 8px;
+    font-family: monospace;
+}
+
+.dars-s-a4c1043079 {
+    min-height: 60vh;
+    background: linear-gradient(180deg, #132d24 0%, #0f1e1a 100%);
+}
+
+.dars-s-2d158b6599 {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 24px 60px;
+    width: 100%;
+}
+  </style>
+  <link href="styles.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet"/>
+ </head>
+ <body>
+  <div class="dars-page dars-s-44d5f1e73b" id="page_0">
+   <div class="dars-container" id="container_0_0">
+    <nav class="dars-navbar dars-s-7b86d29f10" id="dars-navbar">
+     <div class="dars-navbar-nav">
+      <div class="dars-container dars-s-e367a650f8" id="navbar-left">
+       <img alt="Logo" class="dars-image dars-s-1c61bda2a5" height="38px" id="image_0_0_0_0_0" src="Dars-logo.png" width="38px"/>
+       <span class="dars-text dars-s-46b1b7db03" id="text_0_0_0_0_1">
+        Dars Framework
+       </span>
+      </div>
+      <div class="dars-container dars-s-40ffeb2872" id="container_0_0_0_1">
+       <div class="dars-container dars-s-9d1280a5f9" id="navbar-right">
+        <a class="dars-link dars-s-773260a4c6" href="https://ztamdev.github.io/Dars-Framework/" id="link_0_0_0_1_0_0" target="_self">
+         Home
+        </a>
+        <a class="dars-link dars-s-773260a4c6" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_0_0_0_1_0_1" target="_self">
+         Documentation
+        </a>
+        <a class="dars-link dars-s-773260a4c6" href="https://ztamdev.github.io/Dars-Framework/releases.html" id="link_0_0_0_1_0_2" target="_self">
+         Releases
+        </a>
+        <a class="dars-link dars-s-773260a4c6" href="https://ztamdev.github.io/Dars-Framework/roadmap.html" id="link_0_0_0_1_0_3" target="_self">
+         Roadmap
+        </a>
+        <a class="dars-link dars-s-773260a4c6" href="https://dars-playground.vercel.app/" id="link_0_0_0_1_0_4" target="_self">
+         PlayGround
+        </a>
+        <a class="dars-link dars-s-773260a4c6" href="https://github.com/ZtaMDev/Dars-Framework" id="link_0_0_0_1_0_5" target="_self">
+         GitHub
+        </a>
+       </div>
+       <div class="dars-container dars-s-a7fb8b47dc" id="hamburger-menu">
+        <div class="dars-container dars-s-7acb553963" id="hamburger-btn">
+         <div class="dars-container dars-s-a523e4c679" id="container_0_0_0_1_1_0_0">
+          <div class="dars-container dars-s-bd25a63519" id="container_0_0_0_1_1_0_0_0">
+          </div>
+          <div class="dars-container dars-s-bd25a63519" id="container_0_0_0_1_1_0_0_1">
+          </div>
+          <div class="dars-container dars-s-122e9d8767" id="container_0_0_0_1_1_0_0_2">
+          </div>
+         </div>
+        </div>
+        <div class="dars-container dars-s-bb0b285d8a" id="mobile-menu">
+         <a class="dars-link dars-s-8f3a8c1621" href="https://ztamdev.github.io/Dars-Framework/" id="link_0_0_0_1_1_1_0" target="_self">
+          Home
+         </a>
+         <a class="dars-link dars-s-8f3a8c1621" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_0_0_0_1_1_1_1" target="_self">
+          Documentation
+         </a>
+         <a class="dars-link dars-s-8f3a8c1621" href="https://ztamdev.github.io/Dars-Framework/releases.html" id="link_0_0_0_1_1_1_2" target="_self">
+          Releases
+         </a>
+         <a class="dars-link dars-s-8f3a8c1621" href="https://dars-playground.vercel.app/" id="link_0_0_0_1_1_1_3" target="_self">
+          PlayGround
+         </a>
+         <a class="dars-link dars-s-f7e6391ca1" href="https://github.com/ZtaMDev/Dars-Framework" id="link_0_0_0_1_1_1_4" target="_self">
+          GitHub
+         </a>
+        </div>
+       </div>
+      </div>
+     </div>
+    </nav>
+   </div>
+   <div class="dars-container dars-s-37463ec281" id="roadmap-hero">
+    <img alt="Dars Framework Logo" class="dars-image dars-s-4d96099fc3" height="80px" id="image_0_1_0" src="Dars-logo.png" width="80px"/>
+    <span class="dars-text dars-s-abb275b647" id="text_0_1_1">
+     Development Roadmap
+    </span>
+    <span class="dars-text dars-s-3723e9a52b" id="text_0_1_2">
+     Track the journey from v1.9.3 to v2.0.0 — the complete production-grade fullstack Python framework.
+    </span>
+    <div class="dars-container dars-s-6b1dbd1ddb" id="container_0_1_3">
+     <div class="dars-container dars-s-271988dc7d" id="roadmap-progress-fill">
+     </div>
+    </div>
+    <span class="dars-text dars-s-18d5394e24" id="roadmap-progress-text">
+     0% complete
+    </span>
+   </div>
+   <div class="dars-container dars-s-a4c1043079" id="markdown-layout">
+    <div class="dars-container dars-s-2d158b6599" id="markdown-content-container">
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_0_2_0_0">
+      <h1 id="dars-framework-development-roadmap">
+       Dars Framework - Development Roadmap
+      </h1>
+      <p>
+       This document outlines the development roadmap for Dars Framework. The goal is to guide the framework's growth towards a robust and viable alternative for Python-based user interface development.
+      </p>
+      <h2 id="project-metrics">
+       Project Metrics
+      </h2>
+      <ul>
+       <li>
+        <strong>
+         Current Version
+        </strong>
+        : v1.9.3
+       </li>
+       <li>
+        <strong>
+         Target
+        </strong>
+        : v2.0.0 — Complete Production-Grade Fullstack Python Framework
+       </li>
+      </ul>
+      <hr/>
+      <h2 id="completed-v10-v193">
+       Completed (v1.0 → v1.9.3)
+      </h2>
+      <p>
+       All of the following have been implemented and shipped:
+      </p>
+      <ul>
+       <li>
+        <strong>
+         Framework Core
+        </strong>
+        : Base
+        <code>
+         Component
+        </code>
+        class,
+        <code>
+         App
+        </code>
+        class, Virtual DOM, reactive rendering.
+       </li>
+       <li>
+        <strong>
+         Component System
+        </strong>
+        :
+        <code>
+         Text
+        </code>
+        ,
+        <code>
+         Button
+        </code>
+        ,
+        <code>
+         Input
+        </code>
+        ,
+        <code>
+         Container
+        </code>
+        ,
+        <code>
+         Page
+        </code>
+        ,
+        <code>
+         Checkbox
+        </code>
+        ,
+        <code>
+         RadioButton
+        </code>
+        ,
+        <code>
+         Select
+        </code>
+        ,
+        <code>
+         Slider
+        </code>
+        ,
+        <code>
+         DatePicker
+        </code>
+        ,
+        <code>
+         Image
+        </code>
+        ,
+        <code>
+         Link
+        </code>
+        ,
+        <code>
+         Textarea
+        </code>
+        ,
+        <code>
+         ProgressBar
+        </code>
+        ,
+        <code>
+         Tooltip
+        </code>
+        ,
+        <code>
+         Spinner
+        </code>
+        ,
+        <code>
+         Markdown
+        </code>
+        ,
+        <code>
+         Section
+        </code>
+        ,
+        <code>
+         Video
+        </code>
+        ,
+        <code>
+         Audio
+        </code>
+        ,
+        <code>
+         Card
+        </code>
+        ,
+        <code>
+         Modal
+        </code>
+        ,
+        <code>
+         Navbar
+        </code>
+        ,
+        <code>
+         Table
+        </code>
+        ,
+        <code>
+         Tabs
+        </code>
+        ,
+        <code>
+         Accordion
+        </code>
+        ,
+        <code>
+         FileUpload
+        </code>
+        ,
+        <code>
+         Head
+        </code>
+        ,
+        <code>
+         Outlet
+        </code>
+        ,
+        <code>
+         Chart
+        </code>
+        ,
+        <code>
+         DataTable
+        </code>
+        .
+       </li>
+       <li>
+        <strong>
+         Layout Components
+        </strong>
+        :
+        <code>
+         Flex
+        </code>
+        ,
+        <code>
+         Grid
+        </code>
+        ,
+        <code>
+         Anchor
+        </code>
+        .
+       </li>
+       <li>
+        <strong>
+         Custom Component System
+        </strong>
+        :
+        <code>
+         FunctionComponent
+        </code>
+        ,
+        <code>
+         Props
+        </code>
+        , extensible
+        <code>
+         Component
+        </code>
+        base.
+       </li>
+       <li>
+        <strong>
+         Script System
+        </strong>
+        :
+        <code>
+         dScript
+        </code>
+        , DAP (Dars Action Protocol),
+        <code>
+         RawJS
+        </code>
+        , zero-eval runtime, secure script injection.
+       </li>
+       <li>
+        <strong>
+         State Management
+        </strong>
+        :
+        <code>
+         State
+        </code>
+        V2 (reactive properties, increment/decrement, auto loops, transitions), legacy
+        <code>
+         dState
+        </code>
+        /
+        <code>
+         Mod
+        </code>
+        backward compat.
+       </li>
+       <li>
+        <strong>
+         Hooks
+        </strong>
+        :
+        <code>
+         useDynamic
+        </code>
+        ,
+        <code>
+         useValue
+        </code>
+        ,
+        <code>
+         useWatch
+        </code>
+        ,
+        <code>
+         setVRef
+        </code>
+        ,
+        <code>
+         updateVRef
+        </code>
+        ,
+        <code>
+         V()
+        </code>
+        ,
+        <code>
+         url()
+        </code>
+        ,
+        <code>
+         transform()
+        </code>
+        .
+       </li>
+       <li>
+        <strong>
+         Routing
+        </strong>
+        : SPA router, multipage, nested routes, outlets, lazy loading, route types (
+        <code>
+         public
+        </code>
+        ,
+        <code>
+         private
+        </code>
+        ,
+        <code>
+         protected
+        </code>
+        ,
+        <code>
+         SSR
+        </code>
+        ), route obfuscation.
+       </li>
+       <li>
+        <strong>
+         SSR
+        </strong>
+        : Server-side rendering via FastAPI, DSP hydration, client-side rehydration.
+       </li>
+       <li>
+        <strong>
+         Exporter
+        </strong>
+        : HTML/CSS/JS with minification (rjsmin/rcssmin + optional Vite), style optimization pipeline, scoped CSS.
+       </li>
+       <li>
+        <strong>
+         Desktop
+        </strong>
+        : Electron integration, bidirectional JS bridge, packaging templates.
+       </li>
+       <li>
+        <strong>
+         CLI
+        </strong>
+        :
+        <code>
+         dars init
+        </code>
+        ,
+        <code>
+         dars dev
+        </code>
+        ,
+        <code>
+         dars build
+        </code>
+        ,
+        <code>
+         dars export
+        </code>
+        ,
+        <code>
+         dars preview
+        </code>
+        ,
+        <code>
+         dars doctor
+        </code>
+        ,
+        <code>
+         dars test
+        </code>
+        , hot reload.
+       </li>
+       <li>
+        <strong>
+         Utility Styles
+        </strong>
+        : Tailwind-like utility system with arbitrary properties, gradients, rings, filters, transforms.
+       </li>
+       <li>
+        <strong>
+         Animations
+        </strong>
+        :
+        <code>
+         fadeIn
+        </code>
+        ,
+        <code>
+         fadeOut
+        </code>
+        ,
+        <code>
+         slideIn
+        </code>
+        ,
+        <code>
+         slideOut
+        </code>
+        ,
+        <code>
+         scaleIn
+        </code>
+        ,
+        <code>
+         scaleOut
+        </code>
+        ,
+        <code>
+         shake
+        </code>
+        ,
+        <code>
+         bounce
+        </code>
+        ,
+        <code>
+         pulse
+        </code>
+        ,
+        <code>
+         rotate
+        </code>
+        ,
+        <code>
+         flip
+        </code>
+        ,
+        <code>
+         popIn
+        </code>
+        ,
+        <code>
+         popOut
+        </code>
+        ,
+        <code>
+         sequence
+        </code>
+        .
+       </li>
+       <li>
+        <strong>
+         Security
+        </strong>
+        : XSS prevention (DOMPurify), zero-eval runtime, DAP command registry.
+       </li>
+       <li>
+        <strong>
+         Backend
+        </strong>
+        : FastAPI plugin, SSR renderer, route loader,
+        <code>
+         apiConfig.py
+        </code>
+        , dev server orchestration.
+       </li>
+       <li>
+        <strong>
+         HTTP Utilities
+        </strong>
+        :
+        <code>
+         fetch
+        </code>
+        ,
+        <code>
+         get
+        </code>
+        ,
+        <code>
+         post
+        </code>
+        ,
+        <code>
+         put
+        </code>
+        ,
+        <code>
+         delete
+        </code>
+        ,
+        <code>
+         patch
+        </code>
+        ,
+        <code>
+         useData
+        </code>
+        ,
+        <code>
+         DataAccessor
+        </code>
+        .
+       </li>
+       <li>
+        <strong>
+         Form Helpers
+        </strong>
+        :
+        <code>
+         FormData
+        </code>
+        ,
+        <code>
+         collect_form
+        </code>
+        .
+       </li>
+       <li>
+        <strong>
+         Browser APIs
+        </strong>
+        : localStorage (get/set/remove/clear), clipboard (write/copy), scroll, focus/blur, DOM manipulation.
+       </li>
+       <li>
+        <strong>
+         Documentation
+        </strong>
+        : Full docs, VS Code extension, examples, tutorials.
+       </li>
+       <li>
+        <strong>
+         Testing
+        </strong>
+        : Integrated test framework, CLI test runner.
+       </li>
+      </ul>
+      <hr/>
+      <h2 id="v200-roadmap-production-grade-fullstack-framework">
+       🚧 v2.0.0 Roadmap — Production-Grade Fullstack Framework
+      </h2>
+      <p>
+       Everything below is what's needed to make Dars a real, production-usable fullstack framework.
+      </p>
+      <hr/>
+      <h3 id="1-authentication-session-management">
+       1. Authentication &amp; Session Management
+      </h3>
+      <ul>
+       <li>
+        [ ]
+        <code>
+         DarsAuth
+        </code>
+        class with JWT generation (
+        <code>
+         jwt.encode
+        </code>
+        ) and verification
+       </li>
+       <li>
+        [ ] Configurable secret, algorithm (
+        <code>
+         HS256
+        </code>
+        /
+        <code>
+         RS256
+        </code>
+        ), and token expiration
+       </li>
+       <li>
+        [ ] Refresh token rotation flow
+       </li>
+       <li>
+        [ ] Password hashing utilities (bcrypt/argon2 integration)
+       </li>
+       <li>
+        [ ] Client-side auth helpers in runtime JS:
+        <code>
+         authFetch()
+        </code>
+        ,
+        <code>
+         getToken()
+        </code>
+        ,
+        <code>
+         setToken()
+        </code>
+        ,
+        <code>
+         clearToken()
+        </code>
+       </li>
+       <li>
+        [ ]
+        <code>
+         isAuthenticated()
+        </code>
+        check for conditional UI rendering
+       </li>
+       <li>
+        [ ]
+        <code>
+         auth.login()
+        </code>
+        /
+        <code>
+         auth.logout()
+        </code>
+        DAP actions
+       </li>
+       <li>
+        [ ] Auth endpoint templates:
+        <code>
+         /api/auth/login
+        </code>
+        ,
+        <code>
+         /logout
+        </code>
+        ,
+        <code>
+         /refresh
+        </code>
+        ,
+        <code>
+         /me
+        </code>
+       </li>
+       <li>
+        [ ]
+        <code>
+         @requires_auth
+        </code>
+        decorator for SSR/API routes
+       </li>
+       <li>
+        [ ]
+        <code>
+         @requires_role("admin")
+        </code>
+        RBAC decorator
+       </li>
+       <li>
+        [ ] Route guard decorators with custom permission checks
+       </li>
+       <li>
+        [ ] Automatic 401 redirect on token expiry
+       </li>
+       <li>
+        [ ] OAuth2 provider integration (Google, GitHub)
+       </li>
+      </ul>
+      <h3 id="2-middleware-system">
+       2. Middleware System
+      </h3>
+      <ul>
+       <li>
+        [ ]
+        <code>
+         DarsMiddleware
+        </code>
+        base class with
+        <code>
+         before_request()
+        </code>
+        /
+        <code>
+         after_response()
+        </code>
+        hooks
+       </li>
+       <li>
+        [ ] Global middleware registration:
+        <code>
+         app.use(middleware)
+        </code>
+       </li>
+       <li>
+        [ ] Route-specific middleware:
+        <code>
+         @middleware(AuthMiddleware)
+        </code>
+       </li>
+       <li>
+        [ ] Middleware chain execution order
+       </li>
+       <li>
+        [ ]
+        <code>
+         AuthMiddleware
+        </code>
+        — verify JWT on protected routes
+       </li>
+       <li>
+        [ ]
+        <code>
+         CORSMiddleware
+        </code>
+        — configurable cross-origin resource sharing
+       </li>
+       <li>
+        [ ]
+        <code>
+         RateLimitMiddleware
+        </code>
+        — per-IP / per-user rate limiting
+       </li>
+       <li>
+        [ ]
+        <code>
+         LoggingMiddleware
+        </code>
+        — request/response logging
+       </li>
+       <li>
+        [ ]
+        <code>
+         SecurityHeadersMiddleware
+        </code>
+        — CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy
+       </li>
+      </ul>
+      <h3 id="3-data-layer-persistence">
+       3. Data Layer &amp; Persistence
+      </h3>
+      <ul>
+       <li>
+        [ ]
+        <code>
+         JsonStore
+        </code>
+        — JSON file-based key-value store for prototyping
+       </li>
+       <li>
+        [ ]
+        <code>
+         SQLiteStore
+        </code>
+        — lightweight SQLite wrapper
+       </li>
+       <li>
+        [ ] Key-value API:
+        <code>
+         store.get()
+        </code>
+        ,
+        <code>
+         store.set()
+        </code>
+        ,
+        <code>
+         store.delete()
+        </code>
+        ,
+        <code>
+         store.list()
+        </code>
+       </li>
+       <li>
+        [ ] SQLAlchemy/SQLModel ORM integration
+       </li>
+       <li>
+        [ ]
+        <code>
+         DarsModel
+        </code>
+        base class with CRUD operations
+       </li>
+       <li>
+        [ ] Database connection management (pooling, lifecycle)
+       </li>
+       <li>
+        [ ] Auto-generated CRUD API endpoints from models
+       </li>
+       <li>
+        [ ] Alembic integration for schema migrations
+       </li>
+       <li>
+        [ ]
+        <code>
+         dars db migrate
+        </code>
+        /
+        <code>
+         dars db upgrade
+        </code>
+        CLI commands
+       </li>
+       <li>
+        [ ] Pydantic model integration for request/response validation
+       </li>
+       <li>
+        [ ] JSON schema generation from models
+       </li>
+      </ul>
+      <h3 id="4-http-client-improvements">
+       4. HTTP Client Improvements
+      </h3>
+      <ul>
+       <li>
+        [ ] Request interceptors — auto-inject auth headers in all requests
+       </li>
+       <li>
+        [ ] Response interceptors — handle 401 → redirect to login
+       </li>
+       <li>
+        [ ] Global error handler for network failures
+       </li>
+       <li>
+        [ ]
+        <code>
+         useFetch()
+        </code>
+        hook — declarative data fetching bound to State
+       </li>
+       <li>
+        [ ] Automatic
+        <code>
+         isLoading
+        </code>
+        /
+        <code>
+         error
+        </code>
+        /
+        <code>
+         data
+        </code>
+        state management
+       </li>
+       <li>
+        [ ] Response cache with TTL
+       </li>
+       <li>
+        [ ] Auto-refetch on window focus / interval
+       </li>
+       <li>
+        [ ] Implement actual retry logic (currently signature-only in
+        <code>
+         fetch()
+        </code>
+        )
+       </li>
+       <li>
+        [ ] File upload via
+        <code>
+         fetch()
+        </code>
+        with
+        <code>
+         FormData
+        </code>
+        support
+       </li>
+       <li>
+        [ ] Streaming / Server-Sent Events (SSE) support
+       </li>
+       <li>
+        [ ] WebSocket client wrapper
+       </li>
+      </ul>
+      <h3 id="5-form-system-completion">
+       5. Form System Completion
+      </h3>
+      <ul>
+       <li>
+        [ ] Fix duplicate method definitions in
+        <code>
+         form_helpers.py
+        </code>
+       </li>
+       <li>
+        [ ] Implement
+        <code>
+         network_request
+        </code>
+        DAP operation for
+        <code>
+         FormData.submit()
+        </code>
+       </li>
+       <li>
+        [ ] Client-side validation rules:
+        <code>
+         required
+        </code>
+        ,
+        <code>
+         email
+        </code>
+        ,
+        <code>
+         minLength
+        </code>
+        ,
+        <code>
+         maxLength
+        </code>
+        ,
+        <code>
+         pattern
+        </code>
+        ,
+        <code>
+         custom
+        </code>
+       </li>
+       <li>
+        [ ] Server-side validation via Pydantic schemas
+       </li>
+       <li>
+        [ ] Inline error display per field
+       </li>
+       <li>
+        [ ] Form-level error summary
+       </li>
+       <li>
+        [ ]
+        <code>
+         Form
+        </code>
+        wrapper component with built-in validation
+       </li>
+       <li>
+        [ ]
+        <code>
+         Field
+        </code>
+        component for labeled inputs with error display
+       </li>
+       <li>
+        [ ] CSRF token auto-injection in forms and fetch requests
+       </li>
+       <li>
+        [ ] Form state persistence (save draft to localStorage)
+       </li>
+       <li>
+        [ ] Multi-step form support
+       </li>
+      </ul>
+      <h3 id="6-fileupload-complete-pipeline">
+       6. FileUpload Complete Pipeline
+      </h3>
+      <ul>
+       <li>
+        [ ]
+        <code>
+         on_file_selected
+        </code>
+        callback with file metadata (name, size, type, preview URL)
+       </li>
+       <li>
+        [ ] Image preview before upload
+       </li>
+       <li>
+        [ ] Drag-and-drop zone support
+       </li>
+       <li>
+        [ ] Max size / file type validation in browser runtime
+       </li>
+       <li>
+        [ ] Upload progress indicator
+       </li>
+       <li>
+        [ ]
+        <code>
+         uploadTo(url)
+        </code>
+        helper that sends files via
+        <code>
+         FormData
+        </code>
+       </li>
+       <li>
+        [ ] Backend file receiver endpoint template
+       </li>
+       <li>
+        [ ] Multiple file handling with individual progress
+       </li>
+      </ul>
+      <h3 id="7-security-hardening">
+       7. Security Hardening
+      </h3>
+      <ul>
+       <li>
+        [ ] CSRF token generation per session
+       </li>
+       <li>
+        [ ] CSRF auto-injection in forms and fetch requests
+       </li>
+       <li>
+        [ ] CSRF validation middleware
+       </li>
+       <li>
+        [ ] Security headers: CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy
+       </li>
+       <li>
+        [ ] HTTPS enforcement / automatic HTTP → HTTPS redirect
+       </li>
+       <li>
+        [ ] Python-side input sanitization utilities
+       </li>
+       <li>
+        [ ] SQL injection prevention in data layer (parameterized queries)
+       </li>
+       <li>
+        [ ] Audit logging system
+       </li>
+      </ul>
+      <h3 id="8-browser-api-helpers">
+       8. Browser API Helpers
+      </h3>
+      <ul>
+       <li>
+        [ ]
+        <code>
+         sessionStorage
+        </code>
+        helpers (get/set/remove/clear)
+       </li>
+       <li>
+        [ ] Cookie management helpers (get/set/delete with options)
+       </li>
+       <li>
+        [ ]
+        <code>
+         notify()
+        </code>
+        — Web Notifications API wrapper
+       </li>
+       <li>
+        [ ] Network status detection (
+        <code>
+         navigator.onLine
+        </code>
+        )
+       </li>
+       <li>
+        [ ]
+        <code>
+         IntersectionObserver
+        </code>
+        for lazy loading / scroll triggers
+       </li>
+       <li>
+        [ ]
+        <code>
+         matchMedia
+        </code>
+        for responsive breakpoint detection
+       </li>
+       <li>
+        [ ]
+        <code>
+         IndexedDB
+        </code>
+        wrapper for large client-side datasets
+       </li>
+       <li>
+        [ ] Geolocation API helper
+       </li>
+       <li>
+        [ ] Web Share API (
+        <code>
+         navigator.share()
+        </code>
+        )
+       </li>
+       <li>
+        [ ]
+        <code>
+         ResizeObserver
+        </code>
+        for responsive components
+       </li>
+       <li>
+        [ ]
+        <code>
+         window.print()
+        </code>
+        helper
+       </li>
+      </ul>
+      <h3 id="9-business-logic-patterns">
+       9. Business Logic Patterns
+      </h3>
+      <ul>
+       <li>
+        [ ]
+        <code>
+         useComputed()
+        </code>
+        /
+        <code>
+         useMemo()
+        </code>
+        — derived reactive values with dependency tracking
+       </li>
+       <li>
+        [ ]
+        <code>
+         If(condition, then_comp, else_comp)
+        </code>
+        — conditional rendering
+       </li>
+       <li>
+        [ ]
+        <code>
+         Show(condition, component)
+        </code>
+        — toggle visibility
+       </li>
+       <li>
+        [ ]
+        <code>
+         Each(items, template_fn)
+        </code>
+        /
+        <code>
+         For
+        </code>
+        — list rendering with keys
+       </li>
+       <li>
+        [ ] Server Actions — call Python functions from client-side events
+       </li>
+       <li>
+        [ ]
+        <code>
+         debounce(ms, action)
+        </code>
+        — debounce event handlers
+       </li>
+       <li>
+        [ ]
+        <code>
+         throttle(ms, action)
+        </code>
+        — throttle event handlers
+       </li>
+       <li>
+        [ ] Global event bus / pub-sub system
+       </li>
+       <li>
+        [ ] Error boundaries for component error isolation
+       </li>
+       <li>
+        [ ] Suspense / loading states for async data
+       </li>
+      </ul>
+      <h3 id="10-missing-components">
+       10. Missing Components
+      </h3>
+      <ul>
+       <li>
+        [ ]
+        <code>
+         Toast
+        </code>
+        — notification toasts with auto-dismiss and stacking
+       </li>
+       <li>
+        [ ]
+        <code>
+         Drawer
+        </code>
+        — slide-in side panel (left/right/top/bottom)
+       </li>
+       <li>
+        [ ]
+        <code>
+         Breadcrumb
+        </code>
+        — navigation breadcrumbs
+       </li>
+       <li>
+        [ ]
+        <code>
+         Pagination
+        </code>
+        — standalone pagination component
+       </li>
+       <li>
+        [ ]
+        <code>
+         Badge
+        </code>
+        — status badges / chips
+       </li>
+       <li>
+        [ ]
+        <code>
+         Avatar
+        </code>
+        — user avatar with fallback initials
+       </li>
+       <li>
+        [ ]
+        <code>
+         Skeleton
+        </code>
+        — loading skeleton placeholders
+       </li>
+       <li>
+        [ ]
+        <code>
+         Switch
+        </code>
+        /
+        <code>
+         Toggle
+        </code>
+        — boolean toggle switch
+       </li>
+       <li>
+        [ ]
+        <code>
+         ColorPicker
+        </code>
+        — color selection input
+       </li>
+       <li>
+        [ ]
+        <code>
+         RichTextEditor
+        </code>
+        — WYSIWYG text editing integration
+       </li>
+      </ul>
+      <h3 id="11-existing-component-upgrades">
+       11. Existing Component Upgrades
+      </h3>
+      <ul>
+       <li>
+        [ ]
+        <code>
+         Table
+        </code>
+        — client-side pagination, sorting, filtering, row selection, column resize
+       </li>
+       <li>
+        [ ]
+        <code>
+         Select
+        </code>
+        — search/filter, multi-select, async options loading
+       </li>
+       <li>
+        [ ]
+        <code>
+         Input
+        </code>
+        — input masks, debounced
+        <code>
+         on_change
+        </code>
+        , inline validation display
+       </li>
+       <li>
+        [ ]
+        <code>
+         Modal
+        </code>
+        — transition animations, backdrop click to close, nested modals
+       </li>
+       <li>
+        [ ]
+        <code>
+         Navbar
+        </code>
+        — mobile responsive hamburger menu, dropdown submenus
+       </li>
+       <li>
+        [ ]
+        <code>
+         Tabs
+        </code>
+        — lazy-load tab content, URL synchronization
+       </li>
+       <li>
+        [ ]
+        <code>
+         Accordion
+        </code>
+        — multi-open mode, collapse/expand animations
+       </li>
+      </ul>
+      <h3 id="12-developer-experience">
+       12. Developer Experience
+      </h3>
+      <ul>
+       <li>
+        [ ]
+        <code>
+         .env
+        </code>
+        file support for secrets and environment variables
+       </li>
+       <li>
+        [ ]
+        <code>
+         dars.config.json
+        </code>
+        schema validation on startup
+       </li>
+       <li>
+        [ ]
+        <code>
+         dars generate component &lt;name&gt;
+        </code>
+        — scaffold new components
+       </li>
+       <li>
+        [ ]
+        <code>
+         dars generate page &lt;name&gt;
+        </code>
+        — scaffold new pages
+       </li>
+       <li>
+        [ ]
+        <code>
+         dars generate model &lt;name&gt;
+        </code>
+        — scaffold data models
+       </li>
+       <li>
+        [ ] Error overlay in browser dev mode (show Python tracebacks)
+       </li>
+       <li>
+        [ ] Source maps for generated JS
+       </li>
+       <li>
+        [ ] Docker deployment guide and
+        <code>
+         Dockerfile
+        </code>
+        template
+       </li>
+       <li>
+        [ ] Vercel / Railway deployment guides
+       </li>
+       <li>
+        [ ] Production build optimization checklist
+       </li>
+      </ul>
+      <h3 id="13-testing-quality">
+       13. Testing &amp; Quality
+      </h3>
+      <ul>
+       <li>
+        [ ] Component unit testing helpers (render + assert)
+       </li>
+       <li>
+        [ ] Integration test utilities
+       </li>
+       <li>
+        [ ] E2E testing guide (Playwright/Cypress)
+       </li>
+       <li>
+        [ ] Snapshot testing for exported HTML output
+       </li>
+       <li>
+        [ ] CI/CD pipeline templates (GitHub Actions)
+       </li>
+      </ul>
+      <hr/>
+      <h2 id="priority-order">
+       Priority Order
+      </h2>
+      <table>
+       <thead>
+        <tr>
+         <th>
+          #
+         </th>
+         <th>
+          Area
+         </th>
+         <th>
+          Why First
+         </th>
+        </tr>
+       </thead>
+       <tbody>
+        <tr>
+         <td>
+          1
+         </td>
+         <td>
+          <strong>
+           Authentication
+          </strong>
+         </td>
+         <td>
+          Nothing works without user identity
+         </td>
+        </tr>
+        <tr>
+         <td>
+          2
+         </td>
+         <td>
+          <strong>
+           Middleware
+          </strong>
+         </td>
+         <td>
+          Auth depends on middleware pipeline
+         </td>
+        </tr>
+        <tr>
+         <td>
+          3
+         </td>
+         <td>
+          <strong>
+           Data Persistence
+          </strong>
+         </td>
+         <td>
+          Apps need to store data
+         </td>
+        </tr>
+        <tr>
+         <td>
+          4
+         </td>
+         <td>
+          <strong>
+           Form Validation
+          </strong>
+         </td>
+         <td>
+          Every app has forms
+         </td>
+        </tr>
+        <tr>
+         <td>
+          5
+         </td>
+         <td>
+          <strong>
+           HTTP Client
+          </strong>
+         </td>
+         <td>
+          Frontend needs to talk to backend reliably
+         </td>
+        </tr>
+        <tr>
+         <td>
+          6
+         </td>
+         <td>
+          <strong>
+           FileUpload Pipeline
+          </strong>
+         </td>
+         <td>
+          Current component is non-functional
+         </td>
+        </tr>
+        <tr>
+         <td>
+          7
+         </td>
+         <td>
+          <strong>
+           Security Hardening
+          </strong>
+         </td>
+         <td>
+          Required for production
+         </td>
+        </tr>
+        <tr>
+         <td>
+          8
+         </td>
+         <td>
+          <strong>
+           Business Logic
+          </strong>
+         </td>
+         <td>
+          Conditional rendering, computed state
+         </td>
+        </tr>
+        <tr>
+         <td>
+          9
+         </td>
+         <td>
+          <strong>
+           Browser APIs
+          </strong>
+         </td>
+         <td>
+          Quality of life
+         </td>
+        </tr>
+        <tr>
+         <td>
+          10
+         </td>
+         <td>
+          <strong>
+           Components
+          </strong>
+         </td>
+         <td>
+          New + upgraded components
+         </td>
+        </tr>
+        <tr>
+         <td>
+          11
+         </td>
+         <td>
+          <strong>
+           DX &amp; Testing
+          </strong>
+         </td>
+         <td>
+          Developer happiness
+         </td>
+        </tr>
+       </tbody>
+      </table>
+     </div>
+    </div>
+   </div>
+   <div class="dars-container dars-s-2bf2b9dc50" id="footer-section">
+    <div class="dars-container dars-s-b9edec0647" id="container_0_3_0">
+     <div class="dars-container dars-s-ad051c31bc" id="container_0_3_0_0">
+      <div class="dars-container dars-s-32330b2fbf" id="container_0_3_0_0_0">
+       <img alt="Dars Framework" class="dars-image dars-s-9093a9afde" height="50px" id="image_0_3_0_0_0_0" src="Dars-logo.png" width="50px"/>
+       <div class="dars-container dars-s-3705a9abea" id="container_0_3_0_0_0_1">
+        <span class="dars-text dars-s-df9433d016" id="text_0_3_0_0_0_1_0">
+         Dars Framework
+        </span>
+       </div>
+      </div>
+      <div class="dars-container dars-s-9ff400f3b3" id="container_0_3_0_0_1">
+       <div class="dars-container dars-s-fe64e3094d" id="container_0_3_0_0_1_0">
+        <span class="dars-text dars-s-8d9bf8c5ed" id="text_0_3_0_0_1_0_0">
+         Quick Links
+        </span>
+        <a class="dars-link dars-s-b5b74dba69" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_0_3_0_0_1_0_1" target="_self">
+         Documentation
+        </a>
+        <a class="dars-link dars-s-b5b74dba69" href="https://github.com/ZtaMDev/Dars-Framework" id="link_0_3_0_0_1_0_2" target="_self">
+         GitHub
+        </a>
+        <a class="dars-link dars-s-b5b74dba69" href="https://github.com/ZtaMDev/Dars-Framework/tree/CrystalMain/dars/templates/examples" id="link_0_3_0_0_1_0_3" target="_self">
+         Examples
+        </a>
+       </div>
+       <div class="dars-container dars-s-fe64e3094d" id="container_0_3_0_0_1_1">
+        <span class="dars-text dars-s-8d9bf8c5ed" id="text_0_3_0_0_1_1_0">
+         Resources
+        </span>
+        <a class="dars-link dars-s-b5b74dba69" href="https://ztamdev.github.io/Dars-Framework/docs.html" id="link_0_3_0_0_1_1_1" target="_self">
+         Getting Started
+        </a>
+        <a class="dars-link dars-s-b5b74dba69" href="https://github.com/ZtaMDev/Dars-Framework/releases.html" id="link_0_3_0_0_1_1_2" target="_self">
+         Releases
+        </a>
+       </div>
+       <div class="dars-container dars-s-8161a2a3ff" id="container_0_3_0_0_1_2">
+        <span class="dars-text dars-s-474933a055" id="text_0_3_0_0_1_2_0">
+         A modern FullStack Python framework for web and desktop applications.
+        </span>
+       </div>
+      </div>
+      <div class="dars-container dars-s-9a07c4617d" id="container_0_3_0_0_2">
+       <div class="dars-container dars-s-b531c31f9b" id="container_0_3_0_0_2_0">
+        <span class="dars-text dars-s-132d246545" id="text_0_3_0_0_2_0_0">
+         © 2025 Dars Framework.
+        </span>
+       </div>
+       <div class="dars-container dars-s-b59da3237c" id="container_0_3_0_0_2_1">
+        <span class="dars-text dars-s-7c258fc573" id="text_0_3_0_0_2_1_0">
+         Created with
+        </span>
+        <a class="dars-link dars-s-cb2830d9c8" href="https://github.com/ZtaMDev/Dars-Framework" id="link_0_3_0_0_2_1_1" target="_self">
+         Dars Framework
+        </a>
+        <span class="dars-text dars-s-7c258fc573" id="text_0_3_0_0_2_1_2">
+         by
+        </span>
+        <a class="dars-link dars-s-cb2830d9c8" href="https://github.com/ZtaMDev" id="link_0_3_0_0_2_1_3" target="_self">
+         ZtaDev
+        </a>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1778818883" type="module">
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js">
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js">
+  </script>
+  <script defer="" src="app_roadmap.js">
+  </script>
+ </body>
+</html>

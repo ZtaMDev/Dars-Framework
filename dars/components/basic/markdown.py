@@ -18,12 +18,14 @@ class Markdown(Component):
     - **Events**: Handlers like `on_click`, `on_mouse_enter`, etc.
     
     Example:
+
     ```python
     Markdown(
         content="# Hello Dars\nThis is **markdown** content.",
         class_name="p-6 bg-white rounded-xl shadow-sm border border-slate-200"
     )
     ```
+    
     """
     def __init__(
         self,

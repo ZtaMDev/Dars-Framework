@@ -6,6 +6,8 @@ from howitworkscomp import create_howitworks
 from footercomp import create_footer
 from documentation.documentation import docs
 from releases.releases import releases
+from roadmap.roadmap import roadmap
+
 app = App(
     title="Dars Framework",
     language="en",
@@ -46,6 +48,7 @@ index.add_script(
 app.add_page("index", index, title="Dars Framework", index=True)
 app.add_page("docs", docs, title="Dars Docs")
 app.add_page("releases", releases, title="Dars Versions")
+app.add_page("roadmap", roadmap, title="Dars Roadmap")
 
 if __name__ == "__main__":
     app.rTimeCompile(add_file_types=".py, .js, .css, .md, .svg, .png")
