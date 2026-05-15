@@ -1,180 +1,226 @@
 # Dars Framework - Development Roadmap
 
-This document outlines the development roadmap for Dars Framework, covering implemented features, planned improvements to existing systems, and ecosystem expansions. The goal is to guide the framework's growth towards a robust and viable alternative for Python-based user interface development.
+This document outlines the development roadmap for Dars Framework. The goal is to guide the framework's growth towards a robust and viable alternative for Python-based user interface development.
 
 ## Project Metrics
 
-### Lines of Code (LOC) - Approximate
+- **Total LOC**: ~836,931 lines
+- **Current Version**: v1.9.3
+- **Target**: v2.0.0 — Complete Production-Grade Fullstack Python Framework
 
-Based on the current analysis of the source code (Python, Markdown, JavaScript, CSS):
+---
 
-- **Total**: 836931 lines
-- **Docs**: 30021 lines
+## Completed (v1.0 → v1.9.3)
 
-## Development Roadmap
+All of the following have been implemented and shipped:
 
-The following features and components have been successfully implemented in Dars Framework:
+- **Framework Core**: Base `Component` class, `App` class, Virtual DOM, reactive rendering.
+- **Component System**: `Text`, `Button`, `Input`, `Container`, `Page`, `Checkbox`, `RadioButton`, `Select`, `Slider`, `DatePicker`, `Image`, `Link`, `Textarea`, `ProgressBar`, `Tooltip`, `Spinner`, `Markdown`, `Section`, `Video`, `Audio`, `Card`, `Modal`, `Navbar`, `Table`, `Tabs`, `Accordion`, `FileUpload`, `Head`, `Outlet`, `Chart`, `DataTable`.
+- **Layout Components**: `Flex`, `Grid`, `Anchor`.
+- **Custom Component System**: `FunctionComponent`, `Props`, extensible `Component` base.
+- **Script System**: `dScript`, DAP (Dars Action Protocol), `RawJS`, zero-eval runtime, secure script injection.
+- **State Management**: `State` V2 (reactive properties, increment/decrement, auto loops, transitions), legacy `dState`/`Mod` backward compat.
+- **Hooks**: `useDynamic`, `useValue`, `useWatch`, `setVRef`, `updateVRef`, `V()`, `url()`, `transform()`.
+- **Routing**: SPA router, multipage, nested routes, outlets, lazy loading, route types (`public`, `private`, `protected`, `SSR`), route obfuscation.
+- **SSR**: Server-side rendering via FastAPI, DSP hydration, client-side rehydration.
+- **Exporter**: HTML/CSS/JS with minification (rjsmin/rcssmin + optional Vite), style optimization pipeline, scoped CSS.
+- **Desktop**: Electron integration, bidirectional JS bridge, packaging templates.
+- **CLI**: `dars init`, `dars dev`, `dars build`, `dars export`, `dars preview`, `dars doctor`, `dars test`, hot reload.
+- **Utility Styles**: Tailwind-like utility system with arbitrary properties, gradients, rings, filters, transforms.
+- **Animations**: `fadeIn`, `fadeOut`, `slideIn`, `slideOut`, `scaleIn`, `scaleOut`, `shake`, `bounce`, `pulse`, `rotate`, `flip`, `popIn`, `popOut`, `sequence`.
+- **Security**: XSS prevention (DOMPurify), zero-eval runtime, DAP command registry.
+- **Backend**: FastAPI plugin, SSR renderer, route loader, `apiConfig.py`, dev server orchestration.
+- **HTTP Utilities**: `fetch`, `get`, `post`, `put`, `delete`, `patch`, `useData`, `DataAccessor`.
+- **Form Helpers**: `FormData`, `collect_form`.
+- **Browser APIs**: localStorage (get/set/remove/clear), clipboard (write/copy), scroll, focus/blur, DOM manipulation.
+- **Documentation**: Full docs, VS Code extension, examples, tutorials.
+- **Testing**: Integrated test framework, CLI test runner.
 
-- [x] **Framework Core**
-  - [x] Base `Component` class for all UI elements.
-  - [x] Main `App` class for application management.
-- [x] **Component System**
-  - [x] **Basic Components**: `Text`, `Button`, `Input`, `Container`, `Page` (with support for per-page scripts in multipage), `Checkbox`, `RadioButton`, `Select`, `Slider`, `DatePicker`, `Image`, `Link`, `Textarea`, `ProgressBar`, `Tooltip`.
-  - [x] **Advanced Components**: `Card`, `Modal`, `Navbar`.
-  - [x] **Layout Components**: `Flex`, `Grid`, `Anchor`.
-  - [x] **Custom Component System**: Support for extending the base `Component` class and creating custom components with customizable `render` methods and events.
-- [x] **Script System**
-  - [x] `dScript`: Flexible script class supporting both inline and file-based JavaScript, allowing editable presets and advanced actions.
-  - [x] Event Handling: Event binding system for custom components, supporting a wide range of `EventTypes` (Mouse, Keyboard, Form, Load & Window, Custom).
-- [x] **Exporter System**
-  - [x] HTML/CSS/JS Exporter: Generates static web applications, now with native `dScript` support.
-- [x] **Development Tools**
-  - [x] CLI (Command Line Interface) with `Rich` for an improved user experience.
-  - [x] Preview System: Allows quick preview of generated applications.
-- [x] **Documentation and Examples**
-  - [x] Comprehensive documentation, including sections on custom component creation and event handling.
-  - [x] Functional examples demonstrating various framework capabilities.
-- [x] **Hot Reloading**: Implemented in development/beta for a smoother development experience.
-- [x] **Integrated Testing Framework**
+---
 
-### Phase 1: Consolidation and Optimization (Short-Term)
+## 🚧 v2.0.0 Roadmap — Production-Grade Fullstack Framework
 
-This phase will focus on strengthening the framework's current foundation, improving performance and stability, and optimizing the developer experience.
+Everything below is what's needed to make Dars a real, production-usable fullstack framework.
 
-- [x] **Framework Core Enhancements**
-  - [x] **Rendering Optimization**: Research and apply techniques to improve the `render` method's performance, especially for applications with many elements or frequent updates. Consider implementing a Virtual DOM or an efficient reconciliation mechanism to minimize direct DOM manipulations.
-  - [x] **Reactive State Management**: Develop a robust system for global and local application state management, enabling efficient reactive UI updates.
-  - [x] **Improved Property Typing and Validation**: Extend the property system to include more complex validations and clear error messages at development time, facilitating debugging.
-  - [x] **Error Handling and Debugging**: Implement robust tools and mechanisms for runtime error handling and facilitate debugging of Dars applications, both in Python and in the generated JavaScript code.
+---
 
-- [c] **Component System Enhancements**
-  - [x] **Component Lifecycle**: Define and document a clear lifecycle for components (mounting, updating, unmounting) that allows developers to execute logic at specific times.
-  - [x] **Hooks or Mixins**: Explore the implementation of patterns like Hooks or Mixins to reuse state and behavior logic between components more cleanly and modularly.
+### 1. Authentication & Session Management
 
-- [x] **HTML/CSS/JS Exporter Optimization**
-  - [x] **Minification and Bundling**: Integrate minification and bundling tools (e.g., based on `esbuild` or `rollup` via Python) to reduce the size of generated JavaScript and CSS files, improving loading times.
-  - [x] **Asset Optimization**: Implement automatic optimization of images and other static assets during the export process.
-  - [x] **Scoped CSS Generation**: Explore options for generating CSS with scope limited to components, avoiding style conflicts and facilitating the development of reusable components.
+- [ ] `DarsAuth` class with JWT generation (`jwt.encode`) and verification
+- [ ] Configurable secret, algorithm (`HS256`/`RS256`), and token expiration
+- [ ] Refresh token rotation flow
+- [ ] Password hashing utilities (bcrypt/argon2 integration)
+- [ ] Client-side auth helpers in runtime JS: `authFetch()`, `getToken()`, `setToken()`, `clearToken()`
+- [ ] `isAuthenticated()` check for conditional UI rendering
+- [ ] `auth.login()` / `auth.logout()` DAP actions
+- [ ] Auth endpoint templates: `/api/auth/login`, `/logout`, `/refresh`, `/me`
+- [ ] `@requires_auth` decorator for SSR/API routes
+- [ ] `@requires_role("admin")` RBAC decorator
+- [ ] Route guard decorators with custom permission checks
+- [ ] Automatic 401 redirect on token expiry
+- [ ] OAuth2 provider integration (Google, GitHub)
 
-- [x] **CLI Enhancements**
-  - [x] **Additional Commands**: Add commands for creating new projects (`dars init project`).
-  - [x] **Integration with Testing Tools**: Facilitate the execution of unit and integration tests directly from the CLI.
-  - [x] **Detailed Feedback**: Improve CLI error messages and feedback to guide the developer more effectively.
+### 2. Middleware System
 
-### Phase 2: Ecosystem Expansion and Cross-Platform (Mid-Term)
+- [ ] `DarsMiddleware` base class with `before_request()` / `after_response()` hooks
+- [ ] Global middleware registration: `app.use(middleware)`
+- [ ] Route-specific middleware: `@middleware(AuthMiddleware)`
+- [ ] Middleware chain execution order
+- [ ] `AuthMiddleware` — verify JWT on protected routes
+- [ ] `CORSMiddleware` — configurable cross-origin resource sharing
+- [ ] `RateLimitMiddleware` — per-IP / per-user rate limiting
+- [ ] `LoggingMiddleware` — request/response logging
+- [ ] `SecurityHeadersMiddleware` — CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy
 
-This phase will focus on expanding Dars' capabilities to new platforms and building a richer ecosystem around the framework.
+### 3. Data Layer & Persistence
 
-- [x] **Desktop Application Support with Electron**: Enhance the Dars API with a specialized submodule for integration with Electron, enabling the creation of cross-platform desktop applications from Python. This will include:
-  - [x] A dedicated submodule in the Dars API to interact with Electron functionalities.
-  - [x] Handling bidirectional communication between the main Electron process (Node.js) and the rendering process (Python/JS).
-  - [x] Tools and templates to facilitate the packaging and distribution of Electron applications.
+- [ ] `JsonStore` — JSON file-based key-value store for prototyping
+- [ ] `SQLiteStore` — lightweight SQLite wrapper
+- [ ] Key-value API: `store.get()`, `store.set()`, `store.delete()`, `store.list()`
+- [ ] SQLAlchemy/SQLModel ORM integration
+- [ ] `DarsModel` base class with CRUD operations
+- [ ] Database connection management (pooling, lifecycle)
+- [ ] Auto-generated CRUD API endpoints from models
+- [ ] Alembic integration for schema migrations
+- [ ] `dars db migrate` / `dars db upgrade` CLI commands
+- [ ] Pydantic model integration for request/response validation
+- [ ] JSON schema generation from models
 
-- [x] **More Integrated Components**
-  - [x] **Data Visualization Components**: `Chart` (integration with libraries like Chart.js or D3.js), `Table` (with pagination, sorting, and filtering).
-  - [x] **Multimedia Components**: `Video`, `Audio`.
-  - [x] **Advanced Navigation**: `Router` (for single-page application route management), `Tabs`, `Accordion`.
-  - [x] **Advanced Components**:`FileUpload`.
+### 4. HTTP Client Improvements
 
-- [x] **Plugin and Extension System**
-  - [x] Develop a clear API for developers to create their own plugins and extensions for Dars, facilitating integration with third-party tools and framework customization.
+- [ ] Request interceptors — auto-inject auth headers in all requests
+- [ ] Response interceptors — handle 401 → redirect to login
+- [ ] Global error handler for network failures
+- [ ] `useFetch()` hook — declarative data fetching bound to State
+- [ ] Automatic `isLoading` / `error` / `data` state management
+- [ ] Response cache with TTL
+- [ ] Auto-refetch on window focus / interval
+- [ ] Implement actual retry logic (currently signature-only in `fetch()`)
+- [ ] File upload via `fetch()` with `FormData` support
+- [ ] Streaming / Server-Sent Events (SSE) support
+- [ ] WebSocket client wrapper
 
-- [x] **dScript Enhancements**
-  - [x] **dScript Modules**: Allow importing and exporting modules within dScript to better organize JavaScript logic.
-  - [x] **Integration with Popular JS Libraries**: Facilitate the integration of popular JavaScript libraries (e.g., for animations, DOM manipulation, etc.) within dScript.
+### 5. Form System Completion
 
-### Phase 3: Maturity and Adoption (Long-Term)
+- [ ] Fix duplicate method definitions in `form_helpers.py`
+- [ ] Implement `network_request` DAP operation for `FormData.submit()`
+- [ ] Client-side validation rules: `required`, `email`, `minLength`, `maxLength`, `pattern`, `custom`
+- [ ] Server-side validation via Pydantic schemas
+- [ ] Inline error display per field
+- [ ] Form-level error summary
+- [ ] `Form` wrapper component with built-in validation
+- [ ] `Field` component for labeled inputs with error display
+- [ ] CSRF token auto-injection in forms and fetch requests
+- [ ] Form state persistence (save draft to localStorage)
+- [ ] Multi-step form support
 
-This phase will focus on mass adoption, long-term stability, and community growth.
+### 6. FileUpload Complete Pipeline
 
-- [x] **Ecosystem Development Tools**
-  - [x] **VS Code Extension**: Develop a comprehensive extension for Visual Studio Code including:
-    - [x] Intelligent autocompletion for components, properties, and events.
-    - [x] Real-time UI preview within the editor.
-    - [x] Integrated debugging tools.
-    - [x] Code snippet generation.
-  - [x] **IDE Integration**: Explore integration with other popular Python IDEs (PyCharm, etc.).
-  - [x] **Automated Testing Tools**: An integrated testing framework that facilitates writing unit, integration, and end-to-end tests for Dars applications.
+- [ ] `on_file_selected` callback with file metadata (name, size, type, preview URL)
+- [ ] Image preview before upload
+- [ ] Drag-and-drop zone support
+- [ ] Max size / file type validation in browser runtime
+- [ ] Upload progress indicator
+- [ ] `uploadTo(url)` helper that sends files via `FormData`
+- [ ] Backend file receiver endpoint template
+- [ ] Multiple file handling with individual progress
 
-- [x] **Documentation and Community Resources**
-  - [x] **Interactive Tutorials and Advanced Examples**: Create a series of step-by-step tutorials and complete application examples for different use cases.
-  - [x] **Contribution Guides**: Facilitate contribution to the Dars codebase and its documentation.
+### 7. Security Hardening
 
-### Phase 2.5: Fullstack Framework & Security Architecture (v1.6.9 - v1.9.0)
+- [ ] CSRF token generation per session
+- [ ] CSRF auto-injection in forms and fetch requests
+- [ ] CSRF validation middleware
+- [ ] Security headers: CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy
+- [ ] HTTPS enforcement / automatic HTTP → HTTPS redirect
+- [ ] Python-side input sanitization utilities
+- [ ] SQL injection prevention in data layer (parameterized queries)
+- [ ] Audit logging system
 
-This phase transforms Dars into a complete fullstack Python framework with enterprise-grade security and automatic backend integration.
+### 8. Browser API Helpers
 
-#### Security & Routing
+- [ ] `sessionStorage` helpers (get/set/remove/clear)
+- [ ] Cookie management helpers (get/set/delete with options)
+- [ ] `notify()` — Web Notifications API wrapper
+- [ ] Network status detection (`navigator.onLine`)
+- [ ] `IntersectionObserver` for lazy loading / scroll triggers
+- [ ] `matchMedia` for responsive breakpoint detection
+- [ ] `IndexedDB` wrapper for large client-side datasets
+- [ ] Geolocation API helper
+- [ ] Web Share API (`navigator.share()`)
+- [ ] `ResizeObserver` for responsive components
+- [ ] `window.print()` helper
 
-- [x] **Secure Router Foundation**
-  - [x] Lazy loading for private routes
-  - [x] Route obfuscation (hide sensitive routes from client)
-  - [x] Route types: `public`, `private`, `protected`
-  - [x] Backend route loader endpoints
+### 9. Business Logic Patterns
 
-- [ ] **VRef Hooks + Middleware**
-  - [x] Complete `setVRef()` exporter integration
-  - [ ] Middleware system (AuthMiddleware, RateLimitMiddleware, CORSMiddleware)
-  - [ ] Middleware chain execution
-  - [ ] Route-specific and global middleware
+- [ ] `useComputed()` / `useMemo()` — derived reactive values with dependency tracking
+- [ ] `If(condition, then_comp, else_comp)` — conditional rendering
+- [ ] `Show(condition, component)` — toggle visibility
+- [ ] `Each(items, template_fn)` / `For` — list rendering with keys
+- [ ] Server Actions — call Python functions from client-side events
+- [ ] `debounce(ms, action)` — debounce event handlers
+- [ ] `throttle(ms, action)` — throttle event handlers
+- [ ] Global event bus / pub-sub system
+- [ ] Error boundaries for component error isolation
+- [ ] Suspense / loading states for async data
 
-- [x] **FastAPI Backend Plugin**
-  - [x] `DarsBackend` class for FastAPI integration
-  - [x] Route loading endpoints
-  - [x] Middleware execution in backend
-  - [x] Request/response serialization
+### 10. Missing Components
 
-- [ ] **Authentication System**
-  - [ ] JWT token generation and verification
-  - [ ] Session management
-  - [ ] Frontend auth helpers (`login()`, `logout()`, `isAuthenticated()`)
-  - [ ] Auth endpoints (`/api/auth/login`, `/api/auth/logout`, `/api/auth/refresh`)
+- [ ] `Toast` — notification toasts with auto-dismiss and stacking
+- [ ] `Drawer` — slide-in side panel (left/right/top/bottom)
+- [ ] `Breadcrumb` — navigation breadcrumbs
+- [ ] `Pagination` — standalone pagination component
+- [ ] `Badge` — status badges / chips
+- [ ] `Avatar` — user avatar with fallback initials
+- [ ] `Skeleton` — loading skeleton placeholders
+- [ ] `Switch` / `Toggle` — boolean toggle switch
+- [ ] `ColorPicker` — color selection input
+- [ ] `RichTextEditor` — WYSIWYG text editing integration
 
-- [x] **SSR Implementation**
-  - [x] Server-side rendering without middleware
-  - [x] Direct backend integration for SSR
-  - [x] Context injection
-  - [x] Client-side hydration
+### 11. Existing Component Upgrades
 
-- [ ] **Route Guards & Permissions**
-  - [ ] Role-based access control (RBAC)
-  - [ ] Permission system with custom checks
-  - [ ] Route guard decorators
+- [ ] `Table` — client-side pagination, sorting, filtering, row selection, column resize
+- [ ] `Select` — search/filter, multi-select, async options loading
+- [ ] `Input` — input masks, debounced `on_change`, inline validation display
+- [ ] `Modal` — transition animations, backdrop click to close, nested modals
+- [ ] `Navbar` — mobile responsive hamburger menu, dropdown submenus
+- [ ] `Tabs` — lazy-load tab content, URL synchronization
+- [ ] `Accordion` — multi-open mode, collapse/expand animations
 
-- [ ] **Production Hardening**
-  - [ ] HTTPS enforcement
-  - [ ] CSRF protection
-  - [x] XSS prevention
-  - [ ] Security headers
-  - [ ] Audit logging
+### 12. Developer Experience
 
-#### Fullstack Integration
+- [ ] `.env` file support for secrets and environment variables
+- [ ] `dars.config.json` schema validation on startup
+- [ ] `dars generate component <name>` — scaffold new components
+- [ ] `dars generate page <name>` — scaffold new pages
+- [ ] `dars generate model <name>` — scaffold data models
+- [ ] Error overlay in browser dev mode (show Python tracebacks)
+- [ ] Source maps for generated JS
+- [ ] Docker deployment guide and `Dockerfile` template
+- [ ] Vercel / Railway deployment guides
+- [ ] Production build optimization checklist
 
-- [x] **Backend Auto-Detection**
-  - [x] Automatic detection of `/backend` or `/darsBackend` directories
-  - [x] Detection of `api.py` and `apiConfig.py`
-  - [x] Desktop mode support (Electron)
+### 13. Testing & Quality
 
-- [x] **apiConfig.py System**
-  - [x] Centralized URL configuration
-  - [x] `DEV_FRONTEND_URL` and `DEV_BACKEND_URL` constants
-  - [x] `BUILD_FRONTEND_URL` and `BUILD_BACKEND_URL` constants
-  - [x] `get_frontend_url()` and `get_backend_url()` helpers
-  - [x] Accessible from both frontend and backend
+- [ ] Component unit testing helpers (render + assert)
+- [ ] Integration test utilities
+- [ ] E2E testing guide (Playwright/Cypress)
+- [ ] Snapshot testing for exported HTML output
+- [ ] CI/CD pipeline templates (GitHub Actions)
 
-- [x] **Dev Server Orchestration**
-  - [x] `dars dev` starts both frontend and backend concurrently
-  - [x] Frontend on `localhost:8000` (rTimeCompile)
-  - [x] Backend on `localhost:3000` (uvicorn)
-  - [x] Hot reload for both servers
-  - [x] Clear console output with URLs
-  - [x] Graceful shutdown
+---
 
-- [x] **Fullstack Polish & Documentation**
-  - [x] Unified CLI experience
-  - [x] Fullstack tutorial
-  - [x] Backend integration guide
-  - [x] Deployment guide
-  - [x] Best practices documentation
+## Priority Order
 
-**Target**: v2.0.0 - Complete Fullstack Python Framework
+| #   | Area                    | Why First                                  |
+| --- | ----------------------- | ------------------------------------------ |
+| 1   | **Authentication**      | Nothing works without user identity        |
+| 2   | **Middleware**          | Auth depends on middleware pipeline        |
+| 3   | **Data Persistence**    | Apps need to store data                    |
+| 4   | **Form Validation**     | Every app has forms                        |
+| 5   | **HTTP Client**         | Frontend needs to talk to backend reliably |
+| 6   | **FileUpload Pipeline** | Current component is non-functional        |
+| 7   | **Security Hardening**  | Required for production                    |
+| 8   | **Business Logic**      | Conditional rendering, computed state      |
+| 9   | **Browser APIs**        | Quality of life                            |
+| 10  | **Components**          | New + upgraded components                  |
+| 11  | **DX & Testing**        | Developer happiness                        |
