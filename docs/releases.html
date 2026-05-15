@@ -829,13 +829,13 @@
     </div>
     <div class="dars-container dars-s-c59e376995" id="markdown-content-container">
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_0_1_1_0">
-      <h1 id="release-notes-v193">
-       Release Notes v1.9.3
+      <h1 id="release-notes-v194">
+       Release Notes v1.9.4
       </h1>
       <blockquote>
        <p>
         <strong>
-         Configurable Dev Port, Local DOMPurify &amp; Runtime Resource Optimization
+         Relative Import Paths for Static Deployments
         </strong>
        </p>
       </blockquote>
@@ -847,6 +847,149 @@
 </code></pre>
       </div>
       <h2 id="whats-new">
+       What's New
+      </h2>
+      <h3 id="fixed-relative-paths-for-runtime-resources">
+       Fixed: Relative Paths for Runtime Resources
+      </h3>
+      <p>
+       All JavaScript imports inside the framework's runtime resources (
+       <code>
+        dars/exporters/web/resources/
+       </code>
+       ) have been updated to use
+       <strong>
+        relative paths
+       </strong>
+       (e.g.,
+       <code>
+        ./dap.js
+       </code>
+       ) instead of absolute paths (e.g.,
+       <code>
+        lib/dap.js
+       </code>
+       ).
+      </p>
+      <p>
+       <strong>
+        The Problem:
+       </strong>
+      </p>
+      <p>
+       When deploying a Dars application to GitHub Pages (or any host that serves from a subpath like
+       <code>
+        https://user.github.io/my-project/
+       </code>
+       ), the browser resolved non-relative paths against the
+       <strong>
+        host's base URL
+       </strong>
+       instead of the application's directory:
+      </p>
+      <pre>
+<code class="language-none">❌  https://user.github.io/lib/dap.js         → 404
+✅  https://user.github.io/my-project/lib/dap.js  → OK
+</code></pre>
+      <p>
+       This caused
+       <code>
+        dap.js
+       </code>
+       ,
+       <code>
+        dompurify.js
+       </code>
+       , and other runtime scripts to fail loading with
+       <code>
+        404
+       </code>
+       errors on any subpath-based deployment.
+      </p>
+      <p>
+       <strong>
+        The Fix:
+       </strong>
+      </p>
+      <p>
+       All
+       <code>
+        import
+       </code>
+       and
+       <code>
+        &lt;script src="..."&gt;
+       </code>
+       references within the exported runtime files now use
+       <code>
+        ./
+       </code>
+       relative paths, ensuring correct resolution regardless of the hosting base URL:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="gd">- import { ActionProtocol } from "lib/dap.js";</span>
+<span class="gi">+ import { ActionProtocol } from "./dap.js";</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Impact:
+       </strong>
+      </p>
+      <ul>
+       <li>
+        GitHub Pages deployments now work out of the box.
+       </li>
+       <li>
+        Any static hosting behind a subpath (Vercel preview, Netlify subdirectories, etc.) is also fixed.
+       </li>
+       <li>
+        No changes required to user projects — the fix is internal to the framework's exporter.
+       </li>
+      </ul>
+      <h3 id="files-modified">
+       Files Modified
+      </h3>
+      <ul>
+       <li>
+        <code>
+         dars/exporters/web/resources/dars.min.js
+        </code>
+        — Relative import paths
+       </li>
+       <li>
+        <code>
+         dars/exporters/web/resources/dap.js
+        </code>
+        — Relative import paths
+       </li>
+       <li>
+        All runtime JS resources — Consistent
+        <code>
+         ./
+        </code>
+        prefix for local imports
+       </li>
+      </ul>
+      <hr/>
+      <h1 id="release-notes-v193">
+       Release Notes v1.9.3
+      </h1>
+      <blockquote>
+       <p>
+        <strong>
+         Configurable Dev Port, Local DOMPurify &amp; Runtime Resource Optimization
+        </strong>
+       </p>
+      </blockquote>
+      <h2 id="installation-2">
+       Installation
+      </h2>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
+</code></pre>
+      </div>
+      <h2 id="whats-new-2">
        What's New
       </h2>
       <h3 id="configurable-development-port">
@@ -1004,14 +1147,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-2">
+      <h2 id="installation-3">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-2">
+      <h2 id="whats-new-3">
        What's New
       </h2>
       <h3 id="standardized-component-docstrings">
@@ -1083,14 +1226,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-3">
+      <h2 id="installation-4">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-3">
+      <h2 id="whats-new-4">
        What's New
       </h2>
       <h3 id="utility-style-system">
@@ -1288,14 +1431,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-4">
+      <h2 id="installation-5">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-4">
+      <h2 id="whats-new-5">
        What's New
       </h2>
       <h3 id="definitive-removal-of-new-function">
@@ -1572,14 +1715,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-5">
+      <h2 id="installation-6">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-5">
+      <h2 id="whats-new-6">
        What's New
       </h2>
       <h3 id="restored-native-string-concatenation">
@@ -1654,14 +1797,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-6">
+      <h2 id="installation-7">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-6">
+      <h2 id="whats-new-7">
        What's New
       </h2>
       <h3 id="state-v2-reactivity-decoupling">
@@ -1792,14 +1935,14 @@
         release.
        </p>
       </blockquote>
-      <h2 id="installation-7">
+      <h2 id="installation-8">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-7">
+      <h2 id="whats-new-8">
        What's New
       </h2>
       <h3 id="zero-eval-runtime-secure-script-execution">
@@ -1997,14 +2140,14 @@
         : Versions &lt;= v1.8.7 are considered deprecated and NOT recommended for production use. v1.8.8 addresses critical security surfaces by temporarily removing experimental Server Components. Upgrading is mandatory.
        </p>
       </blockquote>
-      <h2 id="installation-8">
+      <h2 id="installation-9">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-8">
+      <h2 id="whats-new-9">
        What's New
       </h2>
       <h3 id="dars-server-protocol-dsp">
@@ -2074,14 +2217,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-9">
+      <h2 id="installation-10">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-9">
+      <h2 id="whats-new-10">
        What's New
       </h2>
       <h3 id="dars-server-components">
@@ -2189,14 +2332,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-10">
+      <h2 id="installation-11">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-10">
+      <h2 id="whats-new-11">
        What's New
       </h2>
       <h3 id="darsenv-environment-awareness">
@@ -2308,14 +2451,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-11">
+      <h2 id="installation-12">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-11">
+      <h2 id="whats-new-12">
        What's New
       </h2>
       <h3 id="multiple-outlets-via-outlet_id">
@@ -2412,14 +2555,14 @@ This keeps state/events safe and avoids breaking hydration.
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-12">
+      <h2 id="installation-13">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-12">
+      <h2 id="whats-new-13">
        What's New
       </h2>
       <h3 id="python-native-minification-by-default-no-nodebun-required">
@@ -2628,14 +2771,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-13">
+      <h2 id="installation-14">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-13">
+      <h2 id="whats-new-14">
        What's New
       </h2>
       <h3 id="fixed-production-build-crash-unexpected-token-export">
@@ -2686,14 +2829,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-14">
+      <h2 id="installation-15">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-14">
+      <h2 id="whats-new-15">
        What's New
       </h2>
       <h3 id="fixed-settimeout-promise-handling">
@@ -2737,14 +2880,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-15">
+      <h2 id="installation-16">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-15">
+      <h2 id="whats-new-16">
        What's New
       </h2>
       <h3 id="new-style-optimization-pipeline-phase-1">
@@ -3114,14 +3257,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-16">
+      <h2 id="installation-17">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-16">
+      <h2 id="whats-new-17">
        What's New
       </h2>
       <h3 id="new-advanced-multimedia-components-video-audio">
@@ -3677,6 +3820,21 @@ improving consistency and providing a real-world example of the upgraded styling
      <div class="sidebar-category">
       Versions
      </div>
+     <a class="sidebar-link sidebar-level-1" href="#release-notes-v194" style="margin-left: 0px">
+      Release Notes v1.9.4
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#installation" style="margin-left: 20px">
+      Installation
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#whats-new" style="margin-left: 20px">
+      What's New
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#fixed-relative-paths-for-runtime-resources" style="margin-left: 40px">
+      Fixed: Relative Paths for Runtime Resources
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#files-modified" style="margin-left: 40px">
+      Files Modified
+     </a>
      <a class="sidebar-link sidebar-level-1" href="#release-notes-v193" style="margin-left: 0px">
       Release Notes v1.9.3
      </a>
@@ -4226,7 +4384,7 @@ improving consistency and providing a real-world example of the upgraded styling
         });
    </script>
   </div>
-  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1778818882" type="module">
+  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1778819590" type="module">
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js">
   </script>

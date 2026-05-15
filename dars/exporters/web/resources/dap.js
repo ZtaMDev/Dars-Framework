@@ -8,7 +8,7 @@ import {
   deleteComponent,
   updateVRef,
   __registry,
-} from "/lib/dars.min.js";
+} from "./dars.min.js";
 
 export const __commandRegistry = new Map();
 export const __darsConfig = {

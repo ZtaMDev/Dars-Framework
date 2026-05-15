@@ -1,3 +1,53 @@
+# Release Notes v1.9.4
+
+> **Relative Import Paths for Static Deployments**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Fixed: Relative Paths for Runtime Resources
+
+All JavaScript imports inside the framework's runtime resources (`dars/exporters/web/resources/`) have been updated to use **relative paths** (e.g., `./dap.js`) instead of absolute paths (e.g., `lib/dap.js`).
+
+**The Problem:**
+
+When deploying a Dars application to GitHub Pages (or any host that serves from a subpath like `https://user.github.io/my-project/`), the browser resolved non-relative paths against the **host's base URL** instead of the application's directory:
+
+```
+❌  https://user.github.io/lib/dap.js         → 404
+✅  https://user.github.io/my-project/lib/dap.js  → OK
+```
+
+This caused `dap.js`, `dompurify.js`, and other runtime scripts to fail loading with `404` errors on any subpath-based deployment.
+
+**The Fix:**
+
+All `import` and `<script src="...">` references within the exported runtime files now use `./` relative paths, ensuring correct resolution regardless of the hosting base URL:
+
+```diff
+- import { ActionProtocol } from "lib/dap.js";
++ import { ActionProtocol } from "./dap.js";
+```
+
+**Impact:**
+
+- GitHub Pages deployments now work out of the box.
+- Any static hosting behind a subpath (Vercel preview, Netlify subdirectories, etc.) is also fixed.
+- No changes required to user projects — the fix is internal to the framework's exporter.
+
+### Files Modified
+
+- `dars/exporters/web/resources/dars.min.js` — Relative import paths
+- `dars/exporters/web/resources/dap.js` — Relative import paths
+- All runtime JS resources — Consistent `./` prefix for local imports
+
+---
+
 # Release Notes v1.9.3
 
 > **Configurable Dev Port, Local DOMPurify & Runtime Resource Optimization**

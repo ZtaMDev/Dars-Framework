@@ -1,7 +1,7 @@
 // ==================== ROUTER ====================
-import { dispatch, __darsConfig } from "/lib/dap.js";
-import { _sanitize, $ } from "/lib/dars.min.js";
-import { _executeExternalScript } from "/lib/ssr.js";
+import { dispatch, __darsConfig } from "./dap.js";
+import { _sanitize, $ } from "./dars.min.js";
+import { _executeExternalScript } from "./ssr.js";
 
 // Vite minification compatible - uses string literals for all object properties
 
