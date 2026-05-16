@@ -12,7 +12,8 @@ from typing import Optional
 from rich.console import Console
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn
-from rich.prompt import Confirm
+from rich.prompt import Confirm, Prompt
+from dars.cli.prompts import select_prompt
 from rich.syntax import Syntax
 from rich.table import Table
 from rich.text import Text
@@ -460,7 +461,7 @@ class DarsExporter:
 
         # Create project directory
         os.makedirs(name)
-        console.print(f"[green]✔ {translator.get('directory_created').format(name=name)}[/green]")
+        console.print(f"[green]SUCCESS: {translator.get('directory_created').format(name=name)}[/green]")
 
         if template:
             # Get template information
@@ -487,9 +488,9 @@ class DarsExporter:
                 
                 if src_file.exists():
                     shutil.copy2(src_file, dest_file)
-                    console.print(f"[green]✔ {translator.get('extra_file_copied').format(file=extra_file)}[/green]")
+                    console.print(f"[green]SUCCESS: {translator.get('extra_file_copied').format(file=extra_file)}[/green]")
 
-            console.print(f"[green]✔ {translator.get('template_copied').format(template=template)}[/green]")
+            console.print(f"[green]SUCCESS: {translator.get('template_copied').format(template=template)}[/green]")
         elif str(proj_type).lower() == 'desktop':
             # Use the default desktop template from dars/templates/desktop/template/
             try:
@@ -559,7 +560,7 @@ if __name__ == "__main__":
 """
                     main_py = Path(name) / "main.py"
                     main_py.write_text(HELLO_WORLD_CODE.strip(), encoding="utf-8")
-                    console.print(f"[green]✔ {translator.get('main_py_created')}[/green]")
+                    console.print(f"[green]SUCCESS: {translator.get('main_py_created')}[/green]")
                 else:
                     # Copy all files from template directory, excluding __pycache__ and dars_preview
                     excluded_dirs = {'__pycache__', 'dars_preview'}
@@ -589,7 +590,7 @@ if __name__ == "__main__":
                             shutil.copy2(src, dst)
                             # Show relative path from template dir
                             rel_path = src.relative_to(template_dir)
-                            console.print(f"[green]✔ {rel_path} copied[/green]")
+                            console.print(f"[green]SUCCESS: {rel_path} copied[/green]")
                     
                     # Copy all files from template
                     for item in template_dir.iterdir():
@@ -597,7 +598,7 @@ if __name__ == "__main__":
                             dest_item = Path(name) / item.name
                             copy_template_recursive(item, dest_item)
                     
-                    console.print("[green]✔ Desktop template copied[/green]")
+                    console.print("[green]SUCCESS: Desktop template copied[/green]")
             except Exception as e:
                 console.print(f"[yellow]⚠ Could not copy desktop template: {e}, using default scaffold[/yellow]")
                 # Fall back to default hello world
@@ -661,7 +662,7 @@ if __name__ == "__main__":
 """
                 main_py = Path(name) / "main.py"
                 main_py.write_text(HELLO_WORLD_CODE.strip(), encoding="utf-8")
-                console.print(f"[green]✔ {translator.get('main_py_created')}[/green]")
+                console.print(f"[green]SUCCESS: {translator.get('main_py_created')}[/green]")
         else:
             # Default Web/Fullstack Scaffold (based on initexample)
             
@@ -872,6 +873,35 @@ app.add_page("index", index(), title="index")
 if __name__ == "__main__":
     app.rTimeCompile()
 """
+
+            # Template for 'web' type (Static/Multipage)
+            STATIC_TEMPLATE_CODE = """from dars.all import *
+
+app = App(title="Static App", theme="dark")
+
+# 1. Define Page
+index = Page(
+    Container(
+        Text(
+            text="Welcome to Dars Static",
+            style="fs-[42px] font-bold mb-[10px]",
+        ),
+        Text(
+            text="This is a standard multipage static-style project.",
+            style="fs-[18px] text-gray-500",
+        ),
+        style="flex flex-col items-center justify-center h-[100vh] ffam-[Arial] bg-[#f0f2f5]",
+    )
+)
+
+# 2. Add Page
+app.add_page("index", index, title="Home", index=True)
+
+# 3. Run app
+if __name__ == "__main__":
+    app.rTimeCompile()
+"""
+
             
             # 4. dars.config.json
             # Default config for SPA / desktop projects
@@ -921,7 +951,7 @@ if __name__ == "__main__":
             if proj_type == 'ssr':
                 # write SSR template
                 (root_path / "main.py").write_text(SSR_TEMPLATE_CODE.strip(), encoding="utf-8")
-                console.print(f"[green]✔ {translator.get('main_py_created')} (SSR Mode)[/green]")
+                console.print(f"[green]SUCCESS: {translator.get('main_py_created')} (SSR Mode)[/green]")
                 
                 # Create config json for SSR projects, including backendEntry pointing to backend/api.py
                 (root_path / "dars.config.json").write_text(DARS_CONFIG_JSON_SSR_CODE.strip(), encoding="utf-8")
@@ -932,11 +962,20 @@ if __name__ == "__main__":
                 (backend_dir / "__init__.py").touch()
                 (backend_dir / "api.py").write_text(API_PY_CODE.strip(), encoding="utf-8")
                 (backend_dir / "apiConfig.py").write_text(API_CONFIG_PY_CODE.strip(), encoding="utf-8")
-                console.print(f"[green]✔ Fullstack scaffold created (backend, apiConfig, main.py)[/green]")
+                console.print(f"[green]SUCCESS: Fullstack scaffold created (backend, apiConfig, main.py)[/green]")
             else:
-                # Default Web/SPA
-                (root_path / "main.py").write_text(SPA_TEMPLATE_CODE.strip(), encoding="utf-8")
-                console.print(f"[green]✔ {translator.get('main_py_created')} (SPA Mode)[/green]")
+                # Default Web/SPA vs Static choice
+                web_mode = 'spa'
+                if '--type' not in sys.argv and '-T' not in sys.argv:
+                    web_mode = select_prompt("Select web mode", choices=['spa', 'static'], default_idx=0)
+                
+                if web_mode == 'static':
+                    (root_path / "main.py").write_text(STATIC_TEMPLATE_CODE.strip(), encoding="utf-8")
+                    console.print(f"[green]SUCCESS: {translator.get('main_py_created')} (Static Mode)[/green]")
+                else:
+                    (root_path / "main.py").write_text(SPA_TEMPLATE_CODE.strip(), encoding="utf-8")
+                    console.print(f"[green]SUCCESS: {translator.get('main_py_created')} (SPA Mode)[/green]")
+                
                 (root_path / "dars.config.json").write_text(DARS_CONFIG_JSON_CODE.strip(), encoding="utf-8")
 
 
@@ -949,7 +988,7 @@ if __name__ == "__main__":
                     update_config(project_root, {"format": "desktop"})
                 except Exception:
                     pass
-            console.print("[green]✔ dars.config.json created[/green]")
+            console.print("[green]SUCCESS: dars.config.json created[/green]")
         except Exception:
             # Non-fatal; keep init working even if config write fails
             pass
@@ -1079,7 +1118,7 @@ if __name__ == "__main__":
                     "  shutdown: () => ipcRenderer.invoke('dars::dev::shutdown')\n" + \
                     "});\n"
                 (backend_dir / 'preload.js').write_text(backend_preload, encoding='utf-8')
-                console.print("[green]✔ backend/ scaffold created[/green]")
+                console.print("[green]SUCCESS: backend/ scaffold created[/green]")
                 
                 # Copy default icon to icons/ directory (only if not already exists from template)
                 try:
@@ -1092,7 +1131,7 @@ if __name__ == "__main__":
                         default_icon_dest = icons_dir / "icon.png"
                         if not default_icon_dest.exists():
                             shutil.copy2(default_icon_src, default_icon_dest)
-                            console.print("[green]✔ icons/icon.png created[/green]")
+                            console.print("[green]SUCCESS: icons/icon.png created[/green]")
                 except Exception as e:
                     console.print(f"[yellow]Warning: could not copy default icon: {e}[/yellow]")
             except Exception as e:
@@ -1217,6 +1256,13 @@ def create_parser(include_hidden: bool = True) -> argparse.ArgumentParser:
     doctor_parser.add_argument('--all', action='store_true', help='Install all missing items (with --yes for non-interactive)')
     doctor_parser.add_argument('--force', action='store_true', help='Re-run checks even if environment was previously satisfied')
 
+    # Generate command
+    generate_parser = subparsers.add_parser('generate', aliases=['g'], help='Generate a new component or page')
+    generate_parser.add_argument('type', nargs='?', choices=['component', 'page'], help='Type to generate: component or page')
+    generate_parser.add_argument('name', nargs='?', help='Name of the component or page')
+    generate_parser.add_argument('--page-type', '-t', choices=['static', 'spa'], help='Type of page to generate (static or spa)')
+    generate_parser.add_argument('--yes', '-y', action='store_true', help='Automatically answer yes to prompts (e.g. inject page)')
+
     # Hidden forced installer (conditionally added to avoid appearing in help)
     if include_hidden:
         forcedev_parser = subparsers.add_parser('forcedev', help=argparse.SUPPRESS)
@@ -1327,6 +1373,14 @@ def list_templates_detailed():
     console.print(table)
 def main():
     """Main CLI function"""
+    try:
+        _main_exec()
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Operation cancelled by user.[/yellow]")
+        sys.exit(0)
+
+def _main_exec():
+    """Inner main execution logic"""
     # English-only: no language parameter pre-scan
     
     # Intercept only when no args provided; otherwise let argparse show the correct subcommand help
@@ -1337,7 +1391,7 @@ def main():
     
     # Continue with normal flow if not help
     # If user asked for top-level help (no subcommand), build parser without hidden commands
-    known_cmds = ['export','info','formats','preview','init','build','config','dev','doctor']
+    known_cmds = ['export','info','formats','preview','init','build','config','dev','doctor','generate','g']
     top_level_help = ('-h' in sys.argv or '--help' in sys.argv) and not any(cmd in sys.argv for cmd in known_cmds)
     parser = create_parser(include_hidden=not top_level_help)
     if top_level_help:
@@ -1511,6 +1565,11 @@ def main():
     elif args.command == 'formats':
         # Show formats
         exporter.show_supported_formats()
+        
+    elif args.command in ('generate', 'g'):
+        from dars.cli.generate import handle_generate
+        handle_generate(args)
+        sys.exit(0)
     
     elif args.command == 'init':
         if args.list_templates:
@@ -1529,7 +1588,7 @@ def main():
                     update_config(project_root, {"format": "web"})
             except Exception:
                 pass
-            console.print("[green]✔ dars.config.json created/updated[/green]")
+            console.print("[green]SUCCESS: dars.config.json created/updated[/green]")
             # If desktop format, ensure backend scaffold exists
             try:
                 cfg2, _ = load_config(project_root)
@@ -1694,7 +1753,7 @@ def main():
                             "  shutdown: () => ipcRenderer.invoke('dars::dev::shutdown')\n" +
                             "});\n",
                             encoding='utf-8')
-                    console.print("[green]✔ backend/ scaffold ensured[/green]")
+                    console.print("[green]SUCCESS: backend/ scaffold ensured[/green]")
                     
                     # Ensure default icon exists in icons/ directory
                     try:
@@ -1707,16 +1766,24 @@ def main():
                             default_icon_dest = icons_dir / "icon.png"
                             if not default_icon_dest.exists():
                                 shutil.copy2(default_icon_src, default_icon_dest)
-                                console.print("[green]✔ icons/icon.png created[/green]")
+                                console.print("[green]SUCCESS: icons/icon.png created[/green]")
                     except Exception as e:
                         console.print(f"[yellow]Warning: could not copy default icon: {e}[/yellow]")
             except Exception:
                 pass
-        elif not args.name:
-            console.print("[red]Error: Project name is required[/red]")
-            parser.parse_args(['init', '--help'])
         else:
-            exporter.init_project(args.name, template=args.template, proj_type=getattr(args, 'type', 'web'))
+            name = args.name
+            if not name:
+                name = Prompt.ask("[cyan]Enter project name[/cyan]")
+            
+            proj_type = getattr(args, 'type', 'web')
+            # If the user didn't specify the type via flag, ask them
+            if '--type' not in sys.argv and '-T' not in sys.argv:
+                proj_type = select_prompt("Select project type", choices=['web', 'desktop', 'ssr'], default_idx=0)
+                
+            exporter.init_project(name, template=args.template, proj_type=proj_type)
+            console.print(f"\n[bold green]Project initialized successfully![/bold green]")
+            console.print(f"[yellow]Remember to:[/yellow] [bold cyan]cd {name}[/bold cyan] [yellow]to start building![/yellow]\n")
 
         
     elif args.command == 'build':

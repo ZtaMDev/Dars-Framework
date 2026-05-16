@@ -23,7 +23,7 @@ class Button(Component):
     Button(
         text="Click me!",
         class_name="bg-indigo-600 text-white px-4 py-2 rounded shadow-md hover:shadow-lg transition-all",
-        on_click=lambda: print("Button clicked!")
+        on_click=log("Button clicked!")
     )
     ```
     """
