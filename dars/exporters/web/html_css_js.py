@@ -485,7 +485,8 @@ class HTMLCSSJSExporter(Exporter):
                                                             bundle=bundle, 
                                                             vdom_script="",  # Vacío porque está combinado
                                                             script_is_module=combined_is_module,
-                                                            combined_js=True)
+                                                            combined_js=True,
+                                                            is_hybrid_index=(slug == "index" and hasattr(app, "has_spa_routes") and app.has_spa_routes()))
                             filename = "index.html"
                         else:
                             html_content = self.generate_html(page_app, css_file="styles.css",
@@ -495,7 +496,8 @@ class HTMLCSSJSExporter(Exporter):
                                                             bundle=bundle, 
                                                             vdom_script="",  # Vacío porque está combinado
                                                             script_is_module=combined_is_module,
-                                                            combined_js=True)
+                                                            combined_js=True,
+                                                            is_hybrid_index=(slug == "index" and hasattr(app, "has_spa_routes") and app.has_spa_routes()))
                             filename = f"{slug}.html"
                     else:
                         # Comportamiento original: archivos separados
@@ -516,7 +518,8 @@ class HTMLCSSJSExporter(Exporter):
                                                             extra_script_srcs=external_srcs, 
                                                             bundle=bundle, 
                                                             vdom_script=vdom_filename,
-                                                            script_is_module=combined_is_module)
+                                                            script_is_module=combined_is_module,
+                                                            is_hybrid_index=(slug == "index" and hasattr(app, "has_spa_routes") and app.has_spa_routes()))
                             filename = "index.html"
                         else:
                             html_content = self.generate_html(page_app, css_file="styles.css",
@@ -525,7 +528,8 @@ class HTMLCSSJSExporter(Exporter):
                                                             extra_script_srcs=external_srcs, 
                                                             bundle=bundle, 
                                                             vdom_script=vdom_filename,
-                                                            script_is_module=combined_is_module)
+                                                            script_is_module=combined_is_module,
+                                                            is_hybrid_index=(slug == "index" and hasattr(app, "has_spa_routes") and app.has_spa_routes()))
                             filename = f"{slug}.html"
                     
                     # Mejorar formato HTML
@@ -994,7 +998,7 @@ self.addEventListener('fetch', event => {
                  script_file: str = "script.js", runtime_file: str = "runtime_dars.js", 
                  extra_script_srcs: list = None, bundle: bool = False, 
                  vdom_script: str = "vdom_tree.js", script_is_module: bool = False,
-                 combined_js: bool = False) -> str:
+                 combined_js: bool = False, is_hybrid_index: bool = False) -> str:
         """Genera el contenido HTML con todas las propiedades de la aplicación"""
         body_content = ""
         from dars.components.basic.container import Container
@@ -1134,6 +1138,32 @@ self.addEventListener('fetch', event => {
         if not bundle:
             version_vars_html = f"<script>window.__DARS_SNAPSHOT_URL = '{snapshot_name}'; window.__DARS_VERSION_URL = '{version_name}';</script>"
 
+        # Anti-flash for hybrid projects
+        anti_flash_script = ""
+        if is_hybrid_index:
+            anti_flash_script = """
+    <style id="dars-anti-flash">
+        html:not([dars-ready]) { display: none !important; }
+    </style>
+    <script>
+        (function(){
+            const p = window.location.pathname;
+            // Reveal immediately if we are on a known entry point
+            // or if we are in a sub-path that might be handled by the SPA router
+            const isEntry = (p === '/' || p === '/index.html' || p.endsWith('.html'));
+            if (isEntry) {
+                document.documentElement.setAttribute('dars-ready', 'true');
+            }
+            // Fallback: ALWAYS reveal after 2.5s to prevent permanent blank screen
+            setTimeout(() => {
+                if (!document.documentElement.hasAttribute('dars-ready')) {
+                    console.warn('[Dars] Anti-flash timeout: forced reveal');
+                    document.documentElement.setAttribute('dars-ready', 'true');
+                }
+            }, 2500);
+        })();
+    </script>"""
+
         # NUEVO: Manejar archivos combinados vs separados
         if combined_js:
             # Cuando está combinado, solo necesitamos el script_file principal
@@ -1182,6 +1212,7 @@ self.addEventListener('fetch', event => {
     <html lang="{app.language}">
     <head>
         <meta charset="{app.config.get('charset', 'UTF-8')}">
+        {anti_flash_script}
         {final_meta_tags}
         <title>{page_title}</title>
         {links_html if not page_metadata else ''}
@@ -1191,6 +1222,7 @@ self.addEventListener('fetch', event => {
     </head>
     <body>
         {body_content}
+        <div id="__dars_spa_root__"></div>
         {version_vars_html}
         {dars_lib_tag}
         {runtime_script_tag}
@@ -2530,6 +2562,17 @@ audio.dars-audio {
         reactive_bindings_js = self._generate_reactive_bindings_js()
         vref_bindings_js = self._generate_vref_bindings_js()
         
+        # Combined SPA/Multipage router registration
+        spa_init_js = ""
+        # Skip this if we are in a pure SPA shell, as it handles registration itself
+        if not getattr(app, '_is_spa_shell', False) and hasattr(self, '_cached_spa_config_light') and self._cached_spa_config_light:
+            config_literal = compile_val(self._cached_spa_config_light)
+            spa_init_js = f"""
+        // SPA Router Registration (Combined Mode)
+        if (window.Dars && window.Dars.router) {{
+            window.Dars.router.registerConfig({config_literal});
+        }}"""
+        
         # Collect used component types for conditional logic injection
         used_types = set()
         self._collect_component_types(page_root, used_types)
@@ -2621,6 +2664,7 @@ audio.dars-audio {
         {reactive_bindings_js}
         
         {vref_bindings_js}
+        {spa_init_js}
     }}
 
     if(document.readyState === 'complete' || document.readyState === 'interactive'){{
@@ -5654,6 +5698,13 @@ audio.dars-audio {
             'notFound': None,
             'backendUrl': getattr(app, 'ssr_url', 'http://localhost:3000') or 'http://localhost:3000'
         }
+        # Light config for cross-page navigation (only paths/names)
+        spa_config_light = {
+            'routes': [],
+            'index': None,
+            'notFoundPath': None,
+            'backendUrl': getattr(app, 'ssr_url', 'http://localhost:3000') or 'http://localhost:3000'
+        }
         for route_name, spa_route in app._spa_routes.items():
             self._current_page_id = route_name
             # Ensure deterministic IDs for this route before rendering
@@ -5697,7 +5748,10 @@ audio.dars-audio {
             # Generate runtime JS with events/states for this route
             # For SSR routes, we disable static event generation to avoid ID mismatches
             is_ssr_route = (route_type == RouteType.SSR)
-            runtime_js = self.generate_javascript(route_app, route_app.root, route_events_map, ssr_mode=is_ssr_route)
+            # Mark the app as part of a shell to avoid duplicate registration
+            shell_app_runtime = copy.copy(route_app)
+            shell_app_runtime._is_spa_shell = True
+            runtime_js = self.generate_javascript(shell_app_runtime, route_app.root, route_events_map, ssr_mode=is_ssr_route)
             
             # Generate VDOM JS content
             # Generate VDOM JS content using native compiler to support reactive props
@@ -5723,7 +5777,7 @@ audio.dars-audio {
             # Always use bundle mode logic for SPA/SSR to ensure app_{route_name}.js exists
             # This is required for consistent loading by ssr.py and the client router
             # Bundle mode: Combine everything into app_{route_name}.js
-            if route_name == "index":
+            if route_name == "index" or getattr(spa_route, "index", False):
                 app_js_filename = "app.js"
             else:
                 app_js_filename = f"app_{route_name}.js"
@@ -5785,16 +5839,20 @@ audio.dars-audio {
 
 
             elif route_type == RouteType.SSR:
-                # SSR routes: only metadata, render on backend
+                # SSR routes: render a static snapshot during export for faster initial load
                 route_config = {
                     'name': route_name,
                     'path': spa_route.route,
-                    'title': route_title,  # Use Head metadata if available
+                    'title': route_title,
                     'type': 'ssr',
                     'ssr_endpoint': route_metadata.loader_endpoint if route_metadata else f"/api/ssr/{route_name}",
+                    'html': route_html, 
+                    'styles': route_styles_css,
+                    'scripts': scripts_array,
+                    'vdom': route_vdom,
                     'parent': spa_route.parent,
                     'outletId': getattr(spa_route, 'outlet_id', 'main'),
-                    'headMetadata': head_metadata  # Include for client-side updates
+                    'headMetadata': head_metadata
                 }
                 
                 # Still write route files for backend SSR to use
@@ -5822,7 +5880,30 @@ audio.dars-audio {
                 # but don't include them in initial __DARS_SPA_CONFIG__
             
             spa_config['routes'].append(route_config)
-            if spa_route.index: spa_config['index'] = route_name
+            
+            # Add to light config (exclude heavy content)
+            light_route = {
+                'name': route_name,
+                'path': spa_route.route,
+                'type': route_config['type'],
+                'parent': spa_route.parent,
+                'outletId': getattr(spa_route, 'outlet_id', 'main')
+            }
+            spa_config_light['routes'].append(light_route)
+            
+            # Write individual route manifest for lazy loading
+            route_manifest = {
+                'html': route_html,
+                'vdom': route_vdom,
+                'scripts': scripts_array,
+                'styles': route_styles_css,
+                'headMetadata': head_metadata
+            }
+            self.write_file(os.path.join(output_path, f"route_{route_name}.json"), json.dumps(route_manifest, indent=2))
+
+            if spa_route.index: 
+                spa_config['index'] = route_name
+                spa_config_light['index'] = route_name
         if app._spa_404_page:
             not_found_app = copy.copy(app)
             
@@ -5844,13 +5925,15 @@ audio.dars-audio {
             }
             spa_config['routes'].append(route_404)
             spa_config['notFoundPath'] = '/404'
+            spa_config_light['notFoundPath'] = '/404'
+            spa_config_light['routes'].append({'name': '__404__', 'path': '/404', 'type': 'public'})
         else:
             # Default 404 page
             from dars.components.basic.text import Text
             
             default_404_root = Container(
                 Text("404 Page Not Found", style={"font-size": "48px", "font-weight": "bold", "margin-bottom": "20px", "color": "#333"}),
-                Text("The page you are looking for does not exist.", style={"font-s ize": "18px", "color": "red", "margin-right":"10px"}),
+                Text("The page you are looking for does not exist.", style={"font-size": "18px", "color": "red", "margin-right":"10px"}),
                 style={
                     "display": "flex", "flex-direction": "column", "height": "100vh", "font-family": "system-ui, -apple-system, sans-serif",
                     "background-color": "#f9f9f9", "margin": "0", "padding": "20px", "text-align": "center"
@@ -5864,6 +5947,37 @@ audio.dars-audio {
             }
             spa_config['routes'].append(route_404)
             spa_config['notFoundPath'] = '/404'
+            spa_config_light['notFoundPath'] = '/404'
+            spa_config_light['routes'].append({'name': '__404__', 'path': '/404', 'type': 'public'})
+
+        # Write the 404 manifest for lazy loading
+        # Find the 404 route config we just added
+        route_404_final = next((r for r in spa_config['routes'] if r['name'] == '__404__'), None)
+        if route_404_final:
+            manifest_404 = {
+                'html': route_404_final['html'],
+                'vdom': route_404_final['vdom'],
+                'scripts': route_404_final['scripts'],
+                'styles': route_404_final['styles'],
+                'headMetadata': {'title': '404 Not Found'}
+            }
+            self.write_file(os.path.join(output_path, "route___404__.json"), json.dumps(manifest_404, indent=2))
+            
+            # Also generate a physical 404.html for static servers
+            # We use the same base as index.html but it will trigger the router's 404 logic
+            # This is basically a copy of index.html that servers will pick up as fallback
+            try:
+                # We can just reuse the index_html content if we have it, or generate a fresh one
+                # Since _export_spa is called before/during main export, we might not have index_html yet
+                # But we can generate a minimal shell similar to index.html
+                shell_404 = self.generate_html(
+                    app, is_hybrid_index=True, 
+                    combined_js=should_combine_js,
+                    script_file="app.js" if should_combine_js else "script.js"
+                )
+                self.write_file(os.path.join(output_path, "404.html"), shell_404)
+            except Exception as e:
+                print(f"[Dars:Exporter] Warning: Failed to generate physical 404.html: {e}")
 
         # Loading/Error components for SSR lazy-load (static HTML placeholders)
         try:
@@ -6004,13 +6118,101 @@ audio.dars-audio {
                 # Use the same method that generates meta tags for multipage
                 initial_meta_tags = self._generate_page_meta_tags(head_metadata, app)
         
+        # 1. Prepare a clean shell using generate_html
+        # We use a copy of the app but with root=None to get an empty __dars_spa_root__
+        shell_app = copy.copy(app)
+        shell_app.root = None 
+        
+        # Determine the correct script filename to use (always app.js for SPA shell to avoid conflicts)
+        main_script_name = "app.js" 
+        
+        spa_html = self.generate_html(
+            shell_app, 
+            is_hybrid_index=True,
+            combined_js=True, # Force combined mode for shell to use the single bundle
+            script_file=main_script_name
+        )
+        
+        # 2. Prerendered content for hydration
+        prerendered_html = ''
+        hydration_scripts = ''
+        if index_route:
+            prerendered_html = index_route.get('html', '')
+            # For SSR routes, we might have actual HTML from a previous render
+            vdom_literal = compile_val(index_route.get('vdom', {}))
+            states_literal = compile_val(index_route.get('states', []))
+            hydration_scripts = f"""<script>
+    window.__ROUTE_VDOM__ = {vdom_literal};
+    window.__DARS_STATE__ = {states_literal};
+    window.__DARS_HYDRATED_PATH__ = "{spa_route.route}";
+</script>"""
+
+        # 3. Inject content and hydration
+        # Replace the empty mount point with prerendered HTML
+        # We use a more robust replacement that handles potential whitespace from BeautifulSoup
+        if '<div id="__dars_spa_root__"></div>' in spa_html:
+            spa_html = spa_html.replace(
+                '<div id="__dars_spa_root__"></div>',
+                f'<div id="__dars_spa_root__">{prerendered_html}</div>'
+            )
+        else:
+            # Fallback for when BS4 or other factors add whitespace
+            import re
+            spa_html = re.sub(
+                r'<div\s+id="__dars_spa_root__">\s*</div>',
+                f'<div id="__dars_spa_root__">{prerendered_html}</div>',
+                spa_html
+            )
+        
         spa_config_literal = compile_val(spa_config)
-        spa_html = f'''<!DOCTYPE html><html lang="{getattr(app, "language", "en")}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">{initial_meta_tags}<title>{initial_title}</title><link rel="stylesheet" href="/runtime_css.css"><link rel="stylesheet" href="/styles.css"></head><body><div id="__dars_spa_root__"></div><script type="module" src="/lib/dars.min.js"></script><script>const __DARS_SPA_CONFIG__ = {spa_config_literal};window.addEventListener("DOMContentLoaded", function() {{ if (window.Dars && window.Dars.router) window.Dars.router.registerConfig(__DARS_SPA_CONFIG__);else console.error("[Dars SPA] Router not available");}});</script>{hot_reload_script}</body></html>'''
+        hydration_block = f"""
+        {hydration_scripts}
+        <script>
+            window.__DARS_SPA_CONFIG__ = {spa_config_literal};
+            // Force reveal if the router doesn't do it or if we are already hydrated
+            function _darsReveal() {{ document.documentElement.setAttribute('dars-ready', 'true'); }}
+            
+            window.addEventListener("DOMContentLoaded", function() {{
+                if (window.Dars && window.Dars.router) {{
+                    // Register the FULL config
+                    window.Dars.router.registerConfig(window.__DARS_SPA_CONFIG__);
+                    // Ensure visibility after a short delay to allow hydration/render
+                    setTimeout(_darsReveal, 100);
+                }} else {{
+                    console.error("[Dars SPA] Router not available");
+                    _darsReveal();
+                }}
+            }});
+        </script>
+        {hot_reload_script}
+        """
+        spa_html = spa_html.replace('</body>', f'{hydration_block}</body>')
+        
+        # Update title and meta if they differ from the app default
+        if initial_title and initial_title != app.title:
+            spa_html = spa_html.replace(f'<title>{app.title}</title>', f'<title>{initial_title}</title>')
+        
+        if initial_meta_tags:
+            spa_html = spa_html.replace('</head>', f'{initial_meta_tags}</head>')
+
+        # 4. Final Formatting
         try:
+            from bs4 import BeautifulSoup
             soup = BeautifulSoup(spa_html, "html.parser")
             spa_html = soup.prettify()
-        except: pass
+        except Exception:
+            pass
+            
         self.write_file(os.path.join(output_path, "index.html"), spa_html)
+        
+        # 5. Ensure the main script is written with the name the shell expects
+        if should_combine_js:
+            # If combined, app.js was already written in the loop for the index route
+            # but we ensure it exists here as a fallback if needed
+            pass
+        else:
+            # If not combined, we might need a default script.js
+            pass
 
         # Generate snapshot/version for SPA hot reload (dev mode only)
         if not bundle:
@@ -6043,6 +6245,9 @@ audio.dars-audio {
             except Exception:
                 version_val = "1"
             self.write_file(os.path.join(output_path, "version.txt"), version_val)
+        
+        # Cache light config for multipage injection
+        self._cached_spa_config_light = spa_config_light
     
     def _scan_for_head_components(self, component):
         """

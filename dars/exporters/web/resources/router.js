@@ -1,7 +1,7 @@
 // ==================== ROUTER ====================
 import { dispatch, __darsConfig } from "./dap.js";
-import { _sanitize, $ } from "./dars.min.js";
-import { _executeExternalScript } from "./ssr.js";
+import { _sanitize, $, _attachEventsMap, registerStates } from "./dars.min.js";
+import { _executeExternalScript, updatePageMetadata } from "./ssr.js";
 
 // Vite minification compatible - uses string literals for all object properties
 
@@ -155,7 +155,9 @@ export function _initializeRouter() {
     const match = _matchRoute(initialPath);
 
     const vdomSource = window.__ROUTE_VDOM__ || window.__DARS_VDOM__;
-    if (vdomSource) {
+    const hydratedPath = window.__DARS_HYDRATED_PATH__ || "/";
+    
+    if (vdomSource && (initialPath === hydratedPath || (initialPath === "/" && hydratedPath === "/index.html"))) {
       // Find matching route to set as current
       if (match && match.route) {
         // Update global state to reflect current route without navigating
@@ -185,7 +187,36 @@ export function _initializeRouter() {
     }
 
     if (!skipInit) {
-      _navigateToRoute(initialPath, { replace: true, skipPushState: true });
+      // Only take over if the current path matches an SPA route
+      if (match) {
+        // HIDE STATIC CONTENT IMMEDIATELY to avoid flash of fallback index.html
+        const container = document.getElementById("__dars_spa_root__");
+        if (container) {
+          document.querySelectorAll(".dars-page").forEach((el) => {
+            if (el !== container) el.style.display = "none";
+          });
+          container.style.display = "";
+        }
+        _navigateToRoute(initialPath, { replace: true, skipPushState: true });
+      } else {
+        // Fallback for missing SPA routes in combined mode
+        if (
+          initialPath !== "/" &&
+          initialPath !== "/index.html" &&
+          !initialPath.endsWith(".html")
+        ) {
+          const notFoundPath = __spaConfig ? __spaConfig["notFoundPath"] : null;
+          if (notFoundPath) {
+            _navigateToRoute(notFoundPath, {
+              replace: true,
+              skipPushState: true,
+            });
+          } else {
+            // No 404 path defined? reveal the page just in case
+            document.documentElement.setAttribute("dars-ready", "true");
+          }
+        }
+      }
     }
 
     // Listen for popstate (browser back/forward)
@@ -195,11 +226,23 @@ export function _initializeRouter() {
           (event.state && event.state["path"]) || window.location.pathname,
         );
         const params = (event.state && event.state["params"]) || {};
-        _navigateToRoute(path, {
-          replace: true,
-          skipPushState: true,
-          params: params,
-        });
+
+        const match = _matchRoute(path);
+        if (match) {
+          _navigateToRoute(path, {
+            replace: true,
+            skipPushState: true,
+            params: params,
+          });
+        } else {
+          // Back to static page: hide SPA root and show static content
+          const container = document.getElementById("__dars_spa_root__");
+          if (container) container.style.display = "none";
+          document.querySelectorAll(".dars-page").forEach((el) => {
+            if (el !== container) el.style.display = "";
+          });
+          document.documentElement.setAttribute("dars-ready", "true");
+        }
       } catch (e) {}
     });
 
@@ -223,7 +266,12 @@ export function _initializeRouter() {
 
         // Check if this matches any SPA route
         const match = _matchRoute(normalizedHref);
-        if (match) {
+        
+        // Intercept if it matches an SPA route, OR if it's a potential 404 (no file extension)
+        // This ensures smooth 404 handling even when navigating from a static root
+        const isFile = normalizedHref.split('?')[0].split('/').pop().includes('.');
+        
+        if (match || (!isFile && __spaConfig && __spaConfig["notFoundPath"])) {
           event.preventDefault();
           navigateTo(normalizedHref);
         }
@@ -497,6 +545,13 @@ export async function _loadRoute(route, params) {
         let container = document.getElementById("__dars_spa_root__");
         if (!container) return;
 
+        // In Combined Mode: hide static pages and show SPA root
+        document.querySelectorAll(".dars-page").forEach((el) => {
+          if (el !== container) el.style.display = "none";
+        });
+        container.style.display = "";
+        document.documentElement.setAttribute("dars-ready", "true");
+
         // Cleanup assets for inactive routes BEFORE rendering new chain
         const activeRouteNames = new Set(chain.map((r) => r["name"]));
 
@@ -565,6 +620,27 @@ export async function _loadRoute(route, params) {
         }
       } catch (e) {
         console.error("[Dars Router] Render chain error:", e);
+      }
+    }
+
+    // If route is public but missing content (Combined Mode / Lazy Load), fetch manifest
+    if (route["type"] === "public" && !route["html"]) {
+      try {
+        const manifestUrl = `/route_${route["name"]}.json`;
+        const response = await fetch(manifestUrl + "?t=" + Date.now());
+        if (response.ok) {
+          const routeData = await response.json();
+          route["html"] = routeData["html"] || "";
+          route["vdom"] = routeData["vdom"] || {};
+          route["scripts"] = routeData["scripts"] || [];
+          route["styles"] = routeData["styles"] || "";
+          route["headMetadata"] = routeData["headMetadata"] || {};
+        }
+      } catch (e) {
+        console.warn(
+          "[Dars Router] Failed to load lazy manifest for:",
+          route["name"],
+        );
       }
     }
 

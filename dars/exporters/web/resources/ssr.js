@@ -1,3 +1,4 @@
+import { registerStates } from "./dars.min.js";
 export function _executeExternalScript(code, context) {
   if (!code) return null;
   try {
@@ -224,13 +225,21 @@ try {
   }
 
   if (typeof window !== "undefined" && Array.isArray(window.__DARS_STATE__)) {
-    registerStates(window.__DARS_STATE__);
+    if (window.Dars && window.Dars.registerStates) {
+      window.Dars.registerStates(window.__DARS_STATE__);
+    } else if (typeof registerStates === "function") {
+      registerStates(window.__DARS_STATE__);
+    }
   }
   if (
     typeof window !== "undefined" &&
     Array.isArray(window.__DARS_STATE_V2__)
   ) {
-    registerStates(window.__DARS_STATE_V2__);
+    if (window.Dars && window.Dars.registerStates) {
+      window.Dars.registerStates(window.__DARS_STATE_V2__);
+    } else if (typeof registerStates === "function") {
+      registerStates(window.__DARS_STATE_V2__);
+    }
   }
 } catch (err) {
   console.error("[Dars:Debug] Critical error during hydration block:", err);

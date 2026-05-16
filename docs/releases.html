@@ -970,13 +970,13 @@
     </div>
     <div class="dars-container dars-s-c59e376995" id="markdown-content-container">
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_0_1_1_0">
-      <h1 id="release-notes-v195">
-       Release Notes v1.9.5
+      <h1 id="release-notes-v196">
+       Release Notes v1.9.6
       </h1>
       <blockquote>
        <p>
         <strong>
-         Modular Animation Engine, Scroll Triggers &amp; Zero-Jitter Handoffs
+         Hybrid Stability, Anti-Flash System &amp; CLI UX Overhaul
         </strong>
        </p>
       </blockquote>
@@ -988,6 +988,245 @@
 </code></pre>
       </div>
       <h2 id="whats-new">
+       What's New
+      </h2>
+      <h3 id="hybrid-ssrspa-stabilization">
+       Hybrid SSR/SPA Stabilization
+      </h3>
+      <p>
+       Resolved critical race conditions and hydration bugs that affected projects using a mix of Server-Side Rendering and Single Page Application routing.
+      </p>
+      <ul>
+       <li>
+        <strong>
+         Cross-Route Hydration Fix
+        </strong>
+        : Introduced
+        <code>
+         window.__DARS_HYDRATED_PATH__
+        </code>
+        to ensure the router only hydrates the page if the current path matches the pre-rendered content. This prevents "blank screens" or incorrect content display when deep-linking into sub-routes.
+       </li>
+       <li>
+        <strong>
+         Static to SSR Seamless Navigation
+        </strong>
+        : Resolved a JSON parsing error when navigating from a static root page to an SSR route. The lightweight SPA configuration injected into static pages now correctly resolves the backend URL, ensuring smooth hydration.
+       </li>
+       <li>
+        <strong>
+         Native 404 Interception
+        </strong>
+        : The SPA router now proactively intercepts clicks to non-existent internal routes (broken links) even when navigating from a static page, gracefully redirecting to the custom 404 component instead of triggering a raw server error.
+       </li>
+       <li>
+        <strong>
+         Single-Source Registration
+        </strong>
+        : Standardized the router configuration to ensure only one authoritative
+        <code>
+         registerConfig
+        </code>
+        call is made during the boot sequence, preventing state corruption in SPA shells.
+       </li>
+      </ul>
+      <h3 id="anti-flash-visibility-system-dars-ready">
+       Anti-Flash Visibility System (
+       <code>
+        dars-ready
+       </code>
+       )
+      </h3>
+      <p>
+       To provide a premium feel, we've implemented a robust visibility management system that hides the page during the delicate hydration phase to prevent "Flash of Unstyled Content" (FOUC).
+      </p>
+      <ul>
+       <li>
+        <strong>
+         <code>
+          dars-ready
+         </code>
+         Attribute
+        </strong>
+        : The framework now manages a
+        <code>
+         dars-ready
+        </code>
+        attribute on the root element. Visibility is automatically triggered once the runtime is ready.
+       </li>
+       <li>
+        <strong>
+         Resilient Fallback
+        </strong>
+        : Added a 2.5s safety timeout that forces the page to be visible even if a third-party script or network error hangs the hydration process, ensuring the user is never stuck with a blank screen.
+       </li>
+      </ul>
+      <h3 id="cli-ux-upgrades-dars-preview-v2">
+       CLI UX Upgrades:
+       <code>
+        dars preview
+       </code>
+       v2
+      </h3>
+      <p>
+       The
+       <code>
+        dars preview
+       </code>
+       command has been significantly improved to be more intuitive and configuration-aware.
+      </p>
+      <ul>
+       <li>
+        <strong>
+         Optional Path
+        </strong>
+        : You can now run
+        <code>
+         dars preview
+        </code>
+        without any arguments. It will automatically detect your
+        <code>
+         outdir
+        </code>
+        from
+        <code>
+         dars.config.json
+        </code>
+        (falling back to
+        <code>
+         ./dist
+        </code>
+        ).
+       </li>
+       <li>
+        <strong>
+         Customizable Ports
+        </strong>
+        : Added
+        <code>
+         --port
+        </code>
+        /
+        <code>
+         -p
+        </code>
+        support to specify the server port. The command also respects the
+        <code>
+         "port"
+        </code>
+        setting in your project's configuration file.
+       </li>
+       <li>
+        <strong>
+         Standardized Dev Propagation
+        </strong>
+        : The
+        <code>
+         dars dev
+        </code>
+        command now more reliably propagates port settings to the underlying application process.
+       </li>
+      </ul>
+      <h3 id="robustness-usability">
+       Robustness &amp; Usability
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Input Validation
+        </strong>
+        : The CLI now prevents the creation of projects, components, or pages with empty names, issuing clear warnings and re-prompting the user.
+       </li>
+       <li>
+        <strong>
+         Improved HTML Injection
+        </strong>
+        : The SPA shell exporter now uses a more resilient replacement logic for the root mounting point, handling whitespace variations introduced by different HTML formatters to ensure consistent pre-rendering.
+       </li>
+      </ul>
+      <h3 id="new-code-generation-suite-dars-generate">
+       New Code Generation Suite (
+       <code>
+        dars generate
+       </code>
+       )
+      </h3>
+      <p>
+       Accelerate your development workflow with the new code generation commands. Scaffold components and pages instantly with automatic project integration.
+      </p>
+      <ul>
+       <li>
+        <strong>
+         <code>
+          dars generate component &lt;name&gt;
+         </code>
+        </strong>
+        : Quickly create new reusable FunctionComponents.
+       </li>
+       <li>
+        <strong>
+         <code>
+          dars generate page &lt;name&gt;
+         </code>
+        </strong>
+        : Scaffold new pages (
+        <strong>
+         Static, SPA or SSR
+        </strong>
+        ) with pre-filled templates.
+       </li>
+       <li>
+        <strong>
+         Intelligent Backend Detection
+        </strong>
+        : Generating an SSR route without an existing backend will trigger a prompt to automatically scaffold the required FastAPI
+        <code>
+         /backend
+        </code>
+        infrastructure and update
+        <code>
+         dars.config.json
+        </code>
+        for you.
+       </li>
+       <li>
+        <strong>
+         Intelligent Auto-Injection
+        </strong>
+        : Use the
+        <code>
+         -y
+        </code>
+        flag (e.g.,
+        <code>
+         dars g page Contact -y
+        </code>
+        ) to automatically add imports and register the new page in your
+        <code>
+         main.py
+        </code>
+        file, linking it to your application instantly.
+       </li>
+      </ul>
+      <hr/>
+      <h1 id="release-notes-v195">
+       Release Notes v1.9.5
+      </h1>
+      <blockquote>
+       <p>
+        <strong>
+         Modular Animation Engine, Scroll Triggers &amp; Zero-Jitter Handoffs
+        </strong>
+       </p>
+      </blockquote>
+      <h2 id="installation-2">
+       Installation
+      </h2>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
+</code></pre>
+      </div>
+      <h2 id="whats-new-2">
        What's New
       </h2>
       <h3 id="modular-animation-engine-animjs">
@@ -1085,19 +1324,29 @@
         _setStylesWithoutTransition
        </code>
        helper that:
-1. Temporarily disables CSS transitions using
-       <code>
-        transition: none !important
-       </code>
-       .
-2. Injects the final animation frame as persistent inline styles.
-3. Forces a synchronous browser reflow (
-       <code>
-        void el.offsetHeight
-       </code>
-       ) to commit the changes silently.
-4. Cancels the WAAPI lock and restores the original CSS transition.
       </p>
+      <ol>
+       <li>
+        Temporarily disables CSS transitions using
+        <code>
+         transition: none !important
+        </code>
+        .
+       </li>
+       <li>
+        Injects the final animation frame as persistent inline styles.
+       </li>
+       <li>
+        Forces a synchronous browser reflow (
+        <code>
+         void el.offsetHeight
+        </code>
+        ) to commit the changes silently.
+       </li>
+       <li>
+        Cancels the WAAPI lock and restores the original CSS transition.
+       </li>
+      </ol>
       <p>
        <strong>
         Result:
@@ -1222,14 +1471,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-2">
+      <h2 id="installation-3">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-2">
+      <h2 id="whats-new-3">
        What's New
       </h2>
       <h3 id="fixed-relative-paths-for-runtime-resources">
@@ -1365,14 +1614,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-3">
+      <h2 id="installation-4">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-3">
+      <h2 id="whats-new-4">
        What's New
       </h2>
       <h3 id="configurable-development-port">
@@ -1530,14 +1779,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-4">
+      <h2 id="installation-5">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-4">
+      <h2 id="whats-new-5">
        What's New
       </h2>
       <h3 id="standardized-component-docstrings">
@@ -1609,14 +1858,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-5">
+      <h2 id="installation-6">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-5">
+      <h2 id="whats-new-6">
        What's New
       </h2>
       <h3 id="utility-style-system">
@@ -1814,14 +2063,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-6">
+      <h2 id="installation-7">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-6">
+      <h2 id="whats-new-7">
        What's New
       </h2>
       <h3 id="definitive-removal-of-new-function">
@@ -2098,14 +2347,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-7">
+      <h2 id="installation-8">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-7">
+      <h2 id="whats-new-8">
        What's New
       </h2>
       <h3 id="restored-native-string-concatenation">
@@ -2180,14 +2429,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-8">
+      <h2 id="installation-9">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-8">
+      <h2 id="whats-new-9">
        What's New
       </h2>
       <h3 id="state-v2-reactivity-decoupling">
@@ -2318,14 +2567,14 @@
         release.
        </p>
       </blockquote>
-      <h2 id="installation-9">
+      <h2 id="installation-10">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-9">
+      <h2 id="whats-new-10">
        What's New
       </h2>
       <h3 id="zero-eval-runtime-secure-script-execution">
@@ -2523,14 +2772,14 @@
         : Versions &lt;= v1.8.7 are considered deprecated and NOT recommended for production use. v1.8.8 addresses critical security surfaces by temporarily removing experimental Server Components. Upgrading is mandatory.
        </p>
       </blockquote>
-      <h2 id="installation-10">
+      <h2 id="installation-11">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-10">
+      <h2 id="whats-new-11">
        What's New
       </h2>
       <h3 id="dars-server-protocol-dsp">
@@ -2600,14 +2849,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-11">
+      <h2 id="installation-12">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-11">
+      <h2 id="whats-new-12">
        What's New
       </h2>
       <h3 id="dars-server-components">
@@ -2715,14 +2964,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-12">
+      <h2 id="installation-13">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-12">
+      <h2 id="whats-new-13">
        What's New
       </h2>
       <h3 id="darsenv-environment-awareness">
@@ -2834,14 +3083,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-13">
+      <h2 id="installation-14">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-13">
+      <h2 id="whats-new-14">
        What's New
       </h2>
       <h3 id="multiple-outlets-via-outlet_id">
@@ -2938,14 +3187,14 @@ This keeps state/events safe and avoids breaking hydration.
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-14">
+      <h2 id="installation-15">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-14">
+      <h2 id="whats-new-15">
        What's New
       </h2>
       <h3 id="python-native-minification-by-default-no-nodebun-required">
@@ -3154,14 +3403,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-15">
+      <h2 id="installation-16">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-15">
+      <h2 id="whats-new-16">
        What's New
       </h2>
       <h3 id="fixed-production-build-crash-unexpected-token-export">
@@ -3212,14 +3461,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-16">
+      <h2 id="installation-17">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-16">
+      <h2 id="whats-new-17">
        What's New
       </h2>
       <h3 id="fixed-settimeout-promise-handling">
@@ -3263,14 +3512,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-17">
+      <h2 id="installation-18">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-17">
+      <h2 id="whats-new-18">
        What's New
       </h2>
       <h3 id="new-style-optimization-pipeline-phase-1">
@@ -3640,14 +3889,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-18">
+      <h2 id="installation-19">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-18">
+      <h2 id="whats-new-19">
        What's New
       </h2>
       <h3 id="new-advanced-multimedia-components-video-audio">
@@ -4203,6 +4452,30 @@ improving consistency and providing a real-world example of the upgraded styling
      <div class="sidebar-category">
       Versions
      </div>
+     <a class="sidebar-link sidebar-level-1" href="#release-notes-v196" style="margin-left: 0px">
+      Release Notes v1.9.6
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#installation" style="margin-left: 20px">
+      Installation
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#whats-new" style="margin-left: 20px">
+      What's New
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#hybrid-ssrspa-stabilization" style="margin-left: 40px">
+      Hybrid SSR/SPA Stabilization
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#anti-flash-visibility-system-dars-ready" style="margin-left: 40px">
+      Anti-Flash Visibility System (`dars-ready`)
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#cli-ux-upgrades-dars-preview-v2" style="margin-left: 40px">
+      CLI UX Upgrades: `dars preview` v2
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#robustness-usability" style="margin-left: 40px">
+      Robustness &amp; Usability
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#new-code-generation-suite-dars-generate" style="margin-left: 40px">
+      New Code Generation Suite (`dars generate`)
+     </a>
      <a class="sidebar-link sidebar-level-1" href="#release-notes-v195" style="margin-left: 0px">
       Release Notes v1.9.5
      </a>
@@ -4791,7 +5064,9 @@ improving consistency and providing a real-world example of the upgraded styling
         });
    </script>
   </div>
-  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1778966347" type="module">
+  <div id="__dars_spa_root__">
+  </div>
+  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1778973992" type="module">
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js">
   </script>

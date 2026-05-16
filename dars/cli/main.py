@@ -13,7 +13,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn
 from rich.prompt import Confirm, Prompt
-from dars.cli.prompts import select_prompt
+from dars.cli.prompts import select_prompt, confirm_prompt
 from rich.syntax import Syntax
 from rich.table import Table
 from rich.text import Text
@@ -963,19 +963,14 @@ if __name__ == "__main__":
                 (backend_dir / "api.py").write_text(API_PY_CODE.strip(), encoding="utf-8")
                 (backend_dir / "apiConfig.py").write_text(API_CONFIG_PY_CODE.strip(), encoding="utf-8")
                 console.print(f"[green]SUCCESS: Fullstack scaffold created (backend, apiConfig, main.py)[/green]")
+            elif proj_type == 'static':
+                (root_path / "main.py").write_text(STATIC_TEMPLATE_CODE.strip(), encoding="utf-8")
+                console.print(f"[green]SUCCESS: {translator.get('main_py_created')} (Static Mode)[/green]")
+                (root_path / "dars.config.json").write_text(DARS_CONFIG_JSON_CODE.strip(), encoding="utf-8")
             else:
-                # Default Web/SPA vs Static choice
-                web_mode = 'spa'
-                if '--type' not in sys.argv and '-T' not in sys.argv:
-                    web_mode = select_prompt("Select web mode", choices=['spa', 'static'], default_idx=0)
-                
-                if web_mode == 'static':
-                    (root_path / "main.py").write_text(STATIC_TEMPLATE_CODE.strip(), encoding="utf-8")
-                    console.print(f"[green]SUCCESS: {translator.get('main_py_created')} (Static Mode)[/green]")
-                else:
-                    (root_path / "main.py").write_text(SPA_TEMPLATE_CODE.strip(), encoding="utf-8")
-                    console.print(f"[green]SUCCESS: {translator.get('main_py_created')} (SPA Mode)[/green]")
-                
+                # Default Web/SPA
+                (root_path / "main.py").write_text(SPA_TEMPLATE_CODE.strip(), encoding="utf-8")
+                console.print(f"[green]SUCCESS: {translator.get('main_py_created')} (SPA Mode)[/green]")
                 (root_path / "dars.config.json").write_text(DARS_CONFIG_JSON_CODE.strip(), encoding="utf-8")
 
 
@@ -1135,7 +1130,7 @@ if __name__ == "__main__":
                 except Exception as e:
                     console.print(f"[yellow]Warning: could not copy default icon: {e}[/yellow]")
             except Exception as e:
-                console.print(f"[yellow]Warning: could not create backend scaffold: {e}[/yellow]")
+                pass
 
         # Final instructions removed per request
 
@@ -1205,7 +1200,8 @@ def create_parser(include_hidden: bool = True) -> argparse.ArgumentParser:
     
     # Preview command
     preview_parser = subparsers.add_parser('preview', help=translator.get('preview_cmd_help'))
-    preview_parser.add_argument('path', help=translator.get('path_help'))
+    preview_parser.add_argument('path', nargs='?', help=translator.get('path_help'))
+    preview_parser.add_argument('--port', '-p', type=int, help='Port to run the preview server on')
     
     init_parser = subparsers.add_parser('init', help=translator.get('init_help'))
     init_parser.add_argument('name', nargs='?', help=translator.get('name_help'))
@@ -1260,7 +1256,7 @@ def create_parser(include_hidden: bool = True) -> argparse.ArgumentParser:
     generate_parser = subparsers.add_parser('generate', aliases=['g'], help='Generate a new component or page')
     generate_parser.add_argument('type', nargs='?', choices=['component', 'page'], help='Type to generate: component or page')
     generate_parser.add_argument('name', nargs='?', help='Name of the component or page')
-    generate_parser.add_argument('--page-type', '-t', choices=['static', 'spa'], help='Type of page to generate (static or spa)')
+    generate_parser.add_argument('--page-type', '-t', choices=['static', 'spa', 'ssr'], help='Type of page to generate (static, spa, or ssr)')
     generate_parser.add_argument('--yes', '-y', action='store_true', help='Automatically answer yes to prompts (e.g. inject page)')
 
     # Hidden forced installer (conditionally added to avoid appearing in help)
@@ -1774,12 +1770,32 @@ def _main_exec():
         else:
             name = args.name
             if not name:
-                name = Prompt.ask("[cyan]Enter project name[/cyan]")
+                while True:
+                    name = Prompt.ask("[cyan]Enter project name[/cyan]")
+                    if name and name.strip():
+                        break
+                    console.print("[red]Error: Project name cannot be empty.[/red]")
             
-            proj_type = getattr(args, 'type', 'web')
-            # If the user didn't specify the type via flag, ask them
             if '--type' not in sys.argv and '-T' not in sys.argv:
-                proj_type = select_prompt("Select project type", choices=['web', 'desktop', 'ssr'], default_idx=0)
+                choice = select_prompt("Select project type", choices=['web', '[red]desktop (BETA)[/red]'], default_idx=0)
+                if 'desktop' in choice:
+                    proj_type = 'desktop'
+                    console.print("\n[bold yellow]⚠ WARNING: Desktop format is currently in BETA.[/bold yellow]")
+                    console.print("[yellow]It is not recommended for production use as it is still under heavy development.[/yellow]\n")
+                    if not confirm_prompt("Do you want to continue?"):
+                        console.print("[red]Operation cancelled.[/red]")
+                        sys.exit(0)
+                else:
+                    # For Web, ask for the specific mode
+                    proj_type = select_prompt("Select web architecture", choices=['spa', 'static', 'ssr'], default_idx=0)
+            else:
+                proj_type = getattr(args, 'type', 'web')
+                if proj_type == 'desktop':
+                    console.print("\n[bold yellow]⚠ WARNING: Desktop format is currently in BETA.[/bold yellow]")
+                    console.print("[yellow]It is not recommended for production use as it is still under heavy development.[/yellow]\n")
+                    if not confirm_prompt("Do you want to continue?"):
+                        console.print("[red]Operation cancelled.[/red]")
+                        sys.exit(0)
                 
             exporter.init_project(name, template=args.template, proj_type=proj_type)
             console.print(f"\n[bold green]Project initialized successfully![/bold green]")
@@ -2065,18 +2081,37 @@ def _main_exec():
         sys.exit(0)
 
     elif args.command == 'preview':
-        index_path = os.path.join(args.path, "index.html")
+        # Resolve path and port from config if needed
+        target_path = args.path
+        port = getattr(args, 'port', None)
+        
+        # Load config if target_path is not provided or if we want to check for defaults
+        project_root = os.getcwd()
+        cfg, found = load_config(project_root)
+        
+        if not target_path:
+            if found and "outdir" in cfg:
+                target_path = cfg["outdir"]
+            else:
+                target_path = "./dist" # Default fallback
+        
+        if port is None and found and "port" in cfg:
+            port = cfg["port"]
+        
+        if port is None:
+            port = 8000 # Final fallback
+            
+        index_path = os.path.join(target_path, "index.html")
         if os.path.exists(index_path):
-            console.print(f"[green]{translator.get('app_found')}: {args.path} [/green]")
+            console.print(f"[green]{translator.get('app_found')}: {target_path} [/green]")
             console.print(f"{translator.get('open_in_browser')}: file://{os.path.abspath(index_path)}")
             console.print(f"{translator.get('view_preview')} [green]y[/green] / [red]n[/red] [y/n] ")
             if input().lower() == 'y':
-                # Pass the current language to preview.py
-                
                 import subprocess
                 process = None
                 try:
-                    process = subprocess.Popen([sys.executable, '-m', 'dars.cli.preview', args.path])
+                    cmd = [sys.executable, '-m', 'dars.cli.preview', target_path, '--port', str(port)]
+                    process = subprocess.Popen(cmd)
                     process.wait()
                 except KeyboardInterrupt:
                     if process:
@@ -2087,7 +2122,7 @@ def _main_exec():
                         process.terminate()
                         process.wait()
         else:
-            console.print(f"[red]{translator.get('index_not_found')} {args.path}[/red]")
+            console.print(f"[red]{translator.get('index_not_found')} {target_path}[/red]")
 
             
     elif args.command == 'config':

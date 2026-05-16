@@ -1,3 +1,53 @@
+# Release Notes v1.9.6
+
+> **Hybrid Stability, Anti-Flash System & CLI UX Overhaul**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Hybrid SSR/SPA Stabilization
+
+Resolved critical race conditions and hydration bugs that affected projects using a mix of Server-Side Rendering and Single Page Application routing.
+
+- **Cross-Route Hydration Fix**: Introduced `window.__DARS_HYDRATED_PATH__` to ensure the router only hydrates the page if the current path matches the pre-rendered content. This prevents "blank screens" or incorrect content display when deep-linking into sub-routes.
+- **Static to SSR Seamless Navigation**: Resolved a JSON parsing error when navigating from a static root page to an SSR route. The lightweight SPA configuration injected into static pages now correctly resolves the backend URL, ensuring smooth hydration.
+- **Native 404 Interception**: The SPA router now proactively intercepts clicks to non-existent internal routes (broken links) even when navigating from a static page, gracefully redirecting to the custom 404 component instead of triggering a raw server error.
+- **Single-Source Registration**: Standardized the router configuration to ensure only one authoritative `registerConfig` call is made during the boot sequence, preventing state corruption in SPA shells.
+
+### Anti-Flash Visibility System (`dars-ready`)
+
+To provide a premium feel, we've implemented a robust visibility management system that hides the page during the delicate hydration phase to prevent "Flash of Unstyled Content" (FOUC).
+
+- **`dars-ready` Attribute**: The framework now manages a `dars-ready` attribute on the root element. Visibility is automatically triggered once the runtime is ready.
+- **Resilient Fallback**: Added a 2.5s safety timeout that forces the page to be visible even if a third-party script or network error hangs the hydration process, ensuring the user is never stuck with a blank screen.
+
+### CLI UX Upgrades: `dars preview` v2
+
+The `dars preview` command has been significantly improved to be more intuitive and configuration-aware.
+
+- **Optional Path**: You can now run `dars preview` without any arguments. It will automatically detect your `outdir` from `dars.config.json` (falling back to `./dist`).
+- **Customizable Ports**: Added `--port` / `-p` support to specify the server port. The command also respects the `"port"` setting in your project's configuration file.
+- **Standardized Dev Propagation**: The `dars dev` command now more reliably propagates port settings to the underlying application process.
+
+### Robustness & Usability
+- **Input Validation**: The CLI now prevents the creation of projects, components, or pages with empty names, issuing clear warnings and re-prompting the user.
+- **Improved HTML Injection**: The SPA shell exporter now uses a more resilient replacement logic for the root mounting point, handling whitespace variations introduced by different HTML formatters to ensure consistent pre-rendering.
+
+### New Code Generation Suite (`dars generate`)
+Accelerate your development workflow with the new code generation commands. Scaffold components and pages instantly with automatic project integration.
+
+- **`dars generate component <name>`**: Quickly create new reusable FunctionComponents.
+- **`dars generate page <name>`**: Scaffold new pages (**Static, SPA or SSR**) with pre-filled templates.
+- **Intelligent Backend Detection**: Generating an SSR route without an existing backend will trigger a prompt to automatically scaffold the required FastAPI `/backend` infrastructure and update `dars.config.json` for you.
+- **Intelligent Auto-Injection**: Use the `-y` flag (e.g., `dars g page Contact -y`) to automatically add imports and register the new page in your `main.py` file, linking it to your application instantly.
+
+---
+
 # Release Notes v1.9.5
 
 > **Modular Animation Engine, Scroll Triggers & Zero-Jitter Handoffs**
@@ -11,9 +61,11 @@ pip install --upgrade dars-framework
 ## What's New
 
 ### Modular Animation Engine (`anim.js`)
+
 The core animation system has been completely decoupled from the monolithic `dars.min.js` runtime into a dedicated `anim.js` module. This provides a cleaner architecture, better caching, and lays the groundwork for future advanced animation plugins.
 
 ### High-Performance Scroll & Viewport Animations
+
 Added a suite of new Web Animations API-based triggers that run autonomously on the client. These features use `IntersectionObserver` to trigger animations the exact moment an element enters the viewport.
 
 - **`animateOnView`**: Trigger CSS keyframe animations when an element scrolls into view.
@@ -22,6 +74,7 @@ Added a suite of new Web Animations API-based triggers that run autonomously on 
 - **`runOnView` / `classOnView`**: Execute JS callbacks or toggle classes based on viewport intersection.
 
 ### Zero-Jitter WAAPI to CSS Handoff
+
 Implemented a bulletproof handoff mechanism between the Web Animations API (WAAPI) and native CSS transitions.
 
 **The Problem:**
@@ -29,6 +82,7 @@ Historically, using `fill: forwards` in WAAPI locks CSS properties, breaking `:h
 
 **The Solution:**
 The new engine uses a specialized `_setStylesWithoutTransition` helper that:
+
 1. Temporarily disables CSS transitions using `transition: none !important`.
 2. Injects the final animation frame as persistent inline styles.
 3. Forces a synchronous browser reflow (`void el.offsetHeight`) to commit the changes silently.
@@ -37,9 +91,11 @@ The new engine uses a specialized `_setStylesWithoutTransition` helper that:
 **Result:** Flawless CSS `:hover` effects immediately after an entrance animation, with zero jitter or layout thrashing.
 
 ### Security Hardening (Zero-Eval Continued)
+
 Continuing our commitment to security, the new animation triggers are built entirely without `eval()` or `new Function()`. Python payloads compile to strict JavaScript object references and IIFEs, completely mitigating dynamic string execution vulnerabilities.
 
 ### DAP Compilation & Reactivity Hardening
+
 - **Native DAP Compilation**: Fixed a critical bug where chained animations via `sequence()` were being compiled as raw JavaScript strings, resulting in `<...dScript object...>` memory references output to the DOM. They are now correctly serialized into pure DAP JSON payloads.
 - **Async Execution in `dap.js`**: `dispatch()`, `sequence()`, and `delay()` commands inside the browser runtime are now fully `async`/`await` capable. This resolves an issue where delayed actions within a sequence were firing synchronously.
 - **`display: block` Layout Shift Fix**: Removed hardcoded `display: block` from core functions like `fadeIn`, `slideIn`, `scaleIn`, `dom_show`, and `dom_toggle`. They now clear the `display` style (i.e. `display: ""`), allowing inline-block elements (like Buttons) to retain their native layout without unwanted line breaks.

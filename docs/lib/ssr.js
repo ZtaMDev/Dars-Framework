@@ -1,4 +1,4 @@
-export function _executeExternalScript(code,context){if(!code)return null;try{const s=document.createElement("script");const ctxId="__dars_ctx_"+Math.random().toString(36).substr(2,9);if(context)window[ctxId]=context;const setup=context?`const event = window["${ctxId}"].event; const element = window["${ctxId}"].element; delete window["${ctxId}"];`:"";s.textContent=`(async () => { 
+import{registerStates}from"./dars.min.js";export function _executeExternalScript(code,context){if(!code)return null;try{const s=document.createElement("script");const ctxId="__dars_ctx_"+Math.random().toString(36).substr(2,9);if(context)window[ctxId]=context;const setup=context?`const event = window["${ctxId}"].event; const element = window["${ctxId}"].element; delete window["${ctxId}"];`:"";s.textContent=`(async () => { 
           ${setup}
           try { 
               ${code} 
@@ -29,5 +29,5 @@ if(payload.reactiveBindings){try{const s=document.createElement("script");s.text
 if(payload.vrefBindings){try{const s=document.createElement("script");s.textContent=payload.vrefBindings;document.body.appendChild(s);s.remove();}catch(e){console.error("[Dars] VRef bindings error:",e);}}
 if(payload.metaTags){const temp=document.createElement("div");temp.innerHTML=payload.metaTags;const newMetas=temp.childNodes;for(let i=0;i<newMetas.length;i++){const node=newMetas[i];if(node.nodeType===1){const tag=node.tagName.toLowerCase();const attr=node.getAttribute("name")||node.getAttribute("property");let existing=null;if(attr){existing=document.head.querySelector(`${tag}[name="${attr}"], ${tag}[property="${attr}"]`,);}
 if(existing){existing.content=node.getAttribute("content");}else{document.head.appendChild(node.cloneNode(true));}}}}}else{console.warn("[Dars:Hydration] Payload is empty or falsy");}}catch(e){console.error("[Dars] Failed to parse DSP payload:",e);}}}
-if(typeof window!=="undefined"&&Array.isArray(window.__DARS_STATE__)){registerStates(window.__DARS_STATE__);}
-if(typeof window!=="undefined"&&Array.isArray(window.__DARS_STATE_V2__)){registerStates(window.__DARS_STATE_V2__);}}catch(err){console.error("[Dars:Debug] Critical error during hydration block:",err);}
+if(typeof window!=="undefined"&&Array.isArray(window.__DARS_STATE__)){if(window.Dars&&window.Dars.registerStates){window.Dars.registerStates(window.__DARS_STATE__);}else if(typeof registerStates==="function"){registerStates(window.__DARS_STATE__);}}
+if(typeof window!=="undefined"&&Array.isArray(window.__DARS_STATE_V2__)){if(window.Dars&&window.Dars.registerStates){window.Dars.registerStates(window.__DARS_STATE_V2__);}else if(typeof registerStates==="function"){registerStates(window.__DARS_STATE_V2__);}}}catch(err){console.error("[Dars:Debug] Critical error during hydration block:",err);}

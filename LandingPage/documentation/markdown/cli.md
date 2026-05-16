@@ -10,11 +10,6 @@ Open your terminal in your project directory and use any of the following comman
 # Show information about your app
  dars info my_app.py
 
-# Export to different formats (web)
- dars export my_app.py --format html --output ./output
- # Skip default Python minifier for this run (does not affect viteMinify)
- dars export my_app.py --format html --output ./output --no-minify
-
 # List supported export formats
  dars formats
 
@@ -29,6 +24,10 @@ Open your terminal in your project directory and use any of the following comman
 
 # Preview an exported app
  dars preview ./output_directory
+ # New in v1.9.6: Path is optional (defaults to config outdir or ./dist)
+ dars preview
+ # New in v1.9.6: Custom port support
+ dars preview -p 9000
 
 # Build using project config (dars.config.json)
  dars build
@@ -44,24 +43,49 @@ Open your terminal in your project directory and use any of the following comman
  dars -v
 ```
 
+## Code Generation (New in v1.9.6)
+
+Scaffold new components and pages instantly with automatic project integration.
+
+```bash
+# Generate a new FunctionComponent
+ dars generate component MyComponent
+ dars g component MyComponent
+
+# Generate a new Page
+ dars generate page About
+ # Specify page type directly
+ dars generate page About --page-type spa
+ dars generate page Home --page-type static
+ dars generate page Profile --page-type ssr
+
+# Generate with auto-injection to main.py
+ dars generate page Contact -y
+```
+
 ## Main Commands Table
-| Command                                 | What it does                               |
-|-----------------------------------------|--------------------------------------------|
-| `dars export my_app.py --format html`   | Export app to HTML/CSS/JS in `./my_app_web` |
-| `dars export my_app.py --format html --no-minify` | Export skipping default Python minifier |
-| `dars preview ./my_app_web`             | Preview exported app locally                |
-| `dars build`                            | Build using dars.config.json                |
-| `dars init --type desktop`              | Scaffold desktop-capable project (BETA)     |
-| `dars build` (desktop config)           | Build desktop app artifacts (BETA)          |
-| `dars build --no-minify`                | Build skipping default Python minifier      |
-| `dars init my_project --type ssr`       | Create a new Full-Stack SSR project        |
-| `dars init my_project`                  | Create a new Dars project (SPA Default)     |
-| `dars dev`                              | Run the configured entry file with hot preview (app.rTimeCompile) |
-| `dars dev --port 9000`                   | Run the dev server on a custom port        |
-| `dars dev --backend`                    | Run only the configured backendEntry (FastAPI/SSR backend) |
-| `dars info my_app.py`                   | Show info about your app                    |
-| `dars formats`                          | List supported export formats               |
-| `dars --help`                           | Show help and all CLI options               |
+
+| Command                                           | What it does                                                      |
+| ------------------------------------------------- | ----------------------------------------------------------------- |
+| `dars export my_app.py --format html`             | Export app to HTML/CSS/JS in `./my_app_web`                       |
+| `dars export my_app.py --format html --no-minify` | Export skipping default Python minifier                           |
+| `dars preview`                                    | Preview exported app (auto-detects output)                        |
+| `dars preview --port 9000`                        | Preview on a custom port                                          |
+| `dars build`                                      | Build using dars.config.json                                      |
+| `dars init --type desktop`                        | Scaffold desktop-capable project (BETA)                           |
+| `dars build` (desktop config)                     | Build desktop app artifacts (BETA)                                |
+| `dars build --no-minify`                          | Build skipping default Python minifier                            |
+| `dars init my_project --type ssr`                 | Create a new Full-Stack SSR project                               |
+| `dars init my_project`                            | Create a new Dars project (SPA Default)                           |
+| `dars dev`                                        | Run the configured entry file with hot preview (app.rTimeCompile) |
+| `dars dev --port 9000`                            | Run the dev server on a custom port                               |
+| `dars dev --backend`                              | Run only the configured backendEntry (FastAPI/SSR backend)        |
+| `dars info my_app.py`                             | Show info about your app                                          |
+| `dars formats`                                    | List supported export formats                                     |
+| `dars generate component <name>`                  | Scaffold a new FunctionComponent                                  |
+| `dars generate page <name>`                       | Scaffold a new page (static or SPA)                               |
+| `dars generate page <name> -y`                    | Scaffold and auto-inject into main app                            |
+| `dars --help`                                     | Show help and all CLI options                                     |
 
 ## Using Official Templates
 
@@ -84,8 +108,8 @@ dars init  -L
 
 2. **Export the template to HTML/CSS/JS:**
    ```bash
-   dars export main.py --format html --output ./hello_output
-   dars export main.py --format html --output ./dashboard_output
+   dars export {file.py} --format html --output ./hello_output
+   dars export {file.py} --format html --output ./dashboard_output
    # ...etc
    ```
 3. **Preview the exported app:**
@@ -94,6 +118,7 @@ dars init  -L
    ```
 
 ## Tips CLI
+
 - Use `dars --help` for a full list of commands and options.
 - You can preview apps either live (with `app.rTimeCompile()`) or from exported files with `dars preview`.
 - Templates are available for quick project setup: use `dars init my_project -t <template>`.
@@ -106,6 +131,7 @@ dars init  -L
 - Build with `dars build`. This feature is in BETA: suitable for testing, not yet for production.
 
 ### Minification labels in output
+
 - Applying minification (default): default Python-side minifier is active.
 - Applying minification (vite): Vite/esbuild minification is active (JS/CSS) and default is disabled.
 - Applying minification (default + vite): both are active.
@@ -121,11 +147,15 @@ When working with SSR (`dars init --type ssr`), the workflow involves two proces
 
 **Common Commands:**
 
-| Command | Description |
-|---------|-------------|
+| Command                | Description                                                |
+| ---------------------- | ---------------------------------------------------------- |
 | `dars init --type ssr` | Scaffolds a project with `backend/` folder and SSR config. |
-| `dars dev` | Starts the hot-reload frontend preview server. |
-| `dars dev --backend` | Starts the SSR/backend server defined by `backendEntry`. |
-| `dars build` | Builds static assets to `dist/` for production. |
+| `dars dev`             | Starts the hot-reload frontend preview server.             |
+| `dars dev --backend`   | Starts the SSR/backend server defined by `backendEntry`.   |
+| `dars build`           | Builds static assets to `dist/` for production.            |
 
-*Note: For production, you only need to run the backend (which serves the built assets).*
+_Note: For production, you only need to run the backend (which serves the built assets)._
+
+```
+
+```

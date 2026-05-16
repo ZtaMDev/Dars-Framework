@@ -4,12 +4,12 @@ This document outlines the development roadmap for Dars Framework. The goal is t
 
 ## Project Metrics
 
-- **Current Version**: v1.9.3
+- **Current Version**: v1.9.6
 - **Target**: v2.0.0 — Complete Production-Grade Fullstack Python Framework
 
 ---
 
-## Completed (v1.0 → v1.9.3)
+## Completed (v1.0 → v1.9.6)
 
 All of the following have been implemented and shipped:
 
@@ -34,6 +34,10 @@ All of the following have been implemented and shipped:
 - **Browser APIs**: localStorage (get/set/remove/clear), clipboard (write/copy), scroll, focus/blur, DOM manipulation.
 - **Documentation**: Full docs, VS Code extension, examples, tutorials.
 - **Testing**: Integrated test framework, CLI test runner.
+- **Hybrid SSR/SPA Stabilization**: Resolved hydration race conditions, cross-route hydration bugs, and stabilized the shared runtime for SSR/SPA hybrid apps.
+- **Anti-Flash System**: Implemented `dars-ready` visibility mechanism with safety fallbacks to prevent FOUC and blank screens during hydration.
+- **CLI v2**: Improved `dars preview` with automatic configuration detection, optional paths, and customizable ports. Standardized `dars dev` port propagation.
+- **Minification Pipeline**: Optimized minification for SPA shells and SSR routes using a unified `app.js` strategy.
 
 ---
 
@@ -188,9 +192,10 @@ Everything below is what's needed to make Dars a real, production-usable fullsta
 ### 12. Developer Experience
 
 - [ ] `.env` file support for secrets and environment variables
-- [ ] `dars.config.json` schema validation on startup
-- [ ] `dars generate component <name>` — scaffold new components
-- [ ] `dars generate page <name>` — scaffold new pages
+- [x] `dars.config.json` awareness in CLI (preview/dev ports and paths)
+- [x] `dars generate` — scaffold new pages
+- [x] `dars generate component <name>` — scaffold new components
+- [x] `dars generate page <name>` — scaffold new pages
 - [ ] `dars generate model <name>` — scaffold data models
 - [ ] Error overlay in browser dev mode (show Python tracebacks)
 - [ ] Source maps for generated JS

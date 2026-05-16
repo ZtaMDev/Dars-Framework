@@ -962,7 +962,7 @@
      Development Roadmap
     </span>
     <span class="dars-text dars-s-3723e9a52b" id="text_0_1_2">
-     Track the journey from v1.9.3 to v2.0.0 — the complete production-grade fullstack Python framework.
+     Track the journey from v1.9.6 to v2.0.0 — the complete production-grade fullstack Python framework.
     </span>
     <div class="dars-container dars-s-6b1dbd1ddb" id="container_0_1_3">
      <div class="dars-container dars-s-271988dc7d" id="roadmap-progress-fill">
@@ -989,7 +989,7 @@
         <strong>
          Current Version
         </strong>
-        : v1.9.3
+        : v1.9.6
        </li>
        <li>
         <strong>
@@ -999,8 +999,8 @@
        </li>
       </ul>
       <hr/>
-      <h2 id="completed-v10-v193">
-       Completed (v1.0 → v1.9.3)
+      <h2 id="completed-v10-v196">
+       Completed (v1.0 → v1.9.6)
       </h2>
       <p>
        All of the following have been implemented and shipped:
@@ -1483,6 +1483,46 @@
          Testing
         </strong>
         : Integrated test framework, CLI test runner.
+       </li>
+       <li>
+        <strong>
+         Hybrid SSR/SPA Stabilization
+        </strong>
+        : Resolved hydration race conditions, cross-route hydration bugs, and stabilized the shared runtime for SSR/SPA hybrid apps.
+       </li>
+       <li>
+        <strong>
+         Anti-Flash System
+        </strong>
+        : Implemented
+        <code>
+         dars-ready
+        </code>
+        visibility mechanism with safety fallbacks to prevent FOUC and blank screens during hydration.
+       </li>
+       <li>
+        <strong>
+         CLI v2
+        </strong>
+        : Improved
+        <code>
+         dars preview
+        </code>
+        with automatic configuration detection, optional paths, and customizable ports. Standardized
+        <code>
+         dars dev
+        </code>
+        port propagation.
+       </li>
+       <li>
+        <strong>
+         Minification Pipeline
+        </strong>
+        : Optimized minification for SPA shells and SSR routes using a unified
+        <code>
+         app.js
+        </code>
+        strategy.
        </li>
       </ul>
       <hr/>
@@ -2250,21 +2290,28 @@
         file support for secrets and environment variables
        </li>
        <li>
-        [ ]
+        [x]
         <code>
          dars.config.json
         </code>
-        schema validation on startup
+        awareness in CLI (preview/dev ports and paths)
        </li>
        <li>
-        [ ]
+        [x]
+        <code>
+         dars generate
+        </code>
+        — scaffold new pages
+       </li>
+       <li>
+        [x]
         <code>
          dars generate component &lt;name&gt;
         </code>
         — scaffold new components
        </li>
        <li>
-        [ ]
+        [x]
         <code>
          dars generate page &lt;name&gt;
         </code>
@@ -2552,7 +2599,9 @@
     </div>
    </div>
   </div>
-  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1778966347" type="module">
+  <div id="__dars_spa_root__">
+  </div>
+  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1778973992" type="module">
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js">
   </script>

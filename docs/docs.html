@@ -1077,6 +1077,9 @@
      <a class="sidebar-link sidebar-level-2" href="#how-to-use-the-cli" style="margin-left: 20px">
       How to Use the CLI
      </a>
+     <a class="sidebar-link sidebar-level-2" href="#code-generation-new-in-v196" style="margin-left: 20px">
+      Code Generation (New in v1.9.6)
+     </a>
      <a class="sidebar-link sidebar-level-2" href="#main-commands-table" style="margin-left: 20px">
       Main Commands Table
      </a>
@@ -3439,11 +3442,6 @@ dars<span class="w"> </span>build
        <pre><span></span><code><span class="c1"># Show information about your app</span>
 <span class="w"> </span>dars<span class="w"> </span>info<span class="w"> </span>my_app.py
 
-<span class="c1"># Export to different formats (web)</span>
-<span class="w"> </span>dars<span class="w"> </span><span class="nb">export</span><span class="w"> </span>my_app.py<span class="w"> </span>--format<span class="w"> </span>html<span class="w"> </span>--output<span class="w"> </span>./output
-<span class="w"> </span><span class="c1"># Skip default Python minifier for this run (does not affect viteMinify)</span>
-<span class="w"> </span>dars<span class="w"> </span><span class="nb">export</span><span class="w"> </span>my_app.py<span class="w"> </span>--format<span class="w"> </span>html<span class="w"> </span>--output<span class="w"> </span>./output<span class="w"> </span>--no-minify
-
 <span class="c1"># List supported export formats</span>
 <span class="w"> </span>dars<span class="w"> </span>formats
 
@@ -3458,6 +3456,10 @@ dars<span class="w"> </span>build
 
 <span class="c1"># Preview an exported app</span>
 <span class="w"> </span>dars<span class="w"> </span>preview<span class="w"> </span>./output_directory
+<span class="w"> </span><span class="c1"># New in v1.9.6: Path is optional (defaults to config outdir or ./dist)</span>
+<span class="w"> </span>dars<span class="w"> </span>preview
+<span class="w"> </span><span class="c1"># New in v1.9.6: Custom port support</span>
+<span class="w"> </span>dars<span class="w"> </span>preview<span class="w"> </span>-p<span class="w"> </span><span class="m">9000</span>
 
 <span class="c1"># Build using project config (dars.config.json)</span>
 <span class="w"> </span>dars<span class="w"> </span>build
@@ -3471,6 +3473,28 @@ dars<span class="w"> </span>build
 
 <span class="c1"># Version</span>
 <span class="w"> </span>dars<span class="w"> </span>-v
+</code></pre>
+      </div>
+      <h2 id="code-generation-new-in-v196">
+       Code Generation (New in v1.9.6)
+      </h2>
+      <p>
+       Scaffold new components and pages instantly with automatic project integration.
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Generate a new FunctionComponent</span>
+<span class="w"> </span>dars<span class="w"> </span>generate<span class="w"> </span>component<span class="w"> </span>MyComponent
+<span class="w"> </span>dars<span class="w"> </span>g<span class="w"> </span>component<span class="w"> </span>MyComponent
+
+<span class="c1"># Generate a new Page</span>
+<span class="w"> </span>dars<span class="w"> </span>generate<span class="w"> </span>page<span class="w"> </span>About
+<span class="w"> </span><span class="c1"># Specify page type directly</span>
+<span class="w"> </span>dars<span class="w"> </span>generate<span class="w"> </span>page<span class="w"> </span>About<span class="w"> </span>--page-type<span class="w"> </span>spa
+<span class="w"> </span>dars<span class="w"> </span>generate<span class="w"> </span>page<span class="w"> </span>Home<span class="w"> </span>--page-type<span class="w"> </span>static
+<span class="w"> </span>dars<span class="w"> </span>generate<span class="w"> </span>page<span class="w"> </span>Profile<span class="w"> </span>--page-type<span class="w"> </span>ssr
+
+<span class="c1"># Generate with auto-injection to main.py</span>
+<span class="w"> </span>dars<span class="w"> </span>generate<span class="w"> </span>page<span class="w"> </span>Contact<span class="w"> </span>-y
 </code></pre>
       </div>
       <h2 id="main-commands-table">
@@ -3514,11 +3538,21 @@ dars<span class="w"> </span>build
         <tr>
          <td>
           <code>
-           dars preview ./my_app_web
+           dars preview
           </code>
          </td>
          <td>
-          Preview exported app locally
+          Preview exported app (auto-detects output)
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           dars preview --port 9000
+          </code>
+         </td>
+         <td>
+          Preview on a custom port
          </td>
         </tr>
         <tr>
@@ -3635,6 +3669,36 @@ dars<span class="w"> </span>build
         <tr>
          <td>
           <code>
+           dars generate component &lt;name&gt;
+          </code>
+         </td>
+         <td>
+          Scaffold a new FunctionComponent
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           dars generate page &lt;name&gt;
+          </code>
+         </td>
+         <td>
+          Scaffold a new page (static or SPA)
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           dars generate page &lt;name&gt; -y
+          </code>
+         </td>
+         <td>
+          Scaffold and auto-inject into main app
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
            dars --help
           </code>
          </td>
@@ -3681,8 +3745,8 @@ dars<span class="w"> </span>init<span class="w">  </span>-L
          </strong>
         </p>
         <div class="codehilite">
-         <pre><span></span><code>dars<span class="w"> </span><span class="nb">export</span><span class="w"> </span>main.py<span class="w"> </span>--format<span class="w"> </span>html<span class="w"> </span>--output<span class="w"> </span>./hello_output
-dars<span class="w"> </span><span class="nb">export</span><span class="w"> </span>main.py<span class="w"> </span>--format<span class="w"> </span>html<span class="w"> </span>--output<span class="w"> </span>./dashboard_output
+         <pre><span></span><code>dars<span class="w"> </span><span class="nb">export</span><span class="w"> </span><span class="o">{</span>file.py<span class="o">}</span><span class="w"> </span>--format<span class="w"> </span>html<span class="w"> </span>--output<span class="w"> </span>./hello_output
+dars<span class="w"> </span><span class="nb">export</span><span class="w"> </span><span class="o">{</span>file.py<span class="o">}</span><span class="w"> </span>--format<span class="w"> </span>html<span class="w"> </span>--output<span class="w"> </span>./dashboard_output
 <span class="c1"># ...etc</span>
 </code></pre>
         </div>
@@ -3919,10 +3983,11 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
        </tbody>
       </table>
       <p>
-       <em>
-        Note: For production, you only need to run the backend (which serves the built assets).
-       </em>
+       _Note: For production, you only need to run the backend (which serves the built assets)._
       </p>
+      <pre>
+<code class="language-none">
+</code></pre>
      </div>
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="md-config">
       <h1 id="dars-project-configuration">
@@ -4012,6 +4077,10 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
         (string): The directory where compiled assets will be saved. Defaults to
         <code>
          dist
+        </code>
+        . This directory is also the default path used by
+        <code>
+         dars preview
         </code>
         .
        </li>
@@ -4110,6 +4179,14 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
         (number): The port for the development preview server. Defaults to
         <code>
          8000
+        </code>
+        . This port is respected by both
+        <code>
+         dars dev
+        </code>
+        and
+        <code>
+         dars preview
         </code>
         .
        </li>
@@ -18768,7 +18845,9 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
     </div>
    </div>
   </div>
-  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1778966345" type="module">
+  <div id="__dars_spa_root__">
+  </div>
+  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1778973990" type="module">
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js">
   </script>

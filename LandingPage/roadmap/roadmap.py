@@ -31,7 +31,7 @@ roadmap = Page(
             }
         ),
         Text(
-            text="Track the journey from v1.9.3 to v2.0.0 — the complete production-grade fullstack Python framework.",
+            text="Track the journey from v1.9.6 to v2.0.0 — the complete production-grade fullstack Python framework.",
             style={
                 "font-size": "17px",
                 "color": "#a0cfc0",

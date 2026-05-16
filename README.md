@@ -439,7 +439,8 @@ For complete documentation, see the [Backend API Guide](https://ztamdev.github.i
 | `dars init --type desktop`            | Scaffold desktop-capable project (BETA)                           |
 | `dars init --type ssr`                | Scaffold full-stack SSR project (SSR + API)                       |
 | `dars build` (desktop config)         | Build desktop app artifacts (BETA)                                |
-| `dars preview ./my_app_web`           | Preview exported app locally                                      |
+| `dars preview`                        | Preview exported app (auto-detects output)                        |
+| `dars preview --port 9000`            | Preview on a custom port                                          |
 | `dars init my_project`                | Create a new Dars project (also creates dars.config.json)         |
 | `dars init --update`                  | Create/Update dars.config.json in current dir                     |
 | `dars build`                          | Build using dars.config.json (entry/outdir/format)                |
@@ -449,6 +450,8 @@ For complete documentation, see the [Backend API Guide](https://ztamdev.github.i
 | `dars dev`                            | Run the configured entry file with hot preview (app.rTimeCompile) |
 | `dars dev --port 9000`                | Run dev server on a custom port (overrides config)                |
 | `dars dev --backend`                  | Run only the configured backendEntry (FastAPI/SSR backend)        |
+| `dars generate component <name>`      | Scaffold a new FunctionComponent                                  |
+| `dars generate page <name>`           | Scaffold a new page (static or SPA)                               |
 | `dars --help`                         | Show help and all CLI options                                     |
 
 Tip: use `dars doctor` to review optional tooling that can enhance bundling/minification.
@@ -459,6 +462,22 @@ Tip: use `dars doctor` to review optional tooling that can enhance bundling/mini
 - Initialize backend scaffolding with `dars init --type desktop` (or `--update`).
 - Build with `dars build` to produce desktop artifacts under `dist/`.
 - This feature is in BETA: usable for testing, not yet recommended for production.
+
+### Code Generation
+
+Scaffold new components and pages instantly with automatic project integration.
+
+```bash
+# Generate a new FunctionComponent
+dars generate component MyComponent
+
+# Generate a new Page (Static, SPA or SSR)
+dars generate page About --page-type spa
+dars generate page Dashboard --page-type ssr
+
+# Scaffold and auto-inject into your main.py file
+dars generate page Contact --yes
+```
 
 ---
 
@@ -489,13 +508,17 @@ python my_app.py --port 8088
 
 ---
 
-You can also use the CLI preview command on an exported app:
+You can also use the CLI preview command on an exported app. Starting from v1.9.6, the path is optional and will be automatically detected from your `dars.config.json` (defaults to `./dist`):
 
 ```bash
-dars preview ./my_exported_app
+# Auto-detects output directory and port from config
+dars preview
+
+# Or specify a custom path and port
+dars preview ./my_exported_app -p 8080
 ```
 
-This will start a local server at http://localhost:8000 to view your exported app in the browser.
+This will start a local server at the configured port (defaults to http://localhost:8000) to view your exported app in the browser.
 
 ---
 
@@ -535,7 +558,7 @@ Example default:
 - `utility_styles`: Dictionary defining custom utility classes. Keys are class names, values are lists of utility strings or raw CSS properties.
 - `markdownHighlight`: Auto-inject a client-side syntax highlighter for fenced code blocks in Markdown. Default `true`.
 - `backendEntry`: Python import path for your SSR/backend app (e.g. `"backend.api:app"`). Required when your app uses `RouteType.SSR` routes. Used by `dars dev --backend`.
-- `port`: The port for the development preview server. Default `8000`.
+- `port`: The port for the development preview server. Default `8000`. This port is used by `dars dev`, `python app.py` (rTimeCompile), and `dars preview`.
 
 Validate your config:
 

@@ -36,7 +36,7 @@ A standard configuration file looks like this:
 - **`format`** (string): Target deployment format. 
   - `html`: Standard web application (SPA/MPA/SSR).
   - `desktop`: Native desktop application (Electron-based, BETA).
-- **`outdir`** (string): The directory where compiled assets will be saved. Defaults to `dist`.
+- **`outdir`** (string): The directory where compiled assets will be saved. Defaults to `dist`. This directory is also the default path used by `dars preview`.
 - **`publicDir`** (string): Directory for static assets (images, fonts, etc.) that will be copied directly to the output.
 
 ### 2. File Filtering
@@ -53,7 +53,7 @@ Dars features a multi-stage minification pipeline to ensure the smallest possibl
 ### 4. Features & Integrations
 - **`markdownHighlight`** (boolean): Automatically injects Prism.js for syntax highlighting in Markdown components.
 - **`backendEntry`** (string): Import path for your FastAPI backend (e.g., `"backend.api:app"`). Required for SSR projects.
-- **`port`** (number): The port for the development preview server. Defaults to `8000`.
+- **`port`** (number): The port for the development preview server. Defaults to `8000`. This port is respected by both `dars dev` and `dars preview`.
 
 ---
 
