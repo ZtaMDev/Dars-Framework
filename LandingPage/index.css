@@ -264,6 +264,228 @@ body {
     filter: drop-shadow(0 0 10px rgba(162, 255, 226, 0.4)) !important;
 }
 
+/* ====== CODE SHOWCASE (Features section) ====== */
+#code-showcase {
+    transition: all 0.3s ease;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* Roadmap CTA Styles */
+#view-roadmap-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.45);
+    filter: brightness(1.1);
+}
+
+#view-roadmap-btn:active {
+    transform: translateY(-1px) scale(0.98);
+}
+
+#roadmap-cta-container > div {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+#roadmap-cta-container > div:hover {
+    border-color: rgba(146, 255, 229, 0.3);
+    background: rgba(25, 45, 40, 0.5);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* Markdown wrapper inside code panel — strip all spacing */
+.code_block.dars-markdown {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+}
+
+.code_block .codehilite {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+}
+
+.code_block .codehilite pre {
+    margin: 0 !important;
+    padding: 16px 20px !important;
+    background: rgba(10, 16, 14, 0.95) !important;
+    border: none !important;
+    border-radius: 0 0 10px 10px !important;
+    font-size: 13px !important;
+    line-height: 1.7 !important;
+    overflow-x: auto !important;
+}
+
+.code_block .codehilite pre code {
+    font-family: 'Fira Code', 'Cascadia Code', 'JetBrains Mono', 'Monaco', monospace !important;
+    font-size: 13px !important;
+    line-height: 1.7 !important;
+    background: none !important;
+    padding: 0 !important;
+    border: none !important;
+    color: #a0cfc0 !important;
+    tab-size: 4 !important;
+}
+
+/* Token colors — match the emerald theme palette */
+.code_block .token.keyword { color: #c792ea !important; }
+.code_block .token.builtin { color: #82aaff !important; }
+.code_block .token.string { color: #a5d6a7 !important; }
+.code_block .token.number { color: #f78c6c !important; }
+.code_block .token.operator { color: #89ddff !important; }
+.code_block .token.punctuation { color: #7a8a85 !important; }
+.code_block .token.function { color: #82aaff !important; }
+.code_block .token.decorator { color: #ffcb6b !important; }
+.code_block .token.comment { color: #5c6e66 !important; font-style: italic !important; }
+.code_block .token.class-name { color: #ffcb6b !important; }
+.code_block .token.boolean { color: #ff5370 !important; }
+
+/* Decorator annotation (combined class) */
+.code_block .token.decorator.annotation.punctuation {
+    color: #ffcb6b !important;
+}
+
+/* Copy button */
+.code_block .dars-code-copy {
+    position: absolute !important;
+    top: 8px !important;
+    right: 8px !important;
+    background: rgba(20, 30, 27, 0.8) !important;
+    color: #92ffe5 !important;
+    border: 1px solid rgba(146, 255, 229, 0.15) !important;
+    border-radius: 6px !important;
+    padding: 4px 10px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    opacity: 0 !important;
+    z-index: 2 !important;
+}
+
+.code_block .codehilite pre:hover .dars-code-copy {
+    opacity: 1 !important;
+}
+
+.code_block .dars-code-copy:hover {
+    background: rgba(16, 185, 129, 0.2) !important;
+    border-color: rgba(146, 255, 229, 0.4) !important;
+}
+
+/* Scrollbar for code panel */
+#code-panel::-webkit-scrollbar,
+.code_block .codehilite pre::-webkit-scrollbar {
+    height: 4px;
+    width: 4px;
+}
+
+#code-panel::-webkit-scrollbar-track,
+.code_block .codehilite pre::-webkit-scrollbar-track {
+    background: rgba(10, 16, 14, 0.5);
+}
+
+#code-panel::-webkit-scrollbar-thumb,
+.code_block .codehilite pre::-webkit-scrollbar-thumb {
+    background: rgba(146, 255, 229, 0.15);
+    border-radius: 2px;
+}
+
+#code-panel::-webkit-scrollbar-thumb:hover,
+.code_block .codehilite pre::-webkit-scrollbar-thumb:hover {
+    background: rgba(146, 255, 229, 0.3);
+}
+
+/* Result panel buttons */
+#demo-dec-btn:hover {
+    background: rgba(26, 58, 48, 1) !important;
+    border-color: rgba(146, 255, 229, 0.3) !important;
+}
+
+#demo-inc-btn:hover {
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45) !important;
+    transform: translateY(-1px);
+}
+
+#demo-inc-btn:active,
+#demo-dec-btn:active {
+    transform: scale(0.95);
+}
+
+/* ── Responsive: Code Showcase & Features ── */
+@media (max-width: 992px) {
+    #code-showcase {
+        max-width: 100% !important;
+    }
+    
+    #code-panel {
+        flex: 1 1 100% !important;
+        margin-bottom: 20px;
+    }
+    
+    #result-panel {
+        width: 100% !important;
+        flex: 1 1 100% !important;
+    }
+}
+
+@media (max-width: 768px) {
+    #code-showcase {
+        flex-direction: column !important;
+        gap: 12px !important;
+    }
+
+    #code-panel {
+        border-radius: 10px !important;
+    }
+
+    .code_block .codehilite pre {
+        font-size: 12px !important;
+        padding: 14px 16px !important;
+    }
+
+    .code_block .codehilite pre code {
+        font-size: 12px !important;
+    }
+
+    #features-section {
+        padding: 40px 16px !important;
+    }
+    
+    #roadmap-cta-container > div {
+        padding: 30px 20px !important;
+    }
+    
+    #roadmap-cta-container h1, 
+    #roadmap-cta-container .dars-text[style*="font-size: 28px"] {
+        font-size: 22px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .code_block .codehilite pre {
+        font-size: 11px !important;
+        padding: 12px 12px !important;
+        line-height: 1.6 !important;
+    }
+
+    .code_block .codehilite pre code {
+        font-size: 11px !important;
+        line-height: 1.6 !important;
+    }
+
+    #code-showcase {
+        margin-bottom: 30px !important;
+    }
+    
+    #view-roadmap-btn {
+        width: 100%;
+        padding: 12px 20px !important;
+        font-size: 15px !important;
+    }
+}
+
 /* ====== HOW IT WORKS SECTION ====== */
 #howitworks-section {
     opacity: 1 !important;
@@ -2025,3 +2247,62 @@ body.menu-open {
 ::-webkit-scrollbar-corner {
     background: transparent;
 }
+
+/* ====== NAVBAR MOBILE OVERRIDES ====== */
+@media (max-width: 768px) {
+    /* Force navbar to be a full-width container */
+    #dars-navbar {
+        display: flex !important;
+        width: 100% !important;
+        left: 0 !important;
+        padding: 0 !important;
+        position: fixed !important;
+        height: 64px !important;
+    }
+
+    /* Hide brand text */
+    #navbar-left .dars-text {
+        display: none !important;
+    }
+    
+    /* Position logo on the far left */
+    #navbar-left {
+        position: absolute !important;
+        left: 20px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        margin: 0 !important;
+        display: flex !important;
+    }
+    
+    /* Position hamburger button on the far right */
+    #hamburger-btn {
+        position: absolute !important;
+        right: 20px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        display: flex !important;
+        z-index: 1001 !important;
+    }
+    
+    /* Hide the parent containers that might be interfering */
+    #navbar-right {
+        display: none !important;
+    }
+    
+    /* Ensure the menu dropdown still works */
+    #mobile-menu {
+        width: 100% !important;
+        left: 0 !important;
+        top: 64px !important;
+    }
+    
+    /* The container of the hamburger needs to be visible but not blocking */
+    #hamburger-menu {
+        display: block !important;
+        position: static !important;
+    }
+}
+
+
+

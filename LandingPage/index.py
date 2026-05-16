@@ -1,6 +1,6 @@
 from dars.all import *
 from herocomp import create_hero
-from featurescomp import create_features
+from featurescomp import create_features, create_example
 from navbarcomp import create_navbar
 from howitworkscomp import create_howitworks
 from footercomp import create_footer
@@ -27,6 +27,7 @@ app = App(
 index = Page(
     create_navbar(),
     create_hero(),
+    create_example(),
     create_features(),
     create_howitworks(),
     create_footer(),

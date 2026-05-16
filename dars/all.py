@@ -128,8 +128,7 @@ __all__ = [
     # Storage utilities
     'saveToLocal', 'loadFromLocal', 'removeFromLocal', 'clearLocalStorage',
     # Clipboard utilities
-    'copyToClipboard', 'copyElementText',
-    # Focus utilities
+    'copyToClipboard', 'copyElementText',    # Focus utilities
     'focus', 'blur',
     # Timer utilities
     'setTimeout',

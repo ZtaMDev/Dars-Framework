@@ -8,11 +8,14 @@ def create_navbar():
             src="Dars-logo.png",
             width="38px",
             height="38px",
-            style="object-contain mr-[10px]"
+            style="object-contain mr-[10px] cursor-pointer",
+            on_click=goTo("/" if DarsEnv.dev else "https://ztamdev.github.io/Dars-Framework/"),
         ),
         Text(
             text="Dars Framework",
-            style="fs-[20px] font-bold text-[#a2ffe2] m-[0]"
+            style="fs-[20px] font-bold text-[#a2ffe2] m-[0] cursor-pointer transition-all duration-300 ease-in-out",
+            hover_style="transition-all duration-300 ease-in-out color-[#cffff0]",
+            on_click=goTo("/" if DarsEnv.dev else "https://ztamdev.github.io/Dars-Framework/"),
         ),
         id="navbar-left",
         style="flex items-center justify-start h-full"
@@ -20,11 +23,6 @@ def create_navbar():
 
     # Botones para la parte derecha del navbar (desktop)
     right_block = Container(
-        Link(
-            "Home",
-            href="/" if DarsEnv.dev else "https://ztamdev.github.io/Dars-Framework/",
-            style="text-[#a0cfc0] no-underline margin-[0_15px] font-medium fs-[16px] transition-all duration-300 ease-in-out padding-[8px_16px] rounded-[6px]"
-        ),
         Link(
             "Documentation",
             href="/docs.html" if DarsEnv.dev else "https://ztamdev.github.io/Dars-Framework/docs.html",
@@ -83,6 +81,11 @@ def create_navbar():
             Link(
                 "Releases",
                 href="/releases.html" if DarsEnv.dev else "https://ztamdev.github.io/Dars-Framework/releases.html",
+                style="block text-[#a0cfc0] no-underline padding-[18px_25px] font-medium fs-[18px] transition-all duration-300 ease-in-out border-bottom-[1px_solid_rgba(100,_255,_200,_0.1)]"
+            ),
+            Link(
+                "Roadmap",
+                href="/roadmap.html" if DarsEnv.dev else "https://ztamdev.github.io/Dars-Framework/roadmap.html",
                 style="block text-[#a0cfc0] no-underline padding-[18px_25px] font-medium fs-[18px] transition-all duration-300 ease-in-out border-bottom-[1px_solid_rgba(100,_255,_200,_0.1)]"
             ),
             Link(

@@ -123,7 +123,7 @@ def create_hero():
             style={
                 "display": "flex",
                 "align-items": "center",
-                "margin-top": "20px",
+                "margin-top": "10px",
                 "opacity": "0",
                 "align-items":"center",
                 "transform": "translateY(10px)",
@@ -158,7 +158,6 @@ def create_hero():
             "text-align": "center",
             "background": "linear-gradient(135deg, #0f1e1a 0%, #132d24 100%)",
             "position": "relative",
-            "padding-top": "80px",
-            "padding": "80px 20px 40px",
+            "padding": "40px 20px 40px",
         }
     )
