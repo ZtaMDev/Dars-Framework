@@ -1,3 +1,51 @@
+# Release Notes v1.9.5
+
+> **Modular Animation Engine, Scroll Triggers & Zero-Jitter Handoffs**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Modular Animation Engine (`anim.js`)
+The core animation system has been completely decoupled from the monolithic `dars.min.js` runtime into a dedicated `anim.js` module. This provides a cleaner architecture, better caching, and lays the groundwork for future advanced animation plugins.
+
+### High-Performance Scroll & Viewport Animations
+Added a suite of new Web Animations API-based triggers that run autonomously on the client. These features use `IntersectionObserver` to trigger animations the exact moment an element enters the viewport.
+
+- **`animateOnView`**: Trigger CSS keyframe animations when an element scrolls into view.
+- **`staggerOnView`**: Sequence animations across multiple elements with a defined delay, triggered when the first element becomes visible.
+- **`scrollProgress`**: Tie CSS properties directly to the scroll percentage of the page (e.g. fading out the hero section on scroll).
+- **`runOnView` / `classOnView`**: Execute JS callbacks or toggle classes based on viewport intersection.
+
+### Zero-Jitter WAAPI to CSS Handoff
+Implemented a bulletproof handoff mechanism between the Web Animations API (WAAPI) and native CSS transitions.
+
+**The Problem:**
+Historically, using `fill: forwards` in WAAPI locks CSS properties, breaking `:hover` states. If you cancel the animation and apply inline styles, it triggers a "phantom" CSS transition, causing visual jitter (especially with matrix interpolation on 3D transforms).
+
+**The Solution:**
+The new engine uses a specialized `_setStylesWithoutTransition` helper that:
+1. Temporarily disables CSS transitions using `transition: none !important`.
+2. Injects the final animation frame as persistent inline styles.
+3. Forces a synchronous browser reflow (`void el.offsetHeight`) to commit the changes silently.
+4. Cancels the WAAPI lock and restores the original CSS transition.
+
+**Result:** Flawless CSS `:hover` effects immediately after an entrance animation, with zero jitter or layout thrashing.
+
+### Security Hardening (Zero-Eval Continued)
+Continuing our commitment to security, the new animation triggers are built entirely without `eval()` or `new Function()`. Python payloads compile to strict JavaScript object references and IIFEs, completely mitigating dynamic string execution vulnerabilities.
+
+### DAP Compilation & Reactivity Hardening
+- **Native DAP Compilation**: Fixed a critical bug where chained animations via `sequence()` were being compiled as raw JavaScript strings, resulting in `<...dScript object...>` memory references output to the DOM. They are now correctly serialized into pure DAP JSON payloads.
+- **Async Execution in `dap.js`**: `dispatch()`, `sequence()`, and `delay()` commands inside the browser runtime are now fully `async`/`await` capable. This resolves an issue where delayed actions within a sequence were firing synchronously.
+- **`display: block` Layout Shift Fix**: Removed hardcoded `display: block` from core functions like `fadeIn`, `slideIn`, `scaleIn`, `dom_show`, and `dom_toggle`. They now clear the `display` style (i.e. `display: ""`), allowing inline-block elements (like Buttons) to retain their native layout without unwanted line breaks.
+
+---
+
 # Release Notes v1.9.4
 
 > **Relative Import Paths for Static Deployments**

@@ -156,6 +156,55 @@ Changes the dimensions of an element.
 morphSize(id="panel", to_width="100%", to_height="500px")
 ```
 
+## Scroll & Viewport Animations
+
+Dars provides a powerful, highly optimized Web Animations API-based engine for scroll and viewport-triggered animations. These run autonomously on the client, without `eval()` or string-execution vulnerabilities.
+
+### `animateOnView(id, keyframes, duration=300, easing="ease", threshold=0.1, ...)`
+Triggers an animation as soon as an element enters the viewport.
+- `keyframes`: A list of dictionaries representing CSS properties (e.g., `[{"opacity": "0"}, {"opacity": "1"}]`).
+- `threshold`: How much of the element must be visible (0.0 to 1.0) before triggering.
+- `once`: If `True`, the animation only runs the first time it enters the viewport.
+
+```python
+# Fade and slide up when scrolled into view
+index.add_script(animateOnView("my-card", [
+    {"opacity": "0", "transform": "translateY(50px)"},
+    {"opacity": "1", "transform": "translateY(0)"}
+], duration=800, threshold=0.2))
+```
+
+### `staggerOnView(ids, keyframes, duration=300, stagger_delay=100, threshold=0.1, ...)`
+Animates a list of elements sequentially with a delay as soon as the *first* element enters the viewport.
+- `ids`: List of element IDs.
+- `stagger_delay`: Milliseconds to wait between starting each element's animation.
+
+```python
+index.add_script(staggerOnView(
+    ["card-1", "card-2", "card-3"],
+    [{"opacity": "0", "transform": "scale(0.9)"},
+     {"opacity": "1", "transform": "scale(1)"}],
+    duration=500, stagger_delay=150
+))
+```
+
+### `scrollProgress(id, property, from_val, to_val, unit="", start=0, end=1)`
+Ties a CSS property directly to the page's scroll progress (0.0 = top of page, 1.0 = bottom).
+- `property`: CSS property to animate (e.g., `"opacity"`, `"translateY"`).
+- `start` / `end`: The scroll progress range where the animation occurs.
+
+```python
+# Fades out the hero section as the user scrolls down
+index.add_script(scrollProgress("hero-section", "opacity", 1.0, 0.0, start=0, end=0.2))
+```
+
+### `runOnView(id, code, threshold=0.1, once=True)`
+Executes arbitrary JavaScript code (via a secure callback mechanism) when an element enters the viewport.
+
+```python
+index.add_script(runOnView("trigger-zone", "console.log('User reached the bottom!');"))
+```
+
 ## Chaining & Sequencing
 
 You can run animations in sequence using the `sequence()` helper or the `.then()` method.

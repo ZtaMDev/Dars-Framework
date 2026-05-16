@@ -105,20 +105,28 @@ def _code_example():
                     "border":"1px solid rgba(146,255,229,0.5)",
                     "scale":"1.1",
                     "background-color":"rgba(26,58,48,0.5)",
-                }),
-                Button(text="+", id="demo-inc-btn", on_click=counter.count.increment(1), style={
-                    "width":"44px","height":"44px","border-radius":"10px",
-                    "border":"none",
-                    "background":"linear-gradient(135deg, #10b981, #059669)",
-                    "color":"white","font-size":"22px","font-weight":"700",
-                    "cursor":"pointer","transition":"all 0.2s ease",
-                    "box-shadow":"0 4px 12px rgba(16,185,129,0.3)",
                 },
-                hover_style={
-                    "box-shadow":"0 4px 12px rgba(16,185,129,0.3)",
-                    "scale":"1.1",
-                    "background-color":"#059669",
-                }),
+                active_style={
+                    "border":"1px solid rgba(146,255,229,0.5)",
+                },
+                ),
+                Button(text="+", id="demo-inc-btn", on_click=counter.count.increment(1), style={
+                        "width":"44px","height":"44px","border-radius":"10px",
+                        "border":"none",
+                        "background":"linear-gradient(135deg, #10b981, #059669)",
+                        "color":"white","font-size":"22px","font-weight":"700",
+                        "cursor":"pointer","transition":"all 0.2s ease",
+                        "box-shadow":"0 4px 12px rgba(16,185,129,0.3)",
+                    },
+                    hover_style={
+                        "box-shadow":"0 4px 12px rgba(16,185,129,0.3)",
+                        "scale":"1.1",
+                        "background-color":"#059669",
+                    },
+                    active_style={
+                        "box-shadow":"0 4px 12px rgba(16,185,129,0.3)",
+                    }
+                ),
                 style={"display":"flex","gap":"12px"}
             ),
             style={
@@ -179,9 +187,7 @@ def _feature_card(icon, title, description, card_id, delay):
             "border-radius": "16px",
             "backdrop-filter": "blur(12px)",
             "box-shadow": "0 8px 32px rgba(0,0,0,0.2)",
-            "opacity": "0",
-            "transform": "translateY(40px) rotateX(10deg)",
-            "transition": f"all 0.6s ease {delay}s"
+            "transition": "all 0.3s ease",
         }
     )
 
@@ -189,6 +195,7 @@ def create_example():
     return Container(
             Text(
                 text="Write Less, Build More",
+                id="example-title",
                 style={
                     "font-size": "56px", "font-weight": "900",
                     "text-align": "center", "margin-bottom": "20px",
@@ -202,6 +209,7 @@ def create_example():
             ),
             Text(
                 text="Experience a declarative, state-driven approach. Build high-performance applications with an elegant Pythonic API that handles the heavy lifting for you.",
+                id="example-subtitle",
                 style={
                     "font-size": "22px", "color": "#a0cfc0",
                     "text-align": "center", "margin-bottom": "60px",
@@ -211,13 +219,14 @@ def create_example():
                 }
             ),
             _code_example(),
+            id="example-section",
             style={
                 "padding": "30px 10px",
                 "background": "linear-gradient(135deg, #0a1512 0%, #0f1e1a 100%)",
                 "min-height": "100vh",
                 "display": "flex", "flex-direction": "column",
                 "justify-content": "flex-start"
-            }
+            },
         )
 def create_features():
     return Container(

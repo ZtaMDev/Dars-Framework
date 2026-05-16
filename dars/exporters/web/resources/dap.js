@@ -77,15 +77,24 @@ _registerCommand("log", (args) => console.log(args.message || args));
 
 _registerCommand("sequence", (args, ctx) => {
   const actions = Array.isArray(args) ? args : args.actions || [];
-  actions.forEach((a) => dispatch(a, ctx));
+  for (const a of actions) {
+    if (a && a.op === "delay") {
+      const ms = a.args?.ms || a.ms || 0;
+      setTimeout(() => dispatch(a.args.action, ctx), ms);
+    } else {
+      dispatch(a, ctx);
+    }
+  }
 });
 _registerCommand("delay", (args, ctx) => {
-  setTimeout(() => dispatch(args.action, ctx), args.ms || 0);
+  if (args.action) {
+    setTimeout(() => dispatch(args.action, ctx), args.ms || 0);
+  }
 });
 
 _registerCommand("dom_show", (args) => {
   const el = $(args.id || args);
-  if (el) el.style.display = args.display || "block";
+  if (el) el.style.display = args.display || "";
 });
 _registerCommand("dom_hide", (args) => {
   const el = $(args.id || args);
@@ -95,7 +104,7 @@ _registerCommand("dom_toggle", (args) => {
   const el = $(args.id || args);
   if (el)
     el.style.display =
-      el.style.display === "none" ? args.display || "block" : "none";
+      el.style.display === "none" ? args.display || "" : "none";
 });
 _registerCommand("dom_set_text", (args) => {
   const el = $(args.id);

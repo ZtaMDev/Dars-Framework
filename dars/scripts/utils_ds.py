@@ -724,3 +724,436 @@ def getInputValue(input_id: str, parent_id: str = None) -> RawJS:
         code = f"document.getElementById('{input_id}').value"
     
     return RawJS(code=code)
+
+
+# ============= Viewport / Scroll Animation Utilities =============
+
+def onViewport(
+    id: str,
+    on_enter: Union[str, 'RawJS', 'dScript', None] = None,
+    on_leave: Union[str, 'RawJS', 'dScript', None] = None,
+    threshold: float = 0.1,
+    root_margin: str = "0px",
+    once: bool = True,
+    enter_class: str = None,
+    leave_class: str = None,
+) -> RawJS:
+    """
+    Execute an action or apply a CSS class when an element enters/leaves the viewport.
+    
+    Uses IntersectionObserver under the hood for high-performance, non-blocking
+    viewport detection. This is the core utility for scroll-triggered animations.
+    
+    Args:
+        id (str): The DOM ID of the element to observe.
+        on_enter (str | RawJS | dScript, optional): Code to execute when the element enters the viewport.
+        on_leave (str | RawJS | dScript, optional): Code to execute when the element leaves the viewport.
+        threshold (float): Percentage of the element visible to trigger (0.0-1.0). Default: 0.1
+        root_margin (str): CSS margin around the root (viewport). Default: "0px"
+        once (bool): If True, stop observing after the first trigger. Default: True
+        enter_class (str, optional): CSS class to add when entering viewport.
+        leave_class (str, optional): CSS class to add when leaving viewport.
+        
+    Returns:
+        RawJS: The compiled viewport observer action.
+        
+    Example:
+        ```python
+        # Add a CSS class on scroll into view
+        Section(id="features", 
+            onMount=onViewport("features", enter_class="animate-fadeIn"))
+        
+        # Execute code when element appears
+        Section(id="stats", 
+            onMount=onViewport("stats", on_enter=log("Stats section visible!")))
+        
+        # Trigger animation on enter, reverse on leave
+        Section(id="hero",
+            onMount=onViewport("hero", 
+                on_enter=addClass("hero", "visible"),
+                on_leave=removeClass("hero", "visible"),
+                once=False))
+        ```
+    """
+    import json
+    
+    def _extract_code(action):
+        if action is None:
+            return ""
+        if isinstance(action, RawJS):
+            return action.code
+        if hasattr(action, 'get_code'):
+            return action.get_code()
+        return str(action)
+    
+    opts_parts = []
+    opts_parts.append(f"threshold: {threshold}")
+    opts_parts.append(f"rootMargin: {json.dumps(root_margin)}")
+    opts_parts.append(f"once: {'true' if once else 'false'}")
+    
+    if on_enter is not None:
+        opts_parts.append(f"onEnter: function(el, entry) {{ {_extract_code(on_enter)} }}")
+    if on_leave is not None:
+        opts_parts.append(f"onLeave: function(el, entry) {{ {_extract_code(on_leave)} }}")
+    if enter_class:
+        opts_parts.append(f"enterClass: {json.dumps(enter_class)}")
+    if leave_class:
+        opts_parts.append(f"leaveClass: {json.dumps(leave_class)}")
+    
+    opts_str = ", ".join(opts_parts)
+    return RawJS(code=f";(function _w(){{ if(window.DarsAnimation) window.DarsAnimation.observe({json.dumps(id)}, {{ {opts_str} }}); else setTimeout(_w, 20); }})();")
+
+
+def classOnView(id: str, class_name: str, threshold: float = 0.1, root_margin: str = "0px", once: bool = True) -> RawJS:
+    """
+    Add a CSS class to an element when it enters the viewport.
+    
+    This is a simplified shortcut for `onViewport()` when you only need to toggle a class.
+    
+    Args:
+        id (str): The DOM ID of the element.
+        class_name (str): The CSS class to add upon viewport entry.
+        threshold (float): Visibility percentage to trigger (0.0-1.0). Default: 0.1
+        root_margin (str): CSS margin around the viewport root. Default: "0px"
+        once (bool): Stop observing after first trigger. Default: True
+        
+    Returns:
+        RawJS: The compiled observer action.
+        
+    Example:
+        ```python
+        Section(id="about", onMount=classOnView("about", "fade-in-up"))
+        ```
+    """
+    import json
+    return RawJS(
+        code=f";(function _w(){{ if(window.DarsAnimation) window.DarsAnimation.classOnView("
+             f"{json.dumps(id)}, {json.dumps(class_name)}, "
+             f"{{ threshold: {threshold}, rootMargin: {json.dumps(root_margin)}, once: {'true' if once else 'false'} }}); else setTimeout(_w, 20); }})();"
+    )
+
+
+def runOnView(id: str, code: Union[str, 'RawJS', 'dScript'], threshold: float = 0.1, once: bool = True) -> RawJS:
+    """
+    Execute arbitrary JavaScript code when an element enters the viewport.
+    
+    This is useful for triggering counters, lazy-loading, analytics events, 
+    or any custom logic when a section becomes visible on screen.
+    
+    Args:
+        id (str): The DOM ID of the element to observe.
+        code (str | RawJS | dScript): The code to execute upon viewport entry.
+        threshold (float): Visibility percentage to trigger. Default: 0.1
+        once (bool): Only trigger once. Default: True
+        
+    Returns:
+        RawJS: The compiled observer action.
+        
+    Example:
+        ```python
+        # Start a counter animation when visible
+        Section(id="counter_section", 
+            onMount=runOnView("counter_section", RawJS("startCounter()")))
+        
+        # Log analytics event
+        Section(id="cta", onMount=runOnView("cta", log("CTA viewed")))
+        ```
+    """
+    import json
+    if isinstance(code, RawJS):
+        code_str = code.code
+    elif hasattr(code, 'get_code'):
+        code_str = code.get_code()
+    else:
+        code_str = str(code)
+    
+    return RawJS(
+        code=f";(function _w(){{ if(window.DarsAnimation) window.DarsAnimation.runOnView("
+             f"{json.dumps(id)}, {json.dumps(code_str)}, "
+             f"{{ threshold: {threshold}, once: {'true' if once else 'false'} }}); else setTimeout(_w, 20); }})();"
+    )
+
+
+def animateOnView(
+    id: str,
+    keyframes: list,
+    duration: int = 600,
+    easing: str = "ease",
+    fill: str = "forwards",
+    threshold: float = 0.1,
+    root_margin: str = "0px",
+    once: bool = True,
+) -> RawJS:
+    """
+    Animate an element using Web Animations API keyframes when it enters the viewport.
+    
+    This combines IntersectionObserver with the Web Animations API for high-performance,
+    compositor-thread animations that only play when the element is visible.
+    
+    Args:
+        id (str): The DOM ID of the element to animate.
+        keyframes (list): List of keyframe dicts, e.g. [{"opacity": "0"}, {"opacity": "1"}]
+        duration (int): Animation duration in milliseconds. Default: 600
+        easing (str): CSS easing function. Default: "ease"
+        fill (str): Animation fill mode. Default: "forwards"
+        threshold (float): Viewport visibility trigger. Default: 0.1
+        root_margin (str): Observer root margin. Default: "0px"
+        once (bool): Only animate once. Default: True
+        
+    Returns:
+        RawJS: The compiled viewport animation action.
+        
+    Example:
+        ```python
+        # Fade in from below on scroll
+        Container(id="feature_card",
+            onMount=animateOnView("feature_card", [
+                {"opacity": "0", "transform": "translateY(40px)"},
+                {"opacity": "1", "transform": "translateY(0)"}
+            ], duration=800, easing="cubic-bezier(0.16, 1, 0.3, 1)"))
+        ```
+    """
+    import json
+    kf = json.dumps(keyframes)
+    anim_opts = json.dumps({"duration": duration, "easing": easing, "fill": fill})
+    view_opts = json.dumps({"threshold": threshold, "rootMargin": root_margin, "once": once})
+    return RawJS(
+        code=f";(function _w(){{ if(window.DarsAnimation) window.DarsAnimation.animateOnView({json.dumps(id)}, {kf}, {anim_opts}, {view_opts}); else setTimeout(_w, 20); }})();"
+    )
+
+
+def staggerOnView(
+    ids: list,
+    keyframes: list,
+    duration: int = 600,
+    easing: str = "ease",
+    stagger_delay: int = 100,
+    fill: str = "forwards",
+    threshold: float = 0.1,
+    once: bool = True,
+) -> RawJS:
+    """
+    Stagger-animate multiple elements when the first one enters the viewport.
+    
+    Each element animates with a configurable delay offset, creating a cascading
+    entrance effect. Only the first element is observed — when it enters the viewport,
+    all elements in the list are animated with staggered delays.
+    
+    Args:
+        ids (list): List of element ID strings to animate.
+        keyframes (list): Shared keyframes for all elements.
+        duration (int): Animation duration per element (ms). Default: 600
+        easing (str): CSS easing function. Default: "ease"
+        stagger_delay (int): Delay between each element's animation start (ms). Default: 100
+        fill (str): Animation fill mode. Default: "forwards"
+        threshold (float): Viewport visibility trigger. Default: 0.1
+        once (bool): Only trigger once. Default: True
+        
+    Returns:
+        RawJS: The compiled stagger animation action.
+        
+    Example:
+        ```python
+        # Stagger cards entrance
+        for i in range(4):
+            Container(id=f"card_{i}", children=[...])
+        
+        # On mount of parent, stagger the children
+        Section(id="cards_section",
+            onMount=staggerOnView(
+                [f"card_{i}" for i in range(4)],
+                [{"opacity": "0", "transform": "translateY(30px)"},
+                 {"opacity": "1", "transform": "translateY(0)"}],
+                stagger_delay=150, duration=700
+            ))
+        ```
+    """
+    import json
+    ids_j = json.dumps(ids)
+    kf = json.dumps(keyframes)
+    anim_opts = json.dumps({"duration": duration, "easing": easing, "fill": fill, "staggerDelay": stagger_delay})
+    view_opts = json.dumps({"threshold": threshold, "once": once})
+    return RawJS(
+        code=f";(function _w(){{ if(window.DarsAnimation) window.DarsAnimation.staggerOnView({ids_j}, {kf}, {anim_opts}, {view_opts}); else setTimeout(_w, 20); }})();"
+    )
+
+
+def scrollProgress(
+    id: str,
+    css_property: str = "opacity",
+    from_val: float = 0,
+    to_val: float = 1,
+    unit: str = "",
+    start: float = 0,
+    end: float = 1,
+) -> RawJS:
+    """
+    Link a CSS property of an element to the page scroll progress (0 to 1).
+    
+    This creates a scroll-linked animation where the property value interpolates
+    between `from_val` and `to_val` as the user scrolls through the page.
+    Uses requestAnimationFrame for smooth 60fps updates.
+    
+    Args:
+        id (str): The DOM ID of the element.
+        css_property (str): The CSS property to animate (camelCase). Default: "opacity"
+        from_val (float): Starting value. Default: 0
+        to_val (float): Ending value. Default: 1
+        unit (str): CSS unit to append (e.g. "px", "deg", "%"). Default: ""
+        start (float): Scroll progress at which animation starts (0-1). Default: 0
+        end (float): Scroll progress at which animation ends (0-1). Default: 1
+        
+    Returns:
+        RawJS: The compiled scroll progress handler.
+        
+    Example:
+        ```python
+        # Fade in header as user scrolls (first 30% of page)
+        Container(id="parallax_bg",
+            onMount=scrollProgress("parallax_bg", "opacity", from_val=0, to_val=1, start=0, end=0.3))
+        
+        # Parallax: move element vertically with scroll
+        Image(id="hero_img",
+            onMount=scrollProgress("hero_img", "transform", 
+                from_val=0, to_val=-200, unit="px", start=0, end=0.5))
+        ```
+    """
+    import json
+    opts = json.dumps({
+        "property": css_property,
+        "from": from_val,
+        "to": to_val,
+        "unit": unit,
+        "start": start,
+        "end": end,
+    })
+    return RawJS(code=f";(function _w(){{ if(window.DarsAnimation) window.DarsAnimation.scrollProgress({json.dumps(id)}, {opts}); else setTimeout(_w, 20); }})();")
+
+
+def animate(
+    id: str,
+    keyframes: list,
+    duration: int = 300,
+    easing: str = "ease",
+    fill: str = "forwards",
+    iterations: Union[int, str] = 1,
+    delay: int = 0,
+    direction: str = "normal",
+) -> RawJS:
+    """
+    Run a Web Animations API animation on a DOM element.
+    
+    This is the most flexible animation primitive — equivalent to calling
+    `element.animate(keyframes, options)` in JavaScript, but defined in Python.
+    Returns a Promise so it can be chained with `.then()`.
+    
+    Args:
+        id (str): The DOM ID of the element to animate.
+        keyframes (list): List of keyframe dicts.
+        duration (int): Duration in milliseconds. Default: 300
+        easing (str): CSS easing function. Default: "ease"
+        fill (str): Fill mode ("forwards", "backwards", "both", "none"). Default: "forwards"
+        iterations (int | str): Number of iterations or "infinite". Default: 1
+        delay (int): Delay before animation starts (ms). Default: 0
+        direction (str): Direction ("normal", "reverse", "alternate"). Default: "normal"
+        
+    Returns:
+        RawJS: The compiled animation action (returns a Promise).
+        
+    Example:
+        ```python
+        # Pulse effect on click
+        Button("Pulse!", on_click=animate("my_btn", [
+            {"transform": "scale(1)"},
+            {"transform": "scale(1.2)"},
+            {"transform": "scale(1)"}
+        ], duration=400, easing="ease-in-out"))
+        
+        # Chain animations
+        Button("Animate!", on_click=animate("box", 
+            [{"opacity": "0"}, {"opacity": "1"}], duration=500
+        ).then(animate("box2", 
+            [{"opacity": "0"}, {"opacity": "1"}], duration=500)))
+        ```
+    """
+    import json
+    kf = json.dumps(keyframes)
+    iters = json.dumps("infinite") if iterations == "infinite" else iterations
+    opts = json.dumps({
+        "duration": duration, "easing": easing, "fill": fill,
+        "iterations": iters, "delay": delay, "direction": direction,
+    })
+    return RawJS(
+        code=f"window.DarsAnimation ? window.DarsAnimation.animate({json.dumps(id)}, {kf}, {opts}) : Promise.resolve()"
+    )
+
+
+def timeline(*steps) -> RawJS:
+    """
+    Run a sequence of animations one after another (timeline).
+    
+    Each step is a dict with `id`, `keyframes`, and optional `options` and `delay`.
+    Animations execute sequentially — each waits for the previous to finish.
+    
+    Args:
+        *steps: Dicts with keys: id (str), keyframes (list), options (dict), delay (int, ms)
+        
+    Returns:
+        RawJS: The compiled timeline action.
+        
+    Example:
+        ```python
+        Button("Run Timeline", on_click=timeline(
+            {"id": "box1", "keyframes": [{"opacity": "0"}, {"opacity": "1"}], "options": {"duration": 400}},
+            {"id": "box2", "keyframes": [{"opacity": "0"}, {"opacity": "1"}], "options": {"duration": 400}, "delay": 200},
+            {"id": "box3", "keyframes": [{"transform": "scale(0)"}, {"transform": "scale(1)"}], "options": {"duration": 600}},
+        ))
+        ```
+    """
+    import json
+    steps_json = json.dumps(list(steps))
+    return RawJS(code=f"if(window.DarsAnimation) window.DarsAnimation.timeline({steps_json});")
+
+
+def stagger(
+    ids: list,
+    keyframes: list,
+    duration: int = 300,
+    easing: str = "ease",
+    stagger_delay: int = 100,
+    fill: str = "forwards",
+) -> RawJS:
+    """
+    Animate multiple elements with staggered delay offsets.
+    
+    Each element starts its animation `stagger_delay` milliseconds after the previous one,
+    creating a cascading/wave animation effect.
+    
+    Args:
+        ids (list): List of element ID strings.
+        keyframes (list): Shared keyframe array.
+        duration (int): Animation duration per element (ms). Default: 300
+        easing (str): CSS easing function. Default: "ease"
+        stagger_delay (int): Delay between each element (ms). Default: 100
+        fill (str): Fill mode. Default: "forwards"
+        
+    Returns:
+        RawJS: The compiled stagger animation action.
+        
+    Example:
+        ```python
+        Button("Stagger In", on_click=stagger(
+            ["item_1", "item_2", "item_3", "item_4"],
+            [{"opacity": "0", "transform": "translateX(-20px)"}, 
+             {"opacity": "1", "transform": "translateX(0)"}],
+            stagger_delay=80, duration=400
+        ))
+        ```
+    """
+    import json
+    opts = json.dumps({
+        "duration": duration, "easing": easing, "fill": fill, "staggerDelay": stagger_delay,
+    })
+    return RawJS(
+        code=f"if(window.DarsAnimation) window.DarsAnimation.stagger({json.dumps(ids)}, {json.dumps(keyframes)}, {opts});"
+    )

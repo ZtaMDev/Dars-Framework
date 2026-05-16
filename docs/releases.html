@@ -2,7 +2,7 @@
 <html lang="en">
  <head>
   <meta charset="utf-8"/>
-  <meta content="Dars framework landing page for the UI multiplatform python framework" name="description"/>
+  <meta content="Dars framework landing page for the UI Fullstack multiplatform python framework" name="description"/>
   <meta content="ZMDev" name="author"/>
   <meta content="framework, python, python framework, dars, dars framework, ui components, declarative UI" name="keywords"/>
   <meta content="index, follow" name="robots"/>
@@ -22,7 +22,7 @@
   <link href="Dars-logo.png" rel="apple-touch-icon"/>
   <link href="Dars-logo.png" rel="apple-touch-icon" sizes="180x180"/>
   <meta content="Dars Framework" property="og:title"/>
-  <meta content="Dars framework landing page for the UI multiplatform python framework" property="og:description"/>
+  <meta content="Dars framework landing page for the UI Fullstack multiplatform python framework" property="og:description"/>
   <meta content="website" property="og:type"/>
   <meta content="summary" name="twitter:card"/>
   <link href="runtime_css.css" rel="stylesheet"/>
@@ -542,15 +542,13 @@
     padding: 0 20px;
 }
 
-.dars-s-7e9087e9c6 {
+.dars-s-8424bf1ab4 {
     background: rgba(20, 30, 27, 0.6);
     border: 1px solid rgba(100,255,200,0.1);
     border-radius: 16px;
     backdrop-filter: blur(12px);
     box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-    opacity: 0;
-    transform: translateY(40px) rotateX(10deg);
-    transition: all 0.6s ease 0.0s;
+    transition: all 0.3s ease;
 }
 
 .dars-s-e7fb390cb3 {
@@ -575,28 +573,6 @@
     font-size: 16px;
     color: #a0cfc0;
     line-height: 1.5;
-}
-
-.dars-s-80f5590a9b {
-    background: rgba(20, 30, 27, 0.6);
-    border: 1px solid rgba(100,255,200,0.1);
-    border-radius: 16px;
-    backdrop-filter: blur(12px);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-    opacity: 0;
-    transform: translateY(40px) rotateX(10deg);
-    transition: all 0.6s ease 0.1s;
-}
-
-.dars-s-b352dabad1 {
-    background: rgba(20, 30, 27, 0.6);
-    border: 1px solid rgba(100,255,200,0.1);
-    border-radius: 16px;
-    backdrop-filter: blur(12px);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-    opacity: 0;
-    transform: translateY(40px) rotateX(10deg);
-    transition: all 0.6s ease 0.2s;
 }
 
 .dars-s-c41e03322a {
@@ -994,13 +970,13 @@
     </div>
     <div class="dars-container dars-s-c59e376995" id="markdown-content-container">
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_0_1_1_0">
-      <h1 id="release-notes-v194">
-       Release Notes v1.9.4
+      <h1 id="release-notes-v195">
+       Release Notes v1.9.5
       </h1>
       <blockquote>
        <p>
         <strong>
-         Relative Import Paths for Static Deployments
+         Modular Animation Engine, Scroll Triggers &amp; Zero-Jitter Handoffs
         </strong>
        </p>
       </blockquote>
@@ -1012,6 +988,248 @@
 </code></pre>
       </div>
       <h2 id="whats-new">
+       What's New
+      </h2>
+      <h3 id="modular-animation-engine-animjs">
+       Modular Animation Engine (
+       <code>
+        anim.js
+       </code>
+       )
+      </h3>
+      <p>
+       The core animation system has been completely decoupled from the monolithic
+       <code>
+        dars.min.js
+       </code>
+       runtime into a dedicated
+       <code>
+        anim.js
+       </code>
+       module. This provides a cleaner architecture, better caching, and lays the groundwork for future advanced animation plugins.
+      </p>
+      <h3 id="high-performance-scroll-viewport-animations">
+       High-Performance Scroll &amp; Viewport Animations
+      </h3>
+      <p>
+       Added a suite of new Web Animations API-based triggers that run autonomously on the client. These features use
+       <code>
+        IntersectionObserver
+       </code>
+       to trigger animations the exact moment an element enters the viewport.
+      </p>
+      <ul>
+       <li>
+        <strong>
+         <code>
+          animateOnView
+         </code>
+        </strong>
+        : Trigger CSS keyframe animations when an element scrolls into view.
+       </li>
+       <li>
+        <strong>
+         <code>
+          staggerOnView
+         </code>
+        </strong>
+        : Sequence animations across multiple elements with a defined delay, triggered when the first element becomes visible.
+       </li>
+       <li>
+        <strong>
+         <code>
+          scrollProgress
+         </code>
+        </strong>
+        : Tie CSS properties directly to the scroll percentage of the page (e.g. fading out the hero section on scroll).
+       </li>
+       <li>
+        <strong>
+         <code>
+          runOnView
+         </code>
+         /
+         <code>
+          classOnView
+         </code>
+        </strong>
+        : Execute JS callbacks or toggle classes based on viewport intersection.
+       </li>
+      </ul>
+      <h3 id="zero-jitter-waapi-to-css-handoff">
+       Zero-Jitter WAAPI to CSS Handoff
+      </h3>
+      <p>
+       Implemented a bulletproof handoff mechanism between the Web Animations API (WAAPI) and native CSS transitions.
+      </p>
+      <p>
+       <strong>
+        The Problem:
+       </strong>
+       Historically, using
+       <code>
+        fill: forwards
+       </code>
+       in WAAPI locks CSS properties, breaking
+       <code>
+        :hover
+       </code>
+       states. If you cancel the animation and apply inline styles, it triggers a "phantom" CSS transition, causing visual jitter (especially with matrix interpolation on 3D transforms).
+      </p>
+      <p>
+       <strong>
+        The Solution:
+       </strong>
+       The new engine uses a specialized
+       <code>
+        _setStylesWithoutTransition
+       </code>
+       helper that:
+1. Temporarily disables CSS transitions using
+       <code>
+        transition: none !important
+       </code>
+       .
+2. Injects the final animation frame as persistent inline styles.
+3. Forces a synchronous browser reflow (
+       <code>
+        void el.offsetHeight
+       </code>
+       ) to commit the changes silently.
+4. Cancels the WAAPI lock and restores the original CSS transition.
+      </p>
+      <p>
+       <strong>
+        Result:
+       </strong>
+       Flawless CSS
+       <code>
+        :hover
+       </code>
+       effects immediately after an entrance animation, with zero jitter or layout thrashing.
+      </p>
+      <h3 id="security-hardening-zero-eval-continued">
+       Security Hardening (Zero-Eval Continued)
+      </h3>
+      <p>
+       Continuing our commitment to security, the new animation triggers are built entirely without
+       <code>
+        eval()
+       </code>
+       or
+       <code>
+        new Function()
+       </code>
+       . Python payloads compile to strict JavaScript object references and IIFEs, completely mitigating dynamic string execution vulnerabilities.
+      </p>
+      <h3 id="dap-compilation-reactivity-hardening">
+       DAP Compilation &amp; Reactivity Hardening
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Native DAP Compilation
+        </strong>
+        : Fixed a critical bug where chained animations via
+        <code>
+         sequence()
+        </code>
+        were being compiled as raw JavaScript strings, resulting in
+        <code>
+         &lt;...dScript object...&gt;
+        </code>
+        memory references output to the DOM. They are now correctly serialized into pure DAP JSON payloads.
+       </li>
+       <li>
+        <strong>
+         Async Execution in
+         <code>
+          dap.js
+         </code>
+        </strong>
+        :
+        <code>
+         dispatch()
+        </code>
+        ,
+        <code>
+         sequence()
+        </code>
+        , and
+        <code>
+         delay()
+        </code>
+        commands inside the browser runtime are now fully
+        <code>
+         async
+        </code>
+        /
+        <code>
+         await
+        </code>
+        capable. This resolves an issue where delayed actions within a sequence were firing synchronously.
+       </li>
+       <li>
+        <strong>
+         <code>
+          display: block
+         </code>
+         Layout Shift Fix
+        </strong>
+        : Removed hardcoded
+        <code>
+         display: block
+        </code>
+        from core functions like
+        <code>
+         fadeIn
+        </code>
+        ,
+        <code>
+         slideIn
+        </code>
+        ,
+        <code>
+         scaleIn
+        </code>
+        ,
+        <code>
+         dom_show
+        </code>
+        , and
+        <code>
+         dom_toggle
+        </code>
+        . They now clear the
+        <code>
+         display
+        </code>
+        style (i.e.
+        <code>
+         display: ""
+        </code>
+        ), allowing inline-block elements (like Buttons) to retain their native layout without unwanted line breaks.
+       </li>
+      </ul>
+      <hr/>
+      <h1 id="release-notes-v194">
+       Release Notes v1.9.4
+      </h1>
+      <blockquote>
+       <p>
+        <strong>
+         Relative Import Paths for Static Deployments
+        </strong>
+       </p>
+      </blockquote>
+      <h2 id="installation-2">
+       Installation
+      </h2>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
+</code></pre>
+      </div>
+      <h2 id="whats-new-2">
        What's New
       </h2>
       <h3 id="fixed-relative-paths-for-runtime-resources">
@@ -1147,14 +1365,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-2">
+      <h2 id="installation-3">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-2">
+      <h2 id="whats-new-3">
        What's New
       </h2>
       <h3 id="configurable-development-port">
@@ -1312,14 +1530,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-3">
+      <h2 id="installation-4">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-3">
+      <h2 id="whats-new-4">
        What's New
       </h2>
       <h3 id="standardized-component-docstrings">
@@ -1391,14 +1609,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-4">
+      <h2 id="installation-5">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-4">
+      <h2 id="whats-new-5">
        What's New
       </h2>
       <h3 id="utility-style-system">
@@ -1596,14 +1814,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-5">
+      <h2 id="installation-6">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-5">
+      <h2 id="whats-new-6">
        What's New
       </h2>
       <h3 id="definitive-removal-of-new-function">
@@ -1880,14 +2098,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-6">
+      <h2 id="installation-7">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-6">
+      <h2 id="whats-new-7">
        What's New
       </h2>
       <h3 id="restored-native-string-concatenation">
@@ -1962,14 +2180,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-7">
+      <h2 id="installation-8">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-7">
+      <h2 id="whats-new-8">
        What's New
       </h2>
       <h3 id="state-v2-reactivity-decoupling">
@@ -2100,14 +2318,14 @@
         release.
        </p>
       </blockquote>
-      <h2 id="installation-8">
+      <h2 id="installation-9">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-8">
+      <h2 id="whats-new-9">
        What's New
       </h2>
       <h3 id="zero-eval-runtime-secure-script-execution">
@@ -2305,14 +2523,14 @@
         : Versions &lt;= v1.8.7 are considered deprecated and NOT recommended for production use. v1.8.8 addresses critical security surfaces by temporarily removing experimental Server Components. Upgrading is mandatory.
        </p>
       </blockquote>
-      <h2 id="installation-9">
+      <h2 id="installation-10">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-9">
+      <h2 id="whats-new-10">
        What's New
       </h2>
       <h3 id="dars-server-protocol-dsp">
@@ -2382,14 +2600,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-10">
+      <h2 id="installation-11">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-10">
+      <h2 id="whats-new-11">
        What's New
       </h2>
       <h3 id="dars-server-components">
@@ -2497,14 +2715,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-11">
+      <h2 id="installation-12">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-11">
+      <h2 id="whats-new-12">
        What's New
       </h2>
       <h3 id="darsenv-environment-awareness">
@@ -2616,14 +2834,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-12">
+      <h2 id="installation-13">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-12">
+      <h2 id="whats-new-13">
        What's New
       </h2>
       <h3 id="multiple-outlets-via-outlet_id">
@@ -2720,14 +2938,14 @@ This keeps state/events safe and avoids breaking hydration.
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-13">
+      <h2 id="installation-14">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-13">
+      <h2 id="whats-new-14">
        What's New
       </h2>
       <h3 id="python-native-minification-by-default-no-nodebun-required">
@@ -2936,14 +3154,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-14">
+      <h2 id="installation-15">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-14">
+      <h2 id="whats-new-15">
        What's New
       </h2>
       <h3 id="fixed-production-build-crash-unexpected-token-export">
@@ -2994,14 +3212,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-15">
+      <h2 id="installation-16">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-15">
+      <h2 id="whats-new-16">
        What's New
       </h2>
       <h3 id="fixed-settimeout-promise-handling">
@@ -3045,14 +3263,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-16">
+      <h2 id="installation-17">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-16">
+      <h2 id="whats-new-17">
        What's New
       </h2>
       <h3 id="new-style-optimization-pipeline-phase-1">
@@ -3422,14 +3640,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-17">
+      <h2 id="installation-18">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-17">
+      <h2 id="whats-new-18">
        What's New
       </h2>
       <h3 id="new-advanced-multimedia-components-video-audio">
@@ -3985,6 +4203,30 @@ improving consistency and providing a real-world example of the upgraded styling
      <div class="sidebar-category">
       Versions
      </div>
+     <a class="sidebar-link sidebar-level-1" href="#release-notes-v195" style="margin-left: 0px">
+      Release Notes v1.9.5
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#installation" style="margin-left: 20px">
+      Installation
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#whats-new" style="margin-left: 20px">
+      What's New
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#modular-animation-engine-animjs" style="margin-left: 40px">
+      Modular Animation Engine (`anim.js`)
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#high-performance-scroll-viewport-animations" style="margin-left: 40px">
+      High-Performance Scroll &amp; Viewport Animations
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#zero-jitter-waapi-to-css-handoff" style="margin-left: 40px">
+      Zero-Jitter WAAPI to CSS Handoff
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#security-hardening-zero-eval-continued" style="margin-left: 40px">
+      Security Hardening (Zero-Eval Continued)
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#dap-compilation-reactivity-hardening" style="margin-left: 40px">
+      DAP Compilation &amp; Reactivity Hardening
+     </a>
      <a class="sidebar-link sidebar-level-1" href="#release-notes-v194" style="margin-left: 0px">
       Release Notes v1.9.4
      </a>
@@ -4549,7 +4791,7 @@ improving consistency and providing a real-world example of the upgraded styling
         });
    </script>
   </div>
-  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1778955651" type="module">
+  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1778966347" type="module">
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js">
   </script>

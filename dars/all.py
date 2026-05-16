@@ -65,6 +65,7 @@ from dars.exporters.web.html_css_js import HTMLCSSJSExporter
 # Script utilities
 from dars.scripts.dscript import dScript, RawJS, Arg
 from dars.scripts.utils_ds import showModal, hideModal, goTo, goToNew, reload, goBack, goForward, alert, confirm, log, getDateTime, show, hide, toggle, addClass, removeClass, toggleClass, scrollTo, scrollToTop, scrollToBottom, scrollToElement, submitForm, resetForm, getValue, clearInput, saveToLocal, loadFromLocal, removeFromLocal, clearLocalStorage, copyToClipboard, copyElementText, focus, blur, setText, setTimeout, getInputValue, switch
+from dars.scripts.utils_ds import onViewport, classOnView, runOnView, animateOnView, staggerOnView, scrollProgress, animate, timeline, stagger  # Viewport & Scroll Animation Utilities
 from dars.scripts.animations import fadeIn, fadeOut, slideIn, slideOut, scaleIn, scaleOut, shake, bounce, pulse, rotate, flip, colorChange, morphSize, popIn, popOut, sequence  # Animation System
 from dars.scripts.script import *
 # Hooks
@@ -136,6 +137,9 @@ __all__ = [
     'fadeIn', 'fadeOut', 'slideIn', 'slideOut', 'scaleIn', 'scaleOut',
     'shake', 'bounce', 'pulse', 'rotate', 'flip',
     'colorChange', 'morphSize', 'popIn', 'popOut', 'sequence',
+    # Viewport & Scroll Animation Engine
+    'onViewport', 'classOnView', 'runOnView', 'animateOnView',
+    'staggerOnView', 'scrollProgress', 'animate', 'timeline', 'stagger',
     # Input utilities
     'getInputValue',
     # Hooks

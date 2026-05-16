@@ -2,7 +2,7 @@
 <html lang="en">
  <head>
   <meta charset="utf-8"/>
-  <meta content="Dars framework landing page for the UI multiplatform python framework" name="description"/>
+  <meta content="Dars framework landing page for the UI Fullstack multiplatform python framework" name="description"/>
   <meta content="ZMDev" name="author"/>
   <meta content="framework, python, python framework, dars, dars framework, ui components, declarative UI" name="keywords"/>
   <meta content="index, follow" name="robots"/>
@@ -22,7 +22,7 @@
   <link href="Dars-logo.png" rel="apple-touch-icon"/>
   <link href="Dars-logo.png" rel="apple-touch-icon" sizes="180x180"/>
   <meta content="Dars Framework" property="og:title"/>
-  <meta content="Dars framework landing page for the UI multiplatform python framework" property="og:description"/>
+  <meta content="Dars framework landing page for the UI Fullstack multiplatform python framework" property="og:description"/>
   <meta content="website" property="og:type"/>
   <meta content="summary" name="twitter:card"/>
   <link href="runtime_css.css" rel="stylesheet"/>
@@ -542,15 +542,13 @@
     padding: 0 20px;
 }
 
-.dars-s-7e9087e9c6 {
+.dars-s-8424bf1ab4 {
     background: rgba(20, 30, 27, 0.6);
     border: 1px solid rgba(100,255,200,0.1);
     border-radius: 16px;
     backdrop-filter: blur(12px);
     box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-    opacity: 0;
-    transform: translateY(40px) rotateX(10deg);
-    transition: all 0.6s ease 0.0s;
+    transition: all 0.3s ease;
 }
 
 .dars-s-e7fb390cb3 {
@@ -575,28 +573,6 @@
     font-size: 16px;
     color: #a0cfc0;
     line-height: 1.5;
-}
-
-.dars-s-80f5590a9b {
-    background: rgba(20, 30, 27, 0.6);
-    border: 1px solid rgba(100,255,200,0.1);
-    border-radius: 16px;
-    backdrop-filter: blur(12px);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-    opacity: 0;
-    transform: translateY(40px) rotateX(10deg);
-    transition: all 0.6s ease 0.1s;
-}
-
-.dars-s-b352dabad1 {
-    background: rgba(20, 30, 27, 0.6);
-    border: 1px solid rgba(100,255,200,0.1);
-    border-radius: 16px;
-    backdrop-filter: blur(12px);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-    opacity: 0;
-    transform: translateY(40px) rotateX(10deg);
-    transition: all 0.6s ease 0.2s;
 }
 
 .dars-s-c41e03322a {
@@ -1633,6 +1609,21 @@
      </a>
      <a class="sidebar-link sidebar-level-4" href="#morphsizeid-towidth-toheight-duration500-easingease" style="margin-left: 60px">
       `morphSize(id, to_width, to_height, duration=500, easing="ease")`
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#scroll-viewport-animations" style="margin-left: 20px">
+      Scroll &amp; Viewport Animations
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#animateonviewid-keyframes-duration300-easingease-threshold01-" style="margin-left: 40px">
+      `animateOnView(id, keyframes, duration=300, easing="ease", threshold=0.1, ...)`
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#staggeronviewids-keyframes-duration300-staggerdelay100-threshold01-" style="margin-left: 40px">
+      `staggerOnView(ids, keyframes, duration=300, stagger_delay=100, threshold=0.1, ...)`
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#scrollprogressid-property-fromval-toval-unit-start0-end1" style="margin-left: 40px">
+      `scrollProgress(id, property, from_val, to_val, unit="", start=0, end=1)`
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#runonviewid-code-threshold01-oncetrue" style="margin-left: 40px">
+      `runOnView(id, code, threshold=0.1, once=True)`
      </a>
      <a class="sidebar-link sidebar-level-2" href="#chaining-sequencing" style="margin-left: 20px">
       Chaining &amp; Sequencing
@@ -10345,6 +10336,133 @@ In modern Dars, you should heavily rely on
        <pre><span></span><code><span class="n">morphSize</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"panel"</span><span class="p">,</span> <span class="n">to_width</span><span class="o">=</span><span class="s2">"100%"</span><span class="p">,</span> <span class="n">to_height</span><span class="o">=</span><span class="s2">"500px"</span><span class="p">)</span>
 </code></pre>
       </div>
+      <h2 id="scroll-viewport-animations">
+       Scroll &amp; Viewport Animations
+      </h2>
+      <p>
+       Dars provides a powerful, highly optimized Web Animations API-based engine for scroll and viewport-triggered animations. These run autonomously on the client, without
+       <code>
+        eval()
+       </code>
+       or string-execution vulnerabilities.
+      </p>
+      <h3 id="animateonviewid-keyframes-duration300-easingease-threshold01">
+       <code>
+        animateOnView(id, keyframes, duration=300, easing="ease", threshold=0.1, ...)
+       </code>
+      </h3>
+      <p>
+       Triggers an animation as soon as an element enters the viewport.
+-
+       <code>
+        keyframes
+       </code>
+       : A list of dictionaries representing CSS properties (e.g.,
+       <code>
+        [{"opacity": "0"}, {"opacity": "1"}]
+       </code>
+       ).
+-
+       <code>
+        threshold
+       </code>
+       : How much of the element must be visible (0.0 to 1.0) before triggering.
+-
+       <code>
+        once
+       </code>
+       : If
+       <code>
+        True
+       </code>
+       , the animation only runs the first time it enters the viewport.
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Fade and slide up when scrolled into view</span>
+<span class="n">index</span><span class="o">.</span><span class="n">add_script</span><span class="p">(</span><span class="n">animateOnView</span><span class="p">(</span><span class="s2">"my-card"</span><span class="p">,</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s2">"opacity"</span><span class="p">:</span> <span class="s2">"0"</span><span class="p">,</span> <span class="s2">"transform"</span><span class="p">:</span> <span class="s2">"translateY(50px)"</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">"opacity"</span><span class="p">:</span> <span class="s2">"1"</span><span class="p">,</span> <span class="s2">"transform"</span><span class="p">:</span> <span class="s2">"translateY(0)"</span><span class="p">}</span>
+<span class="p">],</span> <span class="n">duration</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">0.2</span><span class="p">))</span>
+</code></pre>
+      </div>
+      <h3 id="staggeronviewids-keyframes-duration300-stagger_delay100-threshold01">
+       <code>
+        staggerOnView(ids, keyframes, duration=300, stagger_delay=100, threshold=0.1, ...)
+       </code>
+      </h3>
+      <p>
+       Animates a list of elements sequentially with a delay as soon as the
+       <em>
+        first
+       </em>
+       element enters the viewport.
+-
+       <code>
+        ids
+       </code>
+       : List of element IDs.
+-
+       <code>
+        stagger_delay
+       </code>
+       : Milliseconds to wait between starting each element's animation.
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">index</span><span class="o">.</span><span class="n">add_script</span><span class="p">(</span><span class="n">staggerOnView</span><span class="p">(</span>
+    <span class="p">[</span><span class="s2">"card-1"</span><span class="p">,</span> <span class="s2">"card-2"</span><span class="p">,</span> <span class="s2">"card-3"</span><span class="p">],</span>
+    <span class="p">[{</span><span class="s2">"opacity"</span><span class="p">:</span> <span class="s2">"0"</span><span class="p">,</span> <span class="s2">"transform"</span><span class="p">:</span> <span class="s2">"scale(0.9)"</span><span class="p">},</span>
+     <span class="p">{</span><span class="s2">"opacity"</span><span class="p">:</span> <span class="s2">"1"</span><span class="p">,</span> <span class="s2">"transform"</span><span class="p">:</span> <span class="s2">"scale(1)"</span><span class="p">}],</span>
+    <span class="n">duration</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">stagger_delay</span><span class="o">=</span><span class="mi">150</span>
+<span class="p">))</span>
+</code></pre>
+      </div>
+      <h3 id="scrollprogressid-property-from_val-to_val-unit-start0-end1">
+       <code>
+        scrollProgress(id, property, from_val, to_val, unit="", start=0, end=1)
+       </code>
+      </h3>
+      <p>
+       Ties a CSS property directly to the page's scroll progress (0.0 = top of page, 1.0 = bottom).
+-
+       <code>
+        property
+       </code>
+       : CSS property to animate (e.g.,
+       <code>
+        "opacity"
+       </code>
+       ,
+       <code>
+        "translateY"
+       </code>
+       ).
+-
+       <code>
+        start
+       </code>
+       /
+       <code>
+        end
+       </code>
+       : The scroll progress range where the animation occurs.
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Fades out the hero section as the user scrolls down</span>
+<span class="n">index</span><span class="o">.</span><span class="n">add_script</span><span class="p">(</span><span class="n">scrollProgress</span><span class="p">(</span><span class="s2">"hero-section"</span><span class="p">,</span> <span class="s2">"opacity"</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="mf">0.2</span><span class="p">))</span>
+</code></pre>
+      </div>
+      <h3 id="runonviewid-code-threshold01-oncetrue">
+       <code>
+        runOnView(id, code, threshold=0.1, once=True)
+       </code>
+      </h3>
+      <p>
+       Executes arbitrary JavaScript code (via a secure callback mechanism) when an element enters the viewport.
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">index</span><span class="o">.</span><span class="n">add_script</span><span class="p">(</span><span class="n">runOnView</span><span class="p">(</span><span class="s2">"trigger-zone"</span><span class="p">,</span> <span class="s2">"console.log('User reached the bottom!');"</span><span class="p">))</span>
+</code></pre>
+      </div>
       <h2 id="chaining-sequencing">
        Chaining &amp; Sequencing
       </h2>
@@ -18650,7 +18768,7 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
     </div>
    </div>
   </div>
-  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1778955648" type="module">
+  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1778966345" type="module">
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js">
   </script>

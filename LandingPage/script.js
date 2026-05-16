@@ -1,29 +1,14 @@
 window.addEventListener("scroll", () => {
   const navbar = document.getElementById("dars-navbar");
-  if (window.scrollY > 20) {
-    navbar.classList.add("scrolled");
-  } else {
-    navbar.classList.remove("scrolled");
-  }
-
-  const featuresSection = document.getElementById("features-section");
-  if (featuresSection && !featuresSection.classList.contains("visible")) {
-    const sectionPosition = featuresSection.getBoundingClientRect().top;
-    const screenPosition = window.innerHeight / 1.5;
-
-    if (sectionPosition < screenPosition) {
-      featuresSection.classList.add("visible");
-
-      const featureCards = document.querySelectorAll('[id^="feature-card-"]');
-      featureCards.forEach((card, index) => {
-        setTimeout(() => {
-          card.style.opacity = "1";
-          card.style.transform = "translateY(0)";
-        }, index * 100);
-      });
+  if (navbar) {
+    if (window.scrollY > 20) {
+      navbar.classList.add("scrolled");
+    } else {
+      navbar.classList.remove("scrolled");
     }
   }
 });
+
 
 document.addEventListener('DOMContentLoaded', function () {
   const hamburgerBtn = document.getElementById('hamburger-btn');

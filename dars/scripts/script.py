@@ -21,6 +21,9 @@ class Script(ABC):
         """Returns the script code in the target language"""
         pass
 
+    def __str__(self) -> str:
+        return self.get_code()
+
 class InlineScript(Script):
     """Script defined directly in Python code"""
     def __init__(self, code: str, target_language: str = "javascript", module: bool = False):

@@ -14,7 +14,7 @@ app = App(
     favicon="Dars-logo.png",
     apple_touch_icon="Dars-logo.png",
     author="ZMDev",
-    description="Dars framework landing page for the UI multiplatform python framework",
+    description="Dars framework landing page for the UI Fullstack multiplatform python framework",
     theme_color="#0d1513",
     theme="dark",
     background_color="#0d1513",
@@ -36,7 +36,7 @@ index = Page(
 app.add_global_style(file_path="index.css")
 app.add_script(dScript(file_path="script.js"))
 
-# Start Animations
+# Hero entrance animations (sequential on load)
 index.add_script(
     setTimeout(5, addClass("hero-logo", "show"))
     .then(setTimeout(350, addClass("hero-title", "show")))
@@ -44,6 +44,37 @@ index.add_script(
     .then(setTimeout(950, addClass("pip-command", "show")))
     .then(setTimeout(1250, addClass("get-started-btn", "show")))
 )
+
+index.add_script(animateOnView("example-title", [
+    {"opacity": "0", "transform": "translateY(40px)"},
+    {"opacity": "1", "transform": "translateY(0)"}
+], duration=800, easing="cubic-bezier(0.16, 1, 0.3, 1)"))
+
+index.add_script(animateOnView("example-subtitle", [
+    {"opacity": "0", "transform": "translateY(30px)"},
+    {"opacity": "1", "transform": "translateY(0)"}
+], duration=800, easing="cubic-bezier(0.16, 1, 0.3, 1)", threshold=0.2))
+
+index.add_script(animateOnView("code-showcase", [
+    {"opacity": "0", "transform": "translateY(50px) scale(0.97)"},
+    {"opacity": "1", "transform": "translateY(0) scale(1)"}
+], duration=1000, easing="cubic-bezier(0.16, 1, 0.3, 1)", threshold=0.1))
+
+index.add_script(staggerOnView(
+    ["feature-card-0", "feature-card-1", "feature-card-2"],
+    [{"opacity": "0", "transform": "translateY(50px) rotateX(10deg)"},
+     {"opacity": "1", "transform": "translateY(0) rotateX(0deg)"}],
+    duration=800, stagger_delay=150,
+    easing="cubic-bezier(0.16, 1, 0.3, 1)", threshold=0.15
+))
+
+index.add_script(staggerOnView(
+    ["howitworks-step-1", "howitworks-step-2", "howitworks-step-3"],
+    [{"opacity": "0", "transform": "translateY(40px) scale(0.95)"},
+     {"opacity": "1", "transform": "translateY(0) scale(1)"}],
+    duration=700, stagger_delay=180,
+    easing="cubic-bezier(0.16, 1, 0.3, 1)", threshold=0.1
+))
 
 #Pages
 app.add_page("index", index, title="Dars Framework", index=True)

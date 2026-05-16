@@ -19,7 +19,19 @@ Usage:
 """
 
 from dars.scripts.dscript import dScript
-from dars.actionProtocol import Action
+class Action:
+    @staticmethod
+    def sequence(actions): return {'op': 'sequence', 'args': actions}
+    @staticmethod
+    def dom_set_style(id, style): return {'op': 'dom_set_style', 'args': {'id': id, 'style': style}}
+    @staticmethod
+    def dom_reflow(id): return {'op': 'dom_reflow', 'args': {'id': id}}
+    @staticmethod
+    def delay(ms): return {'op': 'delay', 'args': {'ms': ms}}
+    @staticmethod
+    def dom_hide(id): return {'op': 'dom_hide', 'args': {'id': id}}
+    @staticmethod
+    def dom_animate(id, keyframes, options): return {'op': 'dom_animate', 'args': {'id': id, 'keyframes': keyframes, 'options': options}}
 from typing import Union, List
 
 
@@ -28,7 +40,7 @@ from typing import Union, List
 def fadeIn(id: str, duration: int = 300, easing: str = "ease") -> dScript:
     """Fade in an element with secure DAP."""
     return dScript(data=Action.sequence([
-        Action.dom_set_style(id, {"transition": "none", "opacity": "0", "display": "block"}),
+        Action.dom_set_style(id, {"transition": "none", "opacity": "0", "display": ""}),
         Action.dom_reflow(id),
         Action.delay(ms=20),
         Action.dom_set_style(id, {"transition": f"opacity {duration}ms {easing}", "opacity": "1"}),
@@ -61,7 +73,7 @@ def slideIn(id: str, direction: str = "down", duration: int = 300, easing: str =
     initial_transform = transforms.get(direction, 'translateY(-100%)')
     
     return dScript(data=Action.sequence([
-        Action.dom_set_style(id, {"transition": "none", "transform": initial_transform, "display": "block"}),
+        Action.dom_set_style(id, {"transition": "none", "transform": initial_transform, "display": ""}),
         Action.dom_reflow(id),
         Action.delay(ms=20),
         Action.dom_set_style(id, {"transition": f"transform {duration}ms {easing}", "transform": "translateX(0) translateY(0)"}),
@@ -94,7 +106,7 @@ def slideOut(id: str, direction: str = "up", duration: int = 300, easing: str = 
 def scaleIn(id: str, duration: int = 300, easing: str = "ease", from_scale: float = 0.0) -> dScript:
     """Scale in an element with secure DAP."""
     return dScript(data=Action.sequence([
-        Action.dom_set_style(id, {"transition": "none", "transform": f"scale({from_scale})", "opacity": "0", "display": "block"}),
+        Action.dom_set_style(id, {"transition": "none", "transform": f"scale({from_scale})", "opacity": "0", "display": ""}),
         Action.dom_reflow(id),
         Action.delay(ms=20),
         Action.dom_set_style(id, {"transition": f"transform {duration}ms {easing}, opacity {duration}ms {easing}", "transform": "scale(1)", "opacity": "1"}),

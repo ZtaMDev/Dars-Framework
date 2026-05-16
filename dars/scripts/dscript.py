@@ -305,14 +305,6 @@ def compile_action(action):
         return f"window.open({json.dumps(path)}, '_blank');"
     elif op == 'reload':
         return "window.location.reload();"
-    elif op == 'delay':
-        ms = args.get('ms', 0)
-        inner = compile_action(args.get('action', {}))
-        return f"setTimeout(function() {{ {inner} }}, {ms});"
-    elif op == 'sequence':
-        actions = args.get('actions', args if isinstance(args, list) else [])
-        parts = [compile_action(a) for a in actions]
-        return "\n".join(parts)
     elif op == 'class_add':
         eid = args.get('id', '')
         cn = args.get('className', '')
