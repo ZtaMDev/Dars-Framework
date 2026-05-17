@@ -1,4 +1,4 @@
-# Release Notes v1.9.8
+# Release Notes v1.9.9
 
 > **Production-Grade Fullstack: useFetch, FormValidator, Each, JsonStore, UploadPipeline, SecurityHeaders & .env Support**
 
@@ -187,7 +187,6 @@ app = ssr.fastapi_app
 ---
 
 # Release Notes v1.9.7
-
 
 > **Hybrid Stability, Anti-Flash System & CLI UX Overhaul**
 

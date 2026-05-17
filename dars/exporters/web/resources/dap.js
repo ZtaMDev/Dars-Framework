@@ -9,6 +9,7 @@ import {
   updateVRef,
   __registry,
 } from "./dars.min.js";
+import { _executeExternalScript } from "./ssr.js";
 
 export const __commandRegistry = new Map();
 export const __darsConfig = {
@@ -85,14 +86,15 @@ _registerCommand("confirm", (args, ctx) => {
 });
 _registerCommand("log", (args) => console.log(args.message || args));
 
-_registerCommand("sequence", (args, ctx) => {
+_registerCommand("sequence", async (args, ctx) => {
   const actions = Array.isArray(args) ? args : args.actions || [];
   for (const a of actions) {
     if (a && a.op === "delay") {
       const ms = a.args?.ms || a.ms || 0;
-      setTimeout(() => dispatch(a.args.action, ctx), ms);
+      await new Promise((resolve) => setTimeout(resolve, ms));
+      if (a.args && a.args.action) await dispatch(a.args.action, ctx);
     } else {
-      dispatch(a, ctx);
+      await dispatch(a, ctx);
     }
   }
 });
@@ -136,20 +138,87 @@ _registerCommand("dom_set_value", (args) => {
 });
 // Blocked attribute names that could introduce XSS via event handlers or dangerous protocols
 const _BLOCKED_ATTRS = new Set([
-  "onclick","ondblclick","onmousedown","onmouseup","onmouseover","onmouseout",
-  "onmousemove","onkeydown","onkeyup","onkeypress","onchange","oninput",
-  "onfocus","onblur","onsubmit","onreset","onselect","onload","onunload",
-  "onerror","onabort","onresize","onscroll","oncontextmenu","ondrag",
-  "ondragend","ondragenter","ondragleave","ondragover","ondragstart","ondrop",
-  "onanimationstart","onanimationend","ontransitionend","onpointerdown",
-  "onpointerup","onpointermove","onpointerover","onpointerout","onpointerenter",
-  "onpointerleave","onpointercancel","ontouchstart","ontouchend","ontouchmove",
-  "ontouchcancel","onwheel","oncopy","oncut","onpaste","onbeforeinput",
-  "onformdata","oninvalid","onprogress","onratechange","onseeked","onseeking",
-  "onstalled","onsuspend","ontimeupdate","onvolumechange","onwaiting",
-  "oncanplay","oncanplaythrough","ondurationchange","onemptied","onended",
-  "onloadeddata","onloadedmetadata","onloadstart","onplay","onplaying","onpause",
-  "srcdoc","formaction","action","href","src","data","codebase","classid",
+  "onclick",
+  "ondblclick",
+  "onmousedown",
+  "onmouseup",
+  "onmouseover",
+  "onmouseout",
+  "onmousemove",
+  "onkeydown",
+  "onkeyup",
+  "onkeypress",
+  "onchange",
+  "oninput",
+  "onfocus",
+  "onblur",
+  "onsubmit",
+  "onreset",
+  "onselect",
+  "onload",
+  "onunload",
+  "onerror",
+  "onabort",
+  "onresize",
+  "onscroll",
+  "oncontextmenu",
+  "ondrag",
+  "ondragend",
+  "ondragenter",
+  "ondragleave",
+  "ondragover",
+  "ondragstart",
+  "ondrop",
+  "onanimationstart",
+  "onanimationend",
+  "ontransitionend",
+  "onpointerdown",
+  "onpointerup",
+  "onpointermove",
+  "onpointerover",
+  "onpointerout",
+  "onpointerenter",
+  "onpointerleave",
+  "onpointercancel",
+  "ontouchstart",
+  "ontouchend",
+  "ontouchmove",
+  "ontouchcancel",
+  "onwheel",
+  "oncopy",
+  "oncut",
+  "onpaste",
+  "onbeforeinput",
+  "onformdata",
+  "oninvalid",
+  "onprogress",
+  "onratechange",
+  "onseeked",
+  "onseeking",
+  "onstalled",
+  "onsuspend",
+  "ontimeupdate",
+  "onvolumechange",
+  "onwaiting",
+  "oncanplay",
+  "oncanplaythrough",
+  "ondurationchange",
+  "onemptied",
+  "onended",
+  "onloadeddata",
+  "onloadedmetadata",
+  "onloadstart",
+  "onplay",
+  "onplaying",
+  "onpause",
+  "srcdoc",
+  "formaction",
+  "action",
+  "href",
+  "src",
+  "data",
+  "codebase",
+  "classid",
 ]);
 
 _registerCommand("dom_set_attr", (args) => {
@@ -157,13 +226,17 @@ _registerCommand("dom_set_attr", (args) => {
   if (!el) return;
   const attrName = String(args.name).toLowerCase().trim();
   if (_BLOCKED_ATTRS.has(attrName)) {
-    console.warn(`[Dars:Security] Blocked attempt to set dangerous attribute: "${attrName}"`);
+    console.warn(
+      `[Dars:Security] Blocked attempt to set dangerous attribute: "${attrName}"`,
+    );
     return;
   }
   // Block javascript: protocol in any remaining attribute value
   const val = String(args.value);
   if (/^\s*javascript\s*:/i.test(val)) {
-    console.warn(`[Dars:Security] Blocked javascript: URI in attribute "${attrName}"`);
+    console.warn(
+      `[Dars:Security] Blocked javascript: URI in attribute "${attrName}"`,
+    );
     return;
   }
   el.setAttribute(attrName, val);
@@ -306,7 +379,9 @@ _registerCommand("fetch", async (args, ctx) => {
     // When backendUrl is "/" or empty, keep the URL as-is (same-origin).
     let fetchUrl = args.url;
     if (fetchUrl && !/^https?:\/\//i.test(fetchUrl)) {
-      const base = (window.__DARS_SPA_CONFIG__ && window.__DARS_SPA_CONFIG__.backendUrl) || "";
+      const base =
+        (window.__DARS_SPA_CONFIG__ && window.__DARS_SPA_CONFIG__.backendUrl) ||
+        "";
       if (base && base !== "/") fetchUrl = base.replace(/\/$/, "") + fetchUrl;
     }
     const resp = await fetch(fetchUrl, args.options || {});
@@ -370,7 +445,8 @@ _registerCommand("transform", async (args, ctx) => {
   if (args.method === "upper") return String(input).toUpperCase();
   if (args.method === "lower") return String(input).toLowerCase();
   if (args.method === "trim") return String(input == null ? "" : input).trim();
-  if (args.method === "length") return String(input == null ? "" : input).trim().length;
+  if (args.method === "length")
+    return String(input == null ? "" : input).trim().length;
   if (args.method === "is_email") {
     const s = String(input == null ? "" : input).trim();
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
@@ -378,7 +454,9 @@ _registerCommand("transform", async (args, ctx) => {
   if (args.method === "test_pattern") {
     try {
       return new RegExp(args.pattern).test(String(input == null ? "" : input));
-    } catch (_) { return false; }
+    } catch (_) {
+      return false;
+    }
   }
   if (args.method === "json_stringify") {
     // Return the object itself — network_request will JSON.stringify it
@@ -391,22 +469,32 @@ _registerCommand("transform", async (args, ctx) => {
   if (args.method === "tasks_to_html") {
     try {
       const data = typeof input === "string" ? JSON.parse(input) : input;
-      const tasks = Array.isArray(data) ? data : (data && data.tasks ? data.tasks : []);
-      if (!tasks.length) return '<p class="text-gray-400 text-sm p-2">No tasks yet.</p>';
-      return tasks.map(t => {
-        // Safely extract title — handle string, number, or nested object
-        let title = "";
-        if (t && t.title !== undefined && t.title !== null) {
-          title = typeof t.title === "object" ? JSON.stringify(t.title) : String(t.title);
-        }
-        const safeTitle = _sanitize(title);
-        const done = t && t.done;
-        const id = t && t.id ? t.id : "";
-        return `<div class="flex items-center gap-2 p-2 border rounded mb-1 bg-white">
-          <span class="flex-1 ${done ? 'line-through text-gray-400' : ''}">${safeTitle || '<em class="text-gray-300">untitled</em>'}</span>
+      const tasks = Array.isArray(data)
+        ? data
+        : data && data.tasks
+          ? data.tasks
+          : [];
+      if (!tasks.length)
+        return '<p class="text-gray-400 text-sm p-2">No tasks yet.</p>';
+      return tasks
+        .map((t) => {
+          // Safely extract title — handle string, number, or nested object
+          let title = "";
+          if (t && t.title !== undefined && t.title !== null) {
+            title =
+              typeof t.title === "object"
+                ? JSON.stringify(t.title)
+                : String(t.title);
+          }
+          const safeTitle = _sanitize(title);
+          const done = t && t.done;
+          const id = t && t.id ? t.id : "";
+          return `<div class="flex items-center gap-2 p-2 border rounded mb-1 bg-white">
+          <span class="flex-1 ${done ? "line-through text-gray-400" : ""}">${safeTitle || '<em class="text-gray-300">untitled</em>'}</span>
           <span class="text-xs text-gray-400">#${id}</span>
         </div>`;
-      }).join("");
+        })
+        .join("");
     } catch (e) {
       return `<p class="text-red-400 text-sm">Error rendering tasks: ${e.message}</p>`;
     }
@@ -537,7 +625,10 @@ _registerCommand("vref_set", async (args, ctx) => {
  */
 _registerCommand("storage_get_to_vref", async (args, ctx) => {
   const val = localStorage.getItem(args.storage_key);
-  return dispatch({ op: "vref_update", args: { selector: args.selector, value: val } }, ctx);
+  return dispatch(
+    { op: "vref_update", args: { selector: args.selector, value: val } },
+    ctx,
+  );
 });
 
 /**
@@ -589,11 +680,17 @@ _registerCommand("network_request", async (args, ctx) => {
 
   // Set loading state
   if (loading_selector) {
-    dispatch({ op: "vref_update", args: { selector: loading_selector, value: true } }, ctx);
+    dispatch(
+      { op: "vref_update", args: { selector: loading_selector, value: true } },
+      ctx,
+    );
   }
 
   try {
-    const fetchConfig = { method: method.toUpperCase(), headers: { ...headers } };
+    const fetchConfig = {
+      method: method.toUpperCase(),
+      headers: { ...headers },
+    };
 
     // Inject auth token if present
     const token = localStorage.getItem("dars_auth_token");
@@ -624,10 +721,22 @@ _registerCommand("network_request", async (args, ctx) => {
       localStorage.removeItem("dars_auth_token");
       const errMsg = "Unauthorized (401)";
       if (loading_selector) {
-        dispatch({ op: "vref_update", args: { selector: loading_selector, value: false } }, ctx);
+        dispatch(
+          {
+            op: "vref_update",
+            args: { selector: loading_selector, value: false },
+          },
+          ctx,
+        );
       }
       if (error_selector) {
-        dispatch({ op: "vref_update", args: { selector: error_selector, value: errMsg } }, ctx);
+        dispatch(
+          {
+            op: "vref_update",
+            args: { selector: error_selector, value: errMsg },
+          },
+          ctx,
+        );
       }
       if (on_error) dispatch(on_error, { ...ctx, error: errMsg });
       return;
@@ -646,20 +755,40 @@ _registerCommand("network_request", async (args, ctx) => {
     }
 
     if (loading_selector) {
-      dispatch({ op: "vref_update", args: { selector: loading_selector, value: false } }, ctx);
+      dispatch(
+        {
+          op: "vref_update",
+          args: { selector: loading_selector, value: false },
+        },
+        ctx,
+      );
     }
     if (data_selector) {
-      dispatch({ op: "vref_update", args: { selector: data_selector, value: data } }, ctx);
+      dispatch(
+        { op: "vref_update", args: { selector: data_selector, value: data } },
+        ctx,
+      );
     }
     if (on_success) dispatch(on_success, { ...ctx, response: data });
-
   } catch (e) {
     const errMsg = e && e.message ? e.message : String(e);
     if (loading_selector) {
-      dispatch({ op: "vref_update", args: { selector: loading_selector, value: false } }, ctx);
+      dispatch(
+        {
+          op: "vref_update",
+          args: { selector: loading_selector, value: false },
+        },
+        ctx,
+      );
     }
     if (error_selector) {
-      dispatch({ op: "vref_update", args: { selector: error_selector, value: errMsg } }, ctx);
+      dispatch(
+        {
+          op: "vref_update",
+          args: { selector: error_selector, value: errMsg },
+        },
+        ctx,
+      );
     }
     if (on_error) dispatch(on_error, { ...ctx, error: errMsg });
   }
@@ -711,19 +840,21 @@ _registerCommand("render_tasks", (args, ctx) => {
   if (!el) return;
   try {
     const data = ctx && ctx.response ? ctx.response : {};
-    const tasks = Array.isArray(data) ? data : (data.tasks || []);
+    const tasks = Array.isArray(data) ? data : data.tasks || [];
     if (!tasks.length) {
       el.innerHTML = '<p class="text-gray-400 text-sm p-2">No tasks yet.</p>';
       return;
     }
-    el.innerHTML = tasks.map(t => {
-      const title = _sanitize(String(t.title || ""));
-      const done = t.done ? "line-through text-gray-400" : "";
-      return `<div class="flex items-center gap-2 p-2 border rounded mb-1 bg-white shadow-sm">
+    el.innerHTML = tasks
+      .map((t) => {
+        const title = _sanitize(String(t.title || ""));
+        const done = t.done ? "line-through text-gray-400" : "";
+        return `<div class="flex items-center gap-2 p-2 border rounded mb-1 bg-white shadow-sm">
         <span class="flex-1 ${done}">${title || "<em class='text-gray-300'>untitled</em>"}</span>
         <span class="text-xs text-gray-400 ml-2">#${t.id || ""}</span>
       </div>`;
-    }).join("");
+      })
+      .join("");
   } catch (e) {
     el.innerHTML = `<p class="text-red-400 text-sm p-2">Error: ${e.message}</p>`;
   }
@@ -743,7 +874,10 @@ if (_origVrefUpdate) {
         try {
           const containerSel = container.getAttribute("data-dap-each");
           if (containerSel === sel && container.id) {
-            await dispatch({ op: "dom_each_render", args: { id: container.id } }, ctx);
+            await dispatch(
+              { op: "dom_each_render", args: { id: container.id } },
+              ctx,
+            );
           }
         } catch (_) {}
       }
@@ -819,7 +953,10 @@ _registerCommand("dom_each_render", async (args, ctx) => {
   if (items && !Array.isArray(items) && typeof items === "object") {
     const keys = ["tasks", "items", "data", "results", "list", "rows"];
     for (const k of keys) {
-      if (Array.isArray(items[k])) { items = items[k]; break; }
+      if (Array.isArray(items[k])) {
+        items = items[k];
+        break;
+      }
     }
   }
 
@@ -837,49 +974,72 @@ _registerCommand("dom_each_render", async (args, ctx) => {
 
   if (!template) {
     // Fallback: plain text rendering
-    container.innerHTML = items.map(item => {
-      const text = _sanitize(String(
-        item && typeof item === "object"
-          ? (item.title ?? item.name ?? item.label ?? item.value ?? item.text ?? JSON.stringify(item))
-          : item
-      ));
-      return `<div>${text}</div>`;
-    }).join("");
+    container.innerHTML = items
+      .map((item) => {
+        const text = _sanitize(
+          String(
+            item && typeof item === "object"
+              ? (item.title ??
+                  item.name ??
+                  item.label ??
+                  item.value ??
+                  item.text ??
+                  JSON.stringify(item))
+              : item,
+          ),
+        );
+        return `<div>${text}</div>`;
+      })
+      .join("");
     return;
   }
 
   // Render each item by substituting placeholders in the template
-  const rendered = items.map(item => {
-    if (item === null || item === undefined) return "";
-    let html = template;
+  const rendered = items
+    .map((item) => {
+      if (item === null || item === undefined) return "";
+      let html = template;
 
-    if (typeof item === "object") {
-      // Normalize empty/unknown title values before substitution
-      if (item.title !== undefined) {
-        const t = String(item.title || "").trim();
-        item = { ...item, title: (t === "" || t.toLowerCase() === "unknown" || t.toLowerCase() === "null" || t.toLowerCase() === "none") ? "Unknown" : t };
+      if (typeof item === "object") {
+        // Normalize empty/unknown title values before substitution
+        if (item.title !== undefined) {
+          const t = String(item.title || "").trim();
+          item = {
+            ...item,
+            title:
+              t === "" ||
+              t.toLowerCase() === "unknown" ||
+              t.toLowerCase() === "null" ||
+              t.toLowerCase() === "none"
+                ? "Unknown"
+                : t,
+          };
+        }
+        // Inject a done_class placeholder value based on the done field
+        const doneClass = item.done ? "line-through text-gray-400" : "";
+        item = { ...item, done_class: doneClass };
+
+        // Replace __item_<field>__ with the sanitized field value
+        for (const [key, val] of Object.entries(item)) {
+          const placeholder = `__item_${key}__`;
+          // Don't sanitize class names — they're safe strings we control
+          const safeVal =
+            key === "done_class"
+              ? String(val)
+              : _sanitize(String(val == null ? "" : val));
+          html = html.split(placeholder).join(safeVal);
+        }
+      } else {
+        // Scalar item — replace generic __item_value__ placeholder
+        const safeVal = _sanitize(String(item));
+        html = html.split("__item_value__").join(safeVal);
       }
-      // Inject a done_class placeholder value based on the done field
-      const doneClass = item.done ? "line-through text-gray-400" : "";
-      item = { ...item, done_class: doneClass };
 
-      // Replace __item_<field>__ with the sanitized field value
-      for (const [key, val] of Object.entries(item)) {
-        const placeholder = `__item_${key}__`;
-        // Don't sanitize class names — they're safe strings we control
-        const safeVal = key === "done_class" ? String(val) : _sanitize(String(val == null ? "" : val));
-        html = html.split(placeholder).join(safeVal);
-      }
-    } else {
-      // Scalar item — replace generic __item_value__ placeholder
-      const safeVal = _sanitize(String(item));
-      html = html.split("__item_value__").join(safeVal);
-    }
-
-    // Remove any unreplaced sentinel placeholders
-    html = html.replace(/__item_[a-zA-Z0-9_]+__/g, "");
-    return html;
-  }).join("");
+      // Remove any unreplaced sentinel placeholders
+      html = html.replace(/__item_[a-zA-Z0-9_]+__/g, "");
+      return html;
+    })
+    .join("");
 
   container.innerHTML = rendered;
 });

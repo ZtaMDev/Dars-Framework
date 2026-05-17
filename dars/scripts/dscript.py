@@ -171,6 +171,13 @@ def compile_val(v, is_async=False):
             return f"String({sub}).toLowerCase()"
         elif method == 'trim':
             return f"String({sub}).trim()"
+        elif method == 'length':
+            return f"String({sub} || '').trim().length"
+        elif method == 'is_email':
+            return f"/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(String({sub} || '').trim())"
+        elif method == 'test_pattern':
+            pat = json.dumps(args.get('pattern', ''))
+            return f"(function() {{ try {{ return new RegExp({pat}).test(String({sub} || '')); }} catch(_) {{ return false; }} }})()"
         elif method == 'validate_operator':
             ops = json.dumps(args.get('valid_ops', ['+', '-', '*', '/']), default=_ser)
             return f"(({ops}).includes({sub}) ? {sub} : '+')"
@@ -179,7 +186,11 @@ def compile_val(v, is_async=False):
     elif op == 'bool_expr':
         left = compile_val(args.get('left'), is_async=is_async)
         right = compile_val(args.get('right'), is_async=is_async)
-        op_map = {'==': '==', '===': '===', '!=': '!=', '!==': '!==', '>': '>', '<': '<', '>=': '>=', '<=': '<='}
+        op_map = {
+            '==': '==', '===': '===', '!=': '!=', '!==': '!==',
+            '>': '>', '<': '<', '>=': '>=', '<=': '<=',
+            '&&': '&&', '||': '||'
+        }
         js_op = op_map.get(args.get('operator'), '==')
         return f"({left} {js_op} {right})"
     

@@ -514,7 +514,7 @@ def getValue(input_id: str, target_id: str) -> RawJS:
     return RawJS(code=Action.dom_set_text(id=target_id, text=RawJS(f"document.getElementById('{input_id}').value")))
 
 
-def clearInput(input_id: str) -> RawJS:
+def clearInput(input_id: str) -> dScript:
     """
     Clear the value of an input field and trigger the 'input' event.
     
@@ -522,14 +522,14 @@ def clearInput(input_id: str) -> RawJS:
         input_id (str): The ID of the input or textarea.
         
     Returns:
-        RawJS: The compiled `input_clear` action.
+        dScript: The compiled `input_clear` action.
         
     Example:
         ```python
         Button("Clear Search", on_click=clearInput("search_box"))
         ```
     """
-    return RawJS(code=Action.input_clear(input_id))
+    return dScript(data={"op": "input_clear", "args": {"id": input_id}})
 
 
 # ============= Storage Utilities =============
