@@ -3332,6 +3332,7 @@ audio.dars-audio {
         
         vref_attrs = {}
         initial_values = {}
+        vref_class_selectors = []  # CSS class names from setVRef selectors (e.g. ".value-stuff" -> "value-stuff")
         
         # Helper to check if a value is a VRef object or marker
         def check_vref(val):
@@ -3448,12 +3449,17 @@ audio.dars-audio {
                  if vref_val:
                      initial_values[prop] = vref_val.value
                      vref_attrs['data-vref-value'] = str(vref_val)
+                     # Collect class selectors so render methods can inject them into class_attr.
+                     # Stored separately (not in vref_attrs) to avoid leaking as HTML attributes.
+                     sel = getattr(vref_val, 'selector', None)
+                     if isinstance(sel, str) and sel.startswith('.'):
+                         vref_class_selectors.append(sel[1:])  # strip leading '.'
 
         if bindings:
             # Join multiple bindings with space
             vref_attrs['data-vref'] = " ".join(bindings)
             
-        return {'attrs': vref_attrs, 'initial_values': initial_values}
+        return {'attrs': vref_attrs, 'initial_values': initial_values, 'vref_class_selectors': vref_class_selectors}
 
 
     
@@ -4198,7 +4204,6 @@ audio.dars-audio {
     def render_text(self, text: Text) -> str:
         """Renderiza un componente Text"""
         component_id = self.get_component_id(text, prefix="text")
-        class_attr = f'class="dars-text {text.class_name or ""}"'
         style_attr = f'style="{self.render_styles(text.style)}"' if text.style else ""
         
         # Process useValue props FIRST (non-reactive initial values)
@@ -4224,6 +4229,16 @@ audio.dars-audio {
         vref_info = self._process_vref_props(text)
         vref_attrs = vref_info['attrs']
         vref_initial = vref_info['initial_values']
+
+        # Inject VRef class selectors (e.g. ".value-stuff" -> "value-stuff") into class_attr
+        # so that updateVRef(".value-stuff") can find this element via querySelectorAll
+        extra_classes = vref_info.get('vref_class_selectors', [])
+        base_classes = (text.class_name or "").split()
+        for cls in extra_classes:
+            if cls not in base_classes:
+                base_classes.append(cls)
+        class_attr = f'class="dars-text {" ".join(base_classes)}"'
+
         vref_str = ' '.join([f'{k}="{v}"' for k, v in vref_attrs.items()])
         
         # Use VRef initial value if available
