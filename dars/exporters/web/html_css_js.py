@@ -421,13 +421,40 @@ class HTMLCSSJSExporter(Exporter):
                     
                     # Collect bindings by traversing component tree (without rendering)
                     self._collect_bindings_from_tree(page_app.root)
-                    
+
+                    # Capture useFetch auto-run triggers for this page.
+                    # Strategy: collect all registered triggers, then filter to those
+                    # whose VRef selectors appear in this page's VRef registry.
+                    try:
+                        from dars.hooks.use_fetch import _get_auto_fetch_registry
+                        from dars.hooks.set_vref import _VREF_VALUES_REGISTRY
+                        all_triggers = _get_auto_fetch_registry()
+                        # Each trigger's network_request args contain loading/data/error selectors.
+                        # Match triggers whose selectors are in the current VRef registry.
+                        _page_auto_fetches = []
+                        for trigger in all_triggers:
+                            try:
+                                args = trigger.data.get('args', {}) if trigger.data else {}
+                                sel = args.get('loading_selector', '')
+                                # Check if this selector's VRef was created for this page
+                                # by seeing if it exists in the registry
+                                if sel and any(
+                                    v.selector == sel
+                                    for v in _VREF_VALUES_REGISTRY.values()
+                                ):
+                                    _page_auto_fetches.append(trigger)
+                            except Exception:
+                                pass
+                    except Exception:
+                        _page_auto_fetches = []
+
                     # Pre-render components to populate FC bindings (useDynamic, etc.)
                     # This is critical so that _generate_reactive_bindings_js has data
                     self.render_component(page_app.root)
-                    
+
                     # Generar runtime JS con eventos
-                    runtime_js = self.generate_javascript(page_app, page_app.root, page_events_map)
+                    runtime_js = self.generate_javascript(page_app, page_app.root, page_events_map,
+                                                          _auto_fetches=_page_auto_fetches)
                     
                     # Scripts específicos de esta página
                     page_scripts = []
@@ -435,13 +462,19 @@ class HTMLCSSJSExporter(Exporter):
                     # Scripts globales de la app
                     page_scripts.extend(getattr(app, 'scripts', []))
                     
-                    # Scripts específicos de esta página
+                    # Scripts específicos de esta página (Page dataclass)
                     if hasattr(page, 'scripts'):
                         page_scripts.extend(page.scripts)
                     
                     # Scripts de componentes dentro de la página
                     if hasattr(page_app.root, 'get_scripts'):
                         page_scripts.extend(page_app.root.get_scripts())
+
+                    # Scripts attached directly to the Page component root
+                    # (e.g. useFetch trigger added via page.scripts.append())
+                    root_scripts = getattr(page_app.root, 'scripts', None)
+                    if root_scripts:
+                        page_scripts.extend(root_scripts)
                     
                     # Collect scripts from Markdown components (populated during render_component)
                     md_scripts = getattr(self, '_markdown_scripts', {}).get(slug, [])
@@ -596,10 +629,18 @@ class HTMLCSSJSExporter(Exporter):
 
                 # Pre-render components to populate bindings (useDynamic, etc.)
                 # This is critical so that _generate_reactive_bindings_js has data
+                try:
+                    from dars.hooks.use_fetch import _get_auto_fetch_registry, _clear_auto_fetch_registry
+                    _page_auto_fetches = list(_get_auto_fetch_registry())
+                    _clear_auto_fetch_registry()
+                except Exception:
+                    _page_auto_fetches = []
+
                 self.render_component(page_app.root)
 
                 # Generar runtime JS con eventos
-                runtime_js = self.generate_javascript(page_app, page_app.root, page_events_map)
+                runtime_js = self.generate_javascript(page_app, page_app.root, page_events_map,
+                                                      _auto_fetches=_page_auto_fetches)
 
                 user_scripts = list(getattr(app, 'scripts', []))
                 # Incluir scripts automáticos generados por helpers de escritorio
@@ -1208,10 +1249,12 @@ self.addEventListener('fetch', event => {
         md_html_assets = getattr(self, '_markdown_html_assets', {}).get(current_page_id, [])
         markdown_head_assets = "".join(md_html_assets)
 
+        base_tag = '        <base href="/">\n' if is_hybrid_index else ''
+        
         html_template = f"""<!DOCTYPE html>
     <html lang="{app.language}">
     <head>
-        <meta charset="{app.config.get('charset', 'UTF-8')}">
+{base_tag}        <meta charset="{app.config.get('charset', 'UTF-8')}">
         {anti_flash_script}
         {final_meta_tags}
         <title>{page_title}</title>
@@ -2546,7 +2589,7 @@ audio.dars-audio {
             for child in component.children:
                 self._collect_component_types(child, types_set)
 
-    def generate_javascript(self, app: App, page_root: Component, events_map: Dict[str, Dict[str, Any]] = None, ssr_mode: bool = False) -> str:
+    def generate_javascript(self, app: App, page_root: Component, events_map: Dict[str, Dict[str, Any]] = None, ssr_mode: bool = False, _auto_fetches: list = None) -> str:
         """Genera un runtime modular nativo sin engine de VDOM."""
         
         # Convertir events_map a código JS usando native addEventListener
@@ -2576,6 +2619,40 @@ audio.dars-audio {
         # Collect used component types for conditional logic injection
         used_types = set()
         self._collect_component_types(page_root, used_types)
+
+        # --- Backend URL for synchronous __DARS_SPA_CONFIG__ injection ---
+        import json as _json
+        # In production (bundle=True / DarsEnv.dev=False), default to same-origin ("/").
+        # In development, default to localhost:3000 for the backend dev server.
+        from dars.env import DarsEnv as _DarsEnv
+        _default_backend = 'http://localhost:3000' if _DarsEnv.dev else '/'
+        _backend_url = getattr(app, 'ssr_url', None) or _default_backend
+        if hasattr(self, '_cached_spa_config_light') and self._cached_spa_config_light:
+            _backend_url = self._cached_spa_config_light.get('backendUrl', _backend_url)
+        backend_url_js = _json.dumps({"backendUrl": _backend_url})
+
+        # --- useFetch auto-run scripts ---
+        auto_fetch_js = ""
+        try:
+            # Use the per-page snapshot passed in by the export loop.
+            # Fall back to the global registry only when called directly (e.g. SSR).
+            if _auto_fetches is None:
+                from dars.hooks.use_fetch import _get_auto_fetch_registry, _clear_auto_fetch_registry
+                _auto_fetches = list(_get_auto_fetch_registry())
+                _clear_auto_fetch_registry()
+            if _auto_fetches:
+                fetch_lines = []
+                for trigger in _auto_fetches:
+                    try:
+                        code = trigger.get_code()
+                        if code and code.strip():
+                            fetch_lines.append(f"// useFetch auto-run\n{code}")
+                    except Exception:
+                        pass
+                if fetch_lines:
+                    auto_fetch_js = "\n".join(fetch_lines)
+        except Exception:
+            pass
         
         # Conditional Default Logic
         default_logic_js = ""
@@ -2659,14 +2736,20 @@ audio.dars-audio {
 
     function _darsInit(){{
         // Enable inline JS execution for compile-time generated code only.
-        // This flag is set to true here (within the trusted compiled bundle)
-        // and must NOT be set to true from any external/runtime source.
         (async () => {{
             try {{
                 const dap = await import('./lib/dap.js');
                 if (dap.__darsConfig) dap.__darsConfig.allowInlineJS = true;
             }} catch(_) {{}}
         }})();
+        // Ensure __DARS_SPA_CONFIG__ is available synchronously so that
+        // network_request can resolve relative URLs against backendUrl
+        // before the router finishes async initialisation.
+        if (!window.__DARS_SPA_CONFIG__) {{
+            window.__DARS_SPA_CONFIG__ = {backend_url_js};
+        }} else if (!window.__DARS_SPA_CONFIG__.backendUrl) {{
+            window.__DARS_SPA_CONFIG__.backendUrl = {backend_url_js}.backendUrl;
+        }}
         initializeStates();
         initializeEvents();
         
@@ -2674,6 +2757,14 @@ audio.dars-audio {
         
         {vref_bindings_js}
         {spa_init_js}
+        {auto_fetch_js}
+        // Initialize Show/If conditional elements after VRef registry is ready
+        (async () => {{
+            try {{
+                const dap = await import('./lib/dap.js');
+                if (dap._initConditionalElements) await dap._initConditionalElements({{}});
+            }} catch(_) {{}}
+        }})();
     }}
 
     if(document.readyState === 'complete' || document.readyState === 'interactive'){{
@@ -3992,11 +4083,15 @@ audio.dars-audio {
         # Lista de componentes built-in de Dars que NO deben usar su propio metodo render()
         # (salvo casos especiales como Video/Audio que tienen un render() específico pero
         # se manejan de forma explícita más abajo).
+        from dars.components.basic.if_component import If_Component
+        from dars.components.basic.show_component import Show_Component
+        from dars.components.basic.each_component import Each_Component
         builtin_components = [
             Page, GridLayout, FlexLayout, Text, Button, Input, Container, Image, Link,
             Textarea, Card, Modal, Navbar, Checkbox, RadioButton, Select, Slider,
             DatePicker, Table, Tabs, Accordion, ProgressBar, Spinner, Tooltip, Markdown, Section,
             Video, Audio, FileUpload,
+            Show_Component, Each_Component,
         ]
         
         # Verificar si es un componente personalizado (no built-in)
@@ -4073,6 +4168,13 @@ audio.dars-audio {
         elif isinstance(component, Markdown):
             return self.render_markdown(component)
         else:
+            # Check for If/Show/Each rendering components
+            from dars.components.basic.show_component import Show_Component
+            from dars.components.basic.each_component import Each_Component
+            if isinstance(component, Show_Component):
+                return component.render(self)
+            elif isinstance(component, Each_Component):
+                return component.render(self)
             # Componente genérico
             return self.render_generic_component(component)
 
@@ -4307,57 +4409,93 @@ audio.dars-audio {
         component_id = self.get_component_id(file_upload, prefix="file_upload")
         class_attr = f'class="dars-file-upload {file_upload.class_name or ""}"'
         style_attr = f'style="{self.render_styles(file_upload.style)}"' if file_upload.style else ""
-        
-        # Process useValue props FIRST
+
+        # Process useValue / dynamic / VRef props
         self._process_value_props(file_upload)
-        
-        # Then process dynamic props
         dynamic_info = self._process_dynamic_props(file_upload)
-        
         if dynamic_info['bindings']:
             if not hasattr(self, '_built_in_bindings'):
                 self._built_in_bindings = []
             self._built_in_bindings.extend(dynamic_info['bindings'])
 
-        # Process VRef props
         vref_info = self._process_vref_props(file_upload)
         vref_attrs = vref_info['attrs']
         vref_str = ' '.join([f'{k}="{v}"' for k, v in vref_attrs.items()])
-        
-        # Attributes
-        accept_val = dynamic_info['initial_values'].get('accept', file_upload.accept)
-        if hasattr(accept_val, 'marker'): accept_val = ""
+
+        # Standard attributes
+        # accepted_types takes priority over legacy accept for the HTML accept attr
+        accepted_types = getattr(file_upload, 'accepted_types', []) or []
+        accept_val = (
+            ",".join(accepted_types)
+            if accepted_types
+            else (dynamic_info['initial_values'].get('accept', file_upload.accept) or "")
+        )
         accept_attr = f'accept="{accept_val}"' if accept_val else ""
-        
+
         multiple_val = dynamic_info['initial_values'].get('multiple', file_upload.multiple)
-        if hasattr(multiple_val, 'marker'): multiple_val = False
         multiple_attr = "multiple" if multiple_val else ""
-        
+
         disabled_val = dynamic_info['initial_values'].get('disabled', file_upload.disabled)
-        if hasattr(disabled_val, 'marker'): disabled_val = False
         disabled_attr = "disabled" if disabled_val else ""
-        
+
         required_val = dynamic_info['initial_values'].get('required', file_upload.required)
-        if hasattr(required_val, 'marker'): required_val = False
         required_attr = "required" if required_val else ""
 
-        attrs = [accept_attr, multiple_attr, disabled_attr, required_attr]
-        attrs_str = " ".join(attr for attr in attrs if attr)
-        
-        # We render a hidden input for functionality and a label/container for styling
-        # The container has the main ID and class for layout/events
-        # The input has component_id + '_input'
-        
+        attrs_str = " ".join(a for a in [accept_attr, multiple_attr, disabled_attr, required_attr] if a)
+
+        # Upload pipeline — build onchange handler
+        upload_url = getattr(file_upload, 'upload_url', '/api/upload') or '/api/upload'
+        max_size_bytes = getattr(file_upload, 'max_size_bytes', None)
+        on_upload_complete = getattr(file_upload, 'on_upload_complete', None)
+        on_upload_error = getattr(file_upload, 'on_upload_error', None)
+
+        # Compile DAP callbacks to JS code strings
+        def _to_js(action) -> str:
+            if action is None:
+                return ""
+            if hasattr(action, 'get_code'):
+                return action.get_code() or ""
+            if hasattr(action, 'code') and isinstance(action.code, str):
+                return action.code
+            return ""
+
+        success_js = _to_js(on_upload_complete)
+        error_js = _to_js(on_upload_error)
+
+        # Build the onchange JS for the input element
+        size_check = ""
+        if max_size_bytes:
+            size_check = (
+                f"if(this.files[0] && this.files[0].size > {max_size_bytes}){{"
+                f"  {error_js or 'console.warn(\"[Dars] File too large\")'} ; return; }}"
+            )
+
+        upload_js = ""
+        if upload_url:
+            upload_js = f"""
+var _fd = new FormData();
+_fd.append('file', this.files[0]);
+fetch({repr(upload_url)}, {{method:'POST', body:_fd}})
+  .then(function(r){{ return r.json(); }})
+  .then(function(data){{ {success_js} }})
+  .catch(function(err){{ {error_js or 'console.error("[Dars] Upload error", err)'} }});
+""".strip()
+
+        name_update_js = (
+            f"document.getElementById('{component_id}_name').textContent = "
+            f"this.files.length > 1 ? this.files.length + ' files' : "
+            f"(this.files[0] ? this.files[0].name : '');"
+        )
+
+        onchange_js = f"{size_check} {name_update_js} {upload_js}".strip()
+
         label_html = f'<label for="{component_id}_input" class="dars-file-upload-label">{file_upload.label}</label>'
         name_span = f'<span class="dars-file-upload-name" id="{component_id}_name"></span>'
-        
-        # JS to update filename
-        js_handler = f"document.getElementById('{component_id}_name').textContent = this.files.length > 1 ? this.files.length + ' files' : (this.files[0] ? this.files[0].name : '');"
-        
+
         return (
             f'<div id="{component_id}" {class_attr} {style_attr} {vref_str} data-type="file-upload">'
             f'  <input type="file" id="{component_id}_input" {attrs_str} '
-            f'   style="display:none;" onchange="{js_handler}" />'
+            f'   style="display:none;" onchange="{onchange_js}" />'
             f'  {label_html}'
             f'  {name_span}'
             f'</div>'
@@ -5716,18 +5854,21 @@ audio.dars-audio {
         """Export SPA with client-side routing."""
         import json, copy
         from dars.components.basic.container import Container
+        from dars.env import DarsEnv as _DarsEnv
+        _default_backend = 'http://localhost:3000' if _DarsEnv.dev else '/'
+        _spa_backend_url = getattr(app, 'ssr_url', None) or _default_backend
         spa_config = {
             'routes': [], 
             'index': None, 
             'notFound': None,
-            'backendUrl': getattr(app, 'ssr_url', 'http://localhost:3000') or 'http://localhost:3000'
+            'backendUrl': _spa_backend_url
         }
         # Light config for cross-page navigation (only paths/names)
         spa_config_light = {
             'routes': [],
             'index': None,
             'notFoundPath': None,
-            'backendUrl': getattr(app, 'ssr_url', 'http://localhost:3000') or 'http://localhost:3000'
+            'backendUrl': _spa_backend_url
         }
         for route_name, spa_route in app._spa_routes.items():
             self._current_page_id = route_name
@@ -5775,7 +5916,26 @@ audio.dars-audio {
             # Mark the app as part of a shell to avoid duplicate registration
             shell_app_runtime = copy.copy(route_app)
             shell_app_runtime._is_spa_shell = True
-            runtime_js = self.generate_javascript(shell_app_runtime, route_app.root, route_events_map, ssr_mode=is_ssr_route)
+
+            # Capture auto-fetch triggers for this SPA route from its root scripts
+            try:
+                from dars.hooks.use_fetch import _get_auto_fetch_registry
+                from dars.hooks.set_vref import _VREF_VALUES_REGISTRY
+                all_triggers = _get_auto_fetch_registry()
+                _spa_auto_fetches = []
+                for trigger in all_triggers:
+                    try:
+                        args = trigger.data.get('args', {}) if trigger.data else {}
+                        sel = args.get('loading_selector', '')
+                        if sel and any(v.selector == sel for v in _VREF_VALUES_REGISTRY.values()):
+                            _spa_auto_fetches.append(trigger)
+                    except Exception:
+                        pass
+            except Exception:
+                _spa_auto_fetches = []
+
+            runtime_js = self.generate_javascript(shell_app_runtime, route_app.root, route_events_map,
+                                                   ssr_mode=is_ssr_route, _auto_fetches=_spa_auto_fetches)
             
             # Generate VDOM JS content
             # Generate VDOM JS content using native compiler to support reactive props
@@ -5817,7 +5977,10 @@ audio.dars-audio {
 {combined_js}
 """
             self.write_file(os.path.join(output_path, app_js_filename), combined_all_js)
-            scripts_array = [f"/{app_js_filename}"]
+            # Load per-route scripts as ES modules so they respect the same execution
+            # order as dars.min.js (type="module" defer). This prevents the race condition
+            # where app_about.js runs before window.Dars is initialized from dars.min.js.
+            scripts_array = [{'src': f"/{app_js_filename}", 'module': True}]
             
             # Include external scripts (URLs) from Markdown and other sources
             if external_srcs:
@@ -6165,10 +6328,11 @@ audio.dars-audio {
             # For SSR routes, we might have actual HTML from a previous render
             vdom_literal = compile_val(index_route.get('vdom', {}))
             states_literal = compile_val(index_route.get('states', []))
+            idx_path = index_route.get('path', '/')
             hydration_scripts = f"""<script>
     window.__ROUTE_VDOM__ = {vdom_literal};
     window.__DARS_STATE__ = {states_literal};
-    window.__DARS_HYDRATED_PATH__ = "{spa_route.route}";
+    window.__DARS_HYDRATED_PATH__ = "{idx_path}";
 </script>"""
 
         # 3. Inject content and hydration
@@ -6218,6 +6382,9 @@ audio.dars-audio {
         
         if initial_meta_tags:
             spa_html = spa_html.replace('</head>', f'{initial_meta_tags}</head>')
+            
+        # Ensure all relative assets (app.js, styles.css) resolve to the root when on sub-routes
+        spa_html = spa_html.replace('<head>', '<head>\n  <base href="/">')
 
         # 4. Final Formatting
         try:

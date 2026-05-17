@@ -300,6 +300,46 @@ def compile_action(action):
     elif op == 'navigate':
         path = args.get('path', '/')
         return f"window.location.href = {json.dumps(path)};"
+    elif op == 'sequence':
+        # Compile a sequence of actions into sequential JS statements
+        actions_list = args if isinstance(args, list) else args.get('actions', [])
+        parts = []
+        for sub in actions_list:
+            if sub:
+                parts.append(compile_action(sub))
+        return "\n".join(parts)
+    elif op in ('vref_update', 'vref_set'):
+        selector = args.get('selector', '')
+        value = args.get('value')
+        value_js = compile_val(value, is_async=True)
+        return (
+            f"(async () => {{ try {{ const _dap = await import('./lib/dap.js'); "
+            f"await _dap.dispatch({{op:'vref_update',args:{{selector:{json.dumps(selector)},value:{value_js}}}}});"
+            f"}} catch(_e) {{}} }})();"
+        )
+    elif op == 'network_request':
+        action_json = json.dumps(action, ensure_ascii=False, default=str)
+        return (
+            f"(async () => {{ try {{ const _dap = await import('./lib/dap.js'); "
+            f"await _dap.dispatch({action_json}); }} catch(_e) {{ "
+            f"console.error('[Dars] network_request failed', _e); }} }})();"
+        )
+    elif op == 'dom_set_text':
+        eid = args.get('id', '')
+        text_expr = compile_val(args.get('text', ''), is_async=True)
+        return f"(function(){{ var _e = document.getElementById({json.dumps(eid)}); if(_e) _e.textContent = String({text_expr}); }})();"
+    elif op == 'conditional':
+        cond = compile_val(args.get('condition'), is_async=True)
+        on_true = compile_action(args['on_true']) if args.get('on_true') else ''
+        on_false = compile_action(args['on_false']) if args.get('on_false') else ''
+        return f"if ({cond}) {{ {on_true} }} else {{ {on_false} }}"
+    elif op == 'storage_set':
+        key = json.dumps(args.get('key', ''))
+        val_expr = compile_val(args.get('value', ''), is_async=True)
+        return f"localStorage.setItem({key}, String({val_expr}));"
+    elif op == 'storage_remove':
+        key = json.dumps(args.get('key', ''))
+        return f"localStorage.removeItem({key});"
     elif op == 'navigate_new':
         path = args.get('path', '/')
         return f"window.open({json.dumps(path)}, '_blank');"
@@ -336,9 +376,15 @@ def compile_action(action):
         id_expr = compile_val(args.get('id', ''), is_async=True)
         return f"if (window.DarsModal) window.DarsModal.hide({id_expr});"
     else:
-        # Fallback for unknown actions
+        # Generic DAP action — dispatch via dap.js
+        # Use async import to ensure dap.js is loaded before dispatching
         action_json = json.dumps(action, ensure_ascii=False, default=str)
-        return f"if (window.Dars && typeof window.Dars.dispatch === 'function') window.Dars.dispatch({action_json});"
+        return (
+            f"(async () => {{ try {{ const _dap = await import('./lib/dap.js'); "
+            f"await _dap.dispatch({action_json}); }} catch(_e) {{ "
+            f"if (window.Dars && typeof window.Dars.dispatch === 'function') "
+            f"window.Dars.dispatch({action_json}); }} }})();"
+        )
 
 class RawJS:
     """

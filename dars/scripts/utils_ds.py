@@ -1156,4 +1156,67 @@ def stagger(
     })
     return RawJS(
         code=f"if(window.DarsAnimation) window.DarsAnimation.stagger({json.dumps(ids)}, {json.dumps(keyframes)}, {opts});"
-    )
+    )
+
+
+
+# ============= Action Sequencing =============
+
+def runSequence(*actions) -> dScript:
+    """
+    Execute multiple dScript / RawJS actions in sequence.
+
+    Accepts any mix of :class:`~dars.scripts.dscript.dScript`,
+    :class:`~dars.scripts.dscript.RawJS`, or plain strings.
+
+    Args:
+        *actions: Actions to execute in order.
+
+    Returns:
+        :class:`~dars.scripts.dscript.dScript` encoding a DAP ``sequence``.
+
+    Example::
+
+        Button("Submit",
+               on_click=runSequence(
+                   updateVRef(".loading", True),
+                   fetch_trigger,
+               ))
+    """
+    action_dicts = []
+    for act in actions:
+        if act is None:
+            continue
+        if hasattr(act, 'get_action') and act.get_action():
+            action_dicts.append(act.get_action())
+        elif hasattr(act, 'data') and isinstance(act.data, dict):
+            action_dicts.append(act.data)
+        elif hasattr(act, 'code'):
+            action_dicts.append({"op": "inline", "args": {"code": act.code}})
+        elif isinstance(act, str):
+            action_dicts.append({"op": "inline", "args": {"code": act}})
+    return dScript(data={"op": "sequence", "args": {"actions": action_dicts}})
+
+
+# ============= HTML Content =============
+
+def setHtml(id: str, html: str) -> RawJS:
+    """
+    Set the inner HTML of a DOM element (sanitised by DOMPurify at runtime).
+
+    Args:
+        id: Target element ID.
+        html: HTML string to inject.
+
+    Returns:
+        :class:`~dars.scripts.dscript.RawJS`
+
+    Example::
+
+        Button("Load", on_click=setHtml("content", "<p>Hello</p>"))
+    """
+    import json
+    return RawJS(
+        code=f"(function(){{ var _e = document.getElementById({json.dumps(id)}); "
+             f"if(_e) _e.innerHTML = (window.DOMPurify ? window.DOMPurify.sanitize({json.dumps(html)}) : {json.dumps(html)}); }})();"
+    )

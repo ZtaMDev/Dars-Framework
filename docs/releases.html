@@ -970,13 +970,13 @@
     </div>
     <div class="dars-container dars-s-c59e376995" id="markdown-content-container">
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_0_1_1_0">
-      <h1 id="release-notes-v197">
-       Release Notes v1.9.7
+      <h1 id="release-notes-v198">
+       Release Notes v1.9.8
       </h1>
       <blockquote>
        <p>
         <strong>
-         Hybrid Stability, Anti-Flash System &amp; CLI UX Overhaul
+         Production-Grade Fullstack: useFetch, FormValidator, Each, JsonStore, UploadPipeline, SecurityHeaders &amp; .env Support
         </strong>
        </p>
       </blockquote>
@@ -988,6 +988,579 @@
 </code></pre>
       </div>
       <h2 id="whats-new">
+       What's New
+      </h2>
+      <h3 id="usefetch-declarative-data-fetching-hook">
+       <code>
+        useFetch
+       </code>
+       — Declarative Data Fetching Hook
+      </h3>
+      <p>
+       A new
+       <code>
+        useFetch
+       </code>
+       hook provides a fully Pythonic way to fetch data from APIs and bind the response to reactive VRefs — no JavaScript required.
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">trigger</span><span class="p">,</span> <span class="n">loading</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">error</span> <span class="o">=</span> <span class="n">useFetch</span><span class="p">(</span>
+    <span class="s2">"/api/tasks"</span><span class="p">,</span>
+    <span class="n">method</span><span class="o">=</span><span class="s2">"GET"</span><span class="p">,</span>
+    <span class="n">on_success</span><span class="o">=</span><span class="n">runSequence</span><span class="p">(</span>
+        <span class="n">updateVRef</span><span class="p">(</span><span class="s2">".loading"</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="n">updateVRefFromResponse</span><span class="p">(</span><span class="s2">".tasks-data"</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="n">on_error</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">".error"</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">page</span><span class="o">.</span><span class="n">add_script</span><span class="p">(</span><span class="n">trigger</span><span class="p">)</span>  <span class="c1"># auto-run on page load</span>
+</code></pre>
+      </div>
+      <ul>
+       <li>
+        Returns
+        <code>
+         (trigger_script, loading_vref, data_vref, error_vref)
+        </code>
+        — all pure Python objects
+       </li>
+       <li>
+        Integrates with
+        <code>
+         Show
+        </code>
+        ,
+        <code>
+         Each
+        </code>
+        , and
+        <code>
+         updateVRefFromResponse
+        </code>
+        for zero-boilerplate reactive UIs
+       </li>
+       <li>
+        Handles loading state, 401 interception, and error propagation automatically via the
+        <code>
+         network_request
+        </code>
+        DAP op
+       </li>
+      </ul>
+      <h3 id="updatevreffromresponse-store-fetch-response-into-vref">
+       <code>
+        updateVRefFromResponse
+       </code>
+       — Store Fetch Response into VRef
+      </h3>
+      <p>
+       New helper that stores the API response from a
+       <code>
+        useFetch
+       </code>
+       <code>
+        on_success
+       </code>
+       context directly into a VRef selector. Works seamlessly with
+       <code>
+        Each
+       </code>
+       for runtime list rendering.
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">on_success</span><span class="o">=</span><span class="n">runSequence</span><span class="p">(</span>
+    <span class="n">updateVRef</span><span class="p">(</span><span class="s2">".loading"</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+    <span class="n">updateVRefFromResponse</span><span class="p">(</span><span class="s2">".tasks-data"</span><span class="p">),</span>  <span class="c1"># stores ctx.response → VRef</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="each-runtime-list-rendering-from-vref">
+       <code>
+        Each
+       </code>
+       — Runtime List Rendering from VRef
+      </h3>
+      <p>
+       The
+       <code>
+        Each
+       </code>
+       component now fully supports runtime VRef items (e.g. from
+       <code>
+        useFetch
+       </code>
+       ). Pass a
+       <code>
+        VRefValue
+       </code>
+       as
+       <code>
+        items
+       </code>
+       and a render function — the exporter generates an HTML template at compile time, and the browser substitutes real item values at runtime.
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">Each</span><span class="p">(</span>
+    <span class="n">items</span><span class="o">=</span><span class="n">tasks_vref</span><span class="p">,</span>   <span class="c1"># VRefValue from setVRef([])</span>
+    <span class="n">render</span><span class="o">=</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">Container</span><span class="p">(</span>
+        <span class="n">Text</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"title"</span><span class="p">,</span> <span class="s2">"__item_title__"</span><span class="p">)),</span>
+        <span class="n">Text</span><span class="p">(</span><span class="sa">f</span><span class="s2">"#</span><span class="si">{</span><span class="n">t</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'id'</span><span class="p">,</span><span class="w"> </span><span class="s1">'__item_id__'</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">),</span>
+        <span class="n">style</span><span class="o">=</span><span class="s2">"flex items-center gap-2 p-2 border rounded bg-white"</span><span class="p">,</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <ul>
+       <li>
+        Compile-time: render function called with a sentinel dict to produce the HTML template
+       </li>
+       <li>
+        Runtime:
+        <code>
+         dom_each_render
+        </code>
+        substitutes
+        <code>
+         __item_&lt;field&gt;__
+        </code>
+        placeholders with real values
+       </li>
+       <li>
+        Automatically unwraps common API response shapes (
+        <code>
+         {tasks:[...]}
+        </code>
+        ,
+        <code>
+         {items:[...]}
+        </code>
+        ,
+        <code>
+         {data:[...]}
+        </code>
+        )
+       </li>
+       <li>
+        <code>
+         done_class
+        </code>
+        placeholder supported for conditional styling (e.g. strikethrough for completed items)
+       </li>
+      </ul>
+      <p>
+       <strong>
+        Fixed:
+       </strong>
+       <code>
+        VRefValue
+       </code>
+       objects passed as
+       <code>
+        items
+       </code>
+       no longer cause
+       <code>
+        TypeError: 'VRefValue' object is not iterable
+       </code>
+       at export time.
+      </p>
+      <h3 id="formvalidator-client-side-form-validation">
+       <code>
+        FormValidator
+       </code>
+       — Client-Side Form Validation
+      </h3>
+      <p>
+       Declarative form validation with dual client/server enforcement. Rules are declared once in Python and evaluated both server-side and client-side via DAP.
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">validator</span> <span class="o">=</span> <span class="n">FormValidator</span><span class="p">({</span>
+    <span class="s2">"title"</span><span class="p">:</span> <span class="p">[</span><span class="n">required</span><span class="p">(),</span> <span class="n">min_length</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">max_length</span><span class="p">(</span><span class="mi">100</span><span class="p">)],</span>
+    <span class="s2">"email"</span><span class="p">:</span> <span class="p">[</span><span class="n">required</span><span class="p">(),</span> <span class="n">email</span><span class="p">()],</span>
+<span class="p">})</span>
+
+<span class="c1"># validated_submit: validates first, only submits if all rules pass</span>
+<span class="n">submit_action</span> <span class="o">=</span> <span class="n">validator</span><span class="o">.</span><span class="n">validated_submit</span><span class="p">(</span>
+    <span class="n">url</span><span class="o">=</span><span class="s2">"/api/tasks"</span><span class="p">,</span>
+    <span class="n">form_data</span><span class="o">=</span><span class="n">collect_form</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">V</span><span class="p">(</span><span class="s2">"#title"</span><span class="p">)),</span>
+    <span class="n">on_success</span><span class="o">=</span><span class="n">runSequence</span><span class="p">(</span><span class="n">clearInput</span><span class="p">(</span><span class="s2">"title"</span><span class="p">),</span> <span class="n">fetch_trigger</span><span class="p">),</span>
+    <span class="n">on_error</span><span class="o">=</span><span class="n">setText</span><span class="p">(</span><span class="s2">"submit-error"</span><span class="p">,</span> <span class="s2">"Error submitting."</span><span class="p">),</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       <strong>
+        Available rules:
+       </strong>
+       <code>
+        required()
+       </code>
+       ,
+       <code>
+        min_length(n)
+       </code>
+       ,
+       <code>
+        max_length(n)
+       </code>
+       ,
+       <code>
+        pattern(regex)
+       </code>
+       ,
+       <code>
+        email()
+       </code>
+       ,
+       <code>
+        min_value(n)
+       </code>
+       ,
+       <code>
+        max_value(n)
+       </code>
+       ,
+       <code>
+        custom(fn)
+       </code>
+      </p>
+      <p>
+       <strong>
+        Fixed:
+       </strong>
+       <code>
+        validated_submit
+       </code>
+       now correctly blocks the network request when any validation rule fails. Previously, the submit fired unconditionally after validation.
+      </p>
+      <p>
+       <strong>
+        Fixed:
+       </strong>
+       <code>
+        conditional
+       </code>
+       DAP op now properly resolves DAP expressions (e.g.
+       <code>
+        bool_expr
+       </code>
+       ,
+       <code>
+        transform
+       </code>
+       ) as the condition — previously it only evaluated pre-resolved boolean values.
+      </p>
+      <p>
+       <strong>
+        Fixed:
+       </strong>
+       <code>
+        transform
+       </code>
+       DAP op now supports
+       <code>
+        length
+       </code>
+       ,
+       <code>
+        is_email
+       </code>
+       , and
+       <code>
+        test_pattern
+       </code>
+       methods needed by the validator runtime.
+      </p>
+      <h3 id="jsonstore-file-backed-key-value-store">
+       <code>
+        JsonStore
+       </code>
+       — File-Backed Key-Value Store
+      </h3>
+      <p>
+       Thread-safe, atomic-write JSON persistence for rapid prototyping and small-scale backends.
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">store</span> <span class="o">=</span> <span class="n">JsonStore</span><span class="p">(</span><span class="s2">"data.json"</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="p">{</span><span class="s2">"tasks"</span><span class="p">:</span> <span class="p">[]})</span>
+<span class="n">store</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"tasks"</span><span class="p">,</span> <span class="p">[{</span><span class="s2">"id"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Hello"</span><span class="p">}])</span>
+<span class="n">tasks</span> <span class="o">=</span> <span class="n">store</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"tasks"</span><span class="p">)</span>
+<span class="n">store</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">"tasks"</span><span class="p">)</span>
+<span class="n">store</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+</code></pre>
+      </div>
+      <ul>
+       <li>
+        Atomic writes via write-to-
+        <code>
+         .tmp
+        </code>
+        then
+        <code>
+         os.replace()
+        </code>
+       </li>
+       <li>
+        Per-instance
+        <code>
+         threading.Lock
+        </code>
+        on all mutating operations
+       </li>
+       <li>
+        Raises
+        <code>
+         ValueError
+        </code>
+        with a descriptive message on malformed JSON
+       </li>
+      </ul>
+      <h3 id="uploadpipeline-server-side-file-upload-handler">
+       <code>
+        UploadPipeline
+       </code>
+       — Server-Side File Upload Handler
+      </h3>
+      <p>
+       Validates MIME type and file size, sanitises filenames, and saves uploads to a configurable directory.
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">UploadPipeline</span><span class="p">(</span>
+    <span class="n">upload_dir</span><span class="o">=</span><span class="s2">"uploads"</span><span class="p">,</span>
+    <span class="n">allowed_types</span><span class="o">=</span><span class="p">[</span><span class="s2">"image/png"</span><span class="p">,</span> <span class="s2">"image/jpeg"</span><span class="p">],</span>
+    <span class="n">max_size_bytes</span><span class="o">=</span><span class="mi">10</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">create_endpoint</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s2">"/api/upload"</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <ul>
+       <li>
+        Returns HTTP 415 for unsupported MIME types
+       </li>
+       <li>
+        Returns HTTP 413 for oversized files
+       </li>
+       <li>
+        <code>
+         sanitize_filename()
+        </code>
+        removes path traversal (
+        <code>
+         ../
+        </code>
+        ,
+        <code>
+         ./
+        </code>
+        ) and unsafe characters
+       </li>
+      </ul>
+      <h3 id="securityheadersmiddleware-http-security-headers">
+       <code>
+        SecurityHeadersMiddleware
+       </code>
+       — HTTP Security Headers
+      </h3>
+      <p>
+       Injects five security headers into every response without overwriting existing ones.
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">ssr</span><span class="o">.</span><span class="n">use_security_headers</span><span class="p">()</span>
+<span class="c1"># or manually:</span>
+<span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span><span class="n">SecurityHeadersMiddleware</span><span class="p">,</span> <span class="n">csp</span><span class="o">=</span><span class="s2">"default-src 'self'"</span><span class="p">,</span> <span class="n">hsts</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       Default headers:
+       <code>
+        X-Content-Type-Options
+       </code>
+       ,
+       <code>
+        X-Frame-Options
+       </code>
+       ,
+       <code>
+        X-XSS-Protection
+       </code>
+       ,
+       <code>
+        Referrer-Policy
+       </code>
+       ,
+       <code>
+        Permissions-Policy
+       </code>
+       . Optional
+       <code>
+        Content-Security-Policy
+       </code>
+       and
+       <code>
+        Strict-Transport-Security
+       </code>
+       .
+      </p>
+      <h3 id="darsenv-env-file-support">
+       <code>
+        DarsEnv
+       </code>
+       —
+       <code>
+        .env
+       </code>
+       File Support
+      </h3>
+      <p>
+       <code>
+        DarsEnv
+       </code>
+       now loads
+       <code>
+        .env
+       </code>
+       files automatically at config load time.
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.env</span><span class="w"> </span><span class="kn">import</span> <span class="n">DarsEnv</span>
+
+<span class="n">DarsEnv</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>                        <span class="c1"># loads .env silently if present</span>
+<span class="n">api_key</span> <span class="o">=</span> <span class="n">DarsEnv</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"API_KEY"</span><span class="p">)</span>      <span class="c1"># os.environ.get with default</span>
+<span class="n">secret</span>   <span class="o">=</span> <span class="n">DarsEnv</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="s2">"SECRET"</span><span class="p">)</span>  <span class="c1"># raises KeyError if missing</span>
+</code></pre>
+      </div>
+      <ul>
+       <li>
+        Does not overwrite existing
+        <code>
+         os.environ
+        </code>
+        keys
+       </li>
+       <li>
+        Strips surrounding quotes from values
+       </li>
+       <li>
+        Skips blank lines and
+        <code>
+         #
+        </code>
+        comments
+       </li>
+       <li>
+        Called automatically by
+        <code>
+         load_config()
+        </code>
+        before reading
+        <code>
+         dars.config.json
+        </code>
+       </li>
+      </ul>
+      <h3 id="ssrapp-production-ready-ssr-backend-helper">
+       <code>
+        SSRApp
+       </code>
+       — Production-Ready SSR Backend Helper
+      </h3>
+      <p>
+       The
+       <code>
+        SSRApp
+       </code>
+       class (used in
+       <code>
+        backend/api.py
+       </code>
+       ) now exposes clean methods for CORS, security headers, file uploads, and custom routes:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">ssr</span> <span class="o">=</span> <span class="n">SSRApp</span><span class="p">(</span><span class="n">dars_app</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">"/api/ssr"</span><span class="p">)</span>
+<span class="n">ssr</span><span class="o">.</span><span class="n">use_cors</span><span class="p">(</span><span class="n">origins</span><span class="o">=</span><span class="p">[</span><span class="s2">"http://localhost:4000"</span><span class="p">],</span> <span class="n">credentials</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">ssr</span><span class="o">.</span><span class="n">use_security_headers</span><span class="p">()</span>
+<span class="n">ssr</span><span class="o">.</span><span class="n">use_upload</span><span class="p">(</span><span class="n">upload_dir</span><span class="o">=</span><span class="s2">"uploads"</span><span class="p">,</span> <span class="n">allowed_types</span><span class="o">=</span><span class="p">[</span><span class="s2">"image/png"</span><span class="p">],</span> <span class="n">max_size_bytes</span><span class="o">=</span><span class="mi">10_485_760</span><span class="p">)</span>
+
+<span class="c1"># In production, serve the exported frontend files with built-in SPA 404 fallback:</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">DarsEnv</span><span class="o">.</span><span class="n">is_dev</span><span class="p">():</span>
+    <span class="n">ssr</span><span class="o">.</span><span class="n">use_spa_fallback</span><span class="p">()</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">ssr</span><span class="o">.</span><span class="n">fastapi_app</span>
+</code></pre>
+      </div>
+      <h3 id="cli-ux-upgrades-fullstack-renaming">
+       CLI UX Upgrades &amp;
+       <code>
+        fullstack
+       </code>
+       Renaming
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         <code>
+          dars preview
+         </code>
+         Revamp
+        </strong>
+        : The
+        <code>
+         preview
+        </code>
+        command UI has been completely redesigned with a beautiful
+        <code>
+         rich
+        </code>
+        terminal UI, detailing project mode, target directories, and the backend server. It now interactively asks to start the server and automatically opens your browser. Graceful
+        <code>
+         taskkill
+        </code>
+        shutdown has been added to prevent orphaned background processes.
+       </li>
+       <li>
+        <strong>
+         <code>
+          --type fullstack
+         </code>
+        </strong>
+        : The
+        <code>
+         dars init --type ssr
+        </code>
+        command has been renamed to
+        <code>
+         dars init --type fullstack
+        </code>
+        to better reflect the complete SPA + SSR + API nature of the scaffolded backend.
+       </li>
+      </ul>
+      <hr/>
+      <h1 id="release-notes-v197">
+       Release Notes v1.9.7
+      </h1>
+      <blockquote>
+       <p>
+        <strong>
+         Hybrid Stability, Anti-Flash System &amp; CLI UX Overhaul
+        </strong>
+       </p>
+      </blockquote>
+      <h2 id="installation-2">
+       Installation
+      </h2>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
+</code></pre>
+      </div>
+      <h2 id="whats-new-2">
        What's New
       </h2>
       <h3 id="hybrid-ssrspa-stabilization">
@@ -1219,14 +1792,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-2">
+      <h2 id="installation-3">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-2">
+      <h2 id="whats-new-3">
        What's New
       </h2>
       <h3 id="modular-animation-engine-animjs">
@@ -1471,14 +2044,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-3">
+      <h2 id="installation-4">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-3">
+      <h2 id="whats-new-4">
        What's New
       </h2>
       <h3 id="fixed-relative-paths-for-runtime-resources">
@@ -1614,14 +2187,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-4">
+      <h2 id="installation-5">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-4">
+      <h2 id="whats-new-5">
        What's New
       </h2>
       <h3 id="configurable-development-port">
@@ -1779,14 +2352,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-5">
+      <h2 id="installation-6">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-5">
+      <h2 id="whats-new-6">
        What's New
       </h2>
       <h3 id="standardized-component-docstrings">
@@ -1858,14 +2431,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-6">
+      <h2 id="installation-7">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-6">
+      <h2 id="whats-new-7">
        What's New
       </h2>
       <h3 id="utility-style-system">
@@ -2063,14 +2636,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-7">
+      <h2 id="installation-8">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-7">
+      <h2 id="whats-new-8">
        What's New
       </h2>
       <h3 id="definitive-removal-of-new-function">
@@ -2347,14 +2920,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-8">
+      <h2 id="installation-9">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-8">
+      <h2 id="whats-new-9">
        What's New
       </h2>
       <h3 id="restored-native-string-concatenation">
@@ -2429,14 +3002,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-9">
+      <h2 id="installation-10">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-9">
+      <h2 id="whats-new-10">
        What's New
       </h2>
       <h3 id="state-v2-reactivity-decoupling">
@@ -2567,14 +3140,14 @@
         release.
        </p>
       </blockquote>
-      <h2 id="installation-10">
+      <h2 id="installation-11">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-10">
+      <h2 id="whats-new-11">
        What's New
       </h2>
       <h3 id="zero-eval-runtime-secure-script-execution">
@@ -2772,14 +3345,14 @@
         : Versions &lt;= v1.8.7 are considered deprecated and NOT recommended for production use. v1.8.8 addresses critical security surfaces by temporarily removing experimental Server Components. Upgrading is mandatory.
        </p>
       </blockquote>
-      <h2 id="installation-11">
+      <h2 id="installation-12">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-11">
+      <h2 id="whats-new-12">
        What's New
       </h2>
       <h3 id="dars-server-protocol-dsp">
@@ -2849,14 +3422,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-12">
+      <h2 id="installation-13">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-12">
+      <h2 id="whats-new-13">
        What's New
       </h2>
       <h3 id="dars-server-components">
@@ -2964,14 +3537,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-13">
+      <h2 id="installation-14">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-13">
+      <h2 id="whats-new-14">
        What's New
       </h2>
       <h3 id="darsenv-environment-awareness">
@@ -3083,14 +3656,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-14">
+      <h2 id="installation-15">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-14">
+      <h2 id="whats-new-15">
        What's New
       </h2>
       <h3 id="multiple-outlets-via-outlet_id">
@@ -3187,14 +3760,14 @@ This keeps state/events safe and avoids breaking hydration.
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-15">
+      <h2 id="installation-16">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-15">
+      <h2 id="whats-new-16">
        What's New
       </h2>
       <h3 id="python-native-minification-by-default-no-nodebun-required">
@@ -3403,14 +3976,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-16">
+      <h2 id="installation-17">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-16">
+      <h2 id="whats-new-17">
        What's New
       </h2>
       <h3 id="fixed-production-build-crash-unexpected-token-export">
@@ -3461,14 +4034,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-17">
+      <h2 id="installation-18">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-17">
+      <h2 id="whats-new-18">
        What's New
       </h2>
       <h3 id="fixed-settimeout-promise-handling">
@@ -3512,14 +4085,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-18">
+      <h2 id="installation-19">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-18">
+      <h2 id="whats-new-19">
        What's New
       </h2>
       <h3 id="new-style-optimization-pipeline-phase-1">
@@ -3889,14 +4462,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-19">
+      <h2 id="installation-20">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-19">
+      <h2 id="whats-new-20">
        What's New
       </h2>
       <h3 id="new-advanced-multimedia-components-video-audio">
@@ -4452,6 +5025,45 @@ improving consistency and providing a real-world example of the upgraded styling
      <div class="sidebar-category">
       Versions
      </div>
+     <a class="sidebar-link sidebar-level-1" href="#release-notes-v198" style="margin-left: 0px">
+      Release Notes v1.9.8
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#installation" style="margin-left: 20px">
+      Installation
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#whats-new" style="margin-left: 20px">
+      What's New
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#usefetch-declarative-data-fetching-hook" style="margin-left: 40px">
+      `useFetch` — Declarative Data Fetching Hook
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#updatevreffromresponse-store-fetch-response-into-vref" style="margin-left: 40px">
+      `updateVRefFromResponse` — Store Fetch Response into VRef
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#each-runtime-list-rendering-from-vref" style="margin-left: 40px">
+      `Each` — Runtime List Rendering from VRef
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#formvalidator-client-side-form-validation" style="margin-left: 40px">
+      `FormValidator` — Client-Side Form Validation
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#jsonstore-file-backed-key-value-store" style="margin-left: 40px">
+      `JsonStore` — File-Backed Key-Value Store
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#uploadpipeline-server-side-file-upload-handler" style="margin-left: 40px">
+      `UploadPipeline` — Server-Side File Upload Handler
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#securityheadersmiddleware-http-security-headers" style="margin-left: 40px">
+      `SecurityHeadersMiddleware` — HTTP Security Headers
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#darsenv-env-file-support" style="margin-left: 40px">
+      `DarsEnv` — `.env` File Support
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#ssrapp-production-ready-ssr-backend-helper" style="margin-left: 40px">
+      `SSRApp` — Production-Ready SSR Backend Helper
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#cli-ux-upgrades-fullstack-renaming" style="margin-left: 40px">
+      CLI UX Upgrades &amp; `fullstack` Renaming
+     </a>
      <a class="sidebar-link sidebar-level-1" href="#release-notes-v197" style="margin-left: 0px">
       Release Notes v1.9.7
      </a>
@@ -5066,7 +5678,7 @@ improving consistency and providing a real-world example of the upgraded styling
   </div>
   <div id="__dars_spa_root__">
   </div>
-  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1778989440" type="module">
+  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1779055821" type="module">
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js">
   </script>

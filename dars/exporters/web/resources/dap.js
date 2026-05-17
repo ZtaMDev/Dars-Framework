@@ -281,23 +281,20 @@ _registerCommand("dom_animate", (args) => {
   if (el && args.keyframes) el.animate(args.keyframes, args.options || {});
 });
 
-_registerCommand("conditional", (args, ctx) => {
-  const cond = args.condition;
-  // Note: conditions might still need evaluation if they are strings,
-  // but in DAP they should be pre-evaluated or use a mini-DSL.
-  // For now, support basic equality check if args.left/right provided.
+_registerCommand("conditional", async (args, ctx) => {
+  // Resolve the condition — it may be a DAP expression (bool_expr, transform, etc.)
   let result = false;
-  if (args.left !== undefined && args.right !== undefined) {
-    if (args.op === "==") result = args.left == args.right;
-    else if (args.op === "!=") result = args.left != args.right;
-    else if (args.op === ">") result = args.left > args.right;
-    else if (args.op === "<") result = args.left < args.right;
+  try {
+    const resolved = await _resolveVal(args.condition, ctx);
+    result = Boolean(resolved);
+  } catch (_) {
+    result = false;
   }
 
   if (result) {
-    if (args.on_true) dispatch(args.on_true, ctx);
+    if (args.on_true) await dispatch(args.on_true, ctx);
   } else {
-    if (args.on_false) dispatch(args.on_false, ctx);
+    if (args.on_false) await dispatch(args.on_false, ctx);
   }
 });
 
@@ -305,7 +302,14 @@ _registerCommand("comp_update", (args) => change(args));
 
 _registerCommand("fetch", async (args, ctx) => {
   try {
-    const resp = await fetch(args.url, args.options || {});
+    // Resolve relative URLs against backendUrl.
+    // When backendUrl is "/" or empty, keep the URL as-is (same-origin).
+    let fetchUrl = args.url;
+    if (fetchUrl && !/^https?:\/\//i.test(fetchUrl)) {
+      const base = (window.__DARS_SPA_CONFIG__ && window.__DARS_SPA_CONFIG__.backendUrl) || "";
+      if (base && base !== "/") fetchUrl = base.replace(/\/$/, "") + fetchUrl;
+    }
+    const resp = await fetch(fetchUrl, args.options || {});
     const data = await resp.json();
     if (args.on_success) {
       // Prevent server responses from injecting inline JS ops via on_success dispatch
@@ -319,6 +323,15 @@ _registerCommand("fetch", async (args, ctx) => {
 
 async function _resolveVal(val, ctx) {
   if (val && typeof val === "object" && val.op) {
+    // collect_values: resolve each field value and return a plain object
+    if (val.op === "collect_values") {
+      const result = {};
+      const fieldArgs = val.args || {};
+      for (const [key, expr] of Object.entries(fieldArgs)) {
+        result[key] = await _resolveVal(expr, ctx);
+      }
+      return result;
+    }
     return await dispatch(val, ctx);
   }
   return val;
@@ -345,14 +358,59 @@ _registerCommand("get_state_value", (args) => {
   return null;
 });
 
+_registerCommand("get_context_value", (args, ctx) => {
+  if (!ctx) return null;
+  return ctx[args.key] !== undefined ? ctx[args.key] : null;
+});
+
 _registerCommand("transform", async (args, ctx) => {
   const input = await _resolveVal(args.input, ctx);
   if (args.method === "int") return parseInt(input, 10);
   if (args.method === "float") return parseFloat(input);
   if (args.method === "upper") return String(input).toUpperCase();
   if (args.method === "lower") return String(input).toLowerCase();
+  if (args.method === "trim") return String(input == null ? "" : input).trim();
+  if (args.method === "length") return String(input == null ? "" : input).trim().length;
+  if (args.method === "is_email") {
+    const s = String(input == null ? "" : input).trim();
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+  }
+  if (args.method === "test_pattern") {
+    try {
+      return new RegExp(args.pattern).test(String(input == null ? "" : input));
+    } catch (_) { return false; }
+  }
+  if (args.method === "json_stringify") {
+    // Return the object itself — network_request will JSON.stringify it
+    // Returning the raw object avoids double-encoding
+    return input;
+  }
   if (args.method === "validate_operator")
     return ["+", "-", "*", "/", "%", "**"].includes(input) ? input : "+";
+  // Render a tasks API response {tasks: [...]} as HTML list items
+  if (args.method === "tasks_to_html") {
+    try {
+      const data = typeof input === "string" ? JSON.parse(input) : input;
+      const tasks = Array.isArray(data) ? data : (data && data.tasks ? data.tasks : []);
+      if (!tasks.length) return '<p class="text-gray-400 text-sm p-2">No tasks yet.</p>';
+      return tasks.map(t => {
+        // Safely extract title — handle string, number, or nested object
+        let title = "";
+        if (t && t.title !== undefined && t.title !== null) {
+          title = typeof t.title === "object" ? JSON.stringify(t.title) : String(t.title);
+        }
+        const safeTitle = _sanitize(title);
+        const done = t && t.done;
+        const id = t && t.id ? t.id : "";
+        return `<div class="flex items-center gap-2 p-2 border rounded mb-1 bg-white">
+          <span class="flex-1 ${done ? 'line-through text-gray-400' : ''}">${safeTitle || '<em class="text-gray-300">untitled</em>'}</span>
+          <span class="text-xs text-gray-400">#${id}</span>
+        </div>`;
+      }).join("");
+    } catch (e) {
+      return `<p class="text-red-400 text-sm">Error rendering tasks: ${e.message}</p>`;
+    }
+  }
   return input;
 });
 
@@ -455,7 +513,373 @@ _registerCommand("animate", (args) => {
   const el = $(args.id);
   if (el && window.Dars && window.Dars.animate) window.Dars.animate(args);
 });
-_registerCommand("dom_set_html", (args) => {
+// dom_set_html: async so it can resolve DAP expressions in the html arg
+_registerCommand("dom_set_html", async (args, ctx) => {
   const el = $(args.id);
-  if (el) el.innerHTML = _sanitize(args.html);
+  if (!el) return;
+  const html = await _resolveVal(args.html, ctx);
+  el.innerHTML = _sanitize(String(html || ""));
+});
+
+// ==================== NETWORK & VREF UTILITIES ====================
+
+/**
+ * vref_set — set a named VRef to a value (alias for vref_update with a direct value).
+ * args: { selector: string, value: any }
+ */
+_registerCommand("vref_set", async (args, ctx) => {
+  return dispatch({ op: "vref_update", args }, ctx);
+});
+
+/**
+ * storage_get_to_vref — read a localStorage key and store it in a VRef.
+ * args: { storage_key: string, selector: string }
+ */
+_registerCommand("storage_get_to_vref", async (args, ctx) => {
+  const val = localStorage.getItem(args.storage_key);
+  return dispatch({ op: "vref_update", args: { selector: args.selector, value: val } }, ctx);
+});
+
+/**
+ * network_request — async fetch with loading-state management, interceptor
+ * chain, on_success / on_error callbacks, and 401 interception.
+ *
+ * args:
+ *   url          string
+ *   method       string  (default "GET")
+ *   headers      object  (optional)
+ *   body         any     (optional, auto-stringified if object)
+ *   loading_selector  string  (optional VRef selector set to true/false)
+ *   data_selector     string  (optional VRef selector for response data)
+ *   error_selector    string  (optional VRef selector for error message)
+ *   on_success    DAP action  (optional, dispatched after data_selector is set)
+ *   on_error      DAP action  (optional, dispatched after error_selector is set)
+ */
+_registerCommand("network_request", async (args, ctx) => {
+  const {
+    url,
+    method = "GET",
+    headers = {},
+    body,
+    loading_selector,
+    data_selector,
+    error_selector,
+    on_success,
+    on_error,
+  } = args;
+
+  // Resolve relative URLs against the configured backend URL.
+  // In fullstack/SSR mode the SPA config carries backendUrl (e.g. "http://localhost:3000").
+  // When backendUrl is "/" or empty, the URL is already relative to the current origin —
+  // do NOT prepend anything (avoids "//api/tasks" double-slash issues).
+  function _resolveUrl(rawUrl) {
+    if (!rawUrl) return rawUrl;
+    if (/^https?:\/\//i.test(rawUrl)) return rawUrl; // already absolute
+    const base =
+      (window.__DARS_SPA_CONFIG__ && window.__DARS_SPA_CONFIG__.backendUrl) ||
+      "";
+    // Only prepend if base is a real origin (not empty, not "/")
+    if (base && base !== "/") {
+      return base.replace(/\/$/, "") + rawUrl;
+    }
+    return rawUrl; // relative URL — browser resolves against current origin
+  }
+
+  const resolvedUrl = _resolveUrl(url);
+
+  // Set loading state
+  if (loading_selector) {
+    dispatch({ op: "vref_update", args: { selector: loading_selector, value: true } }, ctx);
+  }
+
+  try {
+    const fetchConfig = { method: method.toUpperCase(), headers: { ...headers } };
+
+    // Inject auth token if present
+    const token = localStorage.getItem("dars_auth_token");
+    if (token && !fetchConfig.headers["Authorization"]) {
+      fetchConfig.headers["Authorization"] = "Bearer " + token;
+    }
+
+    if (body !== undefined && body !== null) {
+      // If body is a DAP expression (has 'op'), resolve it first to get the actual value
+      let resolvedBody = body;
+      if (body && typeof body === "object" && body.op) {
+        resolvedBody = await _resolveVal(body, ctx);
+      }
+      if (resolvedBody && typeof resolvedBody === "object") {
+        fetchConfig.body = JSON.stringify(resolvedBody);
+        if (!fetchConfig.headers["Content-Type"]) {
+          fetchConfig.headers["Content-Type"] = "application/json";
+        }
+      } else if (resolvedBody !== undefined && resolvedBody !== null) {
+        fetchConfig.body = String(resolvedBody);
+      }
+    }
+
+    const resp = await fetch(resolvedUrl, fetchConfig);
+
+    // Handle 401 — clear auth token and surface as error
+    if (resp.status === 401) {
+      localStorage.removeItem("dars_auth_token");
+      const errMsg = "Unauthorized (401)";
+      if (loading_selector) {
+        dispatch({ op: "vref_update", args: { selector: loading_selector, value: false } }, ctx);
+      }
+      if (error_selector) {
+        dispatch({ op: "vref_update", args: { selector: error_selector, value: errMsg } }, ctx);
+      }
+      if (on_error) dispatch(on_error, { ...ctx, error: errMsg });
+      return;
+    }
+
+    let data;
+    const contentType = resp.headers.get("content-type") || "";
+    if (contentType.includes("application/json")) {
+      data = await resp.json();
+    } else {
+      data = await resp.text();
+    }
+
+    if (!resp.ok) {
+      throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
+    }
+
+    if (loading_selector) {
+      dispatch({ op: "vref_update", args: { selector: loading_selector, value: false } }, ctx);
+    }
+    if (data_selector) {
+      dispatch({ op: "vref_update", args: { selector: data_selector, value: data } }, ctx);
+    }
+    if (on_success) dispatch(on_success, { ...ctx, response: data });
+
+  } catch (e) {
+    const errMsg = e && e.message ? e.message : String(e);
+    if (loading_selector) {
+      dispatch({ op: "vref_update", args: { selector: loading_selector, value: false } }, ctx);
+    }
+    if (error_selector) {
+      dispatch({ op: "vref_update", args: { selector: error_selector, value: errMsg } }, ctx);
+    }
+    if (on_error) dispatch(on_error, { ...ctx, error: errMsg });
+  }
+});
+
+// ==================== CONDITIONAL & LIST RENDERING ====================
+
+/**
+ * _initConditionalElements — scan the DOM for data-dap-show and data-dap-if
+ * elements and evaluate their initial state. Also patches vref_update to
+ * re-evaluate conditionals when a VRef changes.
+ */
+async function _initConditionalElements(ctx) {
+  // Initialize Show elements
+  for (const el of document.querySelectorAll("[data-dap-show]")) {
+    try {
+      // Attribute may have &quot; encoded quotes — decode before parsing
+      const raw = el.getAttribute("data-dap-show").replace(/&quot;/g, '"');
+      const condAction = JSON.parse(raw);
+      const cond = await _resolveVal(condAction, ctx || {});
+      el.style.display = cond ? "" : "none";
+    } catch (_) {}
+  }
+  // Initialize If elements
+  for (const el of document.querySelectorAll("[data-dap-if]")) {
+    try {
+      const raw = el.getAttribute("data-dap-if").replace(/&quot;/g, '"');
+      const condAction = JSON.parse(raw);
+      const cond = await _resolveVal(condAction, ctx || {});
+      const thenEl = el.querySelector('[data-if-branch="then"]');
+      const elseEl = el.querySelector('[data-if-branch="else"]');
+      if (thenEl) thenEl.style.display = cond ? "" : "none";
+      if (elseEl) elseEl.style.display = cond ? "none" : "";
+    } catch (_) {}
+  }
+}
+
+// _initConditionalElements is called by the vref_update patch below
+// and also exported so _darsInit can call it after VRef setup.
+export { _initConditionalElements };
+
+/**
+ * render_tasks — render a tasks API response into a container element.
+ * args: { container_id: string }
+ * ctx.response must be the API response: { tasks: [...] } or [...]
+ */
+_registerCommand("render_tasks", (args, ctx) => {
+  const el = $(args.container_id || "task-list");
+  if (!el) return;
+  try {
+    const data = ctx && ctx.response ? ctx.response : {};
+    const tasks = Array.isArray(data) ? data : (data.tasks || []);
+    if (!tasks.length) {
+      el.innerHTML = '<p class="text-gray-400 text-sm p-2">No tasks yet.</p>';
+      return;
+    }
+    el.innerHTML = tasks.map(t => {
+      const title = _sanitize(String(t.title || ""));
+      const done = t.done ? "line-through text-gray-400" : "";
+      return `<div class="flex items-center gap-2 p-2 border rounded mb-1 bg-white shadow-sm">
+        <span class="flex-1 ${done}">${title || "<em class='text-gray-300'>untitled</em>"}</span>
+        <span class="text-xs text-gray-400 ml-2">#${t.id || ""}</span>
+      </div>`;
+    }).join("");
+  } catch (e) {
+    el.innerHTML = `<p class="text-red-400 text-sm p-2">Error: ${e.message}</p>`;
+  }
+});
+
+// Patch vref_update to re-evaluate conditionals AND re-render Each lists after every VRef change
+const _origVrefUpdate = __commandRegistry.get("vref_update");
+if (_origVrefUpdate) {
+  __commandRegistry.set("vref_update", async (args, ctx) => {
+    const result = await _origVrefUpdate(args, ctx);
+    // Re-evaluate all conditional elements after any VRef change
+    await _initConditionalElements(ctx);
+    // Re-render any Each containers bound to this selector
+    if (args && args.selector) {
+      const sel = args.selector;
+      for (const container of document.querySelectorAll("[data-dap-each]")) {
+        try {
+          const containerSel = container.getAttribute("data-dap-each");
+          if (containerSel === sel && container.id) {
+            await dispatch({ op: "dom_each_render", args: { id: container.id } }, ctx);
+          }
+        } catch (_) {}
+      }
+    }
+    return result;
+  });
+}
+
+/**
+ * dom_if_toggle — evaluate a DAP condition and show/hide If branches.
+ * args: { id: wrapperId }
+ * Reads data-dap-if (JSON condition), evaluates it, then shows/hides
+ * the data-if-branch="then" and data-if-branch="else" children.
+ */
+_registerCommand("dom_if_toggle", async (args, ctx) => {
+  const wrapper = $(args.id);
+  if (!wrapper) return;
+  const rawAttr = wrapper.getAttribute("data-dap-if");
+  if (!rawAttr) return;
+  let cond;
+  try {
+    const condAction = JSON.parse(rawAttr.replace(/&quot;/g, '"'));
+    cond = await _resolveVal(condAction, ctx);
+  } catch (_) {
+    return;
+  }
+  const thenEl = wrapper.querySelector('[data-if-branch="then"]');
+  const elseEl = wrapper.querySelector('[data-if-branch="else"]');
+  if (thenEl) thenEl.style.display = cond ? "" : "none";
+  if (elseEl) elseEl.style.display = cond ? "none" : "";
+});
+
+/**
+ * dom_show_toggle — evaluate a DAP condition and show/hide a Show wrapper.
+ * args: { id: wrapperId }
+ * Reads data-dap-show (JSON condition) and calls dom_show / dom_hide.
+ */
+_registerCommand("dom_show_toggle", async (args, ctx) => {
+  const wrapper = $(args.id);
+  if (!wrapper) return;
+  const rawAttr = wrapper.getAttribute("data-dap-show");
+  if (!rawAttr) return;
+  let cond;
+  try {
+    const condAction = JSON.parse(rawAttr.replace(/&quot;/g, '"'));
+    cond = await _resolveVal(condAction, ctx);
+  } catch (_) {
+    return;
+  }
+  wrapper.style.display = cond ? "" : "none";
+});
+
+/**
+ * dom_each_render — re-render a list container from a VRef JSON array.
+ * args: { id: containerId }
+ * Reads data-dap-each (VRef selector), fetches the current array value,
+ * and rebuilds the container's children using the data-each-template HTML
+ * with __item_<field>__ placeholder substitution.
+ */
+_registerCommand("dom_each_render", async (args, ctx) => {
+  const container = $(args.id);
+  if (!container) return;
+  const selector = container.getAttribute("data-dap-each");
+  if (!selector) return;
+
+  // Resolve the current array value from the VRef registry or DOM
+  let items = null;
+  if (window.__DARS_VREF_VALUES__ && selector in window.__DARS_VREF_VALUES__) {
+    items = window.__DARS_VREF_VALUES__[selector];
+  }
+
+  // Support response objects like { tasks: [...] } — unwrap common array keys
+  if (items && !Array.isArray(items) && typeof items === "object") {
+    const keys = ["tasks", "items", "data", "results", "list", "rows"];
+    for (const k of keys) {
+      if (Array.isArray(items[k])) { items = items[k]; break; }
+    }
+  }
+
+  if (!Array.isArray(items)) {
+    container.innerHTML = "";
+    return;
+  }
+
+  // Get the HTML template with __item_<field>__ placeholders
+  const templateEncoded = container.getAttribute("data-each-template") || "";
+  const template = templateEncoded
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'");
+
+  if (!template) {
+    // Fallback: plain text rendering
+    container.innerHTML = items.map(item => {
+      const text = _sanitize(String(
+        item && typeof item === "object"
+          ? (item.title ?? item.name ?? item.label ?? item.value ?? item.text ?? JSON.stringify(item))
+          : item
+      ));
+      return `<div>${text}</div>`;
+    }).join("");
+    return;
+  }
+
+  // Render each item by substituting placeholders in the template
+  const rendered = items.map(item => {
+    if (item === null || item === undefined) return "";
+    let html = template;
+
+    if (typeof item === "object") {
+      // Normalize empty/unknown title values before substitution
+      if (item.title !== undefined) {
+        const t = String(item.title || "").trim();
+        item = { ...item, title: (t === "" || t.toLowerCase() === "unknown" || t.toLowerCase() === "null" || t.toLowerCase() === "none") ? "Unknown" : t };
+      }
+      // Inject a done_class placeholder value based on the done field
+      const doneClass = item.done ? "line-through text-gray-400" : "";
+      item = { ...item, done_class: doneClass };
+
+      // Replace __item_<field>__ with the sanitized field value
+      for (const [key, val] of Object.entries(item)) {
+        const placeholder = `__item_${key}__`;
+        // Don't sanitize class names — they're safe strings we control
+        const safeVal = key === "done_class" ? String(val) : _sanitize(String(val == null ? "" : val));
+        html = html.split(placeholder).join(safeVal);
+      }
+    } else {
+      // Scalar item — replace generic __item_value__ placeholder
+      const safeVal = _sanitize(String(item));
+      html = html.split("__item_value__").join(safeVal);
+    }
+
+    // Remove any unreplaced sentinel placeholders
+    html = html.replace(/__item_[a-zA-Z0-9_]+__/g, "");
+    return html;
+  }).join("");
+
+  container.innerHTML = rendered;
 });

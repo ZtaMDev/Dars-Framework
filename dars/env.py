@@ -5,22 +5,128 @@
 # https://mozilla.org/MPL/2.0/.
 #
 # Copyright (c) 2025 ZtaDev
+"""
+Environment configuration for the Dars Framework.
 
-# Dars Framework - Environment Variables
-#
-# This file provides the DarsEnv class to handle environment-specific logic.
+Provides :class:`DarsEnv` for dev/prod mode tracking and `.env` file loading.
+"""
+
+import os
+from typing import Optional, Tuple
+
 
 class DarsEnv:
     """
     Environment configuration for Dars Framework.
-    
+
     Attributes:
-        dev (bool): Indicates if the application is running in development mode.
-                    True by default (interactive/dev), False when exported for production (bundle=True).
+        dev (bool): ``True`` in development mode, ``False`` in production (bundle).
     """
-    dev = True
+
+    dev: bool = True
 
     @classmethod
-    def set_dev_mode(cls, is_dev: bool):
+    def set_dev_mode(cls, is_dev: bool) -> None:
         """Set the development mode flag."""
         cls.dev = is_dev
+
+    # ------------------------------------------------------------------
+    # .env file support
+    # ------------------------------------------------------------------
+
+    @classmethod
+    def load(cls, path: str = ".env") -> None:
+        """
+        Load key-value pairs from a ``.env`` file into :data:`os.environ`.
+
+        Rules:
+
+        - Silently returns if the file does not exist.
+        - Ignores blank lines and lines whose first non-whitespace character is ``#``.
+        - Splits on the **first** ``=`` only, so values may contain ``=``.
+        - Strips surrounding single or double quotes from values.
+        - Does **not** overwrite keys already present in :data:`os.environ`.
+
+        Args:
+            path: Path to the ``.env`` file (default: ``".env"``).
+        """
+        if not os.path.isfile(path):
+            return
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                for line in f:
+                    parsed = cls._parse_env_line(line)
+                    if parsed is None:
+                        continue
+                    key, value = parsed
+                    if key and key not in os.environ:
+                        os.environ[key] = value
+        except OSError:
+            # Best-effort: never raise on load failure
+            pass
+
+    @classmethod
+    def get(cls, key: str, default: Optional[str] = None) -> Optional[str]:
+        """
+        Return the value of an environment variable.
+
+        Args:
+            key: Variable name.
+            default: Value returned when the key is absent (default: ``None``).
+
+        Returns:
+            The variable value or *default*.
+        """
+        return os.environ.get(key, default)
+
+    @classmethod
+    def require(cls, key: str) -> str:
+        """
+        Return the value of a required environment variable.
+
+        Args:
+            key: Variable name.
+
+        Returns:
+            The variable value.
+
+        Raises:
+            KeyError: If *key* is not set in :data:`os.environ`.
+        """
+        value = os.environ.get(key)
+        if value is None:
+            raise KeyError(
+                f"Required environment variable '{key}' is not set. "
+                "Add it to your .env file or set it in the environment."
+            )
+        return value
+
+    @staticmethod
+    def _parse_env_line(line: str) -> Optional[Tuple[str, str]]:
+        """
+        Parse a single ``.env`` line into a ``(key, value)`` tuple.
+
+        Returns ``None`` for blank lines and comments.
+
+        Args:
+            line: Raw line from the ``.env`` file.
+
+        Returns:
+            ``(key, value)`` or ``None``.
+        """
+        stripped = line.strip()
+        # Skip blank lines and comments
+        if not stripped or stripped.startswith("#"):
+            return None
+        # Split on the first '=' only
+        if "=" not in stripped:
+            return None
+        key, _, value = stripped.partition("=")
+        key = key.strip()
+        value = value.strip()
+        if not key:
+            return None
+        # Strip surrounding quotes (single or double)
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in ('"', "'"):
+            value = value[1:-1]
+        return key, value

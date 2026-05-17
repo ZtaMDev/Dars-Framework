@@ -661,168 +661,6 @@ app.add_page("index", index())
 
 ---
 
-## Form Collection System
-
-Pythonic form data collection and submission without raw JavaScript!
-
-### FormData & collect_form()
-
-The `FormData` class and `collect_form()` helper provide a declarative way to collect form data using `V()` expressions.
-
-#### Basic Usage
-
-```python
-from dars.all import *
-
-# Collect form data with kwargs syntax
-form_data = collect_form(
-    name=V("#name-input"),
-    email=V("#email-input"),
-    age=V("#age-input").int(),
-    is_premium=V("#premium-checkbox")
-)
-
-# Show in alert
-Button("Submit", on_click=form_data.alert())
-
-# Log to console
-Button("Log", on_click=form_data.log())
-
-# Save to state
-Button("Save", on_click=form_data.to_state(state.data))
-```
-
-#### Advanced Features
-
-**Nested Dictionaries & Lists:**
-
-```python
-form_data = collect_form(
-    name=V("#name"),
-    email=V("#email"),
-    
-    # Nested validation results
-    validation={
-        "email_valid": V("#email").includes("@"),
-        "age_ok": (V("#age").int() >= 18).and_(
-                   V("#age").int() <= 120)
-    },
-    
-    # Conditional values
-    discount=(V("#premium").bool()).then("10%", "0%"),
-    
-    # Timestamp
-    submitted_at=getDateTime()
-)
-```
-
-**Alternative Syntaxes:**
-
-```python
-# Using tuples
-form_data = collect_form(
-    ("name", V("#name")),
-    ("email", V("#email"))
-)
-
-# Using dict
-form_data = collect_form({
-    "name": V("#name"),
-    "email": V("#email")
-})
-```
-
-#### FormData Methods
-
-**`.alert(title)`** - Show form data in alert dialog:
-
-```python
-Button("Show Data", on_click=form_data.alert("Form Data"))
-```
-
-**`.log(message)`** - Log form data to console:
-
-```python
-Button("Log Data", on_click=form_data.log("Form submitted"))
-```
-
-**`.to_state(property)`** - Save form data to state:
-
-```python
-Button("Save", on_click=form_data.to_state(state.form_data))
-```
-
-**`.submit(url, state_property, on_success, on_error)`** - Submit to backend:
-
-```python
-# Simple submit
-Button("Submit", on_click=form_data.submit("http://localhost:3000/submit"))
-
-# With state and callbacks
-Button("Submit", on_click=form_data.submit(
-    url="http://localhost:3000/submit",
-    state_property=state.response,
-    on_success=alert("Success!"),
-    on_error=alert("Error!")
-))
-```
-
-**`.submit_and_alert(state_property, title)`** - Submit with alert:
-
-```python
-Button("Submit", on_click=form_data.submit_and_alert(
-    state.data,
-    "Form Submitted!"
-))
-```
-
-### Backend Integration Example
-
-```python
-from dars.all import *
-
-app = App("Form with Backend")
-form = State("form", response="")
-
-# Collect form data
-form_data = collect_form(
-    name=V("#name"),
-    email=V("#email"),
-    age=V("#age").int(),
-    submitted_at=getDateTime()
-)
-
-@route("/")
-def index():
-    return Page(
-        Container(
-            Input(id="name", placeholder="Name"),
-            Input(id="email", placeholder="Email"),
-            Input(id="age", input_type="number", placeholder="Age"),
-            
-            # Submit to backend
-            Button(
-                "Submit to Backend",
-                on_click=form_data.submit(
-                    url="http://localhost:3000/submit",
-                    state_property=form.response,
-                    on_success=alert("Form submitted successfully!")
-                )
-            ),
-            
-            # Display backend response
-            Container(
-                Text("Backend Response:", style="font-bold"),
-                Text(text=useDynamic("form.response"))
-            )
-        )
-    )
-
-app.add_page("index", index())
-```
-
----
-
 ## setVRef() - Independent Value Reference
 
 The `setVRef()` hook allows you to define initial values that are tied to a specific CSS selector. This is the foundation for creating component-level state that can be shared across multiple components without using global `State` objects.
@@ -1221,6 +1059,221 @@ Button("Save to State", on_click=sequence(
 
 ---
 
+## FormValidator — Client-Side Validation
+
+Declarative form validation with dual client/server enforcement.
+
+### Rules
+
+| Constructor | Description |
+|---|---|
+| `required()` | Field must be non-empty |
+| `min_length(n)` | Minimum character count |
+| `max_length(n)` | Maximum character count |
+| `email()` | Must be a valid email address |
+| `pattern(regex)` | Must match regex |
+| `min_value(n)` | Numeric minimum |
+| `max_value(n)` | Numeric maximum |
+| `custom(fn)` | Python callable `(value) -> Optional[str]` |
+
+### `validated_submit`
+
+Validates all rules client-side first. Only fires the network request if every rule passes. Error messages appear in `#{field}-error` elements.
+
+```python
+task_form = collect_form(title=V("#title"))
+
+validator = FormValidator({
+    "title": [required(), min_length(3), max_length(100)],
+})
+
+submit_action = validator.validated_submit(
+    url="/api/tasks",
+    form_data=task_form,
+    on_success=runSequence(clearInput("title"), fetch_trigger),
+    on_error=setText("submit-error", "Error submitting. Try again."),
+)
+
+# In your Page:
+Input(id="title", placeholder="Task title…"),
+Text("", id="title-error", style="text-red-500 text-sm"),
+Button("Add Task", on_click=submit_action),
+```
+
+> **Important:** The input `id` must match the field name in `FormValidator` so the selector `#title` resolves correctly.
+
+### Server-Side Validation
+
+```python
+errors = validator.validate_server({"title": "Hi"})
+# → {"title": ["Must be at least 3 characters."]}
+
+errors = validator.validate_server({"title": "Hello World"})
+# → {}  (all pass)
+```
+
+---
+
+## Form Collection System
+
+Pythonic form data collection and submission without raw JavaScript!
+
+### FormData & collect_form()
+
+The `FormData` class and `collect_form()` helper provide a declarative way to collect form data using `V()` expressions.
+
+#### Basic Usage
+
+```python
+from dars.all import *
+
+# Collect form data with kwargs syntax
+form_data = collect_form(
+    name=V("#name-input"),
+    email=V("#email-input"),
+    age=V("#age-input").int(),
+    is_premium=V("#premium-checkbox")
+)
+
+# Show in alert
+Button("Submit", on_click=form_data.alert())
+
+# Log to console
+Button("Log", on_click=form_data.log())
+
+# Save to state
+Button("Save", on_click=form_data.to_state(state.data))
+```
+
+#### Advanced Features
+
+**Nested Dictionaries & Lists:**
+
+```python
+form_data = collect_form(
+    name=V("#name"),
+    email=V("#email"),
+    
+    # Nested validation results
+    validation={
+        "email_valid": V("#email").includes("@"),
+        "age_ok": (V("#age").int() >= 18).and_(
+                   V("#age").int() <= 120)
+    },
+    
+    # Conditional values
+    discount=(V("#premium").bool()).then("10%", "0%"),
+    
+    # Timestamp
+    submitted_at=getDateTime()
+)
+```
+
+**Alternative Syntaxes:**
+
+```python
+# Using tuples
+form_data = collect_form(
+    ("name", V("#name")),
+    ("email", V("#email"))
+)
+
+# Using dict
+form_data = collect_form({
+    "name": V("#name"),
+    "email": V("#email")
+})
+```
+
+#### FormData Methods
+
+**`.alert(title)`** - Show form data in alert dialog:
+
+```python
+Button("Show Data", on_click=form_data.alert("Form Data"))
+```
+
+**`.log(message)`** - Log form data to console:
+
+```python
+Button("Log Data", on_click=form_data.log("Form submitted"))
+```
+
+**`.to_state(property)`** - Save form data to state:
+
+```python
+Button("Save", on_click=form_data.to_state(state.form_data))
+```
+
+**`.submit(url, state_property, on_success, on_error)`** - Submit to backend:
+
+```python
+# Simple submit
+Button("Submit", on_click=form_data.submit("http://localhost:3000/submit"))
+
+# With state and callbacks
+Button("Submit", on_click=form_data.submit(
+    url="http://localhost:3000/submit",
+    state_property=state.response,
+    on_success=alert("Success!"),
+    on_error=alert("Error!")
+))
+```
+
+**`.submit_and_alert(state_property, title)`** - Submit with alert:
+
+```python
+Button("Submit", on_click=form_data.submit_and_alert(
+    state.data,
+    "Form Submitted!"
+))
+```
+
+### Backend Integration Example
+
+```python
+from dars.all import *
+
+app = App("Form with Backend")
+form = State("form", response="")
+
+# Collect form data
+form_data = collect_form(
+    name=V("#name"),
+    email=V("#email"),
+    age=V("#age").int(),
+    submitted_at=getDateTime()
+)
+
+@route("/")
+def index():
+    return Page(
+        Container(
+            Input(id="name", placeholder="Name"),
+            Input(id="email", placeholder="Email"),
+            Input(id="age", input_type="number", placeholder="Age"),
+            
+            # Submit to backend
+            Button(
+                "Submit to Backend",
+                on_click=form_data.submit(
+                    url="http://localhost:3000/submit",
+                    state_property=form.response,
+                    on_success=alert("Form submitted successfully!")
+                )
+            ),
+            
+            # Display backend response
+            Container(
+                Text("Backend Response:", style="font-bold"),
+                Text(text=useDynamic("form.response"))
+            )
+        )
+    )
+
+app.add_page("index", index())
+```
+
 ## getDateTime() - Timestamp Helper
 
 **Generate client-side timestamps for forms and state updates.
@@ -1331,5 +1384,129 @@ if __name__ == "__main__":
 - Use with non-existent state paths.
 - Nest state paths more than 2 levels deep (currently supports `stateName.property`).
 - Use arithmetic operators without numeric transformations.
+
+---
+
+---
+
+## useFetch() — Declarative Data Fetching
+
+`useFetch` is the primary hook for fetching data from APIs and binding the response to reactive VRefs. It returns a 4-tuple of `(trigger, loading_vref, data_vref, error_vref)` — all pure Python objects.
+
+### Basic Usage
+
+```python
+
+from dars.all import *
+
+trigger, loading, data, error = useFetch("/api/users")
+
+page = Page(
+    Show(loading, Spinner()),
+    Show(error,   Text("Error loading data", style="text-red-500")),
+    Button("Reload", on_click=trigger),
+)
+page.add_script(trigger)  # auto-run on page load
+
+```
+
+### With Callbacks
+
+```python
+
+tasks_sel = ".tasks-data"
+_tasks    = setVRef([], tasks_sel)
+
+trigger, loading, _, error = useFetch(
+    "/api/tasks",
+    on_success=runSequence(
+        updateVRef(".loading", False),
+        updateVRefFromResponse(tasks_sel),  # store response → VRef
+    ),
+    on_error=runSequence(
+        updateVRef(".loading", False),
+        updateVRef(".error", True),
+    ),
+)
+
+```
+
+### POST with Body
+
+```python
+
+trigger, loading, data, error = useFetch(
+    "/api/search",
+    method="POST",
+    body={"query": "dars"},
+    headers={"Content-Type": "application/json"},
+)
+
+```
+
+### Signature
+
+```python
+
+useFetch(
+    url: str,
+    method: str = "GET",
+    body: Any = None,
+    headers: dict = None,
+    on_success: dScript = None,
+    on_error: dScript = None,
+) -> Tuple[dScript, VRefValue, VRefValue, VRefValue]
+
+```
+
+**Returns:** `(trigger_script, loading_vref, data_vref, error_vref)`
+
+- `trigger_script` — `dScript` that initiates the fetch. Use as `on_click` handler or in `runSequence`, or pass to `page.add_script()` to auto-run on load.
+- `loading_vref` — `VRefValue` that is `True` while the request is in flight.
+- `data_vref` — `VRefValue` that holds the parsed response on success.
+- `error_vref` — `VRefValue` that holds the error message on failure.
+
+---
+
+## updateVRefFromResponse() — Store Fetch Response
+
+Stores the API response from a `useFetch` `on_success` context into a VRef selector. The `network_request` DAP op passes the parsed response as `ctx.response`.
+
+```python
+
+updateVRefFromResponse(selector: str, key: str = "response") -> dScript
+
+```
+
+```python
+
+on_success=runSequence(
+    updateVRef(".loading", False),
+    updateVRefFromResponse(".tasks-data"),  # stores ctx.response → VRef
+)
+
+```
+
+Use `key` to read a different context field if needed (default is `"response"`).
+
+---
+
+## runSequence() — Chain Multiple Actions
+
+Execute multiple `dScript` / `RawJS` actions in sequence. Accepts any mix of hooks, VRef updates, fetch triggers, and DAP actions.
+
+```python
+
+from dars.all import *
+
+Button("Submit",
+    on_click=runSequence(
+        updateVRef(".loading", True),
+        fetch_trigger,
+        clearInput("my-input"),
+    )
+)
+
+```
 
 ---

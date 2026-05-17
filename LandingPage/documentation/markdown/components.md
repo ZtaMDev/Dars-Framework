@@ -403,3 +403,144 @@ dynamic_box = Container(
 - **onMount**: Runs once when the component is inserted into the DOM.
 - **onUpdate**: Runs after dynamic updates (e.g., via `updateComp` or reactive `V()` updates).
 - **onUnmount**: Runs right before the component is deleted from the DOM.
+
+---
+
+## Control Flow Components
+
+Dars provides three dedicated components for conditional rendering and list rendering. They work at both compile time (Python booleans and lists) and runtime (VRef expressions from `setVRef` / `useFetch`).
+
+---
+
+### Show — Runtime Visibility Toggle
+
+`Show` **always renders its children** into the DOM. A falsy condition hides the wrapper with `display:none`. When the condition is a VRef expression, the browser runtime shows or hides the wrapper automatically whenever the VRef value changes.
+
+Use `Show` for loading spinners, error banners, and any UI that toggles based on runtime state.
+
+```python
+from dars.all import *
+
+is_loading = setVRef(True, ".tasks-loading")
+has_error  = setVRef(False, ".tasks-error")
+
+# Loading spinner — visible while is_loading is True
+Show(
+    is_loading,
+    Container(
+        Spinner(),
+        Text("Loading tasks…", style="text-gray-500 ml-2"),
+        style="flex items-center gap-2 mb-4",
+    ),
+)
+
+# Error banner — hidden by default, shown when has_error becomes True
+Show(
+    has_error,
+    Container(
+        Text("Could not load tasks. Is the backend running?", style="text-red-600"),
+        style="bg-red-50 border border-red-200 rounded p-3 mb-4",
+    ),
+)
+```
+
+**Compile-time bool** (static hide/show):
+
+```python
+Show(condition=False, Text("Hidden at build time"))
+# → renders with style="display:none"
+```
+
+**Props:**
+
+| Prop | Type | Description |
+|---|---|---|
+| `condition` | `bool` or `VRefValue` | Controls visibility |
+| `*children` | `Component` | One or more child components to render |
+| `id` | `str` | HTML `id` attribute |
+| `class_name` | `str` | CSS class names |
+| `style` | `dict` | Inline styles |
+
+---
+
+### Each — List Rendering
+
+`Each` renders a list of items using a template function. It supports two modes:
+
+- **Compile-time list** — a plain Python `list` is unrolled at export time, one element per item.
+- **Runtime VRef list** — a `VRefValue` (from `setVRef` or `useFetch`) emits a `data-dap-each` attribute; the browser re-renders the container whenever the VRef value changes.
+
+#### Compile-Time List
+
+```python
+from dars.all import *
+
+users = [
+    {"name": "Alice", "role": "Admin"},
+    {"name": "Bob",   "role": "User"},
+]
+
+Each(
+    items=users,
+    render=lambda u: Container(
+        Text(u["name"], style="font-semibold"),
+        Text(u["role"], style="text-sm text-gray-500"),
+        style="flex justify-between p-2 border-b",
+    ),
+)
+```
+
+#### Runtime VRef List (from API)
+
+When `items` is a `VRefValue`, the render function is called at **export time** with a sentinel dict containing `__item_<field>__` placeholder strings. The resulting HTML template is stored in `data-each-template`. At runtime, `dom_each_render` substitutes real item values for each element in the list.
+
+```python
+from dars.all import *
+
+tasks_vref = setVRef([], ".tasks-data")  # starts empty, filled by useFetch
+
+def task_item(t):
+    # t is the sentinel dict at export time → placeholders like "__item_title__"
+    # t is a real task dict at runtime → actual values
+    title   = t.get("title", "__item_title__") if isinstance(t, dict) else "__item_title__"
+    item_id = t.get("id",    "__item_id__")    if isinstance(t, dict) else "__item_id__"
+    return Container(
+        Text(title,         style="flex: 1 1 0%", class_name="__item_done_class__"),
+        Text(f"#{item_id}", style="text-xs text-gray-400 ml-2"),
+        style="flex items-center gap-2 p-2 border rounded mb-1 bg-white shadow-sm",
+    )
+
+Each(
+    items=tasks_vref,
+    render=task_item,
+    class_name="space-y-1 mb-6 min-h-[40px]",
+)
+```
+
+**Special placeholders:**
+
+| Placeholder | Replaced with |
+|---|---|
+| `__item_<field>__` | The value of `item["field"]` for each item |
+| `__item_done_class__` | `"line-through text-gray-400"` if `item["done"]` is truthy, `""` otherwise |
+
+**Supported API response shapes** (automatically unwrapped by `dom_each_render`):
+
+| Response shape | Array used |
+|---|---|
+| `{"tasks": [...]}` | `tasks` |
+| `{"items": [...]}` | `items` |
+| `{"data": [...]}` | `data` |
+| `{"results": [...]}` | `results` |
+| `[...]` | used directly |
+
+**Props:**
+
+| Prop | Type | Description |
+|---|---|---|
+| `items` | `list` or `VRefValue` | Items to render |
+| `render` | `callable(item) -> Component` | Template function |
+| `item_key` | `str` | Key field name for each item (default `"id"`) |
+| `id` | `str` | HTML `id` attribute |
+| `class_name` | `str` | CSS class names |
+| `style` | `dict` | Inline styles |

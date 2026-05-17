@@ -82,7 +82,9 @@ class VRefValue:
             JavaScript code for value registration
         """
         # Format value for JavaScript
-        if isinstance(self.value, bool):
+        if self.value is None:
+            js_value = "null"
+        elif isinstance(self.value, bool):
             js_value = "true" if self.value else "false"
         elif isinstance(self.value, str):
             js_value = f"'{self.value}'"

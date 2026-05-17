@@ -4,7 +4,7 @@ This document outlines the development roadmap for Dars Framework. The goal is t
 
 ## Project Metrics
 
-- **Current Version**: v1.9.6
+- **Current Version**: v1.9.8
 - **Target**: v2.0.0 — Complete Production-Grade Fullstack Python Framework
 
 ---
@@ -73,11 +73,11 @@ Everything below is what's needed to make Dars a real, production-usable fullsta
 - [ ] `CORSMiddleware` — configurable cross-origin resource sharing
 - [ ] `RateLimitMiddleware` — per-IP / per-user rate limiting
 - [ ] `LoggingMiddleware` — request/response logging
-- [ ] `SecurityHeadersMiddleware` — CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy
+- [x] `SecurityHeadersMiddleware` — CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy
 
 ### 3. Data Layer & Persistence
 
-- [ ] `JsonStore` — JSON file-based key-value store for prototyping
+- [x] `JsonStore` — JSON file-based key-value store for prototyping
 - [ ] `SQLiteStore` — lightweight SQLite wrapper
 - [ ] Key-value API: `store.get()`, `store.set()`, `store.delete()`, `store.list()`
 - [ ] SQLAlchemy/SQLModel ORM integration
@@ -91,11 +91,11 @@ Everything below is what's needed to make Dars a real, production-usable fullsta
 
 ### 4. HTTP Client Improvements
 
-- [ ] Request interceptors — auto-inject auth headers in all requests
-- [ ] Response interceptors — handle 401 → redirect to login
+- [x] Request interceptors — auto-inject auth headers in all requests
+- [x] Response interceptors — handle 401 → redirect to login
 - [ ] Global error handler for network failures
-- [ ] `useFetch()` hook — declarative data fetching bound to State
-- [ ] Automatic `isLoading` / `error` / `data` state management
+- [x] `useFetch()` hook — declarative data fetching bound to State
+- [x] Automatic `isLoading` / `error` / `data` state management
 - [ ] Response cache with TTL
 - [ ] Auto-refetch on window focus / interval
 - [ ] Implement actual retry logic (currently signature-only in `fetch()`)
@@ -105,10 +105,10 @@ Everything below is what's needed to make Dars a real, production-usable fullsta
 
 ### 5. Form System Completion
 
-- [ ] Fix duplicate method definitions in `form_helpers.py`
-- [ ] Implement `network_request` DAP operation for `FormData.submit()`
-- [ ] Client-side validation rules: `required`, `email`, `minLength`, `maxLength`, `pattern`, `custom`
-- [ ] Server-side validation via Pydantic schemas
+- [x] Fix duplicate method definitions in `form_helpers.py`
+- [x] Implement `network_request` DAP operation for `FormData.submit()`
+- [x] Client-side validation rules: `required`, `email`, `minLength`, `maxLength`, `pattern`, `custom`
+- [x] Server-side validation via Pydantic schemas (or internal validation equivalent)
 - [ ] Inline error display per field
 - [ ] Form-level error summary
 - [ ] `Form` wrapper component with built-in validation
@@ -133,7 +133,7 @@ Everything below is what's needed to make Dars a real, production-usable fullsta
 - [ ] CSRF token generation per session
 - [ ] CSRF auto-injection in forms and fetch requests
 - [ ] CSRF validation middleware
-- [ ] Security headers: CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy
+- [x] Security headers: CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy
 - [ ] HTTPS enforcement / automatic HTTP → HTTPS redirect
 - [ ] Python-side input sanitization utilities
 - [ ] SQL injection prevention in data layer (parameterized queries)
@@ -156,9 +156,8 @@ Everything below is what's needed to make Dars a real, production-usable fullsta
 ### 9. Business Logic Patterns
 
 - [ ] `useComputed()` / `useMemo()` — derived reactive values with dependency tracking
-- [ ] `If(condition, then_comp, else_comp)` — conditional rendering
-- [ ] `Show(condition, component)` — toggle visibility
-- [ ] `Each(items, template_fn)` / `For` — list rendering with keys
+- [x] `Show(condition, component)` — toggle visibility
+- [x] `Each(items, template_fn)` / `For` — list rendering with keys
 - [ ] Server Actions — call Python functions from client-side events
 - [ ] `debounce(ms, action)` — debounce event handlers
 - [ ] `throttle(ms, action)` — throttle event handlers
@@ -191,7 +190,7 @@ Everything below is what's needed to make Dars a real, production-usable fullsta
 
 ### 12. Developer Experience
 
-- [ ] `.env` file support for secrets and environment variables
+- [x] `.env` file support for secrets and environment variables
 - [x] `dars.config.json` awareness in CLI (preview/dev ports and paths)
 - [x] `dars generate` — scaffold new pages
 - [x] `dars generate component <name>` — scaffold new components

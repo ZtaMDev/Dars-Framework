@@ -1,4 +1,193 @@
+# Release Notes v1.9.8
+
+> **Production-Grade Fullstack: useFetch, FormValidator, Each, JsonStore, UploadPipeline, SecurityHeaders & .env Support**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### `useFetch` — Declarative Data Fetching Hook
+
+A new `useFetch` hook provides a fully Pythonic way to fetch data from APIs and bind the response to reactive VRefs — no JavaScript required.
+
+```python
+from dars.all import *
+
+trigger, loading, data, error = useFetch(
+    "/api/tasks",
+    method="GET",
+    on_success=runSequence(
+        updateVRef(".loading", False),
+        updateVRefFromResponse(".tasks-data"),
+    ),
+    on_error=updateVRef(".error", True),
+)
+
+page.add_script(trigger)  # auto-run on page load
+```
+
+- Returns `(trigger_script, loading_vref, data_vref, error_vref)` — all pure Python objects
+- Integrates with `Show`, `Each`, and `updateVRefFromResponse` for zero-boilerplate reactive UIs
+- Handles loading state, 401 interception, and error propagation automatically via the `network_request` DAP op
+
+### `updateVRefFromResponse` — Store Fetch Response into VRef
+
+New helper that stores the API response from a `useFetch` `on_success` context directly into a VRef selector. Works seamlessly with `Each` for runtime list rendering.
+
+```python
+on_success=runSequence(
+    updateVRef(".loading", False),
+    updateVRefFromResponse(".tasks-data"),  # stores ctx.response → VRef
+)
+```
+
+### `Each` — Runtime List Rendering from VRef
+
+The `Each` component now fully supports runtime VRef items (e.g. from `useFetch`). Pass a `VRefValue` as `items` and a render function — the exporter generates an HTML template at compile time, and the browser substitutes real item values at runtime.
+
+```python
+Each(
+    items=tasks_vref,   # VRefValue from setVRef([])
+    render=lambda t: Container(
+        Text(t.get("title", "__item_title__")),
+        Text(f"#{t.get('id', '__item_id__')}"),
+        style="flex items-center gap-2 p-2 border rounded bg-white",
+    ),
+)
+```
+
+- Compile-time: render function called with a sentinel dict to produce the HTML template
+- Runtime: `dom_each_render` substitutes `__item_<field>__` placeholders with real values
+- Automatically unwraps common API response shapes (`{tasks:[...]}`, `{items:[...]}`, `{data:[...]}`)
+- `done_class` placeholder supported for conditional styling (e.g. strikethrough for completed items)
+
+**Fixed:** `VRefValue` objects passed as `items` no longer cause `TypeError: 'VRefValue' object is not iterable` at export time.
+
+### `FormValidator` — Client-Side Form Validation
+
+Declarative form validation with dual client/server enforcement. Rules are declared once in Python and evaluated both server-side and client-side via DAP.
+
+```python
+validator = FormValidator({
+    "title": [required(), min_length(3), max_length(100)],
+    "email": [required(), email()],
+})
+
+# validated_submit: validates first, only submits if all rules pass
+submit_action = validator.validated_submit(
+    url="/api/tasks",
+    form_data=collect_form(title=V("#title")),
+    on_success=runSequence(clearInput("title"), fetch_trigger),
+    on_error=setText("submit-error", "Error submitting."),
+)
+```
+
+**Available rules:** `required()`, `min_length(n)`, `max_length(n)`, `pattern(regex)`, `email()`, `min_value(n)`, `max_value(n)`, `custom(fn)`
+
+**Fixed:** `validated_submit` now correctly blocks the network request when any validation rule fails. Previously, the submit fired unconditionally after validation.
+
+**Fixed:** `conditional` DAP op now properly resolves DAP expressions (e.g. `bool_expr`, `transform`) as the condition — previously it only evaluated pre-resolved boolean values.
+
+**Fixed:** `transform` DAP op now supports `length`, `is_email`, and `test_pattern` methods needed by the validator runtime.
+
+### `JsonStore` — File-Backed Key-Value Store
+
+Thread-safe, atomic-write JSON persistence for rapid prototyping and small-scale backends.
+
+```python
+from dars.all import *
+
+store = JsonStore("data.json", default={"tasks": []})
+store.set("tasks", [{"id": 1, "title": "Hello"}])
+tasks = store.get("tasks")
+store.delete("tasks")
+store.clear()
+```
+
+- Atomic writes via write-to-`.tmp` then `os.replace()`
+- Per-instance `threading.Lock` on all mutating operations
+- Raises `ValueError` with a descriptive message on malformed JSON
+
+### `UploadPipeline` — Server-Side File Upload Handler
+
+Validates MIME type and file size, sanitises filenames, and saves uploads to a configurable directory.
+
+```python
+from dars.all import *
+
+pipeline = UploadPipeline(
+    upload_dir="uploads",
+    allowed_types=["image/png", "image/jpeg"],
+    max_size_bytes=10 * 1024 * 1024,
+)
+pipeline.create_endpoint(app, path="/api/upload")
+```
+
+- Returns HTTP 415 for unsupported MIME types
+- Returns HTTP 413 for oversized files
+- `sanitize_filename()` removes path traversal (`../`, `./`) and unsafe characters
+
+### `SecurityHeadersMiddleware` — HTTP Security Headers
+
+Injects five security headers into every response without overwriting existing ones.
+
+```python
+from dars.all import *
+
+ssr.use_security_headers()
+# or manually:
+app.add_middleware(SecurityHeadersMiddleware, csp="default-src 'self'", hsts=True)
+```
+
+Default headers: `X-Content-Type-Options`, `X-Frame-Options`, `X-XSS-Protection`, `Referrer-Policy`, `Permissions-Policy`. Optional `Content-Security-Policy` and `Strict-Transport-Security`.
+
+### `DarsEnv` — `.env` File Support
+
+`DarsEnv` now loads `.env` files automatically at config load time.
+
+```python
+from dars.env import DarsEnv
+
+DarsEnv.load()                        # loads .env silently if present
+api_key = DarsEnv.get("API_KEY")      # os.environ.get with default
+secret   = DarsEnv.require("SECRET")  # raises KeyError if missing
+```
+
+- Does not overwrite existing `os.environ` keys
+- Strips surrounding quotes from values
+- Skips blank lines and `#` comments
+- Called automatically by `load_config()` before reading `dars.config.json`
+
+### `SSRApp` — Production-Ready SSR Backend Helper
+
+The `SSRApp` class (used in `backend/api.py`) now exposes clean methods for CORS, security headers, file uploads, and custom routes:
+
+```python
+ssr = SSRApp(dars_app, prefix="/api/ssr")
+ssr.use_cors(origins=["http://localhost:4000"], credentials=True)
+ssr.use_security_headers()
+ssr.use_upload(upload_dir="uploads", allowed_types=["image/png"], max_size_bytes=10_485_760)
+
+# In production, serve the exported frontend files with built-in SPA 404 fallback:
+if not DarsEnv.is_dev():
+    ssr.use_spa_fallback()
+
+app = ssr.fastapi_app
+```
+
+### CLI UX Upgrades & `fullstack` Renaming
+
+- **`dars preview` Revamp**: The `preview` command UI has been completely redesigned with a beautiful `rich` terminal UI, detailing project mode, target directories, and the backend server. It now interactively asks to start the server and automatically opens your browser. Graceful `taskkill` shutdown has been added to prevent orphaned background processes.
+- **`--type fullstack`**: The `dars init --type ssr` command has been renamed to `dars init --type fullstack` to better reflect the complete SPA + SSR + API nature of the scaffolded backend.
+
+---
+
 # Release Notes v1.9.7
+
 
 > **Hybrid Stability, Anti-Flash System & CLI UX Overhaul**
 

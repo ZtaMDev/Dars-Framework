@@ -256,21 +256,9 @@ def preview_app(directory: str, auto_open: bool = True, port: int = 8000, host: 
 
     url = server.get_url()
 
-    # Show information
-    panel = Panel(
-        Text(
-            f"Preview server running successfully\n\n"
-            f"URL: {url}\n"
-            f"Directory: {directory}\n"
-            f"Port: {port}\n\n"
-            f"Press Ctrl+C to stop the server",
-            style="bold green",
-            justify="center",
-        ),
-        title="Dars Preview",
-        border_style="cyan",
-    )
-    console.print(panel)
+    # Show minimal information
+    console.print(f"[dim]Serving directory:[/dim] {directory}")
+    console.print(f"[dim]Press [bold]Ctrl+C[/bold] to stop the server[/dim]\n")
 
     # Open in browser if requested
     if auto_open:

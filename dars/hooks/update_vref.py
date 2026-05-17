@@ -110,3 +110,35 @@ def updateVRef(
             "value": _to_structure(value)
         }
     })
+
+
+def updateVRefFromResponse(selector: str, key: str = "response") -> dScript:
+    """
+    Update a VRef with a value from the fetch response context.
+
+    Use this inside ``on_success`` callbacks of ``useFetch`` to store the
+    API response into a VRef selector so that ``Each`` and other reactive
+    components re-render automatically.
+
+    Args:
+        selector: CSS selector of the VRef to update (e.g. ``".tasks-data"``).
+        key: Key to read from the fetch context (default ``"response"``).
+             ``network_request`` stores the parsed response body under
+             ``ctx.response``.
+
+    Returns:
+        dScript encoding a ``vref_update`` DAP action.
+
+    Example::
+
+        trigger, *_ = useFetch("/api/tasks", on_success=runSequence(
+            updateVRefFromResponse(".tasks-data"),
+        ))
+    """
+    return dScript(data={
+        "op": "vref_update",
+        "args": {
+            "selector": selector,
+            "value": {"op": "get_context_value", "args": {"key": key}},
+        },
+    })

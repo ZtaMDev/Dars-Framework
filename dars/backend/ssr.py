@@ -519,38 +519,34 @@ class SSRApp:
         self.fastapi_app = FastAPI(title=title or f"{dars_app.title} - SSR Backend")
         self.renderer = SSRRenderer(dars_app)
         self._setup_core_routes()
-        
+
     def _setup_core_routes(self):
-        from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
-        
+        from fastapi.responses import HTMLResponse, JSONResponse
+
         # Health check
         @self.fastapi_app.get("/_dars/health")
         async def health_check():
             return {"status": "ok", "app": self.dars_app.title}
-            
+
         # Register SSR routes
         ssr_routes = []
         for name, route in self.dars_app._spa_routes.items():
             metadata = getattr(route.root, '__dars_route_metadata__', None)
             if metadata and metadata.route_type == RouteType.SSR:
                 ssr_routes.append((name, route))
-        
+
         for route_name, route in ssr_routes:
-            # 1. API Endpoint (JSON)
             self._register_api_endpoint(route_name)
-            
-            # 2. HTML Endpoint (Browser)
             if hasattr(route, 'route') and route.route:
-                 self._register_html_endpoint(route_name, route.route)
-                 
-        start_msg = f"[SSR] Initialized {len(ssr_routes)} server-side routes."
-        print(start_msg)
+                self._register_html_endpoint(route_name, route.route)
+
+        print(f"[SSR] Initialized {len(ssr_routes)} server-side routes.")
 
     def _register_api_endpoint(self, route_name: str):
         from fastapi.responses import JSONResponse
-        
+
         api_path = f"{self.prefix}/{route_name}"
-        
+
         @self.fastapi_app.get(api_path)
         async def api_endpoint(request: Request):
             try:
@@ -565,37 +561,161 @@ class SSRApp:
                 raise HTTPException(status_code=500, detail=f"SSR render error: {str(e)}")
 
     def _register_html_endpoint(self, route_name: str, route_path: str):
-        from fastapi.responses import HTMLResponse, StreamingResponse
-        
+        from fastapi.responses import HTMLResponse
+
         @self.fastapi_app.get(route_path)
         async def html_endpoint(request: Request):
             try:
                 params = dict(request.query_params)
                 result = self.renderer.render_route(route_name, params)
-                full_html = result['fullHtml']
-                return HTMLResponse(content=full_html, status_code=200)
+                return HTMLResponse(content=result['fullHtml'], status_code=200)
             except ValueError as e:
                 raise HTTPException(status_code=404, detail=str(e))
             except Exception as e:
-                print(f"Error rendering {route_path}: {e}")
                 import traceback
                 traceback.print_exc()
                 raise HTTPException(status_code=500, detail="Internal Server Error")
 
+    # ------------------------------------------------------------------
+    # Middleware helpers
+    # ------------------------------------------------------------------
+
+    def use_security_headers(self, csp: str = None, hsts: bool = False):
+        """Add :class:`~dars.backend.middleware.SecurityHeadersMiddleware`."""
+        from dars.backend.middleware import SecurityHeadersMiddleware
+        self.fastapi_app.add_middleware(SecurityHeadersMiddleware, csp=csp, hsts=hsts)
+        return self
+
+    def use_cors(self, origins=None, methods=None, headers=None, credentials: bool = True):
+        """Add CORS middleware with Dars-friendly defaults."""
+        from fastapi.middleware.cors import CORSMiddleware as _CORS
+        self.fastapi_app.add_middleware(
+            _CORS,
+            allow_origins=origins or ["*"],
+            allow_methods=methods or ["*"],
+            allow_headers=headers or ["*"],
+            allow_credentials=credentials,
+        )
+        return self
+
+    def use_auth(self, secret: str, exclude_paths: list = None):
+        """Add JWT :class:`~dars.backend.middleware.AuthMiddleware`."""
+        from dars.backend.middleware import AuthMiddleware
+        self.fastapi_app.add_middleware(AuthMiddleware, secret=secret, exclude_paths=exclude_paths or [])
+        return self
+
+    # ------------------------------------------------------------------
+    # Upload pipeline helper
+    # ------------------------------------------------------------------
+
+    def use_upload(self, upload_dir: str = "uploads", allowed_types: list = None,
+                   max_size_bytes: int = None, path: str = "/api/upload"):
+        """Register a file upload endpoint via :class:`~dars.backend.upload.UploadPipeline`."""
+        from dars.backend.upload import UploadPipeline
+        pipeline = UploadPipeline(
+            upload_dir=upload_dir,
+            allowed_types=allowed_types,
+            max_size_bytes=max_size_bytes,
+        )
+        pipeline.create_endpoint(self.fastapi_app, path=path)
+        return self
+
+    def use_spa_fallback(self, frontend_dir: str = None):
+        """
+        Mount the built frontend (dist/) as static files and add an SPA fallback
+        middleware so that SPA routes like /about are served index.html instead
+        of returning 404.
+
+        This MUST be called after all API routes are registered and is the only
+        approach that works when dist/404.html exists (StaticFiles html=True silently
+        serves 404.html without raising, bypassing exception_handler approaches).
+
+        Args:
+            frontend_dir: Absolute path to the dist/ directory. When omitted the
+                          path is resolved from dars.config.json or defaults to
+                          <project_root>/dist.
+        """
+        import os
+        from fastapi.staticfiles import StaticFiles
+        from fastapi.responses import FileResponse
+        from starlette.middleware.base import BaseHTTPMiddleware
+
+        if frontend_dir is None:
+            # Try to resolve from apiConfig
+            try:
+                import importlib, sys
+                if '' not in sys.path:
+                    sys.path.insert(0, '')
+                api_cfg = importlib.import_module('backend.apiConfig')
+                frontend_dir = api_cfg.DarsEnv.get_frontend_dist_dir()
+            except Exception:
+                frontend_dir = os.path.join(os.getcwd(), 'dist')
+
+        frontend_dir = os.path.abspath(frontend_dir)
+        index_html = os.path.join(frontend_dir, 'index.html')
+
+        if not os.path.isdir(frontend_dir):
+            import warnings
+            warnings.warn(
+                f"[Dars] use_spa_fallback: frontend dir not found at '{frontend_dir}'. "
+                "Run 'dars build' first."
+            )
+            return self
+
+        class SPAFallbackMiddleware(BaseHTTPMiddleware):
+            """Return index.html for any 404 with no file extension (SPA routes)."""
+            async def dispatch(self, request, call_next):
+                response = await call_next(request)
+                if response.status_code == 404:
+                    path = request.url.path
+                    if not os.path.splitext(path)[1] and os.path.isfile(index_html):
+                        return FileResponse(index_html, media_type='text/html')
+                return response
+
+        self.fastapi_app.add_middleware(SPAFallbackMiddleware)
+
+        lib_dir = os.path.join(frontend_dir, 'lib')
+        if os.path.isdir(lib_dir):
+            self.fastapi_app.mount('/lib', StaticFiles(directory=lib_dir), name='lib')
+
+        self.fastapi_app.mount('/', StaticFiles(directory=frontend_dir, html=True), name='frontend')
+        return self
+
+    # ------------------------------------------------------------------
+    # Store helper
+    # ------------------------------------------------------------------
+
+    def use_store(self, path: str = "dars_store.json", default: dict = None):
+        """Create and return a :class:`~dars.backend.store.JsonStore` instance."""
+        from dars.backend.store import JsonStore
+        return JsonStore(path=path, default=default)
+
+    # ------------------------------------------------------------------
+    # Standard FastAPI delegation
+    # ------------------------------------------------------------------
+
     def add_middleware(self, middleware_class, **options):
-        """Add FastAPI middleware."""
         self.fastapi_app.add_middleware(middleware_class, **options)
-        
+
     def include_router(self, router, **kwargs):
-        """Include an external APIRouter."""
         self.fastapi_app.include_router(router, **kwargs)
-        
-    def mount(self, path: str, app: Any, name: str = None):
-        """Mount another WSGI/ASGI app."""
+
+    def mount(self, path: str, app, name: str = None):
         self.fastapi_app.mount(path, app, name)
 
+    def get(self, path: str, **kwargs):
+        return self.fastapi_app.get(path, **kwargs)
+
+    def post(self, path: str, **kwargs):
+        return self.fastapi_app.post(path, **kwargs)
+
+    def put(self, path: str, **kwargs):
+        return self.fastapi_app.put(path, **kwargs)
+
+    def delete(self, path: str, **kwargs):
+        return self.fastapi_app.delete(path, **kwargs)
+
     def run(self, host="0.0.0.0", port=8000, reload=False):
-        """Run the SSR server using Uvicorn."""
         import uvicorn
         uvicorn.run(self.fastapi_app, host=host, port=port, reload=reload)
 

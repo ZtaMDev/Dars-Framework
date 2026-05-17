@@ -1,363 +1,677 @@
-# Backend HTTP Utilities 
+# Backend & Fullstack API
 
-Dars Framework provides a powerful, **Pythonic system** for handling HTTP requests and API communication without writing any JavaScript. The `dars.backend` module enables you to fetch data, bind it to components, and create reactive UIs entirely in Python.
+Dars provides a complete fullstack toolkit: HTTP utilities, a declarative fetch hook, form validation, file uploads, a JSON store, security middleware, and environment management — all in pure Python.
 
 ## Table of Contents
 
-- [Quick Start with HTTP UTILS](#quick-start-with-http-utils)
-- [HTTP Functions](#http-functions)
-- [Data Binding with useData()](#data-binding-with-usedata)
-- [JSON Utilities](#json-utilities)
+- [SSR Backend Setup](#ssr-backend-setup)
+- [useFetch — Declarative Data Fetching](#usefetch--declarative-data-fetching)
+- [updateVRefFromResponse](#updatevrefromresponse)
+- [FormValidator — Client-Side Validation](#formvalidator--client-side-validation)
+- [JsonStore — File-Backed Storage](#jsonstore--file-backed-storage)
+- [UploadPipeline — File Uploads](#uploadpipeline--file-uploads)
+- [SecurityHeadersMiddleware](#securityheadersmiddleware)
+- [DarsEnv — Environment Variables](#darsenv--environment-variables)
+- [HTTP Client Utilities](#http-client-utilities)
 - [Component Management](#component-management)
+- [Full Fullstack Example](#full-fullstack-example)
 
 ---
 
-## Quick Start with HTTP UTILS
+## SSR Backend Setup
+
+Dars SSR projects use `SSRApp` to wire together FastAPI, CORS, security headers, and file uploads in one place.
+
+### Project Structure
+
+```
+my-app/
+├── main.py                  # Dars frontend (routes, components)
+├── backend/
+│   ├── api.py               # FastAPI entry point
+│   └── apiConfig.py         # Environment config
+├── dars.config.json
+└── .env                     # Environment variables (auto-loaded)
+```
+
+### `backend/api.py`
 
 ```python
-from dars.all import *
-from dars.backend import get, useData
+from dars.backend.ssr import SSRApp
+from backend.apiConfig import DarsEnv
+from main import app as dars_app
 
-app = App(title="API Demo")
+ssr = SSRApp(dars_app, prefix="/api/ssr", title="My App - Backend")
 
-# Create display component
-user_display = Text("No data", id="user-name")
-user_state = State(user_display, text="No data")
-
-# Fetch and bind data - pure Python!
-fetch_btn = Button(
-    "Fetch User",
-    on_click=get(
-        id="userData",
-        url="https://api.example.com/user/1",
-        callback=user_state.text.set(useData('userData').name)
-    )
+urls = DarsEnv.get_urls()
+ssr.use_cors(
+    origins=[urls["frontend"], "http://127.0.0.1:4000"],
+    credentials=True,
+)
+ssr.use_security_headers()
+ssr.use_upload(
+    upload_dir="uploads",
+    allowed_types=["image/png", "image/jpeg", "application/pdf"],
+    max_size_bytes=10 * 1024 * 1024,
+    path="/api/upload",
 )
 
-app.set_root(Container(user_display, fetch_btn))
+app = ssr.fastapi_app
+
+# ── Production: serve dist/ as static files with SPA fallback ───────────────
+if not DarsEnv.is_dev():
+    ssr.use_spa_fallback()
+# ────────────────────────────────────────────────────────────────────────────
+
+# Custom API routes
+from fastapi import Request
+from fastapi.responses import JSONResponse
+from dars.backend.store import JsonStore
+
+_store = JsonStore("tasks_db.json", default={"tasks": []})
+
+@app.get("/api/tasks")
+async def get_tasks():
+    return JSONResponse({"tasks": _store.get("tasks", [])})
+
+@app.post("/api/tasks")
+async def create_task(request: Request):
+    body = await request.json()
+    tasks = _store.get("tasks", [])
+    task = {"id": len(tasks) + 1, "title": body.get("title", ""), "done": False}
+    tasks.append(task)
+    _store.set("tasks", tasks)
+    return JSONResponse(task, status_code=201)
 
 if __name__ == "__main__":
-    app.rTimeCompile()
+    import uvicorn
+    print("\n" + "=" * 60)
+    print("Dars Fullstack Backend")
+    print("=" * 60)
+    if DarsEnv.is_dev():
+        print(f"  Backend:  {urls['backend']}")
+        print(f"  Frontend: {urls['frontend']}  (run 'dars dev' separately)")
+        print(f"  API Docs: {urls['backend']}/docs")
+        port, host = 3000, "127.0.0.1"
+    else:
+        frontend_dir = DarsEnv.get_frontend_dist_dir()
+        print(f"  App:      http://0.0.0.0:8000  (frontend + API, same origin)")
+        print(f"  Frontend: {frontend_dir}")
+        port, host = 8000, "0.0.0.0"
+    print("=" * 60 + "\n")
+    uvicorn.run(app, host=host, port=port)
+```
+
+### `backend/apiConfig.py`
+
+```python
+import os
+
+class DarsEnv:
+    MODE = os.environ.get("DARS_MODE", "development")
+
+    @staticmethod
+    def is_dev():
+        return DarsEnv.MODE == "development"
+
+    @staticmethod
+    def get_urls():
+        if DarsEnv.is_dev():
+            return {"backend": "http://localhost:3000", "frontend": "http://localhost:4000"}
+        return {"backend": "/", "frontend": "/"}
+```
+
+### Running
+
+```bash
+# Terminal 1 — Frontend dev server
+dars dev
+
+# Terminal 2 — Backend SSR server
+dars dev --backend
 ```
 
 ---
 
-## HTTP Functions
+## useFetch — Declarative Data Fetching
 
-The `dars.backend` module provides standard HTTP methods that return `dScript` objects:
+`useFetch` creates a fetch trigger and three reactive VRefs (loading, data, error) wired to a `network_request` DAP action. No JavaScript needed.
 
-### `get(id, url, **options)`
-
-Performs a GET request.
+### Signature
 
 ```python
-from dars.backend import get
-
-# Basic GET
-get_user = get(
-    id="userData",
-    url="https://jsonplaceholder.typicode.com/users/1"
-)
-
-# With callback
-get_user = get(
-    id="userData",
-    url="https://api.example.com/user/1",
-    callback=status_state.text.set("✅ Loaded!"),
-    on_error=status_state.text.set("❌ Error!")
-)
+useFetch(
+    url: str,
+    method: str = "GET",
+    body: Any = None,
+    headers: dict = None,
+    on_success: dScript = None,
+    on_error: dScript = None,
+) -> Tuple[dScript, VRefValue, VRefValue, VRefValue]
 ```
 
-### `post(id, url, body, **options)`
-
-Performs a POST request.
-
-```python
-from dars.backend import post
-
-# POST with JSON body
-create_user = post(
-    id="createResult",
-    url="https://api.example.com/users",
-    body={"name": "John", "email": "john@example.com"},
-    callback=status_state.text.set("User created!")
-)
-```
-
-### Other Methods
-
-- **`put(id, url, body, **options)`** - Update resource
-- **`delete(id, url, **options)`** - Delete resource
-- **`patch(id, url, body, **options)`** - Partial update
-- **`fetch(id, url, method, **options)`** - Generic fetch
-
-### Common Options
-
-All HTTP functions accept these options:
-
-| Option | Type | Description |
-|--------|------|-------------|
-| `id` | `str` | **Required**. Operation ID (NOT HTML ID) for accessing data |
-| `url` | `str` | **Required**. API endpoint URL |
-| `headers` | `dict` | Custom HTTP headers |
-| `callback` | `dScript` | Executed on success |
-| `on_error` | `dScript` | Executed on error |
-| `parse_json` | `bool` | Auto-parse JSON response (default: `True`) |
-| `timeout` | `int` | Request timeout in milliseconds |
-
----
-
-## Data Binding with useData()
-
-The `useData()` function provides **Pythonic access** to fetched data using dot notation:
+Returns `(trigger_script, loading_vref, data_vref, error_vref)`.
 
 ### Basic Usage
 
 ```python
-from dars.backend import useData
+from dars.all import *
 
-# Access fetched data by operation ID
-user_data = useData('userData')
+trigger, loading, data_vref, error = useFetch("/api/users")
 
-# Access nested properties with dot notation
-user_name = useData('userData').name
-user_email = useData('userData').email
-user_address_city = useData('userData').address.city
+page = Page(
+    Show(loading, Spinner()),
+    Show(error,   Text("Error loading data", style="text-red-500")),
+    Text(data_vref),
+    Button("Reload", on_click=trigger),
+)
+page.add_script(trigger)  # auto-run on load
 ```
 
-### How It Works
-
-1. **Operation ID**: When you call `get(id="userData", ...)`, the response is stored in `window.userData`
-2. **DataAccessor**: `useData('userData')` creates a `DataAccessor` object
-3. **Dot Notation**: `.name` uses `__getattr__` to create `window.userData?.name`
-4. **RawJS Generation**: The `.code` property generates the JavaScript expression
-
-### Binding to StateV2
-
-The most powerful feature is binding API data directly to component states:
+### With Callbacks
 
 ```python
-from dars.all import *
-from dars.backend import get, useData
+tasks_sel = ".tasks-data"
+_tasks = setVRef([], tasks_sel)
 
-# Create components and states
-name_display = Text("", id="user-name")
-email_display = Text("", id="user-email")
-
-name_state = State(name_display, text="")
-email_state = State(email_display, text="")
-
-# Fetch and bind - pure Python!
-fetch_button = Button(
-    "Fetch User",
-    on_click=get(
-        id="userData",
-        url="https://jsonplaceholder.typicode.com/users/1",
-        # Chain multiple state updates with .then()
-        callback=(
-            name_state.text.set(useData('userData').name)
-            .then(email_state.text.set(useData('userData').email))
-        )
-    )
+trigger, loading, _, error = useFetch(
+    "/api/tasks",
+    on_success=runSequence(
+        updateVRef(".loading", False),
+        updateVRefFromResponse(tasks_sel),   # store response → VRef
+    ),
+    on_error=runSequence(
+        updateVRef(".loading", False),
+        updateVRef(".error", True),
+    ),
 )
 ```
 
-### Chaining with `.then()`
-
-Chain multiple operations sequentially:
+### POST with Body
 
 ```python
-# Update multiple components
-callback=(
-    status_state.text.set("Loading...")
-    .then(name_state.text.set(useData('userData').name))
-    .then(email_state.text.set(useData('userData').email))
-    .then(status_state.text.set("✅ Loaded!"))
+trigger, loading, data, error = useFetch(
+    "/api/search",
+    method="POST",
+    body={"query": "dars"},
+    headers={"Content-Type": "application/json"},
 )
 ```
 
 ---
 
-## JSON Utilities
+## updateVRefFromResponse
 
-Helper functions for working with JSON data:
-
-### `stringify(data, pretty=False)`
-
-Convert data to JSON string:
+Stores the API response from a `useFetch` `on_success` context into a VRef selector. The `network_request` DAP op passes the parsed response as `ctx.response`.
 
 ```python
-from dars.backend import stringify, useData
-
-# Stringify fetched data
-display_state.text.set(stringify(useData('userData'), pretty=True))
-
-# Stringify Python objects
-json_str = stringify({"name": "John", "age": 30})
+updateVRefFromResponse(selector: str, key: str = "response") -> dScript
 ```
 
-### `parse(json_string)`
-
-Parse JSON string:
-
 ```python
-from dars.backend import parse
-
-# Parse JSON string
-data = parse('{"name": "John"}')
+on_success=runSequence(
+    updateVRef(".loading", False),
+    updateVRefFromResponse(".tasks-data"),
+)
 ```
 
-### `get_value(obj, path, default=None)`
+Use `key` to read a different context field if needed (default is `"response"`).
 
-Safely access nested values:
+---
+
+## FormValidator — Client-Side Validation
+
+Declarative validation with dual client/server enforcement. Rules are declared once in Python.
+
+### Rules
+
+| Constructor | Description |
+|---|---|
+| `required()` | Field must be non-empty |
+| `min_length(n)` | Minimum character count |
+| `max_length(n)` | Maximum character count |
+| `email()` | Must be a valid email address |
+| `pattern(regex)` | Must match regex |
+| `min_value(n)` | Numeric minimum |
+| `max_value(n)` | Numeric maximum |
+| `custom(fn)` | Python callable `(value) -> Optional[str]` |
+
+### `validated_submit`
+
+Validates all rules client-side first. Only fires the network request if every rule passes. Error messages appear in `#{field}-error` elements.
 
 ```python
-from dars.backend import get_value, useData
+from dars.all import *
 
-# Safe nested access with default
-city = get_value(useData('userData'), 'address.city', default='Unknown')
+task_form = collect_form(title=V("#title"))
+
+validator = FormValidator({
+    "title": [required(), min_length(3), max_length(100)],
+})
+
+submit_action = validator.validated_submit(
+    url="/api/tasks",
+    form_data=task_form,
+    on_success=runSequence(clearInput("title"), fetch_trigger),
+    on_error=setText("submit-error", "Error submitting. Try again."),
+)
+
+# In your Page:
+Input(id="title", placeholder="Task title…"),
+Text("", id="title-error", style="text-red-500 text-sm"),
+Button("Add Task", on_click=submit_action),
+```
+
+> **Important:** The input `id` must match the field name in `FormValidator` so the selector `#title` resolves correctly.
+
+### Server-Side Validation
+
+```python
+errors = validator.validate_server({"title": "Hi"})
+# → {"title": ["Must be at least 3 characters."]}
+
+errors = validator.validate_server({"title": "Hello World"})
+# → {}  (all pass)
+```
+
+### Get Rules as JSON
+
+```python
+rules_json = validator.get_rules_json()
+# → '{"title": [{"type": "required"}, {"type": "min_length", "n": 3}]}'
+```
+
+---
+
+## JsonStore — File-Backed Storage
+
+Thread-safe, atomic-write JSON persistence. Ideal for prototyping and small backends.
+
+```python
+from dars.all import *
+
+store = JsonStore("data.json", default={"tasks": []})
+
+# Read
+tasks = store.get("tasks", [])
+
+# Write (atomic)
+store.set("tasks", tasks + [{"id": 1, "title": "New task"}])
+
+# Delete key
+store.delete("tasks")
+
+# Get all
+all_data = store.all()
+
+# Clear
+store.clear()
+```
+
+- Writes to a `.tmp` file then atomically replaces the target via `os.replace()`
+- Per-instance `threading.Lock` on all mutating operations
+- Raises `ValueError` on malformed JSON with a descriptive message
+
+---
+
+## UploadPipeline — File Uploads
+
+Server-side file upload handler with MIME type validation, size limits, and filename sanitisation.
+
+```python
+from dars.all import *
+
+pipeline = UploadPipeline(
+    upload_dir="uploads",
+    allowed_types=["image/png", "image/jpeg", "image/gif", "application/pdf"],
+    max_size_bytes=10 * 1024 * 1024,  # 10 MB
+)
+pipeline.create_endpoint(app, path="/api/upload")
+```
+
+| Status | Condition |
+|---|---|
+| `200` | Upload successful — returns `{"url": "/uploads/filename.png"}` |
+| `413` | File exceeds `max_size_bytes` |
+| `415` | MIME type not in `allowed_types` |
+| `500` | Disk write failure |
+
+### Custom Rename
+
+```python
+import uuid
+
+pipeline = UploadPipeline(
+    upload_dir="uploads",
+    rename_fn=lambda name: f"{uuid.uuid4().hex}_{name}",
+)
+```
+
+### Filename Sanitisation
+
+`UploadPipeline.sanitize_filename(filename)` removes `../`, `./`, and any character outside `[a-zA-Z0-9._-]`.
+
+### FileUpload Component
+
+```python
+FileUpload(
+    upload_url="/api/upload",
+    accepted_types=["image/png", "image/jpeg"],
+    max_size_bytes=5 * 1024 * 1024,
+    on_upload_complete=setText("status", "Uploaded!"),
+    on_upload_error=setText("status", "Upload failed."),
+)
+```
+
+---
+
+## SecurityHeadersMiddleware
+
+Injects HTTP security headers into every response. Headers are only added when not already present, so application code can override any individual header.
+
+```python
+from dars.all import *
+
+# Via SSRApp (recommended)
+ssr.use_security_headers()
+
+# Or manually
+from dars.backend.middleware import SecurityHeadersMiddleware
+app.add_middleware(SecurityHeadersMiddleware, csp="default-src 'self'", hsts=True)
+```
+
+**Default headers injected:**
+
+| Header | Value |
+|---|---|
+| `X-Content-Type-Options` | `nosniff` |
+| `X-Frame-Options` | `DENY` |
+| `X-XSS-Protection` | `1; mode=block` |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` |
+| `Permissions-Policy` | `geolocation=(), microphone=(), camera=()` |
+
+**Optional:**
+- `csp="..."` → adds `Content-Security-Policy`
+- `hsts=True` → adds `Strict-Transport-Security: max-age=31536000; includeSubDomains`
+
+---
+
+## DarsEnv — Environment Variables
+
+`DarsEnv` loads `.env` files and provides typed access to environment variables.
+
+### `.env` File
+
+```env
+API_KEY=my-secret-key
+DATABASE_URL=sqlite:///./app.db
+DEBUG=true
+```
+
+### Usage
+
+```python
+from dars.env import DarsEnv
+
+# Load .env (called automatically by load_config)
+DarsEnv.load()
+DarsEnv.load(path="config/.env")  # custom path
+
+# Read
+api_key = DarsEnv.get("API_KEY")           # None if missing
+api_key = DarsEnv.get("API_KEY", "default")
+
+# Require (raises KeyError if missing)
+secret = DarsEnv.require("SECRET_KEY")
+
+# Dev/prod mode
+DarsEnv.set_dev_mode(True)
+if DarsEnv.dev:
+    print("Running in development mode")
+```
+
+**Rules:**
+- Does not overwrite existing `os.environ` keys
+- Strips surrounding single or double quotes from values
+- Skips blank lines and `#` comments
+- Splits on the first `=` only (values may contain `=`)
+- Called automatically by `load_config()` before reading `dars.config.json`
+
+---
+
+## HTTP Client Utilities
+
+Lower-level HTTP helpers that return `dScript` objects for use in event handlers.
+
+```python
+from dars.backend.http import fetch, get, post, put, delete, patch
+
+# GET
+get_users = get(id="userData", url="/api/users")
+
+# POST
+create_user = post(
+    id="createResult",
+    url="/api/users",
+    body={"name": "Alice"},
+    callback=alert("User created!"),
+    on_error=alert("Error!"),
+)
+```
+
+### Interceptors
+
+```python
+from dars.backend.http import add_request_interceptor, use_auth_interceptor
+
+# Add auth token to every request
+use_auth_interceptor(token_key="dars_auth_token")
+
+# Custom interceptor
+add_request_interceptor(lambda cfg: {**cfg, "headers": {**cfg.get("headers", {}), "X-App": "1"}})
+```
+
+### `useData` — Access Response Data
+
+```python
+from dars.backend.data import useData
+
+# Dot-notation access to fetched data
+name_state.text.set(useData("userData").name)
+city_state.text.set(useData("userData").address.city)
 ```
 
 ---
 
 ## Component Management
 
-Create, update, and delete components dynamically at runtime:
-
-### `createComp(target, root, position="append")`
-
-Create a new component in the DOM:
+Create, update, and delete components dynamically at runtime.
 
 ```python
-from dars.backend import createComp
+from dars.all import *
 
-# Create new component
-new_text = Text("Hello!", id="new-item")
-create_btn.on_click = createComp(
-    target=new_text,
-    root="container-id",
-    position="append"  # or "prepend", "before:id", "after:id"
+new_item = Text("Hello!", id="new-item")
+
+Button("Add",    on_click=createComp(new_item, root="container-id", position="append"))
+Button("Remove", on_click=deleteComp("new-item"))
+Button("Update", on_click=updateComp("new-item", text="Updated!"))
+```
+
+---
+
+## Full Fullstack Example
+
+A complete task manager using `useFetch`, `Each`, `FormValidator`, `JsonStore`, and `SSRApp`.
+
+### Frontend (`pages/did.py`)
+
+```python
+from dars.all import *
+
+@route("/did")
+def did():
+    loading_sel = ".tasks-loading"
+    error_sel   = ".tasks-error"
+    tasks_sel   = ".tasks-data"
+
+    is_loading = setVRef(True,  loading_sel)
+    has_error  = setVRef(False, error_sel)
+    _tasks     = setVRef([],    tasks_sel)
+
+    on_fetch_success = runSequence(
+        updateVRef(loading_sel, False),
+        updateVRef(error_sel,   False),
+        updateVRefFromResponse(tasks_sel),
+    )
+    on_fetch_error = runSequence(
+        updateVRef(loading_sel, False),
+        updateVRef(error_sel,   True),
+    )
+
+    fetch_trigger, _lv, _dv, _ev = useFetch(
+        "/api/tasks",
+        on_success=on_fetch_success,
+        on_error=on_fetch_error,
+    )
+
+    task_form = collect_form(title=V("#title"))
+    validator = FormValidator({"title": [required(), min_length(3), max_length(100)]})
+
+    submit_action = validator.validated_submit(
+        url="/api/tasks",
+        form_data=task_form,
+        on_success=runSequence(clearInput("title"), fetch_trigger),
+        on_error=setText("submit-error", "Error submitting. Try again."),
+    )
+
+    def task_item(t):
+        title   = t.get("title", "__item_title__") if isinstance(t, dict) else "__item_title__"
+        item_id = t.get("id",    "__item_id__")    if isinstance(t, dict) else "__item_id__"
+        return Container(
+            Text(title,        style="flex: 1 1 0%", class_name="__item_done_class__"),
+            Text(f"#{item_id}", style="text-xs text-gray-400 ml-2"),
+            style="flex items-center gap-2 p-2 border rounded mb-1 bg-white shadow-sm",
+        )
+
+    page = Page(
+        Container(
+            Head("Task Manager"),
+            Text("Task Manager", style="text-3xl font-bold mb-1 text-indigo-600"),
+
+            Show(is_loading, Container(Spinner(), Text("Loading…"), style="flex gap-2 mb-4")),
+            Show(has_error,  Container(Text("Backend not running?", style="text-red-600"),
+                                       style="bg-red-50 border rounded p-3 mb-4")),
+
+            Each(items=_tasks, render=task_item, class_name="space-y-1 mb-6 min-h-[40px]"),
+
+            Container(
+                Text("Add a task", style="font-semibold mb-2"),
+                Input(id="title", placeholder="Task title (min 3 chars)…",
+                      class_name="border rounded px-3 py-2 w-full mb-1"),
+                Text("", id="title-error",  style="text-red-500 text-sm mb-1"),
+                Text("", id="submit-error", style="text-red-500 text-sm mb-2"),
+                Button("Add Task", on_click=submit_action,
+                       style="bg-indigo-600 text-white px-4 py-2 rounded"),
+                style="bg-white border rounded-xl p-4 shadow-sm mb-4",
+            ),
+            Button("↻ Refresh", on_click=fetch_trigger,
+                   style="text-sm text-indigo-500 underline"),
+            style="max-w-xl mx-auto p-8 font-sans",
+        )
+    )
+    page.add_script(fetch_trigger)
+    return page
+```
+
+### Backend (`backend/api.py`)
+
+```python
+from dars.backend.ssr import SSRApp
+from backend.apiConfig import DarsEnv
+from main import app as dars_app
+from dars.backend.store import JsonStore
+from fastapi import Request
+from fastapi.responses import JSONResponse
+import os
+
+ssr = SSRApp(dars_app, prefix="/api/ssr")
+urls = DarsEnv.get_urls()
+ssr.use_cors(origins=[urls["frontend"]], credentials=True)
+ssr.use_security_headers()
+
+app = ssr.fastapi_app
+
+# ── Production: serve dist/ as static files with SPA fallback ───────────────
+if not DarsEnv.is_dev():
+    ssr.use_spa_fallback()
+# ────────────────────────────────────────────────────────────────────────────
+
+_store = JsonStore(
+    path=os.path.join(os.path.dirname(__file__), "..", "tasks_db.json"),
+    default={"tasks": []},
 )
+
+@app.get("/api/tasks")
+async def get_tasks():
+    return JSONResponse({"tasks": _store.get("tasks", [])})
+
+@app.post("/api/tasks")
+async def create_task(request: Request):
+    body  = await request.json()
+    tasks = _store.get("tasks", [])
+    task  = {"id": len(tasks) + 1, "title": body.get("title", ""), "done": False}
+    tasks.append(task)
+    _store.set("tasks", tasks)
+    return JSONResponse(task, status_code=201)
+
+if __name__ == "__main__":
+    import uvicorn
+    print("\n" + "=" * 60)
+    print("Dars Fullstack Backend")
+    print("=" * 60)
+    if DarsEnv.is_dev():
+        port, host = 3000, "127.0.0.1"
+    else:
+        port, host = 8000, "0.0.0.0"
+    print("=" * 60 + "\n")
+    uvicorn.run(app, host=host, port=port)
 ```
 
-**Tip:** You can create a `State()` for a component before it exists using a string ID:
+### How It All Connects
 
-```python
-# Create state with string ID
-item_state = State("new-item", text="Hello!")
-
-# Create component later
-create_btn.on_click = createComp(
-    target=Text("Hello!", id="new-item"),
-    root="container-id"
-)
-
-# State works immediately!
-update_btn.on_click = item_state.text.set("Updated!")
-```
-
-
-### `updateComp(target, **props)`
-
-Update component properties:
-
-```python
-from dars.backend import updateComp
-
-# Update component
-update_btn.on_click = updateComp(
-    "my-component-id",
-    text="Updated!",
-    style="text-red-500"
-)
-```
-
-### `deleteComp(id)`
-
-Remove a component from the DOM:
-
-```python
-from dars.backend import deleteComp
-
-# Delete component
-delete_btn.on_click = deleteComp("component-id")
-```
+1. Page loads → `fetch_trigger` fires → `network_request` DAP op hits `/api/tasks`
+2. Backend reads from `JsonStore` → returns `{"tasks": [...]}`
+3. `on_success` runs → `updateVRefFromResponse(".tasks-data")` stores response in VRef
+4. `dom_each_render` detects VRef change → substitutes `__item_title__`, `__item_id__` placeholders → list renders
+5. User types in `#title` input → clicks "Add Task"
+6. `FormValidator` checks `required()` + `min_length(3)` client-side
+7. If valid → `network_request` POSTs to `/api/tasks` → backend appends to `JsonStore`
+8. `on_success` → `clearInput("title")` + `fetch_trigger` → list refreshes
 
 ---
 
-## Best Practices
+## API Reference
 
-1. **Use Unique Operation IDs**: Each HTTP operation should have a unique `id` to avoid conflicts
-2. **Chain Updates**: Use `.then()` to chain multiple state updates sequentially
-3. **Handle Errors**: Always provide `on_error` callbacks for better UX
-4. **Leverage useData()**: Use dot notation for clean, readable data access
-5. **Combine with StateV2**: Bind API data directly to component states for reactive UIs
+### `useFetch(url, method, body, headers, on_success, on_error)`
+Returns `(trigger, loading_vref, data_vref, error_vref)`.
 
----
+### `updateVRefFromResponse(selector, key="response")`
+Stores `ctx[key]` from fetch context into a VRef.
 
-## API Reference Summary
+### `FormValidator(fields)`
+- `.validated_submit(url, form_data, on_success, on_error)` — validate then submit
+- `.validate_server(data)` → `dict` of errors
+- `.get_rules_json()` → JSON string
 
-### HTTP Functions
-- `get(id, url, **options)` - GET request
-- `post(id, url, body, **options)` - POST request
-- `put(id, url, body, **options)` - PUT request
-- `delete(id, url, **options)` - DELETE request
-- `patch(id, url, body, **options)` - PATCH request
-- `fetch(id, url, method, **options)` - Generic fetch
+### `JsonStore(path, default)`
+- `.get(key, default)`, `.set(key, value)`, `.delete(key)`, `.all()`, `.clear()`
 
-### Data Access
-- `useData(operation_id)` - Access fetched data with dot notation
-- `stringify(data, pretty=False)` - Convert to JSON string
-- `parse(json_string)` - Parse JSON
-- `get_value(obj, path, default=None)` - Safe nested access
+### `UploadPipeline(upload_dir, allowed_types, max_size_bytes, rename_fn)`
+- `.create_endpoint(app, path)` — registers FastAPI POST endpoint
+- `.sanitize_filename(filename)` — static method
 
-### Component Management
-- `createComp(target, root, position)` - Create component
-- `updateComp(target, **props)` - Update component
-- `deleteComp(id)` - Delete component
+### `SecurityHeadersMiddleware(app, csp, hsts)`
+Starlette middleware. Use via `ssr.use_security_headers()` or `app.add_middleware(...)`.
 
----
-
-For more examples, see the test files in `tst/proj/test_http_demo.py` and `tst/proj/test_http_utils.py`.
-
----
-
-## SSR Backend Setup
-
-Dars provides a built-in `create_ssr_app` helper to easily serve your Dars application with Server-Side Rendering (SSR) using FastAPI.
-
-### Project Structure
-When you run `dars init --type ssr`, Dars creates a backend structure for you:
-*   `backend/api.py`: Entry point for the FastAPI server (Default Port: 8000).
-*   `backend/apiConfig.py`: Configuration helper for environment management.
-
-### Configuration (`apiConfig.py`)
-To switch between Development and Production modes, simply edit the `MODE` variable in `backend/apiConfig.py`:
-
-```python
-class DarsEnv:
-    # Set this to "production" when deploying
-    MODE = "development" 
-    
-    DEV = "development"
-    BUILD = "production"
-    
-    # ...
-```
-
-*   **Development**: Backend runs on `localhost:8000`, Frontend on `localhost:3000`. `dars dev` proxies requests.
-*   **Production**: Backend serves everything.
-
-### Running the Backend
-
-```bash
-# Start the SSR Backend (Port 3000)
-python backend/api.py
-```
-
-In a separate terminal, run the frontend dev server:
-
-```bash
-# Start Frontend Dev Server (Port 8000)
-dars dev
-```
+### `DarsEnv`
+- `.load(path=".env")`, `.get(key, default)`, `.require(key)`, `.set_dev_mode(bool)`

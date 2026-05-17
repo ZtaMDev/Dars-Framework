@@ -670,13 +670,18 @@ if __name__ == "__main__":
             API_CONFIG_PY_CODE = """import os
 import sys
 
+
 class DarsEnv:
-    # Set this to "production" when deploying
-    MODE = "development" 
-    
-    DEV = "development"
+    # ── Mode ──────────────────────────────────────────────────────────────────
+    # Development: two servers — dars dev (frontend) + dars dev --backend (API)
+    # Production:  one server  — backend serves frontend static files (same origin)
+    #
+    # Change to "production" before deploying, or set DARS_MODE env var.
+    MODE = os.environ.get("DARS_MODE", "development")
+
+    DEV   = "development"
     BUILD = "production"
-    
+
     @staticmethod
     def get_env():
         return DarsEnv.MODE
@@ -687,129 +692,170 @@ class DarsEnv:
 
     @staticmethod
     def get_urls():
-        # Configuration for URLs
         if DarsEnv.is_dev():
             return {
-                "backend": "http://localhost:3000", # SSR/API Server
-                "frontend": "http://localhost:8000" # Dev Server
+                "backend":  os.environ.get("DARS_BACKEND_URL",  "http://localhost:3000"),
+                "frontend": os.environ.get("DARS_FRONTEND_URL", "http://localhost:8000"),
             }
+        # Production: same origin — backend serves the frontend
         return {
-            "backend": "/", # Production: Same origin
-            "frontend": "/"
+            "backend":  os.environ.get("DARS_BACKEND_URL",  "/"),
+            "frontend": os.environ.get("DARS_FRONTEND_URL", "/"),
         }
+
+    @staticmethod
+    def get_frontend_dist_dir() -> str:
+        \"\"\"
+        Return the absolute path to the frontend static files (dist/).
+
+        In production the backend mounts this directory so that frontend
+        and API share the same origin — no CORS, no separate server.
+
+        Resolution order:
+          1. DARS_FRONTEND_DIR env var
+          2. outdir from dars.config.json in the project root
+          3. Fallback: <project_root>/dist
+        \"\"\"
+        env_dir = os.environ.get("DARS_FRONTEND_DIR", "")
+        if env_dir and os.path.isdir(env_dir):
+            return env_dir
+
+        backend_dir  = os.path.dirname(os.path.abspath(__file__))
+        project_root = os.path.dirname(backend_dir)
+
+        config_path = os.path.join(project_root, "dars.config.json")
+        if os.path.isfile(config_path):
+            try:
+                import json
+                with open(config_path, "r", encoding="utf-8") as f:
+                    cfg = json.load(f)
+                outdir = cfg.get("outdir", "dist")
+                if not os.path.isabs(outdir):
+                    outdir = os.path.join(project_root, outdir)
+                return os.path.normpath(outdir)
+            except Exception:
+                pass
+
+        return os.path.join(project_root, "dist")
 """
 
-            # 2. backend/api.py (No sys.path hacks, relies on python -m module execution)
+            # 2. backend/api.py
             API_PY_CODE = """\"""
-SSR Backend - Dars Framework
-Run with: python -m backend.api
+Fullstack Backend - Dars Framework
+
+Development (two servers):
+    dars dev              → frontend on http://localhost:8000
+    dars dev --backend    → backend  on http://localhost:3000
+
+Production (one server, same origin):
+    Set MODE = "production" in apiConfig.py (or DARS_MODE=production env var)
+    Run: uvicorn backend.api:app --host 0.0.0.0 --port 8000
+    → Serves frontend static files (dist/) + API from the same origin
 \"""
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from dars.backend.ssr import create_ssr_app
 import sys
 import os
-from backend.apiConfig import DarsEnv
 
-# Import the Dars app
-import sys
-sys.path.insert(0, '.')
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from dars.backend.ssr import SSRApp
+from backend.apiConfig import DarsEnv
 from main import app as dars_app
 
+# ── Create SSR app ──────────────────────────────────────────────────────────
+ssr = SSRApp(dars_app, prefix="/api/ssr", title="My Dars App - Backend")
 
-# Create FastAPI app with SSR support
-app = create_ssr_app(dars_app)
+urls = DarsEnv.get_urls()
 
-# Enable CORS for local development
 if DarsEnv.is_dev():
-    urls = DarsEnv.get_urls()
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=[urls['frontend'], "http://127.0.0.1:3000"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+    # Development: CORS needed because frontend runs on a different port
+    ssr.use_cors(
+        origins=[urls["frontend"], "http://127.0.0.1:8000"],
+        credentials=True,
     )
+
+ssr.use_security_headers()
+
+app = ssr.fastapi_app
+
+# ── Add your API routes here ────────────────────────────────────────────────
+# from fastapi import Request
+# from fastapi.responses import JSONResponse
+#
+# @app.get("/api/hello")
+# async def hello():
+#     return JSONResponse({"message": "Hello from Dars!"})
+# ────────────────────────────────────────────────────────────────────────────
+
+# ── Production: serve dist/ as static files with SPA fallback ───────────────
+if not DarsEnv.is_dev():
+    ssr.use_spa_fallback()
+# ────────────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
     import uvicorn
-    urls = DarsEnv.get_urls()
-    print(" " + "="*60)
-    print("Dars SSR Backend")
-    print("="*60)
-    print(f"Endpoints:")
-    print(f" • {urls['backend']}/              - API info")
-    print(f" • {urls['backend']}/api/ssr/*     - SSR routes")
-    print(f"Frontend: {urls['frontend']}")
-    print("="*60 + " ")
-    
-    uvicorn.run(app, host="127.0.0.1", port=3000)
+    print("\\n" + "=" * 60)
+    if DarsEnv.is_dev():
+        print("Dars Fullstack Backend  [development]")
+        print("=" * 60)
+        print(f"  Backend API:  {urls['backend']}")
+        print(f"  API Docs:     {urls['backend']}/docs")
+        print(f"  Frontend:     {urls['frontend']}  (run 'dars dev' separately)")
+        print("=" * 60)
+        print("  Open your browser at: http://localhost:8000")
+        port, host = 3000, "127.0.0.1"
+    else:
+        frontend_dir = DarsEnv.get_frontend_dist_dir()
+        print("Dars Fullstack Backend  [production]")
+        print("=" * 60)
+        print(f"  App (frontend + API): http://localhost:8000")
+        print(f"  API Docs:             http://localhost:8000/docs")
+        print(f"  Frontend dir:         {frontend_dir}")
+        print("=" * 60)
+        print("  Open your browser at: http://localhost:8000")
+        port, host = 8000, "0.0.0.0"
+    print()
+    uvicorn.run(app, host=host, port=port)
 """
 
             # 3. separate templates logic
             
-            # Template for 'ssr' type
+            # Template for 'ssr' / 'fullstack' type
             SSR_TEMPLATE_CODE = """from dars.all import *
 from backend.apiConfig import DarsEnv
 
-# Configure SSR URL
-# In dev: http://localhost:8000
-# In prod: / (same origin)
+# In dev:  ssr_url = "http://localhost:3000"  (separate backend server)
+# In prod: ssr_url = "/"                      (same-origin, backend serves frontend)
 ssr_url = DarsEnv.get_urls()['backend']
 
-app = App(title="Hello World", theme="dark", ssr_url=ssr_url)
+app = App(title="My Fullstack App", theme="dark", ssr_url=ssr_url)
 
-# 1. Define State
-state = State("app", title_val="Simple Counter", count=0)
+# ── State ──────────────────────────────────────────────────────────────────
+state = State("app", count=0)
 
-# 2. Define Route
+# ── Routes ─────────────────────────────────────────────────────────────────
 @route("/", route_type=RouteType.SSR)
-def index(): 
+def index():
     return Page(
-        # 3. Use useValue for app text
-        Text(
-            text=useValue("app.title_val"),
-            style="fs-[33px] text-black font-bold mb-[5x] ",
-        ),
-
-        # 4. Display reactive count
-        Text(
-            text=useDynamic("app.count"),
-            style="fs-[48px] mt-5 mb-[12px]"
-        ),
-        # 5. Interactive Button
-        Button(
-            text="+1",
-            on_click=(
-                state.count.increment(1)
+        Container(
+            Text("My Fullstack App", style="text-3xl font-bold mb-4 text-indigo-600"),
+            Text(text=useDynamic("app.count"), style="text-5xl font-bold mb-6"),
+            Container(
+                Button("+1", on_click=state.count.increment(1),
+                       style="bg-indigo-600 text-white px-6 py-3 rounded-lg mr-2"),
+                Button("-1", on_click=state.count.decrement(1),
+                       style="bg-gray-500 text-white px-6 py-3 rounded-lg mr-2"),
+                Button("Reset", on_click=state.count.set(0),
+                       style="bg-red-500 text-white px-6 py-3 rounded-lg"),
+                style="flex gap-2",
             ),
-            style="bg-[#3498db] text-white p-[15px] px-[30px] rounded-[8px] border-none cursor-pointer fs-[18px]",
-        ),
+            style="flex flex-col items-center justify-center h-screen font-sans",
+        )
+    )
 
-        # 6. Interactive Button
-        Button(
-            text="-1",
-            on_click=(
-                state.count.decrement(1)
-            ),
-            style="bg-[#3498db] text-white p-[15px] px-[30px] rounded-[8px] border-none cursor-pointer fs-[18px] mt-[5px]",
-        ),
-        # 7. Interactive Button
-        Button(
-            text="Reset",
-            on_click=(
-                state.reset()
-            ),
-            style="bg-[#3498db] text-white p-[15px] px-[30px] rounded-[8px] border-none cursor-pointer fs-[18px] mt-[5px]",
-        ),
-        style="flex flex-col items-center justify-center h-[100vh] ffam-[Arial] bg-[#f0f2f5]",
+# ── Add pages ──────────────────────────────────────────────────────────────
+app.add_page("index", index(), title="Home", index=True)
 
-    ) 
-
-# 8. Add page
-app.add_page("index", index(), title="index")
-
-# 9. Run app with preview
+# ── Run ────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     app.rTimeCompile()
 """
@@ -948,10 +994,10 @@ if __name__ == "__main__":
             # Write Initial Files
             root_path = Path(name)
             
-            if proj_type == 'ssr':
-                # write SSR template
+            if proj_type in ('ssr', 'fullstack'):
+                # write Fullstack template
                 (root_path / "main.py").write_text(SSR_TEMPLATE_CODE.strip(), encoding="utf-8")
-                console.print(f"[green]SUCCESS: {translator.get('main_py_created')} (SSR Mode)[/green]")
+                console.print(f"[green]SUCCESS: {translator.get('main_py_created')} (Fullstack Mode)[/green]")
                 
                 # Create config json for SSR projects, including backendEntry pointing to backend/api.py
                 (root_path / "dars.config.json").write_text(DARS_CONFIG_JSON_SSR_CODE.strip(), encoding="utf-8")
@@ -1220,7 +1266,7 @@ def create_parser(include_hidden: bool = True) -> argparse.ArgumentParser:
         help='Create or update dars.config.json in the target (or current) directory'
     )
     init_parser.add_argument(
-        '--type', '-T', choices=['web', 'desktop', 'ssr'], default='web',
+        '--type', '-T', choices=['web', 'desktop', 'ssr', 'fullstack'], default='web',
         help='Project type scaffold (web | desktop | ssr). Default: web'
     )
 
@@ -1787,7 +1833,7 @@ def _main_exec():
                         sys.exit(0)
                 else:
                     # For Web, ask for the specific mode
-                    proj_type = select_prompt("Select web architecture", choices=['spa', 'static', 'ssr'], default_idx=0)
+                    proj_type = select_prompt("Select web architecture", choices=['spa', 'static', 'fullstack'], default_idx=0)
             else:
                 proj_type = getattr(args, 'type', 'web')
                 if proj_type == 'desktop':
@@ -2081,48 +2127,109 @@ def _main_exec():
         sys.exit(0)
 
     elif args.command == 'preview':
-        # Resolve path and port from config if needed
+        import subprocess
+        from rich.panel import Panel
+        from rich.table import Table
+        from rich.align import Align
+
+        # Resolve path and port from config
         target_path = args.path
         port = getattr(args, 'port', None)
-        
-        # Load config if target_path is not provided or if we want to check for defaults
         project_root = os.getcwd()
         cfg, found = load_config(project_root)
-        
+
         if not target_path:
-            if found and "outdir" in cfg:
-                target_path = cfg["outdir"]
-            else:
-                target_path = "./dist" # Default fallback
-        
-        if port is None and found and "port" in cfg:
-            port = cfg["port"]
-        
+            target_path = cfg.get('outdir', './dist') if found else './dist'
         if port is None:
-            port = 8000 # Final fallback
+            port = cfg.get('port', 8000) if found else 8000
+
+        target_path_abs = os.path.abspath(target_path)
+        index_path = os.path.join(target_path_abs, 'index.html')
+        _backend_api = os.path.join(project_root, 'backend', 'api.py')
+        _backend_entry = cfg.get('backendEntry') if found else None
+        has_backend = os.path.isfile(_backend_api) and bool(_backend_entry)
+        mode_label = '[cyan]Fullstack (FastAPI + Static)[/cyan]' if has_backend else '[blue]Static Preview[/blue]'
+        url = f'http://localhost:{port}'
+
+        if not os.path.exists(index_path):
+            console.print(Panel(
+                f"[red]No [bold]index.html[/bold] found in:[/red]\n[dim]{target_path_abs}[/dim]\n\n"
+                "[yellow]Run [bold]dars build[/bold] first to generate the static export.[/yellow]",
+                title="[red]Dars Preview — Build Required[/red]",
+                border_style='red',
+            ))
+            sys.exit(1)
+
+        console.print(f"\n[bold cyan]Dars Preview[/bold cyan] | {mode_label}")
+        if has_backend:
+            console.print(f"[dim]Backend:[/dim] {_backend_entry}")
+        console.print()
+
+        def _kill_proc(p):
+            if p is None or p.poll() is not None:
+                return
+            # Allow graceful shutdown first since SIGINT was sent to the whole process group
+            try:
+                p.wait(timeout=1.5)
+            except subprocess.TimeoutExpired:
+                pass
             
-        index_path = os.path.join(target_path, "index.html")
-        if os.path.exists(index_path):
-            console.print(f"[green]{translator.get('app_found')}: {target_path} [/green]")
-            console.print(f"{translator.get('open_in_browser')}: file://{os.path.abspath(index_path)}")
-            console.print(f"{translator.get('view_preview')} [green]y[/green] / [red]n[/red] [y/n] ")
-            if input().lower() == 'y':
-                import subprocess
-                process = None
+            if p.poll() is not None:
+                return
+
+            # Force kill if still running
+            try:
+                if sys.platform == 'win32':
+                    subprocess.call(
+                        ['taskkill', '/F', '/T', '/PID', str(p.pid)],
+                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                    )
+                else:
+                    import os as _os, signal as _sig
+                    _os.killpg(_os.getpgid(p.pid), _sig.SIGKILL)
+            except Exception:
+                pass
+            try:
+                p.wait(timeout=2)
+            except Exception:
                 try:
-                    cmd = [sys.executable, '-m', 'dars.cli.preview', target_path, '--port', str(port)]
-                    process = subprocess.Popen(cmd)
-                    process.wait()
-                except KeyboardInterrupt:
-                    if process:
-                        process.terminate()
-                        process.wait()
-                finally:
-                    if process and process.poll() is None:
-                        process.terminate()
-                        process.wait()
-        else:
-            console.print(f"[red]{translator.get('index_not_found')} {target_path}[/red]")
+                    p.kill()
+                except Exception:
+                    pass
+
+        process = None
+        try:
+            if has_backend:
+                _preview_env = os.environ.copy()
+                _preview_env['DARS_MODE'] = 'production'
+                _preview_env['PYTHONIOENCODING'] = 'utf-8'
+                _preview_env['PYTHONUTF8'] = '1'
+                cmd = [
+                    sys.executable, '-m', 'uvicorn',
+                    str(_backend_entry),
+                    '--host', '0.0.0.0',
+                    '--port', str(port),
+                ]
+                process = subprocess.Popen(cmd, cwd=project_root, env=_preview_env)
+            else:
+                cmd = [sys.executable, '-m', 'dars.cli.preview', target_path_abs, '--port', str(port), '--no-open']
+                process = subprocess.Popen(cmd)
+
+            # Open browser after short delay
+            import threading, time, webbrowser
+            def _open_browser():
+                time.sleep(1.2)
+                try:
+                    webbrowser.open(url)
+                except Exception:
+                    pass
+            threading.Thread(target=_open_browser, daemon=True).start()
+
+            process.wait()
+        except KeyboardInterrupt:
+            _kill_proc(process)
+        finally:
+            _kill_proc(process)
 
             
     elif args.command == 'config':

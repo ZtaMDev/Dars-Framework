@@ -1,4 +1,4 @@
-import { registerStates } from "./dars.min.js";
+import { _attachEventsMap } from "./dars.min.js";
 export function _executeExternalScript(code, context) {
   if (!code) return null;
   try {
@@ -233,8 +233,12 @@ try {
   if (typeof window !== "undefined" && Array.isArray(window.__DARS_STATE__)) {
     if (window.Dars && window.Dars.registerStates) {
       window.Dars.registerStates(window.__DARS_STATE__);
-    } else if (typeof registerStates === "function") {
-      registerStates(window.__DARS_STATE__);
+    } else {
+      // Lazy import to avoid TDZ when dars.min.js is minified
+      import("./dars.min.js").then(m => {
+        const reg = m.registerStates || (m.default && m.default.registerStates);
+        if (typeof reg === "function") reg(window.__DARS_STATE__);
+      }).catch(() => {});
     }
   }
   if (
@@ -243,8 +247,11 @@ try {
   ) {
     if (window.Dars && window.Dars.registerStates) {
       window.Dars.registerStates(window.__DARS_STATE_V2__);
-    } else if (typeof registerStates === "function") {
-      registerStates(window.__DARS_STATE_V2__);
+    } else {
+      import("./dars.min.js").then(m => {
+        const reg = m.registerStates || (m.default && m.default.registerStates);
+        if (typeof reg === "function") reg(window.__DARS_STATE_V2__);
+      }).catch(() => {});
     }
   }
 } catch (err) {

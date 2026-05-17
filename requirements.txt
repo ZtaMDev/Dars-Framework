@@ -8,3 +8,5 @@ requests==2.33.1
 plotly==6.7.0
 rjsmin==1.2.5
 rcssmin==1.2.2
+starlette==0.47.3
+python-multipart==0.0.28

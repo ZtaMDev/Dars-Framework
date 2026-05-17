@@ -34,6 +34,13 @@ CONFIG_FILENAME = "dars.config.json"
 
 def load_config(project_root: str) -> Tuple[Dict[str, Any], bool]:
     """Load dars.config.json from project_root. Returns (config, found)."""
+    # Load .env first so environment variables are available for config resolution
+    try:
+        from dars.env import DarsEnv
+        DarsEnv.load(os.path.join(project_root, ".env"))
+    except Exception:
+        pass
+
     config_path = os.path.join(project_root, CONFIG_FILENAME)
     if not os.path.isfile(config_path):
         # Autodetect public dir if exists for convenience even without config

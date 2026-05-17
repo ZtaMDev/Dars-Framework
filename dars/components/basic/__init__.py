@@ -18,6 +18,11 @@ from .progressbar import ProgressBar
 from .spinner import Spinner
 from .tooltip import Tooltip
 
+# Conditional & list rendering helpers
+from .if_component import If_Component as If
+from .show_component import Show_Component as Show
+from .each_component import Each_Component as Each
+
 __all__ = [
     'Text',
     'Button', 
@@ -34,5 +39,8 @@ __all__ = [
     'Select',
     'SelectOption',
     'Slider',
-    'DatePicker'
+    'DatePicker',
+    'If',
+    'Show',
+    'Each',
 ]

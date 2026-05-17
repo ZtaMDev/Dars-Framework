@@ -48,5 +48,3 @@ If you are new to Dars, we recommend following the learning path in this order:
 ## Community & Support
 
 - **GitHub**: [Dars Framework Repository](https://github.com/ZtaMDev/Dars-Framework)
-- **Discord**: Join our community for help and updates.
-- **Samples**: Check the `tst/` directory in the repository for hundreds of usage examples.

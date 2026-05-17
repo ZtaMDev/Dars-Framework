@@ -44,6 +44,9 @@ from dars.components.advanced.outlet import Outlet
 from dars.components.basic.video import Video
 from dars.components.basic.audio import Audio
 from dars.components.advanced.file_upload import FileUpload
+# Conditional & list rendering helpers
+from dars.components.basic.show_component import Show_Component as Show
+from dars.components.basic.each_component import Each_Component as Each
 # Layout
 from dars.components.layout.grid import GridLayout, LayoutBase
 # Core
@@ -64,7 +67,7 @@ from dars.dars_tests.run_tests import run_app_tests, run_unit_tests, main
 from dars.exporters.web.html_css_js import HTMLCSSJSExporter
 # Script utilities
 from dars.scripts.dscript import dScript, RawJS, Arg
-from dars.scripts.utils_ds import showModal, hideModal, goTo, goToNew, reload, goBack, goForward, alert, confirm, log, getDateTime, show, hide, toggle, addClass, removeClass, toggleClass, scrollTo, scrollToTop, scrollToBottom, scrollToElement, submitForm, resetForm, getValue, clearInput, saveToLocal, loadFromLocal, removeFromLocal, clearLocalStorage, copyToClipboard, copyElementText, focus, blur, setText, setTimeout, getInputValue, switch
+from dars.scripts.utils_ds import showModal, hideModal, goTo, goToNew, reload, goBack, goForward, alert, confirm, log, getDateTime, show, hide, toggle, addClass, removeClass, toggleClass, scrollTo, scrollToTop, scrollToBottom, scrollToElement, submitForm, resetForm, getValue, clearInput, saveToLocal, loadFromLocal, removeFromLocal, clearLocalStorage, copyToClipboard, copyElementText, focus, blur, setText, setTimeout, getInputValue, switch, runSequence, setHtml
 from dars.scripts.utils_ds import onViewport, classOnView, runOnView, animateOnView, staggerOnView, scrollProgress, animate, timeline, stagger  # Viewport & Scroll Animation Utilities
 from dars.scripts.animations import fadeIn, fadeOut, slideIn, slideOut, scaleIn, scaleOut, shake, bounce, pulse, rotate, flip, colorChange, morphSize, popIn, popOut, sequence  # Animation System
 from dars.scripts.script import *
@@ -75,16 +78,25 @@ from dars.hooks.use_value import useValue
 from dars.hooks.value_helpers import V, url, transform
 from dars.hooks.form_helpers import FormData, collect_form
 from dars.hooks.set_vref import setVRef
-from dars.hooks.update_vref import updateVRef
+from dars.hooks.update_vref import updateVRef, updateVRefFromResponse
+from dars.hooks.use_fetch import useFetch
+from dars.hooks.form_validator import (
+    FormValidator,
+    required, min_length, max_length, pattern, email, min_value, max_value, custom,
+)
 # KeyCode for keyboard events
 from dars.scripts.keycode import KeyCode, onKey, addGlobalKeys
 from dars.version import __version__
 
 # Backend HTTP Utilities (complete import)
 from dars.backend.http import fetch, get, post, put, delete, patch
+from dars.backend.http import add_request_interceptor, add_response_interceptor, clear_interceptors, use_auth_interceptor
 from dars.backend.data import useData, DataAccessor
 from dars.backend.json_utils import stringify, parse, get_value
 from dars.backend.components import createComp, updateComp, deleteComp
+from dars.backend.store import JsonStore
+from dars.backend.middleware import SecurityHeadersMiddleware
+from dars.backend.upload import UploadPipeline
 
 
 
@@ -96,6 +108,8 @@ __all__ = [
     'RadioButton', 'Select', 'Slider', 'Spinner', 'Text', 'Textarea', 'Tooltip',
     'Accordion', 'Card', 'Modal', 'Navbar', 'Table', 'Tabs', 'Section', 'Outlet', 'Head', 'Audio', 'Video',
     'FileUpload',
+    # Conditional & list rendering
+    'Show', 'Each',
     # Visualization
     'Chart', 'DataTable',
     'GridLayout', 'FlexLayout', 'LayoutBase', 'AnchorPoint',
@@ -109,9 +123,12 @@ __all__ = [
     'dState', 'Mod', 'this_for',
     # Backend HTTP Utilities
     'fetch', 'get', 'post', 'put', 'delete', 'patch',
+    'add_request_interceptor', 'add_response_interceptor', 'clear_interceptors', 'use_auth_interceptor',
     'useData', 'DataAccessor',
     'stringify', 'parse', 'get_value',
-    'createComp', 'deleteComp', 'updateComp', 'RawJS', 'this', 'Arg', 'SelectOption', 
+    'createComp', 'deleteComp', 'updateComp', 'RawJS', 'this', 'Arg', 'SelectOption',
+    # Backend utilities
+    'JsonStore', 'SecurityHeadersMiddleware', 'UploadPipeline',
     # SPA Routing
     'route', 'SPARoute', 'RouteNode',
     # Modal utilities
@@ -147,11 +164,16 @@ __all__ = [
     # useValue Hook
     'useValue', 'V', 'url', 'transform',
     # VRef Hooks
-    'setVRef', 'updateVRef',
+    'setVRef', 'updateVRef', 'updateVRefFromResponse',
     # KeyCode for keyboard events
     'KeyCode', 'onKey', 'addGlobalKeys', 'switch',
     # Form utilities
     'FormData', 'collect_form',
+    # Form validation
+    'FormValidator', 'required', 'min_length', 'max_length', 'pattern',
+    'email', 'min_value', 'max_value', 'custom',
+    # useFetch hook
+    'useFetch', "runSequence", "setHtml",
     # Secure Routing
     'RouteType', 'RouteMetadata',
 ]
