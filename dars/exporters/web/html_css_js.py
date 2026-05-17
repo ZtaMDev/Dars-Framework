@@ -1089,7 +1089,7 @@ self.addEventListener('fetch', event => {
                         "    arr = JSON.parse(json||'[]');\n"
                         "  } catch(_) { arr = []; }\n"
                         "  try {\n"
-                        "    const m = await import('/lib/dars.min.js');\n"
+                        "    const m = await import('./lib/dars.min.js');\n"
                         "    const reg = m.registerState || (m.default && m.default.registerState);\n"
                         "    if (typeof reg === 'function') { arr.forEach(s => reg(s.name, s)); }\n"
                         "  } catch (e) {\n"
@@ -1110,7 +1110,7 @@ self.addEventListener('fetch', event => {
                         "  if (!el) { window.__DARS_STATE_BOOTSTRAPPED__ = true; return; }\n"
                         "  const arr = JSON.parse(el.textContent||'[]');\n"
                         "  try {\n"
-                        "    const m = await import('/lib/dars.min.js');\n"
+                        "    const m = await import('./lib/dars.min.js');\n"
                         "    const reg = m.registerState || (m.default && m.default.registerState);\n"
                         "    if (typeof reg === 'function') { arr.forEach(s => reg(s.name, s)); }\n"
                         "  } catch (e) {\n"
@@ -3497,7 +3497,7 @@ audio.dars-audio {
                     lines.append('            // Ensure runtime loaded if used')
                     lines.append('            if (!window.Dars) {')
                     lines.append("                try {")
-                    lines.append("                    const m = await import('/lib/dars.min.js');")
+                    lines.append("                    const m = await import('./lib/dars.min.js');")
                     lines.append("                    window.Dars = m.default || m;")
                     lines.append("                } catch (e) { }")
                     lines.append('            }')

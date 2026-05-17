@@ -1,4 +1,4 @@
-# Release Notes v1.9.6
+# Release Notes v1.9.7
 
 > **Hybrid Stability, Anti-Flash System & CLI UX Overhaul**
 
@@ -35,10 +35,12 @@ The `dars preview` command has been significantly improved to be more intuitive 
 - **Standardized Dev Propagation**: The `dars dev` command now more reliably propagates port settings to the underlying application process.
 
 ### Robustness & Usability
+
 - **Input Validation**: The CLI now prevents the creation of projects, components, or pages with empty names, issuing clear warnings and re-prompting the user.
 - **Improved HTML Injection**: The SPA shell exporter now uses a more resilient replacement logic for the root mounting point, handling whitespace variations introduced by different HTML formatters to ensure consistent pre-rendering.
 
 ### New Code Generation Suite (`dars generate`)
+
 Accelerate your development workflow with the new code generation commands. Scaffold components and pages instantly with automatic project integration.
 
 - **`dars generate component <name>`**: Quickly create new reusable FunctionComponents.
