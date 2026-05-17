@@ -12,7 +12,7 @@ import {
 
 export const __commandRegistry = new Map();
 export const __darsConfig = {
-  allowInlineJS: true,
+  allowInlineJS: false, // Disabled by default; enabled only for compile-time generated code
   strictMode: false, // If true, allowInlineJS becomes false automatically
   debug: false,
 };
@@ -50,10 +50,20 @@ export function _registerCommand(op, fn) {
 // Initialize core commands
 _registerCommand("change", (args) => change(args));
 _registerCommand("navigate", (args) => {
-  window.location.href = args.path || args;
+  const url = args.path || args;
+  if (typeof url === "string" && /^\s*javascript\s*:/i.test(url)) {
+    console.warn("[Dars:Security] Blocked javascript: URI in navigate");
+    return;
+  }
+  window.location.href = url;
 });
 _registerCommand("navigate_new", (args) => {
-  window.open(args.path || args, "_blank");
+  const url = args.path || args;
+  if (typeof url === "string" && /^\s*javascript\s*:/i.test(url)) {
+    console.warn("[Dars:Security] Blocked javascript: URI in navigate_new");
+    return;
+  }
+  window.open(url, "_blank", "noopener,noreferrer");
 });
 _registerCommand("reload", () => {
   window.location.reload();
@@ -124,9 +134,39 @@ _registerCommand("dom_set_value", (args) => {
   const el = $(args.id);
   if (el) el.value = args.value;
 });
+// Blocked attribute names that could introduce XSS via event handlers or dangerous protocols
+const _BLOCKED_ATTRS = new Set([
+  "onclick","ondblclick","onmousedown","onmouseup","onmouseover","onmouseout",
+  "onmousemove","onkeydown","onkeyup","onkeypress","onchange","oninput",
+  "onfocus","onblur","onsubmit","onreset","onselect","onload","onunload",
+  "onerror","onabort","onresize","onscroll","oncontextmenu","ondrag",
+  "ondragend","ondragenter","ondragleave","ondragover","ondragstart","ondrop",
+  "onanimationstart","onanimationend","ontransitionend","onpointerdown",
+  "onpointerup","onpointermove","onpointerover","onpointerout","onpointerenter",
+  "onpointerleave","onpointercancel","ontouchstart","ontouchend","ontouchmove",
+  "ontouchcancel","onwheel","oncopy","oncut","onpaste","onbeforeinput",
+  "onformdata","oninvalid","onprogress","onratechange","onseeked","onseeking",
+  "onstalled","onsuspend","ontimeupdate","onvolumechange","onwaiting",
+  "oncanplay","oncanplaythrough","ondurationchange","onemptied","onended",
+  "onloadeddata","onloadedmetadata","onloadstart","onplay","onplaying","onpause",
+  "srcdoc","formaction","action","href","src","data","codebase","classid",
+]);
+
 _registerCommand("dom_set_attr", (args) => {
   const el = $(args.id);
-  if (el) el.setAttribute(args.name, String(args.value));
+  if (!el) return;
+  const attrName = String(args.name).toLowerCase().trim();
+  if (_BLOCKED_ATTRS.has(attrName)) {
+    console.warn(`[Dars:Security] Blocked attempt to set dangerous attribute: "${attrName}"`);
+    return;
+  }
+  // Block javascript: protocol in any remaining attribute value
+  const val = String(args.value);
+  if (/^\s*javascript\s*:/i.test(val)) {
+    console.warn(`[Dars:Security] Blocked javascript: URI in attribute "${attrName}"`);
+    return;
+  }
+  el.setAttribute(attrName, val);
 });
 _registerCommand("dom_remove_attr", (args) => {
   const el = $(args.id);
@@ -267,9 +307,13 @@ _registerCommand("fetch", async (args, ctx) => {
   try {
     const resp = await fetch(args.url, args.options || {});
     const data = await resp.json();
-    if (args.on_success) dispatch(args.on_success, { ...ctx, response: data });
+    if (args.on_success) {
+      // Prevent server responses from injecting inline JS ops via on_success dispatch
+      // on_success must be a compile-time DAP action, not data from the response
+      dispatch(args.on_success, { ...ctx, response: data });
+    }
   } catch (e) {
-    if (args.on_error) dispatch(args.on_error, { ...ctx, error: e });
+    if (args.on_error) dispatch(args.on_error, { ...ctx, error: String(e) });
   }
 });
 

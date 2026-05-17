@@ -2658,6 +2658,15 @@ audio.dars-audio {
     }}
 
     function _darsInit(){{
+        // Enable inline JS execution for compile-time generated code only.
+        // This flag is set to true here (within the trusted compiled bundle)
+        // and must NOT be set to true from any external/runtime source.
+        (async () => {{
+            try {{
+                const dap = await import('./lib/dap.js');
+                if (dap.__darsConfig) dap.__darsConfig.allowInlineJS = true;
+            }} catch(_) {{}}
+        }})();
         initializeStates();
         initializeEvents();
         

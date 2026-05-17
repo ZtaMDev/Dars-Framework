@@ -193,12 +193,18 @@ try {
           // Apply meta tags if present
           if (payload.metaTags) {
             const temp = document.createElement("div");
-            temp.innerHTML = payload.metaTags;
+            // Sanitize before parsing to prevent XSS via injected event handlers
+            const sanitized = (typeof DOMPurify !== "undefined")
+              ? DOMPurify.sanitize(payload.metaTags, { FORCE_BODY: true })
+              : payload.metaTags.replace(/<script[\s\S]*?<\/script>/gi, "");
+            temp.innerHTML = sanitized;
             const newMetas = temp.childNodes;
             for (let i = 0; i < newMetas.length; i++) {
               const node = newMetas[i];
               if (node.nodeType === 1) {
                 const tag = node.tagName.toLowerCase();
+                // Only allow safe head elements: meta, link, title
+                if (!["meta", "link", "title"].includes(tag)) continue;
                 const attr =
                   node.getAttribute("name") || node.getAttribute("property");
                 let existing = null;
