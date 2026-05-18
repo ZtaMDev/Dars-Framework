@@ -329,7 +329,7 @@ class SSRRenderer:
 
         # Only inject VDOM snapshot AND the bundled script for this page.
         # This matches the behavior of static HTML export where app_{slug}.js is included.
-        script_fn = "app.js" if route_name == "index" else f"app_{route_name}.js"
+        script_fn = f"app_{route_name}.js"
 
         # ---------------------------------------------------------------------
         # CSS Registry Handling
@@ -468,10 +468,10 @@ class SSRRenderer:
     </div>
     {markdown_scripts_html}
     
-    <!-- Dars Server Protocol (DSP) Hydration Data -->
-    <script id="__DARS_DSP_DATA__" type="application/json">{dsp_json}</script>
+    <!-- DSP Hydration Data (vdom) is now fetched securely via API -->
     
     <script type="module" src="/lib/dars.min.js" defer></script>
+    <script type="module" src="/app.js"></script>
     <script type="module" src="/{script_fn}"></script>
 </body>
 </html>"""
@@ -494,7 +494,6 @@ class SSRRenderer:
             "fullHtml": full_html,  # Complete HTML document with <head>
             "styles": registry_css,
             "scripts": [
-                {"type": "lib", "src": "/lib/dars.min.js", "module": True, "defer": True},
                 {"type": "user", "src": f"/{script_fn}", "module": True}
             ],
             "events": {}, # Removed, using native JS

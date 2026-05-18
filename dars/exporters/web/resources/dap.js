@@ -540,7 +540,7 @@ _registerCommand("vref_update", async (args, ctx) => {
   const val = await _resolveVal(args.value, ctx);
   const selector = args.selector;
 
-  // 1. Update global vref registry if it exists
+  // 1. Update global vref registry
   if (
     window.__DARS_VREF_VALUES__ &&
     typeof selector === "string" &&
@@ -549,7 +549,7 @@ _registerCommand("vref_update", async (args, ctx) => {
     window.__DARS_VREF_VALUES__[selector] = val;
   }
 
-  // 2. Update DOM elements
+  // 2. Update DOM elements directly bound to this selector
   if (typeof selector === "string") {
     const els = document.querySelectorAll(selector);
     els.forEach((el) => {
@@ -562,12 +562,46 @@ _registerCommand("vref_update", async (args, ctx) => {
       } else if (el.tagName === "SELECT") {
         el.value = val;
       } else {
-        el.textContent = val;
+        // Only update textContent for elements that are NOT managed by a useVRef binding
+        if (!el.hasAttribute("data-vref")) {
+          el.textContent = val;
+        }
       }
     });
 
-    // 3. Trigger lifecycles using updateVRef
+    // 3. Legacy lifecycle hook
     if (typeof updateVRef === "function") updateVRef(selector);
+  }
+
+  // 4. Re-evaluate all useVRef bindings that depend on this selector.
+  //    A binding with an empty dependencies array is always re-evaluated
+  //    (conservative fallback for expressions we couldn't statically analyse).
+  if (window.__DARS_VREF_BINDINGS__ && window.__DARS_VREF_BINDINGS__.length > 0) {
+    for (const binding of window.__DARS_VREF_BINDINGS__) {
+      if (!binding.elements || binding.elements.length === 0) continue;
+
+      const deps = binding.dependencies || [];
+      const shouldUpdate =
+        deps.length === 0 ||
+        (typeof selector === "string" && deps.includes(selector));
+
+      if (shouldUpdate) {
+        try {
+          const newVal = await binding.vexpr();
+          const strVal =
+            newVal !== null && newVal !== undefined ? String(newVal) : "";
+          binding.elements.forEach((el) => {
+            el.textContent = strVal;
+          });
+          // Fire callbacks after the DOM is updated
+          if (typeof binding.callbacks === "function") {
+            await binding.callbacks();
+          }
+        } catch (e) {
+          console.error("[Dars VRef] Error re-evaluating binding:", e);
+        }
+      }
+    }
   }
 });
 

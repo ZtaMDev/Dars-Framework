@@ -97,7 +97,7 @@ from dars.backend.components import createComp, updateComp, deleteComp
 from dars.backend.store import JsonStore
 from dars.backend.middleware import SecurityHeadersMiddleware
 from dars.backend.upload import UploadPipeline
-
+from dars.hooks.use_vref import useVRef
 
 
 # from dars.core.properties import *
@@ -164,7 +164,7 @@ __all__ = [
     # useValue Hook
     'useValue', 'V', 'url', 'transform',
     # VRef Hooks
-    'setVRef', 'updateVRef', 'updateVRefFromResponse',
+    'setVRef', 'updateVRef', 'updateVRefFromResponse', 'useVRef',
     # KeyCode for keyboard events
     'KeyCode', 'onKey', 'addGlobalKeys', 'switch',
     # Form utilities

@@ -2166,36 +2166,27 @@ def _main_exec():
         console.print()
 
         def _kill_proc(p):
-            if p is None or p.poll() is not None:
+            if p is None:
                 return
-            # Allow graceful shutdown first since SIGINT was sent to the whole process group
-            try:
-                p.wait(timeout=1.5)
-            except subprocess.TimeoutExpired:
-                pass
             
-            if p.poll() is not None:
-                return
-
-            # Force kill if still running
             try:
                 if sys.platform == 'win32':
-                    subprocess.call(
+                    import subprocess
+                    subprocess.run(
                         ['taskkill', '/F', '/T', '/PID', str(p.pid)],
                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                        timeout=3
                     )
                 else:
                     import os as _os, signal as _sig
                     _os.killpg(_os.getpgid(p.pid), _sig.SIGKILL)
             except Exception:
                 pass
+                
             try:
-                p.wait(timeout=2)
+                p.kill()
             except Exception:
-                try:
-                    p.kill()
-                except Exception:
-                    pass
+                pass
 
         process = None
         try:
@@ -2227,7 +2218,15 @@ def _main_exec():
 
             process.wait()
         except KeyboardInterrupt:
+            # Ignore further SIGINTs so user mashing Ctrl+C doesn't interrupt the kill sequence
+            import signal
+            import os as _os_sys
+            try:
+                signal.signal(signal.SIGINT, signal.SIG_IGN)
+            except Exception:
+                pass
             _kill_proc(process)
+            _os_sys._exit(0)
         finally:
             _kill_proc(process)
 

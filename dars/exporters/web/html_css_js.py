@@ -2993,7 +2993,20 @@ audio.dars-audio {
                             marker = val_registry[prop_value]
                             val = marker.get_initial_value()
                             if val is not None:
-                                setattr(component, prop_name, val)
+                                is_marker = (
+                                    isinstance(prop_value, DynamicBinding) or
+                                    type(prop_value).__name__ in ('DynamicBinding', 'ValueMarker', 'VRefValue', 'VRefBinding') or
+                                    (isinstance(prop_value, str) and (
+                                        prop_value.startswith('__DARS_DYNAMIC_') or
+                                        prop_value.startswith('__DARS_VALUE_') or
+                                        prop_value.startswith('__DARS_VREF_')
+                                    )) or
+                                    hasattr(prop_value, 'state_path') or
+                                    hasattr(prop_value, 'marker_id') or
+                                    hasattr(prop_value, 'selector')
+                                )
+                                if not is_marker:
+                                    setattr(component, prop_name, val)
                     except Exception:
                         pass
 
@@ -3019,7 +3032,20 @@ audio.dars-audio {
                 # This ensures that when component.render() is called, it uses the actual value
                 # instead of the marker string
                 if initial_val is not None:
-                    setattr(component, prop_name, initial_val)
+                    is_marker = (
+                        isinstance(prop_value, DynamicBinding) or
+                        type(prop_value).__name__ in ('DynamicBinding', 'ValueMarker', 'VRefValue', 'VRefBinding') or
+                        (isinstance(prop_value, str) and (
+                            prop_value.startswith('__DARS_DYNAMIC_') or
+                            prop_value.startswith('__DARS_VALUE_') or
+                            prop_value.startswith('__DARS_VREF_')
+                        )) or
+                        hasattr(prop_value, 'state_path') or
+                        hasattr(prop_value, 'marker_id') or
+                        hasattr(prop_value, 'selector')
+                    )
+                    if not is_marker:
+                        setattr(component, prop_name, initial_val)
         
         return {'bindings': bindings, 'initial_values': initial_values}
 
@@ -3066,7 +3092,20 @@ audio.dars-audio {
             # This ensures that when component.render() is called, it uses the actual value
             # We do this even if selector is None (for built-in components using useValue just for initial value)
             if initial_val is not None:
-                setattr(component, prop_name, initial_val)
+                is_marker = (
+                    isinstance(prop_value, ValueMarker) or
+                    type(prop_value).__name__ in ('DynamicBinding', 'ValueMarker', 'VRefValue', 'VRefBinding') or
+                    (isinstance(prop_value, str) and (
+                        prop_value.startswith('__DARS_DYNAMIC_') or
+                        prop_value.startswith('__DARS_VALUE_') or
+                        prop_value.startswith('__DARS_VREF_')
+                    )) or
+                    hasattr(prop_value, 'state_path') or
+                    hasattr(prop_value, 'marker_id') or
+                    hasattr(prop_value, 'selector')
+                )
+                if not is_marker:
+                    setattr(component, prop_name, initial_val)
                 initial_values[prop_name] = initial_val
             
             if selector:
@@ -3411,9 +3450,9 @@ audio.dars-audio {
         if hasattr(use_vref, '_VREF_BINDINGS_REGISTRY') and use_vref._VREF_BINDINGS_REGISTRY:
             lines.append("    // VRef Bindings Registration")
             
-            for binding in use_vref._VREF_BINDINGS_REGISTRY:
+            for binding in use_vref._VREF_BINDINGS_REGISTRY.values():
                 if hasattr(binding, 'generate_reactive_js'):
-                    lines.append(binding.generate_reactive_js())
+                    lines.append(binding.generate_reactive_js(component_id="global"))
 
         if not lines:
             return "    // No VRef bindings"
@@ -5872,6 +5911,8 @@ fetch({repr(upload_url)}, {{method:'POST', body:_fd}})
         }
         for route_name, spa_route in app._spa_routes.items():
             self._current_page_id = route_name
+            self._built_in_bindings = []
+            self._dynamic_bindings = {}
             # Ensure deterministic IDs for this route before rendering
             self.ensure_ids_assigned(spa_route.root)
             
@@ -5902,13 +5943,24 @@ fetch({repr(upload_url)}, {{method:'POST', body:_fd}})
             script_filename = ""
             scripts_array = []
             
-            # Always generate scripts and VDOM for ALL route types (PUBLIC and SSR)
-            # This ensures app_{route_name}.js exists for hydration
-            try:
-                vdom_builder = VDomBuilder(id_provider=self.get_component_id)
-                route_vdom, route_events_map = vdom_builder.build(route_app.root), vdom_builder.events_map
-                if bundle: route_vdom = self._obfuscate_vdom(route_vdom)
-            except: pass
+            # Generate VDOM only for SSR routes; PUBLIC routes use native events
+            if route_type == RouteType.SSR:
+                try:
+                    vdom_builder = VDomBuilder(id_provider=self.get_component_id)
+                    route_vdom = vdom_builder.build(route_app.root)
+                    route_events_map = vdom_builder.events_map
+                    if bundle:
+                        route_vdom = self._obfuscate_vdom(route_vdom)
+                except:
+                    pass
+            else:
+                # PUBLIC routes: only collect events, no VDOM needed
+                try:
+                    vdom_builder = VDomBuilder(id_provider=self.get_component_id)
+                    _ = vdom_builder.build(route_app.root)
+                    route_events_map = vdom_builder.events_map
+                except:
+                    pass
             
             # Generate runtime JS with events/states for this route
             # For SSR routes, we disable static event generation to avoid ID mismatches
@@ -5937,10 +5989,12 @@ fetch({repr(upload_url)}, {{method:'POST', body:_fd}})
             runtime_js = self.generate_javascript(shell_app_runtime, route_app.root, route_events_map,
                                                    ssr_mode=is_ssr_route, _auto_fetches=_spa_auto_fetches)
             
-            # Generate VDOM JS content
-            # Generate VDOM JS content using native compiler to support reactive props
-            vdom_js_literal = compile_val(route_vdom)
-            vdom_js_content = f"window.__DARS_VDOM__ = {vdom_js_literal};\n"
+            # Generate VDOM JS content only for SSR routes
+            if route_type == RouteType.SSR and route_vdom:
+                vdom_js_literal = compile_val(route_vdom)
+                vdom_js_content = f"window.__DARS_VDOM__ = {vdom_js_literal};\n"
+            else:
+                vdom_js_content = ""  # PUBLIC routes don't need VDOM
 
             # Collect scripts for this route (app scripts + page scripts)
             route_scripts = []
@@ -5961,12 +6015,53 @@ fetch({repr(upload_url)}, {{method:'POST', body:_fd}})
             # Always use bundle mode logic for SPA/SSR to ensure app_{route_name}.js exists
             # This is required for consistent loading by ssr.py and the client router
             # Bundle mode: Combine everything into app_{route_name}.js
-            if route_name == "index" or getattr(spa_route, "index", False):
-                app_js_filename = "app.js"
-            else:
-                app_js_filename = f"app_{route_name}.js"
+            app_js_filename = f"app_{route_name}.js"
             
-            combined_all_js = f"""// Combined JS for {route_name}
+            # Generate route-specific content based on type
+            if route_type == RouteType.SSR:
+                # SSR: VDOM for hydration + route states + bindings
+                route_events_js = self._generate_route_events_js(route_events_map)
+                route_states_js = self._generate_route_states_js(route_app.root)
+                reactive_bindings_js = self._generate_reactive_bindings_js()
+                vref_bindings_js = self._generate_vref_bindings_js()
+                combined_all_js = f"""// Combined JS for {route_name} (SSR)
+
+// Events (native addEventListener)
+{route_events_js}
+
+// Route States
+{route_states_js}
+
+// Reactive and VRef Bindings
+{reactive_bindings_js}
+{vref_bindings_js}
+
+// User Scripts
+{combined_js}
+"""
+            elif route_type == RouteType.PUBLIC:
+                # PUBLIC: Events + route states + bindings, no VDOM, no runtime wrapper
+                route_events_js = self._generate_route_events_js(route_events_map)
+                route_states_js = self._generate_route_states_js(route_app.root)
+                reactive_bindings_js = self._generate_reactive_bindings_js()
+                vref_bindings_js = self._generate_vref_bindings_js()
+                combined_all_js = f"""// Combined JS for {route_name} (PUBLIC)
+// Events (native addEventListener)
+{route_events_js}
+
+// Route States
+{route_states_js}
+
+// Reactive and VRef Bindings
+{reactive_bindings_js}
+{vref_bindings_js}
+
+// User Scripts
+{combined_js}
+"""
+            else:
+                # Index/shell: full runtime + config + VDOM
+                combined_all_js = f"""// Combined JS for {route_name}
 // VDOM
 {vdom_js_content}
 
@@ -6285,6 +6380,13 @@ fetch({repr(upload_url)}, {{method:'POST', body:_fd}})
 })();
 </script>"""
         
+        # Write the shared shell runtime to app.js
+        # This will be loaded by index.html as the base SPA runtime script
+        self.write_file(os.path.join(output_path, "app.js"), runtime_js)
+
+        # 3. Handle routing and shell generation
+        
+        # Prepare hydration fallback html
         # Extract initial meta tags from index route if it has Head metadata
         initial_title = app.title
         initial_meta_tags = ''
@@ -6628,3 +6730,209 @@ fetch({repr(upload_url)}, {{method:'POST', body:_fd}})
             tags.append(f'<script type="application/ld+json">\n{json_str}\n</script>')
         
         return '\n    '.join(tags)
+
+    def _generate_shell_js(self, app: App) -> str:
+        """Generate shared shell JS: SPA config, router, VRef bindings, conditional init.
+        This is the runtime that runs ONCE in app.js (index route).
+        """
+        spa_init_js = ""
+        if hasattr(self, '_cached_spa_config_light') and self._cached_spa_config_light:
+            config_literal = compile_val(self._cached_spa_config_light)
+            spa_init_js = f"""
+        if (window.Dars && window.Dars.router) {{
+            window.Dars.router.registerConfig({config_literal});
+        }}"""
+        
+        from dars.env import DarsEnv as _DarsEnv
+        _default_backend = 'http://localhost:3000' if _DarsEnv.dev else '/'
+        if hasattr(self, '_cached_spa_config_light') and self._cached_spa_config_light:
+            _backend_url = self._cached_spa_config_light.get('backendUrl', _default_backend)
+        else:
+            _backend_url = getattr(app, 'ssr_url', None) or _default_backend
+        backend_url_js = json.dumps({"backendUrl": _backend_url})
+
+        return f"""// Dars Shell Runtime
+(function(){{
+    function _darsInit(){{
+        (async () => {{
+            try {{
+                const dap = await import('./lib/dap.js');
+                if (dap.__darsConfig) dap.__darsConfig.allowInlineJS = true;
+            }} catch(_) {{}}
+        }})();
+        
+        if (!window.__DARS_SPA_CONFIG__) {{
+            window.__DARS_SPA_CONFIG__ = {backend_url_js};
+        }} else if (!window.__DARS_SPA_CONFIG__.backendUrl) {{
+            window.__DARS_SPA_CONFIG__.backendUrl = {backend_url_js}.backendUrl;
+        }}
+        
+        {spa_init_js}
+        
+        (async () => {{
+            try {{
+                const dap = await import('./lib/dap.js');
+                if (dap._initConditionalElements) await dap._initConditionalElements({{}});
+            }} catch(_) {{}}
+        }})();
+    }}
+
+    if(document.readyState === 'complete' || document.readyState === 'interactive'){{
+        _darsInit();
+    }} else {{
+        document.addEventListener('DOMContentLoaded', _darsInit);
+    }}
+}})();
+"""
+
+    def _generate_route_states_js(self, root_component: Component) -> str:
+        """Generate only the state initialization for a specific route."""
+        try:
+            from dars.core.state import STATE_BOOTSTRAP
+            from dars.core.state_v2 import STATE_V2_REGISTRY
+            
+            if not STATE_BOOTSTRAP and not STATE_V2_REGISTRY:
+                return "    // No route-specific states"
+            
+            lines = []
+            lines.append('    // Route states')
+            lines.append('    try {')
+            lines.append('        const statesConfig = [')
+            
+            if STATE_BOOTSTRAP:
+                for state in STATE_BOOTSTRAP:
+                    state_js = self._state_to_js(state)
+                    lines.append(f'            {state_js},')
+            
+            if STATE_V2_REGISTRY:
+                seen_ids = {}
+                for state in STATE_V2_REGISTRY:
+                    state_id = state.component.id if hasattr(state.component, 'id') else str(state.component)
+                    seen_ids[state_id] = state
+                
+                for state_id, state in seen_ids.items():
+                    default_vals = getattr(state, '_default_snapshot', {})
+                    js_defaults = []
+                    for k, v in default_vals.items():
+                        js_defaults.append(f'"{k}": {self._value_to_js(v)}')
+                    
+                    defaults_str = '{ ' + ', '.join(js_defaults) + ' }'
+                    state_config = f'''{{
+                        "name": "{state_id}",
+                        "id": "{state_id}",
+                        "defaultValue": {defaults_str},
+                        "isV2": true
+                    }}'''
+                    lines.append(f'            {state_config},')
+            
+            lines.append('        ];')
+            lines.append('        if (window.Dars && typeof window.Dars.registerStates === "function") {')
+            lines.append('            window.Dars.registerStates(statesConfig);')
+            lines.append('        } else {')
+            lines.append('            (async () => {')
+            lines.append('                try {')
+            lines.append('                    const m = await import("./lib/dars.min.js");')
+            lines.append('                    const registerStates = m.registerStates || (m.default && m.default.registerStates);')
+            lines.append('                    if (typeof registerStates === "function") registerStates(statesConfig);')
+            lines.append('                } catch (e) { console.error("[Dars] State init error", e); }')
+            lines.append('            })();')
+            lines.append('        }')
+            lines.append('    } catch (e) { console.error("[Dars] State error", e); }')
+            
+            return '\n'.join(lines)
+        except Exception as e:
+            return f'    console.error("[Dars] Route states error: {str(e)}");'
+
+    def _generate_route_events_js(self, events_map: Dict[str, Dict[str, Any]]) -> str:
+        """Generate native event listeners for a specific route (no wrapper)."""
+        if not events_map:
+            return "    // No events for this route"
+        
+        lines = []
+        lines.append('(function() {')
+        lines.append('    function init() {')
+        
+        for comp_id, events in events_map.items():
+            for ev_type, handlers in events.items():
+                handler_list = handlers if isinstance(handlers, (list, tuple)) else [handlers]
+                for handler in handler_list:
+                    code = None
+                    if hasattr(handler, 'get_code'):
+                        code = handler.get_code()
+                    elif hasattr(handler, 'code'):
+                        code = handler.code
+                    elif isinstance(handler, dict):
+                        code = handler.get('code') or handler.get('value')
+                    elif isinstance(handler, str):
+                        code = handler
+                    
+                    if code and code.strip():
+                        safe_code = code.strip()
+                        lines.append(f'        var el = document.getElementById("{comp_id}");')
+                        lines.append(f'        if (el) el.addEventListener("{ev_type}", async function(e) {{')
+                        lines.append(f'            try {{ {safe_code} }} catch(err) {{ console.error("Event error:", err); }}')
+                        lines.append(f'        }});')
+        
+        lines.append('    }')
+        lines.append('    if (document.readyState === "complete" || document.readyState === "interactive") {')
+        lines.append('        init();')
+        lines.append('    } else {')
+        lines.append('        document.addEventListener("DOMContentLoaded", init);')
+        lines.append('    }')
+        lines.append('})();')
+        
+        return '\n'.join(lines)
+
+    def _compile_dynamic_component(self, component: Component) -> dict:
+        """Compile a component to HTML + metadata instead of VDOM.
+        
+        Returns:
+            {
+                'html': '<div id="..." class="...">...</div>',
+                'id': 'generated_id',
+                'type': 'Button',
+                'events': { 'click': [...] },
+                'lifecycle': { 'onMount': '...', 'onUnmount': '...' },
+                'states': [...],
+                'bindings': '...'
+            }
+        """
+        html = self.render_component(component)
+        
+        vdom_builder = VDomBuilder(id_provider=self.get_component_id)
+        vdom = vdom_builder.build(component)
+        events = vdom_builder.events_map
+        
+        lifecycle = {}
+        def _extract_lifecycle(node):
+            if node.get('lifecycle'):
+                lifecycle[node['id']] = node['lifecycle']
+            for child in node.get('children', []):
+                _extract_lifecycle(child)
+        _extract_lifecycle(vdom)
+        
+        self._collect_bindings_from_tree(component)
+        reactive_bindings = self._generate_reactive_bindings_js()
+        vref_bindings = self._generate_vref_bindings_js()
+        
+        from dars.core.state_v2 import STATE_V2_REGISTRY
+        states = []
+        for state in STATE_V2_REGISTRY:
+            state_id = state.component.id if hasattr(state.component, 'id') else str(state.component)
+            default_vals = getattr(state, '_default_snapshot', {})
+            states.append({
+                'name': state_id,
+                'id': state_id,
+                'defaultValue': default_vals,
+                'isV2': True
+            })
+        
+        return {
+            'html': html,
+            'id': vdom.get('id'),
+            'type': vdom.get('type'),
+            'events': events,
+            'lifecycle': lifecycle,
+            'states': states,
+            'bindings': f"{reactive_bindings}\n{vref_bindings}"
+        }

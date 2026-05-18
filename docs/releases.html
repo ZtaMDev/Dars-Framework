@@ -970,13 +970,17 @@
     </div>
     <div class="dars-container dars-s-c59e376995" id="markdown-content-container">
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_0_1_1_0">
-      <h1 id="release-notes-v199">
-       Release Notes v1.9.9
+      <h1 id="release-notes-v1910">
+       Release Notes v1.9.10
       </h1>
       <blockquote>
        <p>
         <strong>
-         Production-Grade Fullstack: useFetch, FormValidator, Each, JsonStore, UploadPipeline, SecurityHeaders &amp; .env Support
+         Secure Asynchronous SSR Hydration,
+         <code>
+          useVRef
+         </code>
+         Hook, Pure SPA Shells &amp; CLI Lifecycle Hardening
         </strong>
        </p>
       </blockquote>
@@ -988,6 +992,297 @@
 </code></pre>
       </div>
       <h2 id="whats-new">
+       What's New
+      </h2>
+      <h3 id="secure-asynchronous-ssr-hydration">
+       Secure Asynchronous SSR Hydration
+      </h3>
+      <p>
+       The Dars Server Protocol (DSP) payload handling has been fundamentally redesigned to prioritize security and DOM cleanliness.
+      </p>
+      <ul>
+       <li>
+        <strong>
+         Clean HTML Payload
+        </strong>
+        : The bulky inline JSON payload (
+        <code>
+         &lt;script id="__DARS_DSP_DATA__"&gt;
+        </code>
+        ) has been entirely removed from the SSR HTML source. Pre-rendered pages are now shipped with pure, semantic HTML.
+       </li>
+       <li>
+        <strong>
+         Same-Origin Async Fetching
+        </strong>
+        : The SPA Router now securely retrieves hydration data (VDOM snapshots, states, and specific scripts) via asynchronous API requests. These requests strictly enforce
+        <code>
+         mode: "same-origin"
+        </code>
+        and
+        <code>
+         credentials: "same-origin"
+        </code>
+        to prevent external interception.
+       </li>
+       <li>
+        <strong>
+         Anti-Flash Routing
+        </strong>
+        : Fixed a rendering regression where the router's initialization sequence would accidentally hide the active SSR DOM.
+        <code>
+         router.js
+        </code>
+        now correctly identifies and preserves the visibility of the hydrated
+        <code>
+         .dars-page
+        </code>
+        root container.
+       </li>
+      </ul>
+      <h3 id="decoupled-spa-shell-runtime-appjs">
+       Decoupled SPA Shell Runtime (
+       <code>
+        app.js
+       </code>
+       )
+      </h3>
+      <ul>
+       <li>
+        <strong>
+         Pure Bootloader
+        </strong>
+        :
+        <code>
+         app.js
+        </code>
+        no longer incorrectly bundles VRef and reactive state bindings (
+        <code>
+         window.__DARS_VREF_VALUES__
+        </code>
+        ) from all compiled routes. It has been refactored into a pristine, lightweight bootloader that _exclusively_ contains the SPA route map and framework initialization logic.
+       </li>
+       <li>
+        <strong>
+         Isolated Route States
+        </strong>
+        : Individual
+        <code>
+         app_{slug}.js
+        </code>
+        files (like
+        <code>
+         app_did.js
+        </code>
+        ) now retain complete, isolated control over their specific states, preventing namespace pollution and duplicate execution on navigation.
+       </li>
+       <li>
+        <strong>
+         Smart Script Deduplication
+        </strong>
+        : The SPA router now scans the DOM before injecting scripts fetched from the SSR API, preventing issues where route-specific scripts were appended twice during initial hydration.
+       </li>
+      </ul>
+      <h3 id="hardened-dev-server-lifecycle">
+       Hardened Dev Server Lifecycle
+      </h3>
+      <p>
+       The CLI process management for
+       <code>
+        dars preview
+       </code>
+       (specifically with Uvicorn backends) has been aggressively optimized.
+      </p>
+      <ul>
+       <li>
+        <strong>
+         Instant Termination
+        </strong>
+        : Pressing
+        <code>
+         Ctrl+C
+        </code>
+        no longer results in a hanging terminal or "zombie" background processes waiting for WebSockets to close.
+       </li>
+       <li>
+        <strong>
+         Force Kill Tree
+        </strong>
+        : The CLI now utilizes forced OS-level termination (
+        <code>
+         taskkill /F /T
+        </code>
+        on Windows,
+        <code>
+         SIGKILL
+        </code>
+        on Unix) combined with an immediate
+        <code>
+         os._exit(0)
+        </code>
+        , ensuring the backend server is dismantled instantly.
+       </li>
+      </ul>
+      <h3 id="usevref-reactive-vref-consumer-hook">
+       <code>
+        useVRef()
+       </code>
+       — Reactive VRef Consumer Hook
+      </h3>
+      <p>
+       The VRef ecosystem is now complete with the introduction of
+       <code>
+        useVRef()
+       </code>
+       , closing the reactive loop alongside
+       <code>
+        setVRef
+       </code>
+       (define) and
+       <code>
+        updateVRef
+       </code>
+       (mutate).
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="c1"># Define initial state</span>
+<span class="n">price</span> <span class="o">=</span> <span class="n">setVRef</span><span class="p">(</span><span class="mf">19.99</span><span class="p">,</span> <span class="s2">".item-price"</span><span class="p">)</span>
+<span class="n">qty</span>   <span class="o">=</span> <span class="n">setVRef</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span>     <span class="s2">".item-qty"</span><span class="p">)</span>
+
+<span class="c1"># Consume reactively — initial value is resolved at SSR time (no flash!)</span>
+<span class="n">Text</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">useVRef</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">".item-price"</span><span class="p">)))</span>
+<span class="n">Text</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">useVRef</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">".item-price"</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">*</span> <span class="n">V</span><span class="p">(</span><span class="s2">".item-qty"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()))</span>  <span class="c1"># "39.98"</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Checkout"</span><span class="p">,</span> <span class="n">disabled</span><span class="o">=</span><span class="n">useVRef</span><span class="p">(</span><span class="n">V</span><span class="p">(</span><span class="s2">".item-qty"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">))</span>
+
+<span class="c1"># Mutate to trigger reactive updates everywhere</span>
+<span class="n">Button</span><span class="p">(</span><span class="s2">"+"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">".item-qty"</span><span class="p">,</span> <span class="n">V</span><span class="p">(</span><span class="s2">".item-qty"</span><span class="p">)</span><span class="o">.</span><span class="n">int</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+</code></pre>
+      </div>
+      <ul>
+       <li>
+        <strong>
+         Zero flash on SSR
+        </strong>
+        :
+        <code>
+         useVRef
+        </code>
+        pre-resolves the initial value at build time by looking up the bound selector in the
+        <code>
+         setVRef
+        </code>
+        registry -- the server HTML already has the correct value.
+       </li>
+       <li>
+        <strong>
+         Auto-dependency detection
+        </strong>
+        : The compiler walks the
+        <code>
+         V()
+        </code>
+        expression tree and automatically extracts every CSS selector used. At runtime, whenever any of those selectors is updated via
+        <code>
+         updateVRef()
+        </code>
+        , the binding re-evaluates and patches the DOM instantly -- no manual
+        <code>
+         dependencies
+        </code>
+        list required.
+       </li>
+       <li>
+        <strong>
+         Reactive callbacks
+        </strong>
+        : Pass
+        <code>
+         dScript
+        </code>
+        ,
+        <code>
+         RawJS
+        </code>
+        , or plain strings via the
+        <code>
+         callbacks
+        </code>
+        parameter (single value or list). They fire every time the binding re-evaluates, enabling side-effects like logging or chained updates.
+       </li>
+      </ul>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Callbacks fire every time .value-stuff changes</span>
+<span class="n">Text</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">useVRef</span><span class="p">(</span>
+    <span class="n">V</span><span class="p">(</span><span class="s2">".value-stuff"</span><span class="p">),</span>
+    <span class="n">callbacks</span><span class="o">=</span><span class="n">RawJS</span><span class="p">(</span><span class="s2">"console.log('value-stuff changed!');"</span><span class="p">)</span>
+<span class="p">))</span>
+</code></pre>
+      </div>
+      <ul>
+       <li>
+        <strong>
+         Expression support
+        </strong>
+        : Accepts any
+        <code>
+         V()
+        </code>
+        expression,
+        <code>
+         MathExpression
+        </code>
+        ,
+        <code>
+         BooleanExpression
+        </code>
+        , or plain literal.
+       </li>
+       <li>
+        <strong>
+         Hydration bridge
+        </strong>
+        : At runtime, the framework injects a JS registration block that reconnects the DOM element to the live
+        <code>
+         window.__DARS_VREF_VALUES__
+        </code>
+        registry, keeping it in sync with any subsequent
+        <code>
+         updateVRef
+        </code>
+        calls.
+       </li>
+       <li>
+        <strong>
+         Compiler fix
+        </strong>
+        : Resolved a regression where
+        <code>
+         VRefBinding
+        </code>
+        objects were iterated by key instead of by value, causing the reactive JS block to be silently omitted from the output bundle.
+       </li>
+      </ul>
+      <hr/>
+      <h1 id="release-notes-v199">
+       Release Notes v1.9.9
+      </h1>
+      <blockquote>
+       <p>
+        <strong>
+         Production-Grade Fullstack: useFetch, FormValidator, Each, JsonStore, UploadPipeline, SecurityHeaders &amp; .env Support
+        </strong>
+       </p>
+      </blockquote>
+      <h2 id="installation-2">
+       Installation
+      </h2>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
+</code></pre>
+      </div>
+      <h2 id="whats-new-2">
        What's New
       </h2>
       <h3 id="usefetch-declarative-data-fetching-hook">
@@ -1553,14 +1848,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-2">
+      <h2 id="installation-3">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-2">
+      <h2 id="whats-new-3">
        What's New
       </h2>
       <h3 id="hybrid-ssrspa-stabilization">
@@ -1792,14 +2087,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-3">
+      <h2 id="installation-4">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-3">
+      <h2 id="whats-new-4">
        What's New
       </h2>
       <h3 id="modular-animation-engine-animjs">
@@ -2044,14 +2339,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-4">
+      <h2 id="installation-5">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-4">
+      <h2 id="whats-new-5">
        What's New
       </h2>
       <h3 id="fixed-relative-paths-for-runtime-resources">
@@ -2187,14 +2482,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-5">
+      <h2 id="installation-6">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-5">
+      <h2 id="whats-new-6">
        What's New
       </h2>
       <h3 id="configurable-development-port">
@@ -2352,14 +2647,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-6">
+      <h2 id="installation-7">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-6">
+      <h2 id="whats-new-7">
        What's New
       </h2>
       <h3 id="standardized-component-docstrings">
@@ -2431,14 +2726,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-7">
+      <h2 id="installation-8">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-7">
+      <h2 id="whats-new-8">
        What's New
       </h2>
       <h3 id="utility-style-system">
@@ -2636,14 +2931,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-8">
+      <h2 id="installation-9">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-8">
+      <h2 id="whats-new-9">
        What's New
       </h2>
       <h3 id="definitive-removal-of-new-function">
@@ -2920,14 +3215,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-9">
+      <h2 id="installation-10">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-9">
+      <h2 id="whats-new-10">
        What's New
       </h2>
       <h3 id="restored-native-string-concatenation">
@@ -3002,14 +3297,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-10">
+      <h2 id="installation-11">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-10">
+      <h2 id="whats-new-11">
        What's New
       </h2>
       <h3 id="state-v2-reactivity-decoupling">
@@ -3140,14 +3435,14 @@
         release.
        </p>
       </blockquote>
-      <h2 id="installation-11">
+      <h2 id="installation-12">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-11">
+      <h2 id="whats-new-12">
        What's New
       </h2>
       <h3 id="zero-eval-runtime-secure-script-execution">
@@ -3345,14 +3640,14 @@
         : Versions &lt;= v1.8.7 are considered deprecated and NOT recommended for production use. v1.8.8 addresses critical security surfaces by temporarily removing experimental Server Components. Upgrading is mandatory.
        </p>
       </blockquote>
-      <h2 id="installation-12">
+      <h2 id="installation-13">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-12">
+      <h2 id="whats-new-13">
        What's New
       </h2>
       <h3 id="dars-server-protocol-dsp">
@@ -3422,14 +3717,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-13">
+      <h2 id="installation-14">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-13">
+      <h2 id="whats-new-14">
        What's New
       </h2>
       <h3 id="dars-server-components">
@@ -3537,14 +3832,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-14">
+      <h2 id="installation-15">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-14">
+      <h2 id="whats-new-15">
        What's New
       </h2>
       <h3 id="darsenv-environment-awareness">
@@ -3656,14 +3951,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-15">
+      <h2 id="installation-16">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-15">
+      <h2 id="whats-new-16">
        What's New
       </h2>
       <h3 id="multiple-outlets-via-outlet_id">
@@ -3760,14 +4055,14 @@ This keeps state/events safe and avoids breaking hydration.
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-16">
+      <h2 id="installation-17">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-16">
+      <h2 id="whats-new-17">
        What's New
       </h2>
       <h3 id="python-native-minification-by-default-no-nodebun-required">
@@ -3976,14 +4271,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-17">
+      <h2 id="installation-18">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-17">
+      <h2 id="whats-new-18">
        What's New
       </h2>
       <h3 id="fixed-production-build-crash-unexpected-token-export">
@@ -4034,14 +4329,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-18">
+      <h2 id="installation-19">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-18">
+      <h2 id="whats-new-19">
        What's New
       </h2>
       <h3 id="fixed-settimeout-promise-handling">
@@ -4085,14 +4380,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-19">
+      <h2 id="installation-20">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-19">
+      <h2 id="whats-new-20">
        What's New
       </h2>
       <h3 id="new-style-optimization-pipeline-phase-1">
@@ -4462,14 +4757,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-20">
+      <h2 id="installation-21">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-20">
+      <h2 id="whats-new-21">
        What's New
       </h2>
       <h3 id="new-advanced-multimedia-components-video-audio">
@@ -5025,6 +5320,27 @@ improving consistency and providing a real-world example of the upgraded styling
      <div class="sidebar-category">
       Versions
      </div>
+     <a class="sidebar-link sidebar-level-1" href="#release-notes-v1910" style="margin-left: 0px">
+      Release Notes v1.9.10
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#installation" style="margin-left: 20px">
+      Installation
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#whats-new" style="margin-left: 20px">
+      What's New
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#secure-asynchronous-ssr-hydration" style="margin-left: 40px">
+      Secure Asynchronous SSR Hydration
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#decoupled-spa-shell-runtime-appjs" style="margin-left: 40px">
+      Decoupled SPA Shell Runtime (`app.js`)
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#hardened-dev-server-lifecycle" style="margin-left: 40px">
+      Hardened Dev Server Lifecycle
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#usevref-reactive-vref-consumer-hook" style="margin-left: 40px">
+      `useVRef()` — Reactive VRef Consumer Hook
+     </a>
      <a class="sidebar-link sidebar-level-1" href="#release-notes-v199" style="margin-left: 0px">
       Release Notes v1.9.9
      </a>
@@ -5678,7 +5994,7 @@ improving consistency and providing a real-world example of the upgraded styling
   </div>
   <div id="__dars_spa_root__">
   </div>
-  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1779059060" type="module">
+  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1779147160" type="module">
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js">
   </script>

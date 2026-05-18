@@ -1,3 +1,74 @@
+# Release Notes v1.9.10
+
+> **Secure Asynchronous SSR Hydration, `useVRef` Hook, Pure SPA Shells & CLI Lifecycle Hardening**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Secure Asynchronous SSR Hydration
+
+The Dars Server Protocol (DSP) payload handling has been fundamentally redesigned to prioritize security and DOM cleanliness.
+
+- **Clean HTML Payload**: The bulky inline JSON payload (`<script id="__DARS_DSP_DATA__">`) has been entirely removed from the SSR HTML source. Pre-rendered pages are now shipped with pure, semantic HTML.
+- **Same-Origin Async Fetching**: The SPA Router now securely retrieves hydration data (VDOM snapshots, states, and specific scripts) via asynchronous API requests. These requests strictly enforce `mode: "same-origin"` and `credentials: "same-origin"` to prevent external interception.
+- **Anti-Flash Routing**: Fixed a rendering regression where the router's initialization sequence would accidentally hide the active SSR DOM. `router.js` now correctly identifies and preserves the visibility of the hydrated `.dars-page` root container.
+
+### Decoupled SPA Shell Runtime (`app.js`)
+
+- **Pure Bootloader**: `app.js` no longer incorrectly bundles VRef and reactive state bindings (`window.__DARS_VREF_VALUES__`) from all compiled routes. It has been refactored into a pristine, lightweight bootloader that _exclusively_ contains the SPA route map and framework initialization logic.
+- **Isolated Route States**: Individual `app_{slug}.js` files (like `app_did.js`) now retain complete, isolated control over their specific states, preventing namespace pollution and duplicate execution on navigation.
+- **Smart Script Deduplication**: The SPA router now scans the DOM before injecting scripts fetched from the SSR API, preventing issues where route-specific scripts were appended twice during initial hydration.
+
+### Hardened Dev Server Lifecycle
+
+The CLI process management for `dars preview` (specifically with Uvicorn backends) has been aggressively optimized.
+
+- **Instant Termination**: Pressing `Ctrl+C` no longer results in a hanging terminal or "zombie" background processes waiting for WebSockets to close.
+- **Force Kill Tree**: The CLI now utilizes forced OS-level termination (`taskkill /F /T` on Windows, `SIGKILL` on Unix) combined with an immediate `os._exit(0)`, ensuring the backend server is dismantled instantly.
+
+### `useVRef()` — Reactive VRef Consumer Hook
+
+The VRef ecosystem is now complete with the introduction of `useVRef()`, closing the reactive loop alongside `setVRef` (define) and `updateVRef` (mutate).
+
+```python
+from dars.all import *
+
+# Define initial state
+price = setVRef(19.99, ".item-price")
+qty   = setVRef(2,     ".item-qty")
+
+# Consume reactively — initial value is resolved at SSR time (no flash!)
+Text(text=useVRef(V(".item-price")))
+Text(text=useVRef(V(".item-price").float() * V(".item-qty").int()))  # "39.98"
+Button("Checkout", disabled=useVRef(V(".item-qty").int() == 0))
+
+# Mutate to trigger reactive updates everywhere
+Button("+", on_click=updateVRef(".item-qty", V(".item-qty").int() + 1))
+```
+
+- **Zero flash on SSR**: `useVRef` pre-resolves the initial value at build time by looking up the bound selector in the `setVRef` registry -- the server HTML already has the correct value.
+- **Auto-dependency detection**: The compiler walks the `V()` expression tree and automatically extracts every CSS selector used. At runtime, whenever any of those selectors is updated via `updateVRef()`, the binding re-evaluates and patches the DOM instantly -- no manual `dependencies` list required.
+- **Reactive callbacks**: Pass `dScript`, `RawJS`, or plain strings via the `callbacks` parameter (single value or list). They fire every time the binding re-evaluates, enabling side-effects like logging or chained updates.
+
+```python
+# Callbacks fire every time .value-stuff changes
+Text(text=useVRef(
+    V(".value-stuff"),
+    callbacks=RawJS("console.log('value-stuff changed!');")
+))
+```
+
+- **Expression support**: Accepts any `V()` expression, `MathExpression`, `BooleanExpression`, or plain literal.
+- **Hydration bridge**: At runtime, the framework injects a JS registration block that reconnects the DOM element to the live `window.__DARS_VREF_VALUES__` registry, keeping it in sync with any subsequent `updateVRef` calls.
+- **Compiler fix**: Resolved a regression where `VRefBinding` objects were iterated by key instead of by value, causing the reactive JS block to be silently omitted from the output bundle.
+
+---
+
 # Release Notes v1.9.9
 
 > **Production-Grade Fullstack: useFetch, FormValidator, Each, JsonStore, UploadPipeline, SecurityHeaders & .env Support**

@@ -154,10 +154,11 @@ export function _initializeRouter() {
     let skipInit = false;
     const match = _matchRoute(initialPath);
 
-    const vdomSource = window.__ROUTE_VDOM__ || window.__DARS_VDOM__;
+    const isSSRRoute = match && match.route && match.route["type"] === "ssr";
+    const vdomSource = isSSRRoute ? (window.__ROUTE_VDOM__ || window.__DARS_VDOM__) : null;
     const hydratedPath = window.__DARS_HYDRATED_PATH__ || "/";
     
-    if (vdomSource && (initialPath === hydratedPath || (initialPath === "/" && hydratedPath === "/index.html"))) {
+    if (isSSRRoute && vdomSource && (initialPath === hydratedPath || (initialPath === "/" && hydratedPath === "/index.html"))) {
       // Find matching route to set as current
       if (match && match.route) {
         // Update global state to reflect current route without navigating
@@ -193,7 +194,7 @@ export function _initializeRouter() {
         const container = document.getElementById("__dars_spa_root__");
         if (container) {
           document.querySelectorAll(".dars-page").forEach((el) => {
-            if (el !== container) el.style.display = "none";
+            if (el !== container && !container.contains(el)) el.style.display = "none";
           });
           container.style.display = "";
         }
@@ -516,7 +517,7 @@ export async function _loadRoute(route, params) {
         if (r["states"] && Array.isArray(r["states"])) {
           registerStates(r["states"]);
         }
-        if (r["vdom"]) {
+        if (r["vdom"] && Object.keys(r["vdom"]).length > 0) {
           try {
             if (typeof window["DarsHydrate"] === "function")
               window["DarsHydrate"](wrapper);
@@ -547,7 +548,7 @@ export async function _loadRoute(route, params) {
 
         // In Combined Mode: hide static pages and show SPA root
         document.querySelectorAll(".dars-page").forEach((el) => {
-          if (el !== container) el.style.display = "none";
+          if (el !== container && !container.contains(el)) el.style.display = "none";
         });
         container.style.display = "";
         document.documentElement.setAttribute("dars-ready", "true");
@@ -649,13 +650,18 @@ export async function _loadRoute(route, params) {
       try {
         const backendUrl = (__spaConfig && __spaConfig["backendUrl"]) || "";
         const loaderUrl = route["ssr_endpoint"] || `/api/ssr/${route["name"]}`;
-        let fullUrl = backendUrl ? `${backendUrl}${loaderUrl}` : loaderUrl;
+        let fullUrl = loaderUrl;
+        if (backendUrl && backendUrl !== "/") {
+          fullUrl = backendUrl.replace(/\/$/, '') + (loaderUrl.startsWith('/') ? loaderUrl : '/' + loaderUrl);
+        }
 
         const sep = fullUrl.includes("?") ? "&" : "?";
         fullUrl = fullUrl + sep + "_t=" + Date.now();
 
         const response = await fetch(fullUrl, {
           headers: { "Content-Type": "application/json" },
+          mode: "same-origin",
+          credentials: "same-origin"
         });
 
         if (!response.ok)
@@ -768,6 +774,15 @@ export function _executeScripts(scripts, routeName) {
  */
 export function _loadExternalScript(src, isModule, routeName) {
   try {
+    const existingScript = document.querySelector(`script[src="${src}"]`);
+    if (existingScript) {
+      if (!existingScript.classList.contains("dars-route-script")) {
+        existingScript.classList.add("dars-route-script");
+        if (routeName) existingScript.setAttribute("data-route", routeName);
+      }
+      return;
+    }
+
     const script = document.createElement("script");
     script.src = String(src);
     script.async = false; // Ensure sequential execution

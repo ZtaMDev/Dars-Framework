@@ -156,7 +156,7 @@ def compile_val(v, is_async=False):
     
     elif op == 'get_dom_value':
         sel = args.get('selector', '')
-        return f"(function() {{ var _e = document.querySelector({json.dumps(sel)}); if(!_e) return ''; return (_e.tagName === 'INPUT' || _e.tagName === 'SELECT' || _e.tagName === 'TEXTAREA') ? _e.value : (_e.textContent || ''); }})()"
+        return f"(function() {{ if (window.__DARS_VREF_VALUES__ && {json.dumps(sel)} in window.__DARS_VREF_VALUES__) return window.__DARS_VREF_VALUES__[{json.dumps(sel)}]; var _e = document.querySelector({json.dumps(sel)}); if(!_e) return ''; return (_e.tagName === 'INPUT' || _e.tagName === 'SELECT' || _e.tagName === 'TEXTAREA') ? _e.value : (_e.textContent || ''); }})()"
     
     elif op == 'transform':
         sub = compile_val(args.get('input'), is_async=is_async)
