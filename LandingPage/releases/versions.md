@@ -59,7 +59,7 @@ Button("+", on_click=updateVRef(".item-qty", V(".item-qty").int() + 1))
 # Callbacks fire every time .value-stuff changes
 Text(text=useVRef(
     V(".value-stuff"),
-    callbacks=RawJS("console.log('value-stuff changed!');")
+    callbacks=log("value-stuff changed!")
 ))
 ```
 
