@@ -115,6 +115,7 @@ class FormData:
         state_property=None,
         on_success=None,
         on_error=None,
+        method: str = "POST",
     ) -> dScript:
         """
         Submit form data to a URL via POST.
@@ -162,7 +163,7 @@ class FormData:
             "op": "network_request",
             "args": {
                 "url": url,
-                "method": "POST",
+                "method": method,
                 "headers": {"Content-Type": "application/json"},
                 "body": {
                     "op": "transform",

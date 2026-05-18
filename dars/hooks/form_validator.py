@@ -374,6 +374,7 @@ class FormValidator:
         state_property=None,
         on_success=None,
         on_error=None,
+        method: str = "POST",
     ) -> 'dScript':
         """
         Validate first, then submit only if all rules pass.
@@ -550,6 +551,7 @@ class FormValidator:
             state_property=state_property,
             on_success=on_success,
             on_error=on_error,
+            method=method,
         ).data
 
         # Step 3: check if ALL error elements are empty — only then submit.
