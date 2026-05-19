@@ -39,7 +39,6 @@ test/
 myapp/
 tst/
 dpm.py
-dars_framework-1.6.2
 .content/
 .pytest_cache
 LandingPage.code-workspace

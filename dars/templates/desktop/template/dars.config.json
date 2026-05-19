@@ -11,8 +11,7 @@
     "node_modules"
   ],
   "bundle": true,
-  "defaultMinify": false,
-  "viteMinify": false,
+  "minify": true,
   "markdownHighlight": true,
   "markdownHighlightTheme": "auto",
   "targetPlatform": "auto"

@@ -1127,6 +1127,18 @@
      <a class="sidebar-link sidebar-level-3" href="#4-features-integrations" style="margin-left: 40px">
       4. Features &amp; Integrations
      </a>
+     <a class="sidebar-link sidebar-level-2" href="#the-dars-bundler" style="margin-left: 20px">
+      The dars-bundler
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#how-it-works" style="margin-left: 40px">
+      How it works
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#discovery-order" style="margin-left: 40px">
+      Discovery order
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#disabling-minification" style="margin-left: 40px">
+      Disabling minification
+     </a>
      <a class="sidebar-link sidebar-level-2" href="#custom-utility-styles" style="margin-left: 20px">
       Custom Utility Styles
      </a>
@@ -4123,7 +4135,7 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
        <code>
         dars.config.json
        </code>
-       file is the central nervous system of your Dars project. it defines how your application is compiled, optimized, and prepared for deployment.
+       file is the central nervous system of your Dars project. It defines how your application is compiled, optimized, and prepared for deployment.
       </p>
       <hr/>
       <h2 id="configuration-overview">
@@ -4141,8 +4153,7 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
 <span class="w">  </span><span class="nt">"include"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
 <span class="w">  </span><span class="nt">"exclude"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"**/__pycache__"</span><span class="p">,</span><span class="w"> </span><span class="s2">".git"</span><span class="p">,</span><span class="w"> </span><span class="s2">".venv"</span><span class="p">,</span><span class="w"> </span><span class="s2">"node_modules"</span><span class="p">],</span>
 <span class="w">  </span><span class="nt">"bundle"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"defaultMinify"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"viteMinify"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"minify"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">"markdownHighlight"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">"markdownHighlightTheme"</span><span class="p">:</span><span class="w"> </span><span class="s2">"auto"</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">"port"</span><span class="p">:</span><span class="w"> </span><span class="mi">8000</span><span class="p">,</span>
@@ -4243,24 +4254,39 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
        3. Optimization &amp; Minification
       </h3>
       <p>
-       Dars features a multi-stage minification pipeline to ensure the smallest possible production bundle.
+       Dars now uses
+       <strong>
+        dars-bundler
+       </strong>
+       — a standalone, high-performance Rust binary — as its sole minification engine. It replaces the previous Python-based rjsmin/rcssmin pipeline and the optional Vite/esbuild dependency.
       </p>
       <ul>
        <li>
         <strong>
          <code>
-          defaultMinify
+          minify
          </code>
         </strong>
-        (boolean): Controls the internal Python-side HTML/CSS minifier.
-       </li>
-       <li>
+        (boolean, default
+        <code>
+         true
+        </code>
+        ): Enables or disables JS and CSS minification via
+        <code>
+         dars-bundler
+        </code>
+        . When enabled, the bundler runs
         <strong>
-         <code>
-          viteMinify
-         </code>
+         SWC
         </strong>
-        (boolean): Enables advanced JavaScript minification using Vite/esbuild. Recommended for production.
+        (Rust) for AST-level JS minification with dead-code elimination, and
+        <strong>
+         LightningCSS
+        </strong>
+        for CSS minification.
+        <strong>
+         No Node.js, npm, or Vite installation is required.
+        </strong>
        </li>
        <li>
         <strong>
@@ -4271,6 +4297,26 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
         (boolean): Ensures all internal dependencies are bundled into the final distribution.
        </li>
       </ul>
+      <blockquote>
+       <p>
+        <strong>
+         Note:
+        </strong>
+        The old
+        <code>
+         viteMinify
+        </code>
+        and
+        <code>
+         defaultMinify
+        </code>
+        keys are still accepted for backwards compatibility but are ignored —
+        <code>
+         minify
+        </code>
+        is the single control point.
+       </p>
+      </blockquote>
       <h3 id="4-features-integrations">
        4. Features &amp; Integrations
       </h3>
@@ -4316,6 +4362,132 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
         .
        </li>
       </ul>
+      <hr/>
+      <h2 id="the-dars-bundler">
+       The dars-bundler
+      </h2>
+      <p>
+       <code>
+        dars-bundler
+       </code>
+       is a standalone Rust binary that Dars ships alongside its runtime. It is automatically detected and invoked during
+       <code>
+        dars build
+       </code>
+       /
+       <code>
+        dars export
+       </code>
+       —
+       <strong>
+        no manual configuration is needed
+       </strong>
+       .
+      </p>
+      <h3 id="how-it-works">
+       How it works
+      </h3>
+      <ol>
+       <li>
+        After Dars generates your HTML/CSS/JS output,
+        <code>
+         dars-bundler
+        </code>
+        is called on the output directory.
+       </li>
+       <li>
+        It walks all JS files and runs
+        <strong>
+         SWC minification
+        </strong>
+        (variable renaming, dead-code elimination, constant folding).
+       </li>
+       <li>
+        It walks all CSS files and runs
+        <strong>
+         LightningCSS minification
+        </strong>
+        (vendor-prefix removal, color optimization, unused selector pruning).
+       </li>
+       <li>
+        Files in
+        <code>
+         lib/
+        </code>
+        (the Dars runtime:
+        <code>
+         dars.min.js
+        </code>
+        ,
+        <code>
+         dap.js
+        </code>
+        , etc.) are processed with the same pipeline.
+       </li>
+       <li>
+        HTML files are
+        <strong>
+         not touched
+        </strong>
+        by dars-bundler; they are already optimized by BeautifulSoup during export.
+       </li>
+      </ol>
+      <h3 id="discovery-order">
+       Discovery order
+      </h3>
+      <p>
+       The bundler is resolved in this order:
+1.
+       <code>
+        DARS_BUNDLER_PATH
+       </code>
+       env variable (user override)
+2. Same directory as the Python executable
+3. System
+       <code>
+        PATH
+       </code>
+       4.
+       <code>
+        dars/bundler/
+       </code>
+       subdirectory shipped with the framework
+5. DarsBundler dev repo
+       <code>
+        target/debug
+       </code>
+       or
+       <code>
+        target/release
+       </code>
+       (development mode)
+      </p>
+      <h3 id="disabling-minification">
+       Disabling minification
+      </h3>
+      <p>
+       Set
+       <code>
+        "minify": false
+       </code>
+       in
+       <code>
+        dars.config.json
+       </code>
+       <strong>
+        or
+       </strong>
+       pass
+       <code>
+        --no-minify
+       </code>
+       to the CLI:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code>dars<span class="w"> </span>build<span class="w"> </span>--no-minify
+dars<span class="w"> </span><span class="nb">export</span><span class="w"> </span>--no-minify
+</code></pre>
+      </div>
       <hr/>
       <h2 id="custom-utility-styles">
        Custom Utility Styles
@@ -20867,7 +21039,7 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
   </div>
   <div id="__dars_spa_root__">
   </div>
-  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1779151123" type="module">
+  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1779161170" type="module">
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js">
   </script>

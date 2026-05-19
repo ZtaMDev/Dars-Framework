@@ -4,12 +4,12 @@ This document outlines the development roadmap for Dars Framework. The goal is t
 
 ## Project Metrics
 
-- **Current Version**: v1.9.8
+- **Current Version**: v1.9.12
 - **Target**: v2.0.0 — Complete Production-Grade Fullstack Python Framework
 
 ---
 
-## Completed (v1.0 → v1.9.6)
+## Completed (v1.0 → v1.9.12)
 
 All of the following have been implemented and shipped:
 
@@ -22,7 +22,7 @@ All of the following have been implemented and shipped:
 - **Hooks**: `useDynamic`, `useValue`, `useWatch`, `setVRef`, `updateVRef`, `V()`, `url()`, `transform()`.
 - **Routing**: SPA router, multipage, nested routes, outlets, lazy loading, route types (`public`, `private`, `protected`, `SSR`), route obfuscation.
 - **SSR**: Server-side rendering via FastAPI, DSP hydration, client-side rehydration.
-- **Exporter**: HTML/CSS/JS with minification (rjsmin/rcssmin + optional Vite), style optimization pipeline, scoped CSS.
+- **Exporter**: HTML/CSS/JS with minification via **dars-bundler** (Rust/SWC/LightningCSS), style optimization pipeline, scoped CSS, static-site router elimination.
 - **Desktop**: Electron integration, bidirectional JS bridge, packaging templates.
 - **CLI**: `dars init`, `dars dev`, `dars build`, `dars export`, `dars preview`, `dars doctor`, `dars test`, hot reload.
 - **Utility Styles**: Tailwind-like utility system with arbitrary properties, gradients, rings, filters, transforms.
@@ -38,6 +38,9 @@ All of the following have been implemented and shipped:
 - **Anti-Flash System**: Implemented `dars-ready` visibility mechanism with safety fallbacks to prevent FOUC and blank screens during hydration.
 - **CLI v2**: Improved `dars preview` with automatic configuration detection, optional paths, and customizable ports. Standardized `dars dev` port propagation.
 - **Minification Pipeline**: Optimized minification for SPA shells and SSR routes using a unified `app.js` strategy.
+- **dars-bundler**: Standalone Rust minification binary (SWC + LightningCSS + Rayon) replacing rjsmin/rcssmin/Vite. Cross-platform builds (Windows/Linux/macOS) via GitHub Actions. Zero Node.js dependency.
+- **Unified `minify` config key**: Replaced `viteMinify` + `defaultMinify` with a single `minify: true/false` key in `dars.config.json`. Backward-compatible with old keys.
+- **Static-site router elimination**: Exporter auto-detects static (non-SPA) projects and omits `router.js` + patches `dars.min.js` to remove dead router imports at build time.
 
 ---
 

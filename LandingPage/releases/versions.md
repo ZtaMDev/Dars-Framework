@@ -1,3 +1,81 @@
+# Release Notes v1.9.12
+
+> **dars-bundler: Standalone Rust Minifier, Static Site Router Optimization & Unified Config**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### dars-bundler — High-Performance Standalone Rust Minifier
+
+Dars now ships with **dars-bundler**, a standalone cross-platform binary written in Rust that replaces the entire `rjsmin` / `rcssmin` / Vite/esbuild minification pipeline. It requires **zero external dependencies** — no Node.js, npm, or Vite installation needed on the developer's machine.
+
+Under the hood, dars-bundler uses:
+
+- **SWC** (Speedy Web Compiler) for AST-level JavaScript minification: dead-code elimination, constant folding, variable mangling, and unreachable-code pruning.
+- **LightningCSS** for CSS minification: vendor-prefix removal, color value optimization, and redundant rule elimination.
+- **Rayon** for parallelized, multi-core file processing across the entire output directory.
+
+The binary is discovered automatically in this priority order:
+
+1. `DARS_BUNDLER_PATH` environment variable (user override)
+2. Alongside the Python executable (venv-friendly)
+3. System `PATH`
+4. `dars/bundler/` inside the framework package (shipped with Dars)
+5. Dev-mode: adjacent `DarsBundler/` repo `target/debug|release` build
+
+Pre-built binaries for **Windows (amd64)**, **Linux (amd64)**, and **macOS (amd64 + arm64)** are released via GitHub Actions on every tagged release.
+
+### Simplified `dars.config.json` — Single `minify` Key
+
+The old dual-key minification configuration (`defaultMinify` + `viteMinify`) has been replaced by a single, unified key:
+
+```json
+{
+  "minify": true
+}
+```
+
+- `true` (default) — dars-bundler runs after export, minifying all JS and CSS files in-place.
+- `false` — minification is skipped entirely.
+
+Old keys are accepted for backward compatibility but are no longer the source of truth. Existing projects do **not** need to update their configs immediately.
+
+All 13 `dars.config.json` files in the framework's own repos have been updated to use the new format.
+
+### Static Site Generation: Router Elimination
+
+When exporting a **purely static site** (no SPA routes), Dars now automatically:
+
+1. **Omits `router.js`** from the generated `lib/` directory entirely — shaving ~11 KB from the cold load.
+2. **Patches `dars.min.js` on-the-fly** to strip the `import { ... } from "./router.js"` statement and the `router:` key from the exported `Dars` object, ensuring no broken import references at runtime.
+
+SPA projects are unaffected — the full router is still included when `app._spa_routes` is populated.
+
+### CLI Minification Flow Cleanup
+
+The `dars export` and `dars build` commands previously contained ~90 lines of duplicated, branching environment-variable logic (`DARS_VITE_MINIFY`, `DARS_DEFAULT_MINIFY`, `DARS_DEFAULT_MINIFY_ONLY_FALLBACK`, etc.) wired across three separate code paths. This has been replaced with a single, clean block:
+
+```python
+minify_enabled = cfg.get('minify', cfg.get('defaultMinify', True))
+os.environ['DARS_MINIFY'] = '1' if minify_enabled else '0'
+```
+
+The `--no-minify` CLI flag continues to work on both `dars export` and `dars build`.
+
+## Deprecations
+
+| Old key         | Status                            | Replacement |
+| --------------- | --------------------------------- | ----------- |
+| `viteMinify`    | Deprecated (backward-compat read) | `minify`    |
+| `defaultMinify` | Deprecated (backward-compat read) | `minify`    |
+
+---
+
 # Release Notes v1.9.11
 
 > **Secure Asynchronous SSR Hydration, `useVRef` Hook, Pure SPA Shells & CLI Lifecycle Hardening**

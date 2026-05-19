@@ -159,13 +159,31 @@ class HTMLCSSJSExporter(Exporter):
                 exporter_dir = os.path.dirname(os.path.abspath(inspect.getfile(self.__class__)))
                 resources_dir = os.path.join(exporter_dir, 'resources')
                 
+                is_spa = hasattr(app, '_spa_routes') and bool(app._spa_routes)
+                
                 if os.path.exists(resources_dir):
                     for filename in os.listdir(resources_dir):
                         if filename.endswith('.js') or filename.endswith('.js.map'):
+                            # Skip router.js if not SPA
+                            if not is_spa and filename.startswith('router.js'):
+                                continue
+                                
                             src = os.path.join(resources_dir, filename)
                             dst = os.path.join(lib_dir, filename)
+                            
                             # Copy fresh every time to ensure updates are reflected
-                            shutil.copy2(src, dst)
+                            if filename == 'dars.min.js' and not is_spa:
+                                import re
+                                with open(src, 'r', encoding='utf-8') as f:
+                                    content = f.read()
+                                # Remove static import for router.js
+                                content = re.sub(r'import\s*\{[^}]*\}\s*from\s*["\']./router\.js["\'];?', '', content)
+                                # Remove router config from Dars object
+                                content = re.sub(r'router:\s*\{[^}]*\},?', '', content)
+                                with open(dst, 'w', encoding='utf-8') as f:
+                                    f.write(content)
+                            else:
+                                shutil.copy2(src, dst)
             except Exception as e:
                 print(f"[Dars] Error copying runtime resources: {e}")
 
@@ -175,8 +193,8 @@ class HTMLCSSJSExporter(Exporter):
             except Exception:
                 cfg, cfg_found = ({}, False)
             
-            # Obtener configuración de viteMinify
-            vite_minify = cfg.get('viteMinify', True) if cfg else True
+            # Obtener configuración de minify (nuevo) con compat para viteMinify antiguo
+            vite_minify = cfg.get('minify', cfg.get('viteMinify', True)) if cfg else True
             
             try:
                 resolved = resolve_paths(cfg if cfg else {}, project_root)

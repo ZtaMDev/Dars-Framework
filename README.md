@@ -574,8 +574,7 @@ dars preview ./my_exported_app -p 8080
   "include": [],
   "exclude": ["**/__pycache__", ".git", ".venv", "node_modules"],
   "bundle": true,
-  "defaultMinify": true,
-  "viteMinify": true,
+  "minify": true,
   "utility_styles": {},
   "markdownHighlight": true,
   "markdownHighlightTheme": "auto",
@@ -591,8 +590,7 @@ dars preview ./my_exported_app -p 8080
 | `outdir` | Output directory |
 | `publicDir` | Folder copied into output (auto-detected if null) |
 | `bundle` | Reserved for future use |
-| `defaultMinify` | Toggle Python HTML/JS/CSS minifier (default `true`) |
-| `viteMinify` | Toggle Vite/esbuild minifier for JS/CSS (default `true`) |
+| `minify` | Enable/disable JS & CSS minification via **dars-bundler** (default `true`). No Node.js/Vite required. |
 | `utility_styles` | Custom utility class definitions |
 | `markdownHighlight` | Auto-inject Prism.js for Markdown code blocks (default `true`) |
 | `backendEntry` | Python import path for SSR/backend app (e.g. `"backend.api:app"`) |

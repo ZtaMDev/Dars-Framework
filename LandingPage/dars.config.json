@@ -4,16 +4,9 @@
   "outdir": "../docs",
   "publicDir": null,
   "include": [],
-  "exclude": [
-    "**/__pycache__",
-    ".git",
-    ".venv",
-    "node_modules"
-  ],
+  "exclude": ["**/__pycache__", ".git", ".venv", "node_modules"],
   "bundle": true,
-  "defaultMinify": true,
-  "viteMinify": true,
+  "minify": true,
   "markdownHighlight": true,
-  "markdownHighlightTheme": "dark",
-  "targetPlatform": "auto"
+  "markdownHighlightTheme": "dark"
 }

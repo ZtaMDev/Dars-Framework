@@ -989,7 +989,7 @@
         <strong>
          Current Version
         </strong>
-        : v1.9.8
+        : v1.9.12
        </li>
        <li>
         <strong>
@@ -999,8 +999,8 @@
        </li>
       </ul>
       <hr/>
-      <h2 id="completed-v10-v196">
-       Completed (v1.0 → v1.9.6)
+      <h2 id="completed-v10-v1912">
+       Completed (v1.0 → v1.9.12)
       </h2>
       <p>
        All of the following have been implemented and shipped:
@@ -1288,7 +1288,11 @@
         <strong>
          Exporter
         </strong>
-        : HTML/CSS/JS with minification (rjsmin/rcssmin + optional Vite), style optimization pipeline, scoped CSS.
+        : HTML/CSS/JS with minification via
+        <strong>
+         dars-bundler
+        </strong>
+        (Rust/SWC/LightningCSS), style optimization pipeline, scoped CSS, static-site router elimination.
        </li>
        <li>
         <strong>
@@ -1523,6 +1527,52 @@
          app.js
         </code>
         strategy.
+       </li>
+       <li>
+        <strong>
+         dars-bundler
+        </strong>
+        : Standalone Rust minification binary (SWC + LightningCSS + Rayon) replacing rjsmin/rcssmin/Vite. Cross-platform builds (Windows/Linux/macOS) via GitHub Actions. Zero Node.js dependency.
+       </li>
+       <li>
+        <strong>
+         Unified
+         <code>
+          minify
+         </code>
+         config key
+        </strong>
+        : Replaced
+        <code>
+         viteMinify
+        </code>
+        +
+        <code>
+         defaultMinify
+        </code>
+        with a single
+        <code>
+         minify: true/false
+        </code>
+        key in
+        <code>
+         dars.config.json
+        </code>
+        . Backward-compatible with old keys.
+       </li>
+       <li>
+        <strong>
+         Static-site router elimination
+        </strong>
+        : Exporter auto-detects static (non-SPA) projects and omits
+        <code>
+         router.js
+        </code>
+        + patches
+        <code>
+         dars.min.js
+        </code>
+        to remove dead router imports at build time.
        </li>
       </ul>
       <hr/>
@@ -2594,7 +2644,7 @@
   </div>
   <div id="__dars_spa_root__">
   </div>
-  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1779151126" type="module">
+  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1779161172" type="module">
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js">
   </script>

@@ -1,6 +1,6 @@
 # Dars Project Configuration
 
-The `dars.config.json` file is the central nervous system of your Dars project. it defines how your application is compiled, optimized, and prepared for deployment.
+The `dars.config.json` file is the central nervous system of your Dars project. It defines how your application is compiled, optimized, and prepared for deployment.
 
 ---
 
@@ -17,8 +17,7 @@ A standard configuration file looks like this:
   "include": [],
   "exclude": ["**/__pycache__", ".git", ".venv", "node_modules"],
   "bundle": true,
-  "defaultMinify": true,
-  "viteMinify": true,
+  "minify": true,
   "markdownHighlight": true,
   "markdownHighlightTheme": "auto",
   "port": 8000,
@@ -44,16 +43,45 @@ A standard configuration file looks like this:
 - **`exclude`** (list): List of patterns to ignore during the build process.
 
 ### 3. Optimization & Minification
-Dars features a multi-stage minification pipeline to ensure the smallest possible production bundle.
+Dars now uses **dars-bundler** — a standalone, high-performance Rust binary — as its sole minification engine. It replaces the previous Python-based rjsmin/rcssmin pipeline and the optional Vite/esbuild dependency.
 
-- **`defaultMinify`** (boolean): Controls the internal Python-side HTML/CSS minifier.
-- **`viteMinify`** (boolean): Enables advanced JavaScript minification using Vite/esbuild. Recommended for production.
+- **`minify`** (boolean, default `true`): Enables or disables JS and CSS minification via `dars-bundler`. When enabled, the bundler runs **SWC** (Rust) for AST-level JS minification with dead-code elimination, and **LightningCSS** for CSS minification. **No Node.js, npm, or Vite installation is required.**
 - **`bundle`** (boolean): Ensures all internal dependencies are bundled into the final distribution.
+
+> **Note:** The old `viteMinify` and `defaultMinify` keys are still accepted for backwards compatibility but are ignored — `minify` is the single control point.
 
 ### 4. Features & Integrations
 - **`markdownHighlight`** (boolean): Automatically injects Prism.js for syntax highlighting in Markdown components.
 - **`backendEntry`** (string): Import path for your FastAPI backend (e.g., `"backend.api:app"`). Required for SSR projects.
 - **`port`** (number): The port for the development preview server. Defaults to `8000`. This port is respected by both `dars dev` and `dars preview`.
+
+---
+
+## The dars-bundler
+
+`dars-bundler` is a standalone Rust binary that Dars ships alongside its runtime. It is automatically detected and invoked during `dars build` / `dars export` — **no manual configuration is needed**.
+
+### How it works
+1. After Dars generates your HTML/CSS/JS output, `dars-bundler` is called on the output directory.
+2. It walks all JS files and runs **SWC minification** (variable renaming, dead-code elimination, constant folding).
+3. It walks all CSS files and runs **LightningCSS minification** (vendor-prefix removal, color optimization, unused selector pruning).
+4. Files in `lib/` (the Dars runtime: `dars.min.js`, `dap.js`, etc.) are processed with the same pipeline.
+5. HTML files are **not touched** by dars-bundler; they are already optimized by BeautifulSoup during export.
+
+### Discovery order
+The bundler is resolved in this order:
+1. `DARS_BUNDLER_PATH` env variable (user override)
+2. Same directory as the Python executable
+3. System `PATH`
+4. `dars/bundler/` subdirectory shipped with the framework
+5. DarsBundler dev repo `target/debug` or `target/release` (development mode)
+
+### Disabling minification
+Set `"minify": false` in `dars.config.json` **or** pass `--no-minify` to the CLI:
+```bash
+dars build --no-minify
+dars export --no-minify
+```
 
 ---
 
