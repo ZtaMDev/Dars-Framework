@@ -155,10 +155,16 @@ export function _initializeRouter() {
     const match = _matchRoute(initialPath);
 
     const isSSRRoute = match && match.route && match.route["type"] === "ssr";
-    const vdomSource = isSSRRoute ? (window.__ROUTE_VDOM__ || window.__DARS_VDOM__) : null;
+    const vdomSource =
+      isSSRRoute ? window.__ROUTE_VDOM__ || window.__DARS_VDOM__ : null;
     const hydratedPath = window.__DARS_HYDRATED_PATH__ || "/";
-    
-    if (isSSRRoute && vdomSource && (initialPath === hydratedPath || (initialPath === "/" && hydratedPath === "/index.html"))) {
+
+    if (
+      isSSRRoute &&
+      vdomSource &&
+      (initialPath === hydratedPath ||
+        (initialPath === "/" && hydratedPath === "/index.html"))
+    ) {
       // Find matching route to set as current
       if (match && match.route) {
         // Update global state to reflect current route without navigating
@@ -168,8 +174,9 @@ export function _initializeRouter() {
 
         // Mark the route as loaded and populate its data from SSR
         match.route.vdom = vdomSource;
-        match.route.html = document.getElementById("__dars_spa_root__")
-          ? document.getElementById("__dars_spa_root__").innerHTML
+        match.route.html =
+          document.getElementById("__dars_spa_root__") ?
+            document.getElementById("__dars_spa_root__").innerHTML
           : "";
         match.route.loaded = true;
 
@@ -194,7 +201,8 @@ export function _initializeRouter() {
         const container = document.getElementById("__dars_spa_root__");
         if (container) {
           document.querySelectorAll(".dars-page").forEach((el) => {
-            if (el !== container && !container.contains(el)) el.style.display = "none";
+            if (el !== container && !container.contains(el))
+              el.style.display = "none";
           });
           container.style.display = "";
         }
@@ -267,11 +275,15 @@ export function _initializeRouter() {
 
         // Check if this matches any SPA route
         const match = _matchRoute(normalizedHref);
-        
+
         // Intercept if it matches an SPA route, OR if it's a potential 404 (no file extension)
         // This ensures smooth 404 handling even when navigating from a static root
-        const isFile = normalizedHref.split('?')[0].split('/').pop().includes('.');
-        
+        const isFile = normalizedHref
+          .split("?")[0]
+          .split("/")
+          .pop()
+          .includes(".");
+
         if (match || (!isFile && __spaConfig && __spaConfig["notFoundPath"])) {
           event.preventDefault();
           navigateTo(normalizedHref);
@@ -469,7 +481,7 @@ export async function _loadRoute(route, params) {
         for (const key in pp) {
           try {
             const value = pp[key];
-            const regex = new RegExp(`\{\{${key}\}\}`, "g");
+            const regex = new RegExp(`\\{\\{${key}\\}\\}`, "g");
             out = out.replace(regex, String(value));
           } catch (e) {}
         }
@@ -548,7 +560,8 @@ export async function _loadRoute(route, params) {
 
         // In Combined Mode: hide static pages and show SPA root
         document.querySelectorAll(".dars-page").forEach((el) => {
-          if (el !== container && !container.contains(el)) el.style.display = "none";
+          if (el !== container && !container.contains(el))
+            el.style.display = "none";
         });
         container.style.display = "";
         document.documentElement.setAttribute("dars-ready", "true");
@@ -652,7 +665,9 @@ export async function _loadRoute(route, params) {
         const loaderUrl = route["ssr_endpoint"] || `/api/ssr/${route["name"]}`;
         let fullUrl = loaderUrl;
         if (backendUrl && backendUrl !== "/") {
-          fullUrl = backendUrl.replace(/\/$/, '') + (loaderUrl.startsWith('/') ? loaderUrl : '/' + loaderUrl);
+          fullUrl =
+            backendUrl.replace(/\/$/, "") +
+            (loaderUrl.startsWith("/") ? loaderUrl : "/" + loaderUrl);
         }
 
         const sep = fullUrl.includes("?") ? "&" : "?";
@@ -661,7 +676,7 @@ export async function _loadRoute(route, params) {
         const response = await fetch(fullUrl, {
           headers: { "Content-Type": "application/json" },
           mode: "same-origin",
-          credentials: "same-origin"
+          credentials: "same-origin",
         });
 
         if (!response.ok)

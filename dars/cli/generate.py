@@ -4,16 +4,19 @@ from rich.console import Console
 from rich.prompt import Prompt, Confirm
 from dars.cli.prompts import select_prompt, confirm_prompt
 
-API_CONFIG_PY_CODE = """import os
+API_CONFIG_PY_CODE = """
+import os
 import sys
 
 class DarsEnv:
-    # Set this to "production" when deploying
-    MODE = "development" 
-    
-    DEV = "development"
+    # Development: two servers — dars dev (frontend) + dars dev --backend (API)
+    # Production:  one server  — backend serves frontend static files (same origin)
+    # Change to "production" before deploying, or set DARS_MODE env var.
+    MODE = os.environ.get("DARS_MODE", "development")
+
+    DEV   = "development"
     BUILD = "production"
-    
+
     @staticmethod
     def get_env():
         return DarsEnv.MODE
@@ -24,62 +27,128 @@ class DarsEnv:
 
     @staticmethod
     def get_urls():
-        # Configuration for URLs
         if DarsEnv.is_dev():
             return {
-                "backend": "http://localhost:3000", # SSR/API Server
-                "frontend": "http://localhost:8000" # Dev Server
+                "backend":  os.environ.get("DARS_BACKEND_URL",  "http://localhost:3000"),
+                "frontend": os.environ.get("DARS_FRONTEND_URL", "http://localhost:8000"),
             }
+        # Production: same origin — backend serves the frontend
         return {
-            "backend": "/", # Production: Same origin
-            "frontend": "/"
+            "backend":  os.environ.get("DARS_BACKEND_URL",  "/"),
+            "frontend": os.environ.get("DARS_FRONTEND_URL", "/"),
         }
+
+    @staticmethod
+    def get_frontend_dist_dir() -> str:
+        \"\"\"
+        Return the absolute path to the frontend static files (dist/).
+
+        In production the backend mounts this directory so that frontend
+        and API share the same origin — no CORS, no separate server.
+
+        Resolution order:
+          1. DARS_FRONTEND_DIR env var
+          2. outdir from dars.config.json in the project root
+          3. Fallback: <project_root>/dist
+        \"\"\"
+        env_dir = os.environ.get("DARS_FRONTEND_DIR", "")
+        if env_dir and os.path.isdir(env_dir):
+            return env_dir
+
+        backend_dir  = os.path.dirname(os.path.abspath(__file__))
+        project_root = os.path.dirname(backend_dir)
+
+        config_path = os.path.join(project_root, "dars.config.json")
+        if os.path.isfile(config_path):
+            try:
+                import json
+                with open(config_path, "r", encoding="utf-8") as f:
+                    cfg = json.load(f)
+                outdir = cfg.get("outdir", "dist")
+                if not os.path.isabs(outdir):
+                    outdir = os.path.join(project_root, outdir)
+                return os.path.normpath(outdir)
+            except Exception:
+                pass
+
+        return os.path.join(project_root, "dist")
 """
 
 API_PY_CODE = """\"""
-SSR Backend - Dars Framework
-Run with: python -m backend.api
+Fullstack Backend - Dars Framework
+
+Development (two servers):
+    dars dev              → frontend on http://localhost:8000
+    dars dev --backend    → backend  on http://localhost:3000
+
+Production (one server, same origin):
+    Set MODE = "production" in apiConfig.py (or DARS_MODE=production env var)
+    Run: uvicorn backend.api:app --host 0.0.0.0 --port 8000
+    → Serves frontend static files (dist/) + API from the same origin
 \"""
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from dars.backend.ssr import create_ssr_app
 import sys
 import os
-from backend.apiConfig import DarsEnv
 
-# Import the Dars app
-import sys
-sys.path.insert(0, '.')
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from dars.backend.ssr import SSRApp
+from backend.apiConfig import DarsEnv
 from main import app as dars_app
 
+# ── Create SSR app ──────────────────────────────────────────────────────────
+ssr = SSRApp(dars_app, prefix="/api/ssr", title="My Dars App - Backend")
 
-# Create FastAPI app with SSR support
-app = create_ssr_app(dars_app)
+urls = DarsEnv.get_urls()
 
-# Enable CORS for local development
 if DarsEnv.is_dev():
-    urls = DarsEnv.get_urls()
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=[urls['frontend'], "http://127.0.0.1:3000"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+    # Development: CORS needed because frontend runs on a different port
+    ssr.use_cors(
+        origins=[urls["frontend"], "http://127.0.0.1:8000"],
+        credentials=True,
     )
+
+ssr.use_security_headers()
+
+app = ssr.fastapi_app
+
+# ── Add your API routes here ────────────────────────────────────────────────
+# from fastapi import Request
+# from fastapi.responses import JSONResponse
+#
+# @app.get("/api/hello")
+# async def hello():
+#     return JSONResponse({"message": "Hello from Dars!"})
+# ────────────────────────────────────────────────────────────────────────────
+
+# ── Production: serve dist/ as static files with SPA fallback ───────────────
+if not DarsEnv.is_dev():
+    ssr.use_spa_fallback()
+# ────────────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
     import uvicorn
-    urls = DarsEnv.get_urls()
-    print(" " + "="*60)
-    print("Dars SSR Backend")
-    print("="*60)
-    print(f"Endpoints:")
-    print(f" • {urls['backend']}/              - API info")
-    print(f" • {urls['backend']}/api/ssr/*     - SSR routes")
-    print(f"Frontend: {urls['frontend']}")
-    print("="*60 + " ")
-    
-    uvicorn.run(app, host="127.0.0.1", port=3000)
+    print("\\n" + "=" * 60)
+    if DarsEnv.is_dev():
+        print("Dars Fullstack Backend  [development]")
+        print("=" * 60)
+        print(f"  Backend API:  {urls['backend']}")
+        print(f"  API Docs:     {urls['backend']}/docs")
+        print(f"  Frontend:     {urls['frontend']}  (run 'dars dev' separately)")
+        print("=" * 60)
+        print("  Open your browser at: http://localhost:8000")
+        port, host = 3000, "127.0.0.1"
+    else:
+        frontend_dir = DarsEnv.get_frontend_dist_dir()
+        print("Dars Fullstack Backend  [production]")
+        print("=" * 60)
+        print(f"  App (frontend + API): http://localhost:8000")
+        print(f"  API Docs:             http://localhost:8000/docs")
+        print(f"  Frontend dir:         {frontend_dir}")
+        print("=" * 60)
+        print("  Open your browser at: http://localhost:8000")
+        port, host = 8000, "0.0.0.0"
+    print()
+    uvicorn.run(app, host=host, port=port)
 """
 
 console = Console()
@@ -118,7 +187,7 @@ def {safe_name}(props):
         Text("{name} Component works!")
     )
 """
-        with open(file_path, "w") as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             f.write(content)
         console.print(f"[green]SUCCESS: Component {name} generated successfully at {file_path}[/green]")
         console.print("[yellow]Note: Remember to import and use it in your main application.[/yellow]")
@@ -179,23 +248,23 @@ def {safe_name}():
                 
                 if confirm_prompt("Do you want to automatically scaffold the SSR backend now?"):
                     os.makedirs("backend", exist_ok=True)
-                    with open("backend/__init__.py", "w") as f: pass
+                    with open("backend/__init__.py", "w", encoding="utf-8") as f: pass
                     
-                    with open("backend/apiConfig.py", "w") as f:
+                    with open("backend/apiConfig.py", "w", encoding="utf-8") as f:
                         f.write(API_CONFIG_PY_CODE.strip())
                     
-                    with open("backend/api.py", "w") as f:
+                    with open("backend/api.py", "w", encoding="utf-8") as f:
                         f.write(API_PY_CODE.strip())
                     
                     # Update config
                     if os.path.exists("dars.config.json"):
                         import json
                         try:
-                            with open("dars.config.json", "r") as f:
+                            with open("dars.config.json", "r", encoding="utf-8") as f:
                                 config = json.load(f)
                             if "backendEntry" not in config:
                                 config["backendEntry"] = "backend.api:app"
-                                with open("dars.config.json", "w") as f:
+                                with open("dars.config.json", "w", encoding="utf-8") as f:
                                     json.dump(config, f, indent=2)
                                 console.print("[green]SUCCESS: Updated dars.config.json with backendEntry.[/green]")
                         except:
@@ -204,7 +273,7 @@ def {safe_name}():
                     console.print("[green]SUCCESS: SSR Backend scaffolded at /backend[/green]")
                     console.print("[yellow]Note: Remember to run 'dars dev --backend' to start the SSR server.[/yellow]")
             
-        with open(file_path, "w") as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             f.write(content)
         console.print(f"[green]SUCCESS: Page {name} generated successfully at {file_path}[/green]")
         
@@ -218,7 +287,7 @@ def {safe_name}():
             if os.path.exists("dars.config.json"):
                 import json
                 try:
-                    with open("dars.config.json", "r") as f:
+                    with open("dars.config.json", "r", encoding="utf-8") as f:
                         config = json.load(f)
                     entry_file = config.get("entry", "main.py")
                 except:
@@ -234,7 +303,7 @@ def {safe_name}():
                     return
             
             try:
-                with open(entry_file, "r") as f:
+                with open(entry_file, "r", encoding="utf-8") as f:
                     lines = f.readlines()
                 
                 content_all = "".join(lines)
@@ -277,7 +346,7 @@ def {safe_name}():
                     else:
                         lines.append("\n" + inject_statement + "\n")
                 
-                with open(entry_file, "w") as f:
+                with open(entry_file, "w", encoding="utf-8") as f:
                     f.writelines(lines)
                 
                 console.print(f"[green]SUCCESS: Successfully added {name} to {entry_file}[/green]")

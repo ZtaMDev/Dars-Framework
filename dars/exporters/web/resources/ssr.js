@@ -7,8 +7,9 @@ export function _executeExternalScript(code, context) {
     if (context) window[ctxId] = context;
 
     // Provide local 'event' and 'element' (this) to the script
-    const setup = context
-      ? `const event = window["${ctxId}"].event; const element = window["${ctxId}"].element; delete window["${ctxId}"];`
+    const setup =
+      context ?
+        `const event = window["${ctxId}"].event; const element = window["${ctxId}"].element; delete window["${ctxId}"];`
       : "";
 
     s.textContent = `(async () => { 
@@ -59,8 +60,9 @@ export function updatePageMetadata(metadata) {
 
     // Keywords
     if (metadata.keywords) {
-      const kw = Array.isArray(metadata.keywords)
-        ? metadata.keywords.join(", ")
+      const kw =
+        Array.isArray(metadata.keywords) ?
+          metadata.keywords.join(", ")
         : metadata.keywords;
       _updateMeta("keywords", kw);
     }
@@ -194,9 +196,10 @@ try {
           if (payload.metaTags) {
             const temp = document.createElement("div");
             // Sanitize before parsing to prevent XSS via injected event handlers
-            const sanitized = (typeof DOMPurify !== "undefined")
-              ? DOMPurify.sanitize(payload.metaTags, { FORCE_BODY: true })
-              : payload.metaTags.replace(/<script[\s\S]*?<\/script>/gi, "");
+            const sanitized =
+              typeof DOMPurify !== "undefined" ?
+                DOMPurify.sanitize(payload.metaTags, { FORCE_BODY: true })
+              : payload.metaTags.replace(/[<>]/g, "");
             temp.innerHTML = sanitized;
             const newMetas = temp.childNodes;
             for (let i = 0; i < newMetas.length; i++) {
@@ -235,10 +238,13 @@ try {
       window.Dars.registerStates(window.__DARS_STATE__);
     } else {
       // Lazy import to avoid TDZ when dars.min.js is minified
-      import("./dars.min.js").then(m => {
-        const reg = m.registerStates || (m.default && m.default.registerStates);
-        if (typeof reg === "function") reg(window.__DARS_STATE__);
-      }).catch(() => {});
+      import("./dars.min.js")
+        .then((m) => {
+          const reg =
+            m.registerStates || (m.default && m.default.registerStates);
+          if (typeof reg === "function") reg(window.__DARS_STATE__);
+        })
+        .catch(() => {});
     }
   }
   if (
@@ -248,10 +254,13 @@ try {
     if (window.Dars && window.Dars.registerStates) {
       window.Dars.registerStates(window.__DARS_STATE_V2__);
     } else {
-      import("./dars.min.js").then(m => {
-        const reg = m.registerStates || (m.default && m.default.registerStates);
-        if (typeof reg === "function") reg(window.__DARS_STATE_V2__);
-      }).catch(() => {});
+      import("./dars.min.js")
+        .then((m) => {
+          const reg =
+            m.registerStates || (m.default && m.default.registerStates);
+          if (typeof reg === "function") reg(window.__DARS_STATE_V2__);
+        })
+        .catch(() => {});
     }
   }
 } catch (err) {

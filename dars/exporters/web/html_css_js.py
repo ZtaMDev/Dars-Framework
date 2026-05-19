@@ -5605,13 +5605,13 @@ fetch({repr(upload_url)}, {{method:'POST', body:_fd}})
             # Prism.js theme CSS selection
             css_links = ''
             if hl_theme == 'dark':
-                css_links = '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css">\n'
+                css_links = markdown.load_prism_theme()
             elif hl_theme == 'light':
                 css_links = '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">\n'
             else:  # auto
                 css_links = (
-                    '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" media="(prefers-color-scheme: light)">\n'
-                    '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" media="(prefers-color-scheme: dark)">\n'
+                    '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" media="(prefers-color-scheme: light)">\n' +
+                    markdown.load_prism_theme()
                 )
             
             # Copy Button styles are now in runtime_css.css

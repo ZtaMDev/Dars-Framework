@@ -154,8 +154,4 @@ When working with SSR (`dars init --type ssr`), the workflow involves two proces
 | `dars dev --backend`   | Starts the SSR/backend server defined by `backendEntry`.   |
 | `dars build`           | Builds static assets to `dist/` for production.            |
 
-_Note: For production, you only need to run the backend (which serves the built assets)._
-
-```
-
-```
+\_Note: For production, you only need to run the backend (which serves the built assets).

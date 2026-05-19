@@ -467,9 +467,6 @@ class SSRRenderer:
         </div>
     </div>
     {markdown_scripts_html}
-    
-    <!-- DSP Hydration Data (vdom) is now fetched securely via API -->
-    
     <script type="module" src="/lib/dars.min.js" defer></script>
     <script type="module" src="/app.js"></script>
     <script type="module" src="/{script_fn}"></script>
@@ -485,13 +482,15 @@ class SSRRenderer:
                     rc['styles'] = ''
         except Exception:
             pass
-
+        
+        from bs4 import BeautifulSoup
         # Route rendered successfully
-
+        html_sp = BeautifulSoup(full_html, "html.parser")
+        html_content = html_sp.prettify()
         return {
             "name": route_name,
             "html": body_html,  # Body HTML for SPA hydration
-            "fullHtml": full_html,  # Complete HTML document with <head>
+            "fullHtml": html_content,  # Complete HTML document with <head>
             "styles": registry_css,
             "scripts": [
                 {"type": "user", "src": f"/{script_fn}", "module": True}

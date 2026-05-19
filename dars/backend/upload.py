@@ -111,10 +111,10 @@ class UploadPipeline:
         try:
             with open(dest, "wb") as f:
                 f.write(content)
-        except OSError as exc:
+        except OSError:
             return JSONResponse(
                 status_code=500,
-                content={"error": f"Upload failed: {exc}"},
+                content={"error": f"Upload failed"},
             )
 
         relative_url = f"/{self.upload_dir.rstrip('/')}/{safe_name}"

@@ -34,8 +34,9 @@ class Markdown(Component):
         id: Optional[str] = None,
         class_name: Optional[str] = None,
         style: Optional[Dict[str, Any]] = None,
-        dark_theme: bool = False,
+        dark_theme: bool = True,
         lazy: bool = False,
+        prism_theme: str = "prism-okaidia",
         **kwargs
     ):
     
@@ -51,6 +52,7 @@ class Markdown(Component):
         self.file_path = file_path
         self.dark_theme = dark_theme
         self.lazy = lazy
+        self.prism_theme = prism_theme
         self.rendered_html = ""
         
         # Load and process markdown content
@@ -97,6 +99,20 @@ class Markdown(Component):
         else:
             self.class_name = self.class_name.replace("dars-markdown-dark", "") if self.class_name else ""
     
+    def load_prism_theme(self) -> str:
+        """Dynamically load the selected Prism.js theme."""
+        
+        theme_url = (
+            f"https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/"
+            f"{self.prism_theme}.min.css"
+        )
+
+        html = f'<link href="{theme_url}" rel="stylesheet">'
+        
+        self.rendered_html += html
+        
+        return html
+
     def render(self, exporter: Any) -> str:
-        # El método render será implementado por cada exportador
-        raise NotImplementedError("El método render debe ser implementado por el exportador")
+        """Render the Markdown component with the selected theme."""
+        raise NotImplementedError("Exporter implements the component render")

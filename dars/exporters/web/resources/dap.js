@@ -469,11 +469,10 @@ _registerCommand("transform", async (args, ctx) => {
   if (args.method === "tasks_to_html") {
     try {
       const data = typeof input === "string" ? JSON.parse(input) : input;
-      const tasks = Array.isArray(data)
-        ? data
-        : data && data.tasks
-          ? data.tasks
-          : [];
+      const tasks =
+        Array.isArray(data) ? data
+        : data && data.tasks ? data.tasks
+        : [];
       if (!tasks.length)
         return '<p class="text-gray-400 text-sm p-2">No tasks yet.</p>';
       return tasks
@@ -482,9 +481,9 @@ _registerCommand("transform", async (args, ctx) => {
           let title = "";
           if (t && t.title !== undefined && t.title !== null) {
             title =
-              typeof t.title === "object"
-                ? JSON.stringify(t.title)
-                : String(t.title);
+              typeof t.title === "object" ?
+                JSON.stringify(t.title)
+              : String(t.title);
           }
           const safeTitle = _sanitize(title);
           const done = t && t.done;
@@ -576,14 +575,18 @@ _registerCommand("vref_update", async (args, ctx) => {
   // 4. Re-evaluate all useVRef bindings that depend on this selector.
   //    A binding with an empty dependencies array is always re-evaluated
   //    (conservative fallback for expressions we couldn't statically analyse).
-  if (window.__DARS_VREF_BINDINGS__ && window.__DARS_VREF_BINDINGS__.length > 0) {
+  if (
+    window.__DARS_VREF_BINDINGS__ &&
+    window.__DARS_VREF_BINDINGS__.length > 0
+  ) {
     for (const binding of window.__DARS_VREF_BINDINGS__) {
       if (!binding.elements || binding.elements.length === 0) continue;
 
       const deps = binding.dependencies || [];
       // Only re-evaluate if this binding explicitly depends on the updated selector.
       // Bindings with empty dependencies (e.g. static values) never update.
-      const shouldUpdate = typeof selector === "string" && deps.includes(selector);
+      const shouldUpdate =
+        typeof selector === "string" && deps.includes(selector);
 
       if (shouldUpdate) {
         try {
@@ -1002,9 +1005,9 @@ _registerCommand("dom_each_render", async (args, ctx) => {
   // Get the HTML template with __item_<field>__ placeholders
   const templateEncoded = container.getAttribute("data-each-template") || "";
   const template = templateEncoded
-    .replace(/&amp;/g, "&")
     .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'");
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, "&");
 
   if (!template) {
     // Fallback: plain text rendering
@@ -1012,14 +1015,14 @@ _registerCommand("dom_each_render", async (args, ctx) => {
       .map((item) => {
         const text = _sanitize(
           String(
-            item && typeof item === "object"
-              ? (item.title ??
-                  item.name ??
-                  item.label ??
-                  item.value ??
-                  item.text ??
-                  JSON.stringify(item))
-              : item,
+            item && typeof item === "object" ?
+              (item.title ??
+                item.name ??
+                item.label ??
+                item.value ??
+                item.text ??
+                JSON.stringify(item))
+            : item,
           ),
         );
         return `<div>${text}</div>`;
@@ -1041,12 +1044,14 @@ _registerCommand("dom_each_render", async (args, ctx) => {
           item = {
             ...item,
             title:
-              t === "" ||
-              t.toLowerCase() === "unknown" ||
-              t.toLowerCase() === "null" ||
-              t.toLowerCase() === "none"
-                ? "Unknown"
-                : t,
+              (
+                t === "" ||
+                t.toLowerCase() === "unknown" ||
+                t.toLowerCase() === "null" ||
+                t.toLowerCase() === "none"
+              ) ?
+                "Unknown"
+              : t,
           };
         }
         // Inject a done_class placeholder value based on the done field
@@ -1058,9 +1063,9 @@ _registerCommand("dom_each_render", async (args, ctx) => {
           const placeholder = `__item_${key}__`;
           // Don't sanitize class names — they're safe strings we control
           const safeVal =
-            key === "done_class"
-              ? String(val)
-              : _sanitize(String(val == null ? "" : val));
+            key === "done_class" ?
+              String(val)
+            : _sanitize(String(val == null ? "" : val));
           html = html.split(placeholder).join(safeVal);
         }
       } else {
