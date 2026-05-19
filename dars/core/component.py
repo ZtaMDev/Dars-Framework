@@ -5,6 +5,44 @@
 # https://mozilla.org/MPL/2.0/.
 #
 # Copyright (c) 2025 ZtaDev
+"""# Dars - Components Documentation
+
+---
+
+## Barrel Import
+
+You can import all main components and modules with a single line:
+
+```python
+from dars.all import *
+```
+
+This simplifies integration and improves developer experience by exposing components like `Text`, `Button`, `Container`, `State`, and DAP functions like `log`, `alert`, `showModal`, etc.
+
+> **Note**: Be careful if you create custom components with the same names as built-in components to avoid conflicts.
+
+---
+
+## Introduction to Components
+
+Components are the fundamental UI elements in Dars. Each component encapsulates its appearance, behavior, and state.
+In modern Dars, you should heavily rely on **Utility Classes** (Tailwind-like classes) using the `class_name` property instead of the old `style` dictionary, and use **DAP Functions** (`show()`, `hide()`, `log()`, `alert()`, `updateVRef()`) instead of writing raw inline JavaScript for events.
+
+For custom components, refer to [Custom Components](#custom-components).
+
+---
+
+## Base Component Class
+
+All UI elements inherit from the `Component` base class, which provides standard attributes and DOM manipulation methods.
+
+### Global Properties
+
+- **id**: Unique identifier for the component.
+- **class_name**: String containing CSS utility classes (e.g., `"flex flex-col bg-slate-100 p-4 rounded-lg"`).
+- **style**: Optional dictionary or string for direct inline styles (prefer `class_name`).
+- **children**: List of child components.
+- **Events**: Handlers like `on_click`, `on_change`, `on_mouse_enter`, etc. Accept DAP utility functions or state setters."""
 from typing import Dict, Any, List, Optional, Callable, Union, Type
 from threading import Thread
 import inspect

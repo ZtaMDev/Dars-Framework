@@ -5,6 +5,84 @@
 # https://mozilla.org/MPL/2.0/.
 #
 # Copyright (c) 2025 ZtaDev
+"""## dScript: The Universal Action Container
+
+The `dScript` class is the primary way to define logic in Dars. It supports three modes:
+
+### 1. Structured Action (Recommended)
+Define actions using the `data` parameter. This is the most secure and modern approach.
+
+```python
+from dars.all import dScript
+
+# A structured DAP action
+my_action = dScript(data={
+    "op": "alert",
+    "args": {"message": "Hello from DAP!"}
+})
+```
+
+### 2. Inline JavaScript (Legacy/Complex)
+For logic that DAP cannot yet express, you can use raw JS. Dars will attempt to convert this to DAP at compile-time.
+
+```python
+script = dScript(code="console.log('Legacy JS');")
+```
+
+### 3. External File Reference
+Load complex JS modules from your project files.
+
+```python
+script = dScript(file_path="./scripts/my_module.js")
+```
+
+---
+
+## Advanced Logic Helpers
+
+### RawJS: Escaping String Literals
+When you pass a string to a DAP helper (like `this().state()`), Dars treats it as a text literal. Use `RawJS` to tell the compiler: "This is a JavaScript variable/expression".
+
+```python
+from dars.scripts.dscript import RawJS
+from dars.core.state import this
+
+# Updates the component text with the value of a JS variable named 'myVar'
+update_op = this().state(text=RawJS("myVar"))
+```
+
+### The Arg Helper: Accessing Chained Results
+When chaining scripts with `.then()`, the result of the previous script is passed to the next one. Use the `Arg` helper to access this value Pythonically. `Arg` is a singleton instance of `_ArgHelper` (a `RawJS` subclass).
+
+```python
+from dars.scripts.dscript import Arg
+from dars.desktop import read_text
+
+# Read file -> Update component with result
+read_op = read_text("data.txt")
+update_op = this().state(text=Arg) # Accesses the entire result
+update_op_nested = this().state(text=Arg.content) # Accesses 'result.content'
+
+chained = read_op.then(update_op)
+```
+
+---
+
+## Logic Chaining (`.then()`)
+
+All `dScript` and `RawJS` objects support the `.then()` method for sequential execution. This creates an asynchronous pipeline where values flow between steps.
+
+```python
+from dars.all import *
+
+action = (
+    alert("Starting process...")
+    .then(log("Process step 1"))
+    .then(alert("Finished!"))
+)
+```
+
+---"""
 from typing import Optional, Dict, Any
 from .script import Script
 

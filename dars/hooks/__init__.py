@@ -6,9 +6,18 @@
 #
 # Copyright (c) 2025 ZtaDev
 """
-Dars Hooks System
+# Hooks System
 
-Hooks provide a way to add reactive and stateful behavior to FunctionComponents.
+Dars Framework introduces a **Hooks system** inspired by React, enabling reactive and stateful behavior in both FunctionComponents and built-in components.
+
+The reactivity system in Dars is divided into the following sections:
+
+1. **Pythonic Value Helpers**: The `V()` helper and expression system used throughout all hooks.
+2. **Component-Level State (VRefs)**: Lightweight, fast, and DOM-bound reactive state.
+3. **Global Application State**: Structured `State` objects for shared application logic.
+4. **Forms & Validation**: Hooks for form collection and client-side validation.
+5. **Network & Async Operations**: Data fetching and chained actions.
+6. **Best Practices**: Guidelines and tips.
 """
 
 from .use_dynamic import useDynamic

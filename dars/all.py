@@ -7,7 +7,15 @@
 # Copyright (c) 2025 ZtaDev
 # Barrel import for all Dars components and core modules
 # Usage: from dars.all import *
+"""## Barrel Import
 
+You can import all main components and modules with a single line:
+
+```python
+from dars.all import *
+```
+
+This simplifies integration and improves developer experience by exposing components like `Text`, `Button`, `Container`, `State`, and DAP functions like `log`, `alert`, `showModal`, etc."""
 # Advanced Components
 from dars.components.advanced.accordion import Accordion
 from dars.components.advanced.card import Card

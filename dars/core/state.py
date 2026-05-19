@@ -5,6 +5,14 @@
 # https://mozilla.org/MPL/2.0/.
 #
 # Copyright (c) 2025 ZtaDev
+"""LEGACY USE STATEV2
+
+import it with:
+
+```python
+from dars.core.state_v2.py import State
+```
+"""
 from typing import Any, Dict, List, Optional
 from dars.scripts.dscript import dScript, RawJS
 from dars.core.utilities import parse_utility_string

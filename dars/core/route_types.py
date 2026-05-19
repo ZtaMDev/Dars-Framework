@@ -10,16 +10,14 @@ Route Types for Secure Routing and SSR
 
 This module defines route types for the Dars Framework:
 - PUBLIC: Routes that load immediately (no authentication required)
-- PRIVATE: Routes that require authentication (lazy loaded from backend)
-- PROTECTED: Routes with custom middleware (lazy loaded with middleware check)
 - SSR: Server-Side Rendered routes (rendered on backend, fetched on navigation)
 """
 
 from enum import Enum
 from typing import List, Optional, TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from dars.middleware.base import Middleware
+from fastapi.middleware import Middleware
+
 
 
 class RouteType(Enum):
