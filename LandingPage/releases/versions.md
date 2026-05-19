@@ -1,4 +1,4 @@
-# Release Notes v1.9.10
+# Release Notes v1.9.11
 
 > **Secure Asynchronous SSR Hydration, `useVRef` Hook, Pure SPA Shells & CLI Lifecycle Hardening**
 

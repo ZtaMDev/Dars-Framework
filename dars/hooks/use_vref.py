@@ -166,7 +166,12 @@ class VRefBinding:
         # Build dependency selector list.
         # Explicit dependencies override auto-detection.
         if self.dependencies:
-            dep_selectors = [f"'{dep.selector}'" for dep in self.dependencies if isinstance(dep, ValueRef)]
+            dep_selectors = []
+            for dep in self.dependencies:
+                if isinstance(dep, ValueRef):
+                    dep_selectors.append(f"'{dep.selector}'")
+                elif isinstance(dep, str):
+                    dep_selectors.append(f"'{dep}'")
         else:
             dep_selectors = [f"'{s}'" for s in self._extract_selectors(self.vexpr)]
         

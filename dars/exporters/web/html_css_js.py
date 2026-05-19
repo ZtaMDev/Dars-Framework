@@ -3092,20 +3092,9 @@ audio.dars-audio {
             # This ensures that when component.render() is called, it uses the actual value
             # We do this even if selector is None (for built-in components using useValue just for initial value)
             if initial_val is not None:
-                is_marker = (
-                    isinstance(prop_value, ValueMarker) or
-                    type(prop_value).__name__ in ('DynamicBinding', 'ValueMarker', 'VRefValue', 'VRefBinding') or
-                    (isinstance(prop_value, str) and (
-                        prop_value.startswith('__DARS_DYNAMIC_') or
-                        prop_value.startswith('__DARS_VALUE_') or
-                        prop_value.startswith('__DARS_VREF_')
-                    )) or
-                    hasattr(prop_value, 'state_path') or
-                    hasattr(prop_value, 'marker_id') or
-                    hasattr(prop_value, 'selector')
-                )
-                if not is_marker:
-                    setattr(component, prop_name, initial_val)
+                # ValueMarker is non-reactive, so we replace the marker with the actual initial value
+                # immediately on the component so it renders the text, not the marker ID.
+                setattr(component, prop_name, initial_val)
                 initial_values[prop_name] = initial_val
             
             if selector:

@@ -6,5 +6,5 @@
 #
 # Copyright (c) 2025 ZtaDev
 
-__version__ = "1.9.10"
-__release_url__ = "https://github.com/ZtaMDev/Dars-Framework/releases/tag/1.9.10"
+__version__ = "1.9.11"
+__release_url__ = "https://github.com/ZtaMDev/Dars-Framework/releases/tag/1.9.11"

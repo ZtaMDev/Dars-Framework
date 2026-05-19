@@ -581,9 +581,9 @@ _registerCommand("vref_update", async (args, ctx) => {
       if (!binding.elements || binding.elements.length === 0) continue;
 
       const deps = binding.dependencies || [];
-      const shouldUpdate =
-        deps.length === 0 ||
-        (typeof selector === "string" && deps.includes(selector));
+      // Only re-evaluate if this binding explicitly depends on the updated selector.
+      // Bindings with empty dependencies (e.g. static values) never update.
+      const shouldUpdate = typeof selector === "string" && deps.includes(selector);
 
       if (shouldUpdate) {
         try {
