@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "dars-framework"
 version = "1.9.13"
-description = "Dars is a Full-Stack multiplatform Python UI framework for building modern, interactive web and desktop apps with Python code. Seamlessly integrated with FastAPI, it allows you to build complete applications with Server-Side Rendering (SSR) and reactive SPA capabilities also classic multipage html and desktop apps in a single codebase."
+description = "Dars is a Full-Stack multiplatform Python UI framework for building modern, interactive web and desktop apps entirely in Python. Seamlessly integrated with FastAPI, it lets you build complete applications with Server-Side Rendering (SSR), reactive SPA routing, static site generation, and a production-ready backend API — all from a single Python codebase."
 dependencies = [ "rich==15.0.0", "bs4==0.0.2", "uvicorn==0.47.0", "markdown2==2.5.5", "requests==2.34.2", "plotly==6.7.0", "fastapi==0.136.1", "rjsmin==1.2.5", "rcssmin==1.2.2", "starlette==1.0.0", "python-multipart==0.0.29"]
 license = "MPL-2.0"
 readme = "README.md"
@@ -19,8 +19,7 @@ email = "ztadevs@gmail.com"
 [tool.pydepm.scripts]
 dev = "cd LandingPage && dars dev"
 build = "cd LandingPage && dars build"
-test = "cd tst/proj/v1/v2 && python calculator_clean.py --port 3000"
-prev = "cd docs && dars preview ./"
+prev = "cd LandingPage && dars preview"
 
 [[project.maintainers]]
 name = "ztamdev"
