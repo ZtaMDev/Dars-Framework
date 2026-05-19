@@ -1,12 +1,12 @@
 bs4==0.0.2
 rich==15.0.0
-uvicorn==0.46.0
+uvicorn==0.47.0
 fastapi==0.136.1
 markdown2==2.5.5
 pydepm==1.1.2
-requests==2.33.1
+requests==2.34.2
 plotly==6.7.0
 rjsmin==1.2.5
 rcssmin==1.2.2
-starlette==0.47.3
-python-multipart==0.0.28
+starlette==1.0.0
+python-multipart==0.0.29
