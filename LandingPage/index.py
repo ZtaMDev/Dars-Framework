@@ -23,7 +23,6 @@ app = App(
     apple_mobile_web_app_title="Dars Framework",
     keywords=["framework","python","python framework", "dars","dars framework", "ui components", "declarative UI"]
 )
-
 index = Page(
     create_navbar(),
     create_hero(),

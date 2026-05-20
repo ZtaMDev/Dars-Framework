@@ -1,4 +1,7 @@
 /* ====== GENERAL ====== */
+:root {
+  color-scheme: dark;
+}
 html,
 body {
   margin: 0;
@@ -12,6 +15,10 @@ body {
   background-size: cover;
   font-family: "Inter", system-ui, sans-serif;
   color: white;
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* ====== NAVBAR ====== */

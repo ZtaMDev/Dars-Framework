@@ -814,8 +814,9 @@ class App:
         self.config.setdefault('viewport', {
             'width': 'device-width',
             'initial_scale': 1.0,
-            'user_scalable': 'yes'
-        })
+            'user_scalable': 'yes',
+            'viewport-fit': 'cover'
+        }) 
         self.config.setdefault('theme', 'light')
         self.config.setdefault('responsive', True)
         self.config.setdefault('charset', 'UTF-8')
