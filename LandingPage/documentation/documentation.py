@@ -1,9 +1,19 @@
+from dars.components.advanced.head import Head
 from dars.all import *
+# pyrefly: ignore [missing-import]
 from footercomp import create_footer
+# pyrefly: ignore [missing-import]
 from documentation.sidebarcomp import create_sidebar
+# pyrefly: ignore [missing-import]
 from navbarcomp import create_navbar
 
 docs = Page(
+    Head(
+        title="Documentation - Dars Framework",
+        description="Everything you need to build modern apps with Python.",
+        keywords=["dars", "framework", "python", "documentation"],
+        lang="en"
+    ),
     create_navbar(),
     create_sidebar(),
     Container(

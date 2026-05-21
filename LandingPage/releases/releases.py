@@ -1,6 +1,9 @@
 from dars.all import *
+# pyrefly: ignore [missing-import]
 from navbarcomp import create_navbar
+# pyrefly: ignore [missing-import]
 from footercomp import create_footer
+# pyrefly: ignore [missing-import]
 from releases.sidebarcomp import create_sidebar_releases
 
 releases = Page(

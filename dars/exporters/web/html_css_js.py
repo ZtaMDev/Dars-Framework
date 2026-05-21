@@ -161,6 +161,29 @@ class HTMLCSSJSExporter(Exporter):
                 
                 is_spa = hasattr(app, '_spa_routes') and bool(app._spa_routes)
                 
+                # Check for SSR routes
+                has_ssr = False
+                try:
+                    from dars.core.route_types import RouteType
+                    if is_spa:
+                        for spa_route in getattr(app, '_spa_routes', {}).values():
+                            root = getattr(spa_route, 'root', None)
+                            meta = getattr(root, '__dars_route_metadata__', None)
+                            if getattr(meta, 'route_type', None) == RouteType.SSR:
+                                has_ssr = True
+                                break
+                    if not has_ssr and hasattr(app, 'is_multipage') and app.is_multipage():
+                        for page in getattr(app, '_pages', {}).values():
+                            root = getattr(page, 'root', None)
+                            meta = getattr(root, '__dars_route_metadata__', None)
+                            if getattr(meta, 'route_type', None) == RouteType.SSR:
+                                has_ssr = True
+                                break
+                except Exception:
+                    pass
+                
+                needs_ssr_module = is_spa or has_ssr
+                
                 if os.path.exists(resources_dir):
                     for filename in os.listdir(resources_dir):
                         if filename.endswith('.js') or filename.endswith('.js.map'):
@@ -168,18 +191,31 @@ class HTMLCSSJSExporter(Exporter):
                             if not is_spa and filename.startswith('router.js'):
                                 continue
                                 
+                            # Skip ssr.js if neither SPA nor SSR
+                            if not needs_ssr_module and filename.startswith('ssr.js'):
+                                continue
+                                
                             src = os.path.join(resources_dir, filename)
                             dst = os.path.join(lib_dir, filename)
                             
                             # Copy fresh every time to ensure updates are reflected
-                            if filename == 'dars.min.js' and not is_spa:
+                            if filename == 'dars.min.js' and (not is_spa or not needs_ssr_module):
                                 import re
                                 with open(src, 'r', encoding='utf-8') as f:
                                     content = f.read()
-                                # Remove static import for router.js
-                                content = re.sub(r'import\s*\{[^}]*\}\s*from\s*["\']./router\.js["\'];?', '', content)
-                                # Remove router config from Dars object
-                                content = re.sub(r'router:\s*\{[^}]*\},?', '', content)
+                                if not is_spa:
+                                    # Remove static import for router.js
+                                    content = re.sub(r'import\s*\{[^}]*\}\s*from\s*["\']./router\.js["\'];?', '', content)
+                                    # Remove router config from Dars object
+                                    content = re.sub(r'router:\s*\{[^}]*\},?', '', content)
+                                if not needs_ssr_module:
+                                    # Remove static import for ssr.js
+                                    content = re.sub(r'import\s*\{[^}]*\}\s*from\s*["\']./ssr\.js["\'];?', '', content)
+                                    # Provide fallback for _executeExternalScript for inline events if ssr.js is not present
+                                    fallback = "\nfunction updatePageMetadata(){}\n"
+                                    fallback += "function _updateMeta(){}\n"
+                                    fallback += "function _updateLink(){}\n"
+                                    content = content + fallback
                                 with open(dst, 'w', encoding='utf-8') as f:
                                     f.write(content)
                             else:
@@ -498,15 +534,6 @@ class HTMLCSSJSExporter(Exporter):
                     md_scripts = getattr(self, '_markdown_scripts', {}).get(slug, [])
                     if md_scripts:
                         page_scripts.extend(md_scripts)
-
-                    # Incluir scripts automáticos generados por helpers de escritorio
-                    try:
-                        import dars.desktop as _dars_desktop
-                        auto = getattr(_dars_desktop, '_auto_scripts', None)
-                        if auto:
-                            page_scripts.extend(auto)
-                    except Exception:
-                        pass
                     
                     # Preparar scripts
                     combined_js, external_srcs, combined_is_module = self._prepare_page_scripts(page_scripts, output_path, project_root)
@@ -661,14 +688,6 @@ class HTMLCSSJSExporter(Exporter):
                                                       _auto_fetches=_page_auto_fetches)
 
                 user_scripts = list(getattr(app, 'scripts', []))
-                # Incluir scripts automáticos generados por helpers de escritorio
-                try:
-                    import dars.desktop as _dars_desktop
-                    auto = getattr(_dars_desktop, '_auto_scripts', None)
-                    if auto:
-                        user_scripts.extend(auto)
-                except Exception:
-                    pass
                 combined_js, external_srcs, combined_is_module = self._prepare_page_scripts(user_scripts, output_path, project_root)
 
                 if should_combine_js:
@@ -742,15 +761,6 @@ class HTMLCSSJSExporter(Exporter):
                 from dars.core.state import STATE_BOOTSTRAP
                 if isinstance(STATE_BOOTSTRAP, list):
                     STATE_BOOTSTRAP.clear()
-            except Exception:
-                pass
-
-            # Limpiar scripts automáticos generados por dars.desktop helpers
-            try:
-                import dars.desktop as _dars_desktop
-                auto = getattr(_dars_desktop, '_auto_scripts', None)
-                if isinstance(auto, list):
-                    auto.clear()
             except Exception:
                 pass
 

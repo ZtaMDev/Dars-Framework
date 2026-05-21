@@ -6,10 +6,10 @@ html,
 body {
   margin: 0;
   padding: 0;
-  height: 100%;
   width: 100%;
   overflow-x: hidden;
-  background: linear-gradient(180deg, #0c0e12 0%, #0e1117 50%, #0b0c10 100%);
+  background-color: #0c0e12;
+  background-image: linear-gradient(180deg, #0c0e12 0%, #0e1117 50%, #0b0c10 100%);
   background-attachment: fixed;
   background-repeat: no-repeat;
   background-size: cover;

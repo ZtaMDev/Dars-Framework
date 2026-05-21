@@ -1,34 +1,5 @@
 import { _attachEventsMap } from "./dars.min.js";
-export function _executeExternalScript(code, context) {
-  if (!code) return null;
-  try {
-    const s = document.createElement("script");
-    const ctxId = "__dars_ctx_" + Math.random().toString(36).substr(2, 9);
-    if (context) window[ctxId] = context;
-
-    // Provide local 'event' and 'element' (this) to the script
-    const setup =
-      context ?
-        `const event = window["${ctxId}"].event; const element = window["${ctxId}"].element; delete window["${ctxId}"];`
-      : "";
-
-    s.textContent = `(async () => { 
-          ${setup}
-          try { 
-              ${code} 
-          } catch(e) { 
-              console.error('[Dars] Script execution error:', e); 
-          } 
-      })();`;
-
-    document.body.appendChild(s);
-    s.remove();
-  } catch (e) {
-    console.error("[Dars:Security] Error executing external script:", e);
-  }
-  return null;
-}
-
+import { _executeExternalScript } from "./dap.js";
 // If the SSR backend provided a snapshot for State V2, expose it on the
 // Dars object so tools or advanced integrations can inspect it. The
 // current runtime does not require this snapshot to function, but having
@@ -40,7 +11,7 @@ try {
   ) {
     Dars.stateV2Snapshot = window.__DARS_STATE_V2__;
   }
-} catch (_) {}
+} catch (_) { }
 
 // ==================== HEAD METADATA UPDATES ====================
 // Update head metadata on SPA route change
@@ -63,7 +34,7 @@ export function updatePageMetadata(metadata) {
       const kw =
         Array.isArray(metadata.keywords) ?
           metadata.keywords.join(", ")
-        : metadata.keywords;
+          : metadata.keywords;
       _updateMeta("keywords", kw);
     }
 
@@ -98,7 +69,7 @@ export function updatePageMetadata(metadata) {
   } catch (e) {
     try {
       console.error("[Dars] Metadata update error:", e);
-    } catch (_) {}
+    } catch (_) { }
   }
 }
 
@@ -114,7 +85,7 @@ export function _updateMeta(name, content, attr) {
       document.head.appendChild(meta);
     }
     meta.setAttribute("content", String(content));
-  } catch (_) {}
+  } catch (_) { }
 }
 
 export function _updateLink(rel, href) {
@@ -128,12 +99,12 @@ export function _updateLink(rel, href) {
       document.head.appendChild(link);
     }
     link.setAttribute("href", String(href));
-  } catch (_) {}
+  } catch (_) { }
 }
 
 try {
   window.Dars = window.Dars || Dars;
-} catch (_) {}
+} catch (_) { }
 
 // ==================== DSP HYDRATION ====================
 try {
@@ -199,7 +170,7 @@ try {
             const sanitized =
               typeof DOMPurify !== "undefined" ?
                 DOMPurify.sanitize(payload.metaTags, { FORCE_BODY: true })
-              : payload.metaTags.replace(/[<>]/g, "");
+                : payload.metaTags.replace(/[<>]/g, "");
             temp.innerHTML = sanitized;
             const newMetas = temp.childNodes;
             for (let i = 0; i < newMetas.length; i++) {
@@ -244,7 +215,7 @@ try {
             m.registerStates || (m.default && m.default.registerStates);
           if (typeof reg === "function") reg(window.__DARS_STATE__);
         })
-        .catch(() => {});
+        .catch(() => { });
     }
   }
   if (
@@ -260,7 +231,7 @@ try {
             m.registerStates || (m.default && m.default.registerStates);
           if (typeof reg === "function") reg(window.__DARS_STATE_V2__);
         })
-        .catch(() => {});
+        .catch(() => { });
     }
   }
 } catch (err) {

@@ -1,5 +1,7 @@
 from dars.all import *
+# pyrefly: ignore [missing-import]
 from navbarcomp import create_navbar
+# pyrefly: ignore [missing-import]
 from footercomp import create_footer
 
 

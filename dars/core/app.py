@@ -599,8 +599,8 @@ class App:
     
     **SEO & Social Media:**
     
-    - **og_title, og_description, og_image, og_url**: Open Graph meta tags.
-    - **twitter_card, twitter_site, twitter_creator**: Twitter Card meta tags.
+    - **og_title, og_description, og_image, og_url, og_type, og_site_name, og_locale**: Open Graph meta tags.
+    - **twitter_card, twitter_site, twitter_creator, twitter_title, twitter_description, twitter_image**: Twitter Card meta tags.
     - **robots**: Robots meta tag for search engines.
     - **canonical_url**: Canonical URL for SEO.
     
@@ -680,6 +680,21 @@ class App:
         service_worker_path: str = "",
         service_worker_enabled: bool = False,
         ssr_url: str = None,  # URL for SSR backend fetching
+        og_title: str = "",
+        og_description: str = "",
+        og_image: str = "",
+        og_url: str = "",
+        og_type: str = "website",
+        og_site_name: str = "",
+        og_locale: str = "",
+        twitter_card: str = "summary",
+        twitter_site: str = "",
+        twitter_creator: str = "",
+        twitter_title: str = "",
+        twitter_description: str = "",
+        twitter_image: str = "",
+        robots: str = "index, follow",
+        canonical_url: str = "",
         **config
     ):
 
@@ -762,21 +777,25 @@ class App:
         #       app.rTimeCompile()  # o app.timeCompile()
         # Así tendrás preview instantáneo y control explícito, sin efectos colaterales.
         #
-        self.og_title = config.get('og_title', title)
-        self.og_description = config.get('og_description', description)
-        self.og_image = config.get('og_image', '')
-        self.og_url = config.get('og_url', '')
-        self.og_type = config.get('og_type', 'website')
-        self.og_site_name = config.get('og_site_name', '')
+        self.og_title = og_title or config.get('og_title', title)
+        self.og_description = og_description or config.get('og_description', description)
+        self.og_image = og_image or config.get('og_image', '')
+        self.og_url = og_url or config.get('og_url', '')
+        self.og_type = og_type or config.get('og_type', 'website')
+        self.og_site_name = og_site_name or config.get('og_site_name', '')
+        self.og_locale = og_locale or config.get('og_locale', '')
         
         # Twitter Cards
-        self.twitter_card = config.get('twitter_card', 'summary')
-        self.twitter_site = config.get('twitter_site', '')
-        self.twitter_creator = config.get('twitter_creator', '')
+        self.twitter_card = twitter_card or config.get('twitter_card', 'summary')
+        self.twitter_site = twitter_site or config.get('twitter_site', '')
+        self.twitter_creator = twitter_creator or config.get('twitter_creator', '')
+        self.twitter_title = twitter_title or config.get('twitter_title', '')
+        self.twitter_description = twitter_description or config.get('twitter_description', '')
+        self.twitter_image = twitter_image or config.get('twitter_image', '')
         
         # SEO y robots
-        self.robots = config.get('robots', 'index, follow')
-        self.canonical_url = config.get('canonical_url', '')
+        self.robots = robots or config.get('robots', 'index, follow')
+        self.canonical_url = canonical_url or config.get('canonical_url', '')
         
         # PWA configuración
         self.pwa_enabled = config.get('pwa_enabled', False)

@@ -1,8 +1,8 @@
 // ==================== ROUTER ====================
 import { dispatch, __darsConfig } from "./dap.js";
 import { _sanitize, $, _attachEventsMap, registerStates } from "./dars.min.js";
-import { _executeExternalScript, updatePageMetadata } from "./ssr.js";
-
+import { updatePageMetadata } from "./ssr.js";
+import { _executeExternalScript } from "./dap.js";
 // Vite minification compatible - uses string literals for all object properties
 
 export const __spaRoutes = []; // Array of route configs (for pattern matching)

@@ -9,7 +9,36 @@ import {
   updateVRef,
   __registry,
 } from "./dars.min.js";
-import { _executeExternalScript } from "./ssr.js";
+
+export function _executeExternalScript(code, context) {
+  if (!code) return null;
+  try {
+    const s = document.createElement("script");
+    const ctxId = "__dars_ctx_" + Math.random().toString(36).substr(2, 9);
+    if (context) window[ctxId] = context;
+
+    // Provide local 'event' and 'element' (this) to the script
+    const setup =
+      context ?
+        `const event = window["${ctxId}"].event; const element = window["${ctxId}"].element; delete window["${ctxId}"];`
+        : "";
+
+    s.textContent = `(async () => { 
+          ${setup}
+          try { 
+              ${code} 
+          } catch(e) { 
+              console.error('[Dars] Script execution error:', e); 
+          } 
+      })();`;
+
+    document.body.appendChild(s);
+    s.remove();
+  } catch (e) {
+    console.error("[Dars:Security] Error executing external script:", e);
+  }
+  return null;
+}
 
 export const __commandRegistry = new Map();
 export const __darsConfig = {
@@ -471,8 +500,8 @@ _registerCommand("transform", async (args, ctx) => {
       const data = typeof input === "string" ? JSON.parse(input) : input;
       const tasks =
         Array.isArray(data) ? data
-        : data && data.tasks ? data.tasks
-        : [];
+          : data && data.tasks ? data.tasks
+            : [];
       if (!tasks.length)
         return '<p class="text-gray-400 text-sm p-2">No tasks yet.</p>';
       return tasks
@@ -483,7 +512,7 @@ _registerCommand("transform", async (args, ctx) => {
             title =
               typeof t.title === "object" ?
                 JSON.stringify(t.title)
-              : String(t.title);
+                : String(t.title);
           }
           const safeTitle = _sanitize(title);
           const done = t && t.done;
@@ -847,7 +876,7 @@ async function _initConditionalElements(ctx) {
       const condAction = JSON.parse(raw);
       const cond = await _resolveVal(condAction, ctx || {});
       el.style.display = cond ? "" : "none";
-    } catch (_) {}
+    } catch (_) { }
   }
   // Initialize If elements
   for (const el of document.querySelectorAll("[data-dap-if]")) {
@@ -859,7 +888,7 @@ async function _initConditionalElements(ctx) {
       const elseEl = el.querySelector('[data-if-branch="else"]');
       if (thenEl) thenEl.style.display = cond ? "" : "none";
       if (elseEl) elseEl.style.display = cond ? "none" : "";
-    } catch (_) {}
+    } catch (_) { }
   }
 }
 
@@ -916,7 +945,7 @@ if (_origVrefUpdate) {
               ctx,
             );
           }
-        } catch (_) {}
+        } catch (_) { }
       }
     }
     return result;
@@ -1022,7 +1051,7 @@ _registerCommand("dom_each_render", async (args, ctx) => {
                 item.value ??
                 item.text ??
                 JSON.stringify(item))
-            : item,
+              : item,
           ),
         );
         return `<div>${text}</div>`;
@@ -1051,7 +1080,7 @@ _registerCommand("dom_each_render", async (args, ctx) => {
                 t.toLowerCase() === "none"
               ) ?
                 "Unknown"
-              : t,
+                : t,
           };
         }
         // Inject a done_class placeholder value based on the done field
@@ -1065,7 +1094,7 @@ _registerCommand("dom_each_render", async (args, ctx) => {
           const safeVal =
             key === "done_class" ?
               String(val)
-            : _sanitize(String(val == null ? "" : val));
+              : _sanitize(String(val == null ? "" : val));
           html = html.split(placeholder).join(safeVal);
         }
       } else {
