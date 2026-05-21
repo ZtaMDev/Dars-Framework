@@ -23,7 +23,7 @@ All of the following have been implemented and shipped:
 - **Routing**: SPA router, multipage, nested routes, outlets, lazy loading, route types (`public`, `private`, `protected`, `SSR`), route obfuscation.
 - **SSR**: Server-side rendering via FastAPI, DSP hydration, client-side rehydration.
 - **Exporter**: HTML/CSS/JS with minification via **dars-bundler** (Rust/SWC/LightningCSS), style optimization pipeline, scoped CSS, static-site router elimination.
-- **Desktop**: Electron integration, bidirectional JS bridge, packaging templates.
+- **Web Deployment**: Web app routing, SSR, static export, and web-ready build pipelines.
 - **CLI**: `dars init`, `dars dev`, `dars build`, `dars export`, `dars preview`, `dars doctor`, `dars test`, hot reload.
 - **Utility Styles**: Tailwind-like utility system with arbitrary properties, gradients, rings, filters, transforms.
 - **Animations**: `fadeIn`, `fadeOut`, `slideIn`, `slideOut`, `scaleIn`, `scaleOut`, `shake`, `bounce`, `pulse`, `rotate`, `flip`, `popIn`, `popOut`, `sequence`.

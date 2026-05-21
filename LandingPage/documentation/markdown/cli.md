@@ -31,8 +31,6 @@ Open your terminal in your project directory and use any of the following comman
 
 # Build using project config (dars.config.json)
  dars build
- # Build desktop (BETA) when format is desktop in config
- dars build
  # Build without the default Python minifier
  dars build --no-minify
 
@@ -72,8 +70,6 @@ Scaffold new components and pages instantly with automatic project integration.
 | `dars preview`                                    | Preview exported app (auto-detects output)                        |
 | `dars preview --port 9000`                        | Preview on a custom port                                          |
 | `dars build`                                      | Build using dars.config.json                                      |
-| `dars init --type desktop`                        | Scaffold desktop-capable project (BETA)                           |
-| `dars build` (desktop config)                     | Build desktop app artifacts (BETA)                                |
 | `dars build --no-minify`                          | Build skipping default Python minifier                            |
 | `dars init my_project --type ssr`                 | Create a new Full-Stack SSR project                               |
 | `dars init my_project`                            | Create a new Dars project (SPA Default)                           |
@@ -123,13 +119,6 @@ dars init  -L
 - You can preview apps either live (with `app.rTimeCompile()`) or from exported files with `dars preview`.
 - Templates are available for quick project setup: use `dars init my_project -t <template>`.
 
-### Desktop (BETA) CLI
-
-- Mark your project with `"format": "desktop"` in `dars.config.json`.
-- Use `dars init --type desktop` (or `--update`) to scaffold backend files.
-- Run `dars doctor --all --yes` to set up optional tooling.
-- Build with `dars build`. This feature is in BETA: suitable for testing, not yet for production.
-
 ### Minification labels in output
 
 - Applying minification (default): default Python-side minifier is active.
@@ -154,4 +143,4 @@ When working with SSR (`dars init --type ssr`), the workflow involves two proces
 | `dars dev --backend`   | Starts the SSR/backend server defined by `backendEntry`.   |
 | `dars build`           | Builds static assets to `dist/` for production.            |
 
-\_Note: For production, you only need to run the backend (which serves the built assets).
+Note: For production, you only need to run the backend (which serves the built assets).

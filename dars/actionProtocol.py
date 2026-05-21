@@ -113,9 +113,6 @@ class DAPOp:
     # === HTTP (Backend) ===
     FETCH = "fetch"
     
-    # === Desktop (Electron) ===
-    DESKTOP_FS_READ = "desktop_fs_read"
-    DESKTOP_FS_WRITE = "desktop_fs_write"
 
 
 class ActionBuilder:

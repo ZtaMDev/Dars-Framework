@@ -130,35 +130,15 @@ Congratulations! Dars is ready to use.
 
 ---
 
-## Desktop (BETA)
+## Web Export
 
-You can build native desktop apps from Dars projects. This capability is in **BETA** and is not recommended for production yet, but it is usable for testing.
-
-### Quickstart
+Dars exports web applications as optimized HTML, CSS, and JavaScript. Run `dars build` to generate production-ready web assets in your configured output directory.
 
 ```bash
-# Scaffold or update a desktop-capable project
-dars init --type desktop
-# or
-dars init --update
-
-# Verify optional tooling (Node/Bun and packager)
-dars doctor --all --yes
-
-# Ensure your config sets the desktop format and target
-# dars.config.json
-{
-  "entry": "main.py",
-  "format": "desktop",
-  "outdir": "dist",
-  "targetPlatform": "auto"
-}
-
-# Build desktop artifacts
 dars build
 ```
 
 Notes:
 
-- Desktop support is under active development; configuration keys and defaults may change.
-- Some platform targets (like macOS) require building on that OS for signing.
+- Ensure your `dars.config.json` is configured correctly for web export.
+- Use `dars preview` to inspect the generated output locally.

@@ -970,13 +970,17 @@
     </div>
     <div class="dars-container dars-s-c59e376995" id="markdown-content-container">
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_0_1_1_0">
-      <h1 id="release-notes-v1912">
-       Release Notes v1.9.12
+      <h1 id="release-notes-v1913">
+       Release Notes v1.9.13
       </h1>
       <blockquote>
        <p>
         <strong>
-         dars-bundler: Standalone Rust Minifier, Static Site Router Optimization &amp; Unified Config
+         Desktop exporter removed, future
+         <code>
+          dars-desktop
+         </code>
+         with PyQt6 + WebEngine, and continued web exporter stability
         </strong>
        </p>
       </blockquote>
@@ -988,6 +992,110 @@
 </code></pre>
       </div>
       <h2 id="whats-new">
+       What's New
+      </h2>
+      <h3 id="desktop-exporter-removal-and-new-desktop-strategy">
+       Desktop exporter removal and new desktop strategy
+      </h3>
+      <p>
+       The legacy desktop export path has been removed from the core Dars framework. This makes the framework leaner and keeps the main package focused on web application export, build, and SSR workflows.
+      </p>
+      <ul>
+       <li>
+        The
+        <code>
+         format: "desktop"
+        </code>
+        export path is no longer supported in
+        <code>
+         dars-framework
+        </code>
+        .
+       </li>
+       <li>
+        Desktop application support is being re-architected as a separate package:
+        <code>
+         dars-desktop
+        </code>
+        .
+       </li>
+       <li>
+        The new approach will use
+        <strong>
+         pure Python
+        </strong>
+        with
+        <strong>
+         PyQt6
+        </strong>
+        and
+        <strong>
+         PyQt6 WebEngine
+        </strong>
+        , avoiding Electron and Node/npm dependencies.
+       </li>
+       <li>
+        This future package will embed the Dars web runtime inside a native Qt browser view and provide a Python-first desktop packaging experience.
+       </li>
+      </ul>
+      <h3 id="core-framework-focus">
+       Core framework focus
+      </h3>
+      <ul>
+       <li>
+        <code>
+         dars-framework
+        </code>
+        now prioritizes stable web export, SPA/SSR workflows, and the improved
+        <code>
+         dars-bundler
+        </code>
+        pipeline.
+       </li>
+       <li>
+        This separation allows desktop packaging innovation without affecting the core web framework.
+       </li>
+      </ul>
+      <h3 id="future-package-roadmap-dars-desktop">
+       Future package roadmap:
+       <code>
+        dars-desktop
+       </code>
+      </h3>
+      <ul>
+       <li>
+        Planned as an independent companion package delivering desktop shells using PyQt6 WebEngine.
+       </li>
+       <li>
+        Designed for Python-only install flows and Qt-native desktop lifecycle management.
+       </li>
+       <li>
+        Will allow clean separation between web export features in
+        <code>
+         dars-framework
+        </code>
+        and desktop-specific packaging logic.
+       </li>
+      </ul>
+      <hr/>
+      <h1 id="release-notes-v1912">
+       Release Notes v1.9.12
+      </h1>
+      <blockquote>
+       <p>
+        <strong>
+         dars-bundler: Standalone Rust Minifier, Static Site Router Optimization &amp; Unified Config
+        </strong>
+       </p>
+      </blockquote>
+      <h2 id="installation-2">
+       Installation
+      </h2>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
+</code></pre>
+      </div>
+      <h2 id="whats-new-2">
        What's New
       </h2>
       <h3 id="dars-bundler-high-performance-standalone-rust-minifier">
@@ -1308,14 +1416,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-2">
+      <h2 id="installation-3">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-2">
+      <h2 id="whats-new-3">
        What's New
       </h2>
       <h3 id="secure-asynchronous-ssr-hydration">
@@ -1599,14 +1707,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-3">
+      <h2 id="installation-4">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-3">
+      <h2 id="whats-new-4">
        What's New
       </h2>
       <h3 id="usefetch-declarative-data-fetching-hook">
@@ -2172,14 +2280,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-4">
+      <h2 id="installation-5">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-4">
+      <h2 id="whats-new-5">
        What's New
       </h2>
       <h3 id="hybrid-ssrspa-stabilization">
@@ -2411,14 +2519,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-5">
+      <h2 id="installation-6">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-5">
+      <h2 id="whats-new-6">
        What's New
       </h2>
       <h3 id="modular-animation-engine-animjs">
@@ -2663,14 +2771,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-6">
+      <h2 id="installation-7">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-6">
+      <h2 id="whats-new-7">
        What's New
       </h2>
       <h3 id="fixed-relative-paths-for-runtime-resources">
@@ -2806,14 +2914,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-7">
+      <h2 id="installation-8">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-7">
+      <h2 id="whats-new-8">
        What's New
       </h2>
       <h3 id="configurable-development-port">
@@ -2971,14 +3079,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-8">
+      <h2 id="installation-9">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-8">
+      <h2 id="whats-new-9">
        What's New
       </h2>
       <h3 id="standardized-component-docstrings">
@@ -3050,14 +3158,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-9">
+      <h2 id="installation-10">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-9">
+      <h2 id="whats-new-10">
        What's New
       </h2>
       <h3 id="utility-style-system">
@@ -3255,14 +3363,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-10">
+      <h2 id="installation-11">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-10">
+      <h2 id="whats-new-11">
        What's New
       </h2>
       <h3 id="definitive-removal-of-new-function">
@@ -3539,14 +3647,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-11">
+      <h2 id="installation-12">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-11">
+      <h2 id="whats-new-12">
        What's New
       </h2>
       <h3 id="restored-native-string-concatenation">
@@ -3621,14 +3729,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-12">
+      <h2 id="installation-13">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-12">
+      <h2 id="whats-new-13">
        What's New
       </h2>
       <h3 id="state-v2-reactivity-decoupling">
@@ -3759,14 +3867,14 @@
         release.
        </p>
       </blockquote>
-      <h2 id="installation-13">
+      <h2 id="installation-14">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-13">
+      <h2 id="whats-new-14">
        What's New
       </h2>
       <h3 id="zero-eval-runtime-secure-script-execution">
@@ -3964,14 +4072,14 @@
         : Versions &lt;= v1.8.7 are considered deprecated and NOT recommended for production use. v1.8.8 addresses critical security surfaces by temporarily removing experimental Server Components. Upgrading is mandatory.
        </p>
       </blockquote>
-      <h2 id="installation-14">
+      <h2 id="installation-15">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-14">
+      <h2 id="whats-new-15">
        What's New
       </h2>
       <h3 id="dars-server-protocol-dsp">
@@ -4041,14 +4149,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-15">
+      <h2 id="installation-16">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-15">
+      <h2 id="whats-new-16">
        What's New
       </h2>
       <h3 id="dars-server-components">
@@ -4156,14 +4264,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-16">
+      <h2 id="installation-17">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-16">
+      <h2 id="whats-new-17">
        What's New
       </h2>
       <h3 id="darsenv-environment-awareness">
@@ -4275,14 +4383,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-17">
+      <h2 id="installation-18">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-17">
+      <h2 id="whats-new-18">
        What's New
       </h2>
       <h3 id="multiple-outlets-via-outlet_id">
@@ -4379,14 +4487,14 @@ This keeps state/events safe and avoids breaking hydration.
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-18">
+      <h2 id="installation-19">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-18">
+      <h2 id="whats-new-19">
        What's New
       </h2>
       <h3 id="python-native-minification-by-default-no-nodebun-required">
@@ -4595,14 +4703,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-19">
+      <h2 id="installation-20">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-19">
+      <h2 id="whats-new-20">
        What's New
       </h2>
       <h3 id="fixed-production-build-crash-unexpected-token-export">
@@ -4653,14 +4761,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-20">
+      <h2 id="installation-21">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-20">
+      <h2 id="whats-new-21">
        What's New
       </h2>
       <h3 id="fixed-settimeout-promise-handling">
@@ -4704,14 +4812,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-21">
+      <h2 id="installation-22">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-21">
+      <h2 id="whats-new-22">
        What's New
       </h2>
       <h3 id="new-style-optimization-pipeline-phase-1">
@@ -5081,14 +5189,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-22">
+      <h2 id="installation-23">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-22">
+      <h2 id="whats-new-23">
        What's New
       </h2>
       <h3 id="new-advanced-multimedia-components-video-audio">
@@ -5605,7 +5713,7 @@ improving consistency and providing a real-world example of the upgraded styling
         </div>
         <div class="dars-container dars-s-8161a2a3ff" id="container_0_1_2_0_0_1_2">
          <span class="dars-text dars-s-474933a055" id="text_0_1_2_0_0_1_2_0">
-          A modern FullStack Python framework for web and desktop applications.
+          A modern FullStack Python framework for web applications.
          </span>
         </div>
        </div>
@@ -5644,6 +5752,24 @@ improving consistency and providing a real-world example of the upgraded styling
      <div class="sidebar-category">
       Versions
      </div>
+     <a class="sidebar-link sidebar-level-1" href="#release-notes-v1913" style="margin-left: 0px">
+      Release Notes v1.9.13
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#installation" style="margin-left: 20px">
+      Installation
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#whats-new" style="margin-left: 20px">
+      What's New
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#desktop-exporter-removal-and-new-desktop-strategy" style="margin-left: 40px">
+      Desktop exporter removal and new desktop strategy
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#core-framework-focus" style="margin-left: 40px">
+      Core framework focus
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#future-package-roadmap-dars-desktop" style="margin-left: 40px">
+      Future package roadmap: `dars-desktop`
+     </a>
      <a class="sidebar-link sidebar-level-1" href="#release-notes-v1912" style="margin-left: 0px">
       Release Notes v1.9.12
      </a>
@@ -6342,7 +6468,7 @@ improving consistency and providing a real-world example of the upgraded styling
   </div>
   <div id="__dars_spa_root__">
   </div>
-  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1779308851" type="module">
+  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1779323152" type="module">
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js">
   </script>

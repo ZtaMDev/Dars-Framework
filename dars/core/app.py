@@ -559,7 +559,6 @@ class App:
     
     - **Single-Page App (SPA)**: Set a root Component for client-side routing.
     - **Multi-Page App (MPA)**: Add multiple pages with the `add_page()` method.
-    - **Desktop App**: Deploy as a desktop application using Electron or similar.
     
     **Props:**
     
@@ -680,8 +679,6 @@ class App:
         background_color: str = "#ffffff",
         service_worker_path: str = "",
         service_worker_enabled: bool = False,
-        desktop: bool = False,
-        devtools: bool = True,  # Auto-open DevTools in desktop dev mode
         ssr_url: str = None,  # URL for SSR backend fetching
         **config
     ):
@@ -708,7 +705,6 @@ class App:
         self.version = version
         self.keywords = keywords or []
         self.language = language
-        self.desktop = desktop
         # Iconos y favicon
         self.favicon = favicon
         self.icon = icon  # Para PWA y meta tags
@@ -727,7 +723,6 @@ class App:
         self.service_worker_enabled = service_worker_enabled
         
         # Desktop configuration
-        self.devtools = devtools  # Control DevTools auto-open in dev mode
         self.ssr_url = ssr_url
         
         # Load project configuration and register custom utilities
@@ -1398,11 +1393,8 @@ class App:
                         with open(version_file, 'w') as f:
                             f.write(new_version)
                         
-                        # Exportar la aplicación
-                        if is_desktop:
-                            elec_exporter.export(new_app, preview_dir, bundle=False)
-                        else:
-                            exporter.export(new_app, preview_dir, bundle=False)
+                        
+                        exporter.export(new_app, preview_dir, bundle=False)
                         
                         # Verificar que la exportación fue exitosa
                         index_path = os.path.join(preview_dir, "index.html")
@@ -1426,347 +1418,6 @@ class App:
                     else:
                         print(f"[Dars] Hot reload failed: {e}\n{tb}")
                     return False # Indicate failure
-        # ---- DESKTOP MODE ----
-        if is_desktop:
-            try:
-                from dars.exporters.desktop.electron import ElectronExporter
-                from dars.core import js_bridge as jsb
-            except Exception as e:
-                if console:
-                    console.print(f"[red]Desktop dev setup failed: {e}[/red]")
-                else:
-                    print(f"[Dars] Desktop dev setup failed: {e}")
-                return
-            
- 
-
-            try:
-                with pushd(project_root):
-                    elec_exporter = ElectronExporter()
-                    ok = elec_exporter.export(self, preview_dir, bundle=False)
-                    if not ok:
-                        if console:
-                            console.print("[red]Electron export failed.[/red]")
-                        else:
-                            print("[Dars] Electron export failed.")
-                        return
-
-                if not jsb.electron_available():
-                    if console:
-                        console.print("[yellow]⚠ Electron not found. Run: dars doctor --all --yes[/yellow]")
-                    else:
-                        print("[Dars] Electron not found. Run: dars doctor --all --yes")
-                    return
-
-                run_msg = f"Running dev: {app_file}\nLaunching Electron (dev)..."
-                if console:
-                    console.print(f"[cyan]{run_msg}[/cyan]")
-                else:
-                    print(run_msg)
-
-                files_to_watch = _collect_project_files_by_ext(project_root, watch_exts)
-                if not files_to_watch:
-                    files_to_watch = [app_file]
-
-                electron_proc = None
-                stream_threads = []
-                control_port = None
-                restart_triggered = False
-
-                def start_electron():
-                    nonlocal electron_proc, stream_threads, control_port, restart_triggered
-                    try:
-                        import socket as _socket
-                        s = _socket.socket()
-                        s.bind(('127.0.0.1', 0))
-                        picked = s.getsockname()[1]
-                        s.close()
-                    except Exception:
-                        picked = None
-                        
-                    env = os.environ.copy()
-                    env['DARS_DEV'] = '1'
-                    env['DARS_DEVTOOLS'] = '1' if getattr(self, 'devtools', True) else '0'
-                    if picked:
-                        env['DARS_CONTROL_PORT'] = str(picked)
-                        
-                    p, cmd = jsb.electron_dev_spawn(cwd=preview_dir, env=env)
-                    if p and picked:
-                        control_port = picked
-                        
-                    if not p:
-                        msg = f"Could not start Electron (cmd: {cmd}). Ensure Electron is installed."
-                        if console:
-                            console.print(f"[red]{msg}[/red]")
-                        else:
-                            print(msg)
-                        return False
-
-                    def _stream_output(pipe, is_err=False):
-                        try:
-                            for line in iter(pipe.readline, ''):
-                                if not line:
-                                    break
-                                text = line.rstrip('\n')
-                                
-                                # Filter out harmless DevTools warnings
-                                if "Autofill.enable" in text or "Autofill.setAddresses" in text:
-                                    continue
-                                if "wasn't found" in text and ("Autofill" in text or "protocol_client" in text):
-                                    continue
-                                
-                                # Only show actual errors, not all stderr
-                                if is_err and (("Error" in text and ("occurred in handler" in text or "ENOENT" in text or "TypeError" in text or "ReferenceError" in text)) or "Uncaught" in text):
-                                    if console:
-                                        console.print(f"[red][Electron Error][/red] {text}")
-                                    else:
-                                        print(f"[Electron Error] {text}")
-                                elif not is_err and text.strip():  # Only show non-empty stdout
-                                    # Skip empty lines and unnecessary output
-                                    if console:
-                                        console.print(f"[dim][Electron][/dim] {text}")
-                                    else:
-                                        print(f"[Electron] {text}")
-                        except Exception:
-                            pass
-
-                    t_out = threading.Thread(target=_stream_output, args=(p.stdout, False), daemon=True)
-                    t_err = threading.Thread(target=_stream_output, args=(p.stderr, True), daemon=True)
-                    t_out.start()
-                    t_err.start()
-                    stream_threads = [t_out, t_err]
-                    electron_proc = p
-                    
-                    try:
-                        if console:
-                            console.print(f"[magenta]Electron PID: {p.pid}[/magenta]")
-                        else:
-                            print(f"[Dars] Electron PID: {p.pid}")
-                    except Exception:
-                        pass
-                    
-                    restart_triggered = False
-                    return True
-
-                def stop_electron():
-                    nonlocal electron_proc
-                    if electron_proc:
-                        # Fast shutdown - use terminate immediately for faster exit
-                        try:
-                            if control_port:
-                                try:
-                                    import urllib.request as _ur
-                                    url = f"http://127.0.0.1:{control_port}/__dars_shutdown"
-                                    req = _ur.Request(url, method='POST')
-                                    _ur.urlopen(req, timeout=0.5)  # Reduced timeout
-                                except Exception:
-                                    pass
-                        except Exception:
-                            pass
-
-                        # Fast kill process
-                        try:
-                            pid = electron_proc.pid
-                            if os.name == 'nt':
-                                subprocess.run(["taskkill", "/F", "/T", "/PID", str(pid)], 
-                                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=2)
-                            else:
-                                try:
-                                    os.killpg(os.getpgid(pid), signal.SIGTERM)
-                                    electron_proc.wait(timeout=1)
-                                except:
-                                    try:
-                                        electron_proc.terminate()
-                                        electron_proc.wait(timeout=1)
-                                    except:
-                                        try:
-                                            electron_proc.kill()
-                                        except:
-                                            pass
-                        except Exception:
-                            try:
-                                electron_proc.terminate()
-                            except:
-                                pass
-                        finally:
-                            electron_proc = None
-
-                def reload_and_restart(changed_file=None):
-                    nonlocal restart_triggered
-                    # Prevent concurrent restarts
-                    if restart_triggered:
-                        return
-                    
-                    reloaded = handle_file_change(f"File changed: {os.path.relpath(changed_file, project_root)}" if changed_file else "Change detected")
-                    if reloaded:
-                        restart_triggered = True
-                        time.sleep(0.3)  # Small delay to consolidate multiple file change events
-                        stop_electron()
-                        time.sleep(0.2)  # Ensure process fully stopped
-                        if not shutdown_event.is_set():  # Only restart if not shutting down
-                            start_electron()
-                            restart_triggered = False
-
-
-                # Crear EnhancedFileWatchers para archivos individuales
-                for f in files_to_watch:
-                    try:
-                        w = EnhancedFileWatcher(f, lambda f=f: reload_and_restart(f))
-                        w.start()
-                        watchers.append(w)
-                    except Exception as e:
-                        if console:
-                            console.print(f"[yellow]Warning: could not watch {f}: {e}[/yellow]")
-                        else:
-                            print(f"[Dars] Warning: could not watch {f}: {e}")
-
-                # Crear DirectoryWatcher para detectar nuevos archivos
-                try:
-                    dir_watcher = DirectoryWatcher(
-                        project_root, 
-                        watch_exts, 
-                        lambda msg: reload_and_restart(),
-                        poll_interval=2.0  # Check for new files every 2 seconds
-                    )
-                    dir_watcher.start()
-                    directory_watchers.append(dir_watcher)
-                    
-                except Exception as e:
-                    if console:
-                        console.print(f"[yellow]Warning: could not start directory watcher: {e}[/yellow]")
-
-                # Mark initialization as complete
-                initialization_complete.set()
-
-                # Check if shutdown was requested during initialization
-                if shutdown_event.is_set():
-                    if console:
-                        console.print("[yellow]Shutdown requested during initialization. Stopping...[/yellow]")
-                    # Clean up and return
-                    for w in watchers:
-                        try:
-                            w.stop()
-                        except Exception:
-                            pass
-                    for dw in directory_watchers:
-                        try:
-                            dw.stop()
-                        except Exception:
-                            pass
-                    return
-
-                if not start_electron():
-                    for w in watchers:
-                        try:
-                            w.stop()
-                        except Exception:
-                            pass
-                    for dw in directory_watchers:
-                        try:
-                            dw.stop()
-                        except Exception:
-                            pass
-                    return
-
-                # Stop startup spinner once Electron dev process is running
-                if startup_status:
-                    try:
-                        startup_status.stop()
-                    except Exception:
-                        pass
-
-                try:
-                    while not shutdown_event.is_set():
-                        if electron_proc and electron_proc.poll() is not None:
-                            code = electron_proc.returncode
-                            # Only restart if it wasn't a deliberate restart from file change
-                            if restart_triggered:
-                                # Already being handled by reload_and_restart
-                                if console:
-                                    console.print(f"[dim][Electron restarting after file change...][/dim]")
-                                # Wait for the restart to complete
-                                time.sleep(1)
-                                continue
-                            else:
-                                if console:
-                                    console.print(f"[cyan]Electron closed by user (code {code}). Stopping dev mode...[/cyan]")
-                                else:
-                                    print(f"[Dars] Electron closed by user (code {code}). Stopping dev mode...")
-                                shutdown_event.set()
-                                break
-                        time.sleep(0.5)
-  # Faster polling
-                except KeyboardInterrupt:
-                    shutdown_event.set()
-                finally:
-                    # Show stopped message IMMEDIATELY
-                    if console:
-                        console.print("[green]OK Preview stopped.[/green]")
-                    else:
-                        print("OK Preview stopped.")
-                    
-                    # All cleanup in background thread
-                    def _background_cleanup():
-                        # Stop Electron
-                        stop_electron()
-                        
-                        # Stop watchers
-                        for w in watchers:
-                            try:
-                                w.stop()
-                            except Exception:
-                                pass
-                        
-                        # Stop directory watchers
-                        for dw in directory_watchers:
-                            try:
-                                dw.stop()
-                            except Exception:
-                                pass
-                    
-                    # Start background cleanup
-                    cleanup_bg_thread = threading.Thread(target=_background_cleanup, daemon=True)
-                    cleanup_bg_thread.start()
-                    
-                    cleanup_done_event.set()
-                    
-                    # Clean up preview directory with spinner
-                    def _cleanup_preview():
-                        try:
-                            shutil.rmtree(preview_dir, ignore_errors=True)
-                        except Exception:
-                            pass
-                    
-                    # Show spinner while cleaning up (max 2 seconds)
-                    if console:
-                        with console.status("[yellow]Cleaning up preview files...[/yellow]", spinner="dots"):
-                            cleanup_thread = threading.Thread(target=_cleanup_preview, daemon=True)
-                            cleanup_thread.start()
-                            cleanup_thread.join(timeout=2.0)
-                        console.print("[green]OK Preview files deleted.[/green]")
-                    else:
-                        cleanup_thread = threading.Thread(target=_cleanup_preview, daemon=True)
-                        cleanup_thread.start()
-                        cleanup_thread.join(timeout=2.0)
-                        print("Preview files deleted.")
-                    
-                    # Restore original directory
-                    try:
-                        os.chdir(cwd_original)
-                    except Exception:
-                        pass
-                    
-
-
-            except Exception as e:
-                import traceback
-                traceback.print_exc()
-                initialization_complete.set()
-                raise
-
-            # Desktop mode should never fall through into the web preview flow.
-            # Once the Electron dev loop finishes (normally or via Ctrl+C), exit rTimeCompile.
-            return
 
         # ---- WEB MODE ----
         # Mark initialization as in progress

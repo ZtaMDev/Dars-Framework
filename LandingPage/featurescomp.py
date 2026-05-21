@@ -256,7 +256,7 @@ def create_features():
                 "Build applications quickly with our intuitive API and pre-built components, or creating your own custom components.",
                 "feature-card-0", 0.0),
             _feature_card("globe.svg", "Multiplatform",
-                "Deploy your apps on web and desktop with the same codebase changing only a single configuration.",
+                "Deploy your apps on the web with the same codebase and minimal configuration.",
                 "feature-card-1", 0.1),
             _feature_card("lightning.svg", "High Performance",
                 "Optimized rendering and efficient resource management for smooth experiences.",

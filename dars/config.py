@@ -21,7 +21,6 @@ DEFAULT_CONFIG = {
     "viteMinify": True,
     "markdownHighlight": True,
     "markdownHighlightTheme": "auto",
-    "targetPlatform": "auto",  # Desktop-only option: platform target for Electron build (auto|windows|linux|macos)
     "port": 8000,
     # Optional: backend entry for SSR projects (module or file path). Disabled by default.
     "backendEntry": None,

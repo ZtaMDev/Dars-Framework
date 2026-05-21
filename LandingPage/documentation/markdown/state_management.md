@@ -37,6 +37,7 @@ counter_state = State(display, text=0)
 ```
 
 **Constructor Parameters:**
+
 - `component`: The component to manage (can be a component object or string ID)
 - `**default_props`: Default property values (e.g., `text=0`, `style="..."`)
 
@@ -66,11 +67,11 @@ increment_btn.on_click = dynamic_state.text.increment(by=1)
 ```
 
 **Use Cases:**
+
 - Components created with `createComp()`
 - Dynamically generated UIs
 - Conditional component rendering
 - Server-side rendered components
-
 
 ### Reactive Properties
 
@@ -129,27 +130,32 @@ button.on_click = counter.text.set(value=0)
 State V2 supports updating **all component properties**, not just text:
 
 **Text Content:**
+
 ```python
 state.text.set("New text")
 ```
 
 **HTML Content:**
+
 ```python
 state.html.set("<strong>Bold text</strong>")
 ```
 
 **CSS Styles:**
+
 ```python
 state.style.set("text-red-500 fs-[24px]")
 ```
 
 **CSS Classes:**
+
 ```python
 # Set class name
 state.style.set("active")
 ```
 
 **Event Handlers:**
+
 ```python
 # Update event handler dynamically
 state.update(on_click=alert("New handler!"))
@@ -160,6 +166,7 @@ state.update(on_click=log('clicked'))
 ```
 
 **Multiple Properties at Once:**
+
 ```python
 state.update(
     text="Updated!",
@@ -169,7 +176,6 @@ state.update(
 ```
 
 ### Auto Operations
-
 
 Auto operations create continuous reactive updates:
 
@@ -182,6 +188,7 @@ stop_btn.on_click = timer.text.stop_auto()
 ```
 
 **With Limits:**
+
 ```python
 # Auto-increment up to 100
 timer.text.auto_increment(by=1, interval=1000, max=100)
@@ -222,6 +229,7 @@ fetch_btn = Button(
 ```
 
 **Key Features:**
+
 - **`useData('id')`** - Access fetched data by operation ID
 - **Dot notation** - `useData('userData').name` accesses nested properties
 - **`.then()` chaining** - Chain multiple state updates sequentially
@@ -246,7 +254,7 @@ status_state = State(status, text="Paused", style="paused")
 start_btn = Button("Start",
     on_click=timer.text.auto_increment(by=1, interval=1000)
 )
-stop_btn = Button("Stop", 
+stop_btn = Button("Stop",
     on_click=[
         timer.text.stop_auto(),
         status_state.update(text="Paused", style="paused")
@@ -282,6 +290,7 @@ btn = Button("Click me", on_click=this().state(text="Clicked!", style="text-red-
 ```
 
 Supported dynamic properties:
+
 - `text`: Update text content.
 - `html`: Update inner HTML.
 - `style`: Dictionary of CSS styles.
@@ -299,19 +308,18 @@ this().state(
 ### Using Raw JavaScript Values (`RawJS`)
 
 You can pass raw JavaScript variables to dynamic updates using `RawJS`. This is particularly useful when:
+
 - Chaining scripts where a previous script returns a value
 - Working with async operations like file reading
 - Using `dScript.ARG` to reference values from previous scripts
 
 ```python
 from dars.scripts.dscript import RawJS, Arg
-from dars.desktop import read_text
 
-# Read file -> Update component with result using the Arg helper
-read_op = read_text("data.txt")
+# Example: update component with the result from a previous action
 update_op = this().state(text=Arg)
 
-chained = read_op.then(update_op)
+chained = some_async_action.then(update_op)
 
 # Using custom JavaScript expressions
 this().state(text=RawJS("someVar + ' processed'"))
@@ -322,12 +330,14 @@ this().state(text=RawJS("someVar + ' processed'"))
 ## Best Practices
 
 ### Choose State V2 When:
+
 - Building simple counters or timers
 - Need auto-increment/decrement
 - Want quick reactive updates
 - Working with single components
 
 ### Use `this()` When:
+
 - Don't need state tracking
 - Making one-off updates
 - Working with async operations

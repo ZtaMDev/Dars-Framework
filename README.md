@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <em>Dars is a Full-Stack multiplatform Python UI framework for building modern, interactive web and desktop apps entirely in Python. Seamlessly integrated with FastAPI, it lets you build complete applications with Server-Side Rendering (SSR), reactive SPA routing, static site generation, and a production-ready backend API — all from a single Python codebase, with zero JavaScript required.</em>
+  <em>Dars is a Full-Stack Python UI framework for building modern, interactive web applications entirely in Python. Seamlessly integrated with FastAPI, it lets you build complete applications with Server-Side Rendering (SSR), reactive SPA routing, static site generation, and a production-ready backend API — all from a single Python codebase, with zero JavaScript required.</em>
 </p>
 
 <div align="center">
@@ -37,7 +37,6 @@ Try Dars without installing anything — visit the [Dars Playground](https://dar
 - Build your UI using Python classes and components (`Text`, `Button`, `Container`, `Page`, `Each`, `Show`, `If`, etc.).
 - Preview instantly with hot-reload using `app.rTimeCompile()`.
 - Export your app to static/dynamic/SSR web files with a single CLI command.
-- Export to native desktop apps (BETA) using project config `format: "desktop"` and `dars build`.
 - Use multipage layouts, scripts, hooks, and more — see docs for advanced features.
 - **One app, four deployment targets simultaneously:** Dars supports Static Site Generation (SSG), Single-Page Application (SPA) routing, Server-Side Rendering (SSR) with FastAPI, and a full Backend API — all from the same Python codebase. Mix and match freely: export some pages as static HTML for SEO, serve others via SSR for dynamic content, and expose REST API endpoints alongside your UI.
 - **Full backend toolkit included:** `useFetch` for declarative data fetching, `FormValidator` for client-side validation, `Each` for runtime list rendering from API responses, `JsonStore` for file-backed persistence, `UploadPipeline` for secure file uploads, `SecurityHeadersMiddleware` for HTTP security, and `DarsEnv` for `.env` file support.
@@ -504,26 +503,24 @@ For complete backend documentation, see the [Backend & API Guide](https://ztamde
 
 ## CLI Usage
 
-| Command | What it does |
-|---|---|
-| `dars export my_app.py --format html` | Export app to HTML/CSS/JS in `./my_app_web` |
-| `dars init --type desktop` | Scaffold desktop-capable project (BETA) |
-| `dars init --type fullstack` | Scaffold full-stack project (SPA + SSR + API) |
-| `dars build` (desktop config) | Build desktop app artifacts (BETA) |
-| `dars preview` | Preview exported app (auto-detects output) |
-| `dars preview --port 9000` | Preview on a custom port |
-| `dars init my_project` | Create a new Dars project |
-| `dars init --update` | Create/Update dars.config.json in current dir |
-| `dars build` | Build using dars.config.json |
-| `dars config validate` | Validate dars.config.json and print report |
-| `dars info my_app.py` | Show info about your app |
-| `dars formats` | List supported export formats |
-| `dars dev` | Run the configured entry file with hot preview |
-| `dars dev --port 9000` | Run dev server on a custom port |
-| `dars dev --backend` | Run only the configured backendEntry (FastAPI/SSR backend) |
-| `dars generate component <name>` | Scaffold a new FunctionComponent |
-| `dars generate page <name>` | Scaffold a new page (static, SPA, or SSR) |
-| `dars --help` | Show help and all CLI options |
+| Command                               | What it does                                               |
+| ------------------------------------- | ---------------------------------------------------------- |
+| `dars export my_app.py --format html` | Export app to HTML/CSS/JS in `./my_app_web`                |
+| `dars init --type fullstack`          | Scaffold full-stack project (SPA + SSR + API)              |
+| `dars preview`                        | Preview exported app (auto-detects output)                 |
+| `dars preview --port 9000`            | Preview on a custom port                                   |
+| `dars init my_project`                | Create a new Dars project                                  |
+| `dars init --update`                  | Create/Update dars.config.json in current dir              |
+| `dars build`                          | Build using dars.config.json                               |
+| `dars config validate`                | Validate dars.config.json and print report                 |
+| `dars info my_app.py`                 | Show info about your app                                   |
+| `dars formats`                        | List supported export formats                              |
+| `dars dev`                            | Run the configured entry file with hot preview             |
+| `dars dev --port 9000`                | Run dev server on a custom port                            |
+| `dars dev --backend`                  | Run only the configured backendEntry (FastAPI/SSR backend) |
+| `dars generate component <name>`      | Scaffold a new FunctionComponent                           |
+| `dars generate page <name>`           | Scaffold a new page (static, SPA, or SSR)                  |
+| `dars --help`                         | Show help and all CLI options                              |
 
 Tip: use `dars doctor` to review optional tooling that can enhance bundling/minification.
 
@@ -583,18 +580,18 @@ dars preview ./my_exported_app -p 8080
 }
 ```
 
-| Key | Description |
-|---|---|
-| `entry` | Python entry file for `dars build` and `dars export config` |
-| `format` | Export format: `html` or `desktop` |
-| `outdir` | Output directory |
-| `publicDir` | Folder copied into output (auto-detected if null) |
-| `bundle` | Reserved for future use |
-| `minify` | Enable/disable JS & CSS minification via **dars-bundler** (default `true`). No Node.js/Vite required. |
-| `utility_styles` | Custom utility class definitions |
-| `markdownHighlight` | Auto-inject Prism.js for Markdown code blocks (default `true`) |
-| `backendEntry` | Python import path for SSR/backend app (e.g. `"backend.api:app"`) |
-| `port` | Dev preview server port (default `8000`) |
+| Key                 | Description                                                                                           |
+| ------------------- | ----------------------------------------------------------------------------------------------------- |
+| `entry`             | Python entry file for `dars build` and `dars export config`                                           |
+| `format`            | Export format: `html`                                                                                 |
+| `outdir`            | Output directory                                                                                      |
+| `publicDir`         | Folder copied into output (auto-detected if null)                                                     |
+| `bundle`            | Reserved for future use                                                                               |
+| `minify`            | Enable/disable JS & CSS minification via **dars-bundler** (default `true`). No Node.js/Vite required. |
+| `utility_styles`    | Custom utility class definitions                                                                      |
+| `markdownHighlight` | Auto-inject Prism.js for Markdown code blocks (default `true`)                                        |
+| `backendEntry`      | Python import path for SSR/backend app (e.g. `"backend.api:app"`)                                     |
+| `port`              | Dev preview server port (default `8000`)                                                              |
 
 ```bash
 dars config validate

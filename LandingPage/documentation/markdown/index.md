@@ -1,6 +1,6 @@
 # Dars Framework Documentation
 
-Dars Framework is a full-stack Python UI framework for building web and desktop applications. It provides a declarative component-based architecture where developers define UIs in Python, which are then compiled to optimized HTML, CSS, and JavaScript. The framework supports multiple deployment targets from a single codebase: Single-Page Applications (SPA), Multi-Page Applications (MPA), Server-Side Rendered (SSR) applications with FastAPI, and desktop applications via Electron.
+Dars Framework is a full-stack Python UI framework for building web applications. It provides a declarative component-based architecture where developers define UIs in Python, which are then compiled to optimized HTML, CSS, and JavaScript. The framework supports multiple deployment targets from a single codebase: Single-Page Applications (SPA), Multi-Page Applications (MPA), and Server-Side Rendered (SSR) applications with FastAPI.
 
 ---
 
@@ -10,7 +10,7 @@ Dars Framework is a full-stack Python UI framework for building web and desktop 
 - **Modern Styling System**: Built-in Tailwind-like utility system that compiles directly to optimized CSS without external build tools like Node.js or PostCSS.
 - **Full-Stack by Design**: Seamlessly transition from static SPAs to complex SSR applications with FastAPI integration.
 - **Declarative & Reactive**: Build complex UIs with ease using a component-based architecture and a powerful reactive state management system (Hooks).
-- **Multi-Target Deployment**: One codebase for Web (SPA/SSR) and Desktop (Electron).
+- **Multi-Target Deployment**: One codebase for Web (SPA/SSR).
 - **SEO Ready**: Advanced SSR and Metadata (Head) management ensure your application is fully discoverable by search engines.
 - **Developer Experience**: Fast feedback loop with a powerful CLI, hot reloading, and zero-config deployment options.
 

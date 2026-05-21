@@ -1,3 +1,37 @@
+# Release Notes v1.9.13
+
+> **Desktop exporter removed, future `dars-desktop` with PyQt6 + WebEngine, and continued web exporter stability**
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Desktop exporter removal and new desktop strategy
+
+The legacy desktop export path has been removed from the core Dars framework. This makes the framework leaner and keeps the main package focused on web application export, build, and SSR workflows.
+
+- The `format: "desktop"` export path is no longer supported in `dars-framework`.
+- Desktop application support is being re-architected as a separate package: `dars-desktop`.
+- The new approach will use **pure Python** with **PyQt6** and **PyQt6 WebEngine**, avoiding Electron and Node/npm dependencies.
+- This future package will embed the Dars web runtime inside a native Qt browser view and provide a Python-first desktop packaging experience.
+
+### Core framework focus
+
+- `dars-framework` now prioritizes stable web export, SPA/SSR workflows, and the improved `dars-bundler` pipeline.
+- This separation allows desktop packaging innovation without affecting the core web framework.
+
+### Future package roadmap: `dars-desktop`
+
+- Planned as an independent companion package delivering desktop shells using PyQt6 WebEngine.
+- Designed for Python-only install flows and Qt-native desktop lifecycle management.
+- Will allow clean separation between web export features in `dars-framework` and desktop-specific packaging logic.
+
+---
+
 # Release Notes v1.9.12
 
 > **dars-bundler: Standalone Rust Minifier, Static Site Router Optimization & Unified Config**

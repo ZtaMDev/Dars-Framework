@@ -23,10 +23,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from dars.core.app import App
 from dars.exporters.web.html_css_js import HTMLCSSJSExporter
-from dars.exporters.desktop.electron import ElectronExporter
 from dars.cli.translations import translator
 from dars.config import load_config, resolve_paths, write_default_config, update_config
-from dars.cli.doctor.doctor import run_doctor, run_forcedev
 from dars.env import DarsEnv
 
 console = Console()
@@ -208,7 +206,6 @@ class DarsExporter:
         self.exporters = {
             'html': HTMLCSSJSExporter(),  # legacy alias
             'web': HTMLCSSJSExporter(),   # preferred alias
-            'desktop': ElectronExporter(),
         }
         
     def load_app_from_file(self, file_path: str) -> Optional[App]:
@@ -343,7 +340,6 @@ class DarsExporter:
         formats_info = {
             'web': ('HTML/CSS/JavaScript', 'Web'),
             'html': ('HTML/CSS/JavaScript (legacy alias)', 'Web'),
-            'desktop': ('Electron (HTML/CSS/JS + Bridge)', 'Desktop'),
         }
         
         for format_name, (description, platform) in formats_info.items():
@@ -454,178 +450,6 @@ class DarsExporter:
                     console.print(f"[green]SUCCESS: {translator.get('extra_file_copied').format(file=extra_file)}[/green]")
 
             console.print(f"[green]SUCCESS: {translator.get('template_copied').format(template=template)}[/green]")
-        elif str(proj_type).lower() == 'desktop':
-            # Use the default desktop template from dars/templates/desktop/template/
-            try:
-                current_file = Path(__file__).resolve()
-                template_dir = current_file.parent.parent / "templates" / "desktop" / "template"
-                
-                if not template_dir.exists():
-                    console.print(f"[yellow]⚠ Desktop template directory not found, using default scaffold[/yellow]")
-                    # Fall back to default hello world
-                    HELLO_WORLD_CODE = """
-from dars.all import *
-
-app = App(title="Hello World", theme="dark", desktop=True)
-# Crear componentes
-index = Page(
-    Text(
-        text="Hello World",
-        style={
-            'font-size': '48px',
-            'color': '#2c3e50',
-            'margin-bottom': '20px',
-            'font-weight': 'bold',
-            'text-align': 'center'
-        }
-    ),
-    Text(
-        text="Hello World",
-        style={
-            'font-size': '20px',
-            'color': '#7f8c8d',
-            'margin-bottom': '40px',
-            'text-align': 'center'
-        }
-    ),
-
-    Button(
-        text="Click Me!",
-        on_click= dScript("alert('Hello World')"),
-        on_mouse_enter=dScript("this.style.backgroundColor = '#2980b9';"),
-        on_mouse_leave=dScript("this.style.backgroundColor = '#3498db';"),
-        style={
-            'background-color': '#3498db',
-            'color': 'white',
-            'padding': '15px 30px',
-            'border': 'none',
-            'border-radius': '8px',
-            'font-size': '18px',
-            'cursor': 'pointer',
-            'transition': 'background-color 0.3s'
-        }
-    ),
-    style={
-        'display': 'flex',
-        'flex-direction': 'column',
-        'align-items': 'center',
-        'justify-content': 'center',
-        'min-height': '100vh',
-        'background-color': '#f0f2f5',
-        'font-family': 'Arial, sans-serif'
-    }
-) 
-
-app.add_page("index", index, title="Hello World", index=True)
-
-if __name__ == "__main__":
-    app.rTimeCompile()
-"""
-                    main_py = Path(name) / "main.py"
-                    main_py.write_text(HELLO_WORLD_CODE.strip(), encoding="utf-8")
-                    console.print(f"[green]SUCCESS: {translator.get('main_py_created')}[/green]")
-                else:
-                    # Copy all files from template directory, excluding __pycache__ and dars_preview
-                    excluded_dirs = {'__pycache__', 'dars_preview'}
-                    excluded_files = {'.pyc', '.pyo'}
-                    
-                    def should_copy(item_path: Path) -> bool:
-                        """Check if a file/directory should be copied"""
-                        # Skip excluded directories
-                        if item_path.name in excluded_dirs:
-                            return False
-                        # Skip excluded file extensions
-                        if item_path.suffix in excluded_files:
-                            return False
-                        return True
-                    
-                    def copy_template_recursive(src: Path, dst: Path):
-                        """Recursively copy template files"""
-                        if not should_copy(src):
-                            return
-                        
-                        if src.is_dir():
-                            dst.mkdir(parents=True, exist_ok=True)
-                            for item in src.iterdir():
-                                copy_template_recursive(item, dst / item.name)
-                        else:
-                            dst.parent.mkdir(parents=True, exist_ok=True)
-                            shutil.copy2(src, dst)
-                            # Show relative path from template dir
-                            rel_path = src.relative_to(template_dir)
-                            console.print(f"[green]SUCCESS: {rel_path} copied[/green]")
-                    
-                    # Copy all files from template
-                    for item in template_dir.iterdir():
-                        if should_copy(item):
-                            dest_item = Path(name) / item.name
-                            copy_template_recursive(item, dest_item)
-                    
-                    console.print("[green]SUCCESS: Desktop template copied[/green]")
-            except Exception as e:
-                console.print(f"[yellow]⚠ Could not copy desktop template: {e}, using default scaffold[/yellow]")
-                # Fall back to default hello world
-                HELLO_WORLD_CODE = """
-from dars.all import *
-
-app = App(title="Hello World", theme="dark", desktop=True)
-# Crear componentes
-index = Page(
-    Text(
-        text="Hello World",
-        style={
-            'font-size': '48px',
-            'color': '#2c3e50',
-            'margin-bottom': '20px',
-            'font-weight': 'bold',
-            'text-align': 'center'
-        }
-    ),
-    Text(
-        text="Hello World",
-        style={
-            'font-size': '20px',
-            'color': '#7f8c8d',
-            'margin-bottom': '40px',
-            'text-align': 'center'
-        }
-    ),
-
-    Button(
-        text="Click Me!",
-        on_click= dScript("alert('Hello World')"),
-        on_mouse_enter=dScript("this.style.backgroundColor = '#2980b9';"),
-        on_mouse_leave=dScript("this.style.backgroundColor = '#3498db';"),
-        style={
-            'background-color': '#3498db',
-            'color': 'white',
-            'padding': '15px 30px',
-            'border': 'none',
-            'border-radius': '8px',
-            'font-size': '18px',
-            'cursor': 'pointer',
-            'transition': 'background-color 0.3s'
-        }
-    ),
-    style={
-        'display': 'flex',
-        'flex-direction': 'column',
-        'align-items': 'center',
-        'justify-content': 'center',
-        'min-height': '100vh',
-        'background-color': '#f0f2f5',
-        'font-family': 'Arial, sans-serif'
-    }
-) 
-
-app.add_page("index", index, title="Hello World", index=True)
-
-if __name__ == "__main__":
-    app.rTimeCompile()
-"""
-                main_py = Path(name) / "main.py"
-                main_py.write_text(HELLO_WORLD_CODE.strip(), encoding="utf-8")
-                console.print(f"[green]SUCCESS: {translator.get('main_py_created')}[/green]")
         else:
             # Default Web/Fullstack Scaffold (based on initexample)
             
@@ -915,7 +739,7 @@ if __name__ == "__main__":
 
             
             # 4. dars.config.json
-            # Default config for SPA / desktop projects
+            # Default config for SPA projects
             DARS_CONFIG_JSON_CODE = """{
   "entry": "main.py",
   "format": "web",
@@ -987,161 +811,10 @@ if __name__ == "__main__":
         try:
             project_root = os.path.abspath(name)
             write_default_config(project_root, overwrite=False)
-            if str(proj_type).lower() == 'desktop':
-                try:
-                    update_config(project_root, {"format": "desktop"})
-                except Exception:
-                    pass
             console.print("[green]SUCCESS: dars.config.json created[/green]")
         except Exception:
             # Non-fatal; keep init working even if config write fails
             pass
-
-        # Desktop backend scaffold (only if template was not used, as template already includes backend)
-        if str(proj_type).lower() == 'desktop' and template is None:
-            try:
-                backend_dir = Path(name) / 'backend'
-                # Check if backend already exists (from template)
-                if not backend_dir.exists():
-                    backend_dir.mkdir(parents=True, exist_ok=True)
-                    # package.json (CJS)
-                    backend_pkg = '{\n' + \
-                        '  "name": "dars-electron-backend",\n' + \
-                        '  "private": true,\n' + \
-                        '  "main": "main.js",\n' + \
-                        '  "scripts": {"start": "electron ."},\n' + \
-                        '  "devDependencies": {"electron": "39.2.6"}\n' + \
-                    '}\n'
-                    (backend_dir / 'package.json').write_text(backend_pkg, encoding='utf-8')
-                    # main.js
-                    backend_main = "const { app, BrowserWindow, Menu, ipcMain } = require('electron');\n" + \
-                        "const path = require('path');\n" + \
-                        "const fs = require('fs').promises;\n" + \
-                        "const http = require('http');\n\n" + \
-                        "function createWindow() {\n" + \
-                        "  const win = new BrowserWindow({\n" + \
-                        "    width: 1000, height: 700,\n" + \
-                        "    webPreferences: {\n" + \
-                        "      contextIsolation: true,\n" + \
-                        "      preload: path.join(__dirname, 'preload.js')\n" + \
-                        "    }\n" + \
-                        "  });\n" + \
-                        "  Menu.setApplicationMenu(null);\n" + \
-                        "  win.loadFile(path.join(__dirname, 'app', 'index.html'));\n" + \
-                        "}\n\n" + \
-                        "app.whenReady().then(() => {\n" + \
-                        "  createWindow();\n" + \
-                        "  app.on('activate', function () {\n" + \
-                        "    if (BrowserWindow.getAllWindows().length === 0) createWindow();\n" + \
-                        "  });\n" + \
-                        "});\n\n" + \
-                                        "// Utility to resolve paths: absolute paths are used as-is; relative paths resolve against process.cwd()\n" + \
-                                        "function resolvePath(p) {\n" + \
-                                        "  if (!p || typeof p !== 'string') throw new Error('filePath must be a string');\n" + \
-                                        "  if (path.isAbsolute(p)) return p;\n" + \
-                                        "  return path.resolve(process.cwd(), p);\n" + \
-                                        "}\n\n" + \
-                                        "function closeAllAndExit() {\n" + \
-                                        "  try {\n" + \
-                                        "    const wins = BrowserWindow.getAllWindows();\n" + \
-                                        "    wins.forEach(w => { try { w.close(); } catch(e) {} });\n" + \
-                                        "  } catch (e) {}\n" + \
-                                        "  setTimeout(() => { try { app.quit(); } catch(e) {} }, 300);\n" + \
-                                        "}\n\n" + \
-                                        "// Allow renderer to request graceful shutdown\n" + \
-                                        "ipcMain.handle('dars::dev::shutdown', async () => {\n" + \
-                                        "  closeAllAndExit();\n" + \
-                                        "  return true;\n" + \
-                                        "});\n\n" + \
-                                        "// HTTP control server for external processes (e.g., Python dev launcher)\n" + \
-                                        "const controlPort = process.env.DARS_CONTROL_PORT;\n" + \
-                                        "if (controlPort) {\n" + \
-                                        "  try {\n" + \
-                                        "    const server = http.createServer((req, res) => {\n" + \
-                                        "      if (req.method === 'POST' && req.url === '/__dars_shutdown') {\n" + \
-                                        "        closeAllAndExit();\n" + \
-                                        "        res.writeHead(200); res.end('ok');\n" + \
-                                        "        return;\n" + \
-                                        "      }\n" + \
-                                        "      res.writeHead(404); res.end('not-found');\n" + \
-                                        "    });\n" + \
-                                        "    server.listen(Number(controlPort), '127.0.0.1');\n" + \
-                                        "  } catch (e) { /* ignore */ }\n" + \
-                                        "}\n\n" + \
-                                        "// IPC handlers for Dars desktop API\n" + \
-                                        "ipcMain.handle('dars::FileSystem::read_text', async (_e, filePath, encoding = 'utf-8') => {\n" + \
-                                        "  const resolved = resolvePath(filePath);\n" + \
-                                        "  const content = await fs.readFile(resolved, { encoding });\n" + \
-                                        "  return content;\n" + \
-                                        "});\n\n" + \
-                                        "ipcMain.handle('dars::FileSystem::write_text', async (_e, filePath, data, encoding = 'utf-8') => {\n" + \
-                                        "  const resolved = resolvePath(filePath);\n" + \
-                                        "  if (typeof data !== 'string') data = String(data ?? '');\n" + \
-                                        "  await fs.writeFile(resolved, data, { encoding });\n" + \
-                                        "  return true;\n" + \
-                                        "});\n\n" + \
-                                        "ipcMain.on('dars::console', (event, type, ...args) => {\n" + \
-                                        "  console.log(`[Renderer ${type.toUpperCase()}]`, ...args);\n" + \
-                                        "});\n\n" + \
-                                        "app.on('window-all-closed', function () {\n" + \
-                                        "  if (process.platform !== 'darwin') app.quit();\n" + \
-                                        "});\n"
-                (backend_dir / 'main.js').write_text(backend_main, encoding='utf-8')
-                # preload.js
-                backend_preload = "const { contextBridge, ipcRenderer } = require('electron');\n" + \
-                    "\n" + \
-                    "// Override console to send logs to main process\n" + \
-                    "const methods = ['log', 'warn', 'error', 'info', 'debug'];\n" + \
-                    "methods.forEach(method => {\n" + \
-                    "    const original = console[method];\n" + \
-                    "    console[method] = (...args) => {\n" + \
-                    "        original(...args);\n" + \
-                    "        try {\n" + \
-                    "            ipcRenderer.send('dars::console', method, ...args.map(a => {\n" + \
-                    "                try {\n" + \
-                    "                    return typeof a === 'object' ? JSON.stringify(a) : String(a);\n" + \
-                    "                } catch(e) {\n" + \
-                    "                    return String(a);\n" + \
-                    "                }\n" + \
-                    "            }));\n" + \
-                    "        } catch(e) {}\n" + \
-                    "    };\n" + \
-                    "});\n\n" + \
-                    "contextBridge.exposeInMainWorld('DarsIPC', {\n" + \
-                    "  invoke: (channel, ...args) => ipcRenderer.invoke(channel, ...args)\n" + \
-                    "});\n" + \
-                    "// Also expose a minimal DarsDesktopAPI for renderer convenience\n" + \
-                    "contextBridge.exposeInMainWorld('DarsDesktopAPI', {\n" + \
-                    "  FileSystem: {\n" + \
-                    "    read_text: (...args) => ipcRenderer.invoke('dars::FileSystem::read_text', ...args),\n" + \
-                    "    write_text: (...args) => ipcRenderer.invoke('dars::FileSystem::write_text', ...args)\n" + \
-                    "  }\n" + \
-                    "});\n" + \
-                    "// Dev helpers: request graceful shutdown from Python dev launcher\n" + \
-                    "contextBridge.exposeInMainWorld('DarsDev', {\n" + \
-                    "  shutdown: () => ipcRenderer.invoke('dars::dev::shutdown')\n" + \
-                    "});\n"
-                (backend_dir / 'preload.js').write_text(backend_preload, encoding='utf-8')
-                console.print("[green]SUCCESS: backend/ scaffold created[/green]")
-                
-                # Copy default icon to icons/ directory (only if not already exists from template)
-                try:
-                    icons_dir = Path(name) / 'icons'
-                    icons_dir.mkdir(parents=True, exist_ok=True)
-                    # Get path to default icon in templates/desktop
-                    current_file = Path(__file__).resolve()
-                    default_icon_src = current_file.parent.parent / "templates" / "desktop" / "icon.png"
-                    if default_icon_src.exists():
-                        default_icon_dest = icons_dir / "icon.png"
-                        if not default_icon_dest.exists():
-                            shutil.copy2(default_icon_src, default_icon_dest)
-                            console.print("[green]SUCCESS: icons/icon.png created[/green]")
-                except Exception as e:
-                    console.print(f"[yellow]Warning: could not copy default icon: {e}[/yellow]")
-            except Exception as e:
-                pass
-
-        # Final instructions removed per request
 
 def print_version_info():
     import importlib.util
@@ -1172,7 +845,7 @@ def create_parser(include_hidden: bool = True) -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(
         dest='command',
         help=translator.get('available_commands'),
-        metavar='{export,info,formats,preview,init,build,config,dev,doctor}'
+        metavar='{export,info,formats,preview,init,build,config,dev}'
     )
     
     # Export command
@@ -1182,7 +855,7 @@ def create_parser(include_hidden: bool = True) -> argparse.ArgumentParser:
     # --format opcional (default: html)
     export_parser.add_argument(
         '--format', '-f',
-        choices=["web", "html", "desktop"],
+        choices=["web", "html"],
         default="web",
         help=translator.get('format_help') + " (default: web)"
     )
@@ -1229,8 +902,8 @@ def create_parser(include_hidden: bool = True) -> argparse.ArgumentParser:
         help='Create or update dars.config.json in the target (or current) directory'
     )
     init_parser.add_argument(
-        '--type', '-T', choices=['web', 'desktop', 'ssr', 'fullstack'], default='web',
-        help='Project type scaffold (web | desktop | ssr). Default: web'
+        '--type', '-T', choices=['web', 'ssr', 'fullstack'], default='web',
+        help='Project type scaffold (web | ssr). Default: web'
     )
 
     # Build command (config-driven)
@@ -1253,24 +926,12 @@ def create_parser(include_hidden: bool = True) -> argparse.ArgumentParser:
     dev_parser.add_argument('--port', '-P', type=int, help='Port to run the dev server on (overrides config)')
     dev_parser.add_argument('--backend', action='store_true', help='Run only the configured backendEntry (SSR/API) instead of the frontend entry')
     # English-only: no language option on subparsers
-    
-    # Doctor command
-    doctor_parser = subparsers.add_parser('doctor', help='Check and install required external tools (Node LTS, Bun) and Python deps')
-    doctor_parser.add_argument('--check', action='store_true', help='Only verify environment and exit non-zero if missing')
-    doctor_parser.add_argument('--yes', '-y', action='store_true', help='Assume yes for all prompts')
-    doctor_parser.add_argument('--all', action='store_true', help='Install all missing items (with --yes for non-interactive)')
-    doctor_parser.add_argument('--force', action='store_true', help='Re-run checks even if environment was previously satisfied')
-
     # Generate command
     generate_parser = subparsers.add_parser('generate', aliases=['g'], help='Generate a new component or page')
     generate_parser.add_argument('type', nargs='?', choices=['component', 'page'], help='Type to generate: component or page')
     generate_parser.add_argument('name', nargs='?', help='Name of the component or page')
     generate_parser.add_argument('--page-type', '-t', choices=['static', 'spa', 'ssr'], help='Type of page to generate (static, spa, or ssr)')
     generate_parser.add_argument('--yes', '-y', action='store_true', help='Automatically answer yes to prompts (e.g. inject page)')
-
-    # Hidden forced installer (conditionally added to avoid appearing in help)
-    if include_hidden:
-        forcedev_parser = subparsers.add_parser('forcedev', help=argparse.SUPPRESS)
 
     return parser
 
@@ -1396,7 +1057,7 @@ def _main_exec():
     
     # Continue with normal flow if not help
     # If user asked for top-level help (no subcommand), build parser without hidden commands
-    known_cmds = ['export','info','formats','preview','init','build','config','dev','doctor','generate','g']
+    known_cmds = ['export','info','formats','preview','init','build','config','dev','generate','g']
     top_level_help = ('-h' in sys.argv or '--help' in sys.argv) and not any(cmd in sys.argv for cmd in known_cmds)
     parser = create_parser(include_hidden=not top_level_help)
     if top_level_help:
@@ -1463,10 +1124,9 @@ def _main_exec():
         if fmt_cli == 'html':
             fmt_cli = 'web'
         # Validate format
-        if fmt_cli not in ['web', 'desktop']:
+        if fmt_cli not in ['web']:
             console.print(f"[red]{translator.get('error_format_only_html')}[/red]")
             sys.exit(1)
-        # proceed (desktop is implemented)
 
         # Ensure outdir can be created
         try:
@@ -1513,188 +1173,6 @@ def _main_exec():
             except Exception:
                 pass
             console.print("[green]SUCCESS: dars.config.json created/updated[/green]")
-            # If desktop format, ensure backend scaffold exists
-            try:
-                cfg2, _ = load_config(project_root)
-                if str(cfg2.get('format', '')).lower() == 'desktop':
-                    backend_dir = Path(project_root) / 'backend'
-                    backend_dir.mkdir(parents=True, exist_ok=True)
-                    # package.json (CJS)
-                    pkg_path = backend_dir / 'package.json'
-                    if not pkg_path.exists():
-                        pkg_path.write_text('{\n' +
-                                            '  "name": "dars-electron-backend",\n' +
-                                            '  "private": true,\n' +
-                                            '  "main": "main.js",\n' +
-                                            '  "scripts": {"start": "electron ."},\n' +
-                                            '  "devDependencies": {"electron": "39.2.6"}\n' +
-                                            '}\n', encoding='utf-8')
-                    # main.js
-                    main_js_path = backend_dir / 'main.js'
-                    if not main_js_path.exists():
-                        main_js_path.write_text(
-                    "const { app, BrowserWindow, Menu, ipcMain } = require('electron');\n" +
-                    "const path = require('path');\n" +
-                    "const fs = require('fs').promises;\n" +
-                    "const http = require('http');\n\n" +
-                    "function createWindow() {\n" +
-                    "  const win = new BrowserWindow({\n" +
-                    "    width: 1000, height: 700,\n" +
-                    "    webPreferences: {\n" +
-                    "      contextIsolation: true,\n" +
-                    "      preload: path.join(__dirname, 'preload.js')\n" +
-                    "    }\n" +
-                    "  });\n" +
-                    "  Menu.setApplicationMenu(null);\n" +
-                    "  win.loadFile(path.join(__dirname, 'app', 'index.html'));\n" +
-                    "  // Open DevTools in development mode if enabled\n" +
-                    "  if (process.env.DARS_DEV === '1' && process.env.DARS_DEVTOOLS !== '0') {\n" +
-                    "    win.webContents.openDevTools();\n" +
-                    "  }\n" +
-                    "}\n\n" +
-                    "app.whenReady().then(() => {\n" +
-                    "  createWindow();\n" +
-                    "  app.on('activate', function () {\n" +
-                    "    if (BrowserWindow.getAllWindows().length === 0) createWindow();\n" +
-                    "  });\n" +
-                    "});\n\n" +
-                    "// Utility to resolve paths: absolute paths are used as-is; relative paths resolve against process.cwd()\n" +
-                    "function resolvePath(p) {\n" +
-                    "  if (!p || typeof p !== 'string') throw new Error('filePath must be a string');\n" +
-                    "  if (path.isAbsolute(p)) return p;\n" +
-                    "  return path.resolve(process.cwd(), p);\n" +
-                    "}\n\n" +
-                    "function closeAllAndExit() {\n" +
-                    "  try {\n" +
-                    "    const wins = BrowserWindow.getAllWindows();\n" +
-                    "    wins.forEach(w => { try { w.close(); } catch(e) {} });\n" +
-                    "  } catch (e) {}\n" +
-                    "  setTimeout(() => { try { app.quit(); } catch(e) {} }, 300);\n" +
-                    "}\n\n" +
-                    "ipcMain.handle('dars::dev::shutdown', async () => {\n" +
-                    "  closeAllAndExit();\n" +
-                    "  return true;\n" +
-                    "});\n\n" +
-                    "const controlPort = process.env.DARS_CONTROL_PORT;\n" +
-                    "if (controlPort) {\n" +
-                    "  try {\n" +
-                    "    const server = http.createServer((req, res) => {\n" +
-                    "      if (req.method === 'POST' && req.url === '/__dars_shutdown') {\n" +
-                    "        closeAllAndExit();\n" +
-                    "        res.writeHead(200); res.end('ok');\n" +
-                    "        return;\n" +
-                    "      }\n" +
-                    "      res.writeHead(404); res.end('not-found');\n" +
-                    "    });\n" +
-                    "    server.listen(Number(controlPort), '127.0.0.1');\n" +
-                    "  } catch (e) { /* ignore */ }\n" +
-                    "}\n\n" +
-                    "// IPC handlers for Dars desktop API\n" +
-                    "ipcMain.handle('dars::FileSystem::read_text', async (_e, filePath, encoding = 'utf-8') => {\n" +
-                    "  const resolved = resolvePath(filePath);\n" +
-                    "  const content = await fs.readFile(resolved, { encoding });\n" +
-                    "  return content;\n" +
-                    "});\n\n" +
-                    "ipcMain.handle('dars::FileSystem::write_text', async (_e, filePath, data, encoding = 'utf-8') => {\n" +
-                    "  const resolved = resolvePath(filePath);\n" +
-                    "  if (typeof data !== 'string') data = String(data ?? '');\n" +
-                    "  await fs.mkdir(path.dirname(resolved), { recursive: true });\n" +
-                    "  await fs.writeFile(resolved, data, { encoding });\n" +
-                    "  return true;\n" +
-                    "});\n\n" +
-                    "ipcMain.handle('dars::FileSystem::read_file', async (_e, filePath) => {\n" +
-                    "  const resolved = resolvePath(filePath);\n" +
-                    "  try {\n" +
-                    "    const data = await fs.readFile(resolved);\n" +
-                    "    // Convert to array for JSON serialization\n" +
-                    "    return { data: Array.from(data) };\n" +
-                    "  } catch (error) {\n" +
-                    "    console.error('Error reading file:', error);\n" +
-                    "    throw error;\n" +
-                    "  }\n" +
-                    "});\n\n" +
-                    "ipcMain.handle('dars::FileSystem::write_file', async (_e, filePath, data) => {\n" +
-                    "  const resolved = resolvePath(filePath);\n" +
-                    "  try {\n" +
-                    "    await fs.mkdir(path.dirname(resolved), { recursive: true });\n" +
-                    "    await fs.writeFile(resolved, Buffer.from(data));\n" +
-                    "    return true;\n" +
-                    "  } catch (error) {\n" +
-                    "    console.error('Error writing file:', error);\n" +
-                    "    throw error;\n" +
-                    "  }\n" +
-                    "});\n\n" +
-                    "ipcMain.handle('dars::FileSystem::list_directory', async (_e, dirPath, pattern = '*', includeSize = false) => {\n" +
-                    "  const resolved = resolvePath(dirPath);\n" +
-                    "  try {\n" +
-                    "    const entries = await fs.readdir(resolved, { withFileTypes: true });\n" +
-                    "    const result = [];\n" +
-                    "    for (const entry of entries) {\n" +
-                    "      // Simple pattern matching (supports * wildcard)\n" +
-                    "      if (pattern !== '*') {\n" +
-                    "        const regex = new RegExp('^' + pattern.replace(/\\*/g, '.*') + '$');\n" +
-                    "        if (!regex.test(entry.name)) continue;\n" +
-                    "      }\n" +
-                    "      const obj = {\n" +
-                    "        name: entry.name,\n" +
-                    "        isDirectory: entry.isDirectory()\n" +
-                    "      };\n" +
-                    "      if (includeSize) {\n" +
-                    "        const stats = await fs.stat(path.join(resolved, entry.name));\n" +
-                    "        obj.size = stats.size;\n" +
-                    "      }\n" +
-                    "      result.push(obj);\n" +
-                    "    }\n" +
-                    "    return result;\n" +
-                    "  } catch (error) {\n" +
-                    "    console.error('Error listing directory:', error);\n" +
-                    "    throw error;\n" +
-                    "  }\n" +
-                    "});\n\n" +
-                    "app.on('window-all-closed', function () {\n" +
-                    "  if (process.platform !== 'darwin') app.quit();\n" +
-                    "});\n", encoding='utf-8')
-                    # preload.js
-                    preload_path = backend_dir / 'preload.js'
-                    if not preload_path.exists():
-                        preload_path.write_text(
-                            "const { contextBridge, ipcRenderer } = require('electron');\n" +
-                            "contextBridge.exposeInMainWorld('DarsIPC', {\n" +
-                            "  invoke: (channel, ...args) => ipcRenderer.invoke(channel, ...args)\n" +
-                            "});\n" +
-                            "// Also expose a minimal DarsDesktopAPI for renderer convenience\n" +
-                            "contextBridge.exposeInMainWorld('DarsDesktopAPI', {\n" +
-                            "  FileSystem: {\n" +
-                            "    read_text: (...args) => ipcRenderer.invoke('dars::FileSystem::read_text', ...args),\n" +
-                            "    write_text: (...args) => ipcRenderer.invoke('dars::FileSystem::write_text', ...args),\n" +
-                            "    read_file: (...args) => ipcRenderer.invoke('dars::FileSystem::read_file', ...args),\n" +
-                            "    write_file: (...args) => ipcRenderer.invoke('dars::FileSystem::write_file', ...args),\n" +
-                            "    list_directory: (...args) => ipcRenderer.invoke('dars::FileSystem::list_directory', ...args)\n" +
-                            "  }\n" +
-                            "});\n" +
-                            "// Dev helpers: request graceful shutdown from Python dev launcher\n" +
-                            "contextBridge.exposeInMainWorld('DarsDev', {\n" +
-                            "  shutdown: () => ipcRenderer.invoke('dars::dev::shutdown')\n" +
-                            "});\n",
-                            encoding='utf-8')
-                    console.print("[green]SUCCESS: backend/ scaffold ensured[/green]")
-                    
-                    # Ensure default icon exists in icons/ directory
-                    try:
-                        icons_dir = Path(project_root) / 'icons'
-                        icons_dir.mkdir(parents=True, exist_ok=True)
-                        # Get path to default icon in templates/desktop
-                        current_file = Path(__file__).resolve()
-                        default_icon_src = current_file.parent.parent / "templates" / "desktop" / "icon.png"
-                        if default_icon_src.exists():
-                            default_icon_dest = icons_dir / "icon.png"
-                            if not default_icon_dest.exists():
-                                shutil.copy2(default_icon_src, default_icon_dest)
-                                console.print("[green]SUCCESS: icons/icon.png created[/green]")
-                    except Exception as e:
-                        console.print(f"[yellow]Warning: could not copy default icon: {e}[/yellow]")
-            except Exception:
-                pass
         else:
             name = args.name
             if not name:
@@ -1705,25 +1183,9 @@ def _main_exec():
                     console.print("[red]Error: Project name cannot be empty.[/red]")
             
             if '--type' not in sys.argv and '-T' not in sys.argv:
-                choice = select_prompt("Select project type", choices=['web', '[red]desktop (BETA)[/red]'], default_idx=0)
-                if 'desktop' in choice:
-                    proj_type = 'desktop'
-                    console.print("\n[bold yellow]⚠ WARNING: Desktop format is currently in BETA.[/bold yellow]")
-                    console.print("[yellow]It is not recommended for production use as it is still under heavy development.[/yellow]\n")
-                    if not confirm_prompt("Do you want to continue?"):
-                        console.print("[red]Operation cancelled.[/red]")
-                        sys.exit(0)
-                else:
-                    # For Web, ask for the specific mode
-                    proj_type = select_prompt("Select web architecture", choices=['spa', 'static', 'fullstack'], default_idx=0)
+                proj_type = select_prompt("Select project type", choices=['web', 'ssr', 'fullstack'], default_idx=0)
             else:
                 proj_type = getattr(args, 'type', 'web')
-                if proj_type == 'desktop':
-                    console.print("\n[bold yellow]⚠ WARNING: Desktop format is currently in BETA.[/bold yellow]")
-                    console.print("[yellow]It is not recommended for production use as it is still under heavy development.[/yellow]\n")
-                    if not confirm_prompt("Do you want to continue?"):
-                        console.print("[red]Operation cancelled.[/red]")
-                        sys.exit(0)
                 
             exporter.init_project(name, template=args.template, proj_type=proj_type)
             console.print(f"\n[bold green]Project initialized successfully![/bold green]")
@@ -1749,14 +1211,6 @@ def _main_exec():
         format_name = cfg.get('format', 'html')
         outdir = resolved.get('outdir_abs') or os.path.join(project_root, 'dist')
 
-        # Build-only heads-up: esbuild optional, but recommended for better bundling
-        try:
-            from dars.core.js_bridge import esbuild_available as _esb_ok
-            if not _esb_ok():
-                console.print("[yellow][Dars] Notice: esbuild no está disponible. El bundle se hará con minificación básica. Ejecuta 'dars doctor' para ver requerimientos opcionales.[/yellow]")
-        except Exception:
-            pass
-
         # Validate entry file exists
         if not os.path.exists(entry):
             console.print(f"[red]{translator.get('error_entry_not_found_in_config')}: {entry}[/red]")
@@ -1767,10 +1221,9 @@ def _main_exec():
         if format_name == 'html':
             format_name = 'web'
         # Validate format
-        if format_name not in ['web', 'desktop']:
+        if format_name not in ['web']:
             console.print(f"[red]{translator.get('error_format_only_html')}[/red]")
             sys.exit(1)
-        # proceed (desktop is implemented)
 
         # Ensure outdir can be created
         try:
@@ -1780,35 +1233,23 @@ def _main_exec():
             sys.exit(1)
 
         # Determine bundle flag EARLY to set environment before loading app
-        # Respect bundle flag for web; force bundle for desktop to generate source-electron
+        # Respect bundle flag for web
         bundle_flag = True
         try:
             bundle_flag = bool(cfg.get('bundle', True))
         except Exception:
             bundle_flag = True
-        if format_name == 'desktop':
-            bundle_flag = True
-            
         # Set DarsEnv mode
         DarsEnv.set_dev_mode(not bundle_flag)
 
         app = exporter.load_app_from_file(entry)
         if app is None:
             sys.exit(1)
-        # Warn if desktop and no app.version set
-        if format_name == 'desktop':
-            try:
-                if not getattr(app, 'version', ''):
-                    console.print("[yellow][Dars] Notice: no App.version set. Using default 0.1.0 for desktop package.json. It's recommended to set and increment version for production builds.[/yellow]")
-            except Exception:
-                pass
-        # Respect bundle flag for web; force bundle for desktop to generate source-electron
+        # Respect bundle flag for web
         bundle_flag = True
         try:
             bundle_flag = bool(cfg.get('bundle', True))
         except Exception:
-            bundle_flag = True
-        if format_name == 'desktop':
             bundle_flag = True
         try:
             success = exporter.export_app(app, format_name, outdir, show_preview=False, bundle=bundle_flag)
@@ -1817,179 +1258,10 @@ def _main_exec():
             sys.exit(1)
         if not success:
             sys.exit(1)
-
-        # If desktop, run electron-builder to generate executable according to targetPlatform
-        if format_name == 'desktop':
-            try:
-                import sys as _sys
-                from dars.core import js_bridge as jsb
-                # Determine platform target
-                target = str(cfg.get('targetPlatform', 'auto')).lower()
-                if target not in ('auto', 'windows', 'linux', 'macos'):
-                    console.print("[yellow][Dars] Warning: invalid targetPlatform. Using 'auto'.[/yellow]")
-                    target = 'auto'
-                if target == 'auto':
-                    if _sys.platform.startswith('win'):
-                        target = 'windows'
-                    elif _sys.platform.startswith('linux'):
-                        target = 'linux'
-                    elif _sys.platform == 'darwin':
-                        target = 'macos'
-                    else:
-                        target = 'windows'
-                if target == 'macos' and _sys.platform != 'darwin':
-                    console.print("[red]✖ Cannot build macOS from a non-mac host. Use a macOS machine.[/red]")
-                    sys.exit(1)
-                # Guard: Linux targets from non-Linux hosts require Docker
-                if target == 'linux' and not _sys.platform.startswith('linux'):
-                    try:
-                        import shutil as _shutil
-                        has_docker = _shutil.which('docker') is not None
-                    except Exception:
-                        has_docker = False
-                    if not has_docker:
-                        console.print("[red]✖ Cannot build Linux targets from a non-Linux host without Docker.[/red]")
-                        console.print("[yellow]Tip: Install Docker Desktop (enable WSL integration) or build on a Linux/WSL environment, then run dars build again.[/yellow]")
-                        sys.exit(1)
-
-                # Ensure electron-builder available (best effort)
-                if not jsb.electron_builder_available():
-                    console.print("[yellow][Dars] electron-builder not found. Attempting to use Bun runner...[/yellow]")
-                # Compute cwd where package.json lives
-                src_dir = os.path.join(outdir, 'source-electron')
-                if not os.path.isdir(src_dir):
-                    src_dir = outdir
-                # Ensure production deps. Prefer npm; fallback to bun if npm not present
-                try:
-                    from dars.core.js_bridge import has_node, has_npm, has_bun, which, _run as _jsrun
-                    ran_installer = False
-                    if has_node() and has_npm():
-                        npm_bin = which("npm.cmd") or which("npm") or "npm"
-                        console.print("[cyan][Dars] Installing production dependencies in source-electron (npm) ...[/cyan]")
-                        _jsrun([npm_bin, "install", "--production"], cwd=src_dir)
-                        ran_installer = True
-                    if not ran_installer and has_bun():
-                        console.print("[cyan][Dars] Installing production dependencies in source-electron (bun) ...[/cyan]")
-                        _jsrun(["bun", "install", "--production"], cwd=src_dir)
-                except Exception:
-                    pass
-                # Build args - use --dir to generate unpacked directory (not installer)
-                # Target is also configured in package.json, but --dir flag ensures it
-                build_args = ["--dir"]
-                if target == 'windows':
-                    build_args.append("--win")
-                elif target == 'linux':
-                    build_args.append("--linux")
-                elif target == 'macos':
-                    build_args.append("--mac")
-
-                # Show progress with Rich Progress bar
-                from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn
-                import time
-                import threading
-                
-                progress_messages = []
-                last_message = ""
-                current_progress = 10
-                build_complete = False
-                
-                def progress_callback(line: str):
-                    nonlocal last_message, current_progress
-                    # Filter and format electron-builder output
-                    line_lower = line.lower()
-                    if any(keyword in line_lower for keyword in ['packaging', 'building', 'compiling', 'copying', 'writing', 'done', 'error', 'warning']):
-                        # Clean up the message
-                        clean_msg = line.strip()
-                        if clean_msg and clean_msg != last_message:
-                            progress_messages.append(clean_msg)
-                            last_message = clean_msg
-                            # Increment progress based on keywords
-                            if 'packaging' in line_lower:
-                                current_progress = min(current_progress + 15, 90)
-                            elif 'building' in line_lower or 'compiling' in line_lower:
-                                current_progress = min(current_progress + 10, 90)
-                            elif 'copying' in line_lower or 'writing' in line_lower:
-                                current_progress = min(current_progress + 5, 90)
-                            elif 'done' in line_lower:
-                                current_progress = 95
-                
-                def update_progress_bar(progress, task):
-                    """Gradually update progress bar while building"""
-                    nonlocal current_progress, build_complete
-                    while not build_complete:
-                        if current_progress < 90:
-                            # Gradually increase progress over time (simulated)
-                            current_progress = min(current_progress + 1, 90)
-                        progress.update(task, completed=current_progress)
-                        time.sleep(0.5)  # Update every 0.5 seconds
-                
-                with Progress(
-                    SpinnerColumn(),
-                    TextColumn("[progress.description]{task.description}"),
-                    BarColumn(),
-                    TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
-                    TimeElapsedColumn(),
-                    console=console
-                ) as progress:
-                    task = progress.add_task(f"[cyan]Packaging Electron app for {target}...", total=100)
-                    
-                    # Start with some progress
-                    progress.update(task, advance=10)
-                    
-                    # Start progress updater thread
-                    progress_thread = threading.Thread(target=update_progress_bar, args=(progress, task), daemon=True)
-                    progress_thread.start()
-                    
-                    # Run electron-builder with progress callback
-                    start_time = time.time()
-                    code, _out, err = jsb.electron_build(cwd=src_dir, extra_args=build_args, progress_callback=progress_callback)
-                    elapsed = time.time() - start_time
-                    
-                    # Mark build as complete
-                    build_complete = True
-                    progress_thread.join(timeout=1.0)
-                    
-                if code != 0:
-                        progress.update(task, completed=100)
-                        console.print(f"[red]✖ electron-builder failed after {elapsed:.1f}s[/red]")
-                        if _out:
-                            # Show last few error messages
-                            error_lines = [line for line in _out.split('\n') if any(kw in line.lower() for kw in ['error', 'failed', 'exception'])]
-                            if error_lines:
-                                console.print("[red]Error details:[/red]")
-                                for err_line in error_lines[-5:]:  # Last 5 error lines
-                                    console.print(f"  [red]{err_line}[/red]")
-                        if err:
-                            console.print(f"[red]STDERR: {err}[/red]")
-                        sys.exit(1)
-                    
-                    # Complete the progress bar
-                progress.update(task, completed=100, description=f"[green]✓ Packaging completed in {elapsed:.1f}s[/green]")
-                    
-                    # Show summary of what was built
-                if progress_messages:
-                        # Filter for important messages
-                    important = [msg for msg in progress_messages if any(kw in msg.lower() for kw in ['packaging', 'building', 'done', 'created'])]
-                    if important:
-                        console.print(f"\n[dim]Build output:[/dim]")
-                        for msg in important[-3:]:  # Last 3 important messages
-                            console.print(f"  [dim]{msg}[/dim]")
-                
-                console.print(f"[green]✔ Electron package created in dist/ (took {elapsed:.1f}s)[/green]")
-            except Exception as e:
-                console.print(f"[red]Desktop build failed: {e}[/red]")
-                sys.exit(1)
-
         sys.exit(0)
 
     elif args.command == 'preview':
-        import subprocess
-        from rich.panel import Panel
-        from rich.table import Table
-        from rich.align import Align
-
-        # Resolve path and port from config
-        target_path = args.path
+        target_path = getattr(args, 'path', None)
         port = getattr(args, 'port', None)
         project_root = os.getcwd()
         cfg, found = load_config(project_root)
@@ -2046,6 +1318,8 @@ def _main_exec():
 
         process = None
         try:
+            import subprocess
+
             if has_backend:
                 _preview_env = os.environ.copy()
                 _preview_env['DARS_MODE'] = 'production'
@@ -2111,11 +1385,9 @@ def _main_exec():
             else:
                 issues.append(ok(translator.get('cfg_entry_ok').format(path=cfg.get('entry'))))
 
-            # format validation: accept 'web', legacy 'html' and 'desktop'.
+            # format validation: accept 'web' or legacy 'html'
             fmt = cfg.get('format')
             if fmt == 'web' or fmt == 'html':
-                issues.append(ok(translator.get('cfg_format_ok').format(fmt=fmt)))
-            elif fmt == 'desktop':
                 issues.append(ok(translator.get('cfg_format_ok').format(fmt=fmt)))
             else:
                 issues.append(err(translator.get('cfg_format_only_html').format(fmt=fmt)))
@@ -2263,28 +1535,6 @@ def _main_exec():
         resolved = resolve_paths(cfg, project_root)
         entry = resolved.get('entry_abs') or os.path.join(project_root, cfg.get('entry', 'main.py'))
 
-        # If this is a desktop project and Electron is below the recommended baseline,
-        # emit a non-fatal security warning so users know they should update it.
-        try:
-            fmt = str(cfg.get('format', '')).lower() if cfg else ''
-        except Exception:
-            fmt = ''
-        if fmt == 'desktop':
-            try:
-                from dars.cli.doctor.detect import detect_electron
-                from dars.cli.doctor.doctor import MIN_SAFE_ELECTRON, _is_version_less
-
-                elec = detect_electron()
-                ver = elec.get('version') or None
-                if ver and _is_version_less(str(ver), MIN_SAFE_ELECTRON):
-                    console.print(
-                        f"[yellow][Dars] Warning: Electron {ver} is below the recommended security baseline ({MIN_SAFE_ELECTRON}). "
-                        "Run 'dars doctor --all --yes' to update Electron/electron-builder via Bun.[/yellow]"
-                    )
-            except Exception:
-                # Best-effort only; don't block dev if detection fails
-                pass
-
         if not os.path.exists(entry):
             console.print(f"[red]{translator.get('error_entry_not_found_in_config')}: {entry}[/red]")
             console.print(f"[yellow]{translator.get('edit_config_hint')}[/yellow]")
@@ -2383,61 +1633,6 @@ def _main_exec():
             console.print(f"[red]Failed to start dev process: {e}[/red]")
             sys.exit(1)
 
-    elif args.command == 'doctor':
-        try:
-            from dars.core.js_bridge import electron_available, electron_builder_available, ensure_electron, ensure_electron_builder
-        except Exception:
-            # If js bridge is not available, fall back to base doctor
-            code = run_doctor(
-                check_only=getattr(args, 'check', False),
-                auto_yes=getattr(args, 'yes', False),
-                install_all=getattr(args, 'all', False),
-                force=getattr(args, 'force', False)
-            )
-            sys.exit(code)
-
-        check_only = bool(getattr(args, 'check', False))
-        wants_install = bool(getattr(args, 'all', False))
-        auto_yes = bool(getattr(args, 'yes', False))
-
-        # Non-interactive: --check => print Electron status and return combined code
-        if check_only:
-            elec_ok = electron_available()
-            builder_ok = electron_builder_available()
-            # Pretty status lines to match doctor style
-            console.print("[bold]Electron (optional):[/bold] " + ("[green]OK[/green]" if elec_ok else "[yellow]MISSING[/yellow]"))
-            console.print("[bold]electron-builder (optional):[/bold] " + ("[green]OK[/green]" if builder_ok else "[yellow]MISSING[/yellow]"))
-            base = run_doctor(check_only=True, auto_yes=auto_yes, install_all=False, force=getattr(args, 'force', False))
-            missing = not (elec_ok and builder_ok)
-            sys.exit(1 if (base != 0 or missing) else 0)
-
-        # Non-interactive: --all (optionally with --yes) => install Electron tools up-front, then run base doctor
-        if wants_install:
-            elec_ok = electron_available()
-            if not elec_ok:
-                if auto_yes or Confirm.ask("¿Instalar Electron con Bun (devDependency)?", default=True):
-                    ensure_electron()
-            builder_ok = electron_builder_available()
-            if not builder_ok:
-                if auto_yes or Confirm.ask("¿Instalar electron-builder con Bun (devDependency)?", default=True):
-                    ensure_electron_builder()
-            # After attempting installs, run base doctor (which may show interactive UI)
-            code = run_doctor(check_only=False, auto_yes=auto_yes, install_all=True, force=getattr(args, 'force', False))
-            sys.exit(code)
-
-        # Interactive mode: delegate entirely to base doctor; no extra prints or installs
-        code = run_doctor(
-            check_only=False,
-            auto_yes=auto_yes,
-            install_all=False,
-            force=getattr(args, 'force', False)
-        )
-        sys.exit(code)
-
-    elif args.command == 'forcedev':
-        # Hidden: force-install Node, Bun, and all Python deps without prompts
-        code = run_forcedev()
-        sys.exit(code)
 
 
 if __name__ == "__main__":

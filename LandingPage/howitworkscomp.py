@@ -174,7 +174,7 @@ def create_howitworks():
                         }
                     ),
                     Text(
-                        "Deploy your application in the test built-in server or your preferred hosting provider. Or export it to desktop as a native app.",
+                        "Deploy your application in the test built-in server or your preferred hosting provider.",
                         style={
                             "font-size": "16px",
                             "color": "#a0cfc0",

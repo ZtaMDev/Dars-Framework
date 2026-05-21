@@ -1043,11 +1043,8 @@
      <a class="sidebar-link sidebar-level-2" href="#post-installation-checklist" style="margin-left: 20px">
       Post-Installation Checklist
      </a>
-     <a class="sidebar-link sidebar-level-2" href="#desktop-beta" style="margin-left: 20px">
-      Desktop (BETA)
-     </a>
-     <a class="sidebar-link sidebar-level-3" href="#quickstart" style="margin-left: 40px">
-      Quickstart
+     <a class="sidebar-link sidebar-level-2" href="#web-export" style="margin-left: 20px">
+      Web Export
      </a>
      <div class="sidebar-divider">
      </div>
@@ -1091,9 +1088,6 @@
      </a>
      <a class="sidebar-link sidebar-level-2" href="#tips-cli" style="margin-left: 20px">
       Tips CLI
-     </a>
-     <a class="sidebar-link sidebar-level-3" href="#desktop-beta-cli" style="margin-left: 40px">
-      Desktop (BETA) CLI
      </a>
      <a class="sidebar-link sidebar-level-3" href="#minification-labels-in-output" style="margin-left: 40px">
       Minification labels in output
@@ -1147,9 +1141,6 @@
      </a>
      <a class="sidebar-link sidebar-level-3" href="#web-html" style="margin-left: 40px">
       Web (HTML)
-     </a>
-     <a class="sidebar-link sidebar-level-3" href="#desktop-beta" style="margin-left: 40px">
-      Desktop (BETA)
      </a>
      <a class="sidebar-link sidebar-level-2" href="#best-practices" style="margin-left: 20px">
       Best Practices
@@ -2540,32 +2531,8 @@
      <a class="sidebar-link sidebar-level-3" href="#extending-existing-exporters" style="margin-left: 40px">
       Extending Existing Exporters
      </a>
-     <a class="sidebar-link sidebar-level-2" href="#desktop-export-beta" style="margin-left: 20px">
-      Desktop Export (BETA)
-     </a>
-     <a class="sidebar-link sidebar-level-3" href="#status-and-scope" style="margin-left: 40px">
-      Status and Scope
-     </a>
-     <a class="sidebar-link sidebar-level-3" href="#quickstart-desktop-export" style="margin-left: 40px">
-      Quickstart desktop Export
-     </a>
-     <a class="sidebar-link sidebar-level-3" href="#native-functions-dynamic-updates" style="margin-left: 40px">
-      Native Functions &amp; Dynamic Updates
-     </a>
-     <a class="sidebar-link sidebar-level-4" href="#file-system-operations" style="margin-left: 60px">
-      File System Operations
-     </a>
-     <a class="sidebar-link sidebar-level-4" href="#chaining-multiple-operations" style="margin-left: 60px">
-      Chaining Multiple Operations
-     </a>
-     <a class="sidebar-link sidebar-level-3" href="#platform-targeting" style="margin-left: 40px">
-      Platform Targeting
-     </a>
-     <a class="sidebar-link sidebar-level-3" href="#metadata-and-packaging-notes" style="margin-left: 40px">
-      Metadata and Packaging Notes
-     </a>
-     <a class="sidebar-link sidebar-level-3" href="#caveats-beta" style="margin-left: 40px">
-      Caveats (BETA)
+     <a class="sidebar-link sidebar-level-2" href="#exporting-web-applications" style="margin-left: 20px">
+      Exporting Web Applications
      </a>
      <div class="sidebar-divider">
      </div>
@@ -2880,7 +2847,7 @@
        Dars Framework Documentation
       </h1>
       <p>
-       Dars Framework is a full-stack Python UI framework for building web and desktop applications. It provides a declarative component-based architecture where developers define UIs in Python, which are then compiled to optimized HTML, CSS, and JavaScript. The framework supports multiple deployment targets from a single codebase: Single-Page Applications (SPA), Multi-Page Applications (MPA), Server-Side Rendered (SSR) applications with FastAPI, and desktop applications via Electron.
+       Dars Framework is a full-stack Python UI framework for building web applications. It provides a declarative component-based architecture where developers define UIs in Python, which are then compiled to optimized HTML, CSS, and JavaScript. The framework supports multiple deployment targets from a single codebase: Single-Page Applications (SPA), Multi-Page Applications (MPA), and Server-Side Rendered (SSR) applications with FastAPI.
       </p>
       <hr/>
       <h2 id="why-use-dars-framework">
@@ -2915,7 +2882,7 @@
         <strong>
          Multi-Target Deployment
         </strong>
-        : One codebase for Web (SPA/SSR) and Desktop (Electron).
+        : One codebase for Web (SPA/SSR).
        </li>
        <li>
         <strong>
@@ -3345,39 +3312,18 @@ dars<span class="w"> </span>preview<span class="w"> </span>./output_directory
        Congratulations! Dars is ready to use.
       </p>
       <hr/>
-      <h2 id="desktop-beta">
-       Desktop (BETA)
+      <h2 id="web-export">
+       Web Export
       </h2>
       <p>
-       You can build native desktop apps from Dars projects. This capability is in
-       <strong>
-        BETA
-       </strong>
-       and is not recommended for production yet, but it is usable for testing.
+       Dars exports web applications as optimized HTML, CSS, and JavaScript. Run
+       <code>
+        dars build
+       </code>
+       to generate production-ready web assets in your configured output directory.
       </p>
-      <h3 id="quickstart">
-       Quickstart
-      </h3>
       <div class="codehilite">
-       <pre><span></span><code><span class="c1"># Scaffold or update a desktop-capable project</span>
-dars<span class="w"> </span>init<span class="w"> </span>--type<span class="w"> </span>desktop
-<span class="c1"># or</span>
-dars<span class="w"> </span>init<span class="w"> </span>--update
-
-<span class="c1"># Verify optional tooling (Node/Bun and packager)</span>
-dars<span class="w"> </span>doctor<span class="w"> </span>--all<span class="w"> </span>--yes
-
-<span class="c1"># Ensure your config sets the desktop format and target</span>
-<span class="c1"># dars.config.json</span>
-<span class="o">{</span>
-<span class="w">  </span><span class="s2">"entry"</span>:<span class="w"> </span><span class="s2">"main.py"</span>,
-<span class="w">  </span><span class="s2">"format"</span>:<span class="w"> </span><span class="s2">"desktop"</span>,
-<span class="w">  </span><span class="s2">"outdir"</span>:<span class="w"> </span><span class="s2">"dist"</span>,
-<span class="w">  </span><span class="s2">"targetPlatform"</span>:<span class="w"> </span><span class="s2">"auto"</span>
-<span class="o">}</span>
-
-<span class="c1"># Build desktop artifacts</span>
-dars<span class="w"> </span>build
+       <pre><span></span><code>dars<span class="w"> </span>build
 </code></pre>
       </div>
       <p>
@@ -3385,10 +3331,18 @@ dars<span class="w"> </span>build
       </p>
       <ul>
        <li>
-        Desktop support is under active development; configuration keys and defaults may change.
+        Ensure your
+        <code>
+         dars.config.json
+        </code>
+        is configured correctly for web export.
        </li>
        <li>
-        Some platform targets (like macOS) require building on that OS for signing.
+        Use
+        <code>
+         dars preview
+        </code>
+        to inspect the generated output locally.
        </li>
       </ul>
      </div>
@@ -3600,8 +3554,6 @@ dars<span class="w"> </span>build
 
 <span class="c1"># Build using project config (dars.config.json)</span>
 <span class="w"> </span>dars<span class="w"> </span>build
-<span class="w"> </span><span class="c1"># Build desktop (BETA) when format is desktop in config</span>
-<span class="w"> </span>dars<span class="w"> </span>build
 <span class="w"> </span><span class="c1"># Build without the default Python minifier</span>
 <span class="w"> </span>dars<span class="w"> </span>build<span class="w"> </span>--no-minify
 
@@ -3700,27 +3652,6 @@ dars<span class="w"> </span>build
          </td>
          <td>
           Build using dars.config.json
-         </td>
-        </tr>
-        <tr>
-         <td>
-          <code>
-           dars init --type desktop
-          </code>
-         </td>
-         <td>
-          Scaffold desktop-capable project (BETA)
-         </td>
-        </tr>
-        <tr>
-         <td>
-          <code>
-           dars build
-          </code>
-          (desktop config)
-         </td>
-         <td>
-          Build desktop app artifacts (BETA)
          </td>
         </tr>
         <tr>
@@ -3930,47 +3861,6 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
         .
        </li>
       </ul>
-      <h3 id="desktop-beta-cli">
-       Desktop (BETA) CLI
-      </h3>
-      <ul>
-       <li>
-        Mark your project with
-        <code>
-         "format": "desktop"
-        </code>
-        in
-        <code>
-         dars.config.json
-        </code>
-        .
-       </li>
-       <li>
-        Use
-        <code>
-         dars init --type desktop
-        </code>
-        (or
-        <code>
-         --update
-        </code>
-        ) to scaffold backend files.
-       </li>
-       <li>
-        Run
-        <code>
-         dars doctor --all --yes
-        </code>
-        to set up optional tooling.
-       </li>
-       <li>
-        Build with
-        <code>
-         dars build
-        </code>
-        . This feature is in BETA: suitable for testing, not yet for production.
-       </li>
-      </ul>
       <h3 id="minification-labels-in-output">
        Minification labels in output
       </h3>
@@ -4120,7 +4010,7 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
        </tbody>
       </table>
       <p>
-       _Note: For production, you only need to run the backend (which serves the built assets).
+       Note: For production, you only need to run the backend (which serves the built assets).
       </p>
      </div>
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="md-config">
@@ -4192,12 +4082,6 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
            html
           </code>
           : Standard web application (SPA/MPA/SSR).
-         </li>
-         <li>
-          <code>
-           desktop
-          </code>
-          : Native desktop application (Electron-based, BETA).
          </li>
         </ul>
        </li>
@@ -4434,31 +4318,41 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
       </h3>
       <p>
        The bundler is resolved in this order:
-1.
-       <code>
-        DARS_BUNDLER_PATH
-       </code>
-       env variable (user override)
-2. Same directory as the Python executable
-3. System
-       <code>
-        PATH
-       </code>
-       4.
-       <code>
-        dars/bundler/
-       </code>
-       subdirectory shipped with the framework
-5. DarsBundler dev repo
-       <code>
-        target/debug
-       </code>
-       or
-       <code>
-        target/release
-       </code>
-       (development mode)
       </p>
+      <ol>
+       <li>
+        <code>
+         DARS_BUNDLER_PATH
+        </code>
+        env variable (user override)
+       </li>
+       <li>
+        Same directory as the Python executable
+       </li>
+       <li>
+        System
+        <code>
+         PATH
+        </code>
+       </li>
+       <li>
+        <code>
+         dars/bundler/
+        </code>
+        subdirectory shipped with the framework
+       </li>
+       <li>
+        DarsBundler dev repo
+        <code>
+         target/debug
+        </code>
+        or
+        <code>
+         target/release
+        </code>
+        (development mode)
+       </li>
+      </ol>
       <h3 id="disabling-minification">
        Disabling minification
       </h3>
@@ -4541,43 +4435,6 @@ dars<span class="w"> </span><span class="nb">export</span><span class="w"> </spa
         html
        </code>
        , Dars generates optimized HTML, CSS, and JS files compatible with any static host or FastAPI server.
-      </p>
-      <h3 id="desktop-beta">
-       Desktop (BETA)
-      </h3>
-      <p>
-       When
-       <code>
-        format
-       </code>
-       is
-       <code>
-        desktop
-       </code>
-       , Dars produces native desktop artifacts.
--
-       <strong>
-        <code>
-         targetPlatform
-        </code>
-       </strong>
-       (string): Specifies the target OS (
-       <code>
-        auto
-       </code>
-       ,
-       <code>
-        windows
-       </code>
-       ,
-       <code>
-        linux
-       </code>
-       ,
-       <code>
-        macos
-       </code>
-       ).
       </p>
       <hr/>
       <h2 id="best-practices">
@@ -12866,25 +12723,29 @@ You can configure global loading and error placeholders for this lazy-load step:
        <strong>
         Constructor Parameters:
        </strong>
-       -
-       <code>
-        component
-       </code>
-       : The component to manage (can be a component object or string ID)
--
-       <code>
-        **default_props
-       </code>
-       : Default property values (e.g.,
-       <code>
-        text=0
-       </code>
-       ,
-       <code>
-        style="..."
-       </code>
-       )
       </p>
+      <ul>
+       <li>
+        <code>
+         component
+        </code>
+        : The component to manage (can be a component object or string ID)
+       </li>
+       <li>
+        <code>
+         **default_props
+        </code>
+        : Default property values (e.g.,
+        <code>
+         text=0
+        </code>
+        ,
+        <code>
+         style="..."
+        </code>
+        )
+       </li>
+      </ul>
       <h3 id="state-with-string-ids-for-dynamic-components">
        State with String IDs (for Dynamic Components)
       </h3>
@@ -12919,14 +12780,24 @@ You can configure global loading and error placeholders for this lazy-load step:
        <strong>
         Use Cases:
        </strong>
-       - Components created with
-       <code>
-        createComp()
-       </code>
-       - Dynamically generated UIs
-- Conditional component rendering
-- Server-side rendered components
       </p>
+      <ul>
+       <li>
+        Components created with
+        <code>
+         createComp()
+        </code>
+       </li>
+       <li>
+        Dynamically generated UIs
+       </li>
+       <li>
+        Conditional component rendering
+       </li>
+       <li>
+        Server-side rendered components
+       </li>
+      </ul>
       <h3 id="reactive-properties">
        Reactive Properties
       </h3>
@@ -13127,36 +12998,42 @@ You can configure global loading and error placeholders for this lazy-load step:
        <strong>
         Key Features:
        </strong>
-       -
-       <strong>
-        <code>
-         useData('id')
-        </code>
-       </strong>
-       - Access fetched data by operation ID
--
-       <strong>
-        Dot notation
-       </strong>
-       -
-       <code>
-        useData('userData').name
-       </code>
-       accesses nested properties
--
-       <strong>
-        <code>
-         .then()
-        </code>
-        chaining
-       </strong>
-       - Chain multiple state updates sequentially
--
-       <strong>
-        No JavaScript
-       </strong>
-       - Everything is pure Python
       </p>
+      <ul>
+       <li>
+        <strong>
+         <code>
+          useData('id')
+         </code>
+        </strong>
+        - Access fetched data by operation ID
+       </li>
+       <li>
+        <strong>
+         Dot notation
+        </strong>
+        -
+        <code>
+         useData('userData').name
+        </code>
+        accesses nested properties
+       </li>
+       <li>
+        <strong>
+         <code>
+          .then()
+         </code>
+         chaining
+        </strong>
+        - Chain multiple state updates sequentially
+       </li>
+       <li>
+        <strong>
+         No JavaScript
+        </strong>
+        - Everything is pure Python
+       </li>
+      </ul>
       <h2 id="complete-example">
        Complete Example
       </h2>
@@ -13177,7 +13054,7 @@ You can configure global loading and error placeholders for this lazy-load step:
 <span class="n">start_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Start"</span><span class="p">,</span>
     <span class="n">on_click</span><span class="o">=</span><span class="n">timer</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">auto_increment</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
 <span class="p">)</span>
-<span class="n">stop_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Stop"</span><span class="p">,</span> 
+<span class="n">stop_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Stop"</span><span class="p">,</span>
     <span class="n">on_click</span><span class="o">=</span><span class="p">[</span>
         <span class="n">timer</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">stop_auto</span><span class="p">(),</span>
         <span class="n">status_state</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">"Paused"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">"paused"</span><span class="p">)</span>
@@ -13228,44 +13105,51 @@ You can configure global loading and error placeholders for this lazy-load step:
       </div>
       <p>
        Supported dynamic properties:
--
-       <code>
-        text
-       </code>
-       : Update text content.
--
-       <code>
-        html
-       </code>
-       : Update inner HTML.
--
-       <code>
-        style
-       </code>
-       : Dictionary of CSS styles.
--
-       <code>
-        attrs
-       </code>
-       : Dictionary of attributes.
--
-       <code>
-        classes
-       </code>
-       : Dictionary with
-       <code>
-        add
-       </code>
-       ,
-       <code>
-        remove
-       </code>
-       , or
-       <code>
-        toggle
-       </code>
-       (single string or list of strings).
       </p>
+      <ul>
+       <li>
+        <code>
+         text
+        </code>
+        : Update text content.
+       </li>
+       <li>
+        <code>
+         html
+        </code>
+        : Update inner HTML.
+       </li>
+       <li>
+        <code>
+         style
+        </code>
+        : Dictionary of CSS styles.
+       </li>
+       <li>
+        <code>
+         attrs
+        </code>
+        : Dictionary of attributes.
+       </li>
+       <li>
+        <code>
+         classes
+        </code>
+        : Dictionary with
+        <code>
+         add
+        </code>
+        ,
+        <code>
+         remove
+        </code>
+        , or
+        <code>
+         toggle
+        </code>
+        (single string or list of strings).
+       </li>
+      </ul>
       <div class="codehilite">
        <pre><span></span><code><span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span>
     <span class="n">text</span><span class="o">=</span><span class="s2">"Updated"</span><span class="p">,</span>
@@ -13287,23 +13171,29 @@ You can configure global loading and error placeholders for this lazy-load step:
         RawJS
        </code>
        . This is particularly useful when:
-- Chaining scripts where a previous script returns a value
-- Working with async operations like file reading
-- Using
-       <code>
-        dScript.ARG
-       </code>
-       to reference values from previous scripts
       </p>
+      <ul>
+       <li>
+        Chaining scripts where a previous script returns a value
+       </li>
+       <li>
+        Working with async operations like file reading
+       </li>
+       <li>
+        Using
+        <code>
+         dScript.ARG
+        </code>
+        to reference values from previous scripts
+       </li>
+      </ul>
       <div class="codehilite">
        <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.scripts.dscript</span><span class="w"> </span><span class="kn">import</span> <span class="n">RawJS</span><span class="p">,</span> <span class="n">Arg</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dars.desktop</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_text</span>
 
-<span class="c1"># Read file -&gt; Update component with result using the Arg helper</span>
-<span class="n">read_op</span> <span class="o">=</span> <span class="n">read_text</span><span class="p">(</span><span class="s2">"data.txt"</span><span class="p">)</span>
+<span class="c1"># Example: update component with the result from a previous action</span>
 <span class="n">update_op</span> <span class="o">=</span> <span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">Arg</span><span class="p">)</span>
 
-<span class="n">chained</span> <span class="o">=</span> <span class="n">read_op</span><span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="n">update_op</span><span class="p">)</span>
+<span class="n">chained</span> <span class="o">=</span> <span class="n">some_async_action</span><span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="n">update_op</span><span class="p">)</span>
 
 <span class="c1"># Using custom JavaScript expressions</span>
 <span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">RawJS</span><span class="p">(</span><span class="s2">"someVar + ' processed'"</span><span class="p">))</span>
@@ -19856,19 +19746,34 @@ DEBUG=true
       <div class="codehilite">
        <pre><span></span><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
 <span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">"en"</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
-    <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">"UTF-8"</span><span class="p">&gt;</span>
-    <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">name</span><span class="o">=</span><span class="s">"viewport"</span> <span class="na">content</span><span class="o">=</span><span class="s">"width=device-width, initial-scale=1.0"</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">"UTF-8"</span> <span class="p">/&gt;</span>
+    <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">name</span><span class="o">=</span><span class="s">"viewport"</span> <span class="na">content</span><span class="o">=</span><span class="s">"width=device-width, initial-scale=1.0"</span> <span class="p">/&gt;</span>
     <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>My Application<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
-    <span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">"stylesheet"</span> <span class="na">href</span><span class="o">=</span><span class="s">"styles.css"</span><span class="p">&gt;</span>
-<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
-    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">id</span><span class="o">=</span><span class="s">"container_123"</span> <span class="na">class</span><span class="o">=</span><span class="s">"dars-container"</span> <span class="na">style</span><span class="o">=</span><span class="s">"display: flex; flex-direction: column; padding: 20px;"</span><span class="p">&gt;</span>
-        <span class="p">&lt;</span><span class="nt">span</span> <span class="na">id</span><span class="o">=</span><span class="s">"text_456"</span> <span class="na">class</span><span class="o">=</span><span class="s">"dars-text"</span> <span class="na">style</span><span class="o">=</span><span class="s">"font-size: 24px; color: #333;"</span><span class="p">&gt;</span>Hello Dars!<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;</span>
-        <span class="p">&lt;</span><span class="nt">button</span> <span class="na">id</span><span class="o">=</span><span class="s">"button_789"</span> <span class="na">class</span><span class="o">=</span><span class="s">"dars-button"</span> <span class="na">style</span><span class="o">=</span><span class="s">"background-color: #007bff; color: white;"</span><span class="p">&gt;</span>Click<span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">"stylesheet"</span> <span class="na">href</span><span class="o">=</span><span class="s">"styles.css"</span> <span class="p">/&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">div</span>
+      <span class="na">id</span><span class="o">=</span><span class="s">"container_123"</span>
+      <span class="na">class</span><span class="o">=</span><span class="s">"dars-container"</span>
+      <span class="na">style</span><span class="o">=</span><span class="s">"display: flex; flex-direction: column; padding: 20px;"</span>
+    <span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">span</span>
+        <span class="na">id</span><span class="o">=</span><span class="s">"text_456"</span>
+        <span class="na">class</span><span class="o">=</span><span class="s">"dars-text"</span>
+        <span class="na">style</span><span class="o">=</span><span class="s">"font-size: 24px; color: #333;"</span>
+        <span class="p">&gt;</span>Hello Dars!<span class="p">&lt;/</span><span class="nt">span</span>
+      <span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">button</span>
+        <span class="na">id</span><span class="o">=</span><span class="s">"button_789"</span>
+        <span class="na">class</span><span class="o">=</span><span class="s">"dars-button"</span>
+        <span class="na">style</span><span class="o">=</span><span class="s">"background-color: #007bff; color: white;"</span>
+      <span class="p">&gt;</span>
+        Click
+      <span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
     <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
     <span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">"script.js"</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
-<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
 <span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
 </code></pre>
       </div>
@@ -19880,28 +19785,29 @@ DEBUG=true
       <div class="codehilite">
        <pre><span></span><code><span class="c">/* Base Dars styles */</span>
 <span class="o">*</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">box-sizing</span><span class="p">:</span><span class="w"> </span><span class="kc">border-box</span><span class="p">;</span>
+<span class="w">  </span><span class="k">box-sizing</span><span class="p">:</span><span class="w"> </span><span class="kc">border-box</span><span class="p">;</span>
 <span class="p">}</span>
 
 <span class="nt">body</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">margin</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="w">    </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="w">    </span><span class="k">font-family</span><span class="p">:</span><span class="w"> </span><span class="o">-</span><span class="n">apple-system</span><span class="p">,</span><span class="w"> </span><span class="n">BlinkMacSystemFont</span><span class="p">,</span><span class="w"> </span><span class="s1">'Segoe UI'</span><span class="p">,</span><span class="w"> </span><span class="s1">'Roboto'</span><span class="p">,</span><span class="w"> </span><span class="kc">sans-serif</span><span class="p">;</span>
+<span class="w">  </span><span class="k">margin</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="k">font-family</span><span class="p">:</span>
+<span class="w">    </span><span class="o">-</span><span class="n">apple-system</span><span class="p">,</span><span class="w"> </span><span class="n">BlinkMacSystemFont</span><span class="p">,</span><span class="w"> </span><span class="s2">"Segoe UI"</span><span class="p">,</span><span class="w"> </span><span class="s2">"Roboto"</span><span class="p">,</span><span class="w"> </span><span class="kc">sans-serif</span><span class="p">;</span>
 <span class="p">}</span>
 
 <span class="p">.</span><span class="nc">dars-button</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">display</span><span class="p">:</span><span class="w"> </span><span class="kc">inline-block</span><span class="p">;</span>
-<span class="w">    </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="kt">px</span><span class="w"> </span><span class="mi">16</span><span class="kt">px</span><span class="p">;</span>
-<span class="w">    </span><span class="k">border</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="kt">px</span><span class="w"> </span><span class="kc">solid</span><span class="w"> </span><span class="mh">#ccc</span><span class="p">;</span>
-<span class="w">    </span><span class="k">background-color</span><span class="p">:</span><span class="w"> </span><span class="mh">#f8f9fa</span><span class="p">;</span>
-<span class="w">    </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="mh">#333</span><span class="p">;</span>
-<span class="w">    </span><span class="k">cursor</span><span class="p">:</span><span class="w"> </span><span class="kc">pointer</span><span class="p">;</span>
-<span class="w">    </span><span class="k">border-radius</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="kt">px</span><span class="p">;</span>
-<span class="w">    </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="mi">14</span><span class="kt">px</span><span class="p">;</span>
+<span class="w">  </span><span class="k">display</span><span class="p">:</span><span class="w"> </span><span class="kc">inline-block</span><span class="p">;</span>
+<span class="w">  </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="kt">px</span><span class="w"> </span><span class="mi">16</span><span class="kt">px</span><span class="p">;</span>
+<span class="w">  </span><span class="k">border</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="kt">px</span><span class="w"> </span><span class="kc">solid</span><span class="w"> </span><span class="mh">#ccc</span><span class="p">;</span>
+<span class="w">  </span><span class="k">background-color</span><span class="p">:</span><span class="w"> </span><span class="mh">#f8f9fa</span><span class="p">;</span>
+<span class="w">  </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="mh">#333</span><span class="p">;</span>
+<span class="w">  </span><span class="k">cursor</span><span class="p">:</span><span class="w"> </span><span class="kc">pointer</span><span class="p">;</span>
+<span class="w">  </span><span class="k">border-radius</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="kt">px</span><span class="p">;</span>
+<span class="w">  </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="mi">14</span><span class="kt">px</span><span class="p">;</span>
 <span class="p">}</span>
 
 <span class="p">.</span><span class="nc">dars-button</span><span class="p">:</span><span class="nd">hover</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">background-color</span><span class="p">:</span><span class="w"> </span><span class="mh">#e9ecef</span><span class="p">;</span>
+<span class="w">  </span><span class="k">background-color</span><span class="p">:</span><span class="w"> </span><span class="mh">#e9ecef</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre>
       </div>
@@ -19976,311 +19882,19 @@ DEBUG=true
         <span class="k">return</span> <span class="s2">"generated_code"</span>
 </code></pre>
       </div>
-      <h2 id="desktop-export-beta">
-       Desktop Export (BETA)
+      <h2 id="exporting-web-applications">
+       Exporting Web Applications
       </h2>
       <p>
-       The desktop exporter allows you to package your Dars app as a native desktop application. This feature is currently in BETA: usable for testing and internal tooling, but not recommended for production deployments yet.
+       Dars currently supports exporting web applications using the standard web exporter. Your exported output includes optimized HTML, CSS, and JavaScript that can be hosted as static assets or served with FastAPI.
       </p>
-      <h3 id="status-and-scope">
-       Status and Scope
-      </h3>
-      <ul>
-       <li>
-        BETA: Many options and integrations are still evolving (advanced packaging, signing, etc.).
-       </li>
-       <li>
-        Cross‑platform targets supported: Windows, Linux, macOS (host restrictions apply for macOS signing, and linux if you don't have docker).
-       </li>
-       <li>
-        Underlying tech: Electron is used to deliver a native desktop container for your web UI.
-       </li>
-       <li>
-        Hot Reload:
-        <code>
-         dars dev
-        </code>
-        with desktop apps is fully supported, but for now it closes and reopen the electron dev app when a file change is detected.
-        <h3 id="quickstart-desktop-export">
-         Quickstart desktop Export
-        </h3>
-       </li>
-      </ul>
-      <ol>
-       <li>
-        <p>
-         Initialize or update your project for desktop:
-        </p>
-        <div class="codehilite">
-         <pre><span></span><code>dars<span class="w"> </span>init<span class="w"> </span>--type<span class="w"> </span>desktop
-<span class="c1"># or if you already have a project</span>
-dars<span class="w"> </span>init<span class="w"> </span>--update
-</code></pre>
-        </div>
-       </li>
-       <li>
-        <p>
-         Ensure your project config has desktop format:
-        </p>
-        <div class="codehilite">
-         <pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">"entry"</span><span class="p">:</span><span class="w"> </span><span class="s2">"main.py"</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"format"</span><span class="p">:</span><span class="w"> </span><span class="s2">"desktop"</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"outdir"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dist"</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">"targetPlatform"</span><span class="p">:</span><span class="w"> </span><span class="s2">"auto"</span>
-<span class="p">}</span>
-</code></pre>
-        </div>
-       </li>
-       <li>
-        <p>
-         Verify optional tooling (Node/Bun, Electron, electron‑builder):
-        </p>
-        <div class="codehilite">
-         <pre><span></span><code>dars<span class="w"> </span>doctor<span class="w"> </span>--all<span class="w"> </span>--yes
-</code></pre>
-        </div>
-       </li>
-       <li>
-        <p>
-         Build your desktop app:
-        </p>
-        <div class="codehilite">
-         <pre><span></span><code>dars<span class="w"> </span>build
-</code></pre>
-        </div>
-       </li>
-      </ol>
       <p>
-       Artifacts will be placed in
+       For advanced export scenarios, you can extend
        <code>
-        dist/
+        dars.exporters.base.Exporter
        </code>
-       . The desktop source (used for packaging) is emitted to
-       <code>
-        dist/source-electron/
-       </code>
-       .
+       and implement custom export behavior for your target platform.
       </p>
-      <h3 id="native-functions-dynamic-updates">
-       Native Functions &amp; Dynamic Updates
-      </h3>
-      <p>
-       You can access native filesystem functions via the
-       <code>
-        dars.desktop
-       </code>
-       module:
-      </p>
-      <div class="codehilite">
-       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.desktop</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_text</span><span class="p">,</span> <span class="n">write_text</span><span class="p">,</span> <span class="n">read_file</span><span class="p">,</span> <span class="n">write_file</span><span class="p">,</span> <span class="n">list_directory</span><span class="p">,</span> <span class="n">get_value</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dars.core.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">this</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dars.scripts.dscript</span><span class="w"> </span><span class="kn">import</span> <span class="n">RawJS</span><span class="p">,</span> <span class="n">dScript</span>
-</code></pre>
-      </div>
-      <h4 id="file-system-operations">
-       File System Operations
-      </h4>
-      <p>
-       The desktop module provides async file operations that return
-       <code>
-        dScript
-       </code>
-       objects, perfect for chaining with
-       <code>
-        this().state()
-       </code>
-       :
-      </p>
-      <p>
-       <strong>
-        Reading Text Files
-       </strong>
-      </p>
-      <div class="codehilite">
-       <pre><span></span><code><span class="c1"># Simple read - button updates itself with file content using the Arg helper</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dars.scripts.dscript</span><span class="w"> </span><span class="kn">import</span> <span class="n">Arg</span>
-
-<span class="n">read_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Load Config"</span><span class="p">,</span>
-    <span class="n">on_click</span><span class="o">=</span><span class="n">read_text</span><span class="p">(</span><span class="s2">"config.txt"</span><span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span>
-        <span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">Arg</span><span class="p">)</span>
-    <span class="p">)</span>
-<span class="p">)</span>
-
-<span class="c1"># Update another component</span>
-<span class="n">display</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s2">"display"</span><span class="p">)</span>
-<span class="n">load_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Load Data"</span><span class="p">,</span>
-    <span class="n">on_click</span><span class="o">=</span><span class="n">read_text</span><span class="p">(</span><span class="s2">"data.txt"</span><span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span>
-        <span class="n">update_component</span><span class="p">(</span><span class="s2">"display"</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">Arg</span><span class="p">)</span>
-    <span class="p">)</span>
-<span class="p">)</span>
-</code></pre>
-      </div>
-      <p>
-       <strong>
-        Writing Text Files
-       </strong>
-      </p>
-      <div class="codehilite">
-       <pre><span></span><code><span class="n">save_btn</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="s2">"Save"</span><span class="p">,</span>
-    <span class="n">on_click</span><span class="o">=</span><span class="n">write_text</span><span class="p">(</span><span class="s2">"output.txt"</span><span class="p">,</span> <span class="s2">"Hello Dars!"</span><span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span>
-        <span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">"Saved!"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">"text-green-500"</span><span class="p">)</span>
-    <span class="p">)</span>
-<span class="p">)</span>
-</code></pre>
-      </div>
-      <p>
-       <strong>
-        Listing Directories
-       </strong>
-      </p>
-      <div class="codehilite">
-       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.desktop</span><span class="w"> </span><span class="kn">import</span> <span class="n">list_directory</span><span class="p">,</span> <span class="n">get_value</span>
-
-
-<span class="n">Button</span><span class="p">(</span><span class="s2">"Browse"</span><span class="p">,</span>
-    <span class="n">on_click</span><span class="o">=</span><span class="n">list_directory</span><span class="p">(</span><span class="s2">"."</span><span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span>
-        <span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"file-list"</span><span class="p">,</span> <span class="n">html</span><span class="o">=</span><span class="n">RawJS</span><span class="p">(</span><span class="s2">"""</span>
-<span class="s2">            value.map(f =&gt; {</span>
-<span class="s2">                const icon = f.isDirectory ? '📁' : '📄';</span>
-<span class="s2">                return `&lt;div&gt;$</span><span class="si">{icon}</span><span class="s2"> $</span><span class="si">{f.name}</span><span class="s2">&lt;/div&gt;`;</span>
-<span class="s2">            }).join('')</span>
-<span class="s2">        """</span><span class="p">))</span>
-    <span class="p">)</span>
-<span class="p">)</span>
-
-
-<span class="n">Button</span><span class="p">(</span><span class="s2">"Python Files"</span><span class="p">,</span>
-    <span class="n">on_click</span><span class="o">=</span><span class="n">list_directory</span><span class="p">(</span><span class="s2">"."</span><span class="p">,</span> <span class="s2">"*.py"</span><span class="p">)</span><span class="o">.</span><span class="n">then</span><span class="p">(</span>
-        <span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"count"</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">RawJS</span><span class="p">(</span><span class="s2">"`Found $</span><span class="si">{Arg.length}</span><span class="s2"> files`"</span><span class="p">))</span>
-    <span class="p">)</span>
-<span class="p">)</span>
-
-
-<span class="n">Input</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"path"</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s2">"."</span><span class="p">)</span>
-<span class="n">Button</span><span class="p">(</span><span class="s2">"List Directory"</span><span class="p">,</span>
-    <span class="n">on_click</span><span class="o">=</span><span class="n">list_directory</span><span class="p">(</span><span class="n">get_value</span><span class="p">(</span><span class="s2">"path"</span><span class="p">))</span><span class="o">.</span><span class="n">then</span><span class="p">(</span>
-        <span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"output"</span><span class="p">,</span> <span class="n">html</span><span class="o">=</span><span class="n">RawJS</span><span class="p">(</span><span class="s2">"value.map(f =&gt; f.name).join('&lt;br&gt;')"</span><span class="p">))</span>
-    <span class="p">)</span>
-<span class="p">)</span>
-
-
-<span class="n">list_directory</span><span class="p">(</span><span class="s2">"."</span><span class="p">,</span> <span class="s2">"*"</span><span class="p">,</span> <span class="n">include_size</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</code></pre>
-      </div>
-      <p>
-       <strong>
-        Binary File Operations
-       </strong>
-      </p>
-      <div class="codehilite">
-       <pre><span></span><code><span class="n">img_data</span> <span class="o">=</span> <span class="n">read_file</span><span class="p">(</span><span class="s2">"image.png"</span><span class="p">)</span>
-
-
-<span class="n">write_file</span><span class="p">(</span><span class="s2">"output.bin"</span><span class="p">,</span> <span class="n">data_bytes</span><span class="p">)</span>
-</code></pre>
-      </div>
-      <h4 id="chaining-multiple-operations">
-       Chaining Multiple Operations
-      </h4>
-      <p>
-       Use
-       <code>
-        dScript.then()
-       </code>
-       for sequential operations:
-      </p>
-      <div class="codehilite">
-       <pre><span></span><code><span class="c1"># Read → Process → Update → Write</span>
-<span class="n">Button</span><span class="p">(</span><span class="s2">"Process File"</span><span class="p">,</span>
-    <span class="n">on_click</span><span class="o">=</span><span class="n">read_text</span><span class="p">(</span><span class="s2">"input.txt"</span><span class="p">)</span>
-        <span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="n">dScript</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s2">"const processed = value.toUpperCase(); return processed;"</span><span class="p">))</span>
-        <span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="n">write_text</span><span class="p">(</span><span class="s2">"output.txt"</span><span class="p">,</span> <span class="n">RawJS</span><span class="p">(</span><span class="s2">"processed"</span><span class="p">)))</span>
-        <span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">"Complete!"</span><span class="p">))</span>
-<span class="p">)</span>
-</code></pre>
-      </div>
-      <p>
-       All file paths are relative to the app's directory. See
-       <a href="state_management.md#dynamic-state-updates--this">
-        State Management
-       </a>
-       and
-       <a href="scripts.md#chaining-scripts-then">
-        Scripts
-       </a>
-       for more details on
-       <code>
-        this()
-       </code>
-       and chaining.
-      </p>
-      <h3 id="platform-targeting">
-       Platform Targeting
-      </h3>
-      <ul>
-       <li>
-        <code>
-         targetPlatform
-        </code>
-        :
-        <code>
-         auto
-        </code>
-        |
-        <code>
-         windows
-        </code>
-        |
-        <code>
-         linux
-        </code>
-        |
-        <code>
-         macos
-        </code>
-        .
-       </li>
-       <li>
-        On non‑mac hosts, building for macOS is not supported.
-       </li>
-      </ul>
-      <h3 id="metadata-and-packaging-notes">
-       Metadata and Packaging Notes
-      </h3>
-      <ul>
-       <li>
-        App metadata is taken from your
-        <code>
-         App
-        </code>
-        instance when available: title, description, author, version.
-       </li>
-       <li>
-        If version is not set, a default
-        <code>
-         0.1.0
-        </code>
-        is used and a warning is shown.
-       </li>
-       <li>
-        Package manager and Electron version are pinned by the exporter to make builds predictable.
-       </li>
-      </ul>
-      <h3 id="caveats-beta">
-       Caveats (BETA)
-      </h3>
-      <ul>
-       <li>
-        Not yet recommended for production.
-       </li>
-       <li>
-        Some advanced packaging and signing options may require manual configuration.
-       </li>
-       <li>
-        Expect changes to configuration keys and defaults as the feature matures.
-       </li>
-      </ul>
      </div>
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="md-scripts">
       <h1 id="dars-script-action-system">
@@ -20328,13 +19942,15 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
         </strong>
         : Actions are defined as Python dictionaries, making them easier to debug and validate.
        </li>
+      </ol>
+      <ul>
        <li>
         <strong>
          Full-Stack Consistency
         </strong>
-        : The same action structure works in SPA, SSR, and Desktop targets.
+        : The same action structure works in SPA and SSR targets.
        </li>
-      </ol>
+      </ul>
       <hr/>
       <h2 id="dscript-the-universal-action-container">
        dScript: The Universal Action Container
@@ -20440,14 +20056,12 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
       </p>
       <div class="codehilite">
        <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.scripts.dscript</span><span class="w"> </span><span class="kn">import</span> <span class="n">Arg</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dars.desktop</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_text</span>
 
-<span class="c1"># Read file -&gt; Update component with result</span>
-<span class="n">read_op</span> <span class="o">=</span> <span class="n">read_text</span><span class="p">(</span><span class="s2">"data.txt"</span><span class="p">)</span>
+<span class="c1"># Example chaining: use the previous result in the next script</span>
 <span class="n">update_op</span> <span class="o">=</span> <span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">Arg</span><span class="p">)</span> <span class="c1"># Accesses the entire result</span>
 <span class="n">update_op_nested</span> <span class="o">=</span> <span class="n">this</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">Arg</span><span class="o">.</span><span class="n">content</span><span class="p">)</span> <span class="c1"># Accesses 'result.content'</span>
 
-<span class="n">chained</span> <span class="o">=</span> <span class="n">read_op</span><span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="n">update_op</span><span class="p">)</span>
+<span class="n">chained</span> <span class="o">=</span> <span class="n">some_async_action</span><span class="o">.</span><span class="n">then</span><span class="p">(</span><span class="n">update_op</span><span class="p">)</span>
 </code></pre>
       </div>
       <hr/>
@@ -20653,7 +20267,9 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
         </tr>
        </tbody>
       </table>
-      <hr/>
+      <p>
+       and a LOT more..
+      </p>
       <h2 id="animation-system">
        Animation System
       </h2>
@@ -21004,7 +20620,7 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
         </div>
         <div class="dars-container dars-s-8161a2a3ff" id="container_0_2_2_0_0_1_2">
          <span class="dars-text dars-s-474933a055" id="text_0_2_2_0_0_1_2_0">
-          A modern FullStack Python framework for web and desktop applications.
+          A modern FullStack Python framework for web applications.
          </span>
         </div>
        </div>
@@ -21036,7 +20652,7 @@ dars<span class="w"> </span>init<span class="w"> </span>--update
   </div>
   <div id="__dars_spa_root__">
   </div>
-  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1779308848" type="module">
+  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1779323149" type="module">
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js">
   </script>

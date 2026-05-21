@@ -127,7 +127,7 @@ def create_footer():
                     Container(
 
                         Text(
-                            "A modern FullStack Python framework for web and desktop applications.",
+                            "A modern FullStack Python framework for web applications.",
                             style={
                                 "color": "#a0cfc0",
                                 "font-size": "14px",
