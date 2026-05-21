@@ -754,7 +754,7 @@ if not DarsEnv.is_dev():
     ssr.use_spa_fallback()
 # ────────────────────────────────────────────────────────────────────────────
 
-if __name__ == "__main__":
+def main():
     import uvicorn
     print("\\n" + "=" * 60)
     if DarsEnv.is_dev():
@@ -778,6 +778,8 @@ if __name__ == "__main__":
         port, host = 8000, "0.0.0.0"
     print()
     uvicorn.run(app, host=host, port=port)
+if __name__ == "__main__":
+    main()
 """
 
             # 3. separate templates logic
