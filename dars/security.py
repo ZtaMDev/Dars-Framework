@@ -59,7 +59,7 @@ def _restore_html_blocks(src: str, tokens):
     return s
 
 
-# ─── Dars Bundler Integration ─────────────────────────────────────────────────
+# Dars Bundler Integration
 
 def _find_dars_bundler() -> Optional[str]:
     """Locate the dars-bundler binary.

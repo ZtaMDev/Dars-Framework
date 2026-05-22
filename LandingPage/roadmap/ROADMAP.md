@@ -128,7 +128,7 @@ Everything below is what's needed to make Dars a real, production-usable fullsta
 - [ ] Max size / file type validation in browser runtime
 - [ ] Upload progress indicator
 - [ ] `uploadTo(url)` helper that sends files via `FormData`
-- [ ] Backend file receiver endpoint template
+- [x] Backend file receiver endpoint template
 - [ ] Multiple file handling with individual progress
 
 ### 7. Security Hardening
