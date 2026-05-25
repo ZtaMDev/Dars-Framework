@@ -460,7 +460,7 @@ import sys
 
 class DarsEnv:
     # ── Mode ──────────────────────────────────────────────────────────────────
-    # Development: two servers — dars dev (frontend) + dars dev --backend (API)
+    # Development: dars dev starts frontend and backend together when backendEntry is configured(on dars.config.json) — separate servers with CORS
     # Production:  one server  — backend serves frontend static files (same origin)
     #
     # Change to "production" before deploying, or set DARS_MODE env var.
@@ -530,9 +530,7 @@ class DarsEnv:
             API_PY_CODE = """\"""
 Fullstack Backend - Dars Framework
 
-Development (two servers):
-    dars dev              → frontend on http://localhost:8000
-    dars dev --backend    → backend  on http://localhost:3000
+Development: `dars dev` starts frontend and backend together when backendEntry is configured(on dars.config.json).
 
 Production (one server, same origin):
     Set MODE = "production" in apiConfig.py (or DARS_MODE=production env var)
@@ -924,7 +922,7 @@ def create_parser(include_hidden: bool = True) -> argparse.ArgumentParser:
     dev_parser = subparsers.add_parser('dev', help='Run the configured entry file in development mode')
     dev_parser.add_argument('--project', '-p', default='.', help='Project root where dars.config.json resides (default: .)')
     dev_parser.add_argument('--port', '-P', type=int, help='Port to run the dev server on (overrides config)')
-    dev_parser.add_argument('--backend', action='store_true', help='Run only the configured backendEntry (SSR/API) instead of the frontend entry')
+    dev_parser.add_argument('--backend', action='store_true', help='Run only the configured backendEntry (SSR/API) instead of the frontend entry. Deprecated; use `dars dev` when backendEntry is configured.')
     # English-only: no language option on subparsers
     # Generate command
     generate_parser = subparsers.add_parser('generate', aliases=['g'], help='Generate a new component or page')
@@ -1542,23 +1540,29 @@ def _main_exec():
 
         import subprocess
 
-        # If --backend is set, run only the backendEntry (SSR/API) via uvicorn
+        # Default frontend port resolution: CLI arg > config > fallback 8000
+        port_to_pass = getattr(args, 'port', None)
+        if port_to_pass is None and found and "port" in cfg:
+            port_to_pass = cfg["port"]
+        if port_to_pass is None:
+            port_to_pass = 8000
+
+        backend_entry = cfg.get('backendEntry') if cfg else None
+        backend_proc = None
+
         if getattr(args, 'backend', False):
-            backend_entry = cfg.get('backendEntry')
+            if backend_entry:
+                console.print("[yellow]Warning: `dars dev --backend` is deprecated. Use `dars dev` to start the fullstack development server when backendEntry is configured.[/yellow]")
             if not backend_entry:
-                # Reuse the same message used in config validate
                 console.print(f"[red]{translator.get('cfg_backend_entry_missing')}[/red]")
                 sys.exit(1)
 
             uvicorn_target = str(backend_entry)
-
-            # Resolve host/port from backend.apiConfig.DarsEnv if available
             host = '127.0.0.1'
             port = 3000
             try:
                 import importlib
 
-                # Ensure project_root is on sys.path so `backend` package is importable
                 if project_root not in sys.path:
                     sys.path.insert(0, project_root)
 
@@ -1570,20 +1574,17 @@ def _main_exec():
                     urls = ApiDarsEnv.get_urls()
                     backend_url = urls.get('backend')
                     if isinstance(backend_url, str):
-                        # Try stdlib parsing first
                         parsed = urlparse(backend_url)
                         if parsed.hostname:
                             host = parsed.hostname
                         if parsed.port:
                             port = parsed.port
-                        # Fallback manual parse if urlparse didn't give a port
                         if parsed.port is None and ':' in backend_url.rsplit('/', 1)[-1]:
                             tail = backend_url.rsplit('/', 1)[-1]
                             parts = tail.split(':')
                             if len(parts) == 2 and parts[1].isdigit():
                                 port = int(parts[1])
             except Exception:
-                # Fallback to default host/port if anything fails
                 pass
 
             backend_cmd = [
@@ -1594,9 +1595,17 @@ def _main_exec():
                 '--host', str(host),
                 '--port', str(port),
             ]
+            backend_env = os.environ.copy()
+            backend_env['DARS_MODE'] = 'development'
+            backend_env['DARS_BACKEND_URL'] = f"http://{host}:{port}"
+            backend_env['DARS_FRONTEND_URL'] = f"http://localhost:{port_to_pass}"
+            existing_pythonpath = backend_env.get('PYTHONPATH', '')
+            if project_root not in existing_pythonpath.split(os.pathsep):
+                backend_env['PYTHONPATH'] = project_root + (os.pathsep + existing_pythonpath if existing_pythonpath else '')
+
             process = None
             try:
-                process = subprocess.Popen(backend_cmd, cwd=project_root)
+                process = subprocess.Popen(backend_cmd, cwd=project_root, env=backend_env)
                 process.wait()
                 sys.exit(process.returncode or 0)
             except KeyboardInterrupt:
@@ -1608,30 +1617,101 @@ def _main_exec():
                 console.print(f"[red]Failed to start backend dev process: {e}[/red]")
                 sys.exit(1)
 
+        if backend_entry:
+            uvicorn_target = str(backend_entry)
+            host = '127.0.0.1'
+            port = 3000
+            try:
+                import importlib
+
+                if project_root not in sys.path:
+                    sys.path.insert(0, project_root)
+
+                from urllib.parse import urlparse
+
+                api_cfg = importlib.import_module('backend.apiConfig')
+                ApiDarsEnv = getattr(api_cfg, 'DarsEnv', None)
+                if ApiDarsEnv is not None and hasattr(ApiDarsEnv, 'get_urls') and callable(getattr(ApiDarsEnv, 'get_urls')):
+                    urls = ApiDarsEnv.get_urls()
+                    backend_url = urls.get('backend')
+                    if isinstance(backend_url, str):
+                        parsed = urlparse(backend_url)
+                        if parsed.hostname:
+                            host = parsed.hostname
+                        if parsed.port:
+                            port = parsed.port
+                        if parsed.port is None and ':' in backend_url.rsplit('/', 1)[-1]:
+                            tail = backend_url.rsplit('/', 1)[-1]
+                            parts = tail.split(':')
+                            if len(parts) == 2 and parts[1].isdigit():
+                                port = int(parts[1])
+            except Exception:
+                pass
+
+            backend_cmd = [
+                sys.executable,
+                '-m', 'uvicorn',
+                uvicorn_target,
+                '--reload',
+                '--host', str(host),
+                '--port', str(port),
+            ]
+            backend_env = os.environ.copy()
+            backend_env['DARS_MODE'] = 'development'
+            backend_env['DARS_BACKEND_URL'] = f"http://{host}:{port}"
+            backend_env['DARS_FRONTEND_URL'] = f"http://localhost:{port_to_pass}"
+            existing_pythonpath = backend_env.get('PYTHONPATH', '')
+            if project_root not in existing_pythonpath.split(os.pathsep):
+                backend_env['PYTHONPATH'] = project_root + (os.pathsep + existing_pythonpath if existing_pythonpath else '')
+
+            try:
+                backend_proc = subprocess.Popen(backend_cmd, cwd=project_root, env=backend_env)
+                console.print(f"[green]Started backend dev server at http://{host}:{port}[/green]")
+            except Exception as e:
+                console.print(f"[red]Failed to start backend dev process: {e}[/red]")
+                sys.exit(1)
+
         # Default: Run entry in development mode (the entry typically calls app.rTimeCompile()).
-        # Backend/SSR server can be started in a separate terminal with `dars dev --backend` if needed.
         process = None
         try:
             cmd = [sys.executable, entry]
-            # Prioritize CLI arg, then config, then fallback to 8000
-            port_to_pass = getattr(args, 'port', None)
-            if port_to_pass is None and found and "port" in cfg:
-                port_to_pass = cfg["port"]
-            
             if port_to_pass:
                 cmd.extend(['--port', str(port_to_pass)])
-            
-            process = subprocess.Popen(cmd, cwd=os.path.dirname(entry))
+
+            frontend_env = os.environ.copy()
+            frontend_env['DARS_MODE'] = 'development'
+            if backend_entry:
+                frontend_env['DARS_BACKEND_URL'] = f"http://{host}:{port}"
+            frontend_env['DARS_FRONTEND_URL'] = f"http://localhost:{port_to_pass}"
+            existing_pythonpath = frontend_env.get('PYTHONPATH', '')
+            if project_root not in existing_pythonpath.split(os.pathsep):
+                frontend_env['PYTHONPATH'] = project_root + (os.pathsep + existing_pythonpath if existing_pythonpath else '')
+
+            process = subprocess.Popen(cmd, cwd=os.path.dirname(entry), env=frontend_env)
             process.wait()
-            sys.exit(process.returncode or 0)
+            return_code = process.returncode or 0
         except KeyboardInterrupt:
-            if process and process.poll() is None:
-                process.terminate()
-                process.wait()
-            sys.exit(0)
+            return_code = 0
         except Exception as e:
             console.print(f"[red]Failed to start dev process: {e}[/red]")
-            sys.exit(1)
+            return_code = 1
+        finally:
+            if backend_proc and backend_proc.poll() is None:
+                try:
+                    backend_proc.terminate()
+                    backend_proc.wait(timeout=5)
+                except Exception:
+                    try:
+                        backend_proc.kill()
+                    except Exception:
+                        pass
+            if process and process.poll() is None:
+                try:
+                    process.terminate()
+                    process.wait(timeout=5)
+                except Exception:
+                    pass
+        sys.exit(return_code)
 
 
 

@@ -517,7 +517,7 @@ For complete backend documentation, see the [Backend & API Guide](https://ztamde
 | `dars formats`                        | List supported export formats                              |
 | `dars dev`                            | Run the configured entry file with hot preview             |
 | `dars dev --port 9000`                | Run dev server on a custom port                            |
-| `dars dev --backend`                  | Run only the configured backendEntry (FastAPI/SSR backend) |
+| `dars dev --backend`                  | Deprecated: use `dars dev` with backendEntry configured.   |
 | `dars generate component <name>`      | Scaffold a new FunctionComponent                           |
 | `dars generate page <name>`           | Scaffold a new page (static, SPA, or SSR)                  |
 | `dars --help`                         | Show help and all CLI options                              |
@@ -527,12 +527,12 @@ Tip: use `dars doctor` to review optional tooling that can enhance bundling/mini
 ### Running with Backend
 
 ```bash
-# Terminal 1 — Frontend dev server
+# Run both frontend and backend together in development
+# (backendEntry must be configured in dars.config.json)
 dars dev
-
-# Terminal 2 — Backend SSR + API server
-dars dev --backend
 ```
+
+> Note: `dars dev --backend` is deprecated in v1.9.14. `dars dev` now starts the fullstack development server automatically when `backendEntry` is configured.
 
 ---
 

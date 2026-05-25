@@ -2736,7 +2736,9 @@ audio.dars-audio {
         # In production (bundle=True / DarsEnv.dev=False), default to same-origin ("/").
         # In development, default to localhost:3000 for the backend dev server.
         from dars.env import DarsEnv as _DarsEnv
-        _default_backend = 'http://localhost:3000' if _DarsEnv.dev else '/'
+        _default_backend = _DarsEnv.get("DARS_BACKEND_URL") if _DarsEnv.dev else None
+        if not _default_backend:
+            _default_backend = 'http://localhost:3000' if _DarsEnv.dev else '/'
         _backend_url = getattr(app, 'ssr_url', None) or _default_backend
         if hasattr(self, '_cached_spa_config_light') and self._cached_spa_config_light:
             _backend_url = self._cached_spa_config_light.get('backendUrl', _backend_url)
@@ -5994,7 +5996,9 @@ fetch({repr(upload_url)}, {{method:'POST', body:_fd}})
         import json, copy
         from dars.components.basic.container import Container
         from dars.env import DarsEnv as _DarsEnv
-        _default_backend = 'http://localhost:3000' if _DarsEnv.dev else '/'
+        _default_backend = _DarsEnv.get("DARS_BACKEND_URL") if _DarsEnv.dev else None
+        if not _default_backend:
+            _default_backend = 'http://localhost:3000' if _DarsEnv.dev else '/'
         _spa_backend_url = getattr(app, 'ssr_url', None) or _default_backend
         spa_config = {
             'routes': [], 
@@ -6843,7 +6847,9 @@ fetch({repr(upload_url)}, {{method:'POST', body:_fd}})
         }}"""
         
         from dars.env import DarsEnv as _DarsEnv
-        _default_backend = 'http://localhost:3000' if _DarsEnv.dev else '/'
+        _default_backend = _DarsEnv.get("DARS_BACKEND_URL") if _DarsEnv.dev else None
+        if not _default_backend:
+            _default_backend = 'http://localhost:3000' if _DarsEnv.dev else '/'
         if hasattr(self, '_cached_spa_config_light') and self._cached_spa_config_light:
             _backend_url = self._cached_spa_config_light.get('backendUrl', _default_backend)
         else:

@@ -124,12 +124,12 @@ class DarsEnv:
 ### Running
 
 ```bash
-# Terminal 1 — Frontend dev server
+# Run frontend and backend together in development
+# (backendEntry must be configured in dars.config.json)
 dars dev
-
-# Terminal 2 — Backend SSR server
-dars dev --backend
 ```
+
+> Note: `dars dev --backend` is deprecated in v1.9.14. Use `dars dev` to start the fullstack development workflow.
 
 ---
 

@@ -80,3 +80,57 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             )
 
         return response
+
+
+class AuthMiddleware(BaseHTTPMiddleware):
+    """
+    Starlette/FastAPI middleware that validates a JWT Bearer token or cookie.
+    
+    If the token is valid, it injects the decoded payload dictionary into 
+    ``request.state.user``.
+    
+    If a protected route is requested and no token is present or it is invalid,
+    it returns an HTTP 401 response.
+    
+    Args:
+        app: ASGI application.
+        secret: Signing secret key.
+        exclude_paths: List of string URL path prefixes that do not require authentication.
+    """
+    def __init__(self, app, secret: str, exclude_paths: Optional[list] = None) -> None:
+        super().__init__(app)
+        self.secret = secret
+        self.exclude_paths = exclude_paths or []
+
+    async def dispatch(self, request: Request, call_next) -> Response:
+        path = request.url.path
+        
+        # Check if the path is explicitly excluded, or a standard API doc path, or health check
+        is_excluded = (
+            any(path.startswith(p) for p in self.exclude_paths) or
+            path in ['/docs', '/openapi.json', '/redoc', '/_dars/health']
+        )
+        
+        if is_excluded:
+            return await call_next(request)
+            
+        # Extract token from the Authorization header or the dars_auth_token cookie
+        token = None
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            token = auth_header[7:]
+        else:
+            token = request.cookies.get("dars_auth_token")
+            
+        if not token:
+            return Response("Unauthorized: Session token missing", status_code=401)
+            
+        try:
+            from dars.core.auth import DarsAuth
+            user_payload = DarsAuth.decode_token(token, self.secret)
+            # Inject user dictionary securely into request state
+            request.state.user = user_payload
+        except Exception as e:
+            return Response(f"Unauthorized: Invalid session token ({e})", status_code=401)
+            
+        return await call_next(request)

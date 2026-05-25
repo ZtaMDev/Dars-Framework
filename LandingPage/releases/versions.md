@@ -1,3 +1,24 @@
+# Release Notes v1.9.14(private pre-release phase)
+
+> **Unified fullstack dev:** `dars dev` now starts frontend and backend together when `backendEntry` is configured. `dars dev --backend` is deprecated.
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Unified fullstack development
+
+- `dars dev` now launches the frontend preview server and backend SSR/API server together when `backendEntry` is configured in `dars.config.json`.
+- Development environment variables are propagated automatically so the frontend knows the backend URL.
+- `dars dev --backend` remains supported for compatibility, but it now prints a deprecation warning.
+- Documentation and release notes updated to reflect the new single-command workflow.
+
+---
+
 # Release Notes v1.9.13
 
 > **Desktop exporter removed, future `dars-desktop` with PyQt6 + WebEngine, and continued web exporter stability**

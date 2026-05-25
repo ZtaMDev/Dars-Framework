@@ -673,10 +673,11 @@ export async function _loadRoute(route, params) {
         const sep = fullUrl.includes("?") ? "&" : "?";
         fullUrl = fullUrl + sep + "_t=" + Date.now();
 
+        const isSameOrigin = !backendUrl || backendUrl === "/";
         const response = await fetch(fullUrl, {
           headers: { "Content-Type": "application/json" },
-          mode: "same-origin",
-          credentials: "same-origin",
+          mode: isSameOrigin ? "same-origin" : "cors",
+          credentials: isSameOrigin ? "same-origin" : "include",
         });
 
         if (!response.ok)

@@ -255,10 +255,12 @@ dars dev
 
 **Terminal 2 - Backend SSR Server:**
 ```bash
-dars dev --backend
-# Runs on http://localhost:3000
-# Starts uvicorn with the backendEntry from dars.config.json (by default "backend.api:app")
+dars dev
+# Runs frontend and backend together when backendEntry is configured
+# Uses backendEntry from dars.config.json (by default "backend.api:app")
 ```
+
+> Note: `dars dev --backend` is deprecated in v1.9.14; use `dars dev` instead.
 
 ### How It Works
 

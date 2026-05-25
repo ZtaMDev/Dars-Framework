@@ -75,7 +75,7 @@ Scaffold new components and pages instantly with automatic project integration.
 | `dars init my_project`                            | Create a new Dars project (SPA Default)                           |
 | `dars dev`                                        | Run the configured entry file with hot preview (app.rTimeCompile) |
 | `dars dev --port 9000`                            | Run the dev server on a custom port                               |
-| `dars dev --backend`                              | Run only the configured backendEntry (FastAPI/SSR backend)        |
+| `dars dev --backend`                              | Deprecated: use `dars dev` with backendEntry configured.          |
 | `dars info my_app.py`                             | Show info about your app                                          |
 | `dars formats`                                    | List supported export formats                                     |
 | `dars generate component <name>`                  | Scaffold a new FunctionComponent                                  |
@@ -132,7 +132,7 @@ For more, see the [Getting Started](#getting-started-with-dars) guide and the ma
 When working with SSR (`dars init --type ssr`), the workflow involves two processes:
 
 1.  **Frontend (`dars dev`)**: Runs the Dars preview server on port `8000` (or the one set in `dars.config.json`) using `app.rTimeCompile()`.
-2.  **Backend (`dars dev --backend`)**: Runs the FastAPI SSR backend on port `3000` using `backendEntry` from `dars.config.json`.
+2.  **Backend (`dars dev --backend`)**: Deprecated. Use `dars dev` instead when `backendEntry` is configured; it starts frontend and backend together.
 
 **Common Commands:**
 
@@ -140,7 +140,7 @@ When working with SSR (`dars init --type ssr`), the workflow involves two proces
 | ---------------------- | ---------------------------------------------------------- |
 | `dars init --type ssr` | Scaffolds a project with `backend/` folder and SSR config. |
 | `dars dev`             | Starts the hot-reload frontend preview server.             |
-| `dars dev --backend`   | Starts the SSR/backend server defined by `backendEntry`.   |
+| `dars dev --backend`   | Deprecated: use `dars dev` with backendEntry configured.   |
 | `dars build`           | Builds static assets to `dist/` for production.            |
 
 Note: For production, you only need to run the backend (which serves the built assets).

@@ -9,7 +9,7 @@ import os
 import sys
 
 class DarsEnv:
-    # Development: two servers — dars dev (frontend) + dars dev --backend (API)
+    # Development: dars dev starts frontend and backend together when backendEntry is configured
     # Production:  one server  — backend serves frontend static files (same origin)
     # Change to "production" before deploying, or set DARS_MODE env var.
     MODE = os.environ.get("DARS_MODE", "development")
@@ -77,9 +77,7 @@ class DarsEnv:
 API_PY_CODE = """\"""
 Fullstack Backend - Dars Framework
 
-Development (two servers):
-    dars dev              → frontend on http://localhost:8000
-    dars dev --backend    → backend  on http://localhost:3000
+Development: `dars dev` starts frontend and backend together when backendEntry is configured(on dars.config.json).
 
 Production (one server, same origin):
     Set MODE = "production" in apiConfig.py (or DARS_MODE=production env var)
@@ -272,7 +270,7 @@ def {safe_name}():
                             pass
                     
                     console.print("[green]SUCCESS: SSR Backend scaffolded at /backend[/green]")
-                    console.print("[yellow]Note: Remember to run 'dars dev --backend' to start the SSR server.[/yellow]")
+                    console.print("[yellow]Note: Use `dars dev` with backendEntry to start the development server.[/yellow]")
             
         with open(file_path, "w", encoding="utf-8") as f:
             f.write(content)

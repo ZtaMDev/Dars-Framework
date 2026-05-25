@@ -23,12 +23,29 @@ class DarsEnv:
         dev (bool): ``True`` in development mode, ``False`` in production (bundle).
     """
 
-    dev: bool = True
+    _dev_override: Optional[bool] = None
+    dev: bool = os.environ.get("DARS_MODE", "development").strip().lower() != "production"
 
     @classmethod
     def set_dev_mode(cls, is_dev: bool) -> None:
         """Set the development mode flag."""
         cls.dev = is_dev
+        cls._dev_override = is_dev
+
+    @classmethod
+    def get_env(cls) -> str:
+        """Return the current DARS_MODE environment setting."""
+        return os.environ.get("DARS_MODE", "development")
+
+    @classmethod
+    def is_dev(cls) -> bool:
+        """Return whether the current environment is development."""
+        return cls.dev
+
+    @classmethod
+    def _sync_dev_mode(cls) -> None:
+        if cls._dev_override is None:
+            cls.dev = cls.get_env().strip().lower() != "production"
 
     # ------------------------------------------------------------------
     # .env file support
@@ -51,6 +68,7 @@ class DarsEnv:
             path: Path to the ``.env`` file (default: ``".env"``).
         """
         if not os.path.isfile(path):
+            cls._sync_dev_mode()
             return
         try:
             with open(path, "r", encoding="utf-8") as f:
@@ -64,6 +82,8 @@ class DarsEnv:
         except OSError:
             # Best-effort: never raise on load failure
             pass
+        finally:
+            cls._sync_dev_mode()
 
     @classmethod
     def get(cls, key: str, default: Optional[str] = None) -> Optional[str]:

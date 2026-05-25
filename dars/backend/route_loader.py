@@ -124,9 +124,20 @@ class RouteLoader:
                                 detail="Authentication required"
                             )
                         
-                        # TODO: Verify token
-                        # For now, just check if token exists
-                        # In v1.7.2, we'll implement proper JWT verification
+                        try:
+                            from dars.core.auth import DarsAuth
+                            from dars.env import DarsEnv
+                            
+                            # Load DARS_SECRET_KEY from environment or fallback safely
+                            secret = DarsEnv.get("DARS_SECRET_KEY") or "dars_default_secret_key_change_me_in_production"
+                            
+                            # Verify and decode the JWT
+                            DarsAuth.decode_token(token, secret)
+                        except Exception as e:
+                            raise HTTPException(
+                                status_code=401,
+                                detail=f"Unauthorized: Invalid session token ({e})"
+                            )
                     
                     break
         

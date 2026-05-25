@@ -70,6 +70,7 @@ from dars.core.route_types import RouteType, RouteMetadata  # Secure Routing
 # State Management
 from dars.core.state import dState, Mod, this, this_for  # Legacy (backward compatibility)
 from dars.core.state_v2 import State, ReactiveProperty, StateTransition  # V2 State System (PRIMARY)
+from dars.core.auth import DarsAuth, requires_auth, requires_role  # Core Auth Module
 from dars.dars_tests.run_tests import run_app_tests, run_unit_tests, main
 # Exporters (optional, for direct use)
 from dars.exporters.web.html_css_js import HTMLCSSJSExporter
@@ -184,4 +185,6 @@ __all__ = [
     'useFetch', "runSequence", "setHtml",
     # Secure Routing
     'RouteType', 'RouteMetadata',
+    # Auth System
+    'DarsAuth', 'requires_auth', 'requires_role',
 ]
