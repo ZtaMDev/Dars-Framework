@@ -6260,7 +6260,8 @@ fetch({repr(upload_url)}, {{method:'POST', body:_fd}})
                 'styles': route_styles_css,
                 'headMetadata': head_metadata
             }
-            self.write_file(os.path.join(output_path, f"route_{route_name}.json"), json.dumps(route_manifest, indent=2))
+            if route_type != RouteType.SSR:
+                self.write_file(os.path.join(output_path, f"route_{route_name}.json"), json.dumps(route_manifest, indent=2))
 
             if spa_route.index: 
                 spa_config['index'] = route_name

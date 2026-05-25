@@ -75,8 +75,6 @@ def tasklist():
     # Called at export time with _TEMPLATE_SENTINEL (done=False, title="__item_title__", etc.)
     # The resulting HTML is stored in data-each-template.
     # At runtime dom_each_render substitutes __item_<field>__ with real values.
-    # We embed "__item_done_class__" as a placeholder in the class so the runtime
-    # can inject "line-through text-gray-400" for done tasks.
     def task_item(t):
         raw_title = t.get("title", "__item_title__") if isinstance(t, dict) else "__item_title__"
         title = raw_title if raw_title else "__item_title__"

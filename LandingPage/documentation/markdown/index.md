@@ -38,6 +38,7 @@ If you are new to Dars, we recommend following the learning path in this order:
 
 - [**SPA Routing**](#spa-routing-in-dars-framework): Build fast, interactive single-page applications.
 - [**SSR & FastAPI**](#server-side-rendering-in-dars-framework): Implement server-side rendering for better performance and SEO.
+- [**Authentication & Security**](#authentication-and-security): Learn how to secure your application with Dars.
 - [**Operations (DAP)**](#operations-in-dars): Use the Dars Action Protocol to perform client-side logic without writing JavaScript.
 - [**Custom Components**](#custom-components-in-dars-framework): Learn how to extend the framework with your own reusable components.
 

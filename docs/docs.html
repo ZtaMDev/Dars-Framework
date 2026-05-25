@@ -1970,6 +1970,24 @@
      <a class="sidebar-link sidebar-level-3" href="#environment-detection" style="margin-left: 40px">
       Environment Detection
      </a>
+     <a class="sidebar-link sidebar-level-2" href="#authentication-route-protection" style="margin-left: 20px">
+      Authentication &amp; Route Protection
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#multi-auth-capabilities" style="margin-left: 40px">
+      Multi-Auth Capabilities
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#declaring-security-in-ssr-routes" style="margin-left: 40px">
+      Declaring Security in SSR Routes
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#1-in-line-decorator-autoconfiguration-recommended" style="margin-left: 60px">
+      1. In-line Decorator Autoconfiguration (Recommended)
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#2-isolated-component-configuration-pagesetupauth" style="margin-left: 60px">
+      2. Isolated Component Configuration (`Page.setup_auth`)
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#3-global-application-auth-appsetupauth" style="margin-left: 60px">
+      3. Global Application Auth (`App.setup_auth`)
+     </a>
      <a class="sidebar-link sidebar-level-2" href="#ssr-api-reference" style="margin-left: 20px">
       SSR API Reference
      </a>
@@ -1987,6 +2005,128 @@
      </a>
      <a class="sidebar-link sidebar-level-3" href="#deployment-platforms" style="margin-left: 40px">
       Deployment Platforms
+     </a>
+     <div class="sidebar-divider">
+     </div>
+     <div class="sidebar-category">
+      Auth
+     </div>
+     <a class="sidebar-link sidebar-level-1" href="#authentication-and-security" style="margin-left: 0px">
+      Authentication And Security
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#table-of-contents" style="margin-left: 20px">
+      Table of Contents
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#overview" style="margin-left: 20px">
+      Overview
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#security-architecture" style="margin-left: 20px">
+      Security Architecture
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#token-flow" style="margin-left: 40px">
+      Token Flow
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#cookie-configuration" style="margin-left: 40px">
+      Cookie Configuration
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#csrf-protection" style="margin-left: 40px">
+      CSRF Protection
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#quick-start" style="margin-left: 20px">
+      Quick Start
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#1-define-a-verification-callback" style="margin-left: 40px">
+      1. Define a Verification Callback
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#2-register-with-the-app" style="margin-left: 40px">
+      2. Register with the App
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#3-build-the-login-page" style="margin-left: 40px">
+      3. Build the Login Page
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#multi-auth-multiple-isolated-schemes" style="margin-left: 20px">
+      Multi-Auth: Multiple Isolated Schemes
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#how-cookies-are-scoped" style="margin-left: 40px">
+      How Cookies Are Scoped
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#three-ways-to-declare-auth" style="margin-left: 20px">
+      Three Ways to Declare Auth
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#1-requiresauth-decorator-inline-recommended" style="margin-left: 40px">
+      1. `@requires_auth` Decorator (Inline — Recommended)
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#2-pagesetupauth-component-level" style="margin-left: 40px">
+      2. `Page.setup_auth()` (Component-Level)
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#3-appsetupauth-global" style="margin-left: 40px">
+      3. `App.setup_auth()` (Global)
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#native-auth-endpoints" style="margin-left: 20px">
+      Native Auth Endpoints
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#default-auth-authid-default" style="margin-left: 40px">
+      Default Auth (auth_id = `"default"`)
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#custom-auth-eg-authid-admin" style="margin-left: 40px">
+      Custom Auth (e.g. auth_id = `"admin"`)
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#building-auth-pages-with-dars-apis" style="margin-left: 20px">
+      Building Auth Pages with Dars APIs
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#checking-session-on-page-load" style="margin-left: 40px">
+      Checking Session on Page Load
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#extracting-nested-json-fields" style="margin-left: 40px">
+      Extracting Nested JSON Fields
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#login-form-submission" style="margin-left: 40px">
+      Login Form Submission
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#middleware-route-guards" style="margin-left: 20px">
+      Middleware &amp; Route Guards
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#authmiddleware" style="margin-left: 40px">
+      AuthMiddleware
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#requiresauth-fastapi-routes" style="margin-left: 40px">
+      `@requires_auth` (FastAPI Routes)
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#requiresrole-rbac" style="margin-left: 40px">
+      `@requires_role` (RBAC)
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#api-reference-auth" style="margin-left: 20px">
+      API Reference Auth
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#darsauthencodetokenpayload-secret-algorithmhs256-expiresin3600" style="margin-left: 40px">
+      `DarsAuth.encode_token(payload, secret, algorithm="HS256", expires_in=3600)`
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#darsauthdecodetokentoken-secret-algorithmhs256" style="margin-left: 40px">
+      `DarsAuth.decode_token(token, secret, algorithm="HS256")`
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#darsauthhashpasswordpassword" style="margin-left: 40px">
+      `DarsAuth.hash_password(password)`
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#darsauthverifypasswordpassword-hashed" style="margin-left: 40px">
+      `DarsAuth.verify_password(password, hashed)`
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#darsauthsetauthcookiesresponse-accesstoken-refreshtoken-xsrftoken-authiddefault" style="margin-left: 40px">
+      `DarsAuth.set_auth_cookies(response, access_token, refresh_token, xsrf_token, auth_id="default")`
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#darsauthclearauthcookiesresponse-authiddefault" style="margin-left: 40px">
+      `DarsAuth.clear_auth_cookies(response, auth_id="default")`
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#appsetupauthverifycredentialscallback-secret-authiddefault" style="margin-left: 40px">
+      `App.setup_auth(verify_credentials_callback, secret, auth_id="default")`
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#pagesetupauthverifycredentialscallback-secret-authidnone" style="margin-left: 40px">
+      `Page.setup_auth(verify_credentials_callback, secret, auth_id=None)`
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#requiresauth-requiresauthverifycredentialscallback-secret" style="margin-left: 40px">
+      `@requires_auth` / `@requires_auth(verify_credentials_callback=..., secret=...)`
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#requiresrolerole" style="margin-left: 40px">
+      `@requires_role(role)`
      </a>
      <div class="sidebar-divider">
      </div>
@@ -2405,6 +2545,9 @@
      <a class="sidebar-link sidebar-level-3" href="#updatevreffromresponse-store-fetch-response" style="margin-left: 40px">
       updateVRefFromResponse() — Store Fetch Response
      </a>
+     <a class="sidebar-link sidebar-level-4" href="#nested-json-path-extraction-dot-notation" style="margin-left: 60px">
+      Nested JSON Path Extraction (Dot-Notation)
+     </a>
      <a class="sidebar-link sidebar-level-3" href="#runsequence-chain-multiple-actions" style="margin-left: 40px">
       runSequence() — Chain Multiple Actions
      </a>
@@ -2457,6 +2600,9 @@
      </a>
      <a class="sidebar-link sidebar-level-2" href="#updatevreffromresponse" style="margin-left: 20px">
       updateVRefFromResponse
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#nested-json-path-extraction-dot-notation" style="margin-left: 60px">
+      Nested JSON Path Extraction (Dot-Notation)
      </a>
      <a class="sidebar-link sidebar-level-2" href="#formvalidator-client-side-validation" style="margin-left: 20px">
       FormValidator — Client-Side Validation
@@ -3218,6 +3364,14 @@
          </strong>
         </a>
         : Implement server-side rendering for better performance and SEO.
+       </li>
+       <li>
+        <a href="#authentication-and-security">
+         <strong>
+          Authentication &amp; Security
+         </strong>
+        </a>
+        : Learn how to secure your application with Dars.
        </li>
        <li>
         <a href="#operations-in-dars">
@@ -12557,6 +12711,165 @@ You can configure global loading and error placeholders for this lazy-load step:
 <span class="p">}</span>
 </code></pre>
       </div>
+      <h2 id="authentication-route-protection">
+       Authentication &amp; Route Protection
+      </h2>
+      <p>
+       Dars provides a secure, robust, and completely isolated authentication system. Tokens are kept strictly hidden from the VDOM in the browser using HttpOnly and SameSite cookies, rendering XSS theft impossible. It also integrates strict CSRF protection automatically.
+      </p>
+      <h3 id="multi-auth-capabilities">
+       Multi-Auth Capabilities
+      </h3>
+      <p>
+       Starting in version
+       <code>
+        1.9.15
+       </code>
+       , Dars supports
+       <strong>
+        multiple isolated authentication schemes
+       </strong>
+       running simultaneously in the same application.
+      </p>
+      <ul>
+       <li>
+        <strong>
+         Independent Session Scopes
+        </strong>
+        : Each scheme issues scoped cookies (e.g.
+        <code>
+         dars_access_token_my_scheme
+        </code>
+        ) so a single user can have multiple concurrent sessions without conflicts.
+       </li>
+       <li>
+        <strong>
+         Dynamic Endpoints
+        </strong>
+        : API routes like
+        <code>
+         /_dars/auth/{auth_id}/login
+        </code>
+        ,
+        <code>
+         /logout
+        </code>
+        ,
+        <code>
+         /refresh
+        </code>
+        , and
+        <code>
+         /me
+        </code>
+        are generated automatically for each scheme.
+       </li>
+       <li>
+        <strong>
+         Predictable Dynamic IDs
+        </strong>
+        : When using page or route-specific decorators, Dars generates stable, clean IDs based on your Python functions (e.g.
+        <code>
+         auth_dashboard
+        </code>
+        for
+        <code>
+         def dashboard()
+        </code>
+        ).
+       </li>
+      </ul>
+      <h3 id="declaring-security-in-ssr-routes">
+       Declaring Security in SSR Routes
+      </h3>
+      <p>
+       You can secure SSR routes in three different ways:
+      </p>
+      <h4 id="1-in-line-decorator-autoconfiguration-recommended">
+       1. In-line Decorator Autoconfiguration (Recommended)
+      </h4>
+      <p>
+       You don't even need to call
+       <code>
+        setup_auth
+       </code>
+       globally! Simply put
+       <code>
+        @requires_auth(...)
+       </code>
+       right under your
+       <code>
+        @route
+       </code>
+       decorator. It will automatically register the custom verification callback and dynamic secret on the backend, generating a custom auth scheme for this specific page.
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">verify_user_about</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">username</span> <span class="o">==</span> <span class="s2">"guest"</span> <span class="ow">and</span> <span class="n">password</span> <span class="o">==</span> <span class="s2">"guest"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">"id"</span><span class="p">:</span> <span class="s2">"guest_1"</span><span class="p">,</span> <span class="s2">"username"</span><span class="p">:</span> <span class="s2">"guest"</span><span class="p">,</span> <span class="s2">"role"</span><span class="p">:</span> <span class="s2">"guest"</span><span class="p">}</span>
+    <span class="k">return</span> <span class="kc">None</span>
+
+<span class="nd">@route</span><span class="p">(</span><span class="s2">"/about"</span><span class="p">,</span> <span class="n">route_type</span><span class="o">=</span><span class="n">RouteType</span><span class="o">.</span><span class="n">SSR</span><span class="p">)</span>
+<span class="nd">@requires_auth</span><span class="p">(</span><span class="n">verify_credentials_callback</span><span class="o">=</span><span class="n">verify_user_about</span><span class="p">,</span> <span class="n">secret</span><span class="o">=</span><span class="s2">"my_super_secret_key"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">about</span><span class="p">():</span>
+    <span class="c1"># Automatically protected at runtime!</span>
+    <span class="c1"># Validates requests with scoped cookie: dars_access_token_auth_about</span>
+    <span class="c1"># Dynamic endpoint resolves at: /_dars/auth/auth_about/me</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <h4 id="2-isolated-component-configuration-pagesetup_auth">
+       2. Isolated Component Configuration (
+       <code>
+        Page.setup_auth
+       </code>
+       )
+      </h4>
+      <p>
+       You can configure dynamic isolated authentication on the
+       <code>
+        Page
+       </code>
+       component instance:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="nd">@route</span><span class="p">(</span><span class="s2">"/profile"</span><span class="p">,</span> <span class="n">route_type</span><span class="o">=</span><span class="n">RouteType</span><span class="o">.</span><span class="n">SSR</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">profile</span><span class="p">():</span>
+    <span class="n">page</span> <span class="o">=</span> <span class="n">Page</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+    <span class="n">page</span><span class="o">.</span><span class="n">setup_auth</span><span class="p">(</span><span class="n">verify_credentials_callback</span><span class="o">=</span><span class="n">verify</span><span class="p">,</span> <span class="n">secret</span><span class="o">=</span><span class="s2">"profile_secret"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">page</span>
+</code></pre>
+      </div>
+      <h4 id="3-global-application-auth-appsetup_auth">
+       3. Global Application Auth (
+       <code>
+        App.setup_auth
+       </code>
+       )
+      </h4>
+      <p>
+       Define a global auth scheme (named
+       <code>
+        "default"
+       </code>
+       ) in your
+       <code>
+        main.py
+       </code>
+       :
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"My Fullstack App"</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">setup_auth</span><span class="p">(</span><span class="n">verify_credentials_callback</span><span class="o">=</span><span class="n">verify_user</span><span class="p">,</span> <span class="n">secret</span><span class="o">=</span><span class="s2">"global_secret_key"</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       For detailed guides and deep dives into Dars security mechanisms, see
+       <a href="auth.md">
+        Authentication &amp; Security
+       </a>
+       .
+      </p>
       <hr/>
       <h2 id="ssr-api-reference">
        SSR API Reference
@@ -12869,6 +13182,971 @@ You can configure global loading and error placeholders for this lazy-load step:
 - Configure environment variables
       </p>
       <hr/>
+     </div>
+     <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="md-auth">
+      <h1 id="authentication-and-security">
+       Authentication And Security
+      </h1>
+      <p>
+       Dars provides a production-grade, secure-by-default authentication system that is
+       <strong>
+        completely isolated from the VDOM
+       </strong>
+       . Tokens never touch the browser's JavaScript context — they live exclusively in HttpOnly cookies managed by the browser itself. This means even if an attacker injects malicious JS (XSS), they cannot steal session tokens.
+      </p>
+      <h2 id="table-of-contents">
+       Table of Contents
+      </h2>
+      <ul>
+       <li>
+        <a href="#security-architecture">
+         Security Architecture
+        </a>
+       </li>
+       <li>
+        <a href="#multi-auth-multiple-isolated-schemes">
+         Multi-Auth: Multiple Isolated Schemes
+        </a>
+       </li>
+       <li>
+        <a href="#three-ways-to-declare-auth">
+         Three Ways to Declare Auth
+        </a>
+       </li>
+       <li>
+        <a href="#native-auth-endpoints">
+         Native Auth Endpoints
+        </a>
+       </li>
+       <li>
+        <a href="#building-auth-pages-with-dars-apis">
+         Building Auth Pages with Dars APIs
+        </a>
+       </li>
+       <li>
+        <a href="#middleware--route-guards">
+         Middleware &amp; Route Guards
+        </a>
+       </li>
+       <li>
+        <a href="#api-reference-auth">
+         API Reference
+        </a>
+       </li>
+      </ul>
+      <hr/>
+      <h2 id="overview">
+       Overview
+      </h2>
+      <p>
+       Dars Authentication provides:
+      </p>
+      <ul>
+       <li>
+        <strong>
+         HttpOnly Cookie-Based Sessions
+        </strong>
+        — Access and refresh tokens are transported as invisible cookies; JavaScript cannot read them.
+       </li>
+       <li>
+        <strong>
+         CSRF Protection
+        </strong>
+        — Built-in
+        <code>
+         XSRF-TOKEN
+        </code>
+        cookie + header validation for all mutating requests.
+       </li>
+       <li>
+        <strong>
+         Refresh Token Rotation
+        </strong>
+        — Long-lived refresh tokens are automatically rotated on every use and can be revoked server-side.
+       </li>
+       <li>
+        <strong>
+         Multi-Auth Support
+        </strong>
+        — Run multiple independent authentication schemes in the same app, each with its own secret, session store, and scoped cookies.
+       </li>
+       <li>
+        <strong>
+         Pure Python JWT
+        </strong>
+        — Zero third-party dependencies. JWTs are signed with HMAC-SHA256 using Python's standard library.
+       </li>
+       <li>
+        <strong>
+         Password Hashing
+        </strong>
+        — PBKDF2 with SHA-256 (100,000 iterations), timing-attack resistant comparison.
+       </li>
+      </ul>
+      <hr/>
+      <h2 id="security-architecture">
+       Security Architecture
+      </h2>
+      <h3 id="token-flow">
+       Token Flow
+      </h3>
+      <pre>
+<code class="language-none">┌─────────────────────────────────────────────────────────┐
+│                      Browser                            │
+│                                                         │
+│   ┌───────────────┐     Cookies (HttpOnly, Secure)      │
+│   │   Dars VDOM   │ ──── dars_access_token ────────►    │
+│   │   (JS/HTML)   │ ──── dars_refresh_token ───────►    │
+│   │               │ ──── XSRF-TOKEN (readable) ───►     │
+│   │  Cannot read  │                                     │
+│   │  token values │                                     │
+│   └───────────────┘                                     │
+└─────────────────────────────────────────────────────────┘
+              │ Automatic cookie attachment
+              ▼
+┌─────────────────────────────────────────────────────────┐
+│                   Dars Backend (FastAPI)                 │
+│                                                         │
+│   /_dars/auth/login   → Issues tokens as cookies        │
+│   /_dars/auth/me      → Returns user data (JSON)        │
+│   /_dars/auth/refresh → Rotates tokens                  │
+│   /_dars/auth/logout  → Revokes &amp; clears cookies        │
+│                                                         │
+│   AuthMiddleware validates token on protected routes     │
+└─────────────────────────────────────────────────────────┘
+</code></pre>
+      <h3 id="cookie-configuration">
+       Cookie Configuration
+      </h3>
+      <table>
+       <thead>
+        <tr>
+         <th>
+          Cookie
+         </th>
+         <th>
+          HttpOnly
+         </th>
+         <th>
+          SameSite
+         </th>
+         <th>
+          Secure
+         </th>
+         <th>
+          Max-Age
+         </th>
+         <th>
+          Purpose
+         </th>
+        </tr>
+       </thead>
+       <tbody>
+        <tr>
+         <td>
+          <code>
+           dars_access_token
+          </code>
+         </td>
+         <td>
+          ✅
+         </td>
+         <td>
+          Strict
+         </td>
+         <td>
+          ✅
+         </td>
+         <td>
+          15 min
+         </td>
+         <td>
+          Short-lived JWT for API access
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           dars_refresh_token
+          </code>
+         </td>
+         <td>
+          ✅
+         </td>
+         <td>
+          Strict
+         </td>
+         <td>
+          ✅
+         </td>
+         <td>
+          7 days
+         </td>
+         <td>
+          Long-lived opaque token for token rotation
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           XSRF-TOKEN
+          </code>
+         </td>
+         <td>
+          ❌
+         </td>
+         <td>
+          Strict
+         </td>
+         <td>
+          ✅
+         </td>
+         <td>
+          7 days
+         </td>
+         <td>
+          CSRF protection (readable by JS to send as header)
+         </td>
+        </tr>
+       </tbody>
+      </table>
+      <h3 id="csrf-protection">
+       CSRF Protection
+      </h3>
+      <p>
+       For cookie-based auth, Dars requires the
+       <code>
+        X-XSRF-TOKEN
+       </code>
+       header on all mutating requests (
+       <code>
+        POST
+       </code>
+       ,
+       <code>
+        PUT
+       </code>
+       ,
+       <code>
+        DELETE
+       </code>
+       ,
+       <code>
+        PATCH
+       </code>
+       ). The client reads the
+       <code>
+        XSRF-TOKEN
+       </code>
+       cookie and sends its value as the header. The
+       <code>
+        AuthMiddleware
+       </code>
+       validates the match automatically.
+      </p>
+      <hr/>
+      <h2 id="quick-start">
+       Quick Start
+      </h2>
+      <h3 id="1-define-a-verification-callback">
+       1. Define a Verification Callback
+      </h3>
+      <p>
+       Your callback receives
+       <code>
+        (username, password)
+       </code>
+       and returns a user dictionary or
+       <code>
+        None
+       </code>
+       :
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">verify_user</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">):</span>
+    <span class="c1"># Replace with your actual database lookup</span>
+    <span class="k">if</span> <span class="n">username</span> <span class="o">==</span> <span class="s2">"admin"</span> <span class="ow">and</span> <span class="n">password</span> <span class="o">==</span> <span class="s2">"secret"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">"id"</span><span class="p">:</span> <span class="s2">"1"</span><span class="p">,</span> <span class="s2">"username"</span><span class="p">:</span> <span class="s2">"admin"</span><span class="p">,</span> <span class="s2">"role"</span><span class="p">:</span> <span class="s2">"admin"</span><span class="p">}</span>
+    <span class="k">return</span> <span class="kc">None</span>
+</code></pre>
+      </div>
+      <h3 id="2-register-with-the-app">
+       2. Register with the App
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.all</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"My Secure App"</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">setup_auth</span><span class="p">(</span><span class="n">verify_credentials_callback</span><span class="o">=</span><span class="n">verify_user</span><span class="p">,</span> <span class="n">secret</span><span class="o">=</span><span class="s2">"your_secret_key_here"</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="3-build-the-login-page">
+       3. Build the Login Page
+      </h3>
+      <p>
+       Use native Dars APIs (
+       <code>
+        useFetch
+       </code>
+       ,
+       <code>
+        VRefs
+       </code>
+       ,
+       <code>
+        Show
+       </code>
+       ) to build the UI — no raw JavaScript needed:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="nd">@route</span><span class="p">(</span><span class="s2">"/auth"</span><span class="p">,</span> <span class="n">route_type</span><span class="o">=</span><span class="n">RouteType</span><span class="o">.</span><span class="n">SSR</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">auth</span><span class="p">():</span>
+    <span class="n">show_login</span> <span class="o">=</span> <span class="n">setVRef</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">".show-login"</span><span class="p">)</span>
+    <span class="n">show_dashboard</span> <span class="o">=</span> <span class="n">setVRef</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="s2">".show-dashboard"</span><span class="p">)</span>
+    <span class="n">username_sel</span> <span class="o">=</span> <span class="s2">".user-name"</span>
+
+    <span class="c1"># Check if already logged in</span>
+    <span class="n">on_me_success</span> <span class="o">=</span> <span class="n">runSequence</span><span class="p">(</span>
+        <span class="n">updateVRef</span><span class="p">(</span><span class="s2">".show-login"</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="n">updateVRef</span><span class="p">(</span><span class="s2">".show-dashboard"</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+        <span class="n">updateVRefFromResponse</span><span class="p">(</span><span class="n">username_sel</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">"response.user.username"</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">on_me_error</span> <span class="o">=</span> <span class="n">runSequence</span><span class="p">(</span>
+        <span class="n">updateVRef</span><span class="p">(</span><span class="s2">".show-login"</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">fetch_me</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">useFetch</span><span class="p">(</span><span class="s2">"/_dars/auth/me"</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"GET"</span><span class="p">,</span>
+                             <span class="n">on_success</span><span class="o">=</span><span class="n">on_me_success</span><span class="p">,</span> <span class="n">on_error</span><span class="o">=</span><span class="n">on_me_error</span><span class="p">)</span>
+
+    <span class="c1"># Login form</span>
+    <span class="n">login_form</span> <span class="o">=</span> <span class="n">collect_form</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="n">V</span><span class="p">(</span><span class="s2">"#username"</span><span class="p">),</span> <span class="n">password</span><span class="o">=</span><span class="n">V</span><span class="p">(</span><span class="s2">"#password"</span><span class="p">))</span>
+    <span class="n">validator</span> <span class="o">=</span> <span class="n">FormValidator</span><span class="p">({</span><span class="s2">"username"</span><span class="p">:</span> <span class="p">[</span><span class="n">required</span><span class="p">()],</span> <span class="s2">"password"</span><span class="p">:</span> <span class="p">[</span><span class="n">required</span><span class="p">()]})</span>
+
+    <span class="n">on_login_success</span> <span class="o">=</span> <span class="n">runSequence</span><span class="p">(</span>
+        <span class="n">updateVRef</span><span class="p">(</span><span class="s2">".show-login"</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="n">updateVRef</span><span class="p">(</span><span class="s2">".show-dashboard"</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+        <span class="n">updateVRefFromResponse</span><span class="p">(</span><span class="n">username_sel</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">"response.user.username"</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">submit_login</span> <span class="o">=</span> <span class="n">validator</span><span class="o">.</span><span class="n">validated_submit</span><span class="p">(</span>
+        <span class="n">url</span><span class="o">=</span><span class="s2">"/_dars/auth/login"</span><span class="p">,</span> <span class="n">form_data</span><span class="o">=</span><span class="n">login_form</span><span class="p">,</span>
+        <span class="n">on_success</span><span class="o">=</span><span class="n">on_login_success</span><span class="p">,</span>
+        <span class="n">on_error</span><span class="o">=</span><span class="n">runSequence</span><span class="p">(</span><span class="n">updateVRefFromResponse</span><span class="p">(</span><span class="s2">".login-error"</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">"response.detail"</span><span class="p">))</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Logout</span>
+    <span class="n">fetch_logout</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">useFetch</span><span class="p">(</span><span class="s2">"/_dars/auth/logout"</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"POST"</span><span class="p">,</span>
+        <span class="n">on_success</span><span class="o">=</span><span class="n">runSequence</span><span class="p">(</span><span class="n">updateVRef</span><span class="p">(</span><span class="s2">".show-dashboard"</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span> <span class="n">updateVRef</span><span class="p">(</span><span class="s2">".show-login"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)))</span>
+
+    <span class="n">page</span> <span class="o">=</span> <span class="n">Page</span><span class="p">(</span>
+        <span class="n">Container</span><span class="p">(</span>
+            <span class="n">Show</span><span class="p">(</span><span class="n">show_login</span><span class="p">,</span> <span class="n">Container</span><span class="p">(</span>
+                <span class="n">Input</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"username"</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">"Username"</span><span class="p">),</span>
+                <span class="n">Input</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">"password"</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">"Password"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">"password"</span><span class="p">),</span>
+                <span class="n">Text</span><span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="n">class_name</span><span class="o">=</span><span class="s2">"login-error"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">"color: red;"</span><span class="p">),</span>
+                <span class="n">Button</span><span class="p">(</span><span class="s2">"Login"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">submit_login</span><span class="p">),</span>
+            <span class="p">)),</span>
+            <span class="n">Show</span><span class="p">(</span><span class="n">show_dashboard</span><span class="p">,</span> <span class="n">Container</span><span class="p">(</span>
+                <span class="n">Text</span><span class="p">(</span><span class="s2">"Welcome, "</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">"font-weight: bold;"</span><span class="p">),</span>
+                <span class="n">Text</span><span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="n">class_name</span><span class="o">=</span><span class="s2">"user-name"</span><span class="p">),</span>
+                <span class="n">Button</span><span class="p">(</span><span class="s2">"Logout"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">fetch_logout</span><span class="p">),</span>
+            <span class="p">)),</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">page</span><span class="o">.</span><span class="n">add_script</span><span class="p">(</span><span class="n">fetch_me</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">page</span>
+</code></pre>
+      </div>
+      <blockquote>
+       <p>
+        A complete working example is available in the repository at
+        <a href="https://github.com/ZtaDev/Dars-Framework/tree/main/examples/FullStack-app">
+         <code>
+          /examples/FullStack-app
+         </code>
+        </a>
+        .
+       </p>
+      </blockquote>
+      <hr/>
+      <h2 id="multi-auth-multiple-isolated-schemes">
+       Multi-Auth: Multiple Isolated Schemes
+      </h2>
+      <p>
+       Dars allows registering
+       <strong>
+        multiple independent authentication configurations
+       </strong>
+       , each with its own:
+      </p>
+      <ul>
+       <li>
+        Verification callback
+       </li>
+       <li>
+        Secret key
+       </li>
+       <li>
+        Session manager
+       </li>
+       <li>
+        Scoped cookies
+       </li>
+      </ul>
+      <p>
+       Each auth scheme is identified by a unique
+       <code>
+        auth_id
+       </code>
+       . The default global scheme uses the ID
+       <code>
+        "default"
+       </code>
+       .
+      </p>
+      <h3 id="how-cookies-are-scoped">
+       How Cookies Are Scoped
+      </h3>
+      <table>
+       <thead>
+        <tr>
+         <th>
+          Auth ID
+         </th>
+         <th>
+          Access Cookie
+         </th>
+         <th>
+          Refresh Cookie
+         </th>
+        </tr>
+       </thead>
+       <tbody>
+        <tr>
+         <td>
+          <code>
+           "default"
+          </code>
+         </td>
+         <td>
+          <code>
+           dars_access_token
+          </code>
+         </td>
+         <td>
+          <code>
+           dars_refresh_token
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           "admin"
+          </code>
+         </td>
+         <td>
+          <code>
+           dars_access_token_admin
+          </code>
+         </td>
+         <td>
+          <code>
+           dars_refresh_token_admin
+          </code>
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           "auth_about"
+          </code>
+         </td>
+         <td>
+          <code>
+           dars_access_token_auth_about
+          </code>
+         </td>
+         <td>
+          <code>
+           dars_refresh_token_auth_about
+          </code>
+         </td>
+        </tr>
+       </tbody>
+      </table>
+      <p>
+       This ensures that sessions for different auth schemes never collide. A user can be simultaneously logged in as "admin" and "guest" in different sections.
+      </p>
+      <hr/>
+      <h2 id="three-ways-to-declare-auth">
+       Three Ways to Declare Auth
+      </h2>
+      <h3 id="1-requires_auth-decorator-inline-recommended">
+       1.
+       <code>
+        @requires_auth
+       </code>
+       Decorator (Inline — Recommended)
+      </h3>
+      <p>
+       The simplest way. Place it right below your
+       <code>
+        @route
+       </code>
+       decorator. It auto-registers the auth config and generates a predictable
+       <code>
+        auth_id
+       </code>
+       based on the function name:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">verify_guest</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">username</span> <span class="o">==</span> <span class="s2">"guest"</span> <span class="ow">and</span> <span class="n">password</span> <span class="o">==</span> <span class="s2">"guest"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">"id"</span><span class="p">:</span> <span class="s2">"g1"</span><span class="p">,</span> <span class="s2">"username"</span><span class="p">:</span> <span class="s2">"guest"</span><span class="p">,</span> <span class="s2">"role"</span><span class="p">:</span> <span class="s2">"guest"</span><span class="p">}</span>
+    <span class="k">return</span> <span class="kc">None</span>
+
+<span class="nd">@route</span><span class="p">(</span><span class="s2">"/about"</span><span class="p">,</span> <span class="n">route_type</span><span class="o">=</span><span class="n">RouteType</span><span class="o">.</span><span class="n">SSR</span><span class="p">)</span>
+<span class="nd">@requires_auth</span><span class="p">(</span><span class="n">verify_credentials_callback</span><span class="o">=</span><span class="n">verify_guest</span><span class="p">,</span> <span class="n">secret</span><span class="o">=</span><span class="s2">"about_secret"</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">about</span><span class="p">():</span>
+    <span class="c1"># auth_id is automatically "auth_about" (from the function name)</span>
+    <span class="c1"># Endpoints: /_dars/auth/auth_about/login, /me, /logout, /refresh</span>
+    <span class="o">...</span>
+</code></pre>
+      </div>
+      <h3 id="2-pagesetup_auth-component-level">
+       2.
+       <code>
+        Page.setup_auth()
+       </code>
+       (Component-Level)
+      </h3>
+      <p>
+       Configure auth directly on a
+       <code>
+        Page
+       </code>
+       instance:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="nd">@route</span><span class="p">(</span><span class="s2">"/profile"</span><span class="p">,</span> <span class="n">route_type</span><span class="o">=</span><span class="n">RouteType</span><span class="o">.</span><span class="n">SSR</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">profile</span><span class="p">():</span>
+    <span class="n">page</span> <span class="o">=</span> <span class="n">Page</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+    <span class="n">page</span><span class="o">.</span><span class="n">setup_auth</span><span class="p">(</span>
+        <span class="n">verify_credentials_callback</span><span class="o">=</span><span class="n">verify_user</span><span class="p">,</span>
+        <span class="n">secret</span><span class="o">=</span><span class="s2">"profile_secret"</span><span class="p">,</span>
+        <span class="n">auth_id</span><span class="o">=</span><span class="s2">"profile_auth"</span>  <span class="c1"># optional, auto-generated if omitted</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">page</span>
+</code></pre>
+      </div>
+      <h3 id="3-appsetup_auth-global">
+       3.
+       <code>
+        App.setup_auth()
+       </code>
+       (Global)
+      </h3>
+      <p>
+       Register a global auth scheme:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"My App"</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">setup_auth</span><span class="p">(</span>
+    <span class="n">verify_credentials_callback</span><span class="o">=</span><span class="n">verify_user</span><span class="p">,</span>
+    <span class="n">secret</span><span class="o">=</span><span class="s2">"global_secret"</span><span class="p">,</span>
+    <span class="n">auth_id</span><span class="o">=</span><span class="s2">"default"</span>  <span class="c1"># optional, defaults to "default"</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <p>
+       You can call
+       <code>
+        app.setup_auth()
+       </code>
+       multiple times with different
+       <code>
+        auth_id
+       </code>
+       values to register additional schemes.
+      </p>
+      <hr/>
+      <h2 id="native-auth-endpoints">
+       Native Auth Endpoints
+      </h2>
+      <p>
+       When auth is configured, Dars automatically exposes the following FastAPI endpoints under
+       <code>
+        /_dars/auth/
+       </code>
+       :
+      </p>
+      <h3 id="default-auth-auth_id-default">
+       Default Auth (auth_id =
+       <code>
+        "default"
+       </code>
+       )
+      </h3>
+      <table>
+       <thead>
+        <tr>
+         <th>
+          Method
+         </th>
+         <th>
+          Path
+         </th>
+         <th>
+          Description
+         </th>
+        </tr>
+       </thead>
+       <tbody>
+        <tr>
+         <td>
+          <code>
+           POST
+          </code>
+         </td>
+         <td>
+          <code>
+           /_dars/auth/login
+          </code>
+         </td>
+         <td>
+          Validates credentials, issues session cookies
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           POST
+          </code>
+         </td>
+         <td>
+          <code>
+           /_dars/auth/refresh
+          </code>
+         </td>
+         <td>
+          Rotates access token using refresh token
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           POST
+          </code>
+         </td>
+         <td>
+          <code>
+           /_dars/auth/logout
+          </code>
+         </td>
+         <td>
+          Revokes session, clears cookies
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           GET
+          </code>
+         </td>
+         <td>
+          <code>
+           /_dars/auth/me
+          </code>
+         </td>
+         <td>
+          Returns authenticated user's data
+         </td>
+        </tr>
+       </tbody>
+      </table>
+      <h3 id="custom-auth-eg-auth_id-admin">
+       Custom Auth (e.g. auth_id =
+       <code>
+        "admin"
+       </code>
+       )
+      </h3>
+      <table>
+       <thead>
+        <tr>
+         <th>
+          Method
+         </th>
+         <th>
+          Path
+         </th>
+         <th>
+          Description
+         </th>
+        </tr>
+       </thead>
+       <tbody>
+        <tr>
+         <td>
+          <code>
+           POST
+          </code>
+         </td>
+         <td>
+          <code>
+           /_dars/auth/admin/login
+          </code>
+         </td>
+         <td>
+          Login for the "admin" scheme
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           POST
+          </code>
+         </td>
+         <td>
+          <code>
+           /_dars/auth/admin/refresh
+          </code>
+         </td>
+         <td>
+          Refresh for the "admin" scheme
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           POST
+          </code>
+         </td>
+         <td>
+          <code>
+           /_dars/auth/admin/logout
+          </code>
+         </td>
+         <td>
+          Logout for the "admin" scheme
+         </td>
+        </tr>
+        <tr>
+         <td>
+          <code>
+           GET
+          </code>
+         </td>
+         <td>
+          <code>
+           /_dars/auth/admin/me
+          </code>
+         </td>
+         <td>
+          User info for the "admin" scheme
+         </td>
+        </tr>
+       </tbody>
+      </table>
+      <hr/>
+      <h2 id="building-auth-pages-with-dars-apis">
+       Building Auth Pages with Dars APIs
+      </h2>
+      <p>
+       Since the frontend compiles to pure HTML/CSS/JS, you use Dars native APIs to interact with the auth system:
+      </p>
+      <h3 id="checking-session-on-page-load">
+       Checking Session on Page Load
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">fetch_me</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">useFetch</span><span class="p">(</span>
+    <span class="s2">"/_dars/auth/me"</span><span class="p">,</span>   <span class="c1"># or "/_dars/auth/{auth_id}/me"</span>
+    <span class="n">method</span><span class="o">=</span><span class="s2">"GET"</span><span class="p">,</span>
+    <span class="n">on_success</span><span class="o">=</span><span class="n">runSequence</span><span class="p">(</span>
+        <span class="n">updateVRef</span><span class="p">(</span><span class="s2">".show-dashboard"</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+        <span class="n">updateVRefFromResponse</span><span class="p">(</span><span class="s2">".user-name"</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">"response.user.username"</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="n">on_error</span><span class="o">=</span><span class="n">runSequence</span><span class="p">(</span>
+        <span class="n">updateVRef</span><span class="p">(</span><span class="s2">".show-login"</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+<span class="n">page</span><span class="o">.</span><span class="n">add_script</span><span class="p">(</span><span class="n">fetch_me</span><span class="p">)</span>  <span class="c1"># runs on page load</span>
+</code></pre>
+      </div>
+      <h3 id="extracting-nested-json-fields">
+       Extracting Nested JSON Fields
+      </h3>
+      <p>
+       Use dot-notation in
+       <code>
+        updateVRefFromResponse
+       </code>
+       to extract specific fields from the JSON response:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">updateVRefFromResponse</span><span class="p">(</span><span class="s2">".user-name"</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">"response.user.username"</span><span class="p">)</span>
+<span class="n">updateVRefFromResponse</span><span class="p">(</span><span class="s2">".user-role"</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">"response.user.role"</span><span class="p">)</span>
+<span class="n">updateVRefFromResponse</span><span class="p">(</span><span class="s2">".user-email"</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">"response.user.email"</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="login-form-submission">
+       Login Form Submission
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">login_form</span> <span class="o">=</span> <span class="n">collect_form</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="n">V</span><span class="p">(</span><span class="s2">"#username"</span><span class="p">),</span> <span class="n">password</span><span class="o">=</span><span class="n">V</span><span class="p">(</span><span class="s2">"#password"</span><span class="p">))</span>
+<span class="n">validator</span> <span class="o">=</span> <span class="n">FormValidator</span><span class="p">({</span><span class="s2">"username"</span><span class="p">:</span> <span class="p">[</span><span class="n">required</span><span class="p">()],</span> <span class="s2">"password"</span><span class="p">:</span> <span class="p">[</span><span class="n">required</span><span class="p">()]})</span>
+
+<span class="n">submit</span> <span class="o">=</span> <span class="n">validator</span><span class="o">.</span><span class="n">validated_submit</span><span class="p">(</span>
+    <span class="n">url</span><span class="o">=</span><span class="s2">"/_dars/auth/login"</span><span class="p">,</span>
+    <span class="n">form_data</span><span class="o">=</span><span class="n">login_form</span><span class="p">,</span>
+    <span class="n">on_success</span><span class="o">=</span><span class="n">on_login_success</span><span class="p">,</span>
+    <span class="n">on_error</span><span class="o">=</span><span class="n">runSequence</span><span class="p">(</span><span class="n">updateVRefFromResponse</span><span class="p">(</span><span class="s2">".error-msg"</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">"response.detail"</span><span class="p">))</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
+      <hr/>
+      <h2 id="middleware-route-guards">
+       Middleware &amp; Route Guards
+      </h2>
+      <h3 id="authmiddleware">
+       AuthMiddleware
+      </h3>
+      <p>
+       Protects backend API routes by validating JWT cookies. Automatically detects scoped cookies from multiple auth schemes.
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">ssr</span><span class="o">.</span><span class="n">use_auth</span><span class="p">(</span><span class="n">secret</span><span class="o">=</span><span class="s2">"my_secret"</span><span class="p">,</span> <span class="n">exclude_paths</span><span class="o">=</span><span class="p">[</span><span class="s2">"/_dars/auth"</span><span class="p">,</span> <span class="s2">"/api/public"</span><span class="p">])</span>
+</code></pre>
+      </div>
+      <h3 id="requires_auth-fastapi-routes">
+       <code>
+        @requires_auth
+       </code>
+       (FastAPI Routes)
+      </h3>
+      <p>
+       For custom FastAPI endpoints (not Dars pages), use the decorator to enforce authentication:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.core.auth</span><span class="w"> </span><span class="kn">import</span> <span class="n">requires_auth</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/api/protected"</span><span class="p">)</span>
+<span class="nd">@requires_auth</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">protected_route</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">user</span>  <span class="c1"># injected by the decorator</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"message"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"Hello </span><span class="si">{</span><span class="n">user</span><span class="p">[</span><span class="s1">'username'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">}</span>
+</code></pre>
+      </div>
+      <h3 id="requires_role-rbac">
+       <code>
+        @requires_role
+       </code>
+       (RBAC)
+      </h3>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.core.auth</span><span class="w"> </span><span class="kn">import</span> <span class="n">requires_role</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/api/admin"</span><span class="p">)</span>
+<span class="nd">@requires_role</span><span class="p">(</span><span class="s2">"admin"</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">admin_only</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"message"</span><span class="p">:</span> <span class="s2">"Admin access granted"</span><span class="p">}</span>
+</code></pre>
+      </div>
+      <hr/>
+      <h2 id="api-reference-auth">
+       API Reference Auth
+      </h2>
+      <h3 id="darsauthencode_tokenpayload-secret-algorithmhs256-expires_in3600">
+       <code>
+        DarsAuth.encode_token(payload, secret, algorithm="HS256", expires_in=3600)
+       </code>
+      </h3>
+      <p>
+       Generates a signed JWT. Returns the token string.
+      </p>
+      <h3 id="darsauthdecode_tokentoken-secret-algorithmhs256">
+       <code>
+        DarsAuth.decode_token(token, secret, algorithm="HS256")
+       </code>
+      </h3>
+      <p>
+       Validates signature, checks expiration, returns payload dict. Raises
+       <code>
+        ValueError
+       </code>
+       on failure.
+      </p>
+      <h3 id="darsauthhash_passwordpassword">
+       <code>
+        DarsAuth.hash_password(password)
+       </code>
+      </h3>
+      <p>
+       Returns a PBKDF2-SHA256 hash string (100,000 iterations).
+      </p>
+      <h3 id="darsauthverify_passwordpassword-hashed">
+       <code>
+        DarsAuth.verify_password(password, hashed)
+       </code>
+      </h3>
+      <p>
+       Timing-attack resistant password verification. Returns
+       <code>
+        bool
+       </code>
+       .
+      </p>
+      <h3 id="darsauthset_auth_cookiesresponse-access_token-refresh_token-xsrf_token-auth_iddefault">
+       <code>
+        DarsAuth.set_auth_cookies(response, access_token, refresh_token, xsrf_token, auth_id="default")
+       </code>
+      </h3>
+      <p>
+       Sets the three secure cookies with scoped names.
+      </p>
+      <h3 id="darsauthclear_auth_cookiesresponse-auth_iddefault">
+       <code>
+        DarsAuth.clear_auth_cookies(response, auth_id="default")
+       </code>
+      </h3>
+      <p>
+       Clears scoped auth cookies.
+      </p>
+      <h3 id="appsetup_authverify_credentials_callback-secret-auth_iddefault">
+       <code>
+        App.setup_auth(verify_credentials_callback, secret, auth_id="default")
+       </code>
+      </h3>
+      <p>
+       Registers an auth configuration globally.
+      </p>
+      <h3 id="pagesetup_authverify_credentials_callback-secret-auth_idnone">
+       <code>
+        Page.setup_auth(verify_credentials_callback, secret, auth_id=None)
+       </code>
+      </h3>
+      <p>
+       Registers an auth configuration for a specific page.
+      </p>
+      <h3 id="requires_auth-requires_authverify_credentials_callback-secret">
+       <code>
+        @requires_auth
+       </code>
+       /
+       <code>
+        @requires_auth(verify_credentials_callback=..., secret=...)
+       </code>
+      </h3>
+      <p>
+       Decorator for FastAPI routes or Dars page functions. Supports both bare and parameterized forms.
+      </p>
+      <h3 id="requires_rolerole">
+       <code>
+        @requires_role(role)
+       </code>
+      </h3>
+      <p>
+       Decorator for role-based access control on FastAPI routes.
+      </p>
      </div>
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="md-state_management">
       <h1 id="state-management-in-dars">
@@ -16537,17 +17815,31 @@ You can configure global loading and error placeholders for this lazy-load step:
 <span class="p">)</span>
 </code></pre>
       </div>
+      <h4 id="nested-json-path-extraction-dot-notation">
+       Nested JSON Path Extraction (Dot-Notation)
+      </h4>
       <p>
-       Use
+       You can use dot-notation in the
        <code>
         key
        </code>
-       to read a different context field if needed (default is
+       parameter to drill down into nested JSON response structures (e.g.
        <code>
-        "response"
+        response.user.username
        </code>
-       ).
+       ,
+       <code>
+        response.data.items
+       </code>
+       ). This makes Dars completely compatible with any backend or third-party JSON API, extracting just the data you need without manual transformation.
       </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">on_success</span><span class="o">=</span><span class="n">runSequence</span><span class="p">(</span>
+    <span class="n">updateVRefFromResponse</span><span class="p">(</span><span class="s2">".user-name"</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">"response.user.username"</span><span class="p">),</span>
+    <span class="n">updateVRefFromResponse</span><span class="p">(</span><span class="s2">".user-role"</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">"response.user.role"</span><span class="p">),</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
       <hr/>
       <h3 id="runsequence-chain-multiple-actions">
        runSequence() — Chain Multiple Actions
@@ -17825,17 +19117,31 @@ dars<span class="w"> </span>dev
 <span class="p">)</span>
 </code></pre>
       </div>
+      <h4 id="nested-json-path-extraction-dot-notation">
+       Nested JSON Path Extraction (Dot-Notation)
+      </h4>
       <p>
-       Use
+       You can use dot-notation in the
        <code>
         key
        </code>
-       to read a different context field if needed (default is
+       parameter to drill down into nested JSON response structures (e.g.
        <code>
-        "response"
+        response.user.username
        </code>
-       ).
+       ,
+       <code>
+        response.data.items
+       </code>
+       ). This makes Dars completely compatible with any backend or third-party JSON API, extracting just the data you need without manual transformation.
       </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="n">on_success</span><span class="o">=</span><span class="n">runSequence</span><span class="p">(</span>
+    <span class="n">updateVRefFromResponse</span><span class="p">(</span><span class="s2">".user-name"</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">"response.user.username"</span><span class="p">),</span>
+    <span class="n">updateVRefFromResponse</span><span class="p">(</span><span class="s2">".user-role"</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">"response.user.role"</span><span class="p">),</span>
+<span class="p">)</span>
+</code></pre>
+      </div>
       <hr/>
       <h2 id="formvalidator-client-side-validation">
        FormValidator — Client-Side Validation
@@ -20945,7 +22251,7 @@ DEBUG=true
   </div>
   <div id="__dars_spa_root__">
   </div>
-  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1779713212" type="module">
+  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1779727919" type="module">
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js">
   </script>

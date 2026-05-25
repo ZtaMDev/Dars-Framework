@@ -215,7 +215,15 @@ on_success=runSequence(
 )
 ```
 
-Use `key` to read a different context field if needed (default is `"response"`).
+#### Nested JSON Path Extraction (Dot-Notation)
+You can use dot-notation in the `key` parameter to drill down into nested JSON response structures (e.g. `response.user.username`, `response.data.items`). This makes Dars completely compatible with any backend or third-party JSON API, extracting just the data you need without manual transformation.
+
+```python
+on_success=runSequence(
+    updateVRefFromResponse(".user-name", key="response.user.username"),
+    updateVRefFromResponse(".user-role", key="response.user.role"),
+)
+```
 
 ---
 

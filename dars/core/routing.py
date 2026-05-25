@@ -14,6 +14,7 @@ This module provides:
 - RouteNode class for nested route tree structure
 """
 
+from dars.core.route_types import RouteType
 import re
 from typing import List, Optional, Dict, TYPE_CHECKING
 
@@ -69,6 +70,15 @@ def route(
     )
     
     def decorator(func):
+        # Detect function-level requires_auth decorator attributes
+        req_auth = getattr(func, '__requires_auth__', False) or requires_auth
+        auth_id = getattr(func, '__auth_id__', None)
+        
+        if req_auth:
+            metadata.requires_auth = True
+        if auth_id:
+            metadata.auth_id = auth_id
+
         # Store route metadata on the function
         func.__dars_route__ = path
         func.__dars_route_metadata__ = metadata
@@ -80,6 +90,10 @@ def route(
             # If result is a Page, attach route info
             if result is not None:
                 result.__dars_route__ = path
+                # Detect page-level setup_auth configured auth_id
+                if hasattr(result, '_auth_id') and result._auth_id:
+                    metadata.requires_auth = True
+                    metadata.auth_id = result._auth_id
                 result.__dars_route_metadata__ = metadata
                 result.__source_func__ = func
             return result

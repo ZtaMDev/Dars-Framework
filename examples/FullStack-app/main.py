@@ -2,18 +2,14 @@ from dars.all import *
 # pyrefly: ignore [missing-import]
 from pages.about import about
 # pyrefly: ignore [missing-import]
-from pages.tasklist import tasklist, verify_user
+from pages.tasklist import tasklist
 # pyrefly: ignore [missing-import]
-from pages.auth import auth
+from pages.auth import auth, verify_user
 
-# For this project you need the 1.9.15 of dars but at the moment of upload of
-# this file to the repo, it will not be released yet, so you need to
-# compile the framework by yourself with `pip install e .` in the root of 
-# the repo then you can run `dars dev` on this directory
+# !IMPORTANT: For this project you need the v1.9.15 of dars
 
 app = App(title="Static App", theme="dark")
-# Setup dars auth(route protection for now only one for app in text updates will be a lot better)
-# In the next commits i will include an ID parameter to have more than 1 per app, and also route.setup_auth() to not use app.setup_auth() globaly
+# Setup dars auth
 app.setup_auth(verify_credentials_callback=verify_user, secret="super_secret_test_key_123")
 
 # 1. Define Page

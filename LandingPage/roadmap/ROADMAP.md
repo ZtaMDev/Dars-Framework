@@ -52,18 +52,18 @@ Everything below is what's needed to make Dars a real, production-usable fullsta
 
 ### 1. Authentication & Session Management
 
-- [ ] `DarsAuth` class with JWT generation (`jwt.encode`) and verification
-- [ ] Configurable secret, algorithm (`HS256`/`RS256`), and token expiration
-- [ ] Refresh token rotation flow
-- [ ] Password hashing utilities (bcrypt/argon2 integration)
-- [ ] Client-side auth helpers in runtime JS: `authFetch()`, `getToken()`, `setToken()`, `clearToken()`
-- [ ] `isAuthenticated()` check for conditional UI rendering
-- [ ] `auth.login()` / `auth.logout()` DAP actions
-- [ ] Auth endpoint templates: `/api/auth/login`, `/logout`, `/refresh`, `/me`
-- [ ] `@requires_auth` decorator for SSR/API routes
-- [ ] `@requires_role("admin")` RBAC decorator
-- [ ] Route guard decorators with custom permission checks
-- [ ] Automatic 401 redirect on token expiry
+- [x] `DarsAuth` class with JWT generation (`jwt.encode`) and verification
+- [x] Configurable secret, algorithm (`HS256`/`RS256`), and token expiration
+- [x] Refresh token rotation flow
+- [x] Password hashing utilities (bcrypt/argon2 integration - via PBKDF2 standard lib)
+- [x] Client-side auth helpers in runtime JS: scoped cookies, JSON extraction via `key`
+- [x] `isAuthenticated()` check for conditional UI rendering (via `useFetch` to `/me`)
+- [x] `auth.login()` / `auth.logout()` handled via native endpoints and form submits
+- [x] Auth endpoint templates: `/_dars/auth/login`, `/logout`, `/refresh`, `/me` with Multi-Auth support
+- [x] `@requires_auth` decorator for SSR/API routes
+- [x] `@requires_role("admin")` RBAC decorator
+- [x] Route guard decorators with custom permission checks (per-page `setup_auth()`)
+- [x] Automatic 401 redirect on token expiry (handled via middleware/refresh tokens)
 - [ ] OAuth2 provider integration (Google, GitHub)
 
 ### 2. Middleware System
@@ -72,7 +72,7 @@ Everything below is what's needed to make Dars a real, production-usable fullsta
 - [ ] Global middleware registration: `app.use(middleware)`
 - [ ] Route-specific middleware: `@middleware(AuthMiddleware)`
 - [ ] Middleware chain execution order
-- [ ] `AuthMiddleware` — verify JWT on protected routes
+- [x] `AuthMiddleware` — verify JWT on protected routes
 - [ ] `CORSMiddleware` — configurable cross-origin resource sharing
 - [ ] `RateLimitMiddleware` — per-IP / per-user rate limiting
 - [ ] `LoggingMiddleware` — request/response logging

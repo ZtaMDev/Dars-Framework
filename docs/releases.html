@@ -1173,6 +1173,165 @@
     margin: 0 auto;
     padding: 40px 20px;">
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_0_1_1_0">
+      <h1 id="release-notes-v1915">
+       Release Notes v1.9.15
+      </h1>
+      <blockquote>
+       <p>
+        <strong>
+         Production-Grade Authentication: Multi-Auth, Secure Cookies &amp; Server-Side Security
+        </strong>
+        <em>
+         This is a major update that has been in preparation and development for a long time.
+        </em>
+       </p>
+      </blockquote>
+      <h2 id="installation">
+       Installation
+      </h2>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
+</code></pre>
+      </div>
+      <h2 id="whats-new">
+       What's New
+      </h2>
+      <h3 id="secure-by-default-authentication-system">
+       Secure-by-Default Authentication System
+      </h3>
+      <p>
+       Dars now ships with a complete, production-ready authentication system that is
+       <strong>
+        completely isolated from the VDOM
+       </strong>
+       .
+      </p>
+      <ul>
+       <li>
+        <strong>
+         HttpOnly Cookie-Based Sessions
+        </strong>
+        : Tokens never touch the browser's JavaScript context. They live exclusively in HttpOnly cookies.
+       </li>
+       <li>
+        <strong>
+         CSRF Protection
+        </strong>
+        : Built-in
+        <code>
+         XSRF-TOKEN
+        </code>
+        cookie and header validation for all mutating requests (
+        <code>
+         POST
+        </code>
+        ,
+        <code>
+         PUT
+        </code>
+        ,
+        <code>
+         DELETE
+        </code>
+        ,
+        <code>
+         PATCH
+        </code>
+        ).
+       </li>
+       <li>
+        <strong>
+         Refresh Token Rotation
+        </strong>
+        : Long-lived refresh tokens are automatically rotated on every use.
+       </li>
+       <li>
+        <strong>
+         Pure Python JWT
+        </strong>
+        : Zero third-party dependencies for generating and verifying JSON Web Tokens.
+       </li>
+      </ul>
+      <h3 id="multi-auth-multiple-isolated-schemes">
+       Multi-Auth: Multiple Isolated Schemes
+      </h3>
+      <p>
+       You can now register
+       <strong>
+        multiple independent authentication configurations
+       </strong>
+       in the same app, each with its own secret, callback, and scoped cookies.
+      </p>
+      <ul>
+       <li>
+        A user can be logged in as an "admin" and a "guest" simultaneously without session collision.
+       </li>
+       <li>
+        Handled seamlessly by scoped cookie names (e.g.,
+        <code>
+         dars_access_token_admin
+        </code>
+        ).
+       </li>
+      </ul>
+      <h3 id="three-ways-to-declare-auth">
+       Three Ways to Declare Auth
+      </h3>
+      <ol>
+       <li>
+        <strong>
+         <code>
+          @requires_auth
+         </code>
+         (Inline)
+        </strong>
+        : Simply add the decorator below your route. Auto-registers the auth scheme with an ID derived from the function name.
+       </li>
+       <li>
+        <strong>
+         <code>
+          Page.setup_auth()
+         </code>
+         (Component-level)
+        </strong>
+        : Configure auth directly on your
+        <code>
+         Page
+        </code>
+        components.
+       </li>
+       <li>
+        <strong>
+         <code>
+          App.setup_auth()
+         </code>
+         (Global)
+        </strong>
+        : Register an auth configuration globally across your app.
+       </li>
+      </ol>
+      <h3 id="json-field-extraction-in-updatevreffromresponse">
+       JSON Field Extraction in
+       <code>
+        updateVRefFromResponse
+       </code>
+      </h3>
+      <p>
+       <code>
+        updateVRefFromResponse
+       </code>
+       now supports a
+       <code>
+        key
+       </code>
+       parameter, allowing you to easily extract deeply nested fields from JSON API responses using dot-notation. This makes Dars fully server-compatible using standard JSON responses.
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="c1"># Extracts response["user"]["username"] and stores it in the VRef</span>
+<span class="n">updateVRefFromResponse</span><span class="p">(</span><span class="s2">".user-name"</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">"response.user.username"</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <hr/>
       <h1 id="release-notes-v1914">
        Release Notes v1.9.14
       </h1>
@@ -1195,14 +1354,14 @@
         is deprecated.
        </p>
       </blockquote>
-      <h2 id="installation">
+      <h2 id="installation-2">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new">
+      <h2 id="whats-new-2">
        What's New
       </h2>
       <h3 id="unified-fullstack-development">
@@ -1251,14 +1410,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-2">
+      <h2 id="installation-3">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-2">
+      <h2 id="whats-new-3">
        What's New
       </h2>
       <h3 id="desktop-exporter-removal-and-new-desktop-strategy">
@@ -1355,14 +1514,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-3">
+      <h2 id="installation-4">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-3">
+      <h2 id="whats-new-4">
        What's New
       </h2>
       <h3 id="dars-bundler-high-performance-standalone-rust-minifier">
@@ -1683,14 +1842,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-4">
+      <h2 id="installation-5">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-4">
+      <h2 id="whats-new-5">
        What's New
       </h2>
       <h3 id="secure-asynchronous-ssr-hydration">
@@ -1974,14 +2133,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-5">
+      <h2 id="installation-6">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-5">
+      <h2 id="whats-new-6">
        What's New
       </h2>
       <h3 id="usefetch-declarative-data-fetching-hook">
@@ -2547,14 +2706,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-6">
+      <h2 id="installation-7">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-6">
+      <h2 id="whats-new-7">
        What's New
       </h2>
       <h3 id="hybrid-ssrspa-stabilization">
@@ -2786,14 +2945,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-7">
+      <h2 id="installation-8">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-7">
+      <h2 id="whats-new-8">
        What's New
       </h2>
       <h3 id="modular-animation-engine-animjs">
@@ -3038,14 +3197,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-8">
+      <h2 id="installation-9">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-8">
+      <h2 id="whats-new-9">
        What's New
       </h2>
       <h3 id="fixed-relative-paths-for-runtime-resources">
@@ -3181,14 +3340,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-9">
+      <h2 id="installation-10">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-9">
+      <h2 id="whats-new-10">
        What's New
       </h2>
       <h3 id="configurable-development-port">
@@ -3346,14 +3505,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-10">
+      <h2 id="installation-11">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-10">
+      <h2 id="whats-new-11">
        What's New
       </h2>
       <h3 id="standardized-component-docstrings">
@@ -3425,14 +3584,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-11">
+      <h2 id="installation-12">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-11">
+      <h2 id="whats-new-12">
        What's New
       </h2>
       <h3 id="utility-style-system">
@@ -3630,14 +3789,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-12">
+      <h2 id="installation-13">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-12">
+      <h2 id="whats-new-13">
        What's New
       </h2>
       <h3 id="definitive-removal-of-new-function">
@@ -3914,14 +4073,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-13">
+      <h2 id="installation-14">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-13">
+      <h2 id="whats-new-14">
        What's New
       </h2>
       <h3 id="restored-native-string-concatenation">
@@ -3996,14 +4155,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-14">
+      <h2 id="installation-15">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-14">
+      <h2 id="whats-new-15">
        What's New
       </h2>
       <h3 id="state-v2-reactivity-decoupling">
@@ -4134,14 +4293,14 @@
         release.
        </p>
       </blockquote>
-      <h2 id="installation-15">
+      <h2 id="installation-16">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-15">
+      <h2 id="whats-new-16">
        What's New
       </h2>
       <h3 id="zero-eval-runtime-secure-script-execution">
@@ -4339,14 +4498,14 @@
         : Versions &lt;= v1.8.7 are considered deprecated and NOT recommended for production use. v1.8.8 addresses critical security surfaces by temporarily removing experimental Server Components. Upgrading is mandatory.
        </p>
       </blockquote>
-      <h2 id="installation-16">
+      <h2 id="installation-17">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-16">
+      <h2 id="whats-new-17">
        What's New
       </h2>
       <h3 id="dars-server-protocol-dsp">
@@ -4416,14 +4575,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-17">
+      <h2 id="installation-18">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-17">
+      <h2 id="whats-new-18">
        What's New
       </h2>
       <h3 id="dars-server-components">
@@ -4531,14 +4690,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-18">
+      <h2 id="installation-19">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-18">
+      <h2 id="whats-new-19">
        What's New
       </h2>
       <h3 id="darsenv-environment-awareness">
@@ -4650,14 +4809,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-19">
+      <h2 id="installation-20">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-19">
+      <h2 id="whats-new-20">
        What's New
       </h2>
       <h3 id="multiple-outlets-via-outlet_id">
@@ -4754,14 +4913,14 @@ This keeps state/events safe and avoids breaking hydration.
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-20">
+      <h2 id="installation-21">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-20">
+      <h2 id="whats-new-21">
        What's New
       </h2>
       <h3 id="python-native-minification-by-default-no-nodebun-required">
@@ -4970,14 +5129,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-21">
+      <h2 id="installation-22">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-21">
+      <h2 id="whats-new-22">
        What's New
       </h2>
       <h3 id="fixed-production-build-crash-unexpected-token-export">
@@ -5028,14 +5187,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-22">
+      <h2 id="installation-23">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-22">
+      <h2 id="whats-new-23">
        What's New
       </h2>
       <h3 id="fixed-settimeout-promise-handling">
@@ -5079,14 +5238,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-23">
+      <h2 id="installation-24">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-23">
+      <h2 id="whats-new-24">
        What's New
       </h2>
       <h3 id="new-style-optimization-pipeline-phase-1">
@@ -5456,14 +5615,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-24">
+      <h2 id="installation-25">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-24">
+      <h2 id="whats-new-25">
        What's New
       </h2>
       <h3 id="new-advanced-multimedia-components-video-audio">
@@ -6095,6 +6254,27 @@ improving consistency and providing a real-world example of the upgraded styling
      <div class="sidebar-category">
       Versions
      </div>
+     <a class="sidebar-link sidebar-level-1" href="#release-notes-v1915" style="margin-left: 0px">
+      Release Notes v1.9.15
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#installation" style="margin-left: 20px">
+      Installation
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#whats-new" style="margin-left: 20px">
+      What's New
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#secure-by-default-authentication-system" style="margin-left: 40px">
+      Secure-by-Default Authentication System
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#multi-auth-multiple-isolated-schemes" style="margin-left: 40px">
+      Multi-Auth: Multiple Isolated Schemes
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#three-ways-to-declare-auth" style="margin-left: 40px">
+      Three Ways to Declare Auth
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#json-field-extraction-in-updatevreffromresponse" style="margin-left: 40px">
+      JSON Field Extraction in `updateVRefFromResponse`
+     </a>
      <a class="sidebar-link sidebar-level-1" href="#release-notes-v1914" style="margin-left: 0px">
       Release Notes v1.9.14
      </a>
@@ -6823,7 +7003,7 @@ improving consistency and providing a real-world example of the upgraded styling
   </div>
   <div id="__dars_spa_root__">
   </div>
-  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1779713210" type="module">
+  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1779727918" type="module">
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js">
   </script>

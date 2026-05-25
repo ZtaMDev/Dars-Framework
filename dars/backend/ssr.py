@@ -541,7 +541,8 @@ class SSRApp:
             return {"status": "ok", "app": self.dars_app.title}
 
         # Auto-register Dars Auth Router if configured
-        if getattr(self.dars_app, '_auth_secret', None):
+        from dars.backend.auth_routes import _auth_configs
+        if getattr(self.dars_app, '_auth_secret', None) or _auth_configs:
             try:
                 from dars.backend.auth_routes import auth_router
                 self.fastapi_app.include_router(auth_router)

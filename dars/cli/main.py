@@ -1648,6 +1648,7 @@ def _main_exec():
             except Exception:
                 pass
 
+            backend_dir = uvicorn_target.split('.')[0] if '.' in uvicorn_target else ''
             backend_cmd = [
                 sys.executable,
                 '-m', 'uvicorn',
@@ -1655,7 +1656,10 @@ def _main_exec():
                 '--reload',
                 '--host', str(host),
                 '--port', str(port),
+                '--log-level', 'warning'
             ]
+            if backend_dir and os.path.isdir(os.path.join(project_root, backend_dir)):
+                backend_cmd.extend(['--reload-dir', backend_dir])
             backend_env = os.environ.copy()
             backend_env['DARS_MODE'] = 'development'
             backend_env['DARS_BACKEND_URL'] = f"http://{host}:{port}"
@@ -1666,7 +1670,7 @@ def _main_exec():
 
             try:
                 backend_proc = subprocess.Popen(backend_cmd, cwd=project_root, env=backend_env)
-                console.print(f"[green]Started backend dev server at http://{host}:{port}[/green]")
+                console.print(f"[green]Started backend dev server at {port} port.[/green]")
             except Exception as e:
                 console.print(f"[red]Failed to start backend dev process: {e}[/red]")
                 sys.exit(1)

@@ -287,6 +287,61 @@ DarsEnv.get_urls() → {
 }
 ```
 
+## Authentication & Route Protection
+
+Dars provides a secure, robust, and completely isolated authentication system. Tokens are kept strictly hidden from the VDOM in the browser using HttpOnly and SameSite cookies, rendering XSS theft impossible. It also integrates strict CSRF protection automatically.
+
+### Multi-Auth Capabilities
+
+Starting in version `1.9.15`, Dars supports **multiple isolated authentication schemes** running simultaneously in the same application. 
+
+- **Independent Session Scopes**: Each scheme issues scoped cookies (e.g. `dars_access_token_my_scheme`) so a single user can have multiple concurrent sessions without conflicts.
+- **Dynamic Endpoints**: API routes like `/_dars/auth/{auth_id}/login`, `/logout`, `/refresh`, and `/me` are generated automatically for each scheme.
+- **Predictable Dynamic IDs**: When using page or route-specific decorators, Dars generates stable, clean IDs based on your Python functions (e.g. `auth_dashboard` for `def dashboard()`).
+
+### Declaring Security in SSR Routes
+
+You can secure SSR routes in three different ways:
+
+#### 1. In-line Decorator Autoconfiguration (Recommended)
+You don't even need to call `setup_auth` globally! Simply put `@requires_auth(...)` right under your `@route` decorator. It will automatically register the custom verification callback and dynamic secret on the backend, generating a custom auth scheme for this specific page.
+
+```python
+def verify_user_about(username, password):
+    if username == "guest" and password == "guest":
+        return {"id": "guest_1", "username": "guest", "role": "guest"}
+    return None
+
+@route("/about", route_type=RouteType.SSR)
+@requires_auth(verify_credentials_callback=verify_user_about, secret="my_super_secret_key")
+def about():
+    # Automatically protected at runtime!
+    # Validates requests with scoped cookie: dars_access_token_auth_about
+    # Dynamic endpoint resolves at: /_dars/auth/auth_about/me
+    return Page(...)
+```
+
+#### 2. Isolated Component Configuration (`Page.setup_auth`)
+You can configure dynamic isolated authentication on the `Page` component instance:
+
+```python
+@route("/profile", route_type=RouteType.SSR)
+def profile():
+    page = Page(...)
+    page.setup_auth(verify_credentials_callback=verify, secret="profile_secret")
+    return page
+```
+
+#### 3. Global Application Auth (`App.setup_auth`)
+Define a global auth scheme (named `"default"`) in your `main.py`:
+
+```python
+app = App(title="My Fullstack App")
+app.setup_auth(verify_credentials_callback=verify_user, secret="global_secret_key")
+```
+
+For detailed guides and deep dives into Dars security mechanisms, see [Authentication & Security](auth.md).
+
 ---
 
 ## SSR API Reference

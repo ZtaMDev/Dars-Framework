@@ -39,6 +39,7 @@ Try Dars without installing anything — visit the [Dars Playground](https://dar
 - Export your app to static/dynamic/SSR web files with a single CLI command.
 - Use multipage layouts, scripts, hooks, and more — see docs for advanced features.
 - **One app, four deployment targets simultaneously:** Dars supports Static Site Generation (SSG), Single-Page Application (SPA) routing, Server-Side Rendering (SSR) with FastAPI, and a full Backend API — all from the same Python codebase. Mix and match freely: export some pages as static HTML for SEO, serve others via SSR for dynamic content, and expose REST API endpoints alongside your UI.
+- **Production-grade Authentication:** Build secure apps with built-in Multi-Auth, HttpOnly JWT cookies, CSRF protection, and role-based access control — all without writing Javascript.
 - **Full backend toolkit included:** `useFetch` for declarative data fetching, `FormValidator` for client-side validation, `Each` for runtime list rendering from API responses, `JsonStore` for file-backed persistence, `UploadPipeline` for secure file uploads, `SecurityHeadersMiddleware` for HTTP security, and `DarsEnv` for `.env` file support.
 - For more information visit the [Documentation](https://ztamdev.github.io/Dars-Framework/docs.html)
 
@@ -216,6 +217,46 @@ app.set_404_page(Page(
     Link("Go Home", href="/"),
 ))
 ```
+
+---
+
+## Authentication & Security
+
+Dars provides a production-grade, secure-by-default authentication system that is **completely isolated from the VDOM**. Tokens never touch the browser's JavaScript context — they live exclusively in HttpOnly cookies managed by the browser itself.
+
+- **HttpOnly Cookie-Based Sessions**
+- **CSRF Protection** built-in for all mutating requests
+- **Multi-Auth Support** to run multiple independent authentication schemes in the same app
+- **Pure Python JWT** with zero third-party dependencies
+
+### Quick Example
+
+```python
+from dars.all import *
+
+def verify_user(username, password):
+    if username == "admin" and password == "secret":
+        return {"id": "1", "username": "admin", "role": "admin"}
+    return None
+
+@route("/dashboard", route_type=RouteType.SSR)
+@requires_auth(verify_credentials_callback=verify_user, secret="super_secret")
+def dashboard():
+    fetch_me, *_ = useFetch("/_dars/auth/me", method="GET", on_success=updateVRefFromResponse(".user-name", key="response.user.username"))
+    fetch_logout, *_ = useFetch("/_dars/auth/logout", method="POST")
+
+    page = Page(
+        Text("Welcome, ", style="font-weight: bold;"),
+        Text("", class_name="user-name"),
+        Button("Logout", on_click=fetch_logout),
+    )
+    page.add_script(fetch_me)
+    return page
+```
+
+For a complete working example, check out the [`/examples/FullStack-app`](https://github.com/ZtaMDev/Dars-Framework/tree/CrystalMain/examples/FullStack-app) in the repository.
+
+For complete documentation, visit the [Authentication Guide](https://ztamdev.github.io/Dars-Framework/docs.html#authentication-and-security).
 
 ---
 
@@ -503,24 +544,24 @@ For complete backend documentation, see the [Backend & API Guide](https://ztamde
 
 ## CLI Usage
 
-| Command                               | What it does                                               |
-| ------------------------------------- | ---------------------------------------------------------- |
-| `dars export my_app.py --format html` | Export app to HTML/CSS/JS in `./my_app_web`                |
-| `dars init --type fullstack`          | Scaffold full-stack project (SPA + SSR + API)              |
-| `dars preview`                        | Preview exported app (auto-detects output)                 |
-| `dars preview --port 9000`            | Preview on a custom port                                   |
-| `dars init my_project`                | Create a new Dars project                                  |
-| `dars init --update`                  | Create/Update dars.config.json in current dir              |
-| `dars build`                          | Build using dars.config.json                               |
-| `dars config validate`                | Validate dars.config.json and print report                 |
-| `dars info my_app.py`                 | Show info about your app                                   |
-| `dars formats`                        | List supported export formats                              |
-| `dars dev`                            | Run the configured entry file with hot preview             |
-| `dars dev --port 9000`                | Run dev server on a custom port                            |
-| `dars dev --backend`                  | Deprecated: use `dars dev` with backendEntry configured.   |
-| `dars generate component <name>`      | Scaffold a new FunctionComponent                           |
-| `dars generate page <name>`           | Scaffold a new page (static, SPA, or SSR)                  |
-| `dars --help`                         | Show help and all CLI options                              |
+| Command                               | What it does                                             |
+| ------------------------------------- | -------------------------------------------------------- |
+| `dars export my_app.py --format html` | Export app to HTML/CSS/JS in `./my_app_web`              |
+| `dars init --type fullstack`          | Scaffold full-stack project (SPA + SSR + API)            |
+| `dars preview`                        | Preview exported app (auto-detects output)               |
+| `dars preview --port 9000`            | Preview on a custom port                                 |
+| `dars init my_project`                | Create a new Dars project                                |
+| `dars init --update`                  | Create/Update dars.config.json in current dir            |
+| `dars build`                          | Build using dars.config.json                             |
+| `dars config validate`                | Validate dars.config.json and print report               |
+| `dars info my_app.py`                 | Show info about your app                                 |
+| `dars formats`                        | List supported export formats                            |
+| `dars dev`                            | Run the configured entry file with hot preview           |
+| `dars dev --port 9000`                | Run dev server on a custom port                          |
+| `dars dev --backend`                  | Deprecated: use `dars dev` with backendEntry configured. |
+| `dars generate component <name>`      | Scaffold a new FunctionComponent                         |
+| `dars generate page <name>`           | Scaffold a new page (static, SPA, or SSR)                |
+| `dars --help`                         | Show help and all CLI options                            |
 
 Tip: use `dars doctor` to review optional tooling that can enhance bundling/minification.
 

@@ -116,13 +116,26 @@ class AuthMiddleware(BaseHTTPMiddleware):
             
         # Extract token from the Authorization header or the dars_access_token cookie
         token = None
+        auth_id = "default"
         auth_header = request.headers.get("Authorization")
         is_bearer = False
         if auth_header and auth_header.startswith("Bearer "):
             token = auth_header[7:]
             is_bearer = True
         else:
-            token = request.cookies.get("dars_access_token")
+            for cookie_key, cookie_val in request.cookies.items():
+                if cookie_key == "dars_access_token":
+                    token = cookie_val
+                    auth_id = "default"
+                    break
+                elif cookie_key.startswith("dars_access_token_"):
+                    token = cookie_val
+                    auth_id = cookie_key[len("dars_access_token_"):]
+                    break
+            if not token:
+                token = request.cookies.get("dars_access_token_default")
+                if token:
+                    auth_id = "default"
             
         if not token:
             return Response("Unauthorized: Session token missing", status_code=401)
@@ -136,9 +149,15 @@ class AuthMiddleware(BaseHTTPMiddleware):
             
         try:
             from dars.core.auth import DarsAuth
-            user_payload = DarsAuth.decode_token(token, self.secret)
+            from dars.backend.auth_routes import get_auth_config
+            
+            config = get_auth_config(auth_id)
+            secret = config["secret"] if config else self.secret
+            
+            user_payload = DarsAuth.decode_token(token, secret)
             # Inject user dictionary securely into request state
             request.state.user = user_payload
+            request.state.auth_id = auth_id
         except Exception as e:
             return Response(f"Unauthorized: Invalid session token ({e})", status_code=401)
             

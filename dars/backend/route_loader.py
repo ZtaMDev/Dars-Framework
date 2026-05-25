@@ -126,10 +126,15 @@ class RouteLoader:
                         
                         try:
                             from dars.core.auth import DarsAuth
+                            from dars.backend.auth_routes import get_auth_config
                             from dars.env import DarsEnv
                             
-                            # Load DARS_SECRET_KEY from environment or fallback safely
-                            secret = DarsEnv.get("DARS_SECRET_KEY") or "dars_default_secret_key_change_me_in_production"
+                            auth_id = getattr(metadata, 'auth_id', 'default') or 'default'
+                            config = get_auth_config(auth_id)
+                            if config:
+                                secret = config["secret"]
+                            else:
+                                secret = DarsEnv.get("DARS_SECRET_KEY") or "dars_default_secret_key_change_me_in_production"
                             
                             # Verify and decode the JWT
                             DarsAuth.decode_token(token, secret)

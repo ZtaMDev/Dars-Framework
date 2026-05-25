@@ -1809,7 +1809,7 @@
       </h3>
       <ul>
        <li>
-        [ ]
+        [x]
         <code>
          DarsAuth
         </code>
@@ -1820,7 +1820,7 @@
         ) and verification
        </li>
        <li>
-        [ ] Configurable secret, algorithm (
+        [x] Configurable secret, algorithm (
         <code>
          HS256
         </code>
@@ -1831,38 +1831,34 @@
         ), and token expiration
        </li>
        <li>
-        [ ] Refresh token rotation flow
+        [x] Refresh token rotation flow
        </li>
        <li>
-        [ ] Password hashing utilities (bcrypt/argon2 integration)
+        [x] Password hashing utilities (bcrypt/argon2 integration - via PBKDF2 standard lib)
        </li>
        <li>
-        [ ] Client-side auth helpers in runtime JS:
+        [x] Client-side auth helpers in runtime JS: scoped cookies, JSON extraction via
         <code>
-         authFetch()
-        </code>
-        ,
-        <code>
-         getToken()
-        </code>
-        ,
-        <code>
-         setToken()
-        </code>
-        ,
-        <code>
-         clearToken()
+         key
         </code>
        </li>
        <li>
-        [ ]
+        [x]
         <code>
          isAuthenticated()
         </code>
-        check for conditional UI rendering
+        check for conditional UI rendering (via
+        <code>
+         useFetch
+        </code>
+        to
+        <code>
+         /me
+        </code>
+        )
        </li>
        <li>
-        [ ]
+        [x]
         <code>
          auth.login()
         </code>
@@ -1870,12 +1866,12 @@
         <code>
          auth.logout()
         </code>
-        DAP actions
+        handled via native endpoints and form submits
        </li>
        <li>
-        [ ] Auth endpoint templates:
+        [x] Auth endpoint templates:
         <code>
-         /api/auth/login
+         /_dars/auth/login
         </code>
         ,
         <code>
@@ -1889,26 +1885,31 @@
         <code>
          /me
         </code>
+        with Multi-Auth support
        </li>
        <li>
-        [ ]
+        [x]
         <code>
          @requires_auth
         </code>
         decorator for SSR/API routes
        </li>
        <li>
-        [ ]
+        [x]
         <code>
          @requires_role("admin")
         </code>
         RBAC decorator
        </li>
        <li>
-        [ ] Route guard decorators with custom permission checks
+        [x] Route guard decorators with custom permission checks (per-page
+        <code>
+         setup_auth()
+        </code>
+        )
        </li>
        <li>
-        [ ] Automatic 401 redirect on token expiry
+        [x] Automatic 401 redirect on token expiry (handled via middleware/refresh tokens)
        </li>
        <li>
         [ ] OAuth2 provider integration (Google, GitHub)
@@ -1949,7 +1950,7 @@
         [ ] Middleware chain execution order
        </li>
        <li>
-        [ ]
+        [x]
         <code>
          AuthMiddleware
         </code>
@@ -2941,7 +2942,7 @@
   </div>
   <div id="__dars_spa_root__">
   </div>
-  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1779713208" type="module">
+  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1779727917" type="module">
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js">
   </script>

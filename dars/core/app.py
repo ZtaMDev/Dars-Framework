@@ -835,7 +835,7 @@ class App:
         self.config.setdefault('responsive', True)
         self.config.setdefault('charset', 'UTF-8')
         
-    def setup_auth(self, verify_credentials_callback, secret: str):
+    def setup_auth(self, verify_credentials_callback, secret: str, auth_id: str = "default"):
         """
         Configures the secure authentication system for the Dars application.
         
@@ -844,17 +844,23 @@ class App:
                                          a dict with user data (must include 'id' or 'username') if valid,
                                          or None if invalid. Can be async.
             secret: Cryptographic secret key used to sign JWTs. Keep this safe!
+            auth_id: Unique identifier for this auth setup (default: "default").
         """
         import dars.backend.auth_routes as auth_routes
-        from dars.backend.session import SessionManager, InMemorySessionStore
         
-        # Configure the internal auth module
-        auth_routes._verify_callback = verify_credentials_callback
-        auth_routes._session_manager = SessionManager(InMemorySessionStore())
-        auth_routes._app_secret = secret
+        # Register the auth config
+        auth_routes.register_auth_config(verify_credentials_callback, secret, auth_id)
         
-        # Attach secret to app for middlewares
-        self._auth_secret = secret
+        # Attach secret/configs to app for middlewares
+        if not hasattr(self, '_auth_configs'):
+            self._auth_configs = {}
+        self._auth_configs[auth_id] = {
+            "secret": secret,
+            "verify_callback": verify_credentials_callback
+        }
+        
+        if auth_id == "default":
+            self._auth_secret = secret
 
     def set_root(self, component: Component):
         """Sets the root component of the application (backward-compatible single-page mode)."""
@@ -1307,7 +1313,8 @@ class App:
 
             def _should_watch_file(self, file_path):
                 """Check if file should be watched based on exclusion rules."""
-                skip_dirs = {"__pycache__", ".git", "dars_preview", ".pytest_cache", "venv", "env", "node_modules"}
+                outdir = cfg.get("outdir", "dist") if cfg else "dist"
+                skip_dirs = {"__pycache__", ".git", "dars_preview", ".pytest_cache", "venv", "env", "node_modules", outdir}
                 file_str = str(file_path)
                 return not any(skip_dir in file_str for skip_dir in skip_dirs)
 
@@ -1340,7 +1347,8 @@ class App:
         def _collect_project_files_by_ext(root, exts):
             """Collect files with given extensions, excluding certain directories."""
             files = []
-            skip_dirs = {"__pycache__", ".git", "dars_preview", ".pytest_cache", "venv", "env", "node_modules"}
+            outdir = cfg.get("outdir", "dist") if cfg else "dist"
+            skip_dirs = {"__pycache__", ".git", "dars_preview", ".pytest_cache", "venv", "env", "node_modules", outdir}
             
             try:
                 for dirpath, dirnames, filenames in os.walk(root):

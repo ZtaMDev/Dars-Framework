@@ -144,12 +144,14 @@ class DarsAuth:
 
 
     @staticmethod
-    def set_auth_cookies(response: Any, access_token: str, refresh_token: str, xsrf_token: str, secure: bool = True):
+    def set_auth_cookies(response: Any, access_token: str, refresh_token: str, xsrf_token: str, secure: bool = True, auth_id: str = "default"):
         """
         Sets the secure HttpOnly access and refresh cookies, and a readable XSRF-TOKEN cookie.
         """
+        access_key = "dars_access_token" if auth_id == "default" else f"dars_access_token_{auth_id}"
+        refresh_key = "dars_refresh_token" if auth_id == "default" else f"dars_refresh_token_{auth_id}"
         response.set_cookie(
-            key="dars_access_token",
+            key=access_key,
             value=access_token,
             httponly=True,
             secure=secure,
@@ -157,7 +159,7 @@ class DarsAuth:
             max_age=900,  # 15 minutes
         )
         response.set_cookie(
-            key="dars_refresh_token",
+            key=refresh_key,
             value=refresh_token,
             httponly=True,
             secure=secure,
@@ -174,10 +176,12 @@ class DarsAuth:
         )
 
     @staticmethod
-    def clear_auth_cookies(response: Any, secure: bool = True):
+    def clear_auth_cookies(response: Any, secure: bool = True, auth_id: str = "default"):
         """Clears all authentication and CSRF cookies."""
-        response.delete_cookie("dars_access_token", secure=secure, samesite="strict", httponly=True)
-        response.delete_cookie("dars_refresh_token", secure=secure, samesite="strict", httponly=True)
+        access_key = "dars_access_token" if auth_id == "default" else f"dars_access_token_{auth_id}"
+        refresh_key = "dars_refresh_token" if auth_id == "default" else f"dars_refresh_token_{auth_id}"
+        response.delete_cookie(access_key, secure=secure, samesite="strict", httponly=True)
+        response.delete_cookie(refresh_key, secure=secure, samesite="strict", httponly=True)
         response.delete_cookie("XSRF-TOKEN", secure=secure, samesite="strict", httponly=False)
 
 
@@ -185,45 +189,115 @@ class DarsAuth:
 # FastAPI Route Guards Decorators
 # ---------------------------------------------------------------------------
 
-def requires_auth(func):
+def requires_auth(func=None, *, verify_credentials_callback=None, secret=None, auth_id=None):
     """
     FastAPI Route Decorator to enforce authentication.
     Injects request.state.user into the handler. Supports both sync and async.
     """
-    if asyncio.iscoroutinefunction(func):
-        @wraps(func)
-        async def async_wrapper(*args, **kwargs):
-            request = kwargs.get("request")
-            if not request:
-                for arg in args:
-                    if isinstance(arg, Request):
-                        request = arg
-                        break
-            if not request:
-                raise ValueError("@requires_auth requires a 'request: Request' argument in the route handler function signature.")
+    from dars.backend.auth_routes import register_auth_config
+
+    custom_auth_id = None
+    if verify_credentials_callback is not None or secret is not None:
+        if auth_id:
+            custom_auth_id = register_auth_config(verify_credentials_callback, secret or "dars_default_secret_key_change_me_in_production", auth_id)
+
+    def decorator(f):
+        target_auth_id = custom_auth_id or auth_id
+        if not target_auth_id:
+            if verify_credentials_callback is not None or secret is not None:
+                target_auth_id = f"auth_{f.__name__}"
+                register_auth_config(verify_credentials_callback, secret or "dars_default_secret_key_change_me_in_production", target_auth_id)
+            else:
+                target_auth_id = "default"
+
+        f.__requires_auth__ = True
+        f.__auth_id__ = target_auth_id
+
+        if asyncio.iscoroutinefunction(f):
+            @wraps(f)
+            async def async_wrapper(*args, **kwargs):
+                request = kwargs.get("request")
+                if not request:
+                    for arg in args:
+                        if isinstance(arg, Request):
+                            request = arg
+                            break
+                if not request:
+                    return await f(*args, **kwargs)
                 
-            user = getattr(request.state, "user", None)
-            if not user:
-                raise HTTPException(status_code=401, detail="Authentication required")
-            return await func(*args, **kwargs)
-        return async_wrapper
+                user = await _verify_request_for_auth_id(request, target_auth_id)
+                if not user:
+                    raise HTTPException(status_code=401, detail="Authentication required")
+                
+                request.state.user = user
+                request.state.auth_id = target_auth_id
+                return await f(*args, **kwargs)
+            return async_wrapper
+        else:
+            @wraps(f)
+            def sync_wrapper(*args, **kwargs):
+                request = kwargs.get("request")
+                if not request:
+                    for arg in args:
+                        if isinstance(arg, Request):
+                            request = arg
+                            break
+                if not request:
+                    return f(*args, **kwargs)
+                
+                user = _verify_request_for_auth_id_sync(request, target_auth_id)
+                if not user:
+                    raise HTTPException(status_code=401, detail="Authentication required")
+                
+                request.state.user = user
+                request.state.auth_id = target_auth_id
+                return f(*args, **kwargs)
+            return sync_wrapper
+
+    if func is not None and callable(func):
+        return decorator(func)
+    return decorator
+
+
+def _verify_request_for_auth_id_sync(request: Request, auth_id: str) -> Optional[dict]:
+    from dars.backend.auth_routes import get_auth_config
+    config = get_auth_config(auth_id)
+    if not config:
+        user = getattr(request.state, "user", None)
+        return user
+        
+    secret = config["secret"]
+    
+    token = None
+    auth_header = request.headers.get("Authorization")
+    is_bearer = False
+    if auth_header and auth_header.startswith("Bearer "):
+        token = auth_header[7:]
+        is_bearer = True
     else:
-        @wraps(func)
-        def sync_wrapper(*args, **kwargs):
-            request = kwargs.get("request")
-            if not request:
-                for arg in args:
-                    if isinstance(arg, Request):
-                        request = arg
-                        break
-            if not request:
-                raise ValueError("@requires_auth requires a 'request: Request' argument in the route handler function signature.")
-                
-            user = getattr(request.state, "user", None)
-            if not user:
-                raise HTTPException(status_code=401, detail="Authentication required")
-            return func(*args, **kwargs)
-        return sync_wrapper
+        cookie_name = "dars_access_token" if auth_id == "default" else f"dars_access_token_{auth_id}"
+        token = request.cookies.get(cookie_name)
+        if not token and auth_id == "default":
+            token = request.cookies.get("dars_access_token_default")
+            
+    if not token:
+        return None
+        
+    if not is_bearer and request.method in ["POST", "PUT", "DELETE", "PATCH"]:
+        xsrf_cookie = request.cookies.get("XSRF-TOKEN")
+        xsrf_header = request.headers.get("X-XSRF-TOKEN")
+        if not xsrf_cookie or not xsrf_header or xsrf_cookie != xsrf_header:
+            return None
+            
+    try:
+        user_payload = DarsAuth.decode_token(token, secret)
+        return user_payload
+    except Exception:
+        return None
+
+
+async def _verify_request_for_auth_id(request: Request, auth_id: str) -> Optional[dict]:
+    return _verify_request_for_auth_id_sync(request, auth_id)
 
 
 def requires_role(role: str):

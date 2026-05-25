@@ -1,3 +1,49 @@
+# Release Notes v1.9.15
+
+> **Production-Grade Authentication: Multi-Auth, Secure Cookies & Server-Side Security**
+> *This is a major update that has been in preparation and development for a long time.*
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Secure-by-Default Authentication System
+
+Dars now ships with a complete, production-ready authentication system that is **completely isolated from the VDOM**. 
+
+- **HttpOnly Cookie-Based Sessions**: Tokens never touch the browser's JavaScript context. They live exclusively in HttpOnly cookies.
+- **CSRF Protection**: Built-in `XSRF-TOKEN` cookie and header validation for all mutating requests (`POST`, `PUT`, `DELETE`, `PATCH`).
+- **Refresh Token Rotation**: Long-lived refresh tokens are automatically rotated on every use.
+- **Pure Python JWT**: Zero third-party dependencies for generating and verifying JSON Web Tokens.
+
+### Multi-Auth: Multiple Isolated Schemes
+
+You can now register **multiple independent authentication configurations** in the same app, each with its own secret, callback, and scoped cookies.
+
+- A user can be logged in as an "admin" and a "guest" simultaneously without session collision.
+- Handled seamlessly by scoped cookie names (e.g., `dars_access_token_admin`).
+
+### Three Ways to Declare Auth
+
+1. **`@requires_auth` (Inline)**: Simply add the decorator below your route. Auto-registers the auth scheme with an ID derived from the function name.
+2. **`Page.setup_auth()` (Component-level)**: Configure auth directly on your `Page` components.
+3. **`App.setup_auth()` (Global)**: Register an auth configuration globally across your app.
+
+### JSON Field Extraction in `updateVRefFromResponse`
+
+`updateVRefFromResponse` now supports a `key` parameter, allowing you to easily extract deeply nested fields from JSON API responses using dot-notation. This makes Dars fully server-compatible using standard JSON responses.
+
+```python
+# Extracts response["user"]["username"] and stores it in the VRef
+updateVRefFromResponse(".user-name", key="response.user.username")
+```
+
+---
+
 # Release Notes v1.9.14
 
 > **Unified fullstack dev:** `dars dev` now starts frontend and backend together when `backendEntry` is configured. `dars dev --backend` is deprecated.

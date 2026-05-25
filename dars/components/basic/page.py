@@ -131,6 +131,24 @@ class Page(Component):
         self.add_script(watcher)
         return self
 
+    def setup_auth(self, verify_credentials_callback, secret: str, auth_id: Optional[str] = None):
+        """
+        Configures an isolated auth setup for this specific page.
+        """
+        from dars.backend.auth_routes import register_auth_config
+        if auth_id is None:
+            auth_id = f"page_{self.id or id(self)}"
+        
+        register_auth_config(verify_credentials_callback, secret, auth_id)
+        self._auth_id = auth_id
+        
+        metadata = getattr(self, '__dars_route_metadata__', None)
+        if metadata:
+            metadata.requires_auth = True
+            metadata.auth_id = auth_id
+            
+        return self
+
     def get_scripts(self):
         return self.scripts
 

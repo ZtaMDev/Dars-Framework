@@ -65,6 +65,7 @@ class RouteMetadata:
         self.route_type = route_type
         self.requires_auth = requires_auth
         self.middleware = middleware or []
+        self.auth_id = None
         
         # Auto-generate loader endpoint for SSR routes
         if loader_endpoint:
@@ -82,11 +83,13 @@ class RouteMetadata:
         
         Returns:
             Dictionary representation
+            
         """
         return {
             'path': self.path,
             'type': self.route_type.value,
             'requires_auth': self.requires_auth,
+            'auth_id': self.auth_id,
             'loader': self.loader_endpoint,
             'middleware': [m.__class__.__name__ for m in self.middleware]
         }
