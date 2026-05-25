@@ -540,6 +540,15 @@ class SSRApp:
         async def health_check():
             return {"status": "ok", "app": self.dars_app.title}
 
+        # Auto-register Dars Auth Router if configured
+        if getattr(self.dars_app, '_auth_secret', None):
+            try:
+                from dars.backend.auth_routes import auth_router
+                self.fastapi_app.include_router(auth_router)
+                print("[SSR] Initialized native Dars Auth endpoints.")
+            except ImportError:
+                pass
+
         # Register SSR routes
         ssr_routes = []
         for name, route in self.dars_app._spa_routes.items():

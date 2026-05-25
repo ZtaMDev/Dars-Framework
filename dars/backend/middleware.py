@@ -114,16 +114,25 @@ class AuthMiddleware(BaseHTTPMiddleware):
         if is_excluded:
             return await call_next(request)
             
-        # Extract token from the Authorization header or the dars_auth_token cookie
+        # Extract token from the Authorization header or the dars_access_token cookie
         token = None
         auth_header = request.headers.get("Authorization")
+        is_bearer = False
         if auth_header and auth_header.startswith("Bearer "):
             token = auth_header[7:]
+            is_bearer = True
         else:
-            token = request.cookies.get("dars_auth_token")
+            token = request.cookies.get("dars_access_token")
             
         if not token:
             return Response("Unauthorized: Session token missing", status_code=401)
+            
+        # CSRF Protection for cookie-based auth
+        if not is_bearer and request.method in ["POST", "PUT", "DELETE", "PATCH"]:
+            xsrf_cookie = request.cookies.get("XSRF-TOKEN")
+            xsrf_header = request.headers.get("X-XSRF-TOKEN")
+            if not xsrf_cookie or not xsrf_header or xsrf_cookie != xsrf_header:
+                return Response("Forbidden: Invalid CSRF token", status_code=403)
             
         try:
             from dars.core.auth import DarsAuth

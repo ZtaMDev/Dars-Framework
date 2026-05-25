@@ -143,6 +143,44 @@ class DarsAuth:
             return False
 
 
+    @staticmethod
+    def set_auth_cookies(response: Any, access_token: str, refresh_token: str, xsrf_token: str, secure: bool = True):
+        """
+        Sets the secure HttpOnly access and refresh cookies, and a readable XSRF-TOKEN cookie.
+        """
+        response.set_cookie(
+            key="dars_access_token",
+            value=access_token,
+            httponly=True,
+            secure=secure,
+            samesite="strict",
+            max_age=900,  # 15 minutes
+        )
+        response.set_cookie(
+            key="dars_refresh_token",
+            value=refresh_token,
+            httponly=True,
+            secure=secure,
+            samesite="strict",
+            max_age=604800,  # 7 days
+        )
+        response.set_cookie(
+            key="XSRF-TOKEN",
+            value=xsrf_token,
+            httponly=False,
+            secure=secure,
+            samesite="strict",
+            max_age=604800,
+        )
+
+    @staticmethod
+    def clear_auth_cookies(response: Any, secure: bool = True):
+        """Clears all authentication and CSRF cookies."""
+        response.delete_cookie("dars_access_token", secure=secure, samesite="strict", httponly=True)
+        response.delete_cookie("dars_refresh_token", secure=secure, samesite="strict", httponly=True)
+        response.delete_cookie("XSRF-TOKEN", secure=secure, samesite="strict", httponly=False)
+
+
 # ---------------------------------------------------------------------------
 # FastAPI Route Guards Decorators
 # ---------------------------------------------------------------------------

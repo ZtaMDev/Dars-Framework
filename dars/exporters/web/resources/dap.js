@@ -464,7 +464,17 @@ _registerCommand("get_state_value", (args) => {
 
 _registerCommand("get_context_value", (args, ctx) => {
   if (!ctx) return null;
-  return ctx[args.key] !== undefined ? ctx[args.key] : null;
+  const key = args.key;
+  // Support dotted paths like "response.user.username"
+  if (key && key.includes(".")) {
+    let val = ctx;
+    for (const part of key.split(".")) {
+      if (val == null || typeof val !== "object") return null;
+      val = val[part];
+    }
+    return val !== undefined ? val : null;
+  }
+  return ctx[key] !== undefined ? ctx[key] : null;
 });
 
 _registerCommand("transform", async (args, ctx) => {

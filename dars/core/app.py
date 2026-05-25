@@ -835,6 +835,27 @@ class App:
         self.config.setdefault('responsive', True)
         self.config.setdefault('charset', 'UTF-8')
         
+    def setup_auth(self, verify_credentials_callback, secret: str):
+        """
+        Configures the secure authentication system for the Dars application.
+        
+        Args:
+            verify_credentials_callback: Function that receives (username, password) and returns 
+                                         a dict with user data (must include 'id' or 'username') if valid,
+                                         or None if invalid. Can be async.
+            secret: Cryptographic secret key used to sign JWTs. Keep this safe!
+        """
+        import dars.backend.auth_routes as auth_routes
+        from dars.backend.session import SessionManager, InMemorySessionStore
+        
+        # Configure the internal auth module
+        auth_routes._verify_callback = verify_credentials_callback
+        auth_routes._session_manager = SessionManager(InMemorySessionStore())
+        auth_routes._app_secret = secret
+        
+        # Attach secret to app for middlewares
+        self._auth_secret = secret
+
     def set_root(self, component: Component):
         """Sets the root component of the application (backward-compatible single-page mode)."""
         self.root = component

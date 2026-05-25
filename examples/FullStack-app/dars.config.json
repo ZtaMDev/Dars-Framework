@@ -1,0 +1,14 @@
+{
+  "entry": "main.py",
+  "format": "web",
+  "outdir": "dist",
+  "include": [],
+  "port": 4000,
+  "exclude": ["**/__pycache__", ".git", ".venv", "node_modules"],
+  "bundle": true,
+  "minify": true,
+  "markdownHighlight": true,
+  "markdownHighlightTheme": "auto",
+  "utility_styles": {},
+  "backendEntry": "backend.api:app"
+}
