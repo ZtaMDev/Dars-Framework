@@ -46,6 +46,7 @@ from dars.config import load_config, resolve_paths, copy_public_dir
 import json
 import shutil
 import inspect
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 class DarsJSONEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -433,6 +434,7 @@ class HTMLCSSJSExporter(Exporter):
                 if hasattr(app, "has_spa_routes") and app.has_spa_routes():
                     spa_has_index = app.get_spa_index() is not None
                 
+                page_jobs = []
                 for slug, page in app.pages.items():
                     # Ensure deterministic IDs for this page before rendering
                     self.ensure_ids_assigned(page.root)
@@ -447,208 +449,25 @@ class HTMLCSSJSExporter(Exporter):
                     # Si la página tiene parent (es ruta SPA hija), saltar exportación multipage
                     if hasattr(page, 'parent') and page.parent:
                         continue
-                        
-                    page_app = copy.copy(app)
-                    # Use a deep copy of the page root to avoid mutating the shared tree
-                    try:
-                        import copy as _cpy
-                        page_app.root = _cpy.deepcopy(page.root)
-                    except Exception:
-                        page_app.root = page.root
-                    if page.title:
-                        page_app.title = page.title
-                    if page.meta:
-                        for k, v in page.meta.items():
-                            setattr(page_app, k, v)
                     
-                    # Asegurar que root sea Container si es lista
-                    from dars.components.basic.container import Container
-                    if isinstance(page_app.root, list):
-                        page_app.root = Container(children=page_app.root)
+                    page_jobs.append((slug, page))
 
-                    # Fase 1 estilos: registrar estilos estáticos y reemplazar inline por clases
-                    try:
-                        self._collect_static_styles_from_tree(page_app.root)
-                    except Exception:
-                        pass
-
-                    # Generar VDOM y obtener eventos
-                    page_events_map = {}
-                    try:
-                        vdom_builder = VDomBuilder(id_provider=self.get_component_id)
-                        vdom_dict = vdom_builder.build(page_app.root)
-                        page_events_map = vdom_builder.events_map
-                        
-                        if bundle:
-                            self._obfuscate_vdom(vdom_dict) # Still run for potential side effects? No, we can just skip it.
-                        vdom_js = ""
-                    except Exception:
-                        vdom_js = ""
-                        page_events_map = {}
-                    
-                    # Collect bindings by traversing component tree (without rendering)
-                    self._collect_bindings_from_tree(page_app.root)
-
-                    # Capture useFetch auto-run triggers for this page.
-                    # Strategy: collect all registered triggers, then filter to those
-                    # whose VRef selectors appear in this page's VRef registry.
-                    try:
-                        from dars.hooks.use_fetch import _get_auto_fetch_registry
-                        from dars.hooks.set_vref import _VREF_VALUES_REGISTRY
-                        all_triggers = _get_auto_fetch_registry()
-                        # Each trigger's network_request args contain loading/data/error selectors.
-                        # Match triggers whose selectors are in the current VRef registry.
-                        _page_auto_fetches = []
-                        for trigger in all_triggers:
+                if len(page_jobs) > 1:
+                    workers = min(4, os.cpu_count() or 2)
+                    with ThreadPoolExecutor(max_workers=workers) as executor:
+                        futures = {
+                            executor.submit(self._export_multipage_page, app, page, slug, output_path, project_root, bundle, should_combine_js, spa_has_index, index_page): slug
+                            for slug, page in page_jobs
+                        }
+                        for future in as_completed(futures):
+                            slug = futures[future]
                             try:
-                                args = trigger.data.get('args', {}) if trigger.data else {}
-                                sel = args.get('loading_selector', '')
-                                # Check if this selector's VRef was created for this page
-                                # by seeing if it exists in the registry
-                                if sel and any(
-                                    v.selector == sel
-                                    for v in _VREF_VALUES_REGISTRY.values()
-                                ):
-                                    _page_auto_fetches.append(trigger)
-                            except Exception:
-                                pass
-                    except Exception:
-                        _page_auto_fetches = []
-
-                    # Pre-render components to populate FC bindings (useDynamic, etc.)
-                    # This is critical so that _generate_reactive_bindings_js has data
-                    self.render_component(page_app.root)
-
-                    # Generar runtime JS con eventos
-                    runtime_js = self.generate_javascript(page_app, page_app.root, page_events_map,
-                                                          _auto_fetches=_page_auto_fetches)
-                    
-                    # Scripts específicos de esta página
-                    page_scripts = []
-                    
-                    # Scripts globales de la app
-                    page_scripts.extend(getattr(app, 'scripts', []))
-                    
-                    # Scripts específicos de esta página (Page dataclass)
-                    if hasattr(page, 'scripts'):
-                        page_scripts.extend(page.scripts)
-                    
-                    # Scripts de componentes dentro de la página
-                    if hasattr(page_app.root, 'get_scripts'):
-                        page_scripts.extend(page_app.root.get_scripts())
-
-                    # Scripts attached directly to the Page component root
-                    # (e.g. useFetch trigger added via page.scripts.append())
-                    root_scripts = getattr(page_app.root, 'scripts', None)
-                    if root_scripts:
-                        page_scripts.extend(root_scripts)
-                    
-                    # Collect scripts from Markdown components (populated during render_component)
-                    md_scripts = getattr(self, '_markdown_scripts', {}).get(slug, [])
-                    if md_scripts:
-                        page_scripts.extend(md_scripts)
-                    
-                    # Preparar scripts
-                    combined_js, external_srcs, combined_is_module = self._prepare_page_scripts(page_scripts, output_path, project_root)
-
-                    if should_combine_js:
-                        # Combinar runtime + VDOM + scripts en un solo archivo
-                        combined_all_js = f"""
-    {vdom_js}
-    // Runtime
-    {runtime_js}
-
-    // Page Scripts
-    {combined_js}
-    """
-                        app_js_filename = f"app_{slug}.js" if slug != "index" else "app.js"
-                        self.write_file(os.path.join(output_path, app_js_filename), combined_all_js)
-                        
-                        # Generar HTML con solo el archivo combinado
-                        # Solo usar index.html si es multipage index Y no hay SPA index
-                        if index_page is not None and page is index_page and not spa_has_index:
-                            html_content = self.generate_html(page_app, css_file="styles.css",
-                                                            script_file=app_js_filename,
-                                                            runtime_file="",  # Vacío porque está combinado
-                                                            extra_script_srcs=external_srcs, 
-                                                            bundle=bundle, 
-                                                            vdom_script="",  # Vacío porque está combinado
-                                                            script_is_module=combined_is_module,
-                                                            combined_js=True,
-                                                            is_hybrid_index=(slug == "index" and hasattr(app, "has_spa_routes") and app.has_spa_routes()))
-                            filename = "index.html"
-                        else:
-                            html_content = self.generate_html(page_app, css_file="styles.css",
-                                                            script_file=app_js_filename,
-                                                            runtime_file="",  # Vacío porque está combinado
-                                                            extra_script_srcs=external_srcs, 
-                                                            bundle=bundle, 
-                                                            vdom_script="",  # Vacío porque está combinado
-                                                            script_is_module=combined_is_module,
-                                                            combined_js=True,
-                                                            is_hybrid_index=(slug == "index" and hasattr(app, "has_spa_routes") and app.has_spa_routes()))
-                            filename = f"{slug}.html"
-                    else:
-                        # Comportamiento original: archivos separados
-                        vdom_filename = f"vdom_tree_{slug}.js" if slug != "index" else "vdom_tree.js"
-                        self.write_file(os.path.join(output_path, vdom_filename), vdom_js)
-                        
-                        runtime_filename = f"runtime_dars_{slug}.js" if slug != "index" else "runtime_dars.js"
-                        self.write_file(os.path.join(output_path, runtime_filename), runtime_js)
-                        
-                        script_filename = f"script_{slug}.js" if slug != "index" else "script.js"
-                        self.write_file(os.path.join(output_path, script_filename), combined_js)
-                        
-                        # Solo usar index.html si es multipage index Y no hay SPA index
-                        if index_page is not None and page is index_page and not spa_has_index:
-                            html_content = self.generate_html(page_app, css_file="styles.css",
-                                                            script_file=script_filename,
-                                                            runtime_file=runtime_filename,
-                                                            extra_script_srcs=external_srcs, 
-                                                            bundle=bundle, 
-                                                            vdom_script=vdom_filename,
-                                                            script_is_module=combined_is_module,
-                                                            is_hybrid_index=(slug == "index" and hasattr(app, "has_spa_routes") and app.has_spa_routes()))
-                            filename = "index.html"
-                        else:
-                            html_content = self.generate_html(page_app, css_file="styles.css",
-                                                            script_file=script_filename,
-                                                            runtime_file=runtime_filename,
-                                                            extra_script_srcs=external_srcs, 
-                                                            bundle=bundle, 
-                                                            vdom_script=vdom_filename,
-                                                            script_is_module=combined_is_module,
-                                                            is_hybrid_index=(slug == "index" and hasattr(app, "has_spa_routes") and app.has_spa_routes()))
-                            filename = f"{slug}.html"
-                    
-                    # Mejorar formato HTML
-                    try:
-                        soup = BeautifulSoup(html_content, "html.parser")
-                        html_content = soup.prettify()
-                    except ImportError:
-                        pass
-                    
-                    self.write_file(os.path.join(output_path, filename), html_content)
-                    
-                    # Fase 2: snapshot/version por página (solo en dev, no bundle)
-                    if not bundle:
-                        try:
-                            vdom_json = self.generate_vdom_snapshot(page_app.root)
-                        except Exception:
-                            vdom_json = '{}'
-                        if slug != 'index':
-                            snapshot_name = f"snapshot_{slug}.json"
-                            version_name = f"version_{slug}.txt"
-                        else:
-                            snapshot_name = "snapshot.json"
-                            version_name = "version.txt"
-                        self.write_file(os.path.join(output_path, snapshot_name), vdom_json)
-                        try:
-                            import time
-                            version_val = str(int(time.time()*1000))
-                        except Exception:
-                            version_val = "1"
-                        self.write_file(os.path.join(output_path, version_name), version_val)
+                                future.result()
+                            except Exception as e:
+                                print(f"[Dars] Error exporting page '{slug}' in parallel: {e}")
+                else:
+                    for slug, page in page_jobs:
+                        self._export_multipage_page(app, page, slug, output_path, project_root, bundle, should_combine_js, spa_has_index, index_page)
             elif not (hasattr(app, "has_spa_routes") and app.has_spa_routes()):
                 # Single-page clásico (solo si NO hay SPA routes)
                 # Generar VDOM y obtener eventos
@@ -5967,6 +5786,163 @@ fetch({repr(upload_url)}, {{method:'POST', body:_fd}})
         html = html.replace('\n\n', '<br><br>')
         
         return html
+
+    def _export_multipage_page(self, app: App, page, slug: str, output_path: str, project_root: str, bundle: bool, should_combine_js: bool, spa_has_index: bool, index_page):
+        """Export a single multipage page using an isolated exporter worker."""
+        import copy as _cpy
+        from dars.components.basic.container import Container
+
+        # Prepare page-specific app copy and root tree copy
+        page_app = _cpy.copy(app)
+        try:
+            page_app.root = _cpy.deepcopy(page.root)
+        except Exception:
+            page_app.root = page.root
+
+        if page.title:
+            page_app.title = page.title
+        if getattr(page, 'meta', None):
+            for k, v in getattr(page, 'meta', {}).items():
+                setattr(page_app, k, v)
+
+        if isinstance(page_app.root, list):
+            page_app.root = Container(children=page_app.root)
+
+        # Create a temporary exporter to avoid mutating the shared parent exporter state
+        page_exporter = self.__class__()
+        page_exporter._current_output_path = output_path
+        page_exporter._current_app = app
+        page_exporter._style_registry = getattr(self, '_style_registry', {}).copy()
+        page_exporter._hover_style_registry = getattr(self, '_hover_style_registry', {}).copy()
+        page_exporter._active_style_registry = getattr(self, '_active_style_registry', {}).copy()
+        page_exporter._global_css_blocks = list(getattr(self, '_global_css_blocks', []))
+        page_exporter._markdown_html_assets = getattr(self, '_markdown_html_assets', {}).copy()
+        page_exporter._cached_spa_config_light = getattr(self, '_cached_spa_config_light', None)
+        page_exporter._type_obfuscation = getattr(self, '_type_obfuscation', False)
+        page_exporter._hash_ids = getattr(self, '_hash_ids', False)
+        page_exporter._id_hash_map = getattr(self, '_id_hash_map', {}).copy()
+        page_exporter._type_map = getattr(self, '_type_map', {}).copy()
+        page_exporter._type_seq = getattr(self, '_type_seq', 0)
+        page_exporter._watch_scripts = list(getattr(self, '_watch_scripts', []))
+        page_exporter._markdown_scripts = getattr(self, '_markdown_scripts', {})
+        page_exporter._built_in_bindings = []
+        page_exporter._dynamic_bindings = {}
+        page_exporter._current_page_id = slug
+
+        page_exporter.ensure_ids_assigned(page_app.root)
+
+        page_events_map = {}
+        try:
+            vdom_builder = VDomBuilder(id_provider=page_exporter.get_component_id)
+            vdom_builder_root = page_app.root
+            page_events_map = vdom_builder.events_map
+            vdom_dict = vdom_builder.build(vdom_builder_root)
+            if bundle:
+                page_exporter._obfuscate_vdom(vdom_dict)
+            vdom_js = ""
+        except Exception:
+            vdom_js = ""
+            page_events_map = {}
+
+        page_exporter._collect_bindings_from_tree(page_app.root)
+
+        try:
+            from dars.hooks.use_fetch import _get_auto_fetch_registry
+            from dars.hooks.set_vref import _VREF_VALUES_REGISTRY
+            all_triggers = _get_auto_fetch_registry()
+            _page_auto_fetches = []
+            for trigger in all_triggers:
+                try:
+                    args = trigger.data.get('args', {}) if trigger.data else {}
+                    sel = args.get('loading_selector', '')
+                    if sel and any(v.selector == sel for v in _VREF_VALUES_REGISTRY.values()):
+                        _page_auto_fetches.append(trigger)
+                except Exception:
+                    pass
+        except Exception:
+            _page_auto_fetches = []
+
+        page_exporter.render_component(page_app.root)
+        runtime_js = page_exporter.generate_javascript(page_app, page_app.root, page_events_map, _auto_fetches=_page_auto_fetches)
+
+        page_scripts = []
+        page_scripts.extend(getattr(app, 'scripts', []))
+        if hasattr(page, 'scripts'):
+            page_scripts.extend(page.scripts)
+        if hasattr(page_app.root, 'get_scripts'):
+            page_scripts.extend(page_app.root.get_scripts())
+        root_scripts = getattr(page_app.root, 'scripts', None)
+        if root_scripts:
+            page_scripts.extend(root_scripts)
+        md_scripts = getattr(page_exporter, '_markdown_scripts', {}).get(slug, [])
+        if md_scripts:
+            page_scripts.extend(md_scripts)
+
+        combined_js, external_srcs, combined_is_module = page_exporter._prepare_page_scripts(page_scripts, output_path, project_root)
+
+        if should_combine_js:
+            combined_all_js = f"""
+    {vdom_js}
+    // Runtime
+    {runtime_js}
+
+    // Page Scripts
+    {combined_js}
+    """
+            app_js_filename = f"app_{slug}.js" if slug != "index" else "app.js"
+            page_exporter.write_file(os.path.join(output_path, app_js_filename), combined_all_js)
+            html_content = page_exporter.generate_html(page_app, css_file="styles.css",
+                                                      script_file=app_js_filename,
+                                                      runtime_file="",
+                                                      extra_script_srcs=external_srcs,
+                                                      bundle=bundle,
+                                                      vdom_script="",
+                                                      script_is_module=combined_is_module,
+                                                      combined_js=True,
+                                                      is_hybrid_index=(slug == "index" and hasattr(app, "has_spa_routes") and app.has_spa_routes()))
+            filename = "index.html" if index_page is not None and page is index_page and not spa_has_index else f"{slug}.html"
+        else:
+            vdom_filename = f"vdom_tree_{slug}.js" if slug != "index" else "vdom_tree.js"
+            page_exporter.write_file(os.path.join(output_path, vdom_filename), vdom_js)
+            runtime_filename = f"runtime_dars_{slug}.js" if slug != "index" else "runtime_dars.js"
+            page_exporter.write_file(os.path.join(output_path, runtime_filename), runtime_js)
+            script_filename = f"script_{slug}.js" if slug != "index" else "script.js"
+            page_exporter.write_file(os.path.join(output_path, script_filename), combined_js)
+            html_content = page_exporter.generate_html(page_app, css_file="styles.css",
+                                                      script_file=script_filename,
+                                                      runtime_file=runtime_filename,
+                                                      extra_script_srcs=external_srcs,
+                                                      bundle=bundle,
+                                                      vdom_script=vdom_filename,
+                                                      script_is_module=combined_is_module,
+                                                      is_hybrid_index=(slug == "index" and hasattr(app, "has_spa_routes") and app.has_spa_routes()))
+            filename = "index.html" if index_page is not None and page is index_page and not spa_has_index else f"{slug}.html"
+
+        try:
+            soup = BeautifulSoup(html_content, "html.parser")
+            html_content = soup.prettify()
+        except Exception:
+            pass
+
+        page_exporter.write_file(os.path.join(output_path, filename), html_content)
+
+        if not bundle:
+            try:
+                vdom_json = page_exporter.generate_vdom_snapshot(page_app.root)
+            except Exception:
+                vdom_json = '{}'
+            snapshot_name = f"snapshot_{slug}.json" if slug != 'index' else "snapshot.json"
+            version_name = f"version_{slug}.txt" if slug != 'index' else "version.txt"
+            page_exporter.write_file(os.path.join(output_path, snapshot_name), vdom_json)
+            try:
+                import time
+                version_val = str(int(time.time()*1000))
+            except Exception:
+                version_val = "1"
+            page_exporter.write_file(os.path.join(output_path, version_name), version_val)
+
+        return True
+
     def render_generic_component(self, component: Component) -> str:
         """Renderiza un componente genérico con estructura básica"""
         component_id = self.get_component_id(component, prefix="comp")

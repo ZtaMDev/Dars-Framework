@@ -331,6 +331,20 @@ class SSRRenderer:
         # This matches the behavior of static HTML export where app_{slug}.js is included.
         script_fn = f"app_{route_name}.js"
 
+        # Resolve frontend asset URLs when backend and frontend are separate.
+        from dars.env import DarsEnv
+        frontend_url = DarsEnv.get("DARS_FRONTEND_URL") or "/"
+        frontend_url = frontend_url.rstrip("/") if frontend_url else ""
+
+        def _asset_url(path: str) -> str:
+            cleaned = path.lstrip("/")
+            if frontend_url:
+                return f"{frontend_url}/{cleaned}"
+            return cleaned
+
+        # Expose frontend URL in SPA config to help client-side loaders if needed.
+        spa_config["frontendUrl"] = frontend_url or "/"
+
         # ---------------------------------------------------------------------
         # CSS Registry Handling
         # ---------------------------------------------------------------------
@@ -458,7 +472,7 @@ class SSRRenderer:
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {meta_tags_html}
     <title>{page_title}</title>
-    <link rel="stylesheet" href="/runtime_css.css">{registry_style_tag}<link rel="stylesheet" href="/styles.css">{markdown_head_assets}
+    <link rel="stylesheet" href="{_asset_url('runtime_css.css')}">{registry_style_tag}<link rel="stylesheet" href="{_asset_url('styles.css')}">{markdown_head_assets}
 </head>
 <body>
     <div id="__dars_spa_root__">
@@ -467,9 +481,9 @@ class SSRRenderer:
         </div>
     </div>
     {markdown_scripts_html}
-    <script type="module" src="/lib/dars.min.js" defer></script>
-    <script type="module" src="/app.js"></script>
-    <script type="module" src="/{script_fn}"></script>
+    <script type="module" src="{_asset_url('lib/dars.min.js')}" defer></script>
+    <script type="module" src="{_asset_url('app.js')}"></script>
+    <script type="module" src="{_asset_url(script_fn)}"></script>
 </body>
 </html>"""
         

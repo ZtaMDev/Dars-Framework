@@ -158,7 +158,15 @@ export function _initializeRouter() {
     const vdomSource =
       isSSRRoute ? window.__ROUTE_VDOM__ || window.__DARS_VDOM__ : null;
     const hydratedPath = window.__DARS_HYDRATED_PATH__ || "/";
-
+    if (match.route["styles"]) {
+      _injectStyles(match.route["name"], match.route["styles"]);
+    }
+    if (match.route["scripts"]) {
+      _executeScripts(match.route["scripts"], match.route["name"]);
+    }
+    if (match.route["events"]) {
+      _attachEventsMap(match.route["events"]);
+    }
     if (
       isSSRRoute &&
       vdomSource &&
@@ -808,14 +816,6 @@ export function _loadExternalScript(src, isModule, routeName) {
       script.type = "module";
     }
 
-    // Simulate DOMContentLoaded for scripts that depend on it
-    script.onload = function () {
-      try {
-        // Trigger a custom event that scripts can listen to
-        const event = new Event("DOMContentLoaded");
-        document.dispatchEvent(event);
-      } catch (e) {}
-    };
 
     script.onerror = function () {
       console.error("[Dars Router] Script load failed:", src);
