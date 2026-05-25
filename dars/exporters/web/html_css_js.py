@@ -394,7 +394,20 @@ class HTMLCSSJSExporter(Exporter):
             except Exception:
                 pass
 
-            base_css_content = self.generate_base_css()
+            # Recopilar todas las raíces de componentes de la aplicación para extraer solo los estilos utilizados
+            component_roots = []
+            if getattr(app, 'root', None):
+                component_roots.append(app.root)
+            if hasattr(app, 'pages') and app.pages:
+                for page in app.pages.values():
+                    if getattr(page, 'root', None):
+                        component_roots.append(page.root)
+            if hasattr(app, '_spa_routes') and app._spa_routes:
+                for route in app._spa_routes.values():
+                    if hasattr(route, 'root') and route.root:
+                        component_roots.append(route.root)
+
+            base_css_content = self.generate_base_css(component_roots)
             custom_css_content = self.generate_custom_css(app)
 
             self.write_file(os.path.join(output_path, "runtime_css.css"), base_css_content)
@@ -540,10 +553,8 @@ class HTMLCSSJSExporter(Exporter):
 
                     if should_combine_js:
                         # Combinar runtime + VDOM + scripts en un solo archivo
-                        combined_all_js = f"""// Combined JavaScript for {slug}
-    // VDOM
+                        combined_all_js = f"""
     {vdom_js}
-
     // Runtime
     {runtime_js}
 
@@ -692,10 +703,8 @@ class HTMLCSSJSExporter(Exporter):
 
                 if should_combine_js:
                     # Combinar runtime + VDOM + scripts en un solo archivo
-                    combined_all_js = f"""// Combined JavaScript for Single Page App
-    // VDOM
+                    combined_all_js = f"""
     {vdom_js}
-
     // Runtime
     {runtime_js}
 
@@ -1657,9 +1666,39 @@ if ('serviceWorker' in navigator) {
         
         return '\n'.join(twitter_html)
         
-    def generate_base_css(self) -> str:
-        """Genera el contenido CSS base con variables y estilos modernos."""
-        base_css = """/* Dars Framework Base Styles */
+    def generate_base_css(self, component_tree: Any = None) -> str:
+        """Genera el contenido CSS base con variables y estilos modernos, incluyendo opcionalmente solo los estilos de los componentes utilizados."""
+        # 1. Collect used component types
+        used_types = set()
+        
+        # If component_tree is not provided, try to collect from self._current_app
+        if component_tree is None and getattr(self, '_current_app', None) is not None:
+            app = self._current_app
+            component_roots = []
+            if getattr(app, 'root', None):
+                component_roots.append(app.root)
+            if hasattr(app, 'pages') and app.pages:
+                for page in app.pages.values():
+                    if getattr(page, 'root', None):
+                        component_roots.append(page.root)
+            if hasattr(app, '_spa_routes') and app._spa_routes:
+                for route in app._spa_routes.values():
+                    if hasattr(route, 'root') and route.root:
+                        component_roots.append(route.root)
+            if component_roots:
+                used_types = self._collect_all_used_types(component_roots)
+        elif component_tree is not None:
+            used_types = self._collect_all_used_types(component_tree)
+            
+        # If no used_types could be collected (e.g. no tree and no active app),
+        # default to all component types for complete backwards compatibility.
+        default_all = not bool(used_types)
+        
+        # 2. Build base CSS parts
+        parts = []
+        
+        # Always include :root and basic global styles
+        parts.append("""/* Dars Framework Base Styles */
 :root {
     /* Colors */
     --dars-primary: #007bff;
@@ -1705,20 +1744,20 @@ body {
     line-height: 1.5;
 }
 
-/* --- Components --- */
+/* --- Components --- */""")
 
-/* Container */
+        # Component styles dictionary
+        component_css_map = {
+            'Container': """/* Container */
 .dars-container {
     /* Default is block, no need to specify unless overriding */
-}
-
-/* Text */
+}""",
+            'Text': """/* Text */
 .dars-text {
     /* Allow natural flow (inline inside block, etc.) */
     margin: 0;
-}
-
-/* Button */
+}""",
+            'Button': """/* Button */
 .dars-button {
     display: inline-flex;
     align-items: center;
@@ -1751,9 +1790,8 @@ body {
 .dars-button:disabled {
     opacity: 0.65;
     cursor: not-allowed;
-}
-
-/* Input */
+}""",
+            'Input': """/* Input */
 .dars-input {
     display: block;
     width: 100%;
@@ -1775,9 +1813,8 @@ body {
     border-color: #80bdff;
     outline: 0;
     box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-}
-
-/* Textarea */
+}""",
+            'Textarea': """/* Textarea */
 .dars-textarea {
     display: block;
     width: 100%;
@@ -1798,16 +1835,14 @@ body {
     border-color: #80bdff;
     outline: 0;
     box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-}
-
-/* Image */
+}""",
+            'Image': """/* Image */
 .dars-image {
     max-width: 100%;
     height: auto;
     vertical-align: middle;
-}
-
-/* Link */
+}""",
+            'Link': """/* Link */
 .dars-link {
     color: var(--dars-primary);
     text-decoration: none;
@@ -1817,9 +1852,8 @@ body {
 .dars-link:hover {
     color: var(--dars-primary-hover);
     text-decoration: underline;
-}
-
-/* Card */
+}""",
+            'Card': """/* Card */
 .dars-card {
     position: relative;
     display: flex;
@@ -1840,9 +1874,8 @@ body {
     margin-bottom: var(--dars-spacing-md);
     font-size: 1.5rem;
     font-weight: 500;
-}
-
-/* Table */
+}""",
+            'Table': """/* Table */
 .dars-table {
     width: 100%;
     margin-bottom: 1rem;
@@ -1867,9 +1900,8 @@ body {
 
 .dars-table tbody + tbody {
     border-top: 2px solid var(--dars-border-color);
-}
-
-/* Tabs */
+}""",
+            'Tabs': """/* Tabs */
 .dars-tabs {
     margin-bottom: var(--dars-spacing-md);
 }
@@ -1916,9 +1948,8 @@ body {
 
 .dars-tab-panel-active {
     display: block;
-}
-
-/* Accordion */
+}""",
+            'Accordion': """/* Accordion */
 .dars-accordion {
     border: 1px solid rgba(0,0,0,.125);
     border-radius: var(--dars-border-radius);
@@ -1960,9 +1991,8 @@ body {
 
 .dars-accordion-section.dars-accordion-open .dars-accordion-content {
     display: block;
-}
-
-/* Modal */
+}""",
+            'Modal': """/* Modal */
 .dars-modal {
     position: fixed;
     top: 0;
@@ -1996,9 +2026,8 @@ body {
     outline: 0;
     box-shadow: var(--dars-shadow);
     margin: 1.75rem auto;
-}
-
-/* ProgressBar */
+}""",
+            'ProgressBar': """/* ProgressBar */
 .dars-progressbar {
     display: flex;
     height: 1rem;
@@ -2020,9 +2049,8 @@ body {
     white-space: nowrap;
     background-color: var(--dars-primary);
     transition: width 0.6s ease;
-}
-
-/* Spinner */
+}""",
+            'Spinner': """/* Spinner */
 .dars-spinner {
     display: inline-block;
     width: 2rem;
@@ -2037,9 +2065,8 @@ body {
 
 @keyframes dars-spinner-border {
     100% { transform: rotate(360deg); }
-}
-
-/* Tooltip */
+}""",
+            'Tooltip': """/* Tooltip */
 .dars-tooltip {
     position: relative;
     display: inline-block;
@@ -2087,9 +2114,8 @@ body {
     top: 50%;
     left: 105%;
     transform: translateY(-50%);
-}
-
-/* Navbar */
+}""",
+            'Navbar': """/* Navbar */
 .dars-navbar {
     display: flex;
     justify-content: space-between;
@@ -2126,9 +2152,8 @@ body {
 .dars-navbar-nav a:hover {
     background-color: var(--dars-light);
     color: var(--dars-primary-hover);
-}
-
-/* Checkbox */
+}""",
+            'Checkbox': """/* Checkbox */
 .dars-checkbox-wrapper {
     display: inline-flex;
     align-items: center;
@@ -2152,9 +2177,8 @@ body {
     cursor: pointer;
     user-select: none;
     color: var(--dars-text-color);
-}
-
-/* RadioButton */
+}""",
+            'RadioButton': """/* RadioButton */
 .dars-radio-wrapper {
     display: inline-flex;
     align-items: center;
@@ -2178,9 +2202,8 @@ body {
     cursor: pointer;
     user-select: none;
     color: var(--dars-text-color);
-}
-
-/* Select */
+}""",
+            'Select': """/* Select */
 .dars-select {
     display: block;
     width: 100%;
@@ -2213,9 +2236,8 @@ body {
 
 .dars-select option:disabled {
     color: var(--dars-text-muted);
-}
-
-/* Slider */
+}""",
+            'Slider': """/* Slider */
 .dars-slider-wrapper {
     display: flex;
     align-items: center;
@@ -2253,9 +2275,8 @@ body {
 .dars-slider-wrapper label {
     font-weight: 500;
     color: var(--dars-text-color);
-}
-
-/* DatePicker */
+}""",
+            'DatePicker': """/* DatePicker */
 .dars-datepicker {
     display: block;
     width: 100%;
@@ -2302,9 +2323,8 @@ body {
 .dars-datepicker-inline .dars-datepicker {
     border: none;
     padding: 0;
-}
-
-/* Markdown */
+}""",
+            'Markdown': """/* Markdown */
 /* Dars Markdown Copy Button Styles */
 .dars-code-copy {
     position: absolute;
@@ -2508,24 +2528,6 @@ pre:hover .dars-code-copy {
     filter: brightness(0.9);
 }
 
-/* Basic media defaults for Dars components */
-.dars-video,
-video.dars-video {
-    max-width: 100%;
-    height: auto;
-    display: block;
-    border-radius: var(--dars-border-radius);
-    margin: 0 0 1.25rem 0;
-}
-
-.dars-audio,
-audio.dars-audio {
-    width: 100%;
-    max-width: 100%;
-    display: block;
-    margin: 0.5rem 0 1.25rem 0;
-}
-
 .dars-markdown hr {
     border: none;
     height: 1px;
@@ -2535,9 +2537,31 @@ audio.dars-audio {
 
 .dars-markdown-dark hr {
     background-color: #444;
-}
-"""
-        return base_css
+}""",
+            'Video': """/* Basic media defaults for Dars components */
+.dars-video,
+video.dars-video {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    border-radius: var(--dars-border-radius);
+    margin: 0 0 1.25rem 0;
+}""",
+            'Audio': """.dars-audio,
+audio.dars-audio {
+    width: 100%;
+    max-width: 100%;
+    display: block;
+    margin: 0.5rem 0 1.25rem 0;
+}"""
+        }
+        
+        # 3. Add styles conditionally or all by default
+        for comp_name, css_content in component_css_map.items():
+            if default_all or comp_name in used_types:
+                parts.append(css_content)
+                
+        return "\n\n".join(parts)
 
     def build_vdom_tree(self, component: Component) -> dict:
         """Serializa componente SIN eventos"""
@@ -2616,6 +2640,65 @@ audio.dars-audio {
         if hasattr(component, 'children') and component.children:
             for child in component.children:
                 self._collect_component_types(child, types_set)
+
+    def _collect_all_used_types(self, component_tree: Any) -> set:
+        """Helper to collect all used component types from various forms of component_tree input"""
+        used_types = set()
+        if not component_tree:
+            return used_types
+
+        # Case 1: If it's a set or list/tuple of strings, it's already type names
+        if isinstance(component_tree, (set, list, tuple)) and all(isinstance(x, str) for x in component_tree):
+            return set(component_tree)
+
+        # Helper to recursively traverse a Component object
+        def traverse_component(comp):
+            if not comp:
+                return
+            # Add all classes in the Method Resolution Order (ancestor classes) to support custom subclasses
+            try:
+                for cls in comp.__class__.__mro__:
+                    used_types.add(cls.__name__)
+            except Exception:
+                used_types.add(comp.__class__.__name__)
+            
+            # Recurse children
+            if hasattr(comp, 'children') and comp.children:
+                for child in comp.children:
+                    traverse_component(child)
+
+        # Helper to recursively traverse a dictionary (VDOM)
+        def traverse_dict(node):
+            if not isinstance(node, dict):
+                return
+            t = node.get('type')
+            if t and isinstance(t, str):
+                used_types.add(t)
+            children = node.get('children')
+            if isinstance(children, list):
+                for child in children:
+                    traverse_dict(child)
+
+        # Case 2: It's a single dict (VDOM representation)
+        if isinstance(component_tree, dict):
+            traverse_dict(component_tree)
+            return used_types
+
+        # Case 3: It's a list or tuple of components or mixed objects
+        if isinstance(component_tree, (list, tuple, set)):
+            for item in component_tree:
+                if isinstance(item, dict):
+                    traverse_dict(item)
+                elif hasattr(item, '__class__'):
+                    traverse_component(item)
+            return used_types
+
+        # Case 4: It's a single Component object
+        if hasattr(component_tree, '__class__'):
+            traverse_component(component_tree)
+            return used_types
+
+        return used_types
 
     def generate_javascript(self, app: App, page_root: Component, events_map: Dict[str, Dict[str, Any]] = None, ssr_mode: bool = False, _auto_fetches: list = None) -> str:
         """Genera un runtime modular nativo sin engine de VDOM."""
@@ -6079,9 +6162,8 @@ fetch({repr(upload_url)}, {{method:'POST', body:_fd}})
             else:
                 # Index/shell: full runtime + config + VDOM
                 combined_all_js = f"""// Combined JS for {route_name}
-// VDOM
-{vdom_js_content}
 
+{vdom_js_content}
 // Runtime
 {runtime_js}
 

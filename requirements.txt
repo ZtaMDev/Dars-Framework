@@ -6,7 +6,5 @@ markdown2==2.5.5
 pydepm==1.1.2
 requests==2.34.2
 plotly==6.7.0
-rjsmin==1.2.5
-rcssmin==1.2.2
 starlette==1.0.0
 python-multipart==0.0.29
