@@ -1,4 +1,4 @@
-# Release Notes v1.9.14(private pre-release phase)
+# Release Notes v1.9.14
 
 > **Unified fullstack dev:** `dars dev` now starts frontend and backend together when `backendEntry` is configured. `dars dev --backend` is deprecated.
 
