@@ -6,7 +6,8 @@
 #
 # Copyright (c) 2025 ZtaDev
 """Utility functions for creating common dScript patterns using secure DAP actions."""
-from dars.scripts.dscript import dScript, RawJS
+from dars.hooks.value_helpers import ValueRef
+from dars.scripts.dscript import RawJS, dScript
 from dars.actionProtocol import Action
 from typing import Union, List
 
@@ -259,73 +260,70 @@ def getDateTime(format: str = "iso") -> 'ValueRef':
 
 # ============= DOM Manipulation Utilities =============
 
-def show(id: str) -> RawJS:
+def show(id: str) -> dScript:
     """
-    Show a DOM element by setting its CSS display property.
+    Show a DOM element via DAP ``dom_show`` command.
     
     Args:
-        id (str): The ID of the element to show.
+        id (str): The ID or CSS selector of the element to show.
         
     Returns:
-        RawJS: The compiled `dom_show` action.
+        dScript: A DAP action that shows the element.
         
     Example:
         ```python
         Button("Show Details", on_click=show("details_panel"))
         ```
     """
-    return RawJS(code=Action.dom_show(id))
+    return dScript(data={"op": "dom_show", "args": {"id": id}})
 
 
-def hide(id: str) -> RawJS:
+def hide(id: str) -> dScript:
     """
-    Hide a DOM element by setting its CSS display property to 'none'.
+    Hide a DOM element via DAP ``dom_hide`` command.
     
     Args:
-        id (str): The ID of the element to hide.
+        id (str): The ID or CSS selector of the element to hide.
         
     Returns:
-        RawJS: The compiled `dom_hide` action.
+        dScript: A DAP action that hides the element.
         
     Example:
         ```python
         Button("Hide Details", on_click=hide("details_panel"))
         ```
     """
-    return RawJS(code=Action.dom_hide(id))
+    return dScript(data={"op": "dom_hide", "args": {"id": id}})
 
 
-def toggle(id: str) -> RawJS:
+def toggle(id: str) -> dScript:
     """
-    Toggle a DOM element's visibility.
-    
-    If the element is currently hidden (display: none), it will be shown.
-    If it is visible, it will be hidden.
+    Toggle a DOM element's visibility via DAP ``dom_toggle`` command.
     
     Args:
-        id (str): The ID of the element to toggle.
+        id (str): The ID or CSS selector of the element to toggle.
         
     Returns:
-        RawJS: The compiled `dom_toggle` action.
+        dScript: A DAP action that toggles the element's visibility.
         
     Example:
         ```python
         Button("Toggle Menu", on_click=toggle("mobile_menu"))
         ```
     """
-    return RawJS(code=Action.dom_toggle(id))
+    return dScript(data={"op": "dom_toggle", "args": {"id": id}})
 
 
-def setText(id: str, text: Union[str, 'ValueRef']) -> RawJS:
+def setText(id: str, text: Union[str, 'ValueRef']) -> dScript:
     """
-    Set the text content of a DOM element.
+    Set the text content of a DOM element via DAP ``dom_set_text`` command.
     
     Args:
-        id (str): The ID of the target element.
+        id (str): The ID or CSS selector of the target element.
         text (str | ValueRef): The text to set. Can be a static string or a dynamic `ValueRef`.
         
     Returns:
-        RawJS: The compiled `dom_set_text` action.
+        dScript: A DAP action that sets the element's text.
         
     Example:
         ```python
@@ -337,69 +335,65 @@ def setText(id: str, text: Union[str, 'ValueRef']) -> RawJS:
         ```
     """
     from dars.hooks.value_helpers import ValueRef
-    if isinstance(text, ValueRef):
-        return RawJS(code=Action.dom_set_text(id=id, text=RawJS(text._get_code())))
-    else:
-        return RawJS(code=Action.dom_set_text(id=id, text=text))
+    text_val = text._get_code() if isinstance(text, ValueRef) else text
+    return dScript(data={"op": "dom_set_text", "args": {"id": id, "text": text_val}})
 
 
-def addClass(id: str, class_name: str) -> RawJS:
+def addClass(id: str, class_name: str) -> dScript:
     """
-    Add a CSS class to a DOM element.
+    Add a CSS class to a DOM element via DAP ``class_add`` command.
     
     Args:
-        id (str): The ID of the element.
+        id (str): The ID or CSS selector of the element.
         class_name (str): The CSS class to add.
         
     Returns:
-        RawJS: The compiled `class_add` action.
+        dScript: A DAP action that adds the class.
         
     Example:
         ```python
         Button("Highlight", on_click=addClass("text_block", "highlighted"))
         ```
     """
-    return RawJS(code=Action.class_add(id, class_name))
+    return dScript(data={"op": "class_add", "args": {"id": id, "className": class_name}})
 
 
-def removeClass(id: str, class_name: str) -> RawJS:
+def removeClass(id: str, class_name: str) -> dScript:
     """
-    Remove a CSS class from a DOM element.
+    Remove a CSS class from a DOM element via DAP ``class_remove`` command.
     
     Args:
-        id (str): The ID of the element.
+        id (str): The ID or CSS selector of the element.
         class_name (str): The CSS class to remove.
         
     Returns:
-        RawJS: The compiled `class_remove` action.
+        dScript: A DAP action that removes the class.
         
     Example:
         ```python
         Button("Remove Highlight", on_click=removeClass("text_block", "highlighted"))
         ```
     """
-    return RawJS(code=Action.class_remove(id, class_name))
+    return dScript(data={"op": "class_remove", "args": {"id": id, "className": class_name}})
 
 
-def toggleClass(id: str, class_name: str) -> RawJS:
+def toggleClass(id: str, class_name: str) -> dScript:
     """
-    Toggle a CSS class on a DOM element.
-    
-    If the element has the class, it will be removed. If it doesn't, it will be added.
+    Toggle a CSS class on a DOM element via DAP ``class_toggle`` command.
     
     Args:
-        id (str): The ID of the element.
+        id (str): The ID or CSS selector of the element.
         class_name (str): The CSS class to toggle.
         
     Returns:
-        RawJS: The compiled `class_toggle` action.
+        dScript: A DAP action that toggles the class.
         
     Example:
         ```python
         Button("Toggle Dark Mode", on_click=toggleClass("app_body", "dark-theme"))
         ```
     """
-    return RawJS(code=Action.class_toggle(id, class_name))
+    return dScript(data={"op": "class_toggle", "args": {"id": id, "className": class_name}})
 
 
 # ============= Scroll Utilities =============
@@ -672,6 +666,56 @@ def blur(id: str) -> RawJS:
     return RawJS(code=Action.dom_blur(id))
 
 
+# ============= Auth & Redirect Utilities =============
+
+def redirect_after_login(fallback: str = "/") -> dScript:
+    """
+    Navigate to the URL specified in the ``?redirect=`` query parameter.
+    
+    After a successful login, call this function to read the redirect target
+    that was set by the route guard (e.g. ``/login?redirect=%2Fproducts``),
+    decode it, and navigate to it using the SPA router when possible.
+    
+    This is the recommended way to handle post-login redirects. It uses a DAP
+    ``redirect_after_login`` command that reads ``URLSearchParams`` to parse
+    the query string, decodes the redirect value, and tries
+    ``window.navigateTo()`` (SPA navigation) or ``window.location.href`` (full
+    reload) as fallback.
+    
+    Args:
+        fallback (str): Default path if no ``?redirect=`` param is present.
+                        Defaults to ``"/"``.
+    
+    Returns:
+        dScript: The compiled redirect action.
+    
+    Example:
+        ```python
+        Button("Login", on_click=submit_login)
+        # In on_success:
+        runSequence(..., redirect_after_login())
+        ```
+    """
+    return dScript(data={"op": "redirect_after_login", "args": {"fallback": fallback}})
+
+
+def navigate_to(path: str) -> dScript:
+    """
+    Navigate to a path using the SPA router (or full page reload as fallback).
+    
+    Args:
+        path (str): The URL path to navigate to (e.g. ``"/login"``).
+        
+    Returns:
+        dScript: A DAP ``navigate`` action.
+        
+    Example::
+    
+        Button("Go Home", on_click=navigate_to("/"))
+    """
+    return dScript(data={"op": "navigate", "args": {"path": path}})
+
+
 # ============= Keyboard Event Utilities =============
 
 def switch(cases: dict, default=None) -> RawJS:
@@ -705,10 +749,10 @@ def switch(cases: dict, default=None) -> RawJS:
 def setTimeout(delay: int, code: Union['dScript', 'RawJS', str]) -> 'RawJS':
     """Set a timeout to execute a script after a delay. Returns a Promise for chainability."""
     from dars.scripts.dscript import RawJS
-    if hasattr(code, 'code'):
-        code_str = code.code
-    elif hasattr(code, 'get_code'):
+    if hasattr(code, 'get_code'):
         code_str = code.get_code()
+    elif hasattr(code, 'code') and code.code is not None:
+        code_str = code.code
     else:
         code_str = str(code)
     

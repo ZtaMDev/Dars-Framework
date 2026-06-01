@@ -39,12 +39,12 @@ class Slider(Component):
         max_value: Union[int, float] = 100,
         value: Union[int, float] = 50,
         step: Union[int, float] = 1,
-        label: str = "",
+        label: Any = "",
         show_value: bool = True,
-        orientation: str = "horizontal",  # "horizontal" o "vertical"
-        id: Optional[str] = None,
-        class_name: Optional[str] = None,
-        style: Optional[Dict[str, Any]] = None,
+        orientation: Any = "horizontal",  # "horizontal" o "vertical"
+        id: Any = None,
+        class_name: Any = None,
+        style: Optional[Dict[str, Any] | str] = None,
         disabled: bool = False,
         on_change: Optional[Callable] = None,
         on_input: Optional[Callable] = None,

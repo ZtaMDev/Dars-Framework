@@ -27,12 +27,12 @@ class Image(Component):
     """
     def __init__(
         self,
-        src: str,
-        alt: str = "",
-        width: Optional[str] = None,
-        height: Optional[str] = None,
-        class_name: Optional[str] = None,
-        style: Optional[Dict[str, Any]] = None,
+        src: Any,
+        alt: Any = "",
+        width: Any = None,
+        height: Any = None,
+        class_name: Any = None,
+        style: Optional[Dict[str, Any] | str] = None,
         **kwargs
     ):
         super().__init__(class_name=class_name, style=style, **kwargs)

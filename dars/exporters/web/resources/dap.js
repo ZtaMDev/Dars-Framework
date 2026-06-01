@@ -78,6 +78,16 @@ export function _registerCommand(op, fn) {
 }
 
 // Initialize core commands
+_registerCommand("inline", (args) => {
+  const code = args && (args.code || args);
+  if (typeof code === "string") {
+    try {
+      return (new Function(code))();
+    } catch (e) {
+      console.error("[Dars:DAP] Error executing inline code:", e);
+    }
+  }
+});
 _registerCommand("change", (args) => change(args));
 _registerCommand("navigate", (args) => {
   const url = args.path || args;
@@ -85,7 +95,12 @@ _registerCommand("navigate", (args) => {
     console.warn("[Dars:Security] Blocked javascript: URI in navigate");
     return;
   }
-  window.location.href = url;
+  // Prefer SPA navigation if the router is available (avoids full page reload)
+  if (typeof window.navigateTo === "function") {
+    window.navigateTo(url);
+  } else {
+    window.location.href = url;
+  }
 });
 _registerCommand("navigate_new", (args) => {
   const url = args.path || args;
@@ -148,7 +163,8 @@ _registerCommand("dom_toggle", (args) => {
       el.style.display === "none" ? args.display || "" : "none";
 });
 _registerCommand("dom_set_text", (args) => {
-  const el = $(args.id);
+  let el = $(args.id);
+  if (!el) el = document.querySelector(args.id);
   if (el) el.textContent = String(args.text);
 });
 _registerCommand("dom_set_html", (args) => {
@@ -602,7 +618,7 @@ _registerCommand("vref_update", async (args, ctx) => {
       } else {
         // Only update textContent for elements that are NOT managed by a useVRef binding
         if (!el.hasAttribute("data-vref")) {
-          el.textContent = val;
+          el.textContent = typeof val === "object" && val !== null ? JSON.stringify(val, null, 2) : val;
         }
       }
     });
@@ -631,7 +647,9 @@ _registerCommand("vref_update", async (args, ctx) => {
         try {
           const newVal = await binding.vexpr();
           const strVal =
-            newVal !== null && newVal !== undefined ? String(newVal) : "";
+            newVal !== null && newVal !== undefined
+              ? (typeof newVal === "object" ? JSON.stringify(newVal, null, 2) : String(newVal))
+              : "";
           binding.elements.forEach((el) => {
             el.textContent = strVal;
           });
@@ -763,15 +781,30 @@ _registerCommand("network_request", async (args, ctx) => {
   }
 
   try {
+    const resolvedUrlIsCrossOrigin = resolvedUrl &&
+      (resolvedUrl.startsWith("http://") || resolvedUrl.startsWith("https://")) &&
+      !resolvedUrl.startsWith(window.location.origin);
     const fetchConfig = {
       method: method.toUpperCase(),
       headers: { ...headers },
+      credentials: resolvedUrlIsCrossOrigin ? "include" : "same-origin",
     };
 
     // Inject auth token if present
     const token = localStorage.getItem("dars_auth_token");
     if (token && !fetchConfig.headers["Authorization"]) {
       fetchConfig.headers["Authorization"] = "Bearer " + token;
+    }
+
+    // Inject CSRF token for cookie-based auth (state-changing methods)
+    const statefulMethods = ["POST", "PUT", "DELETE", "PATCH"];
+    if (statefulMethods.includes(fetchConfig.method)) {
+      // Read XSRF-TOKEN from document.cookie (works same-origin; cross-origin dev
+      // won't have it — server should skip CSRF check for such requests)
+      const m = document.cookie.match(/\bXSRF-TOKEN=([^;]+)/);
+      if (m && !fetchConfig.headers["X-XSRF-TOKEN"]) {
+        fetchConfig.headers["X-XSRF-TOKEN"] = m[1];
+      }
     }
 
     if (body !== undefined && body !== null) {
@@ -792,7 +825,7 @@ _registerCommand("network_request", async (args, ctx) => {
 
     const resp = await fetch(resolvedUrl, fetchConfig);
 
-    // Handle 401 — clear auth token and surface as error
+    // Handle 401 — clear auth token, surface error, redirect to login
     if (resp.status === 401) {
       localStorage.removeItem("dars_auth_token");
       const errMsg = "Unauthorized (401)";
@@ -815,6 +848,16 @@ _registerCommand("network_request", async (args, ctx) => {
         );
       }
       if (on_error) dispatch(on_error, { ...ctx, error: errMsg });
+      // Redirect to login (SPA nav if possible, otherwise full reload)
+      // but only if we are NOT already on the login page, to avoid redirect loops.
+      const _loginPath =
+        (window.__DARS_SPA_CONFIG__ && window.__DARS_SPA_CONFIG__.loginPath) ||
+        "/login";
+      const _currentPath = window.location.pathname.replace(/\/$/, "") || "/";
+      const _targetPath = _loginPath.replace(/\/$/, "") || "/";
+      if (_currentPath !== _targetPath) {
+        dispatch({ op: "navigate_to_login" });
+      }
       return;
     }
 
@@ -867,6 +910,51 @@ _registerCommand("network_request", async (args, ctx) => {
       );
     }
     if (on_error) dispatch(on_error, { ...ctx, error: errMsg });
+  }
+});
+
+// ==================== AUTH & NAVIGATION COMMANDS ====================
+
+/**
+ * navigate_to_login — redirect to login page, preserving current path as redirect.
+ * Args: { redirect?: string  (optional, overrides default login path) }
+ */
+_registerCommand("navigate_to_login", (args, ctx) => {
+  const redirectPath = args && args.redirect ? args.redirect : undefined;
+  const loginPath = redirectPath || "/login";
+  const _currentPath = window.location.pathname.replace(/\/$/, "") || "/";
+  const _targetLoginPath = loginPath.replace(/\/$/, "") || "/";
+  // Avoid redirect loop — already on login page
+  if (_currentPath === _targetLoginPath) return;
+  if (typeof window.navigateToLogin === "function") {
+    window.navigateToLogin(redirectPath);
+  } else {
+    const target = _currentPath !== "/"
+      ? loginPath + "?redirect=" + encodeURIComponent(_currentPath)
+      : loginPath;
+    window.location.href = target;
+  }
+});
+
+/**
+ * redirect_after_login — navigate to the URL specified in ?redirect= query param.
+ * The redirect may include a path + query string (e.g. "/products?sort=asc").
+ * If no redirect param is set, navigates to the given fallback (default "/").
+ * Args: { fallback?: string }
+ */
+_registerCommand("redirect_after_login", (args) => {
+  let target = "/";
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const raw = params.get("redirect");
+    target = raw ? decodeURIComponent(raw) : (args && args.fallback ? args.fallback : "/");
+  } catch (_) {
+    target = args && args.fallback ? args.fallback : "/";
+  }
+  if (typeof window.navigateTo === "function") {
+    window.navigateTo(target);
+  } else {
+    window.location.href = target;
   }
 });
 
@@ -1120,4 +1208,53 @@ _registerCommand("dom_each_render", async (args, ctx) => {
     .join("");
 
   container.innerHTML = rendered;
+});
+
+// ══════════════════════════════════════════════════════════════════════
+// Server Action — calls a Python backend function via POST /api/actions/:name
+// ══════════════════════════════════════════════════════════════════════
+_registerCommand("call_server", async (args, ctx) => {
+  const actionName = args.name || args.action;
+  if (!actionName) {
+    console.error("[Dars:DAP] call_server requires 'name' or 'action'");
+    return null;
+  }
+  const payload = args.params || args.args || {};
+  const onSuccess = args.on_success || args.onSuccess || null;
+  const onError = args.on_error || args.onError || null;
+
+  try {
+    // Resolve backend URL from SPA config or darsConfig
+    const backendUrl =
+      (window.__DARS_SPA_CONFIG__ && window.__DARS_SPA_CONFIG__.backendUrl) ||
+      __darsConfig.backendUrl ||
+      "";
+    const baseUrl = backendUrl ? backendUrl.replace(/\/+$/, "") : "";
+    const res = await fetch(`${baseUrl}/api/actions/${actionName}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify(payload),
+    });
+    if (res.status === 401) {
+      // Auth required — trigger login redirect
+      if (onError) await dispatch(onError, { ...ctx, error: { status: 401 } });
+      dispatch({ op: "navigate_to_login" });
+      return null;
+    }
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: res.statusText }));
+      console.error(`[Dars:DAP] Server action '${actionName}' failed:`, err);
+      if (onError) await dispatch(onError, { ...ctx, error: err });
+      return null;
+    }
+    const data = await res.json();
+    if (onSuccess) await dispatch(onSuccess, { ...ctx, response: data });
+    return data;
+  } catch (e) {
+    console.error(`[Dars:DAP] Server action '${actionName}' network error:`, e);
+    if (onError) await dispatch(onError, { ...ctx, error: String(e) });
+    return null;
+  }
 });

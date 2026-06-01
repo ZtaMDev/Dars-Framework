@@ -27,9 +27,9 @@ class Navbar(Component):
     def __init__(
         self,
         *children,
-        brand: Optional[str] = None,
-        class_name: Optional[str] = None,
-        style: Optional[Dict[str, Any]] = None,
+        brand: Any = None,
+        class_name: Any = None,
+        style: Optional[Dict[str, Any] | str] = None,
         **kwargs
     ):
         # Compatibilidad retro: si 'children' está en kwargs, lo usamos; si no, usamos los posicionales

@@ -21,10 +21,10 @@ class Text(Component):
     """
     def __init__(
         self, 
-        text: str = "", 
-        id: Optional[str] = None, 
-        class_name: Optional[str] = None, 
-        style: Optional[Dict[str, Any]] = None,
+        text: Any = "", 
+        id: Any = None, 
+        class_name: Any = None, 
+        style: Optional[Dict[str, Any] | str] = None,
         **props
     ):
         super().__init__(id=id, class_name=class_name, style=style, **props)

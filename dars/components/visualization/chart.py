@@ -1,11 +1,14 @@
-from dars.core.component import Component
 import json
 import uuid
+from typing import Any, Dict, Optional
+
+from dars.core.component import Component
+
 
 class Chart(Component):
     """
     Interactive chart component powered by Plotly.js for high-performance visualizations.
-    
+
     Props:
     - **figure** (plotly.Figure): Plotly figure object (created with `go.Figure` or `px.scatter`, etc.).
     - **width** (int/str): Width of the chart container (e.g., `800`, `"100%"`).
@@ -16,12 +19,12 @@ class Chart(Component):
     - **style** (dict): Optional dictionary for CSS utility classes (prefer `style`).
     - **children** (list): List of child components (not typical for Chart).
     - **Events**: Handlers (not typical for Chart).
-    
+
     Example:
     ```python
     import plotly.graph_objects as go
     fig = go.Figure(data=[go.Bar(x=['A', 'B'], y=[10, 20])])
-    
+
     Chart(
         figure=fig,
         width="100%",
@@ -30,82 +33,95 @@ class Chart(Component):
     )
     ```
     """
-    
-    def __init__(self, figure, width=None, height=None, config=None, id=None, style=None, **props):
+
+    def __init__(
+        self,
+        figure,
+        width=None,
+        height=None,
+        config=None,
+        id=None,
+        style: Optional[Dict[str, Any] | str] = None,
+        **props,
+    ):
         super().__init__(id=id, style=style, **props)
-        
+
         if not self.id:
             self.id = f"chart-{str(uuid.uuid4())[:8]}"
-        
+
         # Render immediately to avoid deepcopy issues
         try:
             self._html = self._render_chart(figure, width, height, config or {})
         except Exception as e:
             print(f"Warning: Failed to render chart: {e}")
             self._html = f'<div id="{self.id}" class="dars-chart-error" style="border: 1px solid red; padding: 10px; color: red;">Error rendering chart: {str(e)}</div>'
-    
+
     def __deepcopy__(self, memo):
         """Return self to avoid deepcopy issues."""
         return self
-    
+
     def _is_plotly(self, figure):
         """Check if figure is a Plotly figure."""
-        return hasattr(figure, 'to_json') or hasattr(figure, 'to_plotly_json')
-    
+        return hasattr(figure, "to_json") or hasattr(figure, "to_plotly_json")
+
     def _render_chart(self, figure, width, height, config):
         """Render chart immediately."""
         if self._is_plotly(figure):
             return self._render_plotly(figure, width, height, config)
         else:
             return f'<div id="{self.id}">Error: Unsupported figure type. Only Plotly figures are supported.</div>'
-    
+
     def _render_plotly(self, figure, width, height, config):
         """Render Plotly figure as interactive chart."""
         # Get figure JSON
-        if hasattr(figure, 'to_json'):
+        if hasattr(figure, "to_json"):
             fig_json = figure.to_json()
-        elif hasattr(figure, 'to_plotly_json'):
+        elif hasattr(figure, "to_plotly_json"):
             fig_json_dict = figure.to_plotly_json()
             fig_json = json.dumps(fig_json_dict)
         else:
             fig_json = json.dumps(figure)
-        
+
         fig_dict = json.loads(fig_json)
-        data = json.dumps(fig_dict.get('data', []))
-        layout = json.dumps(fig_dict.get('layout', {}))
-        
-        default_config = {'responsive': True, 'displayModeBar': True, 'displaylogo': False}
+        data = json.dumps(fig_dict.get("data", []))
+        layout = json.dumps(fig_dict.get("layout", {}))
+
+        default_config = {
+            "responsive": True,
+            "displayModeBar": True,
+            "displaylogo": False,
+        }
         final_config = {**default_config, **config}
         config_json = json.dumps(final_config)
-        
+
         container_style = []
         if width:
             w = f"{width}px" if isinstance(width, int) else width
             container_style.append(f"width: {w}")
         else:
             container_style.append("width: 100%")
-            
+
         if height:
             h = f"{height}px" if isinstance(height, int) else height
             container_style.append(f"height: {h}")
         else:
             container_style.append("height: 400px")
-        
+
         style_str = "; ".join(container_style)
-        
+
         return f'''
-<div id="{self.id}" style="{style_str}" class="{self.class_name or ''}"></div>
+<div id="{self.id}" style="{style_str}" class="{self.class_name or ""}"></div>
 <script>
 (function() {{
     var plotDiv = document.getElementById('{self.id}');
     var data = {data};
     var layout = {layout};
     var config = {config_json};
-    
+
     function initPlot() {{
         Plotly.newPlot(plotDiv, data, layout, config);
     }}
-    
+
     if (typeof Plotly === 'undefined') {{
         if (!window.dars_plotly_loading) {{
             window.dars_plotly_loading = true;
@@ -124,7 +140,7 @@ class Chart(Component):
 }})();
 </script>
 '''
-    
+
     def render(self, exporter) -> str:
         """Return pre-rendered HTML."""
         return self._html

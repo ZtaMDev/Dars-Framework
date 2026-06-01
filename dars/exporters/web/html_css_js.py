@@ -5976,18 +5976,21 @@ fetch({repr(upload_url)}, {{method:'POST', body:_fd}})
         if not _default_backend:
             _default_backend = 'http://localhost:3000' if _DarsEnv.dev else '/'
         _spa_backend_url = getattr(app, 'ssr_url', None) or _default_backend
+        _login_page = getattr(app, '_login_page', '/login')
         spa_config = {
             'routes': [], 
             'index': None, 
             'notFound': None,
-            'backendUrl': _spa_backend_url
+            'backendUrl': _spa_backend_url,
+            'loginPath': _login_page,
         }
         # Light config for cross-page navigation (only paths/names)
         spa_config_light = {
             'routes': [],
             'index': None,
             'notFoundPath': None,
-            'backendUrl': _spa_backend_url
+            'backendUrl': _spa_backend_url,
+            'loginPath': _login_page,
         }
         for route_name, spa_route in app._spa_routes.items():
             self._current_page_id = route_name
@@ -6151,10 +6154,12 @@ fetch({repr(upload_url)}, {{method:'POST', body:_fd}})
 {combined_js}
 """
             self.write_file(os.path.join(output_path, app_js_filename), combined_all_js)
-            # Load per-route scripts as ES modules so they respect the same execution
-            # order as dars.min.js (type="module" defer). This prevents the race condition
-            # where app_about.js runs before window.Dars is initialized from dars.min.js.
-            scripts_array = [{'src': f"/{app_js_filename}", 'module': True}]
+            # Load per-route scripts with defer so they execute in order after dars.min.js.
+            # We intentionally do NOT use module scripts here — the SPA router re-executes
+            # route scripts on every navigation (e.g. for login page session check), and
+            # module scripts are cached by the browser and never re-executed even when a
+            # new <script> element is appended.
+            scripts_array = [{'src': f"/{app_js_filename}", 'module': False, 'defer': True}]
             
             # Include external scripts (URLs) from Markdown and other sources
             if external_srcs:
@@ -6198,6 +6203,36 @@ fetch({repr(upload_url)}, {{method:'POST', body:_fd}})
                     'headMetadata': head_metadata  # Include for client-side updates
                 }
 
+
+            elif route_type in (RouteType.PRIVATE, RouteType.PROTECTED):
+                # Private/Protected routes: include auth guard info, lazy-loaded
+                guard_info = {}
+                if route_metadata and route_metadata.guard:
+                    guard_info = route_metadata.guard.to_dict()
+                elif route_type == RouteType.PROTECTED:
+                    guard_info = {'requires_auth': True, 'roles': route_metadata.roles if route_metadata else [], 'redirect': '/login'}
+                elif route_type == RouteType.PRIVATE:
+                    guard_info = {'requires_auth': True, 'redirect': '/login'}
+                
+                route_config = {
+                    'name': route_name, 
+                    'path': spa_route.route, 
+                    'title': route_title,
+                    'type': route_type.value,
+                    'guard': guard_info,
+                    'html': route_html, 
+                    'styles': route_styles_css,
+                    'scripts': scripts_array,
+                    'events': {},
+                    'vdom': route_vdom,
+                    'states': [], 
+                    'preload': spa_route.preload or [],
+                    'parent': spa_route.parent,
+                    'outletId': getattr(spa_route, 'outlet_id', 'main'),
+                    'headMetadata': head_metadata
+                }
+                # Private/protected routes are NOT in the initial bundle
+                # They are loaded on-demand when the user navigates to them
 
             elif route_type == RouteType.SSR:
                 # SSR routes: render a static snapshot during export for faster initial load
@@ -6250,6 +6285,11 @@ fetch({repr(upload_url)}, {{method:'POST', body:_fd}})
                 'parent': spa_route.parent,
                 'outletId': getattr(spa_route, 'outlet_id', 'main')
             }
+            # Include guard info in light config for private/protected routes
+            if route_config.get('guard'):
+                light_route['guard'] = route_config['guard']
+            if route_type in (RouteType.PRIVATE, RouteType.PROTECTED):
+                light_route['type'] = route_type.value
             spa_config_light['routes'].append(light_route)
             
             # Write individual route manifest for lazy loading

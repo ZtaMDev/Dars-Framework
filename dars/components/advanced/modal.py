@@ -27,10 +27,10 @@ class Modal(Component):
     def __init__(
         self,
         children: Optional[List[Component]] = None,
-        title: Optional[str] = None,
+        title: Any = None,
         is_open: bool = False,
-        class_name: Optional[str] = None,
-        style: Optional[Dict[str, Any]] = None,
+        class_name: Any = None,
+        style: Optional[Dict[str, Any] | str] = None,
         minimum_logic: bool = True,
         **kwargs
     ):

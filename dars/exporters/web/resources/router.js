@@ -14,6 +14,127 @@ window.__DARS_INITIAL_LOAD__ = true;
 export let __spaConfig = null;
 export let __spa404Route = null;
 
+// ── Route Guards ─────────────────────────────────────────────────────────────
+// Map: route name -> guard config { requires_auth, roles, redirect }
+export const __spaGuards = new Map();
+// Default redirect path for unauthenticated users
+export let __loginPath = "/login";
+
+/**
+ * Set the login path used when auth is required but user is not authenticated.
+ */
+export function _setLoginPath(path) {
+  __loginPath = path || "/login";
+}
+
+/**
+ * Check whether cookies indicate a session is present.
+ * Returns true if dars_access_token or dars_refresh_token cookie exists.
+ */
+export function _hasSessionCookie() {
+  if (typeof document === "undefined") return false;
+  return (
+    document.cookie.includes("dars_access_token") ||
+    document.cookie.includes("dars_refresh_token")
+  );
+}
+
+/**
+ * Check if user is authenticated by hitting /_dars/auth/me (or using cookie heuristic).
+ * Returns a Promise<boolean>.
+ */
+export async function _isAuthenticated(forceCheck) {
+  // Quick heuristic: check for session cookies
+  if (!forceCheck && _hasSessionCookie()) return true;
+  if (!forceCheck) return false;
+
+  try {
+    const baseUrl =
+      (window.__DARS_SPA_CONFIG__ && window.__DARS_SPA_CONFIG__.backendUrl) || "";
+    const cleanBase = baseUrl ? baseUrl.replace(/\/+$/, "") : "";
+    const isCrossOrigin = baseUrl && baseUrl !== "/" &&
+      !baseUrl.startsWith(window.location.origin);
+    const res = await fetch(`${cleanBase}/_dars/auth/me`, {
+      credentials: isCrossOrigin ? "include" : "same-origin",
+    });
+    if (res.ok) {
+      const data = await res.json();
+      window.__DARS_USER__ = data.user || data;
+      return true;
+    }
+    return false;
+  } catch (e) {
+    return false;
+  }
+}
+
+/**
+ * Register a guard configuration for a route.
+ */
+export function _registerGuard(routeName, guardConfig) {
+  if (guardConfig) {
+    __spaGuards.set(routeName, guardConfig);
+  }
+}
+
+/**
+ * Check if the current user has the required roles.
+ * @param {string[]} requiredRoles
+ * @returns {boolean}
+ */
+export function _hasRoles(requiredRoles) {
+  if (!requiredRoles || requiredRoles.length === 0) return true;
+  const user = window.__DARS_USER__ || null;
+  if (!user) return false;
+  const userRoles = user.roles || user.role ? [user.role] : [];
+  return requiredRoles.some((r) => userRoles.includes(r));
+}
+
+/**
+ * Check the guard for a given route.
+ * Returns an object: { allowed: boolean, redirect?: string }
+ */
+export async function _checkRouteGuard(route) {
+  if (!route) return { allowed: true };
+  const guard = route.guard || __spaGuards.get(route.name);
+  if (!guard) return { allowed: true };
+
+  const requiresAuth = guard.requires_auth === true;
+  const redirect = guard.redirect || __loginPath;
+  const roles = guard.roles || [];
+
+  if (!requiresAuth && roles.length === 0) return { allowed: true };
+
+  // Quick cookie check — fast path if session cookie is present (same-origin only)
+  if (requiresAuth && _hasSessionCookie()) {
+    if (roles.length === 0) return { allowed: true };
+  }
+
+  // Full auth check (fetch /me) — also handles cross-origin dev where cookies
+  // are invisible to document.cookie (frontend:4000, backend:3000)
+  if (requiresAuth) {
+    const authenticated = await _isAuthenticated(true);
+    if (!authenticated) {
+      return { allowed: false, redirect };
+    }
+  }
+
+  // Role check
+  if (roles.length > 0 && !_hasRoles(roles)) {
+    return { allowed: false, redirect: "/403" };
+  }
+
+  return { allowed: true };
+}
+
+// Make helpers available globally for DAP actions
+window._checkRouteGuard = _checkRouteGuard;
+window._hasSessionCookie = _hasSessionCookie;
+window.isAuthenticated = _isAuthenticated;
+window.getRedirectFromURL = getRedirectFromURL;
+window.navigateToLogin = navigateToLogin;
+window.navigateTo = navigateTo;
+
 export function _normalizePath(input) {
   try {
     let p = String(input || "");
@@ -81,6 +202,11 @@ export function registerSPAConfig(config) {
       __darsConfig.allowInlineJS = config.allowInlineJS;
     if (__darsConfig.strictMode) __darsConfig.allowInlineJS = false;
 
+    // Set global login path from config (if provided)
+    if (config["loginPath"]) {
+      _setLoginPath(config["loginPath"]);
+    }
+
     if (config.routes) {
       __spaConfig = config;
       if (!config || !Array.isArray(config["routes"])) return;
@@ -95,6 +221,22 @@ export function registerSPAConfig(config) {
         if (!route["path"] || !route["name"]) continue;
         __spaRoutes.push(route);
         __spaRoutesMap.set(route["name"], route);
+
+        // Register guard if route has guard config
+        if (route["guard"]) {
+          __spaGuards.set(route["name"], route["guard"]);
+        }
+        // Also register guard for private/protected route types
+        if (route["type"] === "private" || route["type"] === "protected") {
+          const existingGuard = __spaGuards.get(route["name"]);
+          if (!existingGuard) {
+            __spaGuards.set(route["name"], {
+              requires_auth: true,
+              roles: route["roles"] || [],
+              redirect: route["redirect"] || __loginPath,
+            });
+          }
+        }
       }
 
       // Register 404 page if exists
@@ -158,13 +300,13 @@ export function _initializeRouter() {
     const vdomSource =
       isSSRRoute ? window.__ROUTE_VDOM__ || window.__DARS_VDOM__ : null;
     const hydratedPath = window.__DARS_HYDRATED_PATH__ || "/";
-    if (match.route["styles"]) {
+    if (match && match.route && match.route["styles"]) {
       _injectStyles(match.route["name"], match.route["styles"]);
     }
-    if (match.route["scripts"]) {
+    if (match && match.route && match.route["scripts"]) {
       _executeScripts(match.route["scripts"], match.route["name"]);
     }
-    if (match.route["events"]) {
+    if (match && match.route && match.route["events"]) {
       _attachEventsMap(match.route["events"]);
     }
     if (
@@ -217,31 +359,56 @@ export function _initializeRouter() {
         _navigateToRoute(initialPath, { replace: true, skipPushState: true });
       } else {
         // Fallback for missing SPA routes in combined mode
-        if (
-          initialPath !== "/" &&
-          initialPath !== "/index.html" &&
-          !initialPath.endsWith(".html")
-        ) {
-          const notFoundPath = __spaConfig ? __spaConfig["notFoundPath"] : null;
-          if (notFoundPath) {
-            _navigateToRoute(notFoundPath, {
-              replace: true,
-              skipPushState: true,
+        // Allow redirect to configured 404 even when the server served the root
+        // index.html (common in fullstack setups where unknown paths fall back to /).
+          // If there are static `.dars-page` elements present (served by the backend),
+          // prefer showing the static content instead of forcing a SPA 404 redirect.
+          const container = document.getElementById("__dars_spa_root__");
+          const staticPages = Array.from(document.querySelectorAll('.dars-page'));
+          const hasExternallyServedStatic = staticPages.some((el) => {
+            // Consider it static if it's not the SPA root container or the container doesn't exist
+            return !container || el !== container && !container.contains(el);
+          });
+
+          // Determine the hydrated path (if the backend marked the original request)
+          const hydratedPath = window.__DARS_HYDRATED_PATH__ || "/";
+
+          // If static markup exists AND it appears to match the hydrated path, show it.
+          // If the server served the root as a fallback for an unknown path (hydratedPath != initialPath),
+          // prefer redirecting to the SPA 404 instead of showing the root static page.
+          if (
+            hasExternallyServedStatic &&
+            (hydratedPath === initialPath || (initialPath === "/" && hydratedPath === "/index.html"))
+          ) {
+            // Reveal static pages and hide SPA root if present
+            if (container) container.style.display = "none";
+            document.querySelectorAll(".dars-page").forEach((el) => {
+              if (el !== container) el.style.display = "";
             });
-          } else {
-            // No 404 path defined? reveal the page just in case
             document.documentElement.setAttribute("dars-ready", "true");
+          } else {
+            // No static page present: allow redirect to configured 404 (unless it's an explicit html resource)
+            if (!initialPath.endsWith(".html")) {
+              const notFoundPath = __spaConfig ? __spaConfig["notFoundPath"] : null;
+              if (notFoundPath) {
+                _navigateToRoute(notFoundPath, {
+                  replace: true,
+                  skipPushState: true,
+                });
+              } else {
+                // No 404 path defined? reveal the page just in case
+                document.documentElement.setAttribute("dars-ready", "true");
+              }
+            }
           }
-        }
       }
     }
 
     // Listen for popstate (browser back/forward)
     window.addEventListener("popstate", function (event) {
       try {
-        const path = _normalizePath(
-          (event.state && event.state["path"]) || window.location.pathname,
-        );
+        const rawPath = (event.state && event.state["path"]) || window.location.pathname;
+        const path = _normalizePath(rawPath);
         const params = (event.state && event.state["params"]) || {};
 
         const match = _matchRoute(path);
@@ -279,6 +446,7 @@ export function _initializeRouter() {
           return; // External link or anchor
         }
 
+        // Preserve full href with query params for SPA nav
         const normalizedHref = _normalizePath(href);
 
         // Check if this matches any SPA route
@@ -286,15 +454,16 @@ export function _initializeRouter() {
 
         // Intercept if it matches an SPA route, OR if it's a potential 404 (no file extension)
         // This ensures smooth 404 handling even when navigating from a static root
-        const isFile = normalizedHref
-          .split("?")[0]
+        const pathOnly = href.split("?")[0];
+        const isFile = pathOnly
           .split("/")
           .pop()
           .includes(".");
 
         if (match || (!isFile && __spaConfig && __spaConfig["notFoundPath"])) {
           event.preventDefault();
-          navigateTo(normalizedHref);
+          // Pass full href (with query params) to navigateTo
+          navigateTo(href);
         }
       } catch (e) {}
     });
@@ -305,10 +474,11 @@ export function _initializeRouter() {
 
 /**
  * Navigate to a route path (public API)
+ * Preserves query params (e.g. ?redirect=/products) in the URL.
  */
 export function navigateTo(path, params) {
   try {
-    _navigateToRoute(_normalizePath(path), {
+    _navigateToRoute(path, {
       replace: false,
       params: params || {},
     });
@@ -318,11 +488,60 @@ export function navigateTo(path, params) {
 }
 
 /**
+ * Navigate to a login page, preserving the current path + query string as redirect param.
+ * Uses SPA navigation if the login path is an SPA route; falls back to
+ * full page reload if not (avoids 404 on non-SPA login pages).
+ */
+export function navigateToLogin(redirect) {
+  const loginPath = redirect || __loginPath;
+  const currentPath = _normalizePath(window.location.pathname);
+  // Avoid redirect loop — already on login page
+  if (currentPath === loginPath) return;
+  // Include current query string in the redirect target so login page
+  // can reconstruct the full original URL after auth.
+  const currentQuery = window.location.search || "";
+  const fullRedirect = currentPath + currentQuery;
+  const redirectParam = fullRedirect !== "/" ? `?redirect=${encodeURIComponent(fullRedirect)}` : "";
+
+  // Check if login path is an SPA route
+  const loginMatch = _matchRoute(loginPath);
+  if (loginMatch) {
+    // SPA route: navigate with redirect param preserved
+    const fullPath = loginPath + redirectParam;
+    _navigateToRoute(fullPath, { replace: false });
+  } else {
+    // Non-SPA route (e.g. static HTML): full page reload
+    window.location.href = loginPath + redirectParam;
+  }
+}
+
+/**
+ * Extract redirect target from current URL query params (used by login pages).
+ * Returns the path to redirect to after login, or "/" if not set.
+ */
+export function getRedirectFromURL() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const redirect = params.get("redirect") || "/";
+    return _normalizePath(redirect);
+  } catch (e) {
+    return "/";
+  }
+}
+
+/**
  * Internal navigation handler
  */
 export async function _navigateToRoute(path, options) {
   try {
     options = options || {};
+
+    // Preserve query params (e.g. ?redirect=/products)
+    let queryString = "";
+    const qIdx = String(path).indexOf("?");
+    if (qIdx >= 0) {
+      queryString = String(path).slice(qIdx);
+    }
 
     path = _normalizePath(path);
 
@@ -377,18 +596,34 @@ export async function _navigateToRoute(path, options) {
     const route = match["route"];
     const matchedParams = match["params"] || {};
 
+    // ── Route Guard Check ─────────────────────────────────────────────
+    // Check if the user is authorized to access this route.
+    // Guards are defined by route_type: private, protected, or via guard config.
+    if (route) {
+      const guardResult = await _checkRouteGuard(route);
+      if (!guardResult.allowed) {
+        console.log(
+          `[Dars Router] Route '${route.name}' requires auth, redirecting to '${guardResult.redirect}'`,
+        );
+        navigateToLogin(guardResult.redirect);
+        return;
+      }
+    }
+    // ── End Guard Check ──────────────────────────────────────────────
+
     // Merge params
     for (const key in matchedParams) {
       params[key] = matchedParams[key];
     }
 
-    // Update browser history
+    // Update browser history (preserve query string for redirect params)
     if (!options["skipPushState"]) {
-      const state = { path: path, params: params };
+      const url = path + queryString;
+      const state = { path: url, params: params };
       if (options["replace"]) {
-        history.replaceState(state, "", path);
+        history.replaceState(state, "", url);
       } else {
-        history.pushState(state, "", path);
+        history.pushState(state, "", url);
       }
     }
 
@@ -645,8 +880,9 @@ export async function _loadRoute(route, params) {
       }
     }
 
-    // If route is public but missing content (Combined Mode / Lazy Load), fetch manifest
-    if (route["type"] === "public" && !route["html"]) {
+    // If route is public, private, or protected but missing content (lazy loaded), fetch manifest
+    const lazyTypes = new Set(["public", "private", "protected"]);
+    if (lazyTypes.has(route["type"]) && !route["html"]) {
       try {
         const manifestUrl = `/route_${route["name"]}.json`;
         const response = await fetch(manifestUrl + "?t=" + Date.now());
@@ -760,7 +996,7 @@ export function _executeScripts(scripts, routeName) {
       if (typeof script === "string") {
         // Check if it's a filename (ends with .js)
         if (script.endsWith(".js")) {
-          _loadExternalScript(script, false, routeName);
+          _loadExternalScript(script, false, false, routeName);
         } else {
           // Inline script code
           try {
@@ -775,7 +1011,7 @@ export function _executeScripts(scripts, routeName) {
       } else {
         // Script object
         if (script["src"]) {
-          _loadExternalScript(script["src"], script["module"], routeName);
+          _loadExternalScript(script["src"], script["module"], script["defer"], routeName);
         } else if (script["code"]) {
           try {
             const s = document.createElement("script");
@@ -796,15 +1032,14 @@ export function _executeScripts(scripts, routeName) {
 /**
  * Load external script
  */
-export function _loadExternalScript(src, isModule, routeName) {
+export function _loadExternalScript(src, isModule, defer, routeName) {
   try {
+    // Remove existing script element so the browser re-executes it
+    // on every navigation (module scripts stay cached by the browser,
+    // but we no longer mark route scripts as module).
     const existingScript = document.querySelector(`script[src="${src}"]`);
     if (existingScript) {
-      if (!existingScript.classList.contains("dars-route-script")) {
-        existingScript.classList.add("dars-route-script");
-        if (routeName) existingScript.setAttribute("data-route", routeName);
-      }
-      return;
+      existingScript.remove();
     }
 
     const script = document.createElement("script");
@@ -815,7 +1050,9 @@ export function _loadExternalScript(src, isModule, routeName) {
     if (isModule) {
       script.type = "module";
     }
-
+    if (defer) {
+      script.defer = true;
+    }
 
     script.onerror = function () {
       console.error("[Dars Router] Script load failed:", src);

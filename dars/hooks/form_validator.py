@@ -386,22 +386,13 @@ class FormValidator:
         # Step 1: clear all error elements, then set them if rules fail
         validate_actions = []
 
-        # First clear all error elements
+        # Pre-compute the error ID for each field — derived from the form_data
+        # selector when available (e.g. "#prod-name" → "prod-name-error").
+        field_error_ids: Dict[str, str] = {}
+        field_selectors: Dict[str, str] = {}
         for field in self.fields:
-            validate_actions.append({
-                "op": "dom_set_text",
-                "args": {"id": f"{field}-error", "text": ""},
-            })
-
-        # Then run each rule — on failure set the error text
-        for field, rules in self.fields.items():
-            error_id = f"{field}-error"
-            # Use the input id matching the field name (e.g. "title" → "#title" or "#title-input")
-            # The selector used in did.py is "#new-task-input" but the form field key is "title".
-            # We look for an element whose id matches the field name directly, or fall back to
-            # the selector stored in form_data if available.
-            field_selector = f"#{field}"
-            # Try to get the actual selector from form_data if it's a FormData instance
+            eid = f"{field}-error"
+            sel = f"#{field}"
             try:
                 from dars.hooks.form_helpers import FormData
                 if isinstance(form_data, FormData) and field in form_data.fields:
@@ -409,13 +400,27 @@ class FormValidator:
                     if hasattr(fv, '_to_structure'):
                         struct = fv._to_structure()
                         if isinstance(struct, dict) and struct.get('op') == 'get_dom_value':
-                            field_selector = struct['args'].get('selector', field_selector)
-                        elif isinstance(struct, dict) and struct.get('op') == 'get_event_property':
-                            pass  # keep default
+                            sel = struct['args'].get('selector', sel)
+                            if sel.startswith('#'):
+                                eid = sel[1:] + '-error'
                     elif hasattr(fv, 'selector'):
-                        field_selector = fv.selector
+                        sel = fv.selector
             except Exception:
                 pass
+            field_error_ids[field] = eid
+            field_selectors[field] = sel
+
+        # Clear all error elements
+        for field in self.fields:
+            validate_actions.append({
+                "op": "dom_set_text",
+                "args": {"id": field_error_ids[field], "text": ""},
+            })
+
+        # Then run each rule — on failure set the error text
+        for field, rules in self.fields.items():
+            error_id = field_error_ids[field]
+            field_selector = field_selectors[field]
 
             get_val = {
                 "op": "get_dom_value",
@@ -556,7 +561,7 @@ class FormValidator:
 
         # Step 3: check if ALL error elements are empty — only then submit.
         # Build a chain of AND conditions: error1=="" && error2=="" && ...
-        error_ids = [f"{field}-error" for field in self.fields]
+        error_ids = list(field_error_ids.values())
 
         def _empty_check(eid):
             return {

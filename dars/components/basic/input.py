@@ -32,18 +32,18 @@ class Input(Component):
     """
     def __init__(
         self, 
-        value: str = "", 
-        placeholder: str = "",
-        input_type: str = "text",  # "text", "password", "email", "number", etc.
-        id: Optional[str] = None, 
-        class_name: Optional[str] = None, 
-        style: Optional[Dict[str, Any]] = None,
+        value: Any = "", 
+        placeholder: Any = "",
+        input_type: Any = "text",  # "text", "password", "email", "number", etc.
+        id: Any = None, 
+        class_name: Any = None, 
+        style: Optional[Dict[str, Any] | str] = None,
         disabled: bool = False,
         readonly: bool = False,
         required: bool = False,
         max_length: Optional[int] = None,
         min_length: Optional[int] = None,
-        pattern: Optional[str] = None,
+        pattern: Any = None,
         on_change: Optional[Callable] = None,
         on_input: Optional[Callable] = None,
         on_focus: Optional[Callable] = None,

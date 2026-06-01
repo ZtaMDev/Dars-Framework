@@ -219,10 +219,10 @@ def addGlobalKeys(app: 'App', key_handlers: dict):
     
     def extract_code(action):
         """Helper to extract JavaScript code from action"""
-        if hasattr(action, 'code'):
-            return action.code
-        elif hasattr(action, 'get_code'):
+        if hasattr(action, 'get_code'):
             return action.get_code()
+        elif hasattr(action, 'code') and action.code is not None:
+            return action.code
         else:
             return str(action)
     

@@ -1,10 +1,12 @@
+from typing import Any, Optional
+
 from dars.core.component import Component
-from typing import Optional
+
 
 class Tooltip(Component):
     """
     Information box that appears on hover, providing extra context for a component.
-    
+
     Props:
     - **text** (str): The message to display in the tooltip box.
     - **child** (Component): The component that will trigger the tooltip.
@@ -14,7 +16,7 @@ class Tooltip(Component):
     - **style** (dict): Optional dictionary for CSS utility classes (prefer `style`).
     - **children** (list): List of child components.
     - **Events**: Handlers for mouse events.
-    
+
     Example:
     ```python
     Tooltip(
@@ -26,11 +28,13 @@ class Tooltip(Component):
     ```
     """
 
-    def __init__(self, text: str, child: Component, position: Optional[str] = "top", **props):
+    def __init__(self, text: Any, child: Component, position: Any = "top", **props):
         super().__init__(**props)
         self.text = text
         self.child = child
         self.position = position
 
     def render(self) -> str:
-        return f'<div class="dars-tooltip dars-tooltip-{self.position}">{self.child.render() if hasattr(self.child, "render") else self.child}<span class="dars-tooltip-text">{self.text}</span></div>'
+        child_render = getattr(self.child, "render", None)
+        child_content = child_render() if callable(child_render) else self.child
+        return f'<div class="dars-tooltip dars-tooltip-{self.position}">{child_content}<span class="dars-tooltip-text">{self.text}</span></div>'

@@ -200,9 +200,6 @@ class SSRRenderer:
         markdown_scripts_html = "".join(route_markdown_scripts)
         
         print(f"[Dars:SSR] Rendering route: {route_name}")
-        print(f"[Dars:SSR] Reactive bindings length: {len(reactive_bindings_js)}")
-        print(f"[Dars:SSR] VRef bindings length: {len(vref_bindings_js)}")
-
         # Fallback: if snapshot was empty, attempt a second collection post-render
         if not _registry_css_snapshot:
             try:
@@ -530,6 +527,12 @@ class SSRApp:
         self.prefix = prefix
         self.fastapi_app = FastAPI(title=title or f"{dars_app.title} - SSR Backend")
         self.renderer = SSRRenderer(dars_app)
+
+        # Apply any middlewares registered on the Dars App
+        if hasattr(dars_app, "_backend_middlewares"):
+            for entry in dars_app._backend_middlewares:
+                self.fastapi_app.add_middleware(entry["cls"], **entry["kwargs"])
+
         self._setup_core_routes()
 
     def _setup_core_routes(self):
@@ -558,11 +561,25 @@ class SSRApp:
                 ssr_routes.append((name, route))
 
         for route_name, route in ssr_routes:
+            metadata = getattr(route.root, '__dars_route_metadata__', None)
+            requires_auth = metadata.requires_auth if metadata else False
+
             self._register_api_endpoint(route_name)
-            if hasattr(route, 'route') and route.route:
+
+            # Only register HTML endpoint for non-auth SSR routes.
+            # Auth-protected SSR routes must NOT prerender their content on the server
+            # (prevents flash-of-protected-content). Client-side guard redirects to login
+            # first; after auth, the API endpoint lazy-loads the rendered content.
+            if not requires_auth and hasattr(route, 'route') and route.route:
                 self._register_html_endpoint(route_name, route.route)
 
-        print(f"[SSR] Initialized {len(ssr_routes)} server-side routes.")
+        # Auto-register Server Actions
+        try:
+            from dars.backend.actions import _ACTION_REGISTRY, register_actions_on_app
+            if _ACTION_REGISTRY:
+                register_actions_on_app(self.fastapi_app)
+        except ImportError:
+            pass
 
     def _register_api_endpoint(self, route_name: str):
         from fastapi.responses import JSONResponse

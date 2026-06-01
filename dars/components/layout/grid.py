@@ -48,13 +48,13 @@ class GridLayout(LayoutBase):
     )
     ```
     """
-    def __init__(self, rows: int = 1, cols: int = 1, children: Optional[List[Component]] = None, anchors: Optional[Dict[str, Any]] = None, gap: str = "16px", **kwargs):
+    def __init__(self, rows: int = 1, cols: int = 1, children: Optional[List[Component]] = None, anchors: Optional[Dict[str, Any]] = None, gap: Any = "16px", **kwargs):
         super().__init__(children=children, anchors=anchors, **kwargs)
         self.rows = rows
         self.cols = cols
         self.gap = gap
 
-    def add_child(self, child: Component, row: int = 0, col: int = 0, row_span: int = 1, col_span: int = 1, anchor: Optional[str] = None):
+    def add_child(self, child: Component, row: int = 0, col: int = 0, row_span: int = 1, col_span: int = 1, anchor: Any = None):
         # Store child with layout info
         if not hasattr(self, '_child_layout'):
             self._child_layout = []

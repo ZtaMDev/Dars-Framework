@@ -26,9 +26,9 @@ class Section(Component):
     def __init__(
         self,
         *children: Component,
-        id: Optional[str] = None, 
-        class_name: Optional[str] = None, 
-        style: Optional[Dict[str, Any]] = None,
+        id: Any = None, 
+        class_name: Any = None, 
+        style: Optional[Dict[str, Any] | str] = None,
         additional_children: Optional[List[Component]] = None,
         **props
     ):

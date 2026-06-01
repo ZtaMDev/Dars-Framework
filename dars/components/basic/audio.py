@@ -32,14 +32,14 @@ class Audio(Component):
 
     def __init__(
         self,
-        src: str,
+        src: Any,
         controls: bool = True,
         autoplay: bool = False,
         loop: bool = False,
         muted: bool = False,
-        preload: Optional[str] = None,
-        class_name: Optional[str] = None,
-        style: Optional[Dict[str, Any]] = None,
+        preload: Any = None,
+        class_name: Any = None,
+        style: Optional[Dict[str, Any] | str] = None,
         attrs: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ) -> None:

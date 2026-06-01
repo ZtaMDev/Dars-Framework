@@ -32,7 +32,7 @@ class Page(Component):
     )
     ```
     """
-    def __init__(self, *children: Component, id: Optional[str] = None, class_name: Optional[str] = None, style: Optional[Dict[str, Any]] = None, **props):
+    def __init__(self, *children: Component, id: Any = None, class_name: Any = None, style: Optional[Dict[str, Any] | str] = None, **props):
         super().__init__(id=id, class_name=class_name, style=style, **props)
         self.scripts = []
         for child in children:
@@ -108,7 +108,7 @@ class Page(Component):
         """
         self.scripts.append(script)
 
-    def useWatch(self, state_path: str, *js_helpers):
+    def useWatch(self, state_path: Any, *js_helpers):
         """
         Watch a state property and execute callback when it changes.
         
@@ -131,7 +131,7 @@ class Page(Component):
         self.add_script(watcher)
         return self
 
-    def setup_auth(self, verify_credentials_callback, secret: str, auth_id: Optional[str] = None):
+    def setup_auth(self, verify_credentials_callback, secret: Any, auth_id: Any = None):
         """
         Configures an isolated auth setup for this specific page.
         """

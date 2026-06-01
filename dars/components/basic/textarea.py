@@ -31,16 +31,16 @@ class Textarea(Component):
     """
     def __init__(
         self,
-        value: str = "",
-        placeholder: str = "",
+        value: Any = "",
+        placeholder: Any = "",
         rows: int = 4,
         cols: int = 50,
         disabled: bool = False,
         readonly: bool = False,
         required: bool = False,
         max_length: Optional[int] = None,
-        class_name: Optional[str] = None,
-        style: Optional[Dict[str, Any]] = None,
+        class_name: Any = None,
+        style: Optional[Dict[str, Any] | str] = None,
         **kwargs
     ):
         super().__init__(class_name=class_name, style=style, **kwargs)

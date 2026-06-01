@@ -39,22 +39,22 @@ class FileUpload(Component):
 
     def __init__(
         self,
-        accept: Optional[str] = None,
+        accept: Any = None,
         multiple: bool = False,
         disabled: bool = False,
         required: bool = False,
         max_size: Optional[int] = None,
-        label: Optional[str] = "Choose File",
+        label: Any = "Choose File",
         # Upload pipeline props
-        upload_url: str = "/api/upload",
+        upload_url: Any = "/api/upload",
         accepted_types: Optional[List[str]] = None,
         max_size_bytes: Optional[int] = None,
         on_upload_complete=None,
         on_upload_error=None,
         # Standard props
-        id: Optional[str] = None,
-        class_name: Optional[str] = None,
-        style: Optional[Dict[str, Any]] = None,
+        id: Any = None,
+        class_name: Any = None,
+        style: Optional[Dict[str, Any] | str] = None,
         on_change: Optional[Callable] = None,
         **props,
     ):

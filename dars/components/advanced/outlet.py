@@ -1,10 +1,13 @@
+from typing import Any
+
 from dars.components.basic.container import Container
+
 
 class Outlet(Container):
     """
     Routing placeholder component for Single Page Applications (SPA).
     Acts as the target where child routes will be dynamically rendered based on the URL.
-    
+
     Props:
     - **outlet_id** (str): Unique identifier for the outlet (defaults to `"main"`).
     - **placeholder** (Component): Component to display while the route content is being loaded.
@@ -13,7 +16,7 @@ class Outlet(Container):
     - **class_name** (str): String containing regular CSS class names.
     - **style** (dict): Optional dictionary for CSS utility classes (prefer `style`).
     - **Events**: Handlers for navigation and lifecycle events.
-    
+
     Example:
     ```python
     Outlet(
@@ -23,9 +26,10 @@ class Outlet(Container):
     )
     ```
     """
-    def __init__(self, outlet_id: str = "main", placeholder=None, *children, **props):
-        if placeholder is None and ('loading' in props):
-            placeholder = props.pop('loading')
+
+    def __init__(self, outlet_id: Any = "main", placeholder=None, *children, **props):
+        if placeholder is None and ("loading" in props):
+            placeholder = props.pop("loading")
 
         if (not children) and (placeholder is not None):
             if isinstance(placeholder, list):

@@ -55,9 +55,9 @@ class If_Component(Component):
         condition: Any,
         then: Union[Component, Callable[[], Component]],
         else_: Optional[Union[Component, Callable[[], Component]]] = None,
-        id: Optional[str] = None,
-        class_name: Optional[str] = None,
-        style: Optional[dict] = None,
+        id: Any = None,
+        class_name: Any = None,
+        style: Optional[dict | str] = None,
         **props,
     ) -> None:
         super().__init__(id=id, class_name=class_name, style=style, **props)

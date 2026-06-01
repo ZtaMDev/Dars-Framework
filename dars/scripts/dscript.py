@@ -490,10 +490,10 @@ class RawJS:
         """
         current_code = self.code.strip()
         
-        if hasattr(next_script, 'code'):
-            next_code = next_script.code.strip()
-        elif hasattr(next_script, 'get_code'):
+        if hasattr(next_script, 'get_code'):
             next_code = next_script.get_code().strip()
+        elif hasattr(next_script, 'code') and next_script.code is not None:
+            next_code = next_script.code.strip()
         else:
             next_code = str(next_script).strip()
             

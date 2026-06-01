@@ -284,6 +284,24 @@ class ActionBuilder:
         return f"console.log({json.dumps(message)});"
     
     @staticmethod
+    def redirect_after_login(fallback: str = "/") -> str:
+        """
+        Navigate to the URL specified in ?redirect= query param.
+        Reads window.location.search, decodes the 'redirect' param,
+        and uses window.navigateTo() (SPA) or falls back to window.location.href.
+        """
+        safe_fallback = fallback.replace("'", "\\'")
+        return (
+            "(function(){"
+            "var p=new URLSearchParams(window.location.search);"
+            "var t=p.get('redirect');"
+            "t=t?decodeURIComponent(t):'" + safe_fallback + "';"
+            "if(window.navigateTo)window.navigateTo(t);"
+            "else window.location.href=t;"
+            "})();"
+        )
+
+    @staticmethod
     def animate(element_id: str, animation_type: str, duration: int = 300, **kwargs) -> str:
         import json
         args = json.dumps({"id": element_id, "type": animation_type, "duration": duration, **kwargs})

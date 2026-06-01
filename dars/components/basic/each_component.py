@@ -71,10 +71,10 @@ class Each_Component(Component):
         self,
         items: Union[list, Any],
         render: Callable[[Any], Component],
-        item_key: str = "id",
-        id: Optional[str] = None,
-        class_name: Optional[str] = None,
-        style: Optional[dict] = None,
+        item_key: Any = "id",
+        id: Any = None,
+        class_name: Any = None,
+        style: Optional[dict | str] = None,
         **props,
     ) -> None:
         super().__init__(id=id, class_name=class_name, style=style, **props)

@@ -11,7 +11,7 @@ Uses:
 from dars.all import *
 
 
-@route("/tasklist", route_type=RouteType.SSR)
+@route("/tasklist")
 def tasklist():
     # ── VRefs ──────────────────────────────────────────────────────────
     loading_sel = ".tasks-loading"

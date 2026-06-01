@@ -843,7 +843,7 @@ def create_parser(include_hidden: bool = True) -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(
         dest='command',
         help=translator.get('available_commands'),
-        metavar='{export,info,formats,preview,init,build,config,dev}'
+        metavar='{export,info,formats,preview,init,build,config,dev,migrate}'
     )
     
     # Export command
@@ -924,6 +924,10 @@ def create_parser(include_hidden: bool = True) -> argparse.ArgumentParser:
     dev_parser.add_argument('--port', '-P', type=int, help='Port to run the dev server on (overrides config)')
     dev_parser.add_argument('--backend', action='store_true', help='Run only the configured backendEntry (SSR/API) instead of the frontend entry. Deprecated; use `dars dev` when backendEntry is configured.')
     # English-only: no language option on subparsers
+    # Migrate command
+    import dars.cli.migrate
+    dars.cli.migrate.add_subparser(subparsers)
+
     # Generate command
     generate_parser = subparsers.add_parser('generate', aliases=['g'], help='Generate a new component or page')
     generate_parser.add_argument('type', nargs='?', choices=['component', 'page'], help='Type to generate: component or page')
@@ -1148,6 +1152,11 @@ def _main_exec():
         # Show formats
         exporter.show_supported_formats()
         
+    elif args.command == 'migrate':
+        from dars.cli.migrate import run_migrate
+        run_migrate(args)
+        sys.exit(0)
+
     elif args.command in ('generate', 'g'):
         from dars.cli.generate import handle_generate
         handle_generate(args)

@@ -1,19 +1,23 @@
+from typing import Any, Callable, Dict, List, Optional, Union
+
 from dars.core.component import Component
-from dars.core.properties import StyleProps
 from dars.core.events import EventTypes
-from typing import Optional, Union, Dict, Any, Callable, List
+from dars.core.properties import StyleProps
+
 
 class SelectOption:
     """Class to represent a select option"""
-    def __init__(self, value: str, label: str, disabled: bool = False):
+
+    def __init__(self, value: Any, label: Any, disabled: bool = False):
         self.value = value
         self.label = label
         self.disabled = disabled
 
+
 class Select(Component):
     """
     Dropdown selection component for choosing one or multiple options.
-    
+
     Props:
     - **options** (list): List of `SelectOption` objects, dicts, or strings.
     - **value** (str): Current selected value(s).
@@ -27,7 +31,7 @@ class Select(Component):
     - **style** (dict): Optional dictionary for CSS utility classes (prefer `style`).
     - **children** (list): List of child components.
     - **Events**: Handlers like `on_change`, `on_focus`, `on_blur`.
-    
+
     Example:
     ```python
     Select(
@@ -38,20 +42,21 @@ class Select(Component):
     )
     ```
     """
+
     def __init__(
         self,
-        options: List[Union[SelectOption, Dict[str, Any], str]] = None,
-        value: Optional[str] = None,
-        placeholder: str = "Seleccionar...",
+        options: Optional[List[Union[SelectOption, Dict[str, Any], str]]] = None,
+        value: Any = None,
+        placeholder: Any = "Seleccionar...",
         multiple: bool = False,
         size: Optional[int] = None,
-        id: Optional[str] = None,
-        class_name: Optional[str] = None,
-        style: Optional[Dict[str, Any]] = None,
+        id: Any = None,
+        class_name: Any = None,
+        style: Optional[Dict[str, Any] | str] = None,
         disabled: bool = False,
         required: bool = False,
         on_change: Optional[Callable] = None,
-        **props
+        **props,
     ):
         super().__init__(id=id, class_name=class_name, style=style, **props)
         self.options = self._process_options(options or [])
@@ -61,41 +66,43 @@ class Select(Component):
         self.size = size  # Número de opciones visibles (para select múltiple)
         self.disabled = disabled
         self.required = required
-        
+
         # Registrar evento de cambio si se proporciona
         if on_change:
             self.set_event(EventTypes.CHANGE, on_change)
-    
-    def _process_options(self, options: List[Union[SelectOption, Dict[str, Any], str]]) -> List[SelectOption]:
+
+    def _process_options(
+        self, options: List[Union[SelectOption, Dict[str, Any], str]]
+    ) -> List[SelectOption]:
         """Procesa las opciones y las convierte a objetos SelectOption"""
         processed_options = []
-        
+
         for option in options:
             if isinstance(option, SelectOption):
                 processed_options.append(option)
             elif isinstance(option, dict):
-                processed_options.append(SelectOption(
-                    value=option.get('value', ''),
-                    label=option.get('label', option.get('value', '')),
-                    disabled=option.get('disabled', False)
-                ))
+                processed_options.append(
+                    SelectOption(
+                        value=option.get("value", ""),
+                        label=option.get("label", option.get("value", "")),
+                        disabled=option.get("disabled", False),
+                    )
+                )
             elif isinstance(option, str):
                 processed_options.append(SelectOption(value=option, label=option))
-        
+
         return processed_options
-    
-    def add_option(self, value: str, label: str = None, disabled: bool = False):
+
+    def add_option(self, value: Any, label: Any = None, disabled: bool = False):
         """Añade una nueva opción al select"""
-        self.options.append(SelectOption(
-            value=value,
-            label=label or value,
-            disabled=disabled
-        ))
-    
-    def remove_option(self, value: str):
+        self.options.append(
+            SelectOption(value=value, label=label or value, disabled=disabled)
+        )
+
+    def remove_option(self, value: Any):
         """Elimina una opción por su valor"""
         self.options = [opt for opt in self.options if opt.value != value]
-    
+
     def get_selected_option(self) -> Optional[SelectOption]:
         """Obtiene la opción seleccionada actualmente"""
         if self.value:
@@ -106,4 +113,6 @@ class Select(Component):
 
     def render(self, exporter: Any) -> str:
         # El método render será implementado por cada exportador
-        raise NotImplementedError("El método render debe ser implementado por el exportador")
+        raise NotImplementedError(
+            "El método render debe ser implementado por el exportador"
+        )

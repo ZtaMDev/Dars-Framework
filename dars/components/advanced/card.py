@@ -25,9 +25,9 @@ class Card(Component):
     def __init__(
         self,
         children: Optional[List[Component]] = None,
-        title: Optional[str] = None,
-        class_name: Optional[str] = None,
-        style: Optional[Dict[str, Any]] = None,
+        title: Any = None,
+        class_name: Any = None,
+        style: Optional[Dict[str, Any] | str] = None,
         minimum_logic: bool = True,
         **kwargs
     ):

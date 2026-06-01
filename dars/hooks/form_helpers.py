@@ -12,7 +12,8 @@ Provides Pythonic helpers for collecting and submitting form data
 without writing raw JavaScript.
 """
 
-from typing import Dict, Any
+from typing import Any, Dict
+
 from dars.scripts.dscript import dScript
 
 
@@ -48,7 +49,7 @@ class FormData:
         """Generate DAP structure for the form data object."""
 
         def process_value(value_expr):
-            if hasattr(value_expr, '_to_structure'):
+            if hasattr(value_expr, "_to_structure"):
                 return value_expr._to_structure()
             elif isinstance(value_expr, dict):
                 return {k: process_value(v) for k, v in value_expr.items()}
@@ -70,10 +71,12 @@ class FormData:
             dScript encoding a DAP ``alert`` action.
         """
         data_struct = self._to_structure()
-        msg = {"op": "transform", "args": {"input": data_struct, "method": "json_stringify"}}
+        msg = {
+            "op": "transform",
+            "args": {"input": data_struct, "method": "json_stringify"},
+        }
         full_msg = {"op": "string_concat", "args": {"parts": [title + ":\n\n", msg]}}
-        from dars.actionProtocol import Action
-        return dScript(data=Action.alert(message=full_msg))
+        return dScript(data={"op": "alert", "args": {"message": full_msg}})
 
     def log(self, message: str = "Form Data") -> dScript:
         """
@@ -86,8 +89,7 @@ class FormData:
             dScript encoding a DAP ``log`` action.
         """
         data_struct = self._to_structure()
-        from dars.actionProtocol import Action
-        return dScript(data=Action.log(message=data_struct))
+        return dScript(data={"op": "log", "args": {"message": data_struct}})
 
     def to_state(self, state_property) -> dScript:
         """
@@ -100,14 +102,16 @@ class FormData:
             dScript encoding a DAP ``change`` action.
         """
         data_struct = self._to_structure()
-        json_data = {"op": "transform", "args": {"input": data_struct, "method": "json_stringify"}}
+        json_data = {
+            "op": "transform",
+            "args": {"input": data_struct, "method": "json_stringify"},
+        }
         change_args = {
             "id": state_property._state.component.id,
             "dynamic": True,
             state_property._name: json_data,
         }
-        from dars.actionProtocol import Action
-        return dScript(data=Action.change(change_args))
+        return dScript(data={"op": "change", "args": change_args})
 
     def submit(
         self,
@@ -132,9 +136,9 @@ class FormData:
         data_struct = self._to_structure()
 
         def _to_action(act):
-            if hasattr(act, 'get_action'):
+            if hasattr(act, "get_action"):
                 return act.get_action()
-            if hasattr(act, 'code'):
+            if hasattr(act, "code"):
                 return {"op": "inline", "args": {"code": act.code}}
             if isinstance(act, str):
                 return {"op": "inline", "args": {"code": act}}
@@ -143,7 +147,10 @@ class FormData:
         success_actions = []
         if state_property:
             response_val = {"op": "get_context_value", "args": {"key": "response_data"}}
-            json_data = {"op": "transform", "args": {"input": response_val, "method": "json_stringify"}}
+            json_data = {
+                "op": "transform",
+                "args": {"input": response_val, "method": "json_stringify"},
+            }
             change_args = {
                 "id": state_property._state.component.id,
                 "dynamic": True,
@@ -157,22 +164,29 @@ class FormData:
         if on_error:
             error_actions.append(_to_action(on_error))
         else:
-            error_actions.append({"op": "alert", "args": {"message": "Error submitting form"}})
+            error_actions.append(
+                {"op": "alert", "args": {"message": "Error submitting form"}}
+            )
 
-        return dScript(data={
-            "op": "network_request",
-            "args": {
-                "url": url,
-                "method": method,
-                "headers": {"Content-Type": "application/json"},
-                "body": {
-                    "op": "transform",
-                    "args": {"input": data_struct, "method": "json_stringify"},
+        return dScript(
+            data={
+                "op": "network_request",
+                "args": {
+                    "url": url,
+                    "method": method,
+                    "headers": {"Content-Type": "application/json"},
+                    "body": {
+                        "op": "transform",
+                        "args": {"input": data_struct, "method": "json_stringify"},
+                    },
+                    "on_success": {
+                        "op": "sequence",
+                        "args": {"actions": success_actions},
+                    },
+                    "on_error": {"op": "sequence", "args": {"actions": error_actions}},
                 },
-                "on_success": {"op": "sequence", "args": {"actions": success_actions}},
-                "on_error": {"op": "sequence", "args": {"actions": error_actions}},
-            },
-        })
+            }
+        )
 
     def submit_and_alert(
         self,
@@ -190,7 +204,10 @@ class FormData:
             dScript encoding a DAP ``sequence`` action.
         """
         data_struct = self._to_structure()
-        msg = {"op": "transform", "args": {"input": data_struct, "method": "json_stringify"}}
+        msg = {
+            "op": "transform",
+            "args": {"input": data_struct, "method": "json_stringify"},
+        }
         full_msg = {"op": "string_concat", "args": {"parts": [title + ":\n\n", msg]}}
 
         actions = [
@@ -199,7 +216,10 @@ class FormData:
         ]
 
         if state_property:
-            json_data = {"op": "transform", "args": {"input": data_struct, "method": "json_stringify"}}
+            json_data = {
+                "op": "transform",
+                "args": {"input": data_struct, "method": "json_stringify"},
+            }
             change_args = {
                 "id": state_property._state.component.id,
                 "dynamic": True,

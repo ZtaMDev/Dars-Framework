@@ -1,37 +1,70 @@
 """
-Backend - Dars Framework
+Fullstack Backend - Dars Framework
 
-Development (two servers):
-    dars dev              → frontend + backend
+Demonstrates:
+  - SSRApp with middleware system (Auth, CORS, Logging, RateLimit, SecurityHeaders)
+  - Data Layer: Database + DarsModel + auto CRUD API
+  - Server Actions: @server_action decorator
+  - Custom API routes with JsonStore (backward compatible)
 """
 import sys
 import os
 
-# Make the project root importable
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from dars.backend.ssr import SSRApp
-# pyrefly: ignore [missing-import]
+from dars.backend.middleware import (
+    SecurityHeadersMiddleware,
+    AuthMiddleware,
+    CORSMiddleware,
+    RateLimitMiddleware,
+    LoggingMiddleware,
+    CompressionMiddleware,
+    DarsMiddleware,
+)
+from dars.backend.actions import server_action, register_actions_on_app
+from dars.backend.models import register_model_api
 from backend.apiConfig import DarsEnv
-
-# Import the Dars app
-# pyrefly: ignore [missing-import]
+from backend.models import get_db, Product
 from main import app as dars_app
 
-# ── Create SSR app ──────────────────────────────────────────────────────────
-ssr = SSRApp(dars_app, prefix="/api/ssr", title="Dars Final Demo - Backend")
+# ── Middleware (MUST be registered BEFORE SSRApp) ────────────────────────
+dars_app.use(SecurityHeadersMiddleware, csp=None, hsts=True)
 
+dars_app.use(
+    LoggingMiddleware,
+    include_paths=["/api/"],
+    exclude_paths=["/api/ssr/"],
+    log_headers=True,
+    log_body=False,
+    sensitive_headers=["authorization", "cookie", "x-auth-token"],
+)
+
+dars_app.use(
+    RateLimitMiddleware,
+    calls_per_minute=120,
+)
+
+dars_app.use(
+    CompressionMiddleware,
+    minimum_size=500,
+)
+
+# CORS (only needed in development)
 urls = DarsEnv.get_urls()
-
 if DarsEnv.is_dev():
-    # Development: CORS needed because frontend runs on a different port
-    ssr.use_cors(
-        origins=[urls["frontend"], "http://127.0.0.1:4000"],
-        credentials=True,
+    dars_app.use(
+        CORSMiddleware,
+        allow_origins=[urls["frontend"], "http://127.0.0.1:4000"],
+        allow_credentials=True,
+        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     )
 
-# Security headers (always enabled)
-ssr.use_security_headers()
+# ── Database setup ────────────────────────────────────────────────────────
+db = get_db()
+
+# ── SSR app (applies middlewares from dars_app automatically) ────────────
+ssr = SSRApp(dars_app, prefix="/api/ssr", title="Dars FullStack Demo - Backend")
 
 # File upload endpoint
 ssr.use_upload(
@@ -41,10 +74,15 @@ ssr.use_upload(
     path="/api/upload",
 )
 
-# Expose the underlying FastAPI app for uvicorn
 app = ssr.fastapi_app
 
-# ── Custom API routes ───────────────────────────────────────────────────────
+# ── Auto-generated CRUD API for models ───────────────────────────────────
+register_model_api(app, db, prefix="/api/models")
+
+# Register actions on the FastAPI app
+register_actions_on_app(app)
+
+# ── Custom API routes (backward compatible with existing task manager) ────
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from dars.backend.store import JsonStore
@@ -81,19 +119,20 @@ async def update_task(task_id: int, request: Request):
             return JSONResponse(t)
     return JSONResponse({"error": "Not found"}, status_code=404)
 
+
 @app.post("/api/deltasks")
 async def delete_task_post(request: Request):
     body = await request.json()
     name = body.get("title", "").strip()
     if not name:
         return JSONResponse({"error": "Title/name is required"}, status_code=400)
-    
     tasks = _store.get("tasks", [])
     filtered_tasks = [t for t in tasks if t.get("title", "").strip().lower() != name.lower()]
     if len(filtered_tasks) < len(tasks):
         _store.set("tasks", filtered_tasks)
         return JSONResponse({"success": True, "message": f"Task '{name}' deleted"})
     return JSONResponse({"error": f"Task '{name}' not found"}, status_code=404)
+
 
 @app.delete("/api/tasks/{task_id}")
 async def delete_task(task_id: int):
@@ -103,27 +142,22 @@ async def delete_task(task_id: int):
     return JSONResponse({"ok": True})
 
 
-# ── Production: serve frontend static files (same origin) ──────────────────
-# In production the backend serves the Dars export (dist/) as static files.
-# This makes frontend + API share the same origin — no CORS, no separate server.
-#
-# SPA fallback: all unmatched paths return index.html so the client-side
-# router can handle /about, /dashboard, etc. without a 404 from the server.
-# ── Production: serve dist/ as static files with SPA fallback ───────────────
+# ── Production: serve dist/ as static files with SPA fallback ─────────────
 if not DarsEnv.is_dev():
     ssr.use_spa_fallback()
-# ────────────────────────────────────────────────────────────────────────────
 
 
 if __name__ == "__main__":
     import uvicorn
     print("\n" + "=" * 60)
-    print("Dars SSR Backend")
+    print("Dars FullStack Backend  [NEW: Data Layer + Middleware + Server Actions]")
     print("=" * 60)
     if DarsEnv.is_dev():
         print(f"  Backend:  {urls['backend']}")
         print(f"  Frontend: {urls['frontend']}  (run 'dars dev' separately)")
         print(f"  API Docs: {urls['backend']}/docs")
+        print(f"  Models:   {urls['backend']}/api/models/products")
+        print(f"  Actions:  {urls['backend']}/api/actions/get_product_stats")
         port, host = 3000, "127.0.0.1"
     else:
         frontend_dir = DarsEnv.get_frontend_dist_dir()

@@ -29,14 +29,14 @@ class Markdown(Component):
     """
     def __init__(
         self,
-        content: Optional[str] = None,
-        file_path: Optional[str] = None,
-        id: Optional[str] = None,
-        class_name: Optional[str] = None,
-        style: Optional[Dict[str, Any]] = None,
+        content: Any = None,
+        file_path: Any = None,
+        id: Any = None,
+        class_name: Any = None,
+        style: Optional[Dict[str, Any] | str] = None,
         dark_theme: bool = True,
         lazy: bool = False,
-        prism_theme: str = "prism-okaidia",
+        prism_theme: Any = "prism-okaidia",
         **kwargs
     ):
     
@@ -70,7 +70,7 @@ class Markdown(Component):
             with open(self.file_path, 'r', encoding='utf-8') as f:
                 self.content = f.read()
     
-    def update_content(self, new_content: Optional[str] = None, new_file_path: Optional[str] = None):
+    def update_content(self, new_content: Any = None, new_file_path: Any = None):
         """
         Update the markdown content of the component.
         

@@ -708,6 +708,7 @@ class App:
         self._spa_403_page = None
         self._spa_loading_page = None
         self._spa_error_page = None
+        self._login_page = "/login"
         
         # Initialize default meta tags
         if "viewport" not in self.meta:
@@ -824,6 +825,9 @@ class App:
         self.event_manager = EventManager()
         self.config = config
         
+        # Middleware registration (for backend FastAPI integration)
+        self._backend_middlewares: List[Dict[str, Any]] = []
+        
         # Configuración por defecto
         self.config.setdefault('viewport', {
             'width': 'device-width',
@@ -835,7 +839,7 @@ class App:
         self.config.setdefault('responsive', True)
         self.config.setdefault('charset', 'UTF-8')
         
-    def setup_auth(self, verify_credentials_callback, secret: str, auth_id: str = "default"):
+    def setup_auth(self, verify_credentials_callback, secret: str, auth_id: str = "default", login_page: str = "/login"):
         """
         Configures the secure authentication system for the Dars application.
         
@@ -845,6 +849,7 @@ class App:
                                          or None if invalid. Can be async.
             secret: Cryptographic secret key used to sign JWTs. Keep this safe!
             auth_id: Unique identifier for this auth setup (default: "default").
+            login_page: Default login page path (default: "/login").
         """
         import dars.backend.auth_routes as auth_routes
         
@@ -861,6 +866,8 @@ class App:
         
         if auth_id == "default":
             self._auth_secret = secret
+        
+        self._login_page = login_page
 
     def set_root(self, component: Component):
         """Sets the root component of the application (backward-compatible single-page mode)."""
@@ -1871,6 +1878,92 @@ class App:
         self.add_script(watcher)
         return self
         
+    # ── Middleware Registration ─────────────────────────────────────────
+    def use(self, middleware_cls: type, **kwargs) -> 'App':
+        """
+        Register a backend middleware on the application.
+        
+        Middlewares are applied in registration order when the backend is started
+        via :meth:`start_backend` or :class:`SSRApp`.
+        
+        Args:
+            middleware_cls: A DarsMiddleware subclass (or any Starlette-compatible
+                          middleware class).
+            **kwargs: Keyword arguments forwarded to the middleware constructor.
+        
+        Example::
+        
+            from dars.backend.middleware import (
+                SecurityHeadersMiddleware, CORSMiddleware, RateLimitMiddleware
+            )
+            
+            app.use(SecurityHeadersMiddleware, csp="default-src 'self'", hsts=True)
+            app.use(CORSMiddleware, allow_origins=["https://example.com"])
+            app.use(RateLimitMiddleware, calls_per_minute=120)
+        """
+        self._backend_middlewares.append({
+            "cls": middleware_cls,
+            "kwargs": kwargs,
+        })
+        return self
+
+    def apply_middlewares(self, fastapi_app) -> None:
+        """
+        Apply all registered middlewares to a FastAPI application.
+        
+        This is called automatically by ``SSRApp`` and ``start_backend()``.
+        
+        Args:
+            fastapi_app: A FastAPI application instance.
+        """
+        for entry in self._backend_middlewares:
+            fastapi_app.add_middleware(entry["cls"], **entry["kwargs"])
+
+    # ── End Middleware Registration ─────────────────────────────────────
+
+    def start_backend(
+        self,
+        host: str = "0.0.0.0",
+        port: int = 8000,
+        log_level: str = "info",
+        **uvicorn_kwargs,
+    ):
+        """
+        Start the FastAPI backend server for SSR with all registered middlewares.
+        
+        This is a convenience method that creates an ``SSRApp``, applies
+        middlewares, and runs ``uvicorn``.
+        
+        Args:
+            host: Bind address (default ``"0.0.0.0"``).
+            port: Bind port (default ``8000``).
+            log_level: Uvicorn log level (default ``"info"``).
+            **uvicorn_kwargs: Additional keyword arguments for ``uvicorn.run``.
+        """
+        try:
+            from dars.backend.ssr import SSRApp
+            import uvicorn
+        except ImportError as exc:
+            raise ImportError(
+                "start_backend() requires uvicorn and the full backend dependencies. "
+                f"Missing: {exc}"
+            ) from exc
+
+        ssr_app = SSRApp(self)
+
+        # Apply all registered middlewares
+        for entry in self._backend_middlewares:
+            ssr_app.fastapi_app.add_middleware(entry["cls"], **entry["kwargs"])
+
+        print(f"[Dars] Starting backend at http://{host}:{port}")
+        uvicorn.run(
+            ssr_app.fastapi_app,
+            host=host,
+            port=port,
+            log_level=log_level,
+            **uvicorn_kwargs,
+        )
+
     def add_global_style(self, selector: str = None, styles: Dict[str, Any] = None, file_path: str = None):
         """
         Adds a global style to the app.
