@@ -1173,6 +1173,466 @@
     margin: 0 auto;
     padding: 40px 20px;">
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_0_1_1_0">
+      <h1 id="release-notes-v1916">
+       Release Notes v1.9.16
+      </h1>
+      <blockquote>
+       <p>
+        <strong>
+         Database Layer, Server Actions, Route Types, Guards, Middleware System &amp; Auth Simplification
+        </strong>
+        <em>
+         Major full-stack expansion: built-in ORM, server-side actions, security middleware, and a simplified decorator-based auth system.
+        </em>
+       </p>
+      </blockquote>
+      <h2 id="installation">
+       Installation
+      </h2>
+      <div class="codehilite">
+       <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
+</code></pre>
+      </div>
+      <h2 id="whats-new">
+       What's New
+      </h2>
+      <h3 id="database-layer-declarative-orm-for-sqlite">
+       Database Layer: Declarative ORM for SQLite
+      </h3>
+      <p>
+       Dars now ships with a complete built-in database layer for SQLite:
+      </p>
+      <ul>
+       <li>
+        <strong>
+         <code>
+          DarsModel
+         </code>
+        </strong>
+        — Declarative model base class with auto-detected fields
+       </li>
+       <li>
+        <strong>
+         Field Types
+        </strong>
+        :
+        <code>
+         TextField
+        </code>
+        ,
+        <code>
+         IntegerField
+        </code>
+        ,
+        <code>
+         FloatField
+        </code>
+        ,
+        <code>
+         BooleanField
+        </code>
+        ,
+        <code>
+         DateTimeField
+        </code>
+        ,
+        <code>
+         JSONField
+        </code>
+        ,
+        <code>
+         ForeignKey
+        </code>
+       </li>
+       <li>
+        <strong>
+         <code>
+          ModelManager
+         </code>
+        </strong>
+        — Per-model query API:
+        <code>
+         all()
+        </code>
+        ,
+        <code>
+         get()
+        </code>
+        ,
+        <code>
+         filter()
+        </code>
+        ,
+        <code>
+         count()
+        </code>
+        ,
+        <code>
+         create()
+        </code>
+        ,
+        <code>
+         delete()
+        </code>
+       </li>
+       <li>
+        <strong>
+         <code>
+          Database
+         </code>
+        </strong>
+        — Thread-safe SQLite connection manager with WAL mode, migration tracking, and raw SQL support
+       </li>
+       <li>
+        <strong>
+         <code>
+          register_model_api()
+         </code>
+        </strong>
+        — Auto-generate full CRUD REST endpoints (
+        <code>
+         GET/POST/PUT/DELETE
+        </code>
+        ) for all registered models
+       </li>
+      </ul>
+      <div class="codehilite">
+       <pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Product</span><span class="p">(</span><span class="n">DarsModel</span><span class="p">):</span>
+    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s2">"products"</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">TextField</span><span class="p">(</span><span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">price</span> <span class="o">=</span> <span class="n">IntegerField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">db</span> <span class="o">=</span> <span class="n">Database</span><span class="p">(</span><span class="s2">"app.db"</span><span class="p">)</span>
+<span class="n">db</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">Product</span><span class="p">)</span>
+<span class="n">db</span><span class="o">.</span><span class="n">create_all</span><span class="p">()</span>
+
+<span class="c1"># Query</span>
+<span class="n">Product</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">price</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="server-actions-call-python-from-the-browser">
+       Server Actions — Call Python from the Browser
+      </h3>
+      <p>
+       A new
+       <code>
+        @server_action
+       </code>
+       decorator system that registers Python functions as API endpoints callable from client-side events:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dars.backend.actions</span><span class="w"> </span><span class="kn">import</span> <span class="n">server_action</span><span class="p">,</span> <span class="n">call_server</span>
+
+<span class="nd">@server_action</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">greet</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="k">return</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"Hello </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">! x</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">count</span><span class="p">)]</span>
+
+<span class="n">Button</span><span class="p">(</span><span class="s2">"Greet"</span><span class="p">,</span> <span class="n">on_click</span><span class="o">=</span><span class="n">call_server</span><span class="p">(</span><span class="s2">"greet"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"World"</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">3</span><span class="p">))</span>
+</code></pre>
+      </div>
+      <ul>
+       <li>
+        Type-annotated parameters validated via Pydantic
+       </li>
+       <li>
+        Sync and async support
+       </li>
+       <li>
+        Auth-protected actions with
+        <code>
+         @server_action(auth_required=True, roles=["admin"])
+        </code>
+       </li>
+       <li>
+        CSRF protection for mutating actions
+       </li>
+       <li>
+        Auto-discovery:
+        <code>
+         discover_actions("backend.api")
+        </code>
+       </li>
+       <li>
+        Exposed as
+        <code>
+         POST /api/actions/{action_name}
+        </code>
+       </li>
+      </ul>
+      <h3 id="route-types">
+       Route Types
+      </h3>
+      <p>
+       New
+       <code>
+        RouteType
+       </code>
+       enum system for SPA-level route protection:
+      </p>
+      <ul>
+       <li>
+        <strong>
+         <code>
+          RouteType.PUBLIC
+         </code>
+        </strong>
+        — No auth required (default)
+       </li>
+       <li>
+        <strong>
+         <code>
+          RouteType.SSR
+         </code>
+        </strong>
+        — Server-side rendered
+       </li>
+       <li>
+        <strong>
+         <code>
+          RouteType.PRIVATE
+         </code>
+        </strong>
+        — Requires authentication, redirects to login
+       </li>
+       <li>
+        <strong>
+         <code>
+          RouteType.PROTECTED
+         </code>
+        </strong>
+        — Requires authentication AND specific roles
+       </li>
+      </ul>
+      <div class="codehilite">
+       <pre><span></span><code><span class="nd">@route</span><span class="p">(</span><span class="s2">"/admin"</span><span class="p">,</span> <span class="n">route_type</span><span class="o">=</span><span class="n">RouteType</span><span class="o">.</span><span class="n">PROTECTED</span><span class="p">,</span> <span class="n">roles</span><span class="o">=</span><span class="p">[</span><span class="s2">"admin"</span><span class="p">])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">admin_panel</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Page</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <h3 id="simplified-auth-system-with-requires_auth">
+       Simplified Auth System with
+       <code>
+        @requires_auth
+       </code>
+      </h3>
+      <p>
+       The authentication system has been fundamentally simplified:
+      </p>
+      <ul>
+       <li>
+        <strong>
+         <code>
+          @requires_auth
+         </code>
+        </strong>
+        — Now a proper FastAPI route decorator that auto-injects
+        <code>
+         request.state.user
+        </code>
+        . Can be used bare (
+        <code>
+         @requires_auth
+        </code>
+        ) or with custom callback/secret (
+        <code>
+         @requires_auth(verify_credentials_callback=fn, secret="...")
+        </code>
+        ).
+       </li>
+       <li>
+        <strong>
+         <code>
+          @requires_role("admin")
+         </code>
+        </strong>
+        — Role-based access control decorator compatible with any FastAPI route.
+       </li>
+       <li>
+        <strong>
+         Auto-registration
+        </strong>
+        : When
+        <code>
+         verify_credentials_callback
+        </code>
+        and
+        <code>
+         secret
+        </code>
+        are passed to
+        <code>
+         @requires_auth
+        </code>
+        , it auto-registers the auth config with a predictable
+        <code>
+         auth_id
+        </code>
+        (e.g.,
+        <code>
+         auth_dashboard
+        </code>
+        for
+        <code>
+         def dashboard()
+        </code>
+        ).
+       </li>
+       <li>
+        <strong>
+         <code>
+          app.setup_auth()
+         </code>
+        </strong>
+        — Global auth configuration with optional
+        <code>
+         auth_id
+        </code>
+        and custom
+        <code>
+         login_page
+        </code>
+        .
+       </li>
+       <li>
+        <strong>
+         Scoped auth endpoints
+        </strong>
+        :
+        <code>
+         /_dars/auth/{auth_id}/login
+        </code>
+        ,
+        <code>
+         /me
+        </code>
+        ,
+        <code>
+         /logout
+        </code>
+        ,
+        <code>
+         /refresh
+        </code>
+        generated automatically for each scheme.
+       </li>
+       <li>
+        <strong>
+         Session management
+        </strong>
+        :
+        <code>
+         SessionManager
+        </code>
+        +
+        <code>
+         InMemorySessionStore
+        </code>
+        with
+        <code>
+         SessionStore
+        </code>
+        protocol for custom backends.
+       </li>
+       <li>
+        <strong>
+         CSRF protection
+        </strong>
+        with automatic
+        <code>
+         XSRF-TOKEN
+        </code>
+        cookie/header validation and refresh token rotation.
+       </li>
+      </ul>
+      <h3 id="production-grade-middleware-system">
+       Production-Grade Middleware System
+      </h3>
+      <p>
+       A complete middleware pipeline for FastAPI/Starlette:
+      </p>
+      <ul>
+       <li>
+        <strong>
+         <code>
+          DarsMiddleware
+         </code>
+        </strong>
+        — Abstract base class with
+        <code>
+         before_request
+        </code>
+        /
+        <code>
+         after_response
+        </code>
+        lifecycle hooks
+       </li>
+       <li>
+        <strong>
+         <code>
+          AuthMiddleware
+         </code>
+        </strong>
+        — JWT Bearer/cookie validation with CSRF protection and multi-auth cookie detection
+       </li>
+       <li>
+        <strong>
+         <code>
+          SecurityHeadersMiddleware
+         </code>
+        </strong>
+        — CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, XSS-Protection
+       </li>
+       <li>
+        <strong>
+         <code>
+          CORSMiddleware
+         </code>
+        </strong>
+        — Configurable CORS with origin matching, credential support, and preflight handling
+       </li>
+       <li>
+        <strong>
+         <code>
+          RateLimitMiddleware
+         </code>
+        </strong>
+        — Sliding-window per-IP/per-user rate limiter with burst support
+       </li>
+       <li>
+        <strong>
+         <code>
+          LoggingMiddleware
+         </code>
+        </strong>
+        — Structured request/response logging with body and header capture
+       </li>
+       <li>
+        <strong>
+         <code>
+          CompressionMiddleware
+         </code>
+        </strong>
+        — Gzip response compression for text-based content types
+       </li>
+       <li>
+        <strong>
+         <code>
+          MiddlewareChain
+         </code>
+        </strong>
+        — Compose multiple middlewares into a single Starlette middleware
+        <h2 id="-register_default_middlewares-one-call-setup-of-the-full-middleware-stack">
+         -
+         <strong>
+          <code>
+           register_default_middlewares()
+          </code>
+         </strong>
+         — One-call setup of the full middleware stack
+        </h2>
+       </li>
+      </ul>
       <h1 id="release-notes-v1915">
        Release Notes v1.9.15
       </h1>
@@ -1186,14 +1646,14 @@
         </em>
        </p>
       </blockquote>
-      <h2 id="installation">
+      <h2 id="installation-2">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new">
+      <h2 id="whats-new-2">
        What's New
       </h2>
       <h3 id="secure-by-default-authentication-system">
@@ -1354,14 +1814,14 @@
         is deprecated.
        </p>
       </blockquote>
-      <h2 id="installation-2">
+      <h2 id="installation-3">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-2">
+      <h2 id="whats-new-3">
        What's New
       </h2>
       <h3 id="unified-fullstack-development">
@@ -1410,14 +1870,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-3">
+      <h2 id="installation-4">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-3">
+      <h2 id="whats-new-4">
        What's New
       </h2>
       <h3 id="desktop-exporter-removal-and-new-desktop-strategy">
@@ -1514,14 +1974,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-4">
+      <h2 id="installation-5">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-4">
+      <h2 id="whats-new-5">
        What's New
       </h2>
       <h3 id="dars-bundler-high-performance-standalone-rust-minifier">
@@ -1842,14 +2302,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-5">
+      <h2 id="installation-6">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-5">
+      <h2 id="whats-new-6">
        What's New
       </h2>
       <h3 id="secure-asynchronous-ssr-hydration">
@@ -2133,14 +2593,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-6">
+      <h2 id="installation-7">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-6">
+      <h2 id="whats-new-7">
        What's New
       </h2>
       <h3 id="usefetch-declarative-data-fetching-hook">
@@ -2706,14 +3166,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-7">
+      <h2 id="installation-8">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-7">
+      <h2 id="whats-new-8">
        What's New
       </h2>
       <h3 id="hybrid-ssrspa-stabilization">
@@ -2945,14 +3405,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-8">
+      <h2 id="installation-9">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-8">
+      <h2 id="whats-new-9">
        What's New
       </h2>
       <h3 id="modular-animation-engine-animjs">
@@ -3197,14 +3657,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-9">
+      <h2 id="installation-10">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-9">
+      <h2 id="whats-new-10">
        What's New
       </h2>
       <h3 id="fixed-relative-paths-for-runtime-resources">
@@ -3340,14 +3800,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-10">
+      <h2 id="installation-11">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-10">
+      <h2 id="whats-new-11">
        What's New
       </h2>
       <h3 id="configurable-development-port">
@@ -3505,14 +3965,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-11">
+      <h2 id="installation-12">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-11">
+      <h2 id="whats-new-12">
        What's New
       </h2>
       <h3 id="standardized-component-docstrings">
@@ -3584,14 +4044,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-12">
+      <h2 id="installation-13">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-12">
+      <h2 id="whats-new-13">
        What's New
       </h2>
       <h3 id="utility-style-system">
@@ -3789,14 +4249,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-13">
+      <h2 id="installation-14">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-13">
+      <h2 id="whats-new-14">
        What's New
       </h2>
       <h3 id="definitive-removal-of-new-function">
@@ -4073,14 +4533,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-14">
+      <h2 id="installation-15">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-14">
+      <h2 id="whats-new-15">
        What's New
       </h2>
       <h3 id="restored-native-string-concatenation">
@@ -4155,14 +4615,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-15">
+      <h2 id="installation-16">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-15">
+      <h2 id="whats-new-16">
        What's New
       </h2>
       <h3 id="state-v2-reactivity-decoupling">
@@ -4293,14 +4753,14 @@
         release.
        </p>
       </blockquote>
-      <h2 id="installation-16">
+      <h2 id="installation-17">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-16">
+      <h2 id="whats-new-17">
        What's New
       </h2>
       <h3 id="zero-eval-runtime-secure-script-execution">
@@ -4498,14 +4958,14 @@
         : Versions &lt;= v1.8.7 are considered deprecated and NOT recommended for production use. v1.8.8 addresses critical security surfaces by temporarily removing experimental Server Components. Upgrading is mandatory.
        </p>
       </blockquote>
-      <h2 id="installation-17">
+      <h2 id="installation-18">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-17">
+      <h2 id="whats-new-18">
        What's New
       </h2>
       <h3 id="dars-server-protocol-dsp">
@@ -4575,14 +5035,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-18">
+      <h2 id="installation-19">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-18">
+      <h2 id="whats-new-19">
        What's New
       </h2>
       <h3 id="dars-server-components">
@@ -4690,14 +5150,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-19">
+      <h2 id="installation-20">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-19">
+      <h2 id="whats-new-20">
        What's New
       </h2>
       <h3 id="darsenv-environment-awareness">
@@ -4809,14 +5269,14 @@
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-20">
+      <h2 id="installation-21">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-20">
+      <h2 id="whats-new-21">
        What's New
       </h2>
       <h3 id="multiple-outlets-via-outlet_id">
@@ -4913,14 +5373,14 @@ This keeps state/events safe and avoids breaking hydration.
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-21">
+      <h2 id="installation-22">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-21">
+      <h2 id="whats-new-22">
        What's New
       </h2>
       <h3 id="python-native-minification-by-default-no-nodebun-required">
@@ -5129,14 +5589,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-22">
+      <h2 id="installation-23">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-22">
+      <h2 id="whats-new-23">
        What's New
       </h2>
       <h3 id="fixed-production-build-crash-unexpected-token-export">
@@ -5187,14 +5647,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-23">
+      <h2 id="installation-24">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-23">
+      <h2 id="whats-new-24">
        What's New
       </h2>
       <h3 id="fixed-settimeout-promise-handling">
@@ -5238,14 +5698,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-24">
+      <h2 id="installation-25">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-24">
+      <h2 id="whats-new-25">
        What's New
       </h2>
       <h3 id="new-style-optimization-pipeline-phase-1">
@@ -5615,14 +6075,14 @@ improving consistency and providing a real-world example of the upgraded styling
         </strong>
        </p>
       </blockquote>
-      <h2 id="installation-25">
+      <h2 id="installation-26">
        Installation
       </h2>
       <div class="codehilite">
        <pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>dars-framework
 </code></pre>
       </div>
-      <h2 id="whats-new-25">
+      <h2 id="whats-new-26">
        What's New
       </h2>
       <h3 id="new-advanced-multimedia-components-video-audio">
@@ -6254,6 +6714,30 @@ improving consistency and providing a real-world example of the upgraded styling
      <div class="sidebar-category">
       Versions
      </div>
+     <a class="sidebar-link sidebar-level-1" href="#release-notes-v1916" style="margin-left: 0px">
+      Release Notes v1.9.16
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#installation" style="margin-left: 20px">
+      Installation
+     </a>
+     <a class="sidebar-link sidebar-level-2" href="#whats-new" style="margin-left: 20px">
+      What's New
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#database-layer-declarative-orm-for-sqlite" style="margin-left: 40px">
+      Database Layer: Declarative ORM for SQLite
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#server-actions-call-python-from-the-browser" style="margin-left: 40px">
+      Server Actions — Call Python from the Browser
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#route-types" style="margin-left: 40px">
+      Route Types
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#simplified-auth-system-with-requiresauth" style="margin-left: 40px">
+      Simplified Auth System with `@requires_auth`
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#production-grade-middleware-system" style="margin-left: 40px">
+      Production-Grade Middleware System
+     </a>
      <a class="sidebar-link sidebar-level-1" href="#release-notes-v1915" style="margin-left: 0px">
       Release Notes v1.9.15
      </a>
@@ -7003,7 +7487,7 @@ improving consistency and providing a real-world example of the upgraded styling
   </div>
   <div id="__dars_spa_root__">
   </div>
-  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1780281562" type="module">
+  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1780354792" type="module">
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js">
   </script>

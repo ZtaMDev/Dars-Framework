@@ -112,6 +112,7 @@ class DAPOp:
     
     # === HTTP (Backend) ===
     FETCH = "fetch"
+    CALL_SERVER = "call_server"
     
 
 

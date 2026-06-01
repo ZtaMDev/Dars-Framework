@@ -82,7 +82,7 @@ _registerCommand("inline", (args) => {
   const code = args && (args.code || args);
   if (typeof code === "string") {
     try {
-      return (new Function(code))();
+      return console.warn("[Dars:DAP] DO NOT USE INLINE CODE EXECUTION",);
     } catch (e) {
       console.error("[Dars:DAP] Error executing inline code:", e);
     }

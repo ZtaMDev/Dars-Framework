@@ -63,6 +63,8 @@ from typing import (
 from fastapi import APIRouter, FastAPI, HTTPException, Request
 from pydantic import BaseModel, ValidationError, create_model
 
+from dars.scripts.dscript import dScript
+
 logger = logging.getLogger("dars.actions")
 
 # ── Global action registry ───────────────────────────────────────────────────
@@ -338,7 +340,6 @@ def call_server(
     Returns:
         A dictionary DAP action that the Dars runtime can dispatch.
     """
-    from dars.scripts.dscript import InlineScript
 
     dap_action = {
         "op": "call_server",
@@ -349,18 +350,22 @@ def call_server(
     }
 
     if on_success is not None:
-        if hasattr(on_success, "get_code"):
-            dap_action["args"]["on_success"] = {"op": "inline", "args": {"code": on_success.get_code()}}
+        if hasattr(on_success, "get_action"):
+            action = on_success.get_action()
+            if action is not None:
+                dap_action["args"]["on_success"] = action
         elif isinstance(on_success, dict):
             dap_action["args"]["on_success"] = on_success
 
     if on_error is not None:
-        if hasattr(on_error, "get_code"):
-            dap_action["args"]["on_error"] = {"op": "inline", "args": {"code": on_error.get_code()}}
+        if hasattr(on_error, "get_action"):
+            action = on_error.get_action()
+            if action is not None:
+                dap_action["args"]["on_error"] = action
         elif isinstance(on_error, dict):
             dap_action["args"]["on_error"] = on_error
 
-    return dap_action
+    return dScript(data=dap_action)
 
 
 # ── Integration helpers ──────────────────────────────────────────────────────

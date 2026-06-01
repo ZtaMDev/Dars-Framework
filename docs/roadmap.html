@@ -1210,7 +1210,7 @@
         <strong>
          Current Version
         </strong>
-        : v1.9.12
+        : v1.9.16
        </li>
        <li>
         <strong>
@@ -1220,8 +1220,8 @@
        </li>
       </ul>
       <hr/>
-      <h2 id="completed-v10-v1912">
-       Completed (v1.0 → v1.9.12)
+      <h2 id="completed-v10-v1916">
+       Completed (v1.0 → v1.9.16)
       </h2>
       <p>
        All of the following have been implemented and shipped:
@@ -1795,6 +1795,226 @@
         </code>
         to remove dead router imports at build time.
        </li>
+       <li>
+        <strong>
+         Database Layer
+        </strong>
+        :
+        <code>
+         DarsModel
+        </code>
+        declarative ORM with
+        <code>
+         TextField
+        </code>
+        ,
+        <code>
+         IntegerField
+        </code>
+        ,
+        <code>
+         FloatField
+        </code>
+        ,
+        <code>
+         BooleanField
+        </code>
+        ,
+        <code>
+         DateTimeField
+        </code>
+        ,
+        <code>
+         JSONField
+        </code>
+        ,
+        <code>
+         ForeignKey
+        </code>
+        .
+        <code>
+         Database
+        </code>
+        thread-safe connection manager with WAL mode, migration tracking. Auto-generated CRUD API via
+        <code>
+         register_model_api()
+        </code>
+        .
+       </li>
+       <li>
+        <strong>
+         Server Actions
+        </strong>
+        :
+        <code>
+         @server_action
+        </code>
+        decorator for registering Python functions as API endpoints.
+        <code>
+         call_server()
+        </code>
+        for calling them from client-side events. Type validation via Pydantic, sync/async support, auth-protected actions, auto-discovery.
+       </li>
+       <li>
+        <strong>
+         Route Types System
+        </strong>
+        :
+        <code>
+         RouteType
+        </code>
+        enum (
+        <code>
+         PUBLIC
+        </code>
+        ,
+        <code>
+         SSR
+        </code>
+        ,
+        <code>
+         PRIVATE
+        </code>
+        ,
+        <code>
+         PROTECTED
+        </code>
+        ).
+        <code>
+         RouteGuard
+        </code>
+        with
+        <code>
+         requires_auth
+        </code>
+        ,
+        <code>
+         roles
+        </code>
+        ,
+        <code>
+         custom_check
+        </code>
+        .
+        <code>
+         RouteMetadata
+        </code>
+        for per-route security configuration.
+        <code>
+         @guard
+        </code>
+        decorator for fine-grained access control.
+       </li>
+       <li>
+        <strong>
+         Simplified Auth System
+        </strong>
+        :
+        <code>
+         @requires_auth
+        </code>
+        FastAPI route decorator with auto
+        <code>
+         request.state.user
+        </code>
+        injection.
+        <code>
+         @requires_role("admin")
+        </code>
+        RBAC decorator. Auto-registration of auth configs with predictable
+        <code>
+         auth_id
+        </code>
+        . Scoped endpoints
+        <code>
+         /_dars/auth/{auth_id}/login
+        </code>
+        ,
+        <code>
+         /me
+        </code>
+        ,
+        <code>
+         /logout
+        </code>
+        ,
+        <code>
+         /refresh
+        </code>
+        . Session management with
+        <code>
+         SessionManager
+        </code>
+        +
+        <code>
+         InMemorySessionStore
+        </code>
+        .
+        <code>
+         SessionStore
+        </code>
+        protocol for custom backends.
+       </li>
+       <li>
+        <strong>
+         Middleware System
+        </strong>
+        :
+        <code>
+         DarsMiddleware
+        </code>
+        abstract base with lifecycle hooks.
+        <code>
+         AuthMiddleware
+        </code>
+        (JWT + CSRF + multi-auth).
+        <code>
+         SecurityHeadersMiddleware
+        </code>
+        (CSP, HSTS, X-Frame-Options, etc.).
+        <code>
+         CORSMiddleware
+        </code>
+        (configurable origins, credentials, preflight).
+        <code>
+         RateLimitMiddleware
+        </code>
+        (sliding-window, burst, per-IP/user).
+        <code>
+         LoggingMiddleware
+        </code>
+        (structured request/response logging).
+        <code>
+         CompressionMiddleware
+        </code>
+        (gzip).
+        <code>
+         MiddlewareChain
+        </code>
+        (compose middlewares).
+        <code>
+         register_default_middlewares()
+        </code>
+        (one-call setup).
+       </li>
+       <li>
+        <strong>
+         DAP Protocol Reference
+        </strong>
+        : Complete
+        <code>
+         DAPOp
+        </code>
+        constants for all supported operations in
+        <code>
+         actionProtocol.py
+        </code>
+        .
+        <code>
+         ActionBuilder
+        </code>
+        helpers for secure client-side action generation.
+       </li>
       </ul>
       <hr/>
       <h2 id="v200-roadmap-production-grade-fullstack-framework">
@@ -1892,14 +2112,18 @@
         <code>
          @requires_auth
         </code>
-        decorator for SSR/API routes
+        decorator for SSR/API routes (v1.9.16 — simplified, auto
+        <code>
+         request.state.user
+        </code>
+        injection)
        </li>
        <li>
         [x]
         <code>
          @requires_role("admin")
         </code>
-        RBAC decorator
+        RBAC decorator (v1.9.16)
        </li>
        <li>
         [x] Route guard decorators with custom permission checks (per-page
@@ -1912,6 +2136,28 @@
         [x] Automatic 401 redirect on token expiry (handled via middleware/refresh tokens)
        </li>
        <li>
+        [x] Session management:
+        <code>
+         SessionManager
+        </code>
+        ,
+        <code>
+         InMemorySessionStore
+        </code>
+        ,
+        <code>
+         SessionStore
+        </code>
+        protocol (v1.9.16)
+       </li>
+       <li>
+        [x] Multi-Auth scoped cookies (
+        <code>
+         dars_access_token_{auth_id}
+        </code>
+        ) and dynamic endpoints (v1.9.16)
+       </li>
+       <li>
         [ ] OAuth2 provider integration (Google, GitHub)
        </li>
       </ul>
@@ -1920,7 +2166,7 @@
       </h3>
       <ul>
        <li>
-        [ ]
+        [x]
         <code>
          DarsMiddleware
         </code>
@@ -1932,13 +2178,14 @@
         <code>
          after_response()
         </code>
-        hooks
+        hooks (v1.9.16)
        </li>
        <li>
-        [ ] Global middleware registration:
+        [x] Global middleware registration via FastAPI
         <code>
-         app.use(middleware)
+         app.add_middleware()
         </code>
+        (v1.9.16)
        </li>
        <li>
         [ ] Route-specific middleware:
@@ -1947,42 +2194,60 @@
         </code>
        </li>
        <li>
-        [ ] Middleware chain execution order
+        [x] Middleware chain via
+        <code>
+         MiddlewareChain
+        </code>
+        composition (v1.9.16)
        </li>
        <li>
         [x]
         <code>
          AuthMiddleware
         </code>
-        — verify JWT on protected routes
+        — verify JWT on protected routes with CSRF + multi-auth (v1.9.16)
        </li>
        <li>
-        [ ]
+        [x]
         <code>
          CORSMiddleware
         </code>
-        — configurable cross-origin resource sharing
+        — configurable cross-origin resource sharing (v1.9.16)
        </li>
        <li>
-        [ ]
+        [x]
         <code>
          RateLimitMiddleware
         </code>
-        — per-IP / per-user rate limiting
+        — per-IP / per-user rate limiting with burst support (v1.9.16)
        </li>
        <li>
-        [ ]
+        [x]
         <code>
          LoggingMiddleware
         </code>
-        — request/response logging
+        — structured request/response logging (v1.9.16)
        </li>
        <li>
         [x]
         <code>
          SecurityHeadersMiddleware
         </code>
-        — CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy
+        — CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy (v1.9.16)
+       </li>
+       <li>
+        [x]
+        <code>
+         CompressionMiddleware
+        </code>
+        — gzip response compression (v1.9.16)
+       </li>
+       <li>
+        [x]
+        <code>
+         register_default_middlewares()
+        </code>
+        — one-call setup (v1.9.16)
        </li>
       </ul>
       <h3 id="3-data-layer-persistence">
@@ -1997,14 +2262,14 @@
         — JSON file-based key-value store for prototyping
        </li>
        <li>
-        [ ]
+        [x] SQLite database support via
         <code>
-         SQLiteStore
+         Database
         </code>
-        — lightweight SQLite wrapper
+        connection manager (v1.9.16)
        </li>
        <li>
-        [ ] Key-value API:
+        [x] Key-value API:
         <code>
          store.get()
         </code>
@@ -2022,20 +2287,112 @@
         </code>
        </li>
        <li>
-        [ ] SQLAlchemy/SQLModel ORM integration
-       </li>
-       <li>
-        [ ]
+        [x] SQLite ORM via
         <code>
          DarsModel
         </code>
-        base class with CRUD operations
+        declarative model base (v1.9.16)
        </li>
        <li>
-        [ ] Database connection management (pooling, lifecycle)
+        [x]
+        <code>
+         DarsModel
+        </code>
+        base class with CRUD operations:
+        <code>
+         .save()
+        </code>
+        ,
+        <code>
+         .delete()
+        </code>
+        ,
+        <code>
+         .to_dict()
+        </code>
+        (v1.9.16)
        </li>
        <li>
-        [ ] Auto-generated CRUD API endpoints from models
+        [x] Database connection management (thread-safe, WAL mode, foreign keys) (v1.9.16)
+       </li>
+       <li>
+        [x] Auto-generated CRUD API endpoints from models via
+        <code>
+         register_model_api()
+        </code>
+        (v1.9.16)
+       </li>
+       <li>
+        [x] Schema migration tracking via
+        <code>
+         _dars_schema_version
+        </code>
+        table (v1.9.16)
+       </li>
+       <li>
+        [x] Field types:
+        <code>
+         TextField
+        </code>
+        ,
+        <code>
+         IntegerField
+        </code>
+        ,
+        <code>
+         FloatField
+        </code>
+        ,
+        <code>
+         BooleanField
+        </code>
+        ,
+        <code>
+         DateTimeField
+        </code>
+        ,
+        <code>
+         JSONField
+        </code>
+        ,
+        <code>
+         ForeignKey
+        </code>
+        (v1.9.16)
+       </li>
+       <li>
+        [x]
+        <code>
+         ModelManager
+        </code>
+        query API:
+        <code>
+         all()
+        </code>
+        ,
+        <code>
+         get()
+        </code>
+        ,
+        <code>
+         filter()
+        </code>
+        ,
+        <code>
+         count()
+        </code>
+        ,
+        <code>
+         create()
+        </code>
+        ,
+        <code>
+         delete()
+        </code>
+        (v1.9.16)
+       </li>
+       <li>
+        [x] Pydantic model integration for auto-generated CRUD validation (v1.9.16)
        </li>
        <li>
         [ ] Alembic integration for schema migrations
@@ -2050,9 +2407,6 @@
          dars db upgrade
         </code>
         CLI commands
-       </li>
-       <li>
-        [ ] Pydantic model integration for request/response validation
        </li>
        <li>
         [ ] JSON schema generation from models
@@ -2380,7 +2734,15 @@
         — list rendering with keys
        </li>
        <li>
-        [ ] Server Actions — call Python functions from client-side events
+        [x] Server Actions — call Python functions from client-side events via
+        <code>
+         @server_action
+        </code>
+        +
+        <code>
+         call_server()
+        </code>
+        (v1.9.16)
        </li>
        <li>
         [ ]
@@ -2942,7 +3304,7 @@
   </div>
   <div id="__dars_spa_root__">
   </div>
-  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1780281561" type="module">
+  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1780354791" type="module">
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js">
   </script>

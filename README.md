@@ -41,6 +41,9 @@ Try Dars without installing anything — visit the [Dars Playground](https://dar
 - **One app, four deployment targets simultaneously:** Dars supports Static Site Generation (SSG), Single-Page Application (SPA) routing, Server-Side Rendering (SSR) with FastAPI, and a full Backend API — all from the same Python codebase. Mix and match freely: export some pages as static HTML for SEO, serve others via SSR for dynamic content, and expose REST API endpoints alongside your UI.
 - **Production-grade Authentication:** Build secure apps with built-in Multi-Auth, HttpOnly JWT cookies, CSRF protection, and role-based access control — all without writing Javascript.
 - **Full backend toolkit included:** `useFetch` for declarative data fetching, `FormValidator` for client-side validation, `Each` for runtime list rendering from API responses, `JsonStore` for file-backed persistence, `UploadPipeline` for secure file uploads, `SecurityHeadersMiddleware` for HTTP security, and `DarsEnv` for `.env` file support.
+- **Database & Models:** Built-in SQLite ORM with `DarsModel`, auto-generated CRUD API, and migration tracking.
+- **Server Actions:** Call Python backend functions directly from client-side events with automatic validation and auth.
+- **Middleware System:** Production-grade middleware pipeline — Auth, CORS, Rate limiting, Logging, Compression, Security headers.
 - For more information visit the [Documentation](https://ztamdev.github.io/Dars-Framework/docs.html)
 
 ---
@@ -222,12 +225,16 @@ app.set_404_page(Page(
 
 ## Authentication & Security
 
-Dars provides a production-grade, secure-by-default authentication system that is **completely isolated from the VDOM**. Tokens never touch the browser's JavaScript context — they live exclusively in HttpOnly cookies managed by the browser itself.
+Dars provides a production-grade, secure-by-default authentication system. Tokens never touch the browser's JavaScript context — they live exclusively in HttpOnly cookies managed by the browser itself.
 
-- **HttpOnly Cookie-Based Sessions**
-- **CSRF Protection** built-in for all mutating requests
-- **Multi-Auth Support** to run multiple independent authentication schemes in the same app
-- **Pure Python JWT** with zero third-party dependencies
+- **HttpOnly Cookie-Based Sessions** with automatic CSRF protection
+- **`@requires_auth` Decorator** — Protect any route, auto-injects `request.state.user`
+- **`@requires_role("admin")`** — Role-based access control
+- **Multi-Auth Support** — Multiple isolated auth schemes in the same app
+- **Pure Python JWT** — Zero third-party dependencies
+- **Auto-generated Auth Endpoints** — `/_dars/auth/{id}/login`, `/me`, `/logout`, `/refresh`
+- **Refresh Token Rotation** with server-side revocation
+- **PBKDF2 Password Hashing** — 100k iterations, timing-attack resistant
 
 ### Quick Example
 
@@ -241,22 +248,103 @@ def verify_user(username, password):
 
 @route("/dashboard", route_type=RouteType.SSR)
 @requires_auth(verify_credentials_callback=verify_user, secret="super_secret")
-def dashboard():
-    fetch_me, *_ = useFetch("/_dars/auth/me", method="GET", on_success=updateVRefFromResponse(".user-name", key="response.user.username"))
-    fetch_logout, *_ = useFetch("/_dars/auth/logout", method="POST")
-
-    page = Page(
-        Text("Welcome, ", style="font-weight: bold;"),
-        Text("", class_name="user-name"),
-        Button("Logout", on_click=fetch_logout),
+async def dashboard(request: Request):
+    user = request.state.user  # injected by @requires_auth
+    return Page(
+        Text(f"Welcome, {user['username']}!"),
     )
-    page.add_script(fetch_me)
-    return page
 ```
 
 For a complete working example, check out the [`/examples/FullStack-app`](https://github.com/ZtaMDev/Dars-Framework/tree/CrystalMain/examples/FullStack-app) in the repository.
 
 For complete documentation, visit the [Authentication Guide](https://ztamdev.github.io/Dars-Framework/docs.html#authentication-and-security).
+
+---
+
+## Server Actions
+
+Call Python backend functions directly from client-side events with zero boilerplate:
+
+```python
+from dars.backend.actions import server_action, call_server
+
+@server_action(csrf_protected=False)
+def greet(name: str, count: int = 1) -> list:
+    return [f"Hello {name}! x{i}" for i in range(count)]
+
+# In your page:
+Button("Greet", on_click=call_server("greet", name="World", count=3))
+```
+
+Features:
+- **Type validation** via Pydantic models built from annotations
+- **Sync & async** support
+- **Auth-protected actions** with `@server_action(auth_required=True, roles=["admin"])`
+- **CSRF protection** for mutating actions
+- **Success/error callbacks** — `call_server("action", on_success=..., on_error=...)`
+
+---
+
+## Database & Models (SQLite ORM)
+
+Dars ships with a built-in declarative ORM for SQLite with auto-generated CRUD API:
+
+```python
+from dars.backend.models import DarsModel, TextField, IntegerField
+from dars.backend.database import Database
+
+class Product(DarsModel):
+    __tablename__ = "products"
+    name = TextField(nullable=False)
+    price = IntegerField(default=0)
+
+db = Database("app.db")
+db.register(Product)
+db.create_all()
+
+# CRUD
+product = Product(name="Widget", price=99)
+product.save()
+all_products = Product.objects.all()
+Product.objects.filter(price=0)
+
+# Auto-generate REST API
+from dars.backend.models import register_model_api
+register_model_api(app, db, prefix="/api/models")
+```
+
+---
+
+## Route Types & Guards
+
+Dars supports four route types with client-side security guards:
+
+```python
+from dars.core.route_types import RouteType
+
+@route("/")                                    # PUBLIC (default)
+@route("/dashboard", route_type=RouteType.SSR) # Server-side rendered
+@route("/account", route_type=RouteType.PRIVATE) # Auth required
+@route("/admin", route_type=RouteType.PROTECTED, roles=["admin"]) # Auth + role
+```
+
+---
+
+## Middleware System
+
+Production-grade middleware pipeline for FastAPI backends:
+
+```python
+from dars.backend.middleware import (
+    AuthMiddleware, SecurityHeadersMiddleware,
+    CORSMiddleware, RateLimitMiddleware,
+    LoggingMiddleware, CompressionMiddleware,
+)
+
+app.add_middleware(AuthMiddleware, secret="your-secret", exclude_paths=["/_dars/auth"])
+app.add_middleware(SecurityHeadersMiddleware, csp="default-src 'self'", hsts=True)
+app.add_middleware(RateLimitMiddleware, calls_per_minute=60)
+```
 
 ---
 
@@ -649,8 +737,12 @@ dars build
 - [Backend & API](https://ztamdev.github.io/Dars-Framework/docs.html#backend-http-utilities)
 - [State Management](https://ztamdev.github.io/Dars-Framework/docs.html#state-management-in-dars)
 - [Styling](https://ztamdev.github.io/Dars-Framework/docs.html#styling-system-in-dars)
-- [Routing](https://ztamdev.github.io/Dars-Framework/docs.html#spa-routing-in-dars-framework)
+- [Routing & Route Types](https://ztamdev.github.io/Dars-Framework/docs.html#spa-routing-in-dars-framework)
 - [SSR & Deployment](https://ztamdev.github.io/Dars-Framework/docs.html#server-side-rendering-in-dars-framework)
+- [Authentication & Security](https://ztamdev.github.io/Dars-Framework/docs.html#authentication-and-security)
+- [Database & Models](https://ztamdev.github.io/Dars-Framework/docs.html#database-and-models)
+- [Server Actions](https://ztamdev.github.io/Dars-Framework/docs.html#server-actions)
+- [Middleware System](https://ztamdev.github.io/Dars-Framework/docs.html#middleware-system)
 - [Animations](https://ztamdev.github.io/Dars-Framework/docs.html#dars-animation-system)
 - [Release Notes](LandingPage/releases/versions.md)
 

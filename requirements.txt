@@ -8,3 +8,4 @@ requests==2.34.2
 plotly==6.7.0
 starlette==1.0.0
 python-multipart==0.0.29
+pydantic==2.10.4

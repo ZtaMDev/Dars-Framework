@@ -50,10 +50,11 @@ export async function _isAuthenticated(forceCheck) {
 
   try {
     const baseUrl =
-      (window.__DARS_SPA_CONFIG__ && window.__DARS_SPA_CONFIG__.backendUrl) || "";
+      (window.__DARS_SPA_CONFIG__ && window.__DARS_SPA_CONFIG__.backendUrl) ||
+      "";
     const cleanBase = baseUrl ? baseUrl.replace(/\/+$/, "") : "";
-    const isCrossOrigin = baseUrl && baseUrl !== "/" &&
-      !baseUrl.startsWith(window.location.origin);
+    const isCrossOrigin =
+      baseUrl && baseUrl !== "/" && !baseUrl.startsWith(window.location.origin);
     const res = await fetch(`${cleanBase}/_dars/auth/me`, {
       credentials: isCrossOrigin ? "include" : "same-origin",
     });
@@ -297,8 +298,9 @@ export function _initializeRouter() {
     const match = _matchRoute(initialPath);
 
     const isSSRRoute = match && match.route && match.route["type"] === "ssr";
-    const vdomSource =
-      isSSRRoute ? window.__ROUTE_VDOM__ || window.__DARS_VDOM__ : null;
+    const vdomSource = isSSRRoute
+      ? window.__ROUTE_VDOM__ || window.__DARS_VDOM__
+      : null;
     const hydratedPath = window.__DARS_HYDRATED_PATH__ || "/";
     if (match && match.route && match.route["styles"]) {
       _injectStyles(match.route["name"], match.route["styles"]);
@@ -324,9 +326,8 @@ export function _initializeRouter() {
 
         // Mark the route as loaded and populate its data from SSR
         match.route.vdom = vdomSource;
-        match.route.html =
-          document.getElementById("__dars_spa_root__") ?
-            document.getElementById("__dars_spa_root__").innerHTML
+        match.route.html = document.getElementById("__dars_spa_root__")
+          ? document.getElementById("__dars_spa_root__").innerHTML
           : "";
         match.route.loaded = true;
 
@@ -361,53 +362,57 @@ export function _initializeRouter() {
         // Fallback for missing SPA routes in combined mode
         // Allow redirect to configured 404 even when the server served the root
         // index.html (common in fullstack setups where unknown paths fall back to /).
-          // If there are static `.dars-page` elements present (served by the backend),
-          // prefer showing the static content instead of forcing a SPA 404 redirect.
-          const container = document.getElementById("__dars_spa_root__");
-          const staticPages = Array.from(document.querySelectorAll('.dars-page'));
-          const hasExternallyServedStatic = staticPages.some((el) => {
-            // Consider it static if it's not the SPA root container or the container doesn't exist
-            return !container || el !== container && !container.contains(el);
+        // If there are static `.dars-page` elements present (served by the backend),
+        // prefer showing the static content instead of forcing a SPA 404 redirect.
+        const container = document.getElementById("__dars_spa_root__");
+        const staticPages = Array.from(document.querySelectorAll(".dars-page"));
+        const hasExternallyServedStatic = staticPages.some((el) => {
+          // Consider it static if it's not the SPA root container or the container doesn't exist
+          return !container || (el !== container && !container.contains(el));
+        });
+
+        // Determine the hydrated path (if the backend marked the original request)
+        const hydratedPath = window.__DARS_HYDRATED_PATH__ || "/";
+
+        // If static markup exists AND it appears to match the hydrated path, show it.
+        // If the server served the root as a fallback for an unknown path (hydratedPath != initialPath),
+        // prefer redirecting to the SPA 404 instead of showing the root static page.
+        if (
+          hasExternallyServedStatic &&
+          (hydratedPath === initialPath ||
+            (initialPath === "/" && hydratedPath === "/index.html"))
+        ) {
+          // Reveal static pages and hide SPA root if present
+          if (container) container.style.display = "none";
+          document.querySelectorAll(".dars-page").forEach((el) => {
+            if (el !== container) el.style.display = "";
           });
-
-          // Determine the hydrated path (if the backend marked the original request)
-          const hydratedPath = window.__DARS_HYDRATED_PATH__ || "/";
-
-          // If static markup exists AND it appears to match the hydrated path, show it.
-          // If the server served the root as a fallback for an unknown path (hydratedPath != initialPath),
-          // prefer redirecting to the SPA 404 instead of showing the root static page.
-          if (
-            hasExternallyServedStatic &&
-            (hydratedPath === initialPath || (initialPath === "/" && hydratedPath === "/index.html"))
-          ) {
-            // Reveal static pages and hide SPA root if present
-            if (container) container.style.display = "none";
-            document.querySelectorAll(".dars-page").forEach((el) => {
-              if (el !== container) el.style.display = "";
-            });
-            document.documentElement.setAttribute("dars-ready", "true");
-          } else {
-            // No static page present: allow redirect to configured 404 (unless it's an explicit html resource)
-            if (!initialPath.endsWith(".html")) {
-              const notFoundPath = __spaConfig ? __spaConfig["notFoundPath"] : null;
-              if (notFoundPath) {
-                _navigateToRoute(notFoundPath, {
-                  replace: true,
-                  skipPushState: true,
-                });
-              } else {
-                // No 404 path defined? reveal the page just in case
-                document.documentElement.setAttribute("dars-ready", "true");
-              }
+          document.documentElement.setAttribute("dars-ready", "true");
+        } else {
+          // No static page present: allow redirect to configured 404 (unless it's an explicit html resource)
+          if (!initialPath.endsWith(".html")) {
+            const notFoundPath = __spaConfig
+              ? __spaConfig["notFoundPath"]
+              : null;
+            if (notFoundPath) {
+              _navigateToRoute(notFoundPath, {
+                replace: true,
+                skipPushState: true,
+              });
+            } else {
+              // No 404 path defined? reveal the page just in case
+              document.documentElement.setAttribute("dars-ready", "true");
             }
           }
+        }
       }
     }
 
     // Listen for popstate (browser back/forward)
     window.addEventListener("popstate", function (event) {
       try {
-        const rawPath = (event.state && event.state["path"]) || window.location.pathname;
+        const rawPath =
+          (event.state && event.state["path"]) || window.location.pathname;
         const path = _normalizePath(rawPath);
         const params = (event.state && event.state["params"]) || {};
 
@@ -455,10 +460,7 @@ export function _initializeRouter() {
         // Intercept if it matches an SPA route, OR if it's a potential 404 (no file extension)
         // This ensures smooth 404 handling even when navigating from a static root
         const pathOnly = href.split("?")[0];
-        const isFile = pathOnly
-          .split("/")
-          .pop()
-          .includes(".");
+        const isFile = pathOnly.split("/").pop().includes(".");
 
         if (match || (!isFile && __spaConfig && __spaConfig["notFoundPath"])) {
           event.preventDefault();
@@ -501,7 +503,8 @@ export function navigateToLogin(redirect) {
   // can reconstruct the full original URL after auth.
   const currentQuery = window.location.search || "";
   const fullRedirect = currentPath + currentQuery;
-  const redirectParam = fullRedirect !== "/" ? `?redirect=${encodeURIComponent(fullRedirect)}` : "";
+  const redirectParam =
+    fullRedirect !== "/" ? `?redirect=${encodeURIComponent(fullRedirect)}` : "";
 
   // Check if login path is an SPA route
   const loginMatch = _matchRoute(loginPath);
@@ -1011,7 +1014,12 @@ export function _executeScripts(scripts, routeName) {
       } else {
         // Script object
         if (script["src"]) {
-          _loadExternalScript(script["src"], script["module"], script["defer"], routeName);
+          _loadExternalScript(
+            script["src"],
+            script["module"],
+            script["defer"],
+            routeName,
+          );
         } else if (script["code"]) {
           try {
             const s = document.createElement("script");

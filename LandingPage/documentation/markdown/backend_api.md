@@ -683,3 +683,231 @@ Starlette middleware. Use via `ssr.use_security_headers()` or `app.add_middlewar
 
 ### `DarsEnv`
 - `.load(path=".env")`, `.get(key, default)`, `.require(key)`, `.set_dev_mode(bool)`
+
+---
+
+## Database & Models
+
+Dars ships with a built-in declarative ORM for SQLite, featuring auto-generated CRUD API endpoints.
+
+### Defining Models
+
+```python
+from dars.backend.models import DarsModel, TextField, IntegerField, BooleanField, FloatField, DateTimeField, JSONField, ForeignKey
+from dars.backend.database import Database
+
+class Product(DarsModel):
+    __tablename__ = "products"
+    name = TextField(nullable=False)
+    price = IntegerField(default=0)
+    in_stock = BooleanField(default=True)
+
+class Order(DarsModel):
+    __tablename__ = "orders"
+    product = ForeignKey(Product)
+    quantity = IntegerField(default=1)
+```
+
+### Available Field Types
+
+| Field | SQL Type | Description |
+|---|---|---|
+| `TextField()` | `TEXT` | String values |
+| `IntegerField()` | `INTEGER` | Integer values |
+| `FloatField()` | `REAL` | Float values |
+| `BooleanField()` | `INTEGER` (0/1) | Boolean values |
+| `DateTimeField()` | `TEXT` (ISO 8601) | Datetime values (`auto_now=True` for timestamps) |
+| `JSONField()` | `TEXT` (JSON) | JSON-serializable data |
+| `ForeignKey(model)` | `INTEGER` | Foreign key reference |
+
+### Database Connection
+
+```python
+from dars.backend.database import Database
+
+db = Database("app.db")    # File-based
+db = Database(":memory:")  # In-memory (default)
+
+db.register(Product, Order)
+db.create_all()
+```
+
+Features:
+- Thread-safe via `threading.local` connections
+- WAL journal mode for concurrent reads
+- Foreign key enforcement
+- Migration tracking via `_dars_schema_version` table
+- Raw SQL: `db.execute()`, `db.fetch_all()`, `db.fetch_one()`
+
+### CRUD Operations
+
+```python
+# Create
+product = Product(name="Widget", price=99, in_stock=True)
+product.save()
+
+# Read by ID
+product = Product.objects.get(1)
+
+# List all
+all_products = Product.objects.all()
+
+# Filter
+cheap = Product.objects.filter(price=0)
+
+# Count
+count = Product.objects.count()
+
+# Create shorthand
+new_product = Product.objects.create(name="Gadget", price=49)
+
+# Update
+product.price = 79
+product.save()
+
+# Delete
+Product.objects.delete(1)
+# or
+product.delete()
+```
+
+### Auto-Generated CRUD API
+
+Wire up REST endpoints for all registered models in one call:
+
+```python
+from dars.backend.models import register_model_api
+
+register_model_api(app, db, prefix="/api/models")
+```
+
+This generates for each model (e.g. `Product` → table `products`):
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/models/products` | List all |
+| `GET` | `/api/models/products/{id}` | Get by id |
+| `POST` | `/api/models/products` | Create |
+| `PUT` | `/api/models/products/{id}` | Update |
+| `DELETE` | `/api/models/products/{id}` | Delete |
+
+All endpoints accept and return JSON with automatic Pydantic validation.
+
+---
+
+## Server Actions
+
+Server Actions let you call Python backend functions directly from client-side events with automatic parameter validation, serialization, and error handling.
+
+### Defining a Server Action
+
+Use the `@server_action` decorator:
+
+```python
+from dars.backend.actions import server_action, call_server
+
+@server_action(csrf_protected=False)
+def greet(name: str, count: int = 1) -> list:
+    """Returns a list of personalized greetings."""
+    return [f"Hello {name}! x{i}" for i in range(count)]
+
+@server_action(name="custom_name", auth_required=True)
+def admin_action(x: int) -> int:
+    return x * 2
+```
+
+Parameters are automatically validated via Pydantic models built from type annotations.
+
+### Calling from Components
+
+Use `call_server()` in event handlers:
+
+```python
+Button("Greet", on_click=call_server("greet", name="World", count=3))
+
+# With success/error callbacks:
+Button("Save", on_click=call_server(
+    "save_user",
+    name="Alice",
+    on_success=log("Saved!"),
+    on_error=log("Failed!"),
+))
+```
+
+### Registration & Autodiscovery
+
+Actions are auto-registered when you start the backend:
+
+```python
+app.start_backend()  # calls register_actions_on_app(fastapi_app)
+```
+
+Or use autodiscovery for modular projects:
+
+```python
+from dars.backend.actions import discover_actions
+
+discover_actions("backend.api")
+discover_actions("app.actions")
+```
+
+### Protected Actions
+
+```python
+@server_action(auth_required=True, roles=["admin"])
+def delete_user(user_id: int) -> dict:
+    # Only authenticated users with "admin" role can call this
+    return {"deleted": user_id}
+```
+
+### Features
+
+- Type-annotated parameters validated via Pydantic
+- Sync and async support
+- Automatic JSON serialization of results
+- Structured error responses (400/500)
+- CSRF protection for mutating actions
+- `call_server()` returns a DAP action compatible with the Dars runtime
+- Actions are exposed as `POST /api/actions/{action_name}` endpoints
+
+---
+
+## Middleware System
+
+Dars provides a complete middleware pipeline for FastAPI/Starlette applications:
+
+### Available Middleware
+
+| Middleware | Description |
+|---|---|
+| `AuthMiddleware` | JWT Bearer/cookie validation with CSRF protection |
+| `SecurityHeadersMiddleware` | CSP, HSTS, X-Frame-Options, and more |
+| `CORSMiddleware` | Configurable cross-origin resource sharing |
+| `RateLimitMiddleware` | Per-IP / per-user sliding-window rate limiting |
+| `LoggingMiddleware` | Structured request/response logging |
+| `CompressionMiddleware` | Gzip response compression |
+
+### Quick Setup
+
+```python
+from dars.backend.middleware import register_default_middlewares
+
+register_default_middlewares(app)
+```
+
+### Custom Middleware
+
+```python
+from dars.backend.middleware import DarsMiddleware
+from starlette.requests import Request
+from starlette.responses import Response
+
+class MyMiddleware(DarsMiddleware):
+    async def before_request(self, request: Request):
+        # Return a Response to short-circuit, or None to continue
+        pass
+
+    async def after_response(self, request: Request, response: Response) -> Response:
+        # Mutate response
+        return response
+```

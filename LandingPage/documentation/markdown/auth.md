@@ -1,73 +1,60 @@
-# Authentication And Security
+# Authentication & Security
 
-Dars provides a production-grade, secure-by-default authentication system that is **completely isolated from the VDOM**. Tokens never touch the browser's JavaScript context — they live exclusively in HttpOnly cookies managed by the browser itself. This means even if an attacker injects malicious JS (XSS), they cannot steal session tokens.
+Dars provides a production-grade, secure-by-default authentication system. Tokens are transported exclusively via HttpOnly cookies — completely isolated from the VDOM/JavaScript context, making XSS-based token theft impossible.
 
 ## Table of Contents
 
-- [Security Architecture](#security-architecture)
+- [Architecture Overview](#architecture-overview)
+- [Quick Start](#quick-start)
+- [Three Ways to Configure Auth](#three-ways-to-configure-auth)
+- [Route Guards & Route Types](#route-guards--route-types)
 - [Multi-Auth: Multiple Isolated Schemes](#multi-auth-multiple-isolated-schemes)
-- [Three Ways to Declare Auth](#three-ways-to-declare-auth)
-- [Native Auth Endpoints](#native-auth-endpoints)
-- [Building Auth Pages with Dars APIs](#building-auth-pages-with-dars-apis)
-- [Middleware & Route Guards](#middleware--route-guards)
-- [API Reference](#api-reference-auth)
+- [Building Auth Pages](#building-auth-pages)
+- [Middleware Reference](#middleware-reference)
+- [API Reference](#api-reference)
 
 ---
 
-## Overview
-
-Dars Authentication provides:
-
-- **HttpOnly Cookie-Based Sessions** — Access and refresh tokens are transported as invisible cookies; JavaScript cannot read them.
-- **CSRF Protection** — Built-in `XSRF-TOKEN` cookie + header validation for all mutating requests.
-- **Refresh Token Rotation** — Long-lived refresh tokens are automatically rotated on every use and can be revoked server-side.
-- **Multi-Auth Support** — Run multiple independent authentication schemes in the same app, each with its own secret, session store, and scoped cookies.
-- **Pure Python JWT** — Zero third-party dependencies. JWTs are signed with HMAC-SHA256 using Python's standard library.
-- **Password Hashing** — PBKDF2 with SHA-256 (100,000 iterations), timing-attack resistant comparison.
-
----
-
-## Security Architecture
+## Architecture Overview
 
 ### Token Flow
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                      Browser                            │
-│                                                         │
-│   ┌───────────────┐     Cookies (HttpOnly, Secure)      │
-│   │   Dars VDOM   │ ──── dars_access_token ────────►    │
-│   │   (JS/HTML)   │ ──── dars_refresh_token ───────►    │
-│   │               │ ──── XSRF-TOKEN (readable) ───►     │
-│   │  Cannot read  │                                     │
-│   │  token values │                                     │
-│   └───────────────┘                                     │
-└─────────────────────────────────────────────────────────┘
-              │ Automatic cookie attachment
-              ▼
-┌─────────────────────────────────────────────────────────┐
-│                   Dars Backend (FastAPI)                 │
-│                                                         │
-│   /_dars/auth/login   → Issues tokens as cookies        │
-│   /_dars/auth/me      → Returns user data (JSON)        │
-│   /_dars/auth/refresh → Rotates tokens                  │
-│   /_dars/auth/logout  → Revokes & clears cookies        │
-│                                                         │
-│   AuthMiddleware validates token on protected routes     │
-└─────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────┐
+│                  Browser                      │
+│                                               │
+│  ┌───────────────┐   Cookies (HttpOnly)      │
+│  │   Dars VDOM   │ ── dars_access_token ──►  │
+│  │   (JS/HTML)   │ ── dars_refresh_token ─►  │
+│  │               │ ── XSRF-TOKEN (read) ──►  │
+│  │  Cannot read  │                            │
+│  │  token values │                            │
+│  └───────────────┘                            │
+└──────────────────────┬────────────────────────┘
+                       │ Auto cookie attach
+                       ▼
+┌──────────────────────────────────────────────┐
+│            Dars Backend (FastAPI)              │
+│                                                │
+│  /_dars/auth/{id}/login    → Issue tokens     │
+│  /_dars/auth/{id}/me       → User data        │
+│  /_dars/auth/{id}/refresh  → Rotate tokens    │
+│  /_dars/auth/{id}/logout   → Revoke session   │
+│                                                │
+│  @requires_auth  → Validates JWT, injects     │
+│                     request.state.user        │
+└──────────────────────────────────────────────┘
 ```
 
 ### Cookie Configuration
 
-| Cookie               | HttpOnly | SameSite | Secure | Max-Age | Purpose                                            |
-| -------------------- | -------- | -------- | ------ | ------- | -------------------------------------------------- |
-| `dars_access_token`  | ✅       | Strict   | ✅     | 15 min  | Short-lived JWT for API access                     |
-| `dars_refresh_token` | ✅       | Strict   | ✅     | 7 days  | Long-lived opaque token for token rotation         |
-| `XSRF-TOKEN`         | ❌       | Strict   | ✅     | 7 days  | CSRF protection (readable by JS to send as header) |
+| Cookie | HttpOnly | SameSite | Secure | Max-Age | Purpose |
+|---|---|---|---|---|---|
+| `dars_access_token` | Yes | Strict | Yes | 15 min | Short-lived JWT |
+| `dars_refresh_token` | Yes | Strict | Yes | 7 days | Long-lived opaque token |
+| `XSRF-TOKEN` | No | Strict | Yes | 7 days | CSRF protection |
 
-### CSRF Protection
-
-For cookie-based auth, Dars requires the `X-XSRF-TOKEN` header on all mutating requests (`POST`, `PUT`, `DELETE`, `PATCH`). The client reads the `XSRF-TOKEN` cookie and sends its value as the header. The `AuthMiddleware` validates the match automatically.
+For multi-auth, cookie names are scoped: `dars_access_token_{auth_id}`, `dars_refresh_token_{auth_id}`.
 
 ---
 
@@ -75,118 +62,77 @@ For cookie-based auth, Dars requires the `X-XSRF-TOKEN` header on all mutating r
 
 ### 1. Define a Verification Callback
 
-Your callback receives `(username, password)` and returns a user dictionary or `None`:
+The callback receives `(username, password)` and returns a user dict (must include `"id"` or `"username"`) or `None`:
 
 ```python
 def verify_user(username, password):
-    # Replace with your actual database lookup
     if username == "admin" and password == "secret":
         return {"id": "1", "username": "admin", "role": "admin"}
     return None
 ```
 
-### 2. Register with the App
+Supports both sync and async callbacks.
+
+### 2. Register Auth with the App
 
 ```python
 from dars.all import *
 
 app = App(title="My Secure App")
-app.setup_auth(verify_credentials_callback=verify_user, secret="your_secret_key_here")
+app.setup_auth(
+    verify_credentials_callback=verify_user,
+    secret="your-secret-key-change-in-production"
+)
 ```
 
-### 3. Build the Login Page
+### 3. Protect a Route
 
-Use native Dars APIs (`useFetch`, `VRefs`, `Show`) to build the UI — no raw JavaScript needed:
+Use `@requires_auth` **below** `@route` for SSR/API routes that need authentication. The decorator automatically injects `request.state.user`:
 
 ```python
-@route("/auth", route_type=RouteType.SSR)
-def auth():
-    show_login = setVRef(True, ".show-login")
-    show_dashboard = setVRef(False, ".show-dashboard")
-    username_sel = ".user-name"
-
-    # Check if already logged in
-    on_me_success = runSequence(
-        updateVRef(".show-login", False),
-        updateVRef(".show-dashboard", True),
-        updateVRefFromResponse(username_sel, key="response.user.username"),
+@route("/dashboard", route_type=RouteType.SSR)
+@requires_auth
+async def dashboard(request: Request):
+    user = request.state.user  # injected by @requires_auth
+    return Page(
+        Text(f"Welcome, {user['username']}!"),
     )
-    on_me_error = runSequence(
-        updateVRef(".show-login", True),
-    )
-    fetch_me, *_ = useFetch("/_dars/auth/me", method="GET",
-                             on_success=on_me_success, on_error=on_me_error)
+```
 
-    # Login form
+### 4. Build a Login Page
+
+```python
+@route("/login", route_type=RouteType.SSR)
+def login_page():
     login_form = collect_form(username=V("#username"), password=V("#password"))
     validator = FormValidator({"username": [required()], "password": [required()]})
 
-    on_login_success = runSequence(
-        updateVRef(".show-login", False),
-        updateVRef(".show-dashboard", True),
-        updateVRefFromResponse(username_sel, key="response.user.username"),
-    )
-    submit_login = validator.validated_submit(
-        url="/_dars/auth/login", form_data=login_form,
-        on_success=on_login_success,
-        on_error=runSequence(updateVRefFromResponse(".login-error", key="response.detail"))
+    on_success = redirect_after_login("/dashboard")
+    submit = validator.validated_submit(
+        url="/_dars/auth/login",
+        form_data=login_form,
+        on_success=on_success,
+        on_error=setText(".error", "Invalid credentials"),
     )
 
-    # Logout
-    fetch_logout, *_ = useFetch("/_dars/auth/logout", method="POST",
-        on_success=runSequence(updateVRef(".show-dashboard", False), updateVRef(".show-login", True)))
-
-    page = Page(
+    return Page(
         Container(
-            Show(show_login, Container(
-                Input(id="username", placeholder="Username"),
-                Input(id="password", placeholder="Password", type="password"),
-                Text("", class_name="login-error", style="color: red;"),
-                Button("Login", on_click=submit_login),
-            )),
-            Show(show_dashboard, Container(
-                Text("Welcome, ", style="font-weight: bold;"),
-                Text("", class_name="user-name"),
-                Button("Logout", on_click=fetch_logout),
-            )),
+            Text("Login", style="text-2xl font-bold"),
+            Input(id="username", placeholder="Username"),
+            Input(id="password", placeholder="Password", type="password"),
+            Text("", class_name="error", style="color: red;"),
+            Button("Login", on_click=submit),
         )
     )
-    page.add_script(fetch_me)
-    return page
 ```
 
-> A complete working example is available in the repository at [`/examples/FullStack-app`](https://github.com/ZtaDev/Dars-Framework/tree/main/examples/FullStack-app).
-
 ---
 
-## Multi-Auth: Multiple Isolated Schemes
+## Three Ways to Configure Auth
 
-Dars allows registering **multiple independent authentication configurations**, each with its own:
+### 1. `@requires_auth` Decorator (Per-Route — Recommended)
 
-- Verification callback
-- Secret key
-- Session manager
-- Scoped cookies
-
-Each auth scheme is identified by a unique `auth_id`. The default global scheme uses the ID `"default"`.
-
-### How Cookies Are Scoped
-
-| Auth ID        | Access Cookie                  | Refresh Cookie                  |
-| -------------- | ------------------------------ | ------------------------------- |
-| `"default"`    | `dars_access_token`            | `dars_refresh_token`            |
-| `"admin"`      | `dars_access_token_admin`      | `dars_refresh_token_admin`      |
-| `"auth_about"` | `dars_access_token_auth_about` | `dars_refresh_token_auth_about` |
-
-This ensures that sessions for different auth schemes never collide. A user can be simultaneously logged in as "admin" and "guest" in different sections.
-
----
-
-## Three Ways to Declare Auth
-
-### 1. `@requires_auth` Decorator (Inline — Recommended)
-
-The simplest way. Place it right below your `@route` decorator. It auto-registers the auth config and generates a predictable `auth_id` based on the function name:
+Place `@requires_auth` directly below `@route`. You can optionally pass `verify_credentials_callback` and `secret` to auto-register a custom auth scheme:
 
 ```python
 def verify_guest(username, password):
@@ -197,69 +143,115 @@ def verify_guest(username, password):
 @route("/about", route_type=RouteType.SSR)
 @requires_auth(verify_credentials_callback=verify_guest, secret="about_secret")
 def about():
-    # auth_id is automatically "auth_about" (from the function name)
+    # Auto-registers auth config with auth_id = "auth_about"
     # Endpoints: /_dars/auth/auth_about/login, /me, /logout, /refresh
-    ...
+    return Page(...)
 ```
 
-### 2. `Page.setup_auth()` (Component-Level)
+When used without arguments (`@requires_auth` as bare decorator), it uses the **default** auth configuration (configured via `app.setup_auth()`).
 
-Configure auth directly on a `Page` instance:
+### 2. `app.setup_auth()` (Global)
 
-```python
-@route("/profile", route_type=RouteType.SSR)
-def profile():
-    page = Page(...)
-    page.setup_auth(
-        verify_credentials_callback=verify_user,
-        secret="profile_secret",
-        auth_id="profile_auth"  # optional, auto-generated if omitted
-    )
-    return page
-```
-
-### 3. `App.setup_auth()` (Global)
-
-Register a global auth scheme:
+Register one or more global auth configurations:
 
 ```python
 app = App(title="My App")
-app.setup_auth(
-    verify_credentials_callback=verify_user,
-    secret="global_secret",
-    auth_id="default"  # optional, defaults to "default"
-)
+app.setup_auth(verify_credentials_callback=verify_admin, secret="admin_secret", auth_id="admin")
+app.setup_auth(verify_credentials_callback=verify_user, secret="user_secret", auth_id="default")
 ```
 
-You can call `app.setup_auth()` multiple times with different `auth_id` values to register additional schemes.
+### 3. `register_auth_config()` (Programmatic)
+
+For advanced use cases, register directly:
+
+```python
+from dars.backend.auth_routes import register_auth_config
+
+register_auth_config(verify_callback, secret, auth_id="custom")
+```
 
 ---
 
-## Native Auth Endpoints
+## Route Guards & Route Types
 
-When auth is configured, Dars automatically exposes the following FastAPI endpoints under `/_dars/auth/`:
+Dars provides two layers of route protection:
 
-### Default Auth (auth_id = `"default"`)
+### Layer 1: Route Types (Client-Side Guards)
 
-| Method | Path                  | Description                                   |
-| ------ | --------------------- | --------------------------------------------- |
-| `POST` | `/_dars/auth/login`   | Validates credentials, issues session cookies |
-| `POST` | `/_dars/auth/refresh` | Rotates access token using refresh token      |
-| `POST` | `/_dars/auth/logout`  | Revokes session, clears cookies               |
-| `GET`  | `/_dars/auth/me`      | Returns authenticated user's data             |
+The `@route` decorator supports `RouteType` for client-side routing guards:
 
-### Custom Auth (e.g. auth_id = `"admin"`)
+```python
+from dars.core.route_types import RouteType
 
-| Method | Path                        | Description                      |
-| ------ | --------------------------- | -------------------------------- |
-| `POST` | `/_dars/auth/admin/login`   | Login for the "admin" scheme     |
-| `POST` | `/_dars/auth/admin/refresh` | Refresh for the "admin" scheme   |
-| `POST` | `/_dars/auth/admin/logout`  | Logout for the "admin" scheme    |
-| `GET`  | `/_dars/auth/admin/me`      | User info for the "admin" scheme |
+# Public — no auth required (default)
+@route("/")
+
+# SSR — server-side rendered, no auth
+@route("/blog", route_type=RouteType.SSR)
+
+# Private — requires authentication, redirects to login if not auth'd
+@route("/account", route_type=RouteType.PRIVATE)
+
+# Protected — requires auth + specific role
+@route("/admin", route_type=RouteType.PROTECTED, roles=["admin"])
+```
+
+These guards work at the SPA router level — unauthenticated users are redirected to `/login` (or custom `redirect` path) without the protected component ever loading.
+
+### Layer 2: `@requires_auth` (Server-Side Enforcement)
+
+For SSR routes and API endpoints, the `@requires_auth` decorator validates the JWT on every request:
+
+```python
+from dars.core.auth import requires_auth, requires_role
+
+# Protect any FastAPI route
+@app.get("/api/protected")
+@requires_auth
+async def protected_route(request: Request):
+    return {"user": request.state.user}
+
+# Role-based access control
+@app.get("/api/admin")
+@requires_role("admin")
+async def admin_only(request: Request):
+    return {"message": "Admin access granted"}
+```
+
+### Combining Both Layers
+
+For maximum security, combine client-side guards with server-side enforcement:
+
+```python
+@route("/admin", route_type=RouteType.PROTECTED, roles=["admin"])
+@requires_auth(verify_credentials_callback=verify_admin, secret="admin_secret")
+async def admin_panel(request: Request):
+    user = request.state.user
+    return Page(...)
+```
 
 ---
 
-## Building Auth Pages with Dars APIs
+## Multi-Auth: Multiple Isolated Schemes
+
+Dars supports running multiple independent authentication schemes simultaneously, each with its own:
+
+- Verification callback
+- Secret key
+- Session store
+- Scoped cookies (identified by `auth_id` suffix)
+
+| Auth ID | Access Cookie | Refresh Cookie |
+|---|---|---|
+| `"default"` | `dars_access_token` | `dars_refresh_token` |
+| `"admin"` | `dars_access_token_admin` | `dars_refresh_token_admin` |
+| `"auth_about"` | `dars_access_token_auth_about` | `dars_refresh_token_auth_about` |
+
+A user can be simultaneously logged in with different identities in different sections of the same app without any session collision.
+
+---
+
+## Building Auth Pages
 
 Since the frontend compiles to pure HTML/CSS/JS, you use Dars native APIs to interact with the auth system:
 
@@ -267,30 +259,24 @@ Since the frontend compiles to pure HTML/CSS/JS, you use Dars native APIs to int
 
 ```python
 fetch_me, *_ = useFetch(
-    "/_dars/auth/me",   # or "/_dars/auth/{auth_id}/me"
+    "/_dars/auth/me",
     method="GET",
     on_success=runSequence(
         updateVRef(".show-dashboard", True),
         updateVRefFromResponse(".user-name", key="response.user.username"),
     ),
-    on_error=runSequence(
-        updateVRef(".show-login", True),
-    )
+    on_error=runSequence(updateVRef(".show-login", True)),
 )
-page.add_script(fetch_me)  # runs on page load
+page.add_script(fetch_me)
 ```
 
-### Extracting Nested JSON Fields
-
-Use dot-notation in `updateVRefFromResponse` to extract specific fields from the JSON response:
+For multi-auth, scope the endpoint:
 
 ```python
-updateVRefFromResponse(".user-name", key="response.user.username")
-updateVRefFromResponse(".user-role", key="response.user.role")
-updateVRefFromResponse(".user-email", key="response.user.email")
+fetch_me, *_ = useFetch("/_dars/auth/admin/me", method="GET", ...)
 ```
 
-### Login Form Submission
+### Login with Form Validation
 
 ```python
 login_form = collect_form(username=V("#username"), password=V("#password"))
@@ -299,88 +285,121 @@ validator = FormValidator({"username": [required()], "password": [required()]})
 submit = validator.validated_submit(
     url="/_dars/auth/login",
     form_data=login_form,
-    on_success=on_login_success,
-    on_error=runSequence(updateVRefFromResponse(".error-msg", key="response.detail"))
+    on_success=redirect_after_login("/dashboard"),
+    on_error=runSequence(updateVRefFromResponse(".error", key="response.detail")),
 )
 ```
 
+### Logout
+
+```python
+fetch_logout, *_ = useFetch("/_dars/auth/logout", method="POST",
+    on_success=runSequence(updateVRef(".show-dashboard", False), updateVRef(".show-login", True)))
+```
+
 ---
 
-## Middleware & Route Guards
+## Middleware Reference
 
 ### AuthMiddleware
 
-Protects backend API routes by validating JWT cookies. Automatically detects scoped cookies from multiple auth schemes.
+Validates JWT on every request (except excluded paths). Injects `request.state.user`:
 
 ```python
-ssr.use_auth(secret="my_secret", exclude_paths=["/_dars/auth", "/api/public"])
+from dars.backend.middleware import AuthMiddleware
+
+app.add_middleware(
+    AuthMiddleware,
+    secret="your-secret",
+    exclude_paths=["/_dars/auth", "/api/public", "/docs"],
+    csrf_protection=True,
+)
 ```
 
-### `@requires_auth` (FastAPI Routes)
+### SecurityHeadersMiddleware
 
-For custom FastAPI endpoints (not Dars pages), use the decorator to enforce authentication:
+Injects security headers into every response:
 
 ```python
-from dars.core.auth import requires_auth
+from dars.backend.middleware import SecurityHeadersMiddleware
 
-@app.get("/api/protected")
-@requires_auth
-async def protected_route(request: Request):
-    user = request.state.user  # injected by the decorator
-    return {"message": f"Hello {user['username']}"}
+app.add_middleware(
+    SecurityHeadersMiddleware,
+    csp="default-src 'self'",
+    hsts=True,
+)
 ```
 
-### `@requires_role` (RBAC)
-
-```python
-from dars.core.auth import requires_role
-
-@app.get("/api/admin")
-@requires_role("admin")
-async def admin_only(request: Request):
-    return {"message": "Admin access granted"}
-```
+Default headers: `X-Content-Type-Options`, `X-Frame-Options`, `X-XSS-Protection`, `Referrer-Policy`, `Permissions-Policy`.
 
 ---
 
-## API Reference Auth
+## API Reference
 
 ### `DarsAuth.encode_token(payload, secret, algorithm="HS256", expires_in=3600)`
 
-Generates a signed JWT. Returns the token string.
+JWT encoding with HMAC-SHA256. Returns token string.
 
 ### `DarsAuth.decode_token(token, secret, algorithm="HS256")`
 
-Validates signature, checks expiration, returns payload dict. Raises `ValueError` on failure.
+Validate JWT, return payload dict. Raises `ValueError` on failure/expiry.
 
-### `DarsAuth.hash_password(password)`
+### `DarsAuth.hash_password(password)` / `DarsAuth.verify_password(password, hashed)`
 
-Returns a PBKDF2-SHA256 hash string (100,000 iterations).
-
-### `DarsAuth.verify_password(password, hashed)`
-
-Timing-attack resistant password verification. Returns `bool`.
+PBKDF2-SHA256 password hashing (100k iterations) with timing-attack resistant comparison.
 
 ### `DarsAuth.set_auth_cookies(response, access_token, refresh_token, xsrf_token, auth_id="default")`
 
-Sets the three secure cookies with scoped names.
+Sets HttpOnly secure cookies with scoped names.
 
 ### `DarsAuth.clear_auth_cookies(response, auth_id="default")`
 
-Clears scoped auth cookies.
+Clears all auth cookies.
 
-### `App.setup_auth(verify_credentials_callback, secret, auth_id="default")`
+### `@requires_auth(verify_credentials_callback=None, secret=None, auth_id=None)`
 
-Registers an auth configuration globally.
-
-### `Page.setup_auth(verify_credentials_callback, secret, auth_id=None)`
-
-Registers an auth configuration for a specific page.
-
-### `@requires_auth` / `@requires_auth(verify_credentials_callback=..., secret=...)`
-
-Decorator for FastAPI routes or Dars page functions. Supports both bare and parameterized forms.
+Decorator for FastAPI route handlers. Validates JWT, injects `request.state.user`. Auto-registers auth config when callback and secret are provided.
 
 ### `@requires_role(role)`
 
-Decorator for role-based access control on FastAPI routes.
+Decorator for role-based access control. Requires `@requires_auth` or middleware to have set `request.state.user` first.
+
+### `app.setup_auth(verify_credentials_callback, secret, auth_id="default", login_page="/login")`
+
+Register a global auth configuration.
+
+### `register_auth_config(verify_credentials_callback, secret, auth_id)`
+
+Programmatic auth config registration.
+
+### `get_auth_config(auth_id)`
+
+Retrieve an auth configuration by ID.
+
+### Native Auth Endpoints
+
+When auth is configured, Dars automatically exposes:
+
+| Method | Path | Description |
+|---|---|---|
+| `POST` | `/_dars/auth/{auth_id}/login` | Validate credentials, issue session |
+| `POST` | `/_dars/auth/{auth_id}/refresh` | Rotate tokens using refresh token |
+| `POST` | `/_dars/auth/{auth_id}/logout` | Revoke session, clear cookies |
+| `GET` | `/_dars/auth/{auth_id}/me` | Return authenticated user data |
+
+For the default scheme (`auth_id="default"`), the path simplifies to `/_dars/auth/login`, etc.
+
+### Session Management
+
+```python
+from dars.backend.session import SessionManager, InMemorySessionStore
+
+store = InMemorySessionStore()
+manager = SessionManager(store)
+
+token = manager.issue_refresh_token(user_id, payload)
+session = manager.validate_refresh_token(token)
+manager.revoke_refresh_token(token)
+```
+
+The `SessionStore` protocol allows custom implementations for Redis, database-backed sessions, etc.

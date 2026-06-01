@@ -13,8 +13,6 @@ async def get_product_stats():
         pass
     return {"total": 0, "avg_price": 0}
 
-
-
 @server_action(csrf_protected=False)
 def generate_random_product(name: str, max_price: float = 100.0):
     """Generate a random product preview (does not save to DB)."""
@@ -25,12 +23,11 @@ def generate_random_product(name: str, max_price: float = 100.0):
         "description": f"Randomly generated product at {datetime.datetime.now().isoformat()}",
         "category": random.choice(["electronics", "clothing", "food", "books"]),
     }
-
 @route("/products", route_type=RouteType.PRIVATE, requires_auth=True)
 def products():
     # ══════════════════════════════════════════════════════════════════
     # VRefs
-    # ══════════════════════════════════════════════════════════════════
+    # ═══════════════════════════════════════`═══════════════════════════
     loading_sel   = ".products-loading"
     error_sel     = ".products-error"
     products_sel  = ".products-data"
@@ -156,13 +153,14 @@ def products():
             style="p-3 border rounded-lg bg-white shadow-sm",
         )
 
+    # In your page:
+    
     # ══════════════════════════════════════════════════════════════════
     # Page layout
     # ══════════════════════════════════════════════════════════════════
     page = Page(
         Container(
             Head("Product Manager - Dars Data Layer Demo"),
-
             # ── Header ──────────────────────────────────────────────
             Container(
                 Text("Product Manager",

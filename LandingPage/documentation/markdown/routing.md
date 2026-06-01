@@ -263,6 +263,89 @@ This ensures that even client-side routes display the correct information in the
 
 ---
 
+## Route Types & Security Guards
+
+Dars provides four route types that control rendering strategy and access control:
+
+### RouteType Enum
+
+| Type | Value | Description |
+|---|---|---|
+| `RouteType.PUBLIC` | `"public"` | Client-side rendered, no auth required. Default. |
+| `RouteType.SSR` | `"ssr"` | Server-side rendered, fetched from backend on navigation. |
+| `RouteType.PRIVATE` | `"private"` | Requires authentication. Not included in initial bundle. Redirects to login. |
+| `RouteType.PROTECTED` | `"protected"` | Requires authentication AND specific roles/permissions. |
+
+### Using Route Types
+
+```python
+from dars.core.route_types import RouteType
+
+@route("/")                         # PUBLIC (default)
+def home():
+    return Page(Text("Home"))
+
+@route("/dashboard", route_type=RouteType.SSR)
+def dashboard():
+    return Page(Text("Dashboard"))
+
+@route("/account", route_type=RouteType.PRIVATE)
+def account():
+    return Page(Text("My Account"))
+
+@route("/admin", route_type=RouteType.PROTECTED, roles=["admin"])
+def admin_panel():
+    return Page(Text("Admin Panel"))
+```
+
+### Route Guards
+
+The `@guard` decorator provides fine-grained access control:
+
+```python
+from dars.core.routing import guard
+
+@route("/premium")
+@guard(requires_auth=True, roles=["premium"], redirect="/pricing")
+def premium_page():
+    return Page(...)
+```
+
+Or inline via the `RouteGuard` class:
+
+```python
+from dars.core.route_types import RouteGuard
+
+@route("/enterprise", guard=RouteGuard(
+    requires_auth=True,
+    roles=["enterprise"],
+    redirect="/contact-sales",
+))
+def enterprise():
+    return Page(...)
+```
+
+### Custom Guard Checks
+
+```python
+@route("/beta")
+@guard(
+    requires_auth=True,
+    custom_check=lambda user: user.get("beta_access", False),
+)
+def beta_page():
+    return Page(...)
+```
+
+### How Guards Work
+
+1. **Client-side**: The SPA router checks the `RouteGuard` configuration before loading a route
+2. **Unauthenticated**: Redirects to `/login` (or custom `redirect` path)
+3. **No matching role**: Shows 403 forbidden page
+4. **Custom check fails**: Blocked without rendering
+
+---
+
 ## Server-Side Rendering (SSR)
 
 Dars Framework provides complete Server-Side Rendering support integrated with FastAPI, allowing you to build full-stack applications with both server-rendered and client-side pages.

@@ -4,12 +4,12 @@ This document outlines the development roadmap for Dars Framework. The goal is t
 
 ## Project Metrics
 
-- **Current Version**: v1.9.12
+- **Current Version**: v1.9.16
 - **Target**: v2.0.0 — Complete Production-Grade Fullstack Python Framework
 
 ---
 
-## Completed (v1.0 → v1.9.12)
+## Completed (v1.0 → v1.9.16)
 
 All of the following have been implemented and shipped:
 
@@ -41,6 +41,12 @@ All of the following have been implemented and shipped:
 - **dars-bundler**: Standalone Rust minification binary (SWC + LightningCSS + Rayon) replacing rjsmin/rcssmin/Vite. Cross-platform builds (Windows/Linux/macOS) via GitHub Actions. Zero Node.js dependency.
 - **Unified `minify` config key**: Replaced `viteMinify` + `defaultMinify` with a single `minify: true/false` key in `dars.config.json`. Backward-compatible with old keys.
 - **Static-site router elimination**: Exporter auto-detects static (non-SPA) projects and omits `router.js` + patches `dars.min.js` to remove dead router imports at build time.
+- **Database Layer**: `DarsModel` declarative ORM with `TextField`, `IntegerField`, `FloatField`, `BooleanField`, `DateTimeField`, `JSONField`, `ForeignKey`. `Database` thread-safe connection manager with WAL mode, migration tracking. Auto-generated CRUD API via `register_model_api()`.
+- **Server Actions**: `@server_action` decorator for registering Python functions as API endpoints. `call_server()` for calling them from client-side events. Type validation via Pydantic, sync/async support, auth-protected actions, auto-discovery.
+- **Route Types System**: `RouteType` enum (`PUBLIC`, `SSR`, `PRIVATE`, `PROTECTED`). `RouteGuard` with `requires_auth`, `roles`, `custom_check`. `RouteMetadata` for per-route security configuration. `@guard` decorator for fine-grained access control.
+- **Simplified Auth System**: `@requires_auth` FastAPI route decorator with auto `request.state.user` injection. `@requires_role("admin")` RBAC decorator. Auto-registration of auth configs with predictable `auth_id`. Scoped endpoints `/_dars/auth/{auth_id}/login`, `/me`, `/logout`, `/refresh`. Session management with `SessionManager` + `InMemorySessionStore`. `SessionStore` protocol for custom backends.
+- **Middleware System**: `DarsMiddleware` abstract base with lifecycle hooks. `AuthMiddleware` (JWT + CSRF + multi-auth). `SecurityHeadersMiddleware` (CSP, HSTS, X-Frame-Options, etc.). `CORSMiddleware` (configurable origins, credentials, preflight). `RateLimitMiddleware` (sliding-window, burst, per-IP/user). `LoggingMiddleware` (structured request/response logging). `CompressionMiddleware` (gzip). `MiddlewareChain` (compose middlewares). `register_default_middlewares()` (one-call setup).
+- **DAP Protocol Reference**: Complete `DAPOp` constants for all supported operations in `actionProtocol.py`. `ActionBuilder` helpers for secure client-side action generation.
 
 ---
 
@@ -60,36 +66,43 @@ Everything below is what's needed to make Dars a real, production-usable fullsta
 - [x] `isAuthenticated()` check for conditional UI rendering (via `useFetch` to `/me`)
 - [x] `auth.login()` / `auth.logout()` handled via native endpoints and form submits
 - [x] Auth endpoint templates: `/_dars/auth/login`, `/logout`, `/refresh`, `/me` with Multi-Auth support
-- [x] `@requires_auth` decorator for SSR/API routes
-- [x] `@requires_role("admin")` RBAC decorator
+- [x] `@requires_auth` decorator for SSR/API routes (v1.9.16 — simplified, auto `request.state.user` injection)
+- [x] `@requires_role("admin")` RBAC decorator (v1.9.16)
 - [x] Route guard decorators with custom permission checks (per-page `setup_auth()`)
 - [x] Automatic 401 redirect on token expiry (handled via middleware/refresh tokens)
+- [x] Session management: `SessionManager`, `InMemorySessionStore`, `SessionStore` protocol (v1.9.16)
+- [x] Multi-Auth scoped cookies (`dars_access_token_{auth_id}`) and dynamic endpoints (v1.9.16)
 - [ ] OAuth2 provider integration (Google, GitHub)
 
 ### 2. Middleware System
 
-- [ ] `DarsMiddleware` base class with `before_request()` / `after_response()` hooks
-- [ ] Global middleware registration: `app.use(middleware)`
+- [x] `DarsMiddleware` base class with `before_request()` / `after_response()` hooks (v1.9.16)
+- [x] Global middleware registration via FastAPI `app.add_middleware()` (v1.9.16)
 - [ ] Route-specific middleware: `@middleware(AuthMiddleware)`
-- [ ] Middleware chain execution order
-- [x] `AuthMiddleware` — verify JWT on protected routes
-- [ ] `CORSMiddleware` — configurable cross-origin resource sharing
-- [ ] `RateLimitMiddleware` — per-IP / per-user rate limiting
-- [ ] `LoggingMiddleware` — request/response logging
-- [x] `SecurityHeadersMiddleware` — CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy
+- [x] Middleware chain via `MiddlewareChain` composition (v1.9.16)
+- [x] `AuthMiddleware` — verify JWT on protected routes with CSRF + multi-auth (v1.9.16)
+- [x] `CORSMiddleware` — configurable cross-origin resource sharing (v1.9.16)
+- [x] `RateLimitMiddleware` — per-IP / per-user rate limiting with burst support (v1.9.16)
+- [x] `LoggingMiddleware` — structured request/response logging (v1.9.16)
+- [x] `SecurityHeadersMiddleware` — CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy (v1.9.16)
+- [x] `CompressionMiddleware` — gzip response compression (v1.9.16)
+- [x] `register_default_middlewares()` — one-call setup (v1.9.16)
 
 ### 3. Data Layer & Persistence
 
 - [x] `JsonStore` — JSON file-based key-value store for prototyping
-- [ ] `SQLiteStore` — lightweight SQLite wrapper
-- [ ] Key-value API: `store.get()`, `store.set()`, `store.delete()`, `store.list()`
-- [ ] SQLAlchemy/SQLModel ORM integration
-- [ ] `DarsModel` base class with CRUD operations
-- [ ] Database connection management (pooling, lifecycle)
-- [ ] Auto-generated CRUD API endpoints from models
+- [x] SQLite database support via `Database` connection manager (v1.9.16)
+- [x] Key-value API: `store.get()`, `store.set()`, `store.delete()`, `store.list()`
+- [x] SQLite ORM via `DarsModel` declarative model base (v1.9.16)
+- [x] `DarsModel` base class with CRUD operations: `.save()`, `.delete()`, `.to_dict()` (v1.9.16)
+- [x] Database connection management (thread-safe, WAL mode, foreign keys) (v1.9.16)
+- [x] Auto-generated CRUD API endpoints from models via `register_model_api()` (v1.9.16)
+- [x] Schema migration tracking via `_dars_schema_version` table (v1.9.16)
+- [x] Field types: `TextField`, `IntegerField`, `FloatField`, `BooleanField`, `DateTimeField`, `JSONField`, `ForeignKey` (v1.9.16)
+- [x] `ModelManager` query API: `all()`, `get()`, `filter()`, `count()`, `create()`, `delete()` (v1.9.16)
+- [x] Pydantic model integration for auto-generated CRUD validation (v1.9.16)
 - [ ] Alembic integration for schema migrations
 - [ ] `dars db migrate` / `dars db upgrade` CLI commands
-- [ ] Pydantic model integration for request/response validation
 - [ ] JSON schema generation from models
 
 ### 4. HTTP Client Improvements
@@ -161,7 +174,7 @@ Everything below is what's needed to make Dars a real, production-usable fullsta
 - [ ] `useComputed()` / `useMemo()` — derived reactive values with dependency tracking
 - [x] `Show(condition, component)` — toggle visibility
 - [x] `Each(items, template_fn)` / `For` — list rendering with keys
-- [ ] Server Actions — call Python functions from client-side events
+- [x] Server Actions — call Python functions from client-side events via `@server_action` + `call_server()` (v1.9.16)
 - [ ] `debounce(ms, action)` — debounce event handlers
 - [ ] `throttle(ms, action)` — throttle event handlers
 - [ ] Global event bus / pub-sub system

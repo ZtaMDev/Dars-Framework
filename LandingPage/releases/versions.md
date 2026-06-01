@@ -1,3 +1,103 @@
+# Release Notes v1.9.16
+
+> **Database Layer, Server Actions, Route Types, Guards, Middleware System & Auth Simplification**
+> *Major full-stack expansion: built-in ORM, server-side actions, security middleware, and a simplified decorator-based auth system.*
+
+## Installation
+
+```bash
+pip install --upgrade dars-framework
+```
+
+## What's New
+
+### Database Layer: Declarative ORM for SQLite
+
+Dars now ships with a complete built-in database layer for SQLite:
+
+- **`DarsModel`** — Declarative model base class with auto-detected fields
+- **Field Types**: `TextField`, `IntegerField`, `FloatField`, `BooleanField`, `DateTimeField`, `JSONField`, `ForeignKey`
+- **`ModelManager`** — Per-model query API: `all()`, `get()`, `filter()`, `count()`, `create()`, `delete()`
+- **`Database`** — Thread-safe SQLite connection manager with WAL mode, migration tracking, and raw SQL support
+- **`register_model_api()`** — Auto-generate full CRUD REST endpoints (`GET/POST/PUT/DELETE`) for all registered models
+
+```python
+class Product(DarsModel):
+    __tablename__ = "products"
+    name = TextField(nullable=False)
+    price = IntegerField(default=0)
+
+db = Database("app.db")
+db.register(Product)
+db.create_all()
+
+# Query
+Product.objects.filter(price=0)
+```
+
+### Server Actions — Call Python from the Browser
+
+A new `@server_action` decorator system that registers Python functions as API endpoints callable from client-side events:
+
+```python
+from dars.backend.actions import server_action, call_server
+
+@server_action
+def greet(name: str, count: int = 1) -> list:
+    return [f"Hello {name}! x{i}" for i in range(count)]
+
+Button("Greet", on_click=call_server("greet", name="World", count=3))
+```
+
+- Type-annotated parameters validated via Pydantic
+- Sync and async support
+- Auth-protected actions with `@server_action(auth_required=True, roles=["admin"])`
+- CSRF protection for mutating actions
+- Auto-discovery: `discover_actions("backend.api")`
+- Exposed as `POST /api/actions/{action_name}`
+
+### Route Types
+
+New `RouteType` enum system for SPA-level route protection:
+
+- **`RouteType.PUBLIC`** — No auth required (default)
+- **`RouteType.SSR`** — Server-side rendered
+- **`RouteType.PRIVATE`** — Requires authentication, redirects to login
+- **`RouteType.PROTECTED`** — Requires authentication AND specific roles
+
+```python
+@route("/admin", route_type=RouteType.PROTECTED, roles=["admin"])
+def admin_panel():
+    return Page(...)
+```
+
+### Simplified Auth System with `@requires_auth`
+
+The authentication system has been fundamentally simplified:
+
+- **`@requires_auth`** — Now a proper FastAPI route decorator that auto-injects `request.state.user`. Can be used bare (`@requires_auth`) or with custom callback/secret (`@requires_auth(verify_credentials_callback=fn, secret="...")`).
+- **`@requires_role("admin")`** — Role-based access control decorator compatible with any FastAPI route.
+- **Auto-registration**: When `verify_credentials_callback` and `secret` are passed to `@requires_auth`, it auto-registers the auth config with a predictable `auth_id` (e.g., `auth_dashboard` for `def dashboard()`).
+- **`app.setup_auth()`** — Global auth configuration with optional `auth_id` and custom `login_page`.
+- **Scoped auth endpoints**: `/_dars/auth/{auth_id}/login`, `/me`, `/logout`, `/refresh` generated automatically for each scheme.
+- **Session management**: `SessionManager` + `InMemorySessionStore` with `SessionStore` protocol for custom backends.
+- **CSRF protection** with automatic `XSRF-TOKEN` cookie/header validation and refresh token rotation.
+
+### Production-Grade Middleware System
+
+A complete middleware pipeline for FastAPI/Starlette:
+
+- **`DarsMiddleware`** — Abstract base class with `before_request` / `after_response` lifecycle hooks
+- **`AuthMiddleware`** — JWT Bearer/cookie validation with CSRF protection and multi-auth cookie detection
+- **`SecurityHeadersMiddleware`** — CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, XSS-Protection
+- **`CORSMiddleware`** — Configurable CORS with origin matching, credential support, and preflight handling
+- **`RateLimitMiddleware`** — Sliding-window per-IP/per-user rate limiter with burst support
+- **`LoggingMiddleware`** — Structured request/response logging with body and header capture
+- **`CompressionMiddleware`** — Gzip response compression for text-based content types
+- **`MiddlewareChain`** — Compose multiple middlewares into a single Starlette middleware
+- **`register_default_middlewares()`** — One-call setup of the full middleware stack
+---
+
 # Release Notes v1.9.15
 
 > **Production-Grade Authentication: Multi-Auth, Secure Cookies & Server-Side Security**
