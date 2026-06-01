@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Dars Model Layer — Declarative ORM for SQLite with auto-generated CRUD API.
 

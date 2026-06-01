@@ -1,4 +1,4 @@
-# Release Notes v1.9.16
+# Release Notes v1.9.17
 
 > **Database Layer, Server Actions, Route Types, Guards, Middleware System & Auth Simplification**
 > *Major full-stack expansion: built-in ORM, server-side actions, security middleware, and a simplified decorator-based auth system.*
