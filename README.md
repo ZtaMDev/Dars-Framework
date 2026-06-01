@@ -7,7 +7,6 @@
 <p align="center">
   <img src="https://img.shields.io/pypi/v/dars-framework?color=brightgreen" alt="PyPI Version" />
   <img src="https://img.shields.io/pypi/pyversions/dars-framework?color=blue" alt="Python Versions" />
-  <img src="https://img.shields.io/github/license/ZtaMDev/Dars-Framework" alt="License" />
   <a href="https://deepwiki.com/ZtaMDev/Dars-Framework"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
 </p>
 
