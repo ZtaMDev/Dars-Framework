@@ -1,7 +1,58 @@
+# Release notes v1.9.18
+
+> **Hotfix release for the 1.9.17 version**
+> _This is a hotfix release for the 1.9.17 version, the 1.9.17 version has a few bugs that have been fixed in this version._
+
+### Bug Fixes
+
+#### Fixed: 422 Unprocessable Content on DarsModel CRUD Routes
+
+Auto-generated CRUD endpoints (`POST /api/models/{table}`, `PUT /api/models/{table}/{id}`) were returning `422 Unprocessable Content` on every request body submission.
+
+**Root cause:** `from __future__ import annotations` in `models.py` caused Python to defer all type annotations as strings. FastAPI's `get_typed_signature` resolved the `data` parameter to the string `"PydanticModel"` instead of the actual Pydantic class, treating it as a query parameter instead of a request body.
+
+**Fix:** Replaced decorator-based route registration with functional registration. Endpoint functions are now defined without annotations on `data`, and `__annotations__` is manually patched with the resolved Pydantic class before registering the route:
+
+```python
+async def create_item(data):
+    ...
+
+create_item.__annotations__['data'] = PydanticModel
+router.post(f"/{table}")(create_item)
+```
+
+#### Fixed: Duplicate Event Listener Execution in SPA Navigation
+
+Clicking a button in an SPA route (e.g. "Add Product") fired the event handler **twice**, causing double submissions and double counter increments.
+
+**Root cause:** When the SPA router navigates to a route, it injects `app_{slug}.js` into the DOM. On re-navigation, the same `addEventListener` is called again on the same element — the browser does not deduplicate listeners with anonymous function references.
+
+**Fix:** Added a dataset-based guard to every generated `addEventListener` call. Before attaching a listener, the code checks for a `data-dars-evt-{event}` attribute. If it already exists, the listener is skipped:
+
+```javascript
+if (!el.dataset.darsEvt_click) {
+    el.dataset.darsEvt_click = "1";
+    el.addEventListener("click", async function(event) { ... });
+}
+```
+
+#### Fixed: `dars dev` Backend Output Visibility
+
+The `dars dev` command was suppressing all backend output via `--log-level warning`, making it impossible to see HTTP request logs, errors, or user `print()` statements from the backend.
+
+**Fix:** Changed log level to `info` and added a background filter thread that suppresses only uvicorn startup bloat (`Started server process`, `Application startup complete`, etc.) while passing all other output through with a `[backend]` prefix for clear visual distinction:
+
+```
+[backend] INFO:     127.0.0.1:52341 - "GET /api/models/products HTTP/1.1" 200
+[backend] INFO:     127.0.0.1:52342 - "POST /api/models/products HTTP/1.1" 201
+```
+
+---
+
 # Release Notes v1.9.17
 
 > **Database Layer, Server Actions, Route Types, Guards, Middleware System & Auth Simplification**
-> *Major full-stack expansion: built-in ORM, server-side actions, security middleware, and a simplified decorator-based auth system.*
+> _Major full-stack expansion: built-in ORM, server-side actions, security middleware, and a simplified decorator-based auth system._
 
 ## Installation
 
@@ -96,12 +147,13 @@ A complete middleware pipeline for FastAPI/Starlette:
 - **`CompressionMiddleware`** — Gzip response compression for text-based content types
 - **`MiddlewareChain`** — Compose multiple middlewares into a single Starlette middleware
 - **`register_default_middlewares()`** — One-call setup of the full middleware stack
+
 ---
 
 # Release Notes v1.9.15
 
 > **Production-Grade Authentication: Multi-Auth, Secure Cookies & Server-Side Security**
-> *This is a major update that has been in preparation and development for a long time.*
+> _This is a major update that has been in preparation and development for a long time._
 
 ## Installation
 
@@ -113,7 +165,7 @@ pip install --upgrade dars-framework
 
 ### Secure-by-Default Authentication System
 
-Dars now ships with a complete, production-ready authentication system that is **completely isolated from the VDOM**. 
+Dars now ships with a complete, production-ready authentication system that is **completely isolated from the VDOM**.
 
 - **HttpOnly Cookie-Based Sessions**: Tokens never touch the browser's JavaScript context. They live exclusively in HttpOnly cookies.
 - **CSRF Protection**: Built-in `XSRF-TOKEN` cookie and header validation for all mutating requests (`POST`, `PUT`, `DELETE`, `PATCH`).

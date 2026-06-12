@@ -24,8 +24,11 @@ from dars.backend.middleware import (
 )
 from dars.backend.actions import server_action, register_actions_on_app
 from dars.backend.models import register_model_api
+# pyrefly: ignore [missing-import]
 from backend.apiConfig import DarsEnv
+# pyrefly: ignore [missing-import]
 from backend.models import get_db, Product
+# pyrefly: ignore [missing-import]
 from main import app as dars_app
 
 # ── Middleware (MUST be registered BEFORE SSRApp) ────────────────────────
@@ -83,7 +86,9 @@ register_model_api(app, db, prefix="/api/models")
 register_actions_on_app(app)
 
 # ── Custom API routes (backward compatible with existing task manager) ────
+# pyrefly: ignore [missing-import]
 from fastapi import Request
+# pyrefly: ignore [missing-import]
 from fastapi.responses import JSONResponse
 from dars.backend.store import JsonStore
 
@@ -148,6 +153,7 @@ if not DarsEnv.is_dev():
 
 
 if __name__ == "__main__":
+    # pyrefly: ignore [missing-import]
     import uvicorn
     print("\n" + "=" * 60)
     print("Dars FullStack Backend  [NEW: Data Layer + Middleware + Server Actions]")

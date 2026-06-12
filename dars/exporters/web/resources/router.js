@@ -302,15 +302,6 @@ export function _initializeRouter() {
       ? window.__ROUTE_VDOM__ || window.__DARS_VDOM__
       : null;
     const hydratedPath = window.__DARS_HYDRATED_PATH__ || "/";
-    if (match && match.route && match.route["styles"]) {
-      _injectStyles(match.route["name"], match.route["styles"]);
-    }
-    if (match && match.route && match.route["scripts"]) {
-      _executeScripts(match.route["scripts"], match.route["name"]);
-    }
-    if (match && match.route && match.route["events"]) {
-      _attachEventsMap(match.route["events"]);
-    }
     if (
       isSSRRoute &&
       vdomSource &&
@@ -319,6 +310,16 @@ export function _initializeRouter() {
     ) {
       // Find matching route to set as current
       if (match && match.route) {
+        if (match.route["styles"]) {
+          _injectStyles(match.route["name"], match.route["styles"]);
+        }
+        if (match.route["scripts"]) {
+          _executeScripts(match.route["scripts"], match.route["name"]);
+        }
+        if (match.route["events"]) {
+          _attachEventsMap(match.route["events"]);
+        }
+
         // Update global state to reflect current route without navigating
         __spaCurrentRoute = initialPath;
         __spaCurrentParams = match.params || {};

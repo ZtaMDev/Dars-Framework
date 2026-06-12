@@ -330,6 +330,7 @@ class VDomBuilder:
             try:
                 # Choose a sensible prefix based on type name (lowercase)
                 prefix = (component.__class__.__name__ or 'comp').lower()
+                # pyrefly: ignore [unexpected-keyword]
                 comp_id = self.id_provider(component, prefix=prefix)
             except Exception:
                 # fallback to existing id attribute (may be None)

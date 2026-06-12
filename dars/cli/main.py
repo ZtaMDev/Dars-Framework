@@ -1665,7 +1665,7 @@ def _main_exec():
                 '--reload',
                 '--host', str(host),
                 '--port', str(port),
-                '--log-level', 'warning'
+                '--log-level', 'info'
             ]
             if backend_dir and os.path.isdir(os.path.join(project_root, backend_dir)):
                 backend_cmd.extend(['--reload-dir', backend_dir])
@@ -1677,8 +1677,41 @@ def _main_exec():
             if project_root not in existing_pythonpath.split(os.pathsep):
                 backend_env['PYTHONPATH'] = project_root + (os.pathsep + existing_pythonpath if existing_pythonpath else '')
 
+            # Uvicorn startup lines to suppress (bloat)
+            _UVICORN_BLOAT = (
+                'INFO:     Started server process',
+                'INFO:     Waiting for application startup',
+                'INFO:     Application startup complete',
+                'INFO:     Uvicorn running on',
+                'INFO:     Started reloader process',
+                'INFO:     Will watch for changes in',
+            )
+
+            def _backend_output_filter(stream):
+                """Read backend stderr line-by-line and print everything except uvicorn startup bloat."""
+                try:
+                    for raw_line in stream:
+                        line = raw_line.rstrip('\r\n')
+                        if any(line.startswith(bl) or line.lstrip().startswith(bl) for bl in _UVICORN_BLOAT):
+                            continue
+                        # Prefix backend lines so the user can distinguish them
+                        console.print(f"[dim cyan][backend][/dim cyan] {line}")
+                except Exception:
+                    pass
+
             try:
-                backend_proc = subprocess.Popen(backend_cmd, cwd=project_root, env=backend_env)
+                backend_proc = subprocess.Popen(
+                    backend_cmd, cwd=project_root, env=backend_env,
+                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                    text=True, bufsize=1
+                )
+                import threading
+                _backend_thread = threading.Thread(
+                    target=_backend_output_filter,
+                    args=(backend_proc.stdout,),
+                    daemon=True
+                )
+                _backend_thread.start()
                 console.print(f"[green]Started backend dev server at {port} port.[/green]")
             except Exception as e:
                 console.print(f"[red]Failed to start backend dev process: {e}[/red]")

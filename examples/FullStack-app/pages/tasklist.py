@@ -8,10 +8,11 @@ Uses:
   - FormValidator + collect_form  (client-side validation before submit)
   - updateVRef, runSequence, clearInput
 """
+from dars.core.route_types import RouteType
 from dars.all import *
 
 
-@route("/tasklist")
+@route("/tasklist", route_type=RouteType.SSR)
 def tasklist():
     # ── VRefs ──────────────────────────────────────────────────────────
     loading_sel = ".tasks-loading"

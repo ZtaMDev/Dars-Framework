@@ -3552,12 +3552,17 @@ audio.dars-audio {
                     lines.append(f'    if (__el_{safe_id}) {{')
                     
                     # Keyboard events specific parsing '.Enter', etc.
+                    safe_evt_name = event_name.replace(".", "_").replace("-", "_")
                     if '.' in event_name and event_name.startswith(('key', 'mouse')):
                         base_event, key_modifier = event_name.split('.', 1)
-                        lines.append(f'        __el_{safe_id}.addEventListener("{base_event}", async function(event) {{')
-                        lines.append(f'            if (event.key !== "{key_modifier}" && event.code !== "{key_modifier}") return;')
+                        lines.append(f'        if (!__el_{safe_id}.dataset.darsEvt_{safe_evt_name}) {{')
+                        lines.append(f'            __el_{safe_id}.dataset.darsEvt_{safe_evt_name} = "1";')
+                        lines.append(f'            __el_{safe_id}.addEventListener("{base_event}", async function(event) {{')
+                        lines.append(f'                if (event.key !== "{key_modifier}" && event.code !== "{key_modifier}") return;')
                     else:
-                        lines.append(f'        __el_{safe_id}.addEventListener("{event_name}", async function(event) {{')
+                        lines.append(f'        if (!__el_{safe_id}.dataset.darsEvt_{safe_evt_name}) {{')
+                        lines.append(f'            __el_{safe_id}.dataset.darsEvt_{safe_evt_name} = "1";')
+                        lines.append(f'            __el_{safe_id}.addEventListener("{event_name}", async function(event) {{')
 
                     # Robust library loading fallback just in case
                     lines.append('            // Ensure runtime loaded if used')
@@ -3573,6 +3578,7 @@ audio.dars-audio {
                         lines.append(f'            try {{ {handler_js} }} catch(e) {{ console.error("Error en handler:", e); }}')
                         
                     lines.append(f'        }});')
+                    lines.append(f'        }}')
                     lines.append(f'    }}')
                     lines.append('')
 
@@ -6500,9 +6506,42 @@ fetch({repr(upload_url)}, {{method:'POST', body:_fd}})
 })();
 </script>"""
         
+        # Generate a clean shell runtime JS that doesn't contain page-specific events, states, or bindings.
+        # We temporarily clear registries to ensure no page-specific logic leaks into the shell runtime.
+        # Note: Since the route loop has already finished, we can safely reset these.
+        self._built_in_bindings = []
+        self._dynamic_bindings = {}
+        
+        # Save and temporarily clear VRef registries
+        from dars.hooks import set_vref, use_vref
+        old_vref_values = getattr(set_vref, '_VREF_VALUES_REGISTRY', {})
+        old_vref_bindings = getattr(use_vref, '_VREF_BINDINGS_REGISTRY', {})
+        set_vref._VREF_VALUES_REGISTRY = {}
+        use_vref._VREF_BINDINGS_REGISTRY = {}
+        
+        # Save and temporarily clear state bootstraps/registries
+        from dars.core import state, state_v2
+        old_bootstrap = getattr(state, 'STATE_BOOTSTRAP', [])
+        old_v2_registry = getattr(state_v2, 'STATE_V2_REGISTRY', [])
+        state.STATE_BOOTSTRAP = []
+        state_v2.STATE_V2_REGISTRY = []
+        
+        # Prepare an empty shell app copy
+        shell_app = copy.copy(app)
+        shell_app.root = None 
+        
+        try:
+            shell_runtime_js = self.generate_javascript(shell_app, None, events_map=None, _auto_fetches=[])
+        finally:
+            # Restore registries immediately
+            set_vref._VREF_VALUES_REGISTRY = old_vref_values
+            use_vref._VREF_BINDINGS_REGISTRY = old_vref_bindings
+            state.STATE_BOOTSTRAP = old_bootstrap
+            state_v2.STATE_V2_REGISTRY = old_v2_registry
+
         # Write the shared shell runtime to app.js
         # This will be loaded by index.html as the base SPA runtime script
-        self.write_file(os.path.join(output_path, "app.js"), runtime_js)
+        self.write_file(os.path.join(output_path, "app.js"), shell_runtime_js)
 
         # 3. Handle routing and shell generation
         

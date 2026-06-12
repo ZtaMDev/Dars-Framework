@@ -1,6 +1,8 @@
 # pyrefly: ignore [missing-import]
 from pages.about import about
+# pyrefly: ignore [missing-import]
 from pages.login import login
+# pyrefly: ignore [missing-import]
 from pages.products import products
 
 # pyrefly: ignore [missing-import]
@@ -43,7 +45,7 @@ index = Page(
 )
 
 # 2. Add Page
-app.add_page("index", index, title="Home", route="/")
+app.add_page("index", index, title="Home")
 app.add_page("about", about())
 app.add_page("tasklist", tasklist())
 app.add_page("products", products())

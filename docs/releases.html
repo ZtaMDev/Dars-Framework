@@ -1173,6 +1173,179 @@
     margin: 0 auto;
     padding: 40px 20px;">
      <div class="dars-markdown markdown_docs dars-markdown-dark dars-code-theme-dark" id="markdown_0_1_1_0">
+      <h1 id="release-notes-v1918">
+       Release notes v1.9.18
+      </h1>
+      <blockquote>
+       <p>
+        <strong>
+         Hotfix release for the 1.9.17 version
+        </strong>
+        _This is a hotfix release for the 1.9.17 version, the 1.9.17 version has a few bugs that have been fixed in this version._
+       </p>
+      </blockquote>
+      <h3 id="bug-fixes">
+       Bug Fixes
+      </h3>
+      <h4 id="fixed-422-unprocessable-content-on-darsmodel-crud-routes">
+       Fixed: 422 Unprocessable Content on DarsModel CRUD Routes
+      </h4>
+      <p>
+       Auto-generated CRUD endpoints (
+       <code>
+        POST /api/models/{table}
+       </code>
+       ,
+       <code>
+        PUT /api/models/{table}/{id}
+       </code>
+       ) were returning
+       <code>
+        422 Unprocessable Content
+       </code>
+       on every request body submission.
+      </p>
+      <p>
+       <strong>
+        Root cause:
+       </strong>
+       <code>
+        from __future__ import annotations
+       </code>
+       in
+       <code>
+        models.py
+       </code>
+       caused Python to defer all type annotations as strings. FastAPI's
+       <code>
+        get_typed_signature
+       </code>
+       resolved the
+       <code>
+        data
+       </code>
+       parameter to the string
+       <code>
+        "PydanticModel"
+       </code>
+       instead of the actual Pydantic class, treating it as a query parameter instead of a request body.
+      </p>
+      <p>
+       <strong>
+        Fix:
+       </strong>
+       Replaced decorator-based route registration with functional registration. Endpoint functions are now defined without annotations on
+       <code>
+        data
+       </code>
+       , and
+       <code>
+        __annotations__
+       </code>
+       is manually patched with the resolved Pydantic class before registering the route:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">create_item</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="o">...</span>
+
+<span class="n">create_item</span><span class="o">.</span><span class="vm">__annotations__</span><span class="p">[</span><span class="s1">'data'</span><span class="p">]</span> <span class="o">=</span> <span class="n">PydanticModel</span>
+<span class="n">router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="sa">f</span><span class="s2">"/</span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s2">"</span><span class="p">)(</span><span class="n">create_item</span><span class="p">)</span>
+</code></pre>
+      </div>
+      <h4 id="fixed-duplicate-event-listener-execution-in-spa-navigation">
+       Fixed: Duplicate Event Listener Execution in SPA Navigation
+      </h4>
+      <p>
+       Clicking a button in an SPA route (e.g. "Add Product") fired the event handler
+       <strong>
+        twice
+       </strong>
+       , causing double submissions and double counter increments.
+      </p>
+      <p>
+       <strong>
+        Root cause:
+       </strong>
+       When the SPA router navigates to a route, it injects
+       <code>
+        app_{slug}.js
+       </code>
+       into the DOM. On re-navigation, the same
+       <code>
+        addEventListener
+       </code>
+       is called again on the same element — the browser does not deduplicate listeners with anonymous function references.
+      </p>
+      <p>
+       <strong>
+        Fix:
+       </strong>
+       Added a dataset-based guard to every generated
+       <code>
+        addEventListener
+       </code>
+       call. Before attaching a listener, the code checks for a
+       <code>
+        data-dars-evt-{event}
+       </code>
+       attribute. If it already exists, the listener is skipped:
+      </p>
+      <div class="codehilite">
+       <pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">el</span><span class="p">.</span><span class="nx">dataset</span><span class="p">.</span><span class="nx">darsEvt_click</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">el</span><span class="p">.</span><span class="nx">dataset</span><span class="p">.</span><span class="nx">darsEvt_click</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"1"</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">el</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s2">"click"</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">});</span>
+<span class="p">}</span>
+</code></pre>
+      </div>
+      <h4 id="fixed-dars-dev-backend-output-visibility">
+       Fixed:
+       <code>
+        dars dev
+       </code>
+       Backend Output Visibility
+      </h4>
+      <p>
+       The
+       <code>
+        dars dev
+       </code>
+       command was suppressing all backend output via
+       <code>
+        --log-level warning
+       </code>
+       , making it impossible to see HTTP request logs, errors, or user
+       <code>
+        print()
+       </code>
+       statements from the backend.
+      </p>
+      <p>
+       <strong>
+        Fix:
+       </strong>
+       Changed log level to
+       <code>
+        info
+       </code>
+       and added a background filter thread that suppresses only uvicorn startup bloat (
+       <code>
+        Started server process
+       </code>
+       ,
+       <code>
+        Application startup complete
+       </code>
+       , etc.) while passing all other output through with a
+       <code>
+        [backend]
+       </code>
+       prefix for clear visual distinction:
+      </p>
+      <pre>
+<code class="language-none">[backend] INFO:     127.0.0.1:52341 - "GET /api/models/products HTTP/1.1" 200
+[backend] INFO:     127.0.0.1:52342 - "POST /api/models/products HTTP/1.1" 201
+</code></pre>
+      <hr/>
       <h1 id="release-notes-v1917">
        Release Notes v1.9.17
       </h1>
@@ -1181,9 +1354,7 @@
         <strong>
          Database Layer, Server Actions, Route Types, Guards, Middleware System &amp; Auth Simplification
         </strong>
-        <em>
-         Major full-stack expansion: built-in ORM, server-side actions, security middleware, and a simplified decorator-based auth system.
-        </em>
+        _Major full-stack expansion: built-in ORM, server-side actions, security middleware, and a simplified decorator-based auth system._
        </p>
       </blockquote>
       <h2 id="installation">
@@ -1622,17 +1793,17 @@
          </code>
         </strong>
         — Compose multiple middlewares into a single Starlette middleware
-        <h2 id="-register_default_middlewares-one-call-setup-of-the-full-middleware-stack">
-         -
-         <strong>
-          <code>
-           register_default_middlewares()
-          </code>
-         </strong>
-         — One-call setup of the full middleware stack
-        </h2>
+       </li>
+       <li>
+        <strong>
+         <code>
+          register_default_middlewares()
+         </code>
+        </strong>
+        — One-call setup of the full middleware stack
        </li>
       </ul>
+      <hr/>
       <h1 id="release-notes-v1915">
        Release Notes v1.9.15
       </h1>
@@ -1641,9 +1812,7 @@
         <strong>
          Production-Grade Authentication: Multi-Auth, Secure Cookies &amp; Server-Side Security
         </strong>
-        <em>
-         This is a major update that has been in preparation and development for a long time.
-        </em>
+        _This is a major update that has been in preparation and development for a long time._
        </p>
       </blockquote>
       <h2 id="installation-2">
@@ -4913,7 +5082,7 @@
         : Resolved the issue where raw JS code strings were occasionally rendered as text in the browser instead of being executed.
        </li>
       </ul>
-      <h3 id="bug-fixes">
+      <h3 id="bug-fixes-2">
        Bug Fixes
       </h3>
       <ul>
@@ -6714,6 +6883,21 @@ improving consistency and providing a real-world example of the upgraded styling
      <div class="sidebar-category">
       Versions
      </div>
+     <a class="sidebar-link sidebar-level-1" href="#release-notes-v1918" style="margin-left: 0px">
+      Release notes v1.9.18
+     </a>
+     <a class="sidebar-link sidebar-level-3" href="#bug-fixes" style="margin-left: 40px">
+      Bug Fixes
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#fixed-422-unprocessable-content-on-darsmodel-crud-routes" style="margin-left: 60px">
+      Fixed: 422 Unprocessable Content on DarsModel CRUD Routes
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#fixed-duplicate-event-listener-execution-in-spa-navigation" style="margin-left: 60px">
+      Fixed: Duplicate Event Listener Execution in SPA Navigation
+     </a>
+     <a class="sidebar-link sidebar-level-4" href="#fixed-dars-dev-backend-output-visibility" style="margin-left: 60px">
+      Fixed: `dars dev` Backend Output Visibility
+     </a>
      <a class="sidebar-link sidebar-level-1" href="#release-notes-v1917" style="margin-left: 0px">
       Release Notes v1.9.17
      </a>
@@ -7487,7 +7671,7 @@ improving consistency and providing a real-world example of the upgraded styling
   </div>
   <div id="__dars_spa_root__">
   </div>
-  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1780355673" type="module">
+  <script data-dars-lib="" defer="" src="lib/dars.min.js?v=1781222636" type="module">
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js">
   </script>

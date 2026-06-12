@@ -1,4 +1,200 @@
-(function(){function t(){var t,e;(async()=>{try{let t=await import("./lib/dap.js");t.__darsConfig&&(t.__darsConfig.allowInlineJS=!0);}catch(t){}})(),window.__DARS_SPA_CONFIG__?window.__DARS_SPA_CONFIG__.backendUrl||(window.__DARS_SPA_CONFIG__.backendUrl="/"):window.__DARS_SPA_CONFIG__={backendUrl:"/"},function(){try{let t=[{name:"counter",id:"counter",defaultValue:{count:0},isV2:!0}];window.Dars&&"function"==typeof window.Dars.registerStates?window.Dars.registerStates(t):window.__DARS_STATES_FN?window.__DARS_STATES_FN(t):(async()=>{try{let e=await import("./lib/dars.min.js"),n=e.registerStates||e.default&&e.default.registerStates;"function"==typeof n&&(n(t),window.__DARS_STATES_FN=n);}catch(t){console.error("[Dars] Failed to initialize states",t);}})();}catch(t){console.error("[Dars] State initialization error",t);}}(),(t=document.getElementById("image_0_1_0_0_0"))&&t.addEventListener("click",async function(t){if(!window.Dars)try{let t=await import("./lib/dars.min.js");window.Dars=t.default||t;}catch(t){}try{window.location.href="https://ztamdev.github.io/Dars-Framework/";}catch(t){console.error("Error en handler:",t);}}),(e=document.getElementById("text_0_1_0_0_1"))&&e.addEventListener("click",async function(t){if(!window.Dars)try{let t=await import("./lib/dars.min.js");window.Dars=t.default||t;}catch(t){}try{window.location.href="https://ztamdev.github.io/Dars-Framework/";}catch(t){console.error("Error en handler:",t);}}),(async()=>{try{let t=await import("./lib/dap.js");t._initConditionalElements&&await t._initConditionalElements({});}catch(t){}})();}"complete"===document.readyState||"interactive"===document.readyState?t():document.addEventListener("DOMContentLoaded",t);})(),window.addEventListener("scroll",()=>{let t=document.getElementById("dars-navbar");t&&(window.scrollY>20?t.classList.add("scrolled"):t.classList.remove("scrolled"));}),document.addEventListener("DOMContentLoaded",function(){let t=document.getElementById("hamburger-btn"),e=document.getElementById("mobile-menu"),n=document.body;t&&e&&(t.addEventListener("click",function(o){o.stopPropagation(),"flex"===e.style.display?(e.style.display="none",t.classList.remove("menu-open"),n.classList.remove("menu-open")):(e.style.display="flex",t.classList.add("menu-open"),n.classList.add("menu-open"));}),e.querySelectorAll("a").forEach(o=>{o.addEventListener("click",function(){e.style.display="none",t.classList.remove("menu-open"),n.classList.remove("menu-open");});}),document.addEventListener("click",function(o){t.contains(o.target)||e.contains(o.target)||(e.style.display="none",t.classList.remove("menu-open"),n.classList.remove("menu-open"));}),document.addEventListener("keydown",function(o){"Escape"===o.key&&"flex"===e.style.display&&(e.style.display="none",t.classList.remove("menu-open"),n.classList.remove("menu-open"));}));}),function(){if(document.getElementById("markdown-layout")){var t=document.createElement("style");t.textContent=`
+
+    
+    // Runtime
+    // Dars Runtime
+(function(){
+    function initializeEvents() {
+    // Evento click para componente image_0_1_0_0_0
+    var __el_image_0_1_0_0_0 = document.getElementById("image_0_1_0_0_0");
+    if (__el_image_0_1_0_0_0) {
+        if (!__el_image_0_1_0_0_0.dataset.darsEvt_click) {
+            __el_image_0_1_0_0_0.dataset.darsEvt_click = "1";
+            __el_image_0_1_0_0_0.addEventListener("click", async function(event) {
+            // Ensure runtime loaded if used
+            if (!window.Dars) {
+                try {
+                    const m = await import('./lib/dars.min.js');
+                    window.Dars = m.default || m;
+                } catch (e) { }
+            }
+            try { window.location.href = 'https://ztamdev.github.io/Dars-Framework/'; } catch(e) { console.error("Error en handler:", e); }
+        });
+        }
+    }
+
+    // Evento click para componente text_0_1_0_0_1
+    var __el_text_0_1_0_0_1 = document.getElementById("text_0_1_0_0_1");
+    if (__el_text_0_1_0_0_1) {
+        if (!__el_text_0_1_0_0_1.dataset.darsEvt_click) {
+            __el_text_0_1_0_0_1.dataset.darsEvt_click = "1";
+            __el_text_0_1_0_0_1.addEventListener("click", async function(event) {
+            // Ensure runtime loaded if used
+            if (!window.Dars) {
+                try {
+                    const m = await import('./lib/dars.min.js');
+                    window.Dars = m.default || m;
+                } catch (e) { }
+            }
+            try { window.location.href = 'https://ztamdev.github.io/Dars-Framework/'; } catch(e) { console.error("Error en handler:", e); }
+        });
+        }
+    }
+
+    
+    // --- Default Logic for Advanced Components ---
+
+    }
+    
+    function initializeStates() {
+    // Inicializar estados
+    try {
+        const statesConfig = [
+            {
+                        "name": "counter",
+                        "id": "counter",
+                        "defaultValue": { "count": 0 },
+                        "isV2": true
+                    },
+        ];
+        if (window.Dars && typeof window.Dars.registerStates === "function") {
+            window.Dars.registerStates(statesConfig);
+        } else if (window.__DARS_STATES_FN) {
+            window.__DARS_STATES_FN(statesConfig);
+        } else {
+            // Fallback: cargar runtime y luego registrar estados
+            (async () => {
+                try {
+                    const m = await import("./lib/dars.min.js");
+                    const registerStates = m.registerStates || (m.default && m.default.registerStates);
+                    if (typeof registerStates === "function") {
+                        registerStates(statesConfig);
+                        window.__DARS_STATES_FN = registerStates;
+                    }
+                } catch (e) {
+                    console.error("[Dars] Failed to initialize states", e);
+                }
+            })();
+        }
+    } catch (e) {
+        console.error("[Dars] State initialization error", e);
+    }
+    }
+
+    function _darsInit(){
+        // Enable inline JS execution for compile-time generated code only.
+        (async () => {
+            try {
+                const dap = await import('./lib/dap.js');
+                if (dap.__darsConfig) dap.__darsConfig.allowInlineJS = true;
+            } catch(_) {}
+        })();
+        // Ensure __DARS_SPA_CONFIG__ is available synchronously so that
+        // network_request can resolve relative URLs against backendUrl
+        // before the router finishes async initialisation.
+        if (!window.__DARS_SPA_CONFIG__) {
+            window.__DARS_SPA_CONFIG__ = {"backendUrl": "/"};
+        } else if (!window.__DARS_SPA_CONFIG__.backendUrl) {
+            window.__DARS_SPA_CONFIG__.backendUrl = {"backendUrl": "/"}.backendUrl;
+        }
+        initializeStates();
+        initializeEvents();
+        
+            // No reactive bindings
+        
+            // No VRef bindings
+        
+        
+        // Initialize Show/If conditional elements after VRef registry is ready
+        (async () => {
+            try {
+                const dap = await import('./lib/dap.js');
+                if (dap._initConditionalElements) await dap._initConditionalElements({});
+            } catch(_) {}
+        })();
+    }
+
+    if(document.readyState === 'complete' || document.readyState === 'interactive'){
+        _darsInit();
+    } else {
+        document.addEventListener('DOMContentLoaded', _darsInit);
+    }
+})();
+
+
+    // Page Scripts
+    // Scripts específicos de esta página (combinados)
+// Script: dScript
+window.addEventListener("scroll", () => {
+  const navbar = document.getElementById("dars-navbar");
+  if (navbar) {
+    if (window.scrollY > 20) {
+      navbar.classList.add("scrolled");
+    } else {
+      navbar.classList.remove("scrolled");
+    }
+  }
+});
+
+
+document.addEventListener('DOMContentLoaded', function () {
+  const hamburgerBtn = document.getElementById('hamburger-btn');
+  const mobileMenu = document.getElementById('mobile-menu');
+  const body = document.body;
+
+  if (hamburgerBtn && mobileMenu) {
+    hamburgerBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      const isOpen = mobileMenu.style.display === 'flex';
+
+      if (isOpen) {
+        // Cerrar menÃº
+        mobileMenu.style.display = 'none';
+        hamburgerBtn.classList.remove('menu-open');
+        body.classList.remove('menu-open');
+      } else {
+        // Abrir menÃº
+        mobileMenu.style.display = 'flex';
+        hamburgerBtn.classList.add('menu-open');
+        body.classList.add('menu-open');
+      }
+    });
+
+    // Cerrar menÃº al hacer clic en un enlace
+    mobileMenu.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', function () {
+        mobileMenu.style.display = 'none';
+        hamburgerBtn.classList.remove('menu-open');
+        body.classList.remove('menu-open');
+      });
+    });
+
+    // Cerrar menÃº al hacer clic fuera
+    document.addEventListener('click', function (event) {
+      if (!hamburgerBtn.contains(event.target) && !mobileMenu.contains(event.target)) {
+        mobileMenu.style.display = 'none';
+        hamburgerBtn.classList.remove('menu-open');
+        body.classList.remove('menu-open');
+      }
+    });
+
+    // Cerrar menÃº con tecla Escape
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && mobileMenu.style.display === 'flex') {
+        mobileMenu.style.display = 'none';
+        hamburgerBtn.classList.remove('menu-open');
+        body.classList.remove('menu-open');
+      }
+    });
+  }
+});
+
+// Script: dScript
+(function() {
+    var layout = document.getElementById('markdown-layout');
+    if (!layout) return;
+
+    var style = document.createElement('style');
+    style.textContent = `
         /* Enhanced docs tables */
         #markdown-content-container table {
             border-collapse: separate;
@@ -53,7 +249,17 @@
             padding: 2px 6px;
             font-size: 0.9em;
         }
-    `,document.head.appendChild(t);}}(),function(){if(document.getElementById("markdown-layout")){var t=document.createElement("style");t.textContent=`
+    `;
+    document.head.appendChild(style);
+})();
+
+// Script: dScript
+(function() {
+    var layout = document.getElementById('markdown-layout');
+    if (!layout) return;
+
+    var style = document.createElement('style');
+    style.textContent = `
         /* Enhanced docs tables */
         #markdown-content-container table {
             border-collapse: separate;
@@ -108,4 +314,14 @@
             padding: 2px 6px;
             font-size: 0.9em;
         }
-    `,document.head.appendChild(t);}}(),window.Prism=window.Prism||{},Prism.plugins=Prism.plugins||{},Prism.plugins.autoloader=Prism.plugins.autoloader||{},Prism.plugins.autoloader.languages_path="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/",function(){window.DarsMarkdown={_retries:0,addCopyButtons:function(t){(t||document).querySelectorAll("pre code").forEach(function(t){var e=t.parentElement;if(!(!e||e.querySelector(".dars-code-copy"))){"static"===getComputedStyle(e).position&&(e.style.position="relative");var n=document.createElement("button");n.className="dars-code-copy",n.type="button",n.textContent="Copy",n.addEventListener("click",async function(e){e.stopPropagation();try{await navigator.clipboard.writeText(t.innerText),n.textContent="Copied",n.classList.add("copied"),setTimeout(function(){n.textContent="Copy",n.classList.remove("copied");},1200);}catch(t){n.textContent="Error",setTimeout(function(){n.textContent="Copy";},1200);}}),e.appendChild(n);}});},guessLang:function(t){var e=t.trim();return/^{[\s\S]*}$/.test(e)||/^\[/.test(e)?"json":/^(pip |python |python3 |dars |#|\$ )/m.test(e)?"bash":/\b(def |class |import |from |print\(|self\b)/.test(e)?"python":null;},stripPygments:function(t){t&&t.innerHTML&&-1!==t.innerHTML.indexOf("<span")&&(t.textContent=t.innerText);},highlight:function(t){var e=this;if(!window.Prism||!Prism.highlightElement){e._retries<20&&(e._retries++,setTimeout(function(){e.highlight(t);},150));return;}(t||document).querySelectorAll("pre code").forEach(function(t){if(e.stripPygments(t),!t.className||-1===t.className.indexOf("language-")){var n=e.guessLang(t.innerText);t.classList.add("language-"+(n||"none"));}Prism.highlightElement(t);}),e.addCopyButtons(t);}},"complete"===document.readyState?window.DarsMarkdown.highlight():window.addEventListener("load",function(){window.DarsMarkdown.highlight();}),document.addEventListener("DOMContentLoaded",function(){window.DarsMarkdown.highlight();}),document.addEventListener("dars:content-loaded",function(t){t.detail&&t.detail.element&&window.DarsMarkdown.highlight(t.detail.element);});}();
+    `;
+    document.head.appendChild(style);
+})();
+
+// Inline dict script
+window.Prism=window.Prism||{};Prism.plugins=Prism.plugins||{};Prism.plugins.autoloader=Prism.plugins.autoloader||{};Prism.plugins.autoloader.languages_path="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/";
+
+// Inline dict script
+(function(){window.DarsMarkdown={_retries:0,addCopyButtons:function(root){(root||document).querySelectorAll("pre code").forEach(function(code){var pre=code.parentElement;if(!pre||pre.querySelector(".dars-code-copy"))return;if(getComputedStyle(pre).position==="static")pre.style.position="relative";var btn=document.createElement("button");btn.className="dars-code-copy";btn.type="button";btn.textContent="Copy";btn.addEventListener("click",async function(e){e.stopPropagation();try{await navigator.clipboard.writeText(code.innerText);btn.textContent="Copied";btn.classList.add("copied");setTimeout(function(){btn.textContent="Copy";btn.classList.remove("copied")},1200)}catch(err){btn.textContent="Error";setTimeout(function(){btn.textContent="Copy"},1200)}});pre.appendChild(btn)})},guessLang:function(text){var t=text.trim();if(/^{[\s\S]*}$/.test(t)||/^\[/.test(t))return "json";if(/^(pip |python |python3 |dars |#|\$ )/m.test(t))return "bash";if(/\b(def |class |import |from |print\(|self\b)/.test(t))return "python";return null},stripPygments:function(code){if(code&&code.innerHTML&&code.innerHTML.indexOf("<span")!==-1){code.textContent=code.innerText}},highlight:function(root){var self=this;if(!window.Prism||!Prism.highlightElement){if(self._retries<20){self._retries++;setTimeout(function(){self.highlight(root)},150)}return}(root||document).querySelectorAll("pre code").forEach(function(code){self.stripPygments(code);if(!code.className||code.className.indexOf("language-")===-1){var g=self.guessLang(code.innerText);code.classList.add("language-"+(g||"none"))}Prism.highlightElement(code)});self.addCopyButtons(root)}};if(document.readyState==="complete")window.DarsMarkdown.highlight();else window.addEventListener("load",function(){window.DarsMarkdown.highlight()});document.addEventListener("DOMContentLoaded",function(){window.DarsMarkdown.highlight()});document.addEventListener("dars:content-loaded",function(e){if(e.detail&&e.detail.element){window.DarsMarkdown.highlight(e.detail.element)}})})();
+
+    

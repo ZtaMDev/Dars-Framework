@@ -1,1 +1,317 @@
-import{$ as e}from"./dars.min.js";let __observers=new Map,__scrollHandlers=new Map,__scrollRAF=null;export const DarsAnimation={_whenReady(e){"loading"===document.readyState?document.addEventListener("DOMContentLoaded",e,{once:!0}):e();},_setStylesWithoutTransition(e,t){if(e&&t)try{let r=e.style.getPropertyValue("transition"),s=e.style.getPropertyPriority("transition");for(let r in e.style.setProperty("transition","none","important"),t)"offset"!==r&&"easing"!==r&&(e.style[r]=t[r]);e.offsetHeight,r?e.style.setProperty("transition",r,s):e.style.removeProperty("transition");}catch(e){}},observe(t,r={}){this._whenReady(()=>{try{let s=e(t);if(!s)return;__observers.has(t)&&(__observers.get(t).disconnect(),__observers.delete(t));let o=r.threshold??.1,n=r.rootMargin||"0px",l=!1!==r.once,a=new IntersectionObserver(e=>{for(let o of e)o.isIntersecting?(r.enterClass&&s.classList.add(r.enterClass),r.leaveClass&&s.classList.remove(r.leaveClass),"function"==typeof r.onEnter&&r.onEnter(s,o),l&&(a.unobserve(s),__observers.delete(t))):(r.leaveClass&&s.classList.add(r.leaveClass),r.enterClass&&s.classList.remove(r.enterClass),"function"==typeof r.onLeave&&r.onLeave(s,o));},{threshold:o,rootMargin:n});a.observe(s),__observers.set(t,a);}catch(e){console.error("[DarsAnimation:observe]",e);}});},unobserve(e){__observers.has(e)&&(__observers.get(e).disconnect(),__observers.delete(e));},animate:(t,r,s={})=>new Promise((o,n)=>{try{let n=e(t);if(!n){o();return;}let l={duration:s.duration??300,easing:s.easing||"ease",fill:s.fill||"forwards",iterations:s.iterations??1,delay:s.delay??0,direction:s.direction||"normal"};"infinite"===s.iterations&&(l.iterations=1/0);let a=n.animate(r,l);a.onfinish=()=>{try{if("forwards"===l.fill&&r.length>0){let e=r[r.length-1];DarsAnimation._setStylesWithoutTransition(n,e),a.cancel();}}catch(e){}o(a);},a.oncancel=()=>o(a);}catch(e){console.error("[DarsAnimation:animate]",e),o();}}),animateOnView(t,r,s={},o={}){let n=this;this._whenReady(()=>{try{let s=e(t);s&&r.length>0&&n._setStylesWithoutTransition(s,r[0]);}catch(e){}n.observe(t,{threshold:o.threshold??.1,rootMargin:o.rootMargin||"0px",once:!1!==o.once,onEnter(e){n.animate(t,r,s);},onLeave:o.onLeave||null});});},stagger(e,t,r={}){let s=r.staggerDelay??100;return Promise.all(e.map((e,o)=>{let n=Object.assign({},r,{delay:(r.delay??0)+o*s});return delete n.staggerDelay,this.animate(e,t,n);}));},staggerOnView(t,r,s={},o={}){if(!t.length)return;let n=this;this._whenReady(()=>{try{r.length>0&&t.forEach(t=>{let s=e(t);s&&n._setStylesWithoutTransition(s,r[0]);});}catch(e){}n.observe(t[0],{threshold:o.threshold??.1,rootMargin:o.rootMargin||"0px 0px -50px 0px",once:!1!==o.once,onEnter(){n.stagger(t,r,s);}});});},async timeline(e){for(let t of e)t.delay&&await new Promise(e=>setTimeout(e,t.delay)),await this.animate(t.id,t.keyframes,t.options||{});},scrollProgress(t,r={}){let s={property:r.property||"opacity",from:r.from??0,to:r.to??1,unit:r.unit||"",start:r.start??0,end:r.end??1};if(__scrollHandlers.set(t,s),!__scrollRAF){let t=()=>{let r=Math.min(Math.max((window.scrollY||document.documentElement.scrollTop)/Math.max(document.documentElement.scrollHeight-window.innerHeight,1),0),1);for(let[t,s]of __scrollHandlers)try{let o=e(t);if(!o)continue;let n=s.end-s.start,l=n>0?Math.min(Math.max((r-s.start)/n,0),1):0,a=s.from+(s.to-s.from)*l;o.style[s.property]=a+s.unit;}catch(e){}__scrollRAF=requestAnimationFrame(t);};__scrollRAF=requestAnimationFrame(t);}},removeScrollProgress(e){__scrollHandlers.delete(e),0===__scrollHandlers.size&&__scrollRAF&&(cancelAnimationFrame(__scrollRAF),__scrollRAF=null);},classOnView(e,t,r={}){this.observe(e,{threshold:r.threshold??.1,rootMargin:r.rootMargin||"0px",once:!1!==r.once,enterClass:t,leaveClass:r.leaveClass||null});},runOnView(e,t,r={}){this.observe(e,{threshold:r.threshold??.1,rootMargin:r.rootMargin||"0px",once:!1!==r.once,onEnter:t});},destroy(){for(let[,e]of __observers)e.disconnect();__observers.clear(),__scrollHandlers.clear(),__scrollRAF&&(cancelAnimationFrame(__scrollRAF),__scrollRAF=null);}};
+import { $ } from "./dars.min.js";
+
+const __observers = new Map();
+const __scrollHandlers = new Map();
+let __scrollRAF = null;
+
+/**
+ * DarsAnimation - Complete animation engine
+ * Provides: viewport triggers, keyframe animations, stagger, timeline, scroll-progress
+ */
+export const DarsAnimation = {
+  /**
+   * Internal: run fn when DOM is ready. If already ready, run immediately.
+   */
+  _whenReady(fn) {
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", fn, { once: true });
+    } else {
+      fn();
+    }
+  },
+
+  /**
+   * Helper: Apply styles without triggering CSS transitions.
+   */
+  _setStylesWithoutTransition(el, styles) {
+    if (!el || !styles) return;
+    try {
+      const oldTrans = el.style.getPropertyValue('transition');
+      const oldPri = el.style.getPropertyPriority('transition');
+      el.style.setProperty('transition', 'none', 'important');
+      
+      for (const k in styles) {
+        if (k !== 'offset' && k !== 'easing') {
+          el.style[k] = styles[k];
+        }
+      }
+      
+      void el.offsetHeight; // Force reflow
+      
+      if (oldTrans) el.style.setProperty('transition', oldTrans, oldPri);
+      else el.style.removeProperty('transition');
+    } catch(e) {}
+  },
+
+  /**
+   * Observe an element for viewport entry/exit via IntersectionObserver.
+   */
+  observe(id, opts = {}) {
+    const _run = () => {
+      try {
+        const el = $(id);
+        if (!el) return;
+        if (__observers.has(id)) {
+          __observers.get(id).disconnect();
+          __observers.delete(id);
+        }
+        const threshold = opts.threshold ?? 0.1;
+        const rootMargin = opts.rootMargin || "0px";
+        const once = opts.once !== false;
+        const observer = new IntersectionObserver((entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              if (opts.enterClass) el.classList.add(opts.enterClass);
+              if (opts.leaveClass) el.classList.remove(opts.leaveClass);
+              if (typeof opts.onEnter === "function") opts.onEnter(el, entry);
+              if (once) { observer.unobserve(el); __observers.delete(id); }
+            } else {
+              if (opts.leaveClass) el.classList.add(opts.leaveClass);
+              if (opts.enterClass) el.classList.remove(opts.enterClass);
+              if (typeof opts.onLeave === "function") opts.onLeave(el, entry);
+            }
+          }
+        }, { threshold, rootMargin });
+        observer.observe(el);
+        __observers.set(id, observer);
+      } catch(e) { console.error("[DarsAnimation:observe]", e); }
+    };
+    this._whenReady(_run);
+  },
+
+  /**
+   * Unobserve an element.
+   */
+  unobserve(id) {
+    if (__observers.has(id)) {
+      __observers.get(id).disconnect();
+      __observers.delete(id);
+    }
+  },
+
+  /**
+   * Run a Web Animations API animation on an element.
+   * @param {string} id - Element ID
+   * @param {Array} keyframes - Keyframe array
+   * @param {object} options - { duration, easing, fill, iterations, delay, direction }
+   * @returns {Promise} resolves when animation finishes
+   */
+  animate(id, keyframes, options = {}) {
+    return new Promise((resolve, reject) => {
+      try {
+        const el = $(id);
+        if (!el) {
+          resolve();
+          return;
+        }
+        const opts = {
+          duration: options.duration ?? 300,
+          easing: options.easing || "ease",
+          fill: options.fill || "forwards",
+          iterations: options.iterations ?? 1,
+          delay: options.delay ?? 0,
+          direction: options.direction || "normal",
+        };
+        if (options.iterations === "infinite") opts.iterations = Infinity;
+        const anim = el.animate(keyframes, opts);
+        
+        anim.onfinish = () => {
+          try {
+            if (opts.fill === "forwards" && keyframes.length > 0) {
+              const finalFrame = keyframes[keyframes.length - 1];
+              // Apply final frame inline safely
+              DarsAnimation._setStylesWithoutTransition(el, finalFrame);
+              // Cancel WAAPI animation to release its priority lock over CSS !important
+              anim.cancel();
+            }
+          } catch (_) {}
+          resolve(anim);
+        };
+        
+        anim.oncancel = () => resolve(anim);
+      } catch (e) {
+        console.error("[DarsAnimation:animate]", e);
+        resolve();
+      }
+    });
+  },
+
+  /**
+   * Animate when element enters viewport.
+   * @param {string} id - Element ID
+   * @param {Array} keyframes - Keyframe array
+   * @param {object} animOpts - Animation options
+   * @param {object} viewOpts - Viewport observer options
+   */
+  animateOnView(id, keyframes, animOpts = {}, viewOpts = {}) {
+    const self = this;
+    this._whenReady(() => {
+      // Set initial hidden state
+      try {
+        const el = $(id);
+        if (el && keyframes.length > 0) {
+          self._setStylesWithoutTransition(el, keyframes[0]);
+        }
+      } catch (_) {}
+      self.observe(id, {
+        threshold: viewOpts.threshold ?? 0.1,
+        rootMargin: viewOpts.rootMargin || "0px",
+        once: viewOpts.once !== false,
+        onEnter(el) {
+          self.animate(id, keyframes, animOpts);
+        },
+        onLeave: viewOpts.onLeave || null,
+      });
+    });
+  },
+
+  /**
+   * Stagger animations across multiple elements.
+   * @param {Array<string>} ids - Array of element IDs
+   * @param {Array} keyframes - Shared keyframes
+   * @param {object} options - Animation options + staggerDelay (ms between each)
+   * @returns {Promise}
+   */
+  stagger(ids, keyframes, options = {}) {
+    const staggerDelay = options.staggerDelay ?? 100;
+    const promises = ids.map((id, i) => {
+      const opts = Object.assign({}, options, {
+        delay: (options.delay ?? 0) + i * staggerDelay,
+      });
+      delete opts.staggerDelay;
+      return this.animate(id, keyframes, opts);
+    });
+    return Promise.all(promises);
+  },
+
+  /**
+   * Stagger on viewport entry.
+   */
+  staggerOnView(ids, keyframes, animOpts = {}, viewOpts = {}) {
+    if (!ids.length) return;
+    const self = this;
+    this._whenReady(() => {
+      // Set initial state on all elements
+      try {
+        if (keyframes.length > 0) {
+          ids.forEach((id) => {
+            const el = $(id);
+            if (el) self._setStylesWithoutTransition(el, keyframes[0]);
+          });
+        }
+      } catch (_) {}
+      // Observe first element as trigger
+      self.observe(ids[0], {
+        threshold: viewOpts.threshold ?? 0.1,
+        rootMargin: viewOpts.rootMargin || "0px 0px -50px 0px",
+        once: viewOpts.once !== false,
+        onEnter() {
+          self.stagger(ids, keyframes, animOpts);
+        },
+      });
+    });
+  },
+
+  /**
+   * Run a timeline of sequential animations.
+   * @param {Array<{id, keyframes, options}>} steps
+   * @returns {Promise}
+   */
+  async timeline(steps) {
+    for (const step of steps) {
+      if (step.delay) await new Promise((r) => setTimeout(r, step.delay));
+      await this.animate(step.id, step.keyframes, step.options || {});
+    }
+  },
+
+  /**
+   * Link an element's style to scroll progress (0-1).
+   * @param {string} id - Element ID
+   * @param {object} opts - { property, from, to, unit, start, end }
+   */
+  scrollProgress(id, opts = {}) {
+    const config = {
+      property: opts.property || "opacity",
+      from: opts.from ?? 0,
+      to: opts.to ?? 1,
+      unit: opts.unit || "",
+      start: opts.start ?? 0,
+      end: opts.end ?? 1,
+    };
+    __scrollHandlers.set(id, config);
+    if (!__scrollRAF) {
+      const tick = () => {
+        const scrollTop = window.scrollY || document.documentElement.scrollTop;
+        const docHeight = Math.max(
+          document.documentElement.scrollHeight - window.innerHeight,
+          1,
+        );
+        const progress = Math.min(Math.max(scrollTop / docHeight, 0), 1);
+        for (const [eid, cfg] of __scrollHandlers) {
+          try {
+            const el = $(eid);
+            if (!el) continue;
+            const range = cfg.end - cfg.start;
+            const local =
+              range > 0
+                ? Math.min(Math.max((progress - cfg.start) / range, 0), 1)
+                : 0;
+            const val = cfg.from + (cfg.to - cfg.from) * local;
+            el.style[cfg.property] = val + cfg.unit;
+          } catch (_) {}
+        }
+        __scrollRAF = requestAnimationFrame(tick);
+      };
+      __scrollRAF = requestAnimationFrame(tick);
+    }
+  },
+
+  /**
+   * Remove scroll progress handler.
+   */
+  removeScrollProgress(id) {
+    __scrollHandlers.delete(id);
+    if (__scrollHandlers.size === 0 && __scrollRAF) {
+      cancelAnimationFrame(__scrollRAF);
+      __scrollRAF = null;
+    }
+  },
+
+  /**
+   * Add CSS class when element is in viewport (simple utility).
+   */
+  classOnView(id, className, opts = {}) {
+    this.observe(id, {
+      threshold: opts.threshold ?? 0.1,
+      rootMargin: opts.rootMargin || "0px",
+      once: opts.once !== false,
+      enterClass: className,
+      leaveClass: opts.leaveClass || null,
+    });
+  },
+
+  /**
+   * Execute arbitrary code when element enters viewport.
+   */
+  runOnView(id, code, opts = {}) {
+    this.observe(id, {
+      threshold: opts.threshold ?? 0.1,
+      rootMargin: opts.rootMargin || "0px",
+      once: opts.once !== false,
+      onEnter: code,
+    });
+  },
+
+  /**
+   * Cleanup all observers and scroll handlers.
+   */
+  destroy() {
+    for (const [, obs] of __observers) obs.disconnect();
+    __observers.clear();
+    __scrollHandlers.clear();
+    if (__scrollRAF) {
+      cancelAnimationFrame(__scrollRAF);
+      __scrollRAF = null;
+    }
+  },
+};

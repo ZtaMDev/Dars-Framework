@@ -475,8 +475,9 @@ def _register_crud_routes(router, db, model_name, model_cls, table, PydanticMode
             raise HTTPException(status_code=404, detail=f"{model_name} not found")
         return JSONResponse(dict(row))
 
-    @router.post(f"/{table}")
-    async def create_item(data: PydanticModel): # type: ignore
+    async def create_item(data): # type: ignore
+        # Fix FastAPI resolving PydanticModel as a string due to __future__ annotations
+
         fields = [f for f in model_cls._fields.values() if f.name and f.name != "id"]
         col_names = ", ".join(f.name for f in fields)
         placeholders = ", ".join("?" for _ in fields)
@@ -488,9 +489,11 @@ def _register_crud_routes(router, db, model_name, model_cls, table, PydanticMode
         db.connection.commit()
         row = db.fetch_one(f"SELECT * FROM {table} WHERE id = ?", (cur.lastrowid,))
         return JSONResponse(dict(row), status_code=201)
+    
+    create_item.__annotations__['data'] = PydanticModel
+    router.post(f"/{table}")(create_item)
 
-    @router.put(f"/{table}/{{item_id}}")
-    async def update_item(item_id: int, data: PydanticModel): # type: ignore
+    async def update_item(item_id: int, data): # type: ignore
         existing = db.fetch_one(f"SELECT * FROM {table} WHERE id = ?", (item_id,))
         if not existing:
             raise HTTPException(status_code=404, detail=f"{model_name} not found")
@@ -502,6 +505,9 @@ def _register_crud_routes(router, db, model_name, model_cls, table, PydanticMode
         db.connection.commit()
         row = db.fetch_one(f"SELECT * FROM {table} WHERE id = ?", (item_id,))
         return JSONResponse(dict(row))
+    
+    update_item.__annotations__['data'] = PydanticModel
+    router.put(f"/{table}/{{item_id}}")(update_item)
 
     @router.delete(f"/{table}/{{item_id}}")
     async def delete_item(item_id: int):
